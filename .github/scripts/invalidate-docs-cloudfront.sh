@@ -32,8 +32,7 @@ case "${mode}" in
       --paths \
         "/static/_meta/charts-snapshot-publish.json" \
         "/static/api/snapshot/*" \
-        "/static/demo/snapshot/*" \
-        "/static/playground/snapshot/*"
+        "/static/demo/snapshot/*"
     ;;
   *)
     echo "Unsupported mode: ${mode}" >&2

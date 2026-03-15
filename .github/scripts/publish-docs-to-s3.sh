@@ -109,7 +109,6 @@ case "${mode}" in
     cache_control_snapshot="no-store, max-age=0"
     sync_subdir "api/snapshot" "${cache_control_snapshot}" "true"
     sync_subdir "demo/snapshot" "${cache_control_snapshot}" "true"
-    sync_subdir "playground/snapshot" "${cache_control_snapshot}" "true"
 
     # Keep non-versioned assets in sync without touching version directories.
     aws s3 sync docs/static/ "${bucket_uri}/" \
