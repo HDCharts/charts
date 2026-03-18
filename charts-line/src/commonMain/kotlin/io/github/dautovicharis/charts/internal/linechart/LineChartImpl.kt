@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.github.dautovicharis.charts.LineChartRenderMode
 import io.github.dautovicharis.charts.internal.NO_SELECTION
-import io.github.dautovicharis.charts.internal.barstackedchart.generateColorShades
+import io.github.dautovicharis.charts.internal.common.palette.generateColorShades
 import io.github.dautovicharis.charts.internal.common.composable.Chart
 import io.github.dautovicharis.charts.internal.common.composable.ChartErrors
 import io.github.dautovicharis.charts.internal.common.composable.Legend

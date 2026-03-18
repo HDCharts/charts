@@ -1,4 +1,4 @@
-package io.github.dautovicharis.charts.internal.barstackedchart
+package io.github.dautovicharis.charts.internal.common.palette
 
 import androidx.compose.ui.graphics.Color
 import io.github.dautovicharis.charts.internal.InternalChartsApi
