@@ -19,10 +19,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.testTag
 import io.github.dautovicharis.charts.internal.NO_SELECTION
 import io.github.dautovicharis.charts.internal.TestTags
-import io.github.dautovicharis.charts.internal.barstackedchart.generateColorShades
 import io.github.dautovicharis.charts.internal.common.composable.Chart
 import io.github.dautovicharis.charts.internal.common.composable.ChartErrors
 import io.github.dautovicharis.charts.internal.common.model.MultiChartData
+import io.github.dautovicharis.charts.internal.common.palette.generateColorShades
 import io.github.dautovicharis.charts.internal.validateRadarData
 import io.github.dautovicharis.charts.style.RadarChartDefaults
 import io.github.dautovicharis.charts.style.RadarChartStyle

@@ -1,7 +1,7 @@
 package io.github.dautovicharis.charts.unit.helpers
 
 import androidx.compose.ui.graphics.Color
-import io.github.dautovicharis.charts.internal.barstackedchart.generateColorShades
+import io.github.dautovicharis.charts.internal.common.palette.generateColorShades
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

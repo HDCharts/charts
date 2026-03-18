@@ -19,10 +19,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import io.github.dautovicharis.charts.internal.NO_SELECTION
 import io.github.dautovicharis.charts.internal.TestTags
-import io.github.dautovicharis.charts.internal.barstackedchart.generateColorShades
 import io.github.dautovicharis.charts.internal.common.composable.Chart
 import io.github.dautovicharis.charts.internal.common.composable.ChartErrors
 import io.github.dautovicharis.charts.internal.common.composable.Legend
+import io.github.dautovicharis.charts.internal.common.palette.generateColorShades
 import io.github.dautovicharis.charts.internal.piechart.PieChart
 import io.github.dautovicharis.charts.internal.piechart.calculatePercentages
 import io.github.dautovicharis.charts.internal.validatePieData
