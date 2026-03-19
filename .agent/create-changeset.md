@@ -16,6 +16,7 @@ Create a PR changeset file when the PR is user-impacting.
 - Infer `short_kebab` from PR title or branch name.
 - Infer `type` from PR/commit semantics.
 - Infer `module` from touched files and project modules.
+- Use `charts_docs_root=../charts-docs` (charts-docs is always a sibling of the `charts` repo).
 - Draft `release_note` from user-visible impact and follow the release note rule.
 - Explicit user-provided values are optional overrides.
 
@@ -28,8 +29,9 @@ Create a PR changeset file when the PR is user-impacting.
 
 1. Apply the user-impact gate.
 2. If skipped, stop.
-3. Ensure `docs/content/snapshot/changes/` exists.
-4. Create `docs/content/snapshot/changes/<pr-number>-<short-kebab>.md` from `.agent/templates/pr-changeset.md.tpl`.
-5. Fill inferred values: `type`, `module`, `pr` (`https://github.com/HDCharts/charts/pull/<number>`), `release_note`.
-6. Validate: no placeholders remain and `release_note` is non-empty and follows the release note rule.
-7. Output the created file path.
+3. Use `charts_docs_root=../charts-docs`.
+4. Ensure `<charts_docs_root>/content/snapshot/changes/` exists.
+5. Create `<charts_docs_root>/content/snapshot/changes/<pr-number>-<short-kebab>.md` from `.agent/templates/pr-changeset.md.tpl`.
+6. Fill inferred values: `type`, `module`, `pr` (`https://github.com/HDCharts/charts/pull/<number>`), `release_note`.
+7. Validate: no placeholders remain and `release_note` is non-empty and follows the release note rule.
+8. Output the created file path.

@@ -27,9 +27,10 @@ Use this file as the **single source of truth** for an agent to ship the current
   - If base is `upstream` and your branch is on `origin` (a fork), use `--head <forkOwner>:<branch>`.
   - Otherwise use `--head <branch>`.
 - **PR changeset template**: `.agent/templates/pr-changeset.md.tpl`
-- **PR changeset destination**: `docs/content/snapshot/changes/`
+- **PR changeset destination**: `../charts-docs/content/snapshot/changes/`
 - **PR changeset filename**: `<pr-number>-<short-kebab>.md`
 - **PR changeset workflow**: `.agent/create-changeset.md`
+- **Docs PR workflow**: `.agent/create-docs-pr.md`
 
 ## Workflow (simple)
 
@@ -52,12 +53,15 @@ Use this file as the **single source of truth** for an agent to ship the current
      - `gh pr create --repo <base-owner>/<base-repo> --base main --head <branch> --title "<title>" --body-file "$PR_BODY_FILE"`
    - `rm -f "$PR_BODY_FILE"`
 11. Capture PR URL and PR number from the `gh pr create` result.
-12. Execute `.agent/create-changeset.md`.
-13. If a changeset is created, commit and push it to the same PR branch:
-    - Commit message: `docs(changeset): add pr #<pr-number> changeset`
-14. Output the PR URL and one of:
-    - created changeset path
-    - explicit skip reason from `.agent/create-changeset.md`
+12. Execute `.agent/create-changeset.md` using the captured PR URL/PR number context.
+13. If step 12 outputs `No changeset needed (technical/internal-only PR).`, skip docs PR creation.
+14. If a changeset path is returned from step 12, execute `.agent/create-docs-pr.md` with:
+    - `pr_number`
+    - `changeset_path` (returned by step 12)
+15. Output:
+    - code PR URL
+    - docs PR URL (when created)
+    - explicit skip reason from `.agent/create-changeset.md` (when skipped)
 
 ## PR body template (short)
 
