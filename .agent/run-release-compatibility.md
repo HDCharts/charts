@@ -14,7 +14,9 @@ Use this flow to generate concise, end-user migration notes for snapshot release
 3. Read reports:
    - `build/reports/api-compatibility/*.md`
 4. Write output:
-   - File: `docs/content/snapshot/breaking-changes.md`
+   - Use `charts_docs_root=../charts-docs` (charts-docs is always a sibling of the `charts` repo).
+   - Ensure `<charts_docs_root>/content/snapshot/` exists.
+   - File: `<charts_docs_root>/content/snapshot/breaking-changes.md`
    - Template: `.agent/templates/migration-guide.md.tpl`
    - If no breaking modules are reported, write `No call-site updates required.`
    - If breaking modules exist, add one `<module>` section per breaking module.
