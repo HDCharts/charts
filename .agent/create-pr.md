@@ -27,6 +27,7 @@ Use this file as the **single source of truth** for an agent to ship the current
   - If base is `upstream` and your branch is on `origin` (a fork), use `--head <forkOwner>:<branch>`.
   - Otherwise use `--head <branch>`.
 - **PR changeset template**: `.agent/templates/pr-changeset.md.tpl`
+- **PR body template**: `.agent/templates/pr-body.md.tpl`
 - **PR changeset destination**: `../charts-docs/content/snapshot/changes/`
 - **PR changeset filename**: `<pr-number>-<short-kebab>.md`
 - **PR changeset workflow**: `.agent/create-changeset.md`
@@ -45,31 +46,29 @@ Use this file as the **single source of truth** for an agent to ship the current
 7. Push: `git push -u <head-remote> <branch>`
 8. Create a temp PR body file (auto-cleaned at the end of this flow):
    - `PR_BODY_FILE="$(mktemp -t pr-body.XXXXXX.md)"`
-9. Write PR body to `$PR_BODY_FILE` (use the template below).
-10. Create PR (GitHub CLI), then delete the temp file:
+9. Write PR body to `$PR_BODY_FILE` using `.agent/templates/pr-body.md.tpl`:
+   - Fill `Release/Changeset` as `Pending (resolved after PR creation)`.
+10. Create PR (GitHub CLI):
    - If head is on the fork (`origin`), include the fork owner:
      - `gh pr create --repo <base-owner>/<base-repo> --base main --head <forkOwner>:<branch> --title "<title>" --body-file "$PR_BODY_FILE"`
    - If head is on upstream, use:
      - `gh pr create --repo <base-owner>/<base-repo> --base main --head <branch> --title "<title>" --body-file "$PR_BODY_FILE"`
-   - `rm -f "$PR_BODY_FILE"`
 11. Capture PR URL and PR number from the `gh pr create` result.
 12. Execute `.agent/create-changeset.md` using the captured PR URL/PR number context.
 13. If step 12 outputs `No changeset needed (technical/internal-only PR).`, skip docs PR creation.
 14. If a changeset path is returned from step 12, execute `.agent/create-docs-pr.md` with:
     - `pr_number`
     - `changeset_path` (returned by step 12)
-15. Output:
+15. Update PR body to final release status:
+    - Reuse `PR_BODY_FILE` and update it using `.agent/templates/pr-body.md.tpl`
+    - Set `Release/Changeset` to:
+      - `Not required (technical/internal-only)` when step 13 path is taken, or
+      - `Created: ../charts-docs/content/snapshot/changes/<pr-number>-<short-kebab>.md` when step 14 succeeded
+    - Optionally include docs PR URL in the same section when created
+    - Update PR body: `gh pr edit <pr-number> --repo <base-owner>/<base-repo> --body-file "$PR_BODY_FILE"`
+16. Output:
     - code PR URL
     - docs PR URL (when created)
     - explicit skip reason from `.agent/create-changeset.md` (when skipped)
-
-## PR body template (short)
-
-## Summary
-<one paragraph>
-
-## Changes
-- <bullets>
-
-## Notes/Risk
-- <if any; otherwise say "None">
+17. Cleanup:
+    - `rm -f "$PR_BODY_FILE"`
