@@ -1,8 +1,5 @@
 package io.github.dautovicharis.charts.style
 
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
@@ -185,12 +182,7 @@ object LineChartDefaults {
         zoomControlsVisible: Boolean = true,
         chartViewStyle: ChartViewStyle = ChartViewDefaults.style(),
     ): LineChartStyle {
-        val padding = chartViewStyle.innerPadding
-        val modifier: Modifier =
-            Modifier
-                .wrapContentSize()
-                .padding(padding)
-                .aspectRatio(1f)
+        val modifier: Modifier = chartViewStyle.wrapContentChartModifier()
 
         val pointColorSameAsLine = pointColor == defaultPointColor()
         val dragPointColorSameAsLine = pointColor == defaultDragPointColor()

@@ -1,5 +1,6 @@
 package io.github.dautovicharis.charts.mock
 
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -220,5 +221,6 @@ internal object MockTest {
             innerPadding = Dp(10f),
             width = Dp.Infinity,
             backgroundColor = Color.White,
+            modifierChart = Modifier.aspectRatio(1f),
         )
 }

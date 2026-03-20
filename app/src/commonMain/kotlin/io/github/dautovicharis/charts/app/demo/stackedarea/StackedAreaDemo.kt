@@ -20,6 +20,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -29,14 +30,14 @@ import chartsproject.app.generated.resources.cd_play_live_updates
 import chartsproject.app.generated.resources.stacked_area_data_points
 import chartsproject.app.generated.resources.stacked_area_data_points_range
 import io.github.dautovicharis.charts.StackedAreaChart
+import io.github.dautovicharis.charts.app.ui.composable.ChartAspectRatioPreset
+import io.github.dautovicharis.charts.app.ui.composable.ChartAspectRatioToggle
 import io.github.dautovicharis.charts.app.ui.composable.ChartDemo
 import io.github.dautovicharis.charts.app.ui.composable.ChartPreset
 import io.github.dautovicharis.charts.app.ui.composable.ChartPresetToggle
-import io.github.dautovicharis.charts.app.ui.composable.ChartStyleItems
 import io.github.dautovicharis.charts.app.ui.composable.StyleItems
 import io.github.dautovicharis.charts.demoshared.theme.LocalChartColors
 import io.github.dautovicharis.charts.demoshared.theme.seriesColors
-import io.github.dautovicharis.charts.style.StackedAreaChartDefaults
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.math.roundToInt
@@ -51,6 +52,7 @@ fun StackedAreaChartDemo(
     val controlsState by viewModel.controlsState.collectAsStateWithLifecycle()
     val chartColors = LocalChartColors.current
     var preset by remember { mutableStateOf(ChartPreset.Default) }
+    var aspectRatioPreset by remember { mutableStateOf(ChartAspectRatioPreset.Square) }
     val areaColors =
         remember(dataSet.seriesKeys, chartColors) {
             chartColors.seriesColors(dataSet.seriesKeys.size)
@@ -60,12 +62,8 @@ fun StackedAreaChartDemo(
 
     val styleItems =
         when (preset) {
-            ChartPreset.Default ->
-                ChartStyleItems(
-                    currentStyle = StackedAreaChartDefaults.style(),
-                    defaultStyle = StackedAreaChartDefaults.style(),
-                )
-            ChartPreset.Custom -> StackedAreaChartStyleItems.custom(areaColors)
+            ChartPreset.Default -> StackedAreaChartStyleItems.default(aspectRatioPreset)
+            ChartPreset.Custom -> StackedAreaChartStyleItems.custom(areaColors, aspectRatioPreset)
         }
 
     ChartDemo(
@@ -73,10 +71,19 @@ fun StackedAreaChartDemo(
         onRefresh = refresh,
         onStyleItemsChanged = onStyleItemsChanged,
         presetContent = {
-            ChartPresetToggle(
-                selectedPreset = preset,
-                onPresetSelected = { preset = it },
-            )
+            Column(
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                ChartPresetToggle(
+                    selectedPreset = preset,
+                    onPresetSelected = { preset = it },
+                )
+                ChartAspectRatioToggle(
+                    selectedPreset = aspectRatioPreset,
+                    onPresetSelected = { aspectRatioPreset = it },
+                )
+            }
         },
         extraButtons = {
             IconButton(
@@ -102,18 +109,19 @@ fun StackedAreaChartDemo(
             )
         },
     ) {
-        key(controlsState.points, controlsState.minValue, controlsState.maxValue, preset) {
+        key(controlsState.points, controlsState.minValue, controlsState.maxValue, preset, aspectRatioPreset) {
             when (preset) {
                 ChartPreset.Default -> {
                     StackedAreaChart(
                         dataSet = dataSet.dataSet,
+                        style = StackedAreaChartStyleItems.defaultStyle(aspectRatioPreset),
                     )
                 }
 
                 ChartPreset.Custom -> {
                     StackedAreaChart(
                         dataSet = dataSet.dataSet,
-                        style = StackedAreaChartStyleItems.customStyle(areaColors),
+                        style = StackedAreaChartStyleItems.customStyle(areaColors, aspectRatioPreset),
                     )
                 }
             }

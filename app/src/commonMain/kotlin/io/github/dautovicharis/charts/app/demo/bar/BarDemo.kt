@@ -20,6 +20,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -29,6 +30,8 @@ import chartsproject.app.generated.resources.bar_data_points_range
 import chartsproject.app.generated.resources.cd_pause_live_updates
 import chartsproject.app.generated.resources.cd_play_live_updates
 import io.github.dautovicharis.charts.BarChart
+import io.github.dautovicharis.charts.app.ui.composable.ChartAspectRatioPreset
+import io.github.dautovicharis.charts.app.ui.composable.ChartAspectRatioToggle
 import io.github.dautovicharis.charts.app.ui.composable.ChartDemo
 import io.github.dautovicharis.charts.app.ui.composable.ChartPreset
 import io.github.dautovicharis.charts.app.ui.composable.ChartPresetToggle
@@ -46,15 +49,17 @@ fun BarChartDemo(
     val isPlaying by viewModel.isPlaying.collectAsStateWithLifecycle()
     val controlsState by viewModel.controlsState.collectAsStateWithLifecycle()
     var preset by remember { mutableStateOf(ChartPreset.Default) }
+    var aspectRatioPreset by remember { mutableStateOf(ChartAspectRatioPreset.Square) }
     val refresh: () -> Unit = viewModel::refresh
 
     val styleItems =
         when (preset) {
-            ChartPreset.Default -> BarChartStyleItems.default()
+            ChartPreset.Default -> BarChartStyleItems.default(aspectRatioPreset)
             ChartPreset.Custom ->
                 BarChartStyleItems.custom(
                     minValue = controlsState.minValue.toFloat(),
                     maxValue = controlsState.maxValue.toFloat(),
+                    aspectRatioPreset = aspectRatioPreset,
                 )
         }
 
@@ -63,10 +68,19 @@ fun BarChartDemo(
         onRefresh = refresh,
         onStyleItemsChanged = onStyleItemsChanged,
         presetContent = {
-            ChartPresetToggle(
-                selectedPreset = preset,
-                onPresetSelected = { preset = it },
-            )
+            Column(
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                ChartPresetToggle(
+                    selectedPreset = preset,
+                    onPresetSelected = { preset = it },
+                )
+                ChartAspectRatioToggle(
+                    selectedPreset = aspectRatioPreset,
+                    onPresetSelected = { aspectRatioPreset = it },
+                )
+            }
         },
         extraButtons = {
             IconButton(
@@ -92,11 +106,12 @@ fun BarChartDemo(
             )
         },
     ) {
-        key(controlsState.points, controlsState.minValue, controlsState.maxValue, preset) {
+        key(controlsState.points, controlsState.minValue, controlsState.maxValue, preset, aspectRatioPreset) {
             when (preset) {
                 ChartPreset.Default -> {
                     BarChart(
                         dataSet,
+                        style = BarChartStyleItems.defaultStyle(aspectRatioPreset),
                     )
                 }
 
@@ -107,6 +122,7 @@ fun BarChartDemo(
                             BarChartStyleItems.customStyle(
                                 minValue = controlsState.minValue.toFloat(),
                                 maxValue = controlsState.maxValue.toFloat(),
+                                aspectRatioPreset = aspectRatioPreset,
                             ),
                     )
                 }
