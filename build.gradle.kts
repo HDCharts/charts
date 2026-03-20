@@ -105,7 +105,6 @@ tasks.register("chartsCheck") {
     group = "Charts"
     description = "Build and tests for the charts project"
     dependsOn(getTasksByName("ktlintCheck", true))
-    dependsOn("buildSrcKtlintCheck")
     dependsOn("build")
     dependsOn("chartsTest")
 
@@ -117,6 +116,20 @@ tasks.register<Exec>("buildSrcKtlintCheck") {
     group = "verification"
     description = "Runs ktlintCheck for buildSrc Kotlin code and scripts"
     commandLine("./gradlew", "-p", "buildSrc", "ktlintCheck")
+}
+
+tasks.register<Exec>("buildSrcKtlintFormat") {
+    group = "formatting"
+    description = "Runs ktlintFormat for buildSrc Kotlin code and scripts"
+    commandLine("./gradlew", "-p", "buildSrc", "ktlintFormat")
+}
+
+tasks.named("ktlintCheck").configure {
+    dependsOn("buildSrcKtlintCheck")
+}
+
+tasks.named("ktlintFormat").configure {
+    dependsOn("buildSrcKtlintFormat")
 }
 
 tasks.register("publishChartsModules") {

@@ -120,8 +120,10 @@ tasks.register("prepareApiCompatibilityBaselineJars") {
                 val baselineJar = baselineJars.singleOrNull()
 
                 if (baselineJar == null) {
+                    val foundBaselineJarNames = baselineJars.map { it.name }
                     throw GradleException(
-                        "Expected exactly one baseline jar for $artifactId in ${libsDir.absolutePath}, found: ${baselineJars.map { it.name }}",
+                        "Expected exactly one baseline jar for $artifactId in ${libsDir.absolutePath}, " +
+                            "found: $foundBaselineJarNames",
                     )
                 }
 
