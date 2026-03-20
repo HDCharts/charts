@@ -1,0 +1,105 @@
+name: set-api-baseline
+
+on:
+  workflow_dispatch:
+    inputs:
+      baseline_ref:
+        description: "Git ref to persist as API baseline (tag, branch, or commit SHA)"
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: set-api-compatibility-baseline
+  cancel-in-progress: true
+
+jobs:
+  set-baseline:
+    name: Create Baseline Update PR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Resolve baseline value
+        id: resolve
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          baseline_ref="${{ github.event.inputs.baseline_ref || '' }}"
+          baseline_ref="$(echo "${baseline_ref}" | tr -d '\r' | xargs || true)"
+
+          if [[ -z "${baseline_ref}" ]]; then
+            echo "Provide baseline_ref." >&2
+            exit 1
+          fi
+
+          baseline_sha="$(git rev-parse -q --verify "${baseline_ref}^{commit}" || true)"
+          if [[ -z "${baseline_sha}" ]]; then
+            echo "Input baseline_ref '${baseline_ref}' does not resolve to a commit." >&2
+            exit 1
+          fi
+          baseline_value="${baseline_sha}"
+          baseline_source="baseline_ref:${baseline_ref}"
+
+          echo "baseline_ref=${baseline_ref}" >> "$GITHUB_OUTPUT"
+          echo "baseline_value=${baseline_value}" >> "$GITHUB_OUTPUT"
+          echo "baseline_source=${baseline_source}" >> "$GITHUB_OUTPUT"
+
+      - name: Write baseline file
+        shell: bash
+        env:
+          BASELINE_REF: ${{ steps.resolve.outputs.baseline_ref }}
+          BASELINE_VALUE: ${{ steps.resolve.outputs.baseline_value }}
+          BASELINE_SOURCE: ${{ steps.resolve.outputs.baseline_source }}
+        run: |
+          set -euo pipefail
+          cat > .github/api-compatibility-baseline.txt <<EOF
+          # Baseline commit used by API compatibility workflow.
+          # Updated via workflow_dispatch: set-api-baseline.
+          # source: ${BASELINE_SOURCE}
+          ${BASELINE_VALUE}
+          EOF
+
+      - name: Create pull request
+        id: cpr
+        uses: peter-evans/create-pull-request@v7
+        with:
+          commit-message: "ci(api): update API compatibility baseline"
+          branch: "ci/update-api-compatibility-baseline"
+          delete-branch: true
+          title: "ci(api): update API compatibility baseline"
+          body: |
+            Updates `.github/api-compatibility-baseline.txt` to a new baseline value.
+
+            - source: `${{ steps.resolve.outputs.baseline_source }}`
+            - value: `${{ steps.resolve.outputs.baseline_value }}`
+          labels: |
+            ci
+
+      - name: Summary
+        if: always()
+        shell: bash
+        env:
+          PR_URL: ${{ steps.cpr.outputs.pull-request-url }}
+          PR_OPERATION: ${{ steps.cpr.outputs.pull-request-operation }}
+          BASELINE_SOURCE: ${{ steps.resolve.outputs.baseline_source }}
+          BASELINE_VALUE: ${{ steps.resolve.outputs.baseline_value }}
+        run: |
+          set -euo pipefail
+          {
+            echo "## Set API Baseline"
+            echo "- source: ${BASELINE_SOURCE}"
+            echo "- value: ${BASELINE_VALUE}"
+            if [[ -n "${PR_URL}" ]]; then
+              echo "- pull request: ${PR_URL}"
+            else
+              echo "- pull request operation: ${PR_OPERATION:-none}"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
