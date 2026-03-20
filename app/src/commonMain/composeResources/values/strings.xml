@@ -63,8 +63,24 @@
     <string name="chart_aspect_square">1:1</string>
     <string name="chart_aspect_wide">16:9</string>
     <string name="chart_aspect_tall">3:4</string>
-    <string name="style_details_title">Style details</string>
     <string name="cd_close_dialog">Close dialog</string>
+    <string name="style_value_color">color</string>
+    <string name="style_value_auto">Auto</string>
+    <string name="style_value_colors_count">%1$d colors</string>
+    <string name="style_value_custom">Custom</string>
+    <string name="style_value_default">Default</string>
+    <string name="style_auto_generated_from_empty">Generated from %1$s because %2$s is empty.</string>
+    <string name="style_name_custom">%1$s (Custom)</string>
+    <string name="style_name_default">%1$s (Default)</string>
+    <string name="style_fallback_name">Style</string>
+    <string name="style_unused_single_series_line_color">lineColor is used when lineColors is empty or chart has a single series.</string>
+    <string name="style_unused_single_series_area_color">areaColor is used when areaColors is empty or chart has a single series.</string>
+    <string name="style_unused_generic_usage">%1$s is used only when %2$s is empty.</string>
+    <string name="style_unused_ignored_because_provided">Ignored because %1$s is provided. %2$s</string>
+    <string name="style_status_modified">Modified</string>
+    <string name="style_status_default">Default</string>
+    <string name="style_status_unused">Unused</string>
+    <string name="style_status_count">(%1$d)</string>
     <string translatable="false" name="github_url">https://github.com/dautovicharis/Charts</string>
 
 </resources>
