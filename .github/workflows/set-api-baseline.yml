@@ -67,10 +67,23 @@ jobs:
           ${BASELINE_VALUE}
           EOF
 
+      - name: Validate workflow update token
+        shell: bash
+        env:
+          CHARTS_WORFLOW_TOKEN: ${{ secrets.CHARTS_WORFLOW_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${CHARTS_WORFLOW_TOKEN:-}" ]]; then
+            echo "Missing required secret: CHARTS_WORFLOW_TOKEN." >&2
+            echo "Creating PRs from this workflow requires a token with workflow write scope." >&2
+            exit 1
+          fi
+
       - name: Create pull request
         id: cpr
         uses: peter-evans/create-pull-request@v7
         with:
+          token: ${{ secrets.CHARTS_WORFLOW_TOKEN }}
           commit-message: "ci(api): update API compatibility baseline"
           branch: "ci/update-api-compatibility-baseline"
           delete-branch: true
