@@ -5,11 +5,6 @@ on:
     branches: [main]
     types: [opened, synchronize, reopened, labeled, unlabeled]
   workflow_dispatch:
-    inputs:
-      baseline_version:
-        description: "Baseline release version (optional, defaults to latest SemVer tag)"
-        required: false
-        type: string
 
 permissions:
   contents: read
@@ -37,33 +32,6 @@ jobs:
           distribution: "temurin"
           cache: gradle
 
-      - name: Resolve baseline version
-        id: baseline
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          input_version="${{ github.event.inputs.baseline_version || '' }}"
-          if [[ -n "${input_version}" ]]; then
-            baseline_version="${input_version}"
-          else
-            baseline_version=$(
-              git tag --sort=-version:refname \
-                | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' \
-                | head -n 1 \
-                | tr -d '\r' \
-                | xargs \
-                || true
-            )
-          fi
-
-          if [[ -z "${baseline_version:-}" ]]; then
-            echo "Unable to resolve baseline release version from tags." >&2
-            exit 1
-          fi
-
-          echo "baseline_version=${baseline_version}" >> "$GITHUB_OUTPUT"
-
       - name: Run API compatibility check
         id: compatibility
         continue-on-error: true
@@ -71,9 +39,8 @@ jobs:
         run: |
           set +e
           set -o pipefail
-          ./gradlew apiCompatibilityCheck \
-            -PapiCompatibilityBaselineVersion="${{ steps.baseline.outputs.baseline_version }}" \
-            --no-daemon 2>&1 | tee api-compatibility.log
+
+          ./gradlew apiCompatibilityCheck --no-daemon 2>&1 | tee api-compatibility.log
           exit_code=${PIPESTATUS[0]}
           set -e
           echo "exit_code=${exit_code}" >> "$GITHUB_OUTPUT"
