@@ -149,11 +149,10 @@ object RadarChartDefaults {
         fillVisible: Boolean = true,
         chartViewStyle: ChartViewStyle = ChartViewDefaults.style(),
     ): RadarChartStyle {
-        val padding = chartViewStyle.innerPadding
         val modifier: Modifier =
             Modifier
                 .wrapContentSize()
-                .padding(padding)
+                .padding(chartViewStyle.innerPadding)
                 .aspectRatio(1f)
 
         val pointColorSameAsLine = pointColor == defaultPointColor()

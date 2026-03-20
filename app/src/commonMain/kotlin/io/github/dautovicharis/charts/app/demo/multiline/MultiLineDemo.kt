@@ -23,6 +23,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
@@ -44,11 +45,12 @@ import io.github.dautovicharis.charts.LineChartRenderMode
 import io.github.dautovicharis.charts.app.demo.line.lineChartTableItems
 import io.github.dautovicharis.charts.app.demo.timeline.LiveTimelineControls
 import io.github.dautovicharis.charts.app.demo.timeline.timelineAnimationDurationMillis
+import io.github.dautovicharis.charts.app.ui.composable.ChartAspectRatioPreset
+import io.github.dautovicharis.charts.app.ui.composable.ChartAspectRatioToggle
 import io.github.dautovicharis.charts.app.ui.composable.ChartDemo
 import io.github.dautovicharis.charts.app.ui.composable.StyleItems
 import io.github.dautovicharis.charts.demoshared.theme.LocalChartColors
 import io.github.dautovicharis.charts.demoshared.theme.seriesColors
-import io.github.dautovicharis.charts.style.LineChartDefaults
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.math.roundToInt
@@ -62,12 +64,13 @@ fun MultiLineChartDemo(
     val chartColors = LocalChartColors.current
     val lineColors = chartColors.seriesColors(uiState.dataSet.seriesKeys.size)
     val timelineAnimationDuration = timelineAnimationDurationMillis(uiState.controlsState.updateIntervalMs)
+    var aspectRatioPreset by remember { mutableStateOf(ChartAspectRatioPreset.Square) }
 
     val styleItems =
         when (uiState.preset) {
-            MultiLineDemoPreset.Default -> lineChartTableItems(LineChartDefaults.style())
-            MultiLineDemoPreset.Timeline -> lineChartTableItems(LineChartDefaults.style())
-            MultiLineDemoPreset.Custom -> MultiLineStyleItems.custom(lineColors)
+            MultiLineDemoPreset.Default -> lineChartTableItems(MultiLineStyleItems.defaultStyle(aspectRatioPreset))
+            MultiLineDemoPreset.Timeline -> lineChartTableItems(MultiLineStyleItems.defaultStyle(aspectRatioPreset))
+            MultiLineDemoPreset.Custom -> MultiLineStyleItems.custom(lineColors, aspectRatioPreset)
         }
 
     ChartDemo(
@@ -76,10 +79,19 @@ fun MultiLineChartDemo(
         refreshVisible = uiState.preset != MultiLineDemoPreset.Timeline,
         onStyleItemsChanged = onStyleItemsChanged,
         presetContent = {
-            MultiLineDemoPresetToggle(
-                selectedPreset = uiState.preset,
-                onPresetSelected = viewModel::onPresetSelected,
-            )
+            Column(
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                MultiLineDemoPresetToggle(
+                    selectedPreset = uiState.preset,
+                    onPresetSelected = viewModel::onPresetSelected,
+                )
+                ChartAspectRatioToggle(
+                    selectedPreset = aspectRatioPreset,
+                    onPresetSelected = { aspectRatioPreset = it },
+                )
+            }
         },
         extraButtons = {
             if (uiState.preset == MultiLineDemoPreset.Timeline) {
@@ -123,12 +135,14 @@ fun MultiLineChartDemo(
             MultiLineDemoPreset.Default -> {
                 LineChart(
                     dataSet = uiState.dataSet.dataSet,
+                    style = MultiLineStyleItems.defaultStyle(aspectRatioPreset),
                 )
             }
 
             MultiLineDemoPreset.Timeline -> {
                 LineChart(
                     dataSet = uiState.dataSet.dataSet,
+                    style = MultiLineStyleItems.defaultStyle(aspectRatioPreset),
                     renderMode = LineChartRenderMode.Timeline,
                     animationDurationMillis = timelineAnimationDuration,
                 )
@@ -137,7 +151,7 @@ fun MultiLineChartDemo(
             MultiLineDemoPreset.Custom -> {
                 val customStyle =
                     MultiLineStyleItems
-                        .customStyle(lineColors)
+                        .customStyle(lineColors, aspectRatioPreset)
                 LineChart(
                     dataSet = uiState.dataSet.dataSet,
                     style = customStyle,

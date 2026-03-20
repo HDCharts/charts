@@ -8,8 +8,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import io.github.dautovicharis.charts.internal.DONUT_MAX_PERCENTAGE
 import io.github.dautovicharis.charts.internal.DONUT_MIN_PERCENTAGE
 
@@ -64,7 +62,6 @@ object PieChartDefaults {
      * @param pieColors The colors to be used for the slices in the pie chart. Defaults to an empty list.
      * @param pieAlpha The alpha value applied to rendered pie slices. Defaults to 0.4f in light theme and 0.6f in dark theme.
      * @param borderColor The color of the border around the pie chart. Defaults to the surface color of the MaterialTheme.
-     * @param innerPadding The inner padding of the pie chart. Defaults to 15.dp.
      * @param donutPercentage The percentage of the chart that should be a donut hole. Defaults to 0f.
      * @param borderWidth The width of the border around the pie chart. Defaults to 3f.
      * @param legendVisible A boolean indicating whether the legend is visible. Defaults to true.
@@ -76,7 +73,6 @@ object PieChartDefaults {
         pieColors: List<Color> = emptyList(),
         pieAlpha: Float = defaultChartAlpha(),
         borderColor: Color = MaterialTheme.colorScheme.surface,
-        innerPadding: Dp = 15.dp,
         donutPercentage: Float = 0f,
         borderWidth: Float = 3f,
         legendVisible: Boolean = true,
@@ -86,7 +82,7 @@ object PieChartDefaults {
             modifier =
                 Modifier
                     .wrapContentSize()
-                    .padding(innerPadding)
+                    .padding(chartViewStyle.innerPadding)
                     .aspectRatio(1f),
             donutPercentage =
                 donutPercentage.coerceIn(

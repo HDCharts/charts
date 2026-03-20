@@ -59,6 +59,10 @@
     <string name="chart_default">Default</string>
     <string name="chart_timeline">Timeline</string>
     <string name="chart_custom">Custom</string>
+    <string name="chart_aspect_ratio">Aspect ratio</string>
+    <string name="chart_aspect_square">1:1</string>
+    <string name="chart_aspect_wide">16:9</string>
+    <string name="chart_aspect_tall">3:4</string>
     <string name="style_details_title">Style details</string>
     <string name="cd_close_dialog">Close dialog</string>
     <string translatable="false" name="github_url">https://github.com/dautovicharis/Charts</string>

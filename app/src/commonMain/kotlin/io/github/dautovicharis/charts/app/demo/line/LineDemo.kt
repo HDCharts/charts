@@ -23,6 +23,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
@@ -43,9 +44,10 @@ import io.github.dautovicharis.charts.LineChart
 import io.github.dautovicharis.charts.LineChartRenderMode
 import io.github.dautovicharis.charts.app.demo.timeline.LiveTimelineControls
 import io.github.dautovicharis.charts.app.demo.timeline.timelineAnimationDurationMillis
+import io.github.dautovicharis.charts.app.ui.composable.ChartAspectRatioPreset
+import io.github.dautovicharis.charts.app.ui.composable.ChartAspectRatioToggle
 import io.github.dautovicharis.charts.app.ui.composable.ChartDemo
 import io.github.dautovicharis.charts.app.ui.composable.StyleItems
-import io.github.dautovicharis.charts.style.LineChartDefaults
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.math.roundToInt
@@ -57,12 +59,13 @@ fun LineChartDemo(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val timelineAnimationDuration = timelineAnimationDurationMillis(uiState.timelineControlsState.updateIntervalMs)
+    var aspectRatioPreset by remember { mutableStateOf(ChartAspectRatioPreset.Square) }
 
     val styleItems =
         when (uiState.preset) {
-            LineDemoPreset.Default -> lineChartTableItems(LineChartDefaults.style())
-            LineDemoPreset.Timeline -> lineChartTableItems(LineChartDefaults.style())
-            LineDemoPreset.Custom -> LineChartStyleItems.custom()
+            LineDemoPreset.Default -> lineChartTableItems(LineChartStyleItems.defaultStyle(aspectRatioPreset))
+            LineDemoPreset.Timeline -> lineChartTableItems(LineChartStyleItems.defaultStyle(aspectRatioPreset))
+            LineDemoPreset.Custom -> LineChartStyleItems.custom(aspectRatioPreset)
         }
 
     ChartDemo(
@@ -71,10 +74,19 @@ fun LineChartDemo(
         refreshVisible = uiState.preset != LineDemoPreset.Timeline,
         onStyleItemsChanged = onStyleItemsChanged,
         presetContent = {
-            LineDemoPresetToggle(
-                selectedPreset = uiState.preset,
-                onPresetSelected = viewModel::onPresetSelected,
-            )
+            Column(
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                LineDemoPresetToggle(
+                    selectedPreset = uiState.preset,
+                    onPresetSelected = viewModel::onPresetSelected,
+                )
+                ChartAspectRatioToggle(
+                    selectedPreset = aspectRatioPreset,
+                    onPresetSelected = { aspectRatioPreset = it },
+                )
+            }
         },
         extraButtons = {
             if (uiState.preset == LineDemoPreset.Timeline) {
@@ -118,12 +130,14 @@ fun LineChartDemo(
             LineDemoPreset.Default -> {
                 LineChart(
                     dataSet = uiState.dataSet,
+                    style = LineChartStyleItems.defaultStyle(aspectRatioPreset),
                 )
             }
 
             LineDemoPreset.Timeline -> {
                 LineChart(
                     dataSet = uiState.dataSet,
+                    style = LineChartStyleItems.defaultStyle(aspectRatioPreset),
                     renderMode = LineChartRenderMode.Timeline,
                     animationDurationMillis = timelineAnimationDuration,
                 )
@@ -132,7 +146,7 @@ fun LineChartDemo(
             LineDemoPreset.Custom -> {
                 LineChart(
                     dataSet = uiState.dataSet,
-                    style = LineChartStyleItems.customStyle(),
+                    style = LineChartStyleItems.customStyle(aspectRatioPreset),
                 )
             }
         }

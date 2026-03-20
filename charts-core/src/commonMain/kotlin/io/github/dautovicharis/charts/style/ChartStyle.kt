@@ -1,6 +1,8 @@
 package io.github.dautovicharis.charts.style
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -30,9 +32,10 @@ import androidx.compose.ui.unit.sp
  * @property innerPadding The inner padding of the chart view.
  * @property width The width of the chart view.
  * @property backgroundColor The background color of the chart view.
+ * @property modifierChart The modifier applied to chart drawing content.
  */
 @Immutable
-class ChartViewStyle constructor(
+class ChartViewStyle(
     val modifierMain: Modifier,
     val styleTitle: TextStyle,
     val modifierTopTitle: Modifier,
@@ -40,7 +43,20 @@ class ChartViewStyle constructor(
     val innerPadding: Dp,
     val width: Dp,
     val backgroundColor: Color,
-)
+    val modifierChart: Modifier,
+) {
+    fun wrapContentChartModifier(contentPadding: Dp = innerPadding): Modifier =
+        Modifier
+            .wrapContentSize()
+            .padding(contentPadding)
+            .then(modifierChart)
+
+    fun fillMaxSizeChartModifier(contentPadding: Dp = innerPadding): Modifier =
+        Modifier
+            .padding(contentPadding)
+            .then(modifierChart)
+            .fillMaxSize()
+}
 
 /**
  * An object that provides default styles for a Chart View.
@@ -54,8 +70,8 @@ object ChartViewDefaults {
      * @param innerPadding The inner padding of the chart view. Defaults to 15.dp.
      * @param cornerRadius The corner radius of the chart view. Defaults to 20.dp.
      * @param shadow The shadow of the chart view. Defaults to 2.dp.
-     * @param backgroundColor The background color of the chart view. Defaults to a subtle blend of
-     * surface and primaryContainer that adapts to dark mode.
+     * @param backgroundColor The background color of the chart view. Defaults to a subtle blend of surface and primaryContainer that adapts to dark mode.
+     * @param modifierChart The modifier applied to chart drawing content. Defaults to a square aspect ratio.
      */
     @Composable
     fun style(
@@ -65,6 +81,7 @@ object ChartViewDefaults {
         cornerRadius: Dp = 20.dp,
         shadow: Dp = 1.dp,
         backgroundColor: Color = defaultChartBackgroundColor(),
+        modifierChart: Modifier = Modifier.aspectRatio(1f),
     ): ChartViewStyle {
         val modifierTitle: Modifier = Modifier.padding(top = innerPadding, start = innerPadding)
         val modifierLegend: Modifier =
@@ -105,6 +122,7 @@ object ChartViewDefaults {
             innerPadding = innerPadding,
             width = width,
             backgroundColor = backgroundColor,
+            modifierChart = modifierChart,
         )
     }
 }

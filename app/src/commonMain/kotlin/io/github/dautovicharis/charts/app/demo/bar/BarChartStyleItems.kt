@@ -1,26 +1,33 @@
 package io.github.dautovicharis.charts.app.demo.bar
 
 import androidx.compose.runtime.Composable
+import io.github.dautovicharis.charts.app.ui.composable.ChartAspectRatioPreset
 import io.github.dautovicharis.charts.app.ui.composable.ChartStyleItems
 import io.github.dautovicharis.charts.app.ui.composable.StyleItems
+import io.github.dautovicharis.charts.app.ui.composable.toChartModifier
 import io.github.dautovicharis.charts.demoshared.fixtures.ChartTestStyleFixtures
 import io.github.dautovicharis.charts.style.BarChartDefaults
 import io.github.dautovicharis.charts.style.ChartViewDefaults
 
 object BarChartStyleItems {
     @Composable
-    fun default(): StyleItems =
+    fun default(aspectRatioPreset: ChartAspectRatioPreset = ChartAspectRatioPreset.Square): StyleItems =
         ChartStyleItems(
-            currentStyle = BarChartDefaults.style(),
-            defaultStyle = BarChartDefaults.style(),
+            currentStyle = defaultStyle(aspectRatioPreset),
+            defaultStyle = defaultStyle(),
         )
+
+    @Composable
+    fun defaultStyle(aspectRatioPreset: ChartAspectRatioPreset = ChartAspectRatioPreset.Square) =
+        BarChartDefaults.style(chartViewStyle = chartViewStyle(aspectRatioPreset))
 
     @Composable
     fun customStyle(
         minValue: Float,
         maxValue: Float,
+        aspectRatioPreset: ChartAspectRatioPreset = ChartAspectRatioPreset.Square,
     ) = ChartTestStyleFixtures.barCustomStyle(
-        chartViewStyle = ChartViewDefaults.style(),
+        chartViewStyle = chartViewStyle(aspectRatioPreset),
         minValue = minValue,
         maxValue = maxValue,
     )
@@ -29,9 +36,19 @@ object BarChartStyleItems {
     fun custom(
         minValue: Float,
         maxValue: Float,
+        aspectRatioPreset: ChartAspectRatioPreset = ChartAspectRatioPreset.Square,
     ): StyleItems =
         ChartStyleItems(
-            currentStyle = customStyle(minValue = minValue, maxValue = maxValue),
-            defaultStyle = BarChartDefaults.style(),
+            currentStyle =
+                customStyle(
+                    minValue = minValue,
+                    maxValue = maxValue,
+                    aspectRatioPreset = aspectRatioPreset,
+                ),
+            defaultStyle = defaultStyle(),
         )
+
+    @Composable
+    private fun chartViewStyle(aspectRatioPreset: ChartAspectRatioPreset) =
+        ChartViewDefaults.style(modifierChart = aspectRatioPreset.toChartModifier())
 }

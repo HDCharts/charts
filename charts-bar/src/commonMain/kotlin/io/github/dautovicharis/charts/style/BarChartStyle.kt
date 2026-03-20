@@ -1,8 +1,5 @@
 package io.github.dautovicharis.charts.style
 
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
@@ -185,12 +182,7 @@ object BarChartDefaults {
         yAxisLabelSize: TextUnit = 11.sp,
         yAxisLabelCount: Int = 5,
     ): BarChartStyle {
-        val padding = chartViewStyle.innerPadding
-        val modifier: Modifier =
-            Modifier
-                .padding(padding)
-                .aspectRatio(1f)
-                .fillMaxSize()
+        val modifier: Modifier = chartViewStyle.fillMaxSizeChartModifier()
 
         return BarChartStyle(
             modifier = modifier,

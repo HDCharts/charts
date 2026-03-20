@@ -1,8 +1,5 @@
 package io.github.dautovicharis.charts.style
 
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
@@ -128,12 +125,7 @@ object StackedAreaChartDefaults {
         xAxisLabelSize: TextUnit = 11.sp,
         xAxisLabelMaxCount: Int = 6,
     ): StackedAreaChartStyle {
-        val padding = chartViewStyle.innerPadding
-        val modifier: Modifier =
-            Modifier
-                .padding(padding)
-                .aspectRatio(1f)
-                .fillMaxSize()
+        val modifier: Modifier = chartViewStyle.fillMaxSizeChartModifier()
 
         return StackedAreaChartStyle(
             modifier = modifier,
