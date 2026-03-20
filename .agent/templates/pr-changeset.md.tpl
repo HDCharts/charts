@@ -1,7 +1,5 @@
 # PR Changeset
 
-<!-- Create this file only for user-impacting PRs. Skip technical/internal-only PRs. -->
-
 - type: `feature|fix|refactor|docs|chore`
 - module: `<charts-line|charts-bar|charts-core|charts|...>`
 - pr: `https://github.com/HDCharts/charts/pull/<number>`
