@@ -3,7 +3,6 @@ package io.github.dautovicharis.charts.app.ui.composable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -24,7 +23,6 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import chartsproject.app.generated.resources.Res
 import chartsproject.app.generated.resources.cd_close_dialog
-import chartsproject.app.generated.resources.style_details_title
 import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -49,7 +47,7 @@ fun StyleInfoDialog(
                     TopAppBar(
                         title = {
                             Text(
-                                text = stringResource(Res.string.style_details_title),
+                                text = styleItems.name,
                                 style = MaterialTheme.typography.titleLarge,
                             )
                         },
@@ -73,18 +71,6 @@ fun StyleInfoDialog(
                             .verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
-                    Surface(
-                        modifier = Modifier.fillMaxWidth(),
-                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
-                        shape = MaterialTheme.shapes.medium,
-                    ) {
-                        Text(
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-                            text = styleItems.name,
-                            style = MaterialTheme.typography.titleSmall,
-                        )
-                    }
-
                     StyleDetailsTable(styleItems = styleItems)
                 }
             }
