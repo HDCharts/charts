@@ -1,6 +1,9 @@
 name: Set API Baseline
 
 on:
+  pull_request_target:
+    branches: [main]
+    types: [closed]
   workflow_dispatch:
     inputs:
       baseline_ref:
@@ -19,6 +22,13 @@ concurrency:
 jobs:
   set-baseline:
     name: Create Baseline Update PR
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (
+        github.event_name == 'pull_request_target' &&
+        github.event.pull_request.merged == true &&
+        contains(github.event.pull_request.labels.*.name, 'breaking-change')
+      )
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -32,12 +42,17 @@ jobs:
         run: |
           set -euo pipefail
 
-          baseline_ref="${{ github.event.inputs.baseline_ref || '' }}"
-          baseline_ref="$(echo "${baseline_ref}" | tr -d '\r' | xargs || true)"
-
-          if [[ -z "${baseline_ref}" ]]; then
-            echo "Provide baseline_ref." >&2
-            exit 1
+          if [[ "${{ github.event_name }}" == "pull_request_target" ]]; then
+            baseline_ref="${{ github.event.pull_request.merge_commit_sha || '' }}"
+            baseline_source="pull_request_target:merge_commit_sha:${{ github.event.pull_request.number }}"
+          else
+            baseline_ref="${{ github.event.inputs.baseline_ref || '' }}"
+            baseline_ref="$(echo "${baseline_ref}" | tr -d '\r' | xargs || true)"
+            if [[ -z "${baseline_ref}" ]]; then
+              echo "Provide baseline_ref." >&2
+              exit 1
+            fi
+            baseline_source="baseline_ref:${baseline_ref}"
           fi
 
           baseline_sha="$(git rev-parse -q --verify "${baseline_ref}^{commit}" || true)"
@@ -46,7 +61,6 @@ jobs:
             exit 1
           fi
           baseline_value="${baseline_sha}"
-          baseline_source="baseline_ref:${baseline_ref}"
 
           echo "baseline_ref=${baseline_ref}" >> "$GITHUB_OUTPUT"
           echo "baseline_value=${baseline_value}" >> "$GITHUB_OUTPUT"
@@ -62,7 +76,7 @@ jobs:
           set -euo pipefail
           cat > .github/api-compatibility-baseline.txt <<EOF
           # Baseline commit used by API compatibility workflow.
-          # Updated via workflow_dispatch: set-api-baseline.
+          # Updated via set-api-baseline workflow.
           # source: ${BASELINE_SOURCE}
           ${BASELINE_VALUE}
           EOF
