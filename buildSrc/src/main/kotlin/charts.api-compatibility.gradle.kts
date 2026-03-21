@@ -98,13 +98,22 @@ tasks.register("prepareApiCompatibilityBaselineJars") {
 
         try {
             val gradlewPath = File(baselineWorktreeDir, "gradlew").absolutePath
-            val baselineJarTasks = ChartsModules.library.map { "$it:jvmJar" }
-            project.execAndGetStdout(
-                listOf(gradlewPath) + baselineJarTasks + listOf("--no-daemon"),
-                baselineWorktreeDir,
-            )
+            val baselineProjects =
+                ChartsModules.library.filter { projectPath ->
+                    val moduleRelativePath =
+                        project(projectPath).projectDir.relativeTo(rootProject.rootDir).path
+                    File(baselineWorktreeDir, moduleRelativePath).isDirectory
+                }
+            val baselineJarTasks = baselineProjects.map { "$it:jvmJar" }
 
-            ChartsModules.library.forEach { projectPath ->
+            if (baselineJarTasks.isNotEmpty()) {
+                project.execAndGetStdout(
+                    listOf(gradlewPath) + baselineJarTasks + listOf("--no-daemon"),
+                    baselineWorktreeDir,
+                )
+            }
+
+            baselineProjects.forEach { projectPath ->
                 val artifactId = projectPath.toArtifactId()
                 val moduleRelativePath =
                     project(projectPath).projectDir.relativeTo(rootProject.rootDir).path
@@ -171,6 +180,9 @@ val apiCompatibilityTasks =
             newArchives.from(newJarProvider)
             oldClasspath.from(oldJarProvider)
             newClasspath.from(newJarProvider)
+            onlyIf {
+                oldJarProvider.get().isFile
+            }
 
             doFirst {
                 logger.lifecycle(
