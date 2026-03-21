@@ -7,6 +7,7 @@ object ChartsModules {
             ":charts-line",
             ":charts-pie",
             ":charts-bar",
+            ":charts-histogram",
             ":charts-stacked-bar",
             ":charts-stacked-area",
             ":charts-radar",

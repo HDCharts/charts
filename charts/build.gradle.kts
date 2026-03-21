@@ -49,6 +49,7 @@ kotlin {
             api(projects.chartsLine)
             api(projects.chartsPie)
             api(projects.chartsBar)
+            api(projects.chartsHistogram)
             api(projects.chartsStackedBar)
             api(projects.chartsStackedArea)
             api(projects.chartsRadar)
@@ -78,6 +79,7 @@ private val apiSourceRoots =
         project.rootDir.resolve("charts-line/src/commonMain/kotlin/io/github/dautovicharis/charts"),
         project.rootDir.resolve("charts-pie/src/commonMain/kotlin/io/github/dautovicharis/charts"),
         project.rootDir.resolve("charts-bar/src/commonMain/kotlin/io/github/dautovicharis/charts"),
+        project.rootDir.resolve("charts-histogram/src/commonMain/kotlin/io/github/dautovicharis/charts"),
         project.rootDir.resolve("charts-stacked-bar/src/commonMain/kotlin/io/github/dautovicharis/charts"),
         project.rootDir.resolve("charts-stacked-area/src/commonMain/kotlin/io/github/dautovicharis/charts"),
         project.rootDir.resolve("charts-radar/src/commonMain/kotlin/io/github/dautovicharis/charts"),

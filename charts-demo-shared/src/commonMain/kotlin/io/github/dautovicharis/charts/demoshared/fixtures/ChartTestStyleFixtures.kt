@@ -9,6 +9,8 @@ import io.github.dautovicharis.charts.demoshared.theme.seriesColors
 import io.github.dautovicharis.charts.style.BarChartDefaults
 import io.github.dautovicharis.charts.style.BarChartStyle
 import io.github.dautovicharis.charts.style.ChartViewStyle
+import io.github.dautovicharis.charts.style.HistogramChartDefaults
+import io.github.dautovicharis.charts.style.HistogramChartStyle
 import io.github.dautovicharis.charts.style.LineChartDefaults
 import io.github.dautovicharis.charts.style.LineChartStyle
 import io.github.dautovicharis.charts.style.PieChartDefaults
@@ -91,6 +93,36 @@ object ChartTestStyleFixtures {
                 emptyList()
             }
         return BarChartDefaults.style(
+            chartViewStyle = chartViewStyle,
+            barColor = chartColors.seriesColor(4),
+            barColors = barColors,
+            minValue = minValue,
+            maxValue = maxValue,
+            gridColor = chartColors.gridLine,
+            axisColor = chartColors.axisLine,
+            xAxisLabelColor = chartColors.axisLabel,
+            selectionLineVisible = true,
+            selectionLineColor = chartColors.selection,
+            selectionLineWidth = 2f,
+        )
+    }
+
+    @Composable
+    fun histogramCustomStyle(
+        chartViewStyle: ChartViewStyle,
+        barCount: Int = 1,
+        useBarColors: Boolean = false,
+        minValue: Float? = 0f,
+        maxValue: Float? = null,
+    ): HistogramChartStyle {
+        val chartColors = LocalChartColors.current
+        val barColors =
+            if (useBarColors) {
+                chartColors.seriesColors(barCount.coerceAtLeast(1))
+            } else {
+                emptyList()
+            }
+        return HistogramChartDefaults.style(
             chartViewStyle = chartViewStyle,
             barColor = chartColors.seriesColor(4),
             barColors = barColors,

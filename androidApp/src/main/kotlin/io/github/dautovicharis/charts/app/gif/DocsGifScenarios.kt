@@ -9,12 +9,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import io.github.dautovicharis.charts.BarChart
+import io.github.dautovicharis.charts.HistogramChart
 import io.github.dautovicharis.charts.LineChart
 import io.github.dautovicharis.charts.PieChart
 import io.github.dautovicharis.charts.RadarChart
 import io.github.dautovicharis.charts.StackedAreaChart
 import io.github.dautovicharis.charts.StackedBarChart
 import io.github.dautovicharis.charts.demoshared.data.barSampleUseCase
+import io.github.dautovicharis.charts.demoshared.data.histogramSampleUseCase
 import io.github.dautovicharis.charts.demoshared.data.lineSampleUseCase
 import io.github.dautovicharis.charts.demoshared.data.multiLineSampleUseCase
 import io.github.dautovicharis.charts.demoshared.data.pieSampleUseCase
@@ -104,6 +106,22 @@ fun MultiLineDefaultGifScenario() {
 fun BarDefaultGifScenario() {
     DocsGifScene {
         BarChart(barSampleUseCase().initialBarDataSet())
+    }
+}
+
+@RecordGif(
+    name = "histogram_default",
+    interactionNodeTag = "HistogramChart",
+    interactions = [
+        GifInteraction(type = GifInteractionType.TAP, target = GifInteractionTarget.LEFT, framesAfter = 14),
+        GifInteraction(type = GifInteractionType.TAP, target = GifInteractionTarget.TOP, framesAfter = 14),
+        GifInteraction(type = GifInteractionType.TAP, target = GifInteractionTarget.RIGHT, framesAfter = 14),
+    ],
+)
+@Composable
+fun HistogramDefaultGifScenario() {
+    DocsGifScene {
+        HistogramChart(histogramSampleUseCase().initialHistogramDataSet())
     }
 }
 

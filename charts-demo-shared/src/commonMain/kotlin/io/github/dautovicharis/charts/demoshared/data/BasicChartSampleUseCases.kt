@@ -42,3 +42,16 @@ interface BarSampleUseCase {
         range: IntRange,
     ): ChartDataSet
 }
+
+interface HistogramSampleUseCase {
+    fun initialHistogramDataSet(): ChartDataSet
+
+    fun histogramDefaultPoints(): Int
+
+    fun histogramDefaultRange(): IntRange
+
+    fun histogramDataSet(
+        points: Int,
+        range: IntRange,
+    ): ChartDataSet
+}

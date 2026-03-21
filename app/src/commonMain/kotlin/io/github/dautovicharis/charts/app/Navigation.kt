@@ -8,18 +8,21 @@ import androidx.navigation.compose.composable
 import chartsproject.app.generated.resources.Res
 import chartsproject.app.generated.resources.bar_chart
 import chartsproject.app.generated.resources.bar_stacked_chart
+import chartsproject.app.generated.resources.histogram_chart
 import chartsproject.app.generated.resources.line_chart
 import chartsproject.app.generated.resources.multi_line_chart
 import chartsproject.app.generated.resources.pie_chart
 import chartsproject.app.generated.resources.radar_chart
 import chartsproject.app.generated.resources.stacked_area_chart
 import chartsproject.charts_demo_shared.generated.resources.ic_bar_chart
+import chartsproject.charts_demo_shared.generated.resources.ic_histogram_chart
 import chartsproject.charts_demo_shared.generated.resources.ic_line_chart
 import chartsproject.charts_demo_shared.generated.resources.ic_multi_line_chart
 import chartsproject.charts_demo_shared.generated.resources.ic_pie_chart
 import chartsproject.charts_demo_shared.generated.resources.ic_radar_chart
 import chartsproject.charts_demo_shared.generated.resources.ic_stacked_bar_chart
 import io.github.dautovicharis.charts.app.demo.bar.BarChartDemo
+import io.github.dautovicharis.charts.app.demo.histogram.HistogramChartDemo
 import io.github.dautovicharis.charts.app.demo.line.LineChartDemo
 import io.github.dautovicharis.charts.app.demo.multiline.MultiLineChartDemo
 import io.github.dautovicharis.charts.app.demo.pie.PieChartDemo
@@ -82,6 +85,13 @@ sealed class ChartDestination(
             title = Res.string.bar_stacked_chart,
         )
 
+    data object HistogramChartScreen :
+        ChartDestination(
+            route = "histogramChart",
+            icon = SharedRes.drawable.ic_histogram_chart,
+            title = Res.string.histogram_chart,
+        )
+
     data object RadarChartScreen :
         ChartDestination(
             route = "radarChart",
@@ -131,6 +141,10 @@ fun Navigation(
 
         composable(ChartDestination.StackedBarChartScreen.route) {
             StackedBarChartDemo(onStyleItemsChanged = onStyleItemsChanged)
+        }
+
+        composable(ChartDestination.HistogramChartScreen.route) {
+            HistogramChartDemo(onStyleItemsChanged = onStyleItemsChanged)
         }
 
         composable(ChartDestination.RadarChartScreen.route) {
