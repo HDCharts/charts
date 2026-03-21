@@ -1,80 +1,60 @@
-# Create PR (branch → commit → push → PR)
+# Create PR
 
-Use this file as the **single source of truth** for an agent to ship the current work using Git + GitHub CLI (`gh`).
-
-> **Important:** Treat this file as instructions. **Do not modify it unless the user explicitly asks you to.**
+Use this as the single instruction for shipping PRs with Git + GitHub CLI (`gh`).
 
 ## Inputs
 
 - `skip_ci_workflows` (optional): `true|false` (default: `false`)
 
+## Terminology
+
+- **Primary PR**: PR for `charts` (this repo).
+- **Companion PR**: optional PR in a sibling repo (`../charts-docs` or `../charts-playground`) when needed.
+
 ## Rules
 
-- Use **CLI only**. Never open web pages.
-- Do **not** check for `gh` auth/token up front. Just run the PR command.
-- If **any step fails**, stop immediately and report the error.
-- Never push directly to the base branch (usually `main`).
-- Do **not** force-push or rewrite history unless explicitly asked.
-- Always run `./gradlew ktlintFormat` before staging/commit.
-- If `ktlintFormat` fails, fix the reported issues and re-run `./gradlew ktlintFormat` until it passes.
+- Use CLI only.
+- Stop on any error and report it.
+- Never push directly to `main`.
+- Never force-push or rewrite history unless explicitly asked.
+- Do not pre-check `gh` auth; just run the command.
+- Remotes:
+  - base remote: `upstream` if exists, else `origin`
+  - head remote: `origin` if exists, else `upstream`
+- PR head format:
+  - use `<forkOwner>:<branch_name>` when pushing from fork to upstream
+  - otherwise use `<branch_name>`
+- For any companion repo (`../charts-docs`, `../charts-playground`), create the companion branch from `<base-remote>/main` before staging files.
 
-## Conventions (short)
+## Workflow
 
-- **Base remote (PR target)**: use `upstream` if it exists; otherwise `origin`
-- **Head remote (push)**: use `origin` if it exists; otherwise `upstream`
-- **Base branch**: `main`
-- **PR head format**:
-  - If base is `upstream` and your branch is on `origin` (a fork), use `--head <forkOwner>:<branch_name>`.
-  - Otherwise use `--head <branch_name>`.
-- **PR changeset template**: `.agent/templates/pr-changeset.md.tpl`
-- **PR body template**: `.agent/templates/pr-body.md.tpl`
-- **PR Git metadata template**: `.agent/templates/pr-git-metadata.md.tpl`
-- **PR changeset destination**: `../charts-docs/content/snapshot/changes/`
-- **PR changeset filename**: `<pr-number>-<short-kebab>.md`
-- **PR changeset workflow**: `.agent/create-changeset.md`
-- **Docs PR workflow**: `.agent/create-docs-pr.md`
+1. Infer summary from current work (do not ask the user).
+2. Resolve metadata from `.agent/templates/pr-git-metadata.md.tpl` and get `branch_name`, `commit_header`, `pr_title`.
+3. Branch from remote main (`git checkout -b "<branch_name>" "<base-remote>/main"`), run `./gradlew ktlintFormat` until it passes, stage, commit, push.
+4. Create the primary PR in `main` using `.agent/templates/pr-body.md.tpl` with release status set to `Pending`.
+5. Capture primary PR URL and PR number.
+6. Run `.agent/create-changeset.md`.
+7. If changeset is required, create a companion docs PR in `HDCharts/charts-docs`:
+   - repo root: `../charts-docs`
+   - branch from remote main: `git checkout -b "docs/changeset-pr-<pr-number>" "<base-remote>/main"`
+   - branch: `docs/changeset-pr-<pr-number>`
+   - commit only `content/snapshot/changes/<pr-number>-<short-kebab>.md`
+   - push branch and create PR using the same remote/head rules as the primary PR
+8. If playground updates are needed, create a companion playground PR in `HDCharts/charts-playground`:
+   - repo root: `../charts-playground`
+   - branch from remote main: `git checkout -b "playground/charts-pr-<pr-number>" "<base-remote>/main"`
+   - branch: `playground/charts-pr-<pr-number>`
+   - commit only playground files related to this charts PR
+   - push branch and create PR using the same remote/head rules as the primary PR
+9. Update primary PR body using `.agent/templates/pr-body.md.tpl`:
+   - `Not required (technical/internal-only)` if no changeset was needed
+   - or `Created: ../charts-docs/content/snapshot/changes/<pr-number>-<short-kebab>.md` (+ docs PR URL if created)
+   - include companion playground PR URL when created
+   - apply the updated body to the primary PR using `gh pr edit <primary-pr-number> --body-file <file>`
 
-## Workflow (simple)
+## Output
 
-1. Infer the summary from context (do not ask the user).
-2. Resolve inputs:
-   - `skip_ci_workflows=false` if not provided.
-3. Decide remotes (base vs head) using the conventions above.
-4. Build Git metadata using `.agent/templates/pr-git-metadata.md.tpl`:
-   - Provide required inputs per the template contract.
-   - Use resolved outputs: `branch_name`, `commit_header`, `pr_title`.
-5. Create a new branch: `git checkout -b <branch_name>`.
-6. Run formatting/lint flow:
-   - `./gradlew ktlintFormat`
-   - If it fails, fix the reported issues and run `./gradlew ktlintFormat` again until it succeeds
-7. Stage changes: `git add -A`
-8. Commit: `git commit -m "<commit_header>"`
-9. Push: `git push -u <head-remote> <branch_name>`
-10. Create a temp PR body file (auto-cleaned at the end of this flow):
-   - `PR_BODY_FILE="$(mktemp -t pr-body.XXXXXX.md)"`
-11. Write PR body to `$PR_BODY_FILE` using `.agent/templates/pr-body.md.tpl`:
-   - Fill `Release/Changeset` as `Pending (resolved after PR creation)`.
-12. Create PR (GitHub CLI):
-   - If head is on the fork (`origin`), include the fork owner:
-     - `gh pr create --repo <base-owner>/<base-repo> --base main --head <forkOwner>:<branch_name> --title "<pr_title>" --body-file "$PR_BODY_FILE"`
-   - If head is on upstream, use:
-     - `gh pr create --repo <base-owner>/<base-repo> --base main --head <branch_name> --title "<pr_title>" --body-file "$PR_BODY_FILE"`
-13. Capture PR URL and PR number from the `gh pr create` result.
-14. Execute `.agent/create-changeset.md` using the captured PR URL/PR number context.
-15. If step 14 outputs `No changeset needed (technical/internal-only PR).`, skip docs PR creation.
-16. If a changeset path is returned from step 14, execute `.agent/create-docs-pr.md` with:
-    - `pr_number`
-    - `changeset_path` (returned by step 14)
-17. Update PR body to final release status:
-    - Reuse `PR_BODY_FILE` and update it using `.agent/templates/pr-body.md.tpl`
-    - Set `Release/Changeset` to:
-      - `Not required (technical/internal-only)` when step 15 path is taken, or
-      - `Created: ../charts-docs/content/snapshot/changes/<pr-number>-<short-kebab>.md` when step 16 succeeded
-    - Optionally include docs PR URL in the same section when created
-    - Update PR body: `gh pr edit <pr-number> --repo <base-owner>/<base-repo> --body-file "$PR_BODY_FILE"`
-18. Output:
-    - code PR URL
-    - docs PR URL (when created)
-    - explicit skip reason from `.agent/create-changeset.md` (when skipped)
-19. Cleanup:
-    - `rm -f "$PR_BODY_FILE"`
+- Primary PR URL
+- Companion docs PR URL (when created)
+- Companion playground PR URL (when created)
+- Exact skip reason from `.agent/create-changeset.md` (when docs companion PR is skipped)

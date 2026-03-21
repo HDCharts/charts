@@ -19,6 +19,9 @@
 <!-- set to one of:
 - Not required (technical/internal-only)
 - Created: ../charts-docs/content/snapshot/changes/<file>.md
+Optionally include companion PR links when created:
+- Docs PR: <url>
+- Playground PR: <url>
 -->
 
 ## Notes/Risk
