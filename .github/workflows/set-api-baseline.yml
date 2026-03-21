@@ -1,4 +1,4 @@
-name: set-api-baseline
+name: Set API Baseline
 
 on:
   workflow_dispatch:
