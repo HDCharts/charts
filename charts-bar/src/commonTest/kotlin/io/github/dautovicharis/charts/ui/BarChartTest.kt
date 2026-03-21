@@ -1,5 +1,6 @@
 package io.github.dautovicharis.charts.ui
 
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.isDisplayed
@@ -9,6 +10,7 @@ import androidx.compose.ui.test.runComposeUiTest
 import io.github.dautovicharis.charts.BarChart
 import io.github.dautovicharis.charts.internal.TestTags
 import io.github.dautovicharis.charts.internal.ValidationErrors.MIN_REQUIRED_BAR
+import io.github.dautovicharis.charts.internal.ValidationErrors.RULE_COLORS_SIZE_MISMATCH
 import io.github.dautovicharis.charts.internal.ValidationErrors.RULE_DATA_POINTS_LESS_THAN_MIN
 import io.github.dautovicharis.charts.internal.common.model.ChartDataType
 import io.github.dautovicharis.charts.internal.format
@@ -16,6 +18,7 @@ import io.github.dautovicharis.charts.mock.MockTest.TITLE
 import io.github.dautovicharis.charts.mock.MockTest.dataSet
 import io.github.dautovicharis.charts.model.ChartDataSet
 import io.github.dautovicharis.charts.model.toChartDataSet
+import io.github.dautovicharis.charts.style.BarChartDefaults
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
@@ -103,5 +106,48 @@ class BarChartTest {
             val lastLabelBounds = onNodeWithText("Region 100").fetchSemanticsNode().boundsInRoot
 
             assertTrue(lastLabelBounds.right <= axisBounds.right - 1f)
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun barChart_withMatchingBarColors_displaysChart() =
+        runComposeUiTest {
+            setContent {
+                val style =
+                    BarChartDefaults.style(
+                        barColors = listOf(Color.Red, Color.Green, Color.Blue, Color.Cyan),
+                    )
+                BarChart(
+                    dataSet = dataSet,
+                    style = style,
+                )
+            }
+
+            onNodeWithTag(TestTags.BAR_CHART).isDisplayed()
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun barChart_withInvalidBarColors_displaysError() =
+        runComposeUiTest {
+            val expectedError =
+                RULE_COLORS_SIZE_MISMATCH.format(
+                    2,
+                    dataSet.data.item.points.size,
+                )
+
+            setContent {
+                val style =
+                    BarChartDefaults.style(
+                        barColors = listOf(Color.Red, Color.Green),
+                    )
+                BarChart(
+                    dataSet = dataSet,
+                    style = style,
+                )
+            }
+
+            onNodeWithTag(TestTags.CHART_ERROR).isDisplayed()
+            onNodeWithText("${expectedError}\n").isDisplayed()
         }
 }

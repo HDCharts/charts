@@ -78,13 +78,22 @@ object ChartTestStyleFixtures {
     @Composable
     fun barCustomStyle(
         chartViewStyle: ChartViewStyle,
+        barCount: Int = 1,
+        useBarColors: Boolean = false,
         minValue: Float? = null,
         maxValue: Float? = null,
     ): BarChartStyle {
         val chartColors = LocalChartColors.current
+        val barColors =
+            if (useBarColors) {
+                chartColors.seriesColors(barCount.coerceAtLeast(1))
+            } else {
+                emptyList()
+            }
         return BarChartDefaults.style(
             chartViewStyle = chartViewStyle,
             barColor = chartColors.seriesColor(4),
+            barColors = barColors,
             minValue = minValue,
             maxValue = maxValue,
             gridColor = chartColors.gridLine,

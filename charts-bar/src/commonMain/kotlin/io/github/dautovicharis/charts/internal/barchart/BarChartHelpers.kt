@@ -101,6 +101,22 @@ internal fun aggregateForCompactDensity(
     return aggregatedPoints.toChartData(labels = aggregatedLabels)
 }
 
+internal fun compactDensityCenterIndices(
+    sourcePointsCount: Int,
+    targetPoints: Int = BAR_DENSE_THRESHOLD,
+): List<Int> {
+    if (sourcePointsCount <= 0) return emptyList()
+    if (targetPoints <= 1 || sourcePointsCount <= targetPoints) {
+        return List(sourcePointsCount) { index -> index }
+    }
+
+    val bucketSize = bucketSizeForTargetCore(totalPoints = sourcePointsCount, targetPoints = targetPoints)
+    val bucketRanges = buildBucketRangesCore(totalPoints = sourcePointsCount, bucketSize = bucketSize)
+    return bucketRanges.map { range ->
+        range.first + ((range.last - range.first) / 2)
+    }
+}
+
 internal fun maxBarsThatFit(
     viewportWidthPx: Float,
     spacingPx: Float,

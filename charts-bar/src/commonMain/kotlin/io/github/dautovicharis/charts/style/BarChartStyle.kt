@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.sp
  * @property modifier The modifier to be applied to the chart.
  * @property chartViewStyle The style to be applied to the chart view.
  * @property barColor The color to be used for the bars in the chart.
+ * @property barColors Optional explicit colors used for individual bars.
  * @property barAlpha The alpha value applied to rendered bars.
  * @property space The space between the bars in the chart.
  * @property minValue Optional fixed minimum value for the chart scale.
@@ -46,6 +47,7 @@ class BarChartStyle(
     val modifier: Modifier,
     val chartViewStyle: ChartViewStyle,
     val barColor: Color,
+    val barColors: List<Color>,
     val barAlpha: Float,
     val space: Dp,
     val minValue: Float?,
@@ -77,6 +79,7 @@ class BarChartStyle(
     override fun getProperties(): List<Pair<String, Any>> =
         listOf(
             BarChartStyle::barColor.name to barColor,
+            BarChartStyle::barColors.name to barColors,
             BarChartStyle::barAlpha.name to barAlpha,
             BarChartStyle::space.name to space,
             BarChartStyle::minValue.name to (minValue ?: "auto"),
@@ -127,6 +130,7 @@ object BarChartDefaults {
      * Returns a BarChartStyle with the provided parameters or their default values.
      *
      * @param barColor The color to be used for the bars in the chart. Defaults to the primary color of the MaterialTheme.
+     * @param barColors Optional explicit colors used for individual bars. Defaults to an empty list.
      * @param barAlpha The alpha value applied to rendered bars. Defaults to 0.4f in light theme and 0.6f in dark theme.
      * @param space The space between the bars in the chart. Defaults to 10.dp.
      * @param minValue Optional fixed minimum value for the chart scale. Defaults to null.
@@ -156,6 +160,7 @@ object BarChartDefaults {
     @Composable
     fun style(
         barColor: Color = MaterialTheme.colorScheme.primary,
+        barColors: List<Color> = emptyList(),
         barAlpha: Float = defaultChartAlpha(),
         space: Dp = 10.dp,
         minValue: Float? = null,
@@ -187,6 +192,7 @@ object BarChartDefaults {
         return BarChartStyle(
             modifier = modifier,
             barColor = barColor,
+            barColors = barColors,
             barAlpha = barAlpha.coerceIn(0f, 1f),
             space = space,
             minValue = minValue,

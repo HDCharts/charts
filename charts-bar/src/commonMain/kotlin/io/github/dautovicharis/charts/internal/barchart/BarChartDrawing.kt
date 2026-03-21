@@ -16,7 +16,8 @@ internal fun DrawScope.drawBars(
     animatedValues: List<Animatable<Float, AnimationVector1D>>,
     visibleRange: IntRange,
     selectedIndex: Int,
-    barColor: Color,
+    barColors: List<Color>,
+    defaultBarColor: Color,
     maxValue: Double,
     minValue: Double,
     barWidthPx: Float,
@@ -70,9 +71,10 @@ internal fun DrawScope.drawBars(
         val barHeight = abs(value) * size.height
         val top = if (value >= 0f) clampedBaselineY - barHeight else clampedBaselineY
         val left = unitWidth * index
+        val resolvedBarColor = barColors.getOrNull(index) ?: defaultBarColor
 
         drawRect(
-            color = barColor,
+            color = resolvedBarColor,
             topLeft = Offset(x = left, y = top),
             size =
                 androidx.compose.ui.geometry.Size(

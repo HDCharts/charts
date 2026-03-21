@@ -27,9 +27,29 @@ fun BarChartDefaultPreview() {
 @Composable
 fun BarChartCustomPreview() {
     ScreenshotSurface {
+        val dataSet = SCREENSHOT_BAR_SAMPLE_USE_CASE.initialBarDataSet()
         BarChart(
-            dataSet = SCREENSHOT_BAR_SAMPLE_USE_CASE.initialBarDataSet(),
+            dataSet = dataSet,
             style = ChartTestStyleFixtures.barCustomStyle(chartViewStyle = ChartViewDefaults.style()),
+            animateOnStart = SCREENSHOT_ANIMATE_ON_START,
+        )
+    }
+}
+
+@PreviewTest
+@ScreenshotPreview
+@Composable
+fun BarChartCustomBarColorsPreview() {
+    ScreenshotSurface {
+        val dataSet = SCREENSHOT_BAR_SAMPLE_USE_CASE.initialBarDataSet()
+        BarChart(
+            dataSet = dataSet,
+            style =
+                ChartTestStyleFixtures.barCustomStyle(
+                    chartViewStyle = ChartViewDefaults.style(),
+                    barCount = dataSet.data.item.points.size,
+                    useBarColors = true,
+                ),
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
         )
     }

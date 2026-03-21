@@ -23,17 +23,21 @@ object BarChartStyleItems {
 
     @Composable
     fun customStyle(
+        barCount: Int,
         minValue: Float,
         maxValue: Float,
         aspectRatioPreset: ChartAspectRatioPreset = ChartAspectRatioPreset.Square,
     ) = ChartTestStyleFixtures.barCustomStyle(
         chartViewStyle = chartViewStyle(aspectRatioPreset),
+        barCount = barCount,
+        useBarColors = true,
         minValue = minValue,
         maxValue = maxValue,
     )
 
     @Composable
     fun custom(
+        barCount: Int,
         minValue: Float,
         maxValue: Float,
         aspectRatioPreset: ChartAspectRatioPreset = ChartAspectRatioPreset.Square,
@@ -41,6 +45,7 @@ object BarChartStyleItems {
         ChartStyleItems(
             currentStyle =
                 customStyle(
+                    barCount = barCount,
                     minValue = minValue,
                     maxValue = maxValue,
                     aspectRatioPreset = aspectRatioPreset,
