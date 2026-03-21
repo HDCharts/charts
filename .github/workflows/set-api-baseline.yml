@@ -84,10 +84,10 @@ jobs:
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.CHARTS_WORFLOW_TOKEN }}
-          commit-message: "ci(api): update API compatibility baseline"
+          commit-message: "ci(api): update API compatibility baseline [skip ci]"
           branch: "ci/update-api-compatibility-baseline"
           delete-branch: true
-          title: "ci(api): update API compatibility baseline"
+          title: "ci(api): update API compatibility baseline [skip ci]"
           body: |
             Updates `.github/api-compatibility-baseline.txt` to a new baseline value.
 
