@@ -185,7 +185,7 @@ object LineChartDefaults {
         val modifier: Modifier = chartViewStyle.wrapContentChartModifier()
 
         val pointColorSameAsLine = pointColor == defaultPointColor()
-        val dragPointColorSameAsLine = pointColor == defaultDragPointColor()
+        val dragPointColorSameAsLine = dragPointColor == defaultDragPointColor()
 
         return LineChartStyle(
             modifier = modifier,
