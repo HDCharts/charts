@@ -15,6 +15,7 @@ dependencies {
         api("${Config.GROUP_ID}:${Config.ARTIFACT_LINE_ID}:${project.version}")
         api("${Config.GROUP_ID}:${Config.ARTIFACT_PIE_ID}:${project.version}")
         api("${Config.GROUP_ID}:${Config.ARTIFACT_BAR_ID}:${project.version}")
+        api("${Config.GROUP_ID}:${Config.ARTIFACT_HISTOGRAM_ID}:${project.version}")
         api("${Config.GROUP_ID}:${Config.ARTIFACT_STACKED_BAR_ID}:${project.version}")
         api("${Config.GROUP_ID}:${Config.ARTIFACT_STACKED_AREA_ID}:${project.version}")
         api("${Config.GROUP_ID}:${Config.ARTIFACT_RADAR_ID}:${project.version}")

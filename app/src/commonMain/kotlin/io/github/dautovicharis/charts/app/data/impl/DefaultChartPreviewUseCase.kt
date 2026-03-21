@@ -20,6 +20,7 @@ class DefaultChartPreviewUseCase : ChartPreviewUseCase {
             "Premium Plan" to listOf(6f, 7f, 8f, 9f, 10f),
         )
     private val previewBarValues = listOf(18f, 32f, 26f, 48f, 36f, 28f, 54f)
+    private val previewHistogramValues = listOf(4f, 7f, 12f, 16f, 14f, 9f, 5f)
     private val previewStackedSeries =
         listOf(
             "North America" to listOf(20f, 22f, 25f),
@@ -38,6 +39,7 @@ class DefaultChartPreviewUseCase : ChartPreviewUseCase {
             multiLineSeries = previewMultiLineSeries,
             stackedAreaSeries = previewStackedAreaSeries,
             barValues = previewBarValues,
+            histogramValues = previewHistogramValues,
             stackedSeries = previewStackedSeries,
             radarSeries = previewRadarSeries,
         )
@@ -55,6 +57,11 @@ class DefaultChartPreviewUseCase : ChartPreviewUseCase {
     override fun nextBarPreview(values: List<Float>): List<Float> =
         values.map { value ->
             jitter(value, from = -8, until = 9, min = 0f, max = 100f)
+        }
+
+    override fun nextHistogramPreview(values: List<Float>): List<Float> =
+        values.map { value ->
+            jitter(value, from = -4, until = 5, min = 0f, max = 60f)
         }
 
     override fun nextMultiLinePreview(): List<Pair<String, List<Float>>> =

@@ -29,6 +29,7 @@ object TestTags {
     const val CHART_TITLE = "ChartTitle"
     const val PIE_CHART = "PieChart"
     const val BAR_CHART = "BarChart"
+    const val HISTOGRAM_CHART = "HistogramChart"
     const val BAR_CHART_ZOOM_OUT = "BarChartZoomOut"
     const val BAR_CHART_ZOOM_IN = "BarChartZoomIn"
     const val BAR_CHART_DENSE_EXPAND = "BarChartDenseExpand"

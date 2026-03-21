@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import io.github.dautovicharis.charts.BarChart
+import io.github.dautovicharis.charts.HistogramChart
 import io.github.dautovicharis.charts.LineChart
 import io.github.dautovicharis.charts.PieChart
 import io.github.dautovicharis.charts.RadarChart
@@ -27,6 +28,7 @@ import io.github.dautovicharis.charts.model.toMultiChartDataSet
 import io.github.dautovicharis.charts.style.BarChartDefaults
 import io.github.dautovicharis.charts.style.ChartViewDefaults
 import io.github.dautovicharis.charts.style.ChartViewStyle
+import io.github.dautovicharis.charts.style.HistogramChartDefaults
 import io.github.dautovicharis.charts.style.LineChartDefaults
 import io.github.dautovicharis.charts.style.PieChartDefaults
 import io.github.dautovicharis.charts.style.RadarChartDefaults
@@ -83,6 +85,7 @@ internal fun ChartPreview(
         is ChartDestination.StackedAreaChartScreen ->
             StackedAreaChartPreview(previews.stackedAreaSeries)
         is ChartDestination.BarChartScreen -> BarChartPreview(previews.barValues)
+        is ChartDestination.HistogramChartScreen -> HistogramChartPreview(previews.histogramValues)
         is ChartDestination.StackedBarChartScreen -> StackedBarChartPreview(previews.stackedSeries)
         is ChartDestination.RadarChartScreen -> RadarChartPreview(previews.radarSeries)
     }
@@ -171,6 +174,33 @@ private fun BarChartPreview(values: List<Float>) {
             BarChartDefaults.style(
                 minValue = 0f,
                 maxValue = 100f,
+                xAxisLabelsVisible = false,
+                yAxisLabelsVisible = false,
+                chartViewStyle = previewChartViewStyle(),
+            ),
+        interactionEnabled = false,
+        animateOnStart = false,
+    )
+}
+
+@Composable
+private fun HistogramChartPreview(values: List<Float>) {
+    val labels =
+        remember(values) {
+            List(values.size) { index -> "B${index + 1}" }
+        }
+    val dataSet =
+        remember(values, labels) {
+            values.toChartDataSet(
+                title = "",
+                labels = labels,
+            )
+        }
+    HistogramChart(
+        dataSet = dataSet,
+        style =
+            HistogramChartDefaults.style(
+                minValue = 0f,
                 xAxisLabelsVisible = false,
                 yAxisLabelsVisible = false,
                 chartViewStyle = previewChartViewStyle(),

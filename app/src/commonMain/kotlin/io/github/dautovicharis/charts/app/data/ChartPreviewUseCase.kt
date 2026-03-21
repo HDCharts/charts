@@ -11,6 +11,8 @@ interface ChartPreviewUseCase {
 
     fun nextBarPreview(values: List<Float>): List<Float>
 
+    fun nextHistogramPreview(values: List<Float>): List<Float>
+
     fun nextMultiLinePreview(): List<Pair<String, List<Float>>>
 
     fun nextStackedAreaPreview(): List<Pair<String, List<Float>>>

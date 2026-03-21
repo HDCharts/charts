@@ -45,6 +45,16 @@ val hasReleaseSigningConfig =
     ).all { !it.isNullOrBlank() }
 
 val gifDocsVersion = providers.gradleProperty("gifDocsVersion").orElse("snapshot")
+val gifContentRoot =
+    providers.gradleProperty("gifContentRoot").orElse(
+        providers.provider {
+            val migratedDocsContent =
+                rootProject.layout.projectDirectory
+                    .dir("../charts-docs/content")
+                    .asFile
+            if (migratedDocsContent.exists()) "../charts-docs/content" else "docs/content"
+        },
+    )
 val protobufSecurityVersion =
     libs.versions.protobuf.security
         .get()
@@ -172,8 +182,8 @@ android {
 gifRecorder {
     applicationId.set(Config.DEMO_NAMESPACE)
     outputDir.set(
-        gifDocsVersion.map { docsVersion ->
-            rootProject.layout.projectDirectory.dir("docs/content/$docsVersion/wiki/assets")
+        gifContentRoot.zip(gifDocsVersion) { contentRoot, docsVersion ->
+            rootProject.layout.projectDirectory.dir("$contentRoot/$docsVersion/wiki/assets")
         },
     )
 }

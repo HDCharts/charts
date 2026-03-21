@@ -18,6 +18,8 @@
     <string name="cd_select_theme">Select theme %1$d</string>
     <string name="bar_data_points">Data points: %1$d</string>
     <string name="bar_data_points_range">Value range: %1$d - %2$d</string>
+    <string name="histogram_data_points">Data points: %1$d</string>
+    <string name="histogram_data_points_range">Value range: %1$d - %2$d</string>
     <string name="line_data_points">Data points: %1$d</string>
     <string name="line_data_points_range">Value range: %1$d - %2$d</string>
     <string name="stacked_bar_data_points">Data points: %1$d</string>
@@ -50,6 +52,7 @@
     <string name="pie_chart">Pie</string>
     <string name="line_chart">Line</string>
     <string name="bar_chart">Bar</string>
+    <string name="histogram_chart">Histogram</string>
     <string name="bar_stacked_chart">Stacked Bar</string>
     <string name="stacked_area_chart">Stacked Area</string>
     <string name="multi_line_chart">Multi Line</string>

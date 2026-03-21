@@ -62,6 +62,7 @@ private fun rememberJsDemoStartupResourcesReady(): Boolean {
                 ChartDestination.MultiLineChartScreen,
                 ChartDestination.StackedAreaChartScreen,
                 ChartDestination.BarChartScreen,
+                ChartDestination.HistogramChartScreen,
                 ChartDestination.StackedBarChartScreen,
                 ChartDestination.RadarChartScreen,
             )

@@ -40,6 +40,7 @@ class MainViewModel : ViewModel() {
                     ChartDestination.MultiLineChartScreen,
                     ChartDestination.StackedAreaChartScreen,
                     ChartDestination.BarChartScreen,
+                    ChartDestination.HistogramChartScreen,
                     ChartDestination.StackedBarChartScreen,
                     ChartDestination.RadarChartScreen,
                 ),
