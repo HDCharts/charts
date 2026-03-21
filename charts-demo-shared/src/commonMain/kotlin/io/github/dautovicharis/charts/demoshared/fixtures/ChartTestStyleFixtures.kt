@@ -48,13 +48,13 @@ object ChartTestStyleFixtures {
         return LineChartDefaults.style(
             chartViewStyle = chartViewStyle,
             lineColor = chartColors.seriesColor(1),
-            pointColor = chartColors.highlight,
             pointSize = 9f,
             bezier = false,
-            dragPointVisible = false,
+            dragPointVisible = true,
+            pointVisible = true,
             dragPointColor = chartColors.selection,
             dragPointSize = 8f,
-            dragActivePointSize = 15f,
+            dragActivePointSize = 10f,
         )
     }
 
