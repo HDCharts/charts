@@ -57,6 +57,7 @@ fun BarChartDemo(
             ChartPreset.Default -> BarChartStyleItems.default(aspectRatioPreset)
             ChartPreset.Custom ->
                 BarChartStyleItems.custom(
+                    barCount = dataSet.data.item.points.size,
                     minValue = controlsState.minValue.toFloat(),
                     maxValue = controlsState.maxValue.toFloat(),
                     aspectRatioPreset = aspectRatioPreset,
@@ -120,6 +121,7 @@ fun BarChartDemo(
                         dataSet = dataSet,
                         style =
                             BarChartStyleItems.customStyle(
+                                barCount = dataSet.data.item.points.size,
                                 minValue = controlsState.minValue.toFloat(),
                                 maxValue = controlsState.maxValue.toFloat(),
                                 aspectRatioPreset = aspectRatioPreset,

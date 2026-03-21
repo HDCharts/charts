@@ -4,6 +4,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.IntSize
 import io.github.dautovicharis.charts.internal.barchart.YAxisTick
 import io.github.dautovicharis.charts.internal.barchart.buildYAxisTicks
+import io.github.dautovicharis.charts.internal.barchart.compactDensityCenterIndices
 import io.github.dautovicharis.charts.internal.barchart.contentWidth
 import io.github.dautovicharis.charts.internal.barchart.estimateXAxisLabelFootprintPx
 import io.github.dautovicharis.charts.internal.barchart.estimateYAxisLabelWidthPx
@@ -133,6 +134,28 @@ class BarChartHelpersTest {
             )
 
         assertEquals(expected = 25, actual = capacity)
+    }
+
+    @Test
+    fun compactDensityCenterIndices_nonDense_returnsIdentityIndices() {
+        val centers =
+            compactDensityCenterIndices(
+                sourcePointsCount = 8,
+                targetPoints = 12,
+            )
+
+        assertEquals(expected = listOf(0, 1, 2, 3, 4, 5, 6, 7), actual = centers)
+    }
+
+    @Test
+    fun compactDensityCenterIndices_dense_returnsBucketCenters() {
+        val centers =
+            compactDensityCenterIndices(
+                sourcePointsCount = 10,
+                targetPoints = 4,
+            )
+
+        assertEquals(expected = listOf(1, 4, 7, 9), actual = centers)
     }
 
     @Test

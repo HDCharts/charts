@@ -42,7 +42,11 @@ internal fun BarChart(
     selectedBarIndex: Int = NO_SELECTION,
     onValueChanged: (Int) -> Unit = {},
 ) {
-    val barColor = style.barColor.copy(alpha = style.barAlpha)
+    val baseBarColor = style.barColor.copy(alpha = style.barAlpha)
+    val sourceBarColors =
+        remember(style.barColors, style.barAlpha) {
+            style.barColors.map { color -> color.copy(alpha = style.barAlpha) }
+        }
     val isPreview = LocalInspectionMode.current
     val sourceDataSize = chartData.points.size
     BoxWithConstraints(modifier = style.modifier) {
@@ -87,6 +91,17 @@ internal fun BarChart(
             }
         var denseExpanded by rememberDenseExpandedState(isDenseModeAvailable = isDenseData)
         val compactDenseMode = isDenseData && !denseExpanded
+        val compactBarCenterIndices =
+            remember(sourceDataSize, compactDenseMode, maxFitBars) {
+                if (compactDenseMode) {
+                    compactDensityCenterIndices(
+                        sourcePointsCount = sourceDataSize,
+                        targetPoints = maxFitBars,
+                    )
+                } else {
+                    emptyList()
+                }
+            }
         val renderData =
             remember(chartData, compactDenseMode, maxFitBars) {
                 if (compactDenseMode) {
@@ -96,6 +111,17 @@ internal fun BarChart(
                     )
                 } else {
                     chartData
+                }
+            }
+        val renderBarColors =
+            remember(sourceBarColors, compactBarCenterIndices, compactDenseMode, baseBarColor) {
+                when {
+                    sourceBarColors.isEmpty() -> emptyList()
+                    !compactDenseMode -> sourceBarColors
+                    else ->
+                        compactBarCenterIndices.map { centerIndex ->
+                            sourceBarColors.getOrElse(centerIndex) { baseBarColor }
+                        }
                 }
             }
         val dataSize = renderData.points.size
@@ -214,7 +240,8 @@ internal fun BarChart(
                 interactionEnabled = interactionEnabled,
                 dragSelectionEnabled = !isScrollable,
                 animatedValues = animatedValues,
-                barColor = barColor,
+                barColors = renderBarColors,
+                defaultBarColor = baseBarColor,
                 fixedMin = fixedMin,
                 fixedMax = fixedMax,
                 isScrollable = isScrollable,

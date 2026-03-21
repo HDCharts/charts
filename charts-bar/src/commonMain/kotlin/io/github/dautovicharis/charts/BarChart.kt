@@ -30,9 +30,10 @@ fun BarChart(
     selectedBarIndex: Int = NO_SELECTION,
 ) {
     val errors =
-        remember(dataSet) {
+        remember(dataSet, style.barColors) {
             validateBarData(
                 data = dataSet.data.item,
+                colorsSize = style.barColors.size,
             )
         }
 
