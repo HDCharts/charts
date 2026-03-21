@@ -15,7 +15,6 @@ Use this file as the **single source of truth** for an agent to ship the current
 - If **any step fails**, stop immediately and report the error.
 - Never push directly to the base branch (usually `main`).
 - Do **not** force-push or rewrite history unless explicitly asked.
-- Do **not** run docs static publish scripts manually; CI handles docs-static updates after merge to `main`.
 - Always run `./gradlew ktlintFormat` before staging/commit.
 - If `ktlintFormat` fails, fix the reported issues and re-run `./gradlew ktlintFormat` until it passes.
 
