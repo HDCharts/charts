@@ -10,6 +10,8 @@ plugins {
     alias(libs.plugins.composeGifRecorder)
 }
 
+val chartsDependencies = resolveChartsDependencyResolution()
+
 val localSigningProperties =
     Properties().apply {
         val localPropertiesFile = rootProject.file("local.properties")
@@ -190,7 +192,7 @@ gifRecorder {
 
 dependencies {
     implementation(project(":app"))
-    implementation(project(":charts"))
+    implementation(chartsDependencies.module(project(":charts"), "charts"))
     implementation(project(":charts-demo-shared"))
     implementation(libs.androidx.activity.compose)
     implementation(libs.compose.ui.tooling.preview)
@@ -203,13 +205,13 @@ dependencies {
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.test.rules)
     androidTestImplementation(project(":app"))
-    androidTestImplementation(project(":charts"))
+    androidTestImplementation(chartsDependencies.module(project(":charts"), "charts"))
     androidTestImplementation(libs.compose.ui.tooling.preview)
 
     screenshotTestImplementation(libs.screenshot.validation.api)
     screenshotTestImplementation(libs.compose.ui.tooling.preview)
     screenshotTestImplementation(libs.compose.ui.tooling)
-    screenshotTestImplementation(project(":charts"))
+    screenshotTestImplementation(chartsDependencies.module(project(":charts"), "charts"))
     screenshotTestImplementation(project(":app"))
     screenshotTestImplementation(project(":charts-demo-shared"))
 }

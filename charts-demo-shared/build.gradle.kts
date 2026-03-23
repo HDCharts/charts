@@ -5,6 +5,8 @@ plugins {
     alias(libs.plugins.compose.compiler)
 }
 
+val chartsDependencies = resolveChartsDependencyResolution()
+
 kotlin {
     jvmToolchain(
         libs.versions.java
@@ -40,8 +42,8 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            api(projects.charts)
-            api(projects.chartsCore)
+            api(chartsDependencies.module(projects.charts, "charts"))
+            api(chartsDependencies.module(projects.chartsCore, "charts-core"))
             api(libs.compose.mpp.runtime)
             api(libs.compose.mpp.foundation)
             api(libs.compose.mpp.material3)

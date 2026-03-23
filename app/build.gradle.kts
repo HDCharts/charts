@@ -9,6 +9,8 @@ plugins {
     alias(libs.plugins.compose.compiler)
 }
 
+val chartsDependencies = resolveChartsDependencyResolution()
+
 kotlin {
     jvmToolchain(
         libs.versions.java
@@ -60,10 +62,8 @@ kotlin {
             implementation(libs.compose.mpp.resources)
             implementation(libs.compose.mpp.material.icons.extended)
 
-            implementation(project(":charts"))
+            implementation(chartsDependencies.module(project(":charts"), "charts"))
             implementation(project(":charts-demo-shared"))
-            // Snapshot test
-            // implementation("io.github.dautovicharis:charts:2.0.0-SNAPSHOT")
             implementation(libs.androidx.lifecycle.runtime.compose)
             implementation(libs.androidx.navigation.compose)
             implementation(libs.androidx.lifecycle.viewmodel.compose)

@@ -59,6 +59,7 @@ jobs:
             ".github/workflows/snapshot-release.yml"
             ".github/workflows/publish-docs-snapshot.yml"
             ".github/workflows/promote-docs.yml"
+            ".github/workflows/android-snapshot-build.yml"
           )
 
           for workflow_file in "${workflow_files[@]}"; do
