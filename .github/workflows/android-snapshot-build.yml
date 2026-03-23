@@ -1,0 +1,70 @@
+name: Android Snapshot Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      # Auto-generated from .version by sync-version-file.yml
+      # VERSION_INPUT_BEGIN
+      version_preview:
+        description: "Version from .version (read-only preview)"
+        required: true
+        type: choice
+        options:
+          - "2.3.0-SNAPSHOT"
+        default: "2.3.0-SNAPSHOT"
+      # VERSION_INPUT_END
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-snapshot-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  android-snapshot-build:
+    name: Assemble Android App with Snapshot
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: 17
+          distribution: zulu
+          cache: gradle
+
+      - name: Validate snapshot input
+        id: snapshot
+        shell: bash
+        env:
+          SNAPSHOT_VERSION: ${{ inputs.version_preview }}
+        run: |
+          set -euo pipefail
+          if [[ "${SNAPSHOT_VERSION}" != *"-SNAPSHOT" ]]; then
+            echo "Expected a -SNAPSHOT version, got: ${SNAPSHOT_VERSION}" >&2
+            exit 1
+          fi
+          echo "version=${SNAPSHOT_VERSION}" >> "$GITHUB_OUTPUT"
+
+      - name: Assemble androidApp debug with snapshot dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./gradlew :androidApp:assembleDebug \
+            -PchartsDependencyMode=snapshot \
+            -PchartsPublishedVersion=${{ steps.snapshot.outputs.version }} \
+            --no-daemon \
+            --stacktrace
+
+      - name: Publish run summary
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "### Android Snapshot Build" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Snapshot version: \`${{ steps.snapshot.outputs.version }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Gradle task: \`:androidApp:assembleDebug\`" >> "$GITHUB_STEP_SUMMARY"

@@ -1,6 +1,14 @@
 rootProject.name = "ChartsProject"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
+val chartsDependencyMode =
+    providers
+        .gradleProperty("chartsDependencyMode")
+        .orElse("local")
+        .get()
+        .lowercase()
+val isSnapshotMode = chartsDependencyMode == "snapshot"
+
 pluginManagement {
     repositories {
         google()
@@ -36,6 +44,20 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        if (isSnapshotMode) {
+            exclusiveContent {
+                forRepository {
+                    maven(url = uri("https://central.sonatype.com/repository/maven-snapshots/")) {
+                        mavenContent {
+                            snapshotsOnly()
+                        }
+                    }
+                }
+                filter {
+                    includeGroup("io.github.dautovicharis")
+                }
+            }
+        }
     }
 }
 
