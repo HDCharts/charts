@@ -54,15 +54,32 @@ jobs:
           fi
           echo "version=${SNAPSHOT_VERSION}" >> "$GITHUB_OUTPUT"
 
-      - name: Assemble androidApp debug with snapshot dependencies
+      - name: Decode keystore
+        env:
+          ANDROID_RELEASE_KEYSTORE_BASE64: ${{ secrets.ANDROID_RELEASE_KEYSTORE_BASE64 }}
         shell: bash
         run: |
           set -euo pipefail
-          ./gradlew :androidApp:assembleDebug \
+          if [[ -z "${ANDROID_RELEASE_KEYSTORE_BASE64:-}" ]]; then
+            echo "Missing required secret: ANDROID_RELEASE_KEYSTORE_BASE64" >&2
+            exit 1
+          fi
+          printenv ANDROID_RELEASE_KEYSTORE_BASE64 | base64 -d > androidApp/release.keystore
+
+      - name: Assemble androidApp release with snapshot dependencies
+        shell: bash
+        env:
+          ORG_GRADLE_PROJECT_ANDROID_RELEASE_STORE_FILE: androidApp/release.keystore
+          ORG_GRADLE_PROJECT_ANDROID_RELEASE_STORE_PASSWORD: ${{ secrets.ANDROID_RELEASE_STORE_PASSWORD }}
+          ORG_GRADLE_PROJECT_ANDROID_RELEASE_KEY_ALIAS: ${{ secrets.ANDROID_RELEASE_KEY_ALIAS }}
+          ORG_GRADLE_PROJECT_ANDROID_RELEASE_KEY_PASSWORD: ${{ secrets.ANDROID_RELEASE_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          ./gradlew :androidApp:assembleRelease \
             -PchartsDependencyMode=snapshot \
             -PchartsPublishedVersion=${{ steps.snapshot.outputs.version }} \
-            --no-daemon \
-            --stacktrace
+            --no-daemon
+          rm -f androidApp/release.keystore
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -83,7 +100,7 @@ jobs:
             exit 1
           fi
           
-          apk_path="androidApp/build/outputs/apk/debug/androidApp-debug.apk"
+          apk_path="androidApp/build/outputs/apk/release/androidApp-release.apk"
           if [[ ! -f "${apk_path}" ]]; then
             echo "APK not found at: ${apk_path}" >&2
             exit 1
@@ -98,8 +115,6 @@ jobs:
             --cache-control "${cache_control}" \
             --only-show-errors
 
-          echo "APK uploaded successfully: HDCharts-${SNAPSHOT_VERSION}.apk"
-
       - name: Publish run summary
         env:
           SNAPSHOT_VERSION: ${{ steps.snapshot.outputs.version }}
@@ -109,5 +124,5 @@ jobs:
           set -euo pipefail
           echo "### Android Snapshot Build" >> "$GITHUB_STEP_SUMMARY"
           echo "- Snapshot version: \`${SNAPSHOT_VERSION}\`" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Gradle task: \`:androidApp:assembleDebug\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Gradle task: \`:androidApp:assembleRelease\`" >> "$GITHUB_STEP_SUMMARY"
           echo "- APK: \`s3://${DOCS_STATIC_BUCKET}/static/android/snapshot/HDCharts-${SNAPSHOT_VERSION}.apk\`" >> "$GITHUB_STEP_SUMMARY"
