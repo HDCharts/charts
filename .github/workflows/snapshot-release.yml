@@ -156,6 +156,8 @@ jobs:
               '',
               'The snapshot is now available on Maven Central Snapshots repository.',
               '',
+              'https://central.sonatype.com/repository/maven-snapshots/io/github/dautovicharis/charts/maven-metadata.xml',
+              '',
               'Umbrella artifact:',
               '```kotlin',
               `implementation("io.github.dautovicharis:charts:${version}")`,
