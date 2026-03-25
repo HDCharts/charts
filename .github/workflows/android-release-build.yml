@@ -1,4 +1,4 @@
-name: Android Snapshot Build
+name: Android Release Build
 
 on:
   workflow_dispatch:
@@ -10,21 +10,26 @@ on:
         required: true
         type: choice
         options:
-          - "2.3.0-SNAPSHOT"
-        default: "2.3.0-SNAPSHOT"
+          - "2.3.0"
+        default: "2.3.0"
       # VERSION_INPUT_END
+      allow_overwrite_release:
+        description: "Allow overwrite of existing release APK"
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read
   id-token: write
 
 concurrency:
-  group: android-snapshot-build-${{ github.ref }}
-  cancel-in-progress: true
+  group: android-release-build-${{ github.run_id }}
+  cancel-in-progress: false
 
 jobs:
-  android-snapshot-build:
-    name: Assemble Android App with Snapshot
+  android-release-build:
+    name: Assemble Android App with Release
     runs-on: ubuntu-latest
     timeout-minutes: 30
     if: ${{ github.repository_owner == 'HDCharts' }}
@@ -41,18 +46,18 @@ jobs:
           distribution: zulu
           cache: gradle
 
-      - name: Validate snapshot input
-        id: snapshot
+      - name: Validate release input
+        id: release
         shell: bash
         env:
-          SNAPSHOT_VERSION: ${{ inputs.version_preview }}
+          RELEASE_VERSION: ${{ inputs.version_preview }}
         run: |
           set -euo pipefail
-          if [[ "${SNAPSHOT_VERSION}" != *"-SNAPSHOT" ]]; then
-            echo "Expected a -SNAPSHOT version, got: ${SNAPSHOT_VERSION}" >&2
+          if [[ "${RELEASE_VERSION}" == *"-SNAPSHOT" ]]; then
+            echo "Expected a release version without -SNAPSHOT suffix, got: ${RELEASE_VERSION}" >&2
             exit 1
           fi
-          echo "version=${SNAPSHOT_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "version=${RELEASE_VERSION}" >> "$GITHUB_OUTPUT"
 
       - name: Decode keystore
         env:
@@ -66,7 +71,7 @@ jobs:
           fi
           printenv ANDROID_RELEASE_KEYSTORE_BASE64 | base64 -d > androidApp/release.keystore
 
-      - name: Assemble androidApp release with snapshot dependencies
+      - name: Assemble androidApp release with release dependencies
         shell: bash
         env:
           ORG_GRADLE_PROJECT_ANDROID_RELEASE_STORE_FILE: androidApp/release.keystore
@@ -76,8 +81,8 @@ jobs:
         run: |
           set -euo pipefail
           ./gradlew :androidApp:assembleRelease \
-            -PchartsDependencyMode=snapshot \
-            -PchartsPublishedVersion=${{ steps.snapshot.outputs.version }} \
+            -PchartsDependencyMode=release \
+            -PchartsPublishedVersion=${{ steps.release.outputs.version }} \
             --no-daemon
           rm -f androidApp/release.keystore
 
@@ -90,38 +95,48 @@ jobs:
       - name: Upload APK to S3
         env:
           DOCS_STATIC_BUCKET: ${{ vars.DOCS_STATIC_BUCKET }}
+          ALLOW_OVERWRITE: ${{ github.event.inputs.allow_overwrite_release }}
         shell: bash
         run: |
           set -euo pipefail
-          
+
           if [[ -z "${DOCS_STATIC_BUCKET:-}" ]]; then
             echo "Missing required repository variable: DOCS_STATIC_BUCKET" >&2
             exit 1
           fi
-          
+
           apk_path="androidApp/build/outputs/apk/release/androidApp-release.apk"
           if [[ ! -f "${apk_path}" ]]; then
             echo "APK not found at: ${apk_path}" >&2
             exit 1
           fi
-          
+
           bucket_uri="s3://${DOCS_STATIC_BUCKET}/static"
-          cache_control="no-store, max-age=0"
-          
+          s3_key="android/release/hdcharts-release.apk"
+
+          # Guard against overwriting an existing release APK
+          if [[ "${ALLOW_OVERWRITE}" != "true" ]]; then
+            if aws s3api head-object --bucket "${DOCS_STATIC_BUCKET}" --key "static/${s3_key}" 2>/dev/null; then
+              echo "Release APK already exists at ${bucket_uri}/${s3_key}" >&2
+              echo "Set allow_overwrite_release=true to overwrite." >&2
+              exit 1
+            fi
+          fi
+
           # Upload APK to S3
-          aws s3 cp "${apk_path}" "${bucket_uri}/android/snapshot/hdcharts-snapshot.apk" \
+          aws s3 cp "${apk_path}" "${bucket_uri}/${s3_key}" \
             --content-type "application/vnd.android.package-archive" \
-            --cache-control "${cache_control}" \
+            --cache-control "public, max-age=31536000, immutable" \
             --only-show-errors
 
       - name: Publish run summary
         env:
-          SNAPSHOT_VERSION: ${{ steps.snapshot.outputs.version }}
+          RELEASE_VERSION: ${{ steps.release.outputs.version }}
           DOCS_STATIC_BUCKET: ${{ vars.DOCS_STATIC_BUCKET }}
         shell: bash
         run: |
           set -euo pipefail
-          echo "### Android Snapshot Build" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Snapshot version: \`${SNAPSHOT_VERSION}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "### Android Release Build" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Release version: \`${RELEASE_VERSION}\`" >> "$GITHUB_STEP_SUMMARY"
           echo "- Gradle task: \`:androidApp:assembleRelease\`" >> "$GITHUB_STEP_SUMMARY"
-          echo "- APK: \`s3://${DOCS_STATIC_BUCKET}/static/android/snapshot/hdcharts-snapshot.apk\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- APK: \`s3://${DOCS_STATIC_BUCKET}/static/android/release/hdcharts-release.apk\`" >> "$GITHUB_STEP_SUMMARY"

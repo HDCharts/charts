@@ -60,11 +60,12 @@ jobs:
             ".github/workflows/publish-docs-snapshot.yml"
             ".github/workflows/promote-docs.yml"
             ".github/workflows/android-snapshot-build.yml"
+            ".github/workflows/android-release-build.yml"
           )
 
           for workflow_file in "${workflow_files[@]}"; do
             case "${workflow_file}" in
-              ".github/workflows/release.yml"|".github/workflows/publish-docs-release.yml"|".github/workflows/promote-docs.yml")
+              ".github/workflows/release.yml"|".github/workflows/publish-docs-release.yml"|".github/workflows/promote-docs.yml"|".github/workflows/android-release-build.yml")
                 workflow_preview_version="${release_preview_version}"
                 ;;
               *)
