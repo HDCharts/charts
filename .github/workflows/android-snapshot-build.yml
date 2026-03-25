@@ -16,6 +16,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 concurrency:
   group: android-snapshot-build-${{ github.ref }}
@@ -25,6 +26,8 @@ jobs:
   android-snapshot-build:
     name: Assemble Android App with Snapshot
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    if: ${{ github.repository_owner == 'HDCharts' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -61,10 +64,50 @@ jobs:
             --no-daemon \
             --stacktrace
 
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Upload APK to S3
+        env:
+          DOCS_STATIC_BUCKET: ${{ vars.DOCS_STATIC_BUCKET }}
+          SNAPSHOT_VERSION: ${{ steps.snapshot.outputs.version }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          
+          if [[ -z "${DOCS_STATIC_BUCKET:-}" ]]; then
+            echo "Missing required repository variable: DOCS_STATIC_BUCKET" >&2
+            exit 1
+          fi
+          
+          apk_path="androidApp/build/outputs/apk/debug/androidApp-debug.apk"
+          if [[ ! -f "${apk_path}" ]]; then
+            echo "APK not found at: ${apk_path}" >&2
+            exit 1
+          fi
+          
+          bucket_uri="s3://${DOCS_STATIC_BUCKET}/static"
+          cache_control="no-store, max-age=0"
+          
+          # Upload APK to S3
+          aws s3 cp "${apk_path}" "${bucket_uri}/android/snapshot/HDCharts-${SNAPSHOT_VERSION}.apk" \
+            --content-type "application/vnd.android.apk" \
+            --cache-control "${cache_control}" \
+            --only-show-errors
+
+          echo "APK uploaded successfully: HDCharts-${SNAPSHOT_VERSION}.apk"
+
       - name: Publish run summary
+        env:
+          SNAPSHOT_VERSION: ${{ steps.snapshot.outputs.version }}
+          DOCS_STATIC_BUCKET: ${{ vars.DOCS_STATIC_BUCKET }}
         shell: bash
         run: |
           set -euo pipefail
           echo "### Android Snapshot Build" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Snapshot version: \`${{ steps.snapshot.outputs.version }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Snapshot version: \`${SNAPSHOT_VERSION}\`" >> "$GITHUB_STEP_SUMMARY"
           echo "- Gradle task: \`:androidApp:assembleDebug\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- APK: \`s3://${DOCS_STATIC_BUCKET}/static/android/snapshot/HDCharts-${SNAPSHOT_VERSION}.apk\`" >> "$GITHUB_STEP_SUMMARY"
