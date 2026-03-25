@@ -222,4 +222,3 @@ jobs:
         run: |
           echo "### Android Snapshot Build Triggered" >> "$GITHUB_STEP_SUMMARY"
           echo "- Version: \`${{ needs.snapshot-release.outputs.snapshot_version }}\`" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Status: Triggered after 15-minute Maven Central sync wait" >> "$GITHUB_STEP_SUMMARY"
