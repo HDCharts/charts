@@ -197,9 +197,6 @@ jobs:
     needs: snapshot-release
     if: ${{ needs.snapshot-release.outputs.is_snapshot == 'true' }}
     steps:
-      - name: Wait 15 minutes for Maven Central sync
-        run: sleep 15m
-
       - name: Trigger Android Snapshot Build workflow
         uses: actions/github-script@v7
         with:
