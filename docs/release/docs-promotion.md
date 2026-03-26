@@ -5,7 +5,7 @@ Workflow: `charts/.github/workflows/promote-docs.yml`
 ```mermaid
 flowchart TD
   A["workflow_dispatch: charts: promote-docs.yml"] --> B["axion: resolve-release-version.sh"]
-  B --> C{"CHARTS_DOCS_WORKFLOW_TOKEN set?"}
+  B --> C{"CHARTS_WORKFLOW_TOKEN set?"}
   C -- No --> CX["Fail"]
   C -- Yes --> E["charts-docs: promote-docs.yml (workflow_dispatch)"]
   E --> F["promote-snapshot-to-release.sh"]
