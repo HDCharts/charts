@@ -60,11 +60,11 @@ jobs:
       - name: Validate charts-docs workflow token
         shell: bash
         env:
-          CHARTS_DOCS_WORKFLOW_TOKEN: ${{ secrets.CHARTS_DOCS_WORKFLOW_TOKEN }}
+          CHARTS_WORKFLOW_TOKEN: ${{ secrets.CHARTS_WORKFLOW_TOKEN }}
         run: |
           set -euo pipefail
-          if [[ -z "${CHARTS_DOCS_WORKFLOW_TOKEN:-}" ]]; then
-            echo "Missing required secret: CHARTS_DOCS_WORKFLOW_TOKEN." >&2
+          if [[ -z "${CHARTS_WORKFLOW_TOKEN:-}" ]]; then
+            echo "Missing required secret: CHARTS_WORKFLOW_TOKEN." >&2
             echo "Cross-repo workflow dispatch to HDCharts/charts-docs cannot use GITHUB_TOKEN." >&2
             exit 1
           fi
@@ -76,7 +76,7 @@ jobs:
           DOCS_REPO_REF: ${{ github.event.inputs.docs_repo_ref }}
           RELEASE_NOTES: ${{ github.event.inputs.release_notes }}
         with:
-          github-token: ${{ secrets.CHARTS_DOCS_WORKFLOW_TOKEN }}
+          github-token: ${{ secrets.CHARTS_WORKFLOW_TOKEN }}
           script: |
             const releaseVersion = process.env.RELEASE_VERSION;
             const docsRepoRef = process.env.DOCS_REPO_REF || 'main';
