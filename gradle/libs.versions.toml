@@ -18,7 +18,7 @@ compose-plugin = "1.10.2"
 compose-material-icons = "1.7.3"
 compose-mpp-material3 = "1.9.0"
 # https://plugins.gradle.org/plugin/org.jetbrains.kotlin.multiplatform
-kotlin-multiplatform = "2.3.10"
+kotlin-multiplatform = "2.3.20"
 # https://developer.android.com/studio/preview/compose-screenshot-testing
 compose-screenshot = "0.0.1-alpha13"
 # Coroutines version
