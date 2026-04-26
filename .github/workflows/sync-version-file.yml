@@ -123,11 +123,11 @@ jobs:
       - name: Validate workflow update token
         shell: bash
         env:
-          CHARTS_WORFLOW_TOKEN: ${{ secrets.CHARTS_WORFLOW_TOKEN }}
+          CHARTS_WORKFLOW_TOKEN: ${{ secrets.CHARTS_WORKFLOW_TOKEN }}
         run: |
           set -euo pipefail
-          if [[ -z "${CHARTS_WORFLOW_TOKEN:-}" ]]; then
-            echo "Missing required secret: CHARTS_WORFLOW_TOKEN." >&2
+          if [[ -z "${CHARTS_WORKFLOW_TOKEN:-}" ]]; then
+            echo "Missing required secret: CHARTS_WORKFLOW_TOKEN." >&2
             echo "Syncing workflow files requires a token with workflow write scope." >&2
             exit 1
           fi
@@ -135,7 +135,7 @@ jobs:
       - name: Create PR when .version changed
         uses: peter-evans/create-pull-request@v7
         with:
-          token: ${{ secrets.CHARTS_WORFLOW_TOKEN }}
+          token: ${{ secrets.CHARTS_WORKFLOW_TOKEN }}
           add-paths: ${{ steps.version.outputs.sync_paths }}
           branch: chore/sync-version-file
           delete-branch: true
