@@ -54,7 +54,7 @@ jose4j-security = "0.9.6"
 jackson-core-security = "2.18.6"
 
 # https://kotlin.github.io/dokka/
-dokka = "2.1.0"
+dokka = "2.2.0"
 # https://github.com/vanniktech/gradle-maven-publish-plugin
 mavenPublish = "0.36.0"
 # https://github.com/gmazzo/gradle-buildconfig-plugin
