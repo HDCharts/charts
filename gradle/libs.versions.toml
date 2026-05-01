@@ -60,7 +60,7 @@ mavenPublish = "0.36.0"
 # https://github.com/gmazzo/gradle-buildconfig-plugin
 buildConfig = "6.0.9"
 # https://github.com/JLLeitschuh/ktlint-gradle
-ktlint = "14.1.0"
+ktlint = "14.2.0"
 axion-release = "1.21.1"
 # https://insert-koin.io
 # https://mvnrepository.com/artifact/io.insert-koin/koin-bom
