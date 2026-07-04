@@ -20,7 +20,7 @@ compose-mpp-material3 = "1.9.0"
 # https://plugins.gradle.org/plugin/org.jetbrains.kotlin.multiplatform
 kotlin-multiplatform = "2.3.10"
 # https://developer.android.com/studio/preview/compose-screenshot-testing
-compose-screenshot = "0.0.1-alpha13"
+compose-screenshot = "0.0.1-alpha14"
 # Coroutines version
 kotlinx-coroutines = "1.10.2"
 kotlinx-collections-immutable = "0.4.0"
