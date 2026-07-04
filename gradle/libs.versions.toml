@@ -18,13 +18,13 @@ compose-plugin = "1.10.3"
 compose-material-icons = "1.7.3"
 compose-mpp-material3 = "1.9.0"
 # https://plugins.gradle.org/plugin/org.jetbrains.kotlin.multiplatform
-kotlin-multiplatform = "2.3.10"
+kotlin-multiplatform = "2.4.0"
 # https://developer.android.com/studio/preview/compose-screenshot-testing
 compose-screenshot = "0.0.1-alpha14"
 # Coroutines version
-kotlinx-coroutines = "1.10.2"
-kotlinx-collections-immutable = "0.4.0"
-ksp = "2.3.6"
+kotlinx-coroutines = "1.11.0"
+kotlinx-collections-immutable = "0.5.1"
+ksp = "2.3.9"
 compose-gif-recorder = "0.1.2"
 # https://www.cve.org/CVERecord?id=CVE-2024-7254
 protobuf-security = "3.25.5"
