@@ -3,7 +3,7 @@
 java = "17"
 
 # Android gradle plugin version
-agp = "9.1.0"
+agp = "9.3.0"
 
 androidx-navigation = "2.9.2"
 androidx-lifecycle = "2.10.0"

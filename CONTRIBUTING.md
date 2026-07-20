@@ -5,7 +5,7 @@ Contributions are welcome.
 There are many ways to contribute, including feature work, bug fixes, performance improvements, test coverage, docs updates, and tooling/CI refinements.
 
 ## Requirements
-- Android Studio Panda 2 | 2025.3.2
+- Android Studio Quail 2 | 2026.1.2
 
 ## Project hierarchy
 <pre>
