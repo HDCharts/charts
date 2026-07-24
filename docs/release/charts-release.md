@@ -20,3 +20,8 @@ flowchart TD
   L --> M["Gradle (Axion): pushRelease (tag push)"]
   M --> N["Commit comment (success)"]
 ```
+
+Before running this workflow, complete the
+[Release Checklist](./release-checklist.md). In particular, the docs promotion
+pull request must be merged because this workflow requires the release version
+in the charts-docs registry.

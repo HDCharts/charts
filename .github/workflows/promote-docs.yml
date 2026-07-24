@@ -13,15 +13,6 @@ on:
           - "2.3.0"
         default: "2.3.0"
       # VERSION_INPUT_END
-      docs_repo_ref:
-        description: "charts-docs ref to dispatch promote workflow on"
-        required: false
-        default: main
-        type: string
-      release_notes:
-        description: "Optional registry notes for charts-docs entry"
-        required: false
-        type: string
 
 permissions:
   contents: read
@@ -34,7 +25,9 @@ jobs:
   promote-docs:
     name: Resolve version and dispatch charts-docs promotion
     runs-on: ubuntu-latest
-    if: ${{ github.repository_owner == 'HDCharts' }}
+    if: >
+      github.repository_owner == 'HDCharts' &&
+      github.ref == 'refs/heads/main'
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -73,26 +66,20 @@ jobs:
         uses: actions/github-script@v7
         env:
           RELEASE_VERSION: ${{ steps.version.outputs.release_version }}
-          DOCS_REPO_REF: ${{ github.event.inputs.docs_repo_ref }}
-          RELEASE_NOTES: ${{ github.event.inputs.release_notes }}
         with:
           github-token: ${{ secrets.CHARTS_WORKFLOW_TOKEN }}
           script: |
             const releaseVersion = process.env.RELEASE_VERSION;
-            const docsRepoRef = process.env.DOCS_REPO_REF || 'main';
-            const releaseNotes = process.env.RELEASE_NOTES || '';
             const sourceRunUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
-            await github.rest.actions.createWorkflowDispatch({
+            await github.rest.repos.createDispatchEvent({
               owner: 'HDCharts',
               repo: 'charts-docs',
-              workflow_id: 'promote-docs.yml',
-              ref: docsRepoRef,
-              inputs: {
+              event_type: 'promote-docs',
+              client_payload: {
                 release_version: releaseVersion,
-                release_notes: releaseNotes,
                 source_repository: `${context.repo.owner}/${context.repo.repo}`,
                 source_sha: context.sha,
                 source_run_url: sourceRunUrl,
               },
             });
-            core.info(`Dispatched charts-docs promote-docs.yml for ${releaseVersion} on ref ${docsRepoRef}`);
+            core.info(`Dispatched charts-docs promotion for ${releaseVersion}`);
