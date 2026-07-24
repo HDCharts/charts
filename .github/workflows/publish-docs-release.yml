@@ -1,5 +1,8 @@
+# Workflow: build the versioned docs/static release and publish it to S3.
+# This workflow is used when promoting a release version of the charts docs site.
+#
+# It handles the release docs publish path.
 name: Publish Docs Release
-
 on:
   workflow_dispatch:
     inputs:

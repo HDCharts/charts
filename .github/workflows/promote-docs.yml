@@ -1,5 +1,8 @@
+# Workflow: dispatch charts-docs to promote snapshot docs into a release version.
+# This is the cross-repo handoff that turns snapshot docs into release docs.
+#
+# It only runs from the charts repo to trigger docs promotion downstream.
 name: Promote Docs
-
 on:
   workflow_dispatch:
     inputs:

@@ -1,5 +1,8 @@
+# Workflow: build the main charts project for pull requests and manual runs.
+# Use this when you want a fast Gradle assemble check without running the full test suite.
+#
+# This is a lightweight CI gate for build validation.
 name: Assemble
-
 on:
   pull_request:
     types: [opened, synchronize, reopened]

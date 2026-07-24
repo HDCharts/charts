@@ -1,5 +1,8 @@
+# Workflow: mirror release notes from charts into charts-docs.
+# This keeps the public docs repo aligned with the release-note source tree.
+#
+# It runs after main branch updates and dispatches the docs repo sync.
 name: Sync Release Notes
-
 on:
   push:
     branches: [main]

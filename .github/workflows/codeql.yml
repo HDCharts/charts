@@ -1,5 +1,8 @@
+# Workflow: run CodeQL security analysis for the charts repo.
+# It scans actions, Java/Kotlin, and JavaScript/TypeScript code.
+#
+# This is the security scan workflow and is manually dispatched.
 name: CodeQL
-
 on:
   workflow_dispatch:
 

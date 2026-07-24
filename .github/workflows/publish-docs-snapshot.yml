@@ -1,5 +1,8 @@
+# Workflow: build and publish the latest docs/static snapshot to S3.
+# It can run manually and also on a daily schedule.
+#
+# This is the snapshot docs publish path.
 name: Publish Docs Snapshot
-
 on:
   workflow_dispatch:
     inputs:

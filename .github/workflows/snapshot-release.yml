@@ -1,3 +1,7 @@
+# Workflow: build and publish a snapshot release.
+# It runs when recent code changes justify a snapshot publish.
+#
+# This is the automated pre-release path used between full releases.
 name: Snapshot Release
 on:
   workflow_dispatch:

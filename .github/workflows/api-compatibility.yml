@@ -1,5 +1,8 @@
+# Workflow: check the public API against the current release baseline.
+# Pull requests can be marked breaking-change to allow intentional incompatibilities.
+#
+# This is the API compatibility gate for release safety.
 name: API Compatibility
-
 on:
   pull_request:
     branches: [main]

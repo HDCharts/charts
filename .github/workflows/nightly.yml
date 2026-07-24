@@ -1,5 +1,8 @@
+# Workflow: dispatch the snapshot release workflow every night.
+# This keeps snapshot publishing moving without a manual trigger.
+#
+# It is the nightly scheduler for release automation.
 name: Nightly Workflows
-
 on:
   schedule:
     # Runs every day at 00:00 UTC.

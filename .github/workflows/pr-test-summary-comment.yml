@@ -1,5 +1,8 @@
+# Workflow: post the charts test summary back onto pull requests.
+# It runs after the Test workflow completes and reuses the shared summary helper.
+#
+# This keeps PR test results visible in the conversation thread.
 name: PR Test Summary Comment
-
 on:
   workflow_run:
     workflows: ["Test"]

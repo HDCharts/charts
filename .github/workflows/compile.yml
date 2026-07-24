@@ -1,5 +1,8 @@
+# Workflow: compile the charts project for pull requests and manual runs.
+# Use this as a lighter check than test to catch build errors early.
+#
+# This is a fast validation step, not the full test suite.
 name: Compile
-
 on:
   pull_request:
     types: [opened, synchronize, reopened]
