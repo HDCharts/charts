@@ -34,10 +34,6 @@ object SecurityOverrides {
     const val HTTP_CLIENT_ARTIFACT = "httpclient"
     const val HTTP_CLIENT_REASON = "Mitigate host confusion in org.apache.httpcomponents:httpclient < 4.5.13"
 
-    const val GUAVA_GROUP = "com.google.guava"
-    const val GUAVA_ARTIFACT = "guava"
-    const val GUAVA_REASON = "Mitigate insecure temp directory handling in com.google.guava:guava < 32.0.0-android"
-
     const val JOSE4J_GROUP = "org.bitbucket.b_c"
     const val JOSE4J_ARTIFACT = "jose4j"
     const val JOSE4J_REASON = "Mitigate DoS via compressed JWE content in org.bitbucket.b_c:jose4j < 0.9.6"

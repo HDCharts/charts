@@ -40,14 +40,13 @@ commons-lang3-security = "3.18.0"
 logback-core-security = "1.3.16"
 # https://www.cve.org/CVERecord?id=CVE-2020-13956
 httpclient-security = "4.5.14"
-# https://www.cve.org/CVERecord?id=CVE-2023-2976
-guava-security = "33.3.1-jre"
-# https://www.cve.org/CVERecord?id=CVE-2025-69873
-ajv-security = "8.18.0"
-# https://www.cve.org/CVERecord?id=CVE-2026-27903
-minimatch-security = "10.2.3"
-# https://github.com/advisories/GHSA-5c6j-r48x-rmvq
-serialize-javascript-security = "7.0.3"
+# https://github.com/advisories/GHSA-qj8w-gfj5-8c6v
+serialize-javascript-security = "7.0.7"
+# https://github.com/advisories/GHSA-w5hq-g745-h8pq
+uuid-security = "11.1.1"
+# https://github.com/advisories/GHSA-79cf-xcqc-c78w
+# https://github.com/advisories/GHSA-mx8g-39q3-5c79
+webpack-dev-server-security = "5.2.6"
 # https://www.cve.org/CVERecord?id=CVE-2024-29371
 jose4j-security = "0.9.6"
 # https://github.com/advisories/GHSA-72hv-8253-57qq
