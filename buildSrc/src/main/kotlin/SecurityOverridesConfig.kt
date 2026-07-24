@@ -8,7 +8,6 @@ fun ConfigurationContainer.configureBuildscriptSecurityOverrides(versionCatalog:
     val nettySecurityVersion = versionCatalog.requiredVersion("netty-codec-http2-security")
     val commonsLang3SecurityVersion = versionCatalog.requiredVersion("commons-lang3-security")
     val httpClientSecurityVersion = versionCatalog.requiredVersion("httpclient-security")
-    val guavaSecurityVersion = versionCatalog.requiredVersion("guava-security")
     val jose4jSecurityVersion = versionCatalog.requiredVersion("jose4j-security")
     val jacksonCoreSecurityVersion = versionCatalog.requiredVersion("jackson-core-security")
     val protobufOverride = SecurityOverrideRule(protobufSecurityVersion, SecurityOverrides.PROTOBUF_REASON)
@@ -18,7 +17,6 @@ fun ConfigurationContainer.configureBuildscriptSecurityOverrides(versionCatalog:
     val nettyHttpOverride = SecurityOverrideRule(nettySecurityVersion, SecurityOverrides.NETTY_HTTP_REASON)
     val commonsLangOverride = SecurityOverrideRule(commonsLang3SecurityVersion, SecurityOverrides.COMMONS_LANG3_REASON)
     val httpClientOverride = SecurityOverrideRule(httpClientSecurityVersion, SecurityOverrides.HTTP_CLIENT_REASON)
-    val guavaOverride = SecurityOverrideRule(guavaSecurityVersion, SecurityOverrides.GUAVA_REASON)
     val jose4jOverride = SecurityOverrideRule(jose4jSecurityVersion, SecurityOverrides.JOSE4J_REASON)
     val jacksonOverride = SecurityOverrideRule(jacksonCoreSecurityVersion, SecurityOverrides.JACKSON_CORE_REASON)
     val buildscriptOverrides =
@@ -49,7 +47,6 @@ fun ConfigurationContainer.configureBuildscriptSecurityOverrides(versionCatalog:
                 DependencyCoordinate(SecurityOverrides.HTTP_COMPONENTS_GROUP, SecurityOverrides.HTTP_CLIENT_ARTIFACT),
                 httpClientOverride,
             )
-            put(DependencyCoordinate(SecurityOverrides.GUAVA_GROUP, SecurityOverrides.GUAVA_ARTIFACT), guavaOverride)
             put(DependencyCoordinate(SecurityOverrides.JOSE4J_GROUP, SecurityOverrides.JOSE4J_ARTIFACT), jose4jOverride)
             put(
                 DependencyCoordinate(SecurityOverrides.JACKSON_CORE_GROUP, SecurityOverrides.JACKSON_CORE_ARTIFACT),
@@ -72,26 +69,19 @@ fun ConfigurationContainer.configureBuildscriptSecurityOverrides(versionCatalog:
 
 fun ConfigurationContainer.configureProjectSecurityOverrides(
     versionCatalog: VersionCatalog,
-    includeCommonsAndGuava: Boolean = false,
+    includeCommonsLang: Boolean = false,
 ) {
     val commonsLang3SecurityVersion = versionCatalog.requiredVersion("commons-lang3-security")
-    val guavaSecurityVersion = versionCatalog.requiredVersion("guava-security")
     val logbackSecurityVersion = versionCatalog.requiredVersion("logback-core-security")
 
     configureEach {
-        if (includeCommonsAndGuava) {
+        if (includeCommonsLang) {
             resolutionStrategy.eachDependency {
                 if (requested.group == SecurityOverrides.COMMONS_LANG_GROUP &&
                     requested.name == SecurityOverrides.COMMONS_LANG3_ARTIFACT
                 ) {
                     useVersion(commonsLang3SecurityVersion)
                     because(SecurityOverrides.COMMONS_LANG3_REASON)
-                }
-                if (requested.group == SecurityOverrides.GUAVA_GROUP &&
-                    requested.name == SecurityOverrides.GUAVA_ARTIFACT
-                ) {
-                    useVersion(guavaSecurityVersion)
-                    because(SecurityOverrides.GUAVA_REASON)
                 }
             }
         }
@@ -125,15 +115,15 @@ private data class SecurityOverrideRule(
 )
 
 fun Project.configureJsSecurityOverrides(versionCatalog: VersionCatalog) {
-    val ajvSecurityVersion = versionCatalog.requiredVersion("ajv-security")
-    val minimatchSecurityVersion = versionCatalog.requiredVersion("minimatch-security")
     val serializeJavascriptSecurityVersion = versionCatalog.requiredVersion("serialize-javascript-security")
+    val uuidSecurityVersion = versionCatalog.requiredVersion("uuid-security")
+    val webpackDevServerSecurityVersion = versionCatalog.requiredVersion("webpack-dev-server-security")
     val yarnRootExtension = resolveYarnRootExtension()
 
     // Keep Kotlin/JS transitive dependencies patched in kotlin-js-store/yarn.lock.
-    yarnRootExtension.applyResolution("ajv", ajvSecurityVersion)
-    yarnRootExtension.applyResolution("minimatch", minimatchSecurityVersion)
     yarnRootExtension.applyResolution("serialize-javascript", serializeJavascriptSecurityVersion)
+    yarnRootExtension.applyResolution("uuid", uuidSecurityVersion)
+    yarnRootExtension.applyResolution("webpack-dev-server", webpackDevServerSecurityVersion)
 }
 
 private fun Project.resolveYarnRootExtension(): Any {

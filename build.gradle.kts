@@ -47,19 +47,13 @@ buildscript {
 // Keep Kotlin/JS transitive dependencies patched in kotlin-js-store/yarn.lock.
 configureJsSecurityOverrides(versionCatalog)
 
-// Root project only needs ktlint/logback override; commons-lang3/guava are enforced in subprojects.
+// Root project only needs the ktlint/logback override; commons-lang3 is enforced in subprojects.
 configurations.configureProjectSecurityOverrides(
     versionCatalog = versionCatalog,
 )
 
 subprojects {
     version = rootProject.version
-
-    tasks.matching { it.name == "jsBrowserTest" }.configureEach {
-        doFirst {
-            rootProject.patchKarmaMinimatchCompatibility()
-        }
-    }
 
     apply(plugin = "org.jlleitschuh.gradle.ktlint")
 
@@ -70,7 +64,7 @@ subprojects {
 
     configurations.configureProjectSecurityOverrides(
         versionCatalog = versionCatalog,
-        includeCommonsAndGuava = true,
+        includeCommonsLang = true,
     )
 }
 
