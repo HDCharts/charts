@@ -55,7 +55,7 @@ jobs:
           fi
 
       - name: Dispatch charts-docs promote workflow
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         env:
           RELEASE_VERSION: ${{ steps.version.outputs.release_version }}
         with:
