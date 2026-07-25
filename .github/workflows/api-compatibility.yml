@@ -29,12 +29,12 @@ jobs:
       HAS_BREAKING_LABEL: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'breaking-change') }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: 17
           distribution: "temurin"
