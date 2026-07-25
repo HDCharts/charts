@@ -1,5 +1,8 @@
+# Workflow: assemble the Android app for a snapshot version.
+# It validates the selected version, decodes the signing keystore, and builds snapshot APKs.
+#
+# This is the manual Android snapshot build path.
 name: Android Snapshot Build
-
 on:
   workflow_dispatch:
     inputs:

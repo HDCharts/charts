@@ -1,5 +1,8 @@
+# Workflow: keep the checked-in .version file in sync with Axion.
+# It also refreshes workflow version inputs for release and snapshot jobs.
+#
+# This runs on main branch pushes.
 name: Sync Version File
-
 on:
   push:
     branches:

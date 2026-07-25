@@ -1,5 +1,8 @@
+# Workflow: assemble the Android app for a release version.
+# It validates the selected version, decodes the signing keystore, and builds release APKs.
+#
+# This is the manual Android release build path.
 name: Android Release Build
-
 on:
   workflow_dispatch:
     inputs:

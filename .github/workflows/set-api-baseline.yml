@@ -1,5 +1,8 @@
+# Workflow: update the stored API compatibility baseline after an approved breaking change.
+# This creates or updates the baseline commit used by the API compatibility workflow.
+#
+# It is used to persist the new baseline after intentional API breaks.
 name: Set API Baseline
-
 on:
   pull_request_target:
     branches: [main]

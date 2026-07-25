@@ -1,5 +1,8 @@
+# Workflow: run Kotlin lint checks on pull requests.
+# It skips when only docs or build-irrelevant files changed.
+#
+# This keeps linting focused on code changes that can affect the build.
 name: Lint
-
 on:
   pull_request:
     types: [opened, synchronize, reopened]

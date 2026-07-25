@@ -1,5 +1,8 @@
+# Workflow: upsert a summary comment on a pull request.
+# It downloads an upstream summary artifact and posts it using a hidden marker.
+#
+# This is the shared comment helper used by PR summary workflows.
 name: PR Summary Comment
-
 on:
   workflow_call:
     inputs:

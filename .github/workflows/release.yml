@@ -1,5 +1,8 @@
+# Workflow: publish a release build of charts.
+# It creates the git tag and updates charts-docs release assets.
+#
+# Use this for the final release path, not for snapshot or CI validation.
 name: Release
-
 on:
   workflow_dispatch:
     inputs:

@@ -1,5 +1,8 @@
+# Workflow: run the charts test suite on pull requests.
+# It uploads a summary artifact and skips work for docs-only changes.
+#
+# This is the main automated test gate for PRs.
 name: Test
-
 on:
   pull_request:
     types: [opened, synchronize, reopened]
