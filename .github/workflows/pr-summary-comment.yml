@@ -49,7 +49,7 @@ jobs:
         id: resolve_pr
         env:
           RUN_ID: ${{ inputs.run_id }}
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const { owner, repo } = context.repo;
@@ -135,7 +135,7 @@ jobs:
           PR_NUMBER: ${{ steps.resolve_pr.outputs.pr_number }}
           MARKER: ${{ inputs.marker }}
           SUMMARY_PATH: ${{ inputs.artifact_dir }}/${{ inputs.summary_file }}
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const fs = require('fs');
