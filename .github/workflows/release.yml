@@ -47,7 +47,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          ./gradlew verifyRelease --no-daemon --stacktrace
+          ./gradlew verifyRelease \
+            -PchartsReleaseVersion="${{ steps.version.outputs.release_version }}" \
+            --no-daemon --stacktrace
 
       - name: Verify tag does not already exist
         shell: bash
