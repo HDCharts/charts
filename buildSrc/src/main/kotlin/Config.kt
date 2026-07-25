@@ -1,9 +1,9 @@
+@Suppress("unused") // Public buildSrc API consumed by the root Gradle build scripts.
 object Config {
     // Common
-    const val COMPILE_SDK = 36
+    const val COMPILE_SDK = 37
     const val MIN_SDK = 24
-    const val TARGET_SDK = 36
-    const val JAVA_VERSION = 17
+    const val TARGET_SDK = 37
     const val GROUP_ID = "io.github.dautovicharis"
     const val ARTIFACT_ID = "charts"
     const val ARTIFACT_CORE_ID = "charts-core"
