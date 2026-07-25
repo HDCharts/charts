@@ -98,6 +98,13 @@ jobs:
           set -euo pipefail
           bash charts-docs-repo/scripts/test-docs-release-links-contract.sh
 
+      - name: Debug AWS CLI availability
+        shell: bash
+        run: |
+          which aws || echo "aws NOT found in PATH"
+          aws --version || echo "aws --version failed"
+          aws sts get-caller-identity || echo "sts get-caller-identity failed"
+
       - name: Publish release assets to S3
         id: publish
         env:
