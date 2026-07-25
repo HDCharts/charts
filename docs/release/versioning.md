@@ -25,10 +25,9 @@ Example:
 4. `Sync Version File` opens a PR to update `.version` to that new snapshot
    version.
 
-The manual release workflows do not accept a version input. They resolve the
-version from Axion at runtime. Workflows that need a checked-in snapshot version,
-such as Android snapshot builds and release-note synchronization, read
-`.version`.
+Manual release workflows resolve the version from Axion at runtime.
+Release-note synchronization reads `.version` as the checked-in target snapshot
+marker.
 
 ## Patch Releases
 

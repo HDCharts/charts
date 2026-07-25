@@ -19,5 +19,5 @@ flowchart TD
   J --> K["Dispatch Android Snapshot Build"]
 ```
 
-The Android snapshot build resolves the snapshot version from `.version` on the
-dispatched ref.
+`Android Snapshot Build` resolves the snapshot version from Axion on the
+selected ref, matching `Snapshot Release`.
