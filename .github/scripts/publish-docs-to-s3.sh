@@ -40,7 +40,7 @@ sync_subdir() {
 s3_prefix_has_objects() {
   local rel_path="$1"
   local ls_output
-  if ! ls_output="$(aws s3 ls "${bucket_uri}/${rel_path}/" --recursive)"; then
+  if ! ls_output="$(aws s3 ls "${bucket_uri}/${rel_path}/" --recursive 2>&1)"; then
     echo "Failed to list S3 prefix: ${bucket_uri}/${rel_path}/" >&2
     echo "AWS error: ${ls_output}" >&2
     exit 1
