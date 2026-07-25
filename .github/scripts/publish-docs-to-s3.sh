@@ -39,14 +39,17 @@ sync_subdir() {
 
 s3_prefix_has_objects() {
   local rel_path="$1"
-  local result
-  result="$(aws s3api list-objects-v2 --bucket "${DOCS_STATIC_BUCKET}" --prefix "static/${rel_path}/" --max-items 1 2>&1)" && rc=0 || rc=$?
-  if [[ "${rc}" -ne 0 ]]; then
+  local key_count
+  if ! key_count="$(aws s3api list-objects-v2 \
+    --bucket "${DOCS_STATIC_BUCKET}" \
+    --prefix "static/${rel_path}/" \
+    --max-keys 1 \
+    --query 'KeyCount' \
+    --output text)"; then
     echo "Failed to list S3 prefix: ${bucket_uri}/${rel_path}/" >&2
-    echo "AWS error: ${result}" >&2
     exit 1
   fi
-  [[ -n "${result}" ]]
+  (( key_count > 0 ))
 }
 
 published_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
@@ -60,12 +63,7 @@ case "${mode}" in
       exit 1
     fi
 
-    allow_overwrite_release="false"
-    if [[ "${ALLOW_OVERWRITE_RELEASE_INPUT:-false}" == "true" ]]; then
-      allow_overwrite_release="true"
-    fi
-
-    if [[ "${allow_overwrite_release}" != "true" ]]; then
+    if [[ "${ALLOW_OVERWRITE_RELEASE_INPUT:-false}" != "true" ]]; then
       protected_paths=(
         "api/${CURRENT_VERSION}"
         "demo/${CURRENT_VERSION}"
