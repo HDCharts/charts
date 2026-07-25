@@ -55,7 +55,7 @@ jobs:
           echo "- File: \`.version\`" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Create PR when .version changed
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@v8
         with:
           add-paths: .version
           branch: chore/sync-version-file
