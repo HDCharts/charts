@@ -6,7 +6,7 @@ java = "17"
 agp = "9.3.1"
 
 androidx-navigation = "2.9.2"
-androidx-lifecycle = "2.10.0"
+androidx-lifecycle = "2.11.0"
 androidx-activity = "1.13.0"
 androidx-test = "1.7.0"
 androidx-test-ext = "1.3.0"
@@ -14,7 +14,7 @@ androidx-test-ext = "1.3.0"
 # Kotlin compatibility
 # https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-compatibility-and-versioning.html#kotlin-compatibility
 compose = "1.11.4"
-compose-plugin = "1.10.3"
+compose-plugin = "1.11.1"
 compose-material-icons = "1.7.3"
 compose-mpp-material3 = "1.9.0"
 # https://plugins.gradle.org/plugin/org.jetbrains.kotlin.multiplatform
