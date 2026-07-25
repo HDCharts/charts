@@ -9,8 +9,11 @@ release-notes/<version>/
 └── migrations/
 ```
 
-- `changes/` contains one short changeset for each user-facing charts pull
-  request.
+- `changes/` contains one short changeset for each public, user-facing charts
+  pull request. Only put text in `release_note` when it belongs in the public
+  "What's New" section. Internal release automation, CI, refactors, and
+  maintenance-only changes should either omit a changeset or keep
+  `release_note` empty.
 - `migrations/` contains one migration fragment for each pull request with
   breaking API changes.
 

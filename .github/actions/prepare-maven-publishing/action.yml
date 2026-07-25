@@ -1,0 +1,63 @@
+name: Prepare Maven publishing
+description: Validate Maven publishing secrets and export Gradle publishing environment variables.
+
+inputs:
+  maven-central-username:
+    required: true
+    description: Maven Central username.
+  maven-central-password:
+    required: true
+    description: Maven Central password.
+  signing-key-id:
+    required: true
+    description: Signing key id.
+  signing-password:
+    required: true
+    description: Signing key password.
+  signing-in-memory-key:
+    required: true
+    description: Signing key material.
+
+runs:
+  using: composite
+  steps:
+    - name: Export Gradle Maven publishing environment
+      shell: bash
+      env:
+        MAVEN_CENTRAL_USERNAME: ${{ inputs.maven-central-username }}
+        MAVEN_CENTRAL_PASSWORD: ${{ inputs.maven-central-password }}
+        SIGNING_KEY_ID: ${{ inputs.signing-key-id }}
+        SIGNING_PASSWORD: ${{ inputs.signing-password }}
+        SIGNING_IN_MEMORY_KEY: ${{ inputs.signing-in-memory-key }}
+      run: |
+        set -euo pipefail
+
+        missing=0
+        for v in MAVEN_CENTRAL_USERNAME MAVEN_CENTRAL_PASSWORD SIGNING_KEY_ID SIGNING_PASSWORD SIGNING_IN_MEMORY_KEY; do
+          if [[ -z "${!v:-}" ]]; then
+            echo "Missing secret: ${v}" >&2
+            missing=1
+          fi
+        done
+
+        if [[ "${missing}" -ne 0 ]]; then
+          echo "Maven publishing cannot proceed because required secrets are missing." >&2
+          exit 1
+        fi
+
+        write_env() {
+          local name="$1"
+          local value="$2"
+          local delimiter="EOF_$(date +%s%N)_${RANDOM}"
+          {
+            echo "${name}<<${delimiter}"
+            printf '%s\n' "${value}"
+            echo "${delimiter}"
+          } >> "${GITHUB_ENV}"
+        }
+
+        write_env ORG_GRADLE_PROJECT_mavenCentralUsername "${MAVEN_CENTRAL_USERNAME}"
+        write_env ORG_GRADLE_PROJECT_mavenCentralPassword "${MAVEN_CENTRAL_PASSWORD}"
+        write_env ORG_GRADLE_PROJECT_signingInMemoryKey "${SIGNING_IN_MEMORY_KEY}"
+        write_env ORG_GRADLE_PROJECT_signingInMemoryKeyId "${SIGNING_KEY_ID}"
+        write_env ORG_GRADLE_PROJECT_signingInMemoryKeyPassword "${SIGNING_PASSWORD}"

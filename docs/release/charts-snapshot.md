@@ -13,7 +13,11 @@ flowchart TD
   F -- No --> FX["Skip snapshot publish"]
   F -- Yes --> G["Check Maven/signing secrets"]
   G --> H{"Secrets complete?"}
-  H -- No --> HX["Skip publish"]
+  H -- No --> HX["Fail"]
   H -- Yes --> I["Gradle (Charts): publishChartsModules"]
   I --> J["Commit comment"]
+  J --> K["Dispatch Android Snapshot Build"]
 ```
+
+`Android Snapshot Build` resolves the snapshot version from Axion on the
+selected ref, matching `Snapshot Release`.

@@ -5,17 +5,6 @@
 name: Promote Docs
 on:
   workflow_dispatch:
-    inputs:
-      # Auto-generated from .version by sync-version-file.yml
-      # VERSION_INPUT_BEGIN
-      version_preview:
-        description: "Version from .version (read-only preview)"
-        required: true
-        type: choice
-        options:
-          - "2.3.0"
-        default: "2.3.0"
-      # VERSION_INPUT_END
 
 permissions:
   contents: read

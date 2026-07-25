@@ -5,17 +5,6 @@
 name: Publish Docs Snapshot
 on:
   workflow_dispatch:
-    inputs:
-      # Auto-generated from .version by sync-version-file.yml
-      # VERSION_INPUT_BEGIN
-      version_preview:
-        description: "Version from .version (read-only preview)"
-        required: true
-        type: choice
-        options:
-          - "2.3.0-SNAPSHOT"
-        default: "2.3.0-SNAPSHOT"
-      # VERSION_INPUT_END
   schedule:
     # Daily at 00:00 UTC.
     - cron: "0 0 * * *"

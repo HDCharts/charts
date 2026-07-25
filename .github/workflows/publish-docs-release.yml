@@ -6,16 +6,6 @@ name: Publish Docs Release
 on:
   workflow_dispatch:
     inputs:
-      # Auto-generated from .version by sync-version-file.yml
-      # VERSION_INPUT_BEGIN
-      version_preview:
-        description: "Version from .version (read-only preview)"
-        required: true
-        type: choice
-        options:
-          - "2.3.0"
-        default: "2.3.0"
-      # VERSION_INPUT_END
       allow_overwrite_release:
         description: "Allow overwrite of existing release assets"
         required: false
@@ -97,25 +87,10 @@ jobs:
           fetch-depth: 1
           path: charts-docs-repo
 
-      - name: Validate release version exists in charts-docs registry
-        shell: bash
-        env:
-          EXPECTED_VERSION: ${{ steps.version.outputs.charts_version }}
-        run: |
-          set -euo pipefail
-          registry_path="charts-docs-repo/registry/versions.json"
-          if [[ ! -f "${registry_path}" ]]; then
-            echo "Missing charts-docs registry: ${registry_path}" >&2
-            exit 1
-          fi
-
-          if ! jq -e --arg expected "${EXPECTED_VERSION}" \
-            'any((.versions // [])[]?; .id == $expected)' "${registry_path}" >/dev/null; then
-            available_versions="$(jq -r '[(.versions // [])[]? | .id | select(type == "string" and . != "")] | join(", ")' "${registry_path}")"
-            echo "Release version ${EXPECTED_VERSION} is not present in charts-docs registry." >&2
-            echo "Available registry versions: ${available_versions:-"(none)"}" >&2
-            exit 1
-          fi
+      - name: Validate docs release version
+        uses: ./.github/actions/validate-docs-release-version
+        with:
+          release-version: ${{ steps.version.outputs.charts_version }}
 
       - name: Validate docs release link contract
         shell: bash

@@ -10,6 +10,7 @@ plugins {
 }
 
 val apiCompatibilityBaselineJarsDirProperty = "apiCompatibilityBaselineJarsDir"
+val apiCompatibilityBaselineRefProperty = "apiCompatibilityBaselineRef"
 val apiCompatibilityBaselineFilePath = ".github/api-compatibility-baseline.txt"
 val apiCompatibilityDefaultBaselineJarsDir = "api-compatibility/baseline-jars"
 // japicmp --exclude expects wildcard expressions, not regex.
@@ -29,7 +30,13 @@ fun Project.baselineJarsDir(): File =
             .get()
             .asFile
 
-fun Project.resolveBaselineRefFromFile(): String {
+fun Project.resolveBaselineRef(): String {
+    providers
+        .gradleProperty(apiCompatibilityBaselineRefProperty)
+        .orNull
+        ?.takeIf { it.isNotBlank() }
+        ?.let { return it }
+
     val baselineFile = rootProject.file(apiCompatibilityBaselineFilePath)
     if (!baselineFile.isFile) {
         throw GradleException(
@@ -49,6 +56,7 @@ fun Project.resolveBaselineRefFromFile(): String {
 fun Project.execAndGetStdout(
     args: List<String>,
     workingDir: File = rootProject.rootDir,
+    ignoreExitCode: Boolean = false,
 ): String {
     val process =
         ProcessBuilder(args)
@@ -57,7 +65,7 @@ fun Project.execAndGetStdout(
             .start()
     val output = process.inputStream.bufferedReader().readText()
     val exitCode = process.waitFor()
-    if (exitCode != 0) {
+    if (exitCode != 0 && !ignoreExitCode) {
         throw GradleException(
             "Command failed (${args.joinToString(" ")}): ${output.trim()}",
         )
@@ -85,12 +93,20 @@ tasks.register("prepareApiCompatibilityBaselineJars") {
         project.delete(baselineJarsDir)
         baselineJarsDir.mkdirs()
 
-        val baselineRef = project.resolveBaselineRefFromFile()
+        val baselineRef = project.resolveBaselineRef()
         val baselineSha =
             project.execAndGetStdout(
                 listOf("git", "rev-parse", "-q", "--verify", "$baselineRef^{commit}"),
             )
         val baselineWorktreeDir = File(temporaryDir, "baseline-src").absoluteFile
+        project.execAndGetStdout(
+            listOf("git", "worktree", "remove", "--force", baselineWorktreeDir.absolutePath),
+            ignoreExitCode = true,
+        )
+        project.execAndGetStdout(
+            listOf("git", "worktree", "prune"),
+            ignoreExitCode = true,
+        )
         project.delete(baselineWorktreeDir)
         baselineWorktreeDir.parentFile.mkdirs()
 
@@ -198,6 +214,6 @@ val apiCompatibilityTasks =
 tasks.register("apiCompatibilityCheck") {
     group = "verification"
     description =
-        "Checks published JVM artifacts for breaking API changes using baseline ref from .github/api-compatibility-baseline.txt (or -P$apiCompatibilityBaselineJarsDirProperty override)."
+        "Checks published JVM artifacts for breaking API changes using baseline ref from .github/api-compatibility-baseline.txt (or -P$apiCompatibilityBaselineRefProperty / -P$apiCompatibilityBaselineJarsDirProperty override)."
     dependsOn(apiCompatibilityTasks)
 }

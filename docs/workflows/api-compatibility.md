@@ -20,6 +20,26 @@ flowchart TD
 
 If a breaking change is acknowledged and merged, always run the post-merge baseline update flow below.
 
+## Release Audit Flow
+
+For release readiness, compare against the previous published release tag, not
+necessarily the checked-in `.github/api-compatibility-baseline.txt`. The checked-in
+baseline may be advanced after accepted breaking-change PRs merge, so it can be
+newer than the previous release.
+
+Run the manual workflow with `baseline_ref` set to the previous release tag, or
+run Gradle locally with:
+
+```bash
+./gradlew apiCompatibilityCheck --no-daemon --continue -PapiCompatibilityBaselineRef=<previous-release-tag>
+```
+
+Example for a `2.3.0` release whose previous release is `2.2.0`:
+
+```bash
+./gradlew apiCompatibilityCheck --no-daemon --continue -PapiCompatibilityBaselineRef=2.2.0
+```
+
 ## Post-Merge Baseline Update Flow
 
 ```mermaid

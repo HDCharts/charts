@@ -1,0 +1,63 @@
+name: Validate docs static release
+description: Verify that versioned docs/static release assets were published to S3.
+
+inputs:
+  release-version:
+    required: true
+    description: Release version expected in docs/static release assets.
+  source-sha:
+    required: true
+    description: Charts commit SHA expected in docs release metadata.
+  docs-static-bucket:
+    required: true
+    description: S3 bucket containing docs/static assets.
+
+runs:
+  using: composite
+  steps:
+    - name: Validate docs static release assets
+      shell: bash
+      env:
+        RELEASE_VERSION: ${{ inputs.release-version }}
+        SOURCE_SHA: ${{ inputs.source-sha }}
+        DOCS_STATIC_BUCKET: ${{ inputs.docs-static-bucket }}
+      run: |
+        set -euo pipefail
+
+        if [[ -z "${DOCS_STATIC_BUCKET:-}" ]]; then
+          echo "Missing required repository variable: DOCS_STATIC_BUCKET" >&2
+          exit 1
+        fi
+
+        metadata_file="$(mktemp)"
+        trap 'rm -f "${metadata_file}"' EXIT
+
+        metadata_s3_uri="s3://${DOCS_STATIC_BUCKET}/static/_meta/charts-release-publish.json"
+        if ! aws s3 cp "${metadata_s3_uri}" "${metadata_file}" --only-show-errors; then
+          echo "Missing docs release metadata: ${metadata_s3_uri}" >&2
+          exit 1
+        fi
+
+        metadata_version="$(jq -r '.charts_version // ""' "${metadata_file}")"
+        if [[ "${metadata_version}" != "${RELEASE_VERSION}" ]]; then
+          echo "Docs release metadata version mismatch: expected ${RELEASE_VERSION}, got ${metadata_version:-"(empty)"}." >&2
+          exit 1
+        fi
+
+        metadata_source_sha="$(jq -r '.source_sha // ""' "${metadata_file}")"
+        if [[ "${metadata_source_sha}" != "${SOURCE_SHA}" ]]; then
+          echo "Docs release metadata source mismatch: expected ${SOURCE_SHA}, got ${metadata_source_sha:-"(empty)"}." >&2
+          exit 1
+        fi
+
+        required_keys=(
+          "static/api/${RELEASE_VERSION}/index.html"
+          "static/demo/${RELEASE_VERSION}/index.html"
+        )
+
+        for key in "${required_keys[@]}"; do
+          if ! aws s3api head-object --bucket "${DOCS_STATIC_BUCKET}" --key "${key}" >/dev/null; then
+            echo "Missing docs release asset: s3://${DOCS_STATIC_BUCKET}/${key}" >&2
+            exit 1
+          fi
+        done
