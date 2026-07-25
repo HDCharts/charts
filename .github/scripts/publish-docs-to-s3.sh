@@ -42,6 +42,7 @@ s3_prefix_has_objects() {
   local ls_output
   if ! ls_output="$(aws s3 ls "${bucket_uri}/${rel_path}/" --recursive)"; then
     echo "Failed to list S3 prefix: ${bucket_uri}/${rel_path}/" >&2
+    echo "AWS error: ${ls_output}" >&2
     exit 1
   fi
   [[ -n "${ls_output}" ]]
