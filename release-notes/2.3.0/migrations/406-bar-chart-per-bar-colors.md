@@ -1,5 +1,10 @@
 ## charts-bar
 
+### Reported API symbols
+
+- `io.github.dautovicharis.charts.style.BarChartDefaults.style(...)`
+- `io.github.dautovicharis.charts.internal.BarValidationKt.validateBarData(...)`
+
 ### Do I need to update call sites?
 
 - No, if you call `BarChartDefaults.style(...)` with named arguments only.

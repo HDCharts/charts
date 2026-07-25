@@ -1,5 +1,4 @@
 # Workflow: keep the checked-in .version file in sync with Axion.
-# It also refreshes workflow version inputs for release and snapshot jobs.
 #
 # This runs on main branch pushes.
 name: Sync Version File
@@ -45,75 +44,7 @@ jobs:
             exit 1
           fi
           printf '%s\n' "${charts_version}" > .version
-          preview_version="$(awk 'NF {gsub(/\r/, "", $0); print $0; exit}' .version)"
-          if [[ -z "${preview_version:-}" ]]; then
-            echo "The .version file is empty." >&2
-            exit 1
-          fi
-          release_preview_version="${preview_version%-SNAPSHOT}"
-          if [[ -z "${release_preview_version:-}" ]]; then
-            echo "Failed to derive release preview version from ${preview_version}." >&2
-            exit 1
-          fi
-
-          workflow_files=(
-            ".github/workflows/publish-docs-release.yml"
-            ".github/workflows/release.yml"
-            ".github/workflows/snapshot-release.yml"
-            ".github/workflows/publish-docs-snapshot.yml"
-            ".github/workflows/promote-docs.yml"
-            ".github/workflows/android-snapshot-build.yml"
-            ".github/workflows/android-release-build.yml"
-          )
-
-          for workflow_file in "${workflow_files[@]}"; do
-            case "${workflow_file}" in
-              ".github/workflows/release.yml"|".github/workflows/publish-docs-release.yml"|".github/workflows/promote-docs.yml"|".github/workflows/android-release-build.yml")
-                workflow_preview_version="${release_preview_version}"
-                ;;
-              *)
-                workflow_preview_version="${preview_version}"
-                ;;
-            esac
-
-            begin_count="$(grep -c "# VERSION_INPUT_BEGIN" "${workflow_file}" || true)"
-            end_count="$(grep -c "# VERSION_INPUT_END" "${workflow_file}" || true)"
-            if [[ "${begin_count}" -ne 1 || "${end_count}" -ne 1 ]]; then
-              echo "Expected exactly one VERSION_INPUT marker pair in ${workflow_file}." >&2
-              exit 1
-            fi
-
-            tmp_file="$(mktemp)"
-            awk -v v="${workflow_preview_version}" '
-              /# VERSION_INPUT_BEGIN/ {
-                print
-                print "      version_preview:"
-                print "        description: \"Version from .version (read-only preview)\""
-                print "        required: true"
-                print "        type: choice"
-                print "        options:"
-                print "          - \"" v "\""
-                print "        default: \"" v "\""
-                skip=1
-                next
-              }
-              /# VERSION_INPUT_END/ {
-                skip=0
-                print
-                next
-              }
-              !skip { print }
-            ' "${workflow_file}" > "${tmp_file}"
-            mv "${tmp_file}" "${workflow_file}"
-          done
-
           echo "charts_version=${charts_version}" >> "$GITHUB_OUTPUT"
-          {
-            echo "sync_paths<<EOF"
-            echo ".version"
-            printf '%s\n' "${workflow_files[@]}"
-            echo "EOF"
-          } >> "$GITHUB_OUTPUT"
 
       - name: Publish resolved version in run summary
         shell: bash
@@ -123,23 +54,10 @@ jobs:
           echo "- Version: \`${{ steps.version.outputs.charts_version }}\`" >> "$GITHUB_STEP_SUMMARY"
           echo "- File: \`.version\`" >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Validate workflow update token
-        shell: bash
-        env:
-          CHARTS_WORKFLOW_TOKEN: ${{ secrets.CHARTS_WORKFLOW_TOKEN }}
-        run: |
-          set -euo pipefail
-          if [[ -z "${CHARTS_WORKFLOW_TOKEN:-}" ]]; then
-            echo "Missing required secret: CHARTS_WORKFLOW_TOKEN." >&2
-            echo "Syncing workflow files requires a token with workflow write scope." >&2
-            exit 1
-          fi
-
       - name: Create PR when .version changed
         uses: peter-evans/create-pull-request@v7
         with:
-          token: ${{ secrets.CHARTS_WORKFLOW_TOKEN }}
-          add-paths: ${{ steps.version.outputs.sync_paths }}
+          add-paths: .version
           branch: chore/sync-version-file
           delete-branch: true
           commit-message: "chore: sync .version"

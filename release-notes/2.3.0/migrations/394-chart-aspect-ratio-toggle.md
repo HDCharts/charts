@@ -1,5 +1,9 @@
 ## charts-core
 
+### Reported API symbols
+
+- `io.github.dautovicharis.charts.style.ChartViewDefaults.style(...)`
+
 ### Do I need to update call sites?
 
 - No, if you already call `ChartViewDefaults.style(...)` and keep the default square chart area.
@@ -24,6 +28,10 @@ val chartViewStyle = ChartViewDefaults.style(
 - Recommended: Prefer named arguments when calling style factory functions.
 
 ## charts-pie
+
+### Reported API symbols
+
+- `io.github.dautovicharis.charts.style.PieChartDefaults.style(...)`
 
 ### Do I need to update call sites?
 

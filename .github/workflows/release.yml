@@ -1,29 +1,19 @@
 # Workflow: publish a release build of charts.
-# It creates the git tag and updates charts-docs release assets.
+# It creates the git tag and publishes Maven artifacts.
 #
 # Use this for the final release path, not for snapshot or CI validation.
 name: Release
 on:
   workflow_dispatch:
-    inputs:
-      # Auto-generated from .version by sync-version-file.yml
-      # VERSION_INPUT_BEGIN
-      version_preview:
-        description: "Version from .version (read-only preview)"
-        required: true
-        type: choice
-        options:
-          - "2.3.0"
-        default: "2.3.0"
-      # VERSION_INPUT_END
 
 permissions:
   contents: write
+  id-token: write
   issues: write
   pull-requests: write
 
 concurrency:
-  group: release-${{ github.run_id }}
+  group: release-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -65,7 +55,7 @@ jobs:
           set -euo pipefail
           VERSION="${{ steps.version.outputs.release_version }}"
           if git rev-parse -q --verify "refs/tags/${VERSION}" >/dev/null; then
-            echo "❌ Tag already exists: ${VERSION}" >&2
+            echo "Release tag already exists: ${VERSION}" >&2
             exit 1
           fi
 
@@ -76,81 +66,52 @@ jobs:
           fetch-depth: 1
           path: charts-docs-repo
 
-      - name: Validate release version exists in charts-docs registry
-        shell: bash
-        env:
-          EXPECTED_VERSION: ${{ steps.version.outputs.release_version }}
-        run: |
-          set -euo pipefail
-          registry_path="charts-docs-repo/registry/versions.json"
-          if [[ ! -f "${registry_path}" ]]; then
-            echo "Missing charts-docs registry: ${registry_path}" >&2
-            exit 1
-          fi
+      - name: Validate docs release version
+        uses: ./.github/actions/validate-docs-release-version
+        with:
+          release-version: ${{ steps.version.outputs.release_version }}
 
-          if ! jq -e --arg expected "${EXPECTED_VERSION}" \
-            'any((.versions // [])[]?; .id == $expected)' "${registry_path}" >/dev/null; then
-            available_versions="$(jq -r '[(.versions // [])[]? | .id | select(type == "string" and . != "")] | join(", ")' "${registry_path}")"
-            echo "Release version ${EXPECTED_VERSION} is not present in charts-docs registry." >&2
-            echo "Available registry versions: ${available_versions:-"(none)"}" >&2
-            exit 1
-          fi
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
 
-      - name: Check required secrets
-        id: secrets_check
-        env:
-          MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
-          MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
-          SIGNING_KEY_ID: ${{ secrets.SIGNING_KEY_ID }}
-          SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
-          SIGNING_IN_MEMORY_KEY: ${{ secrets.SIGNING_IN_MEMORY_KEY }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          missing=0
-          for v in MAVEN_CENTRAL_USERNAME MAVEN_CENTRAL_PASSWORD SIGNING_KEY_ID SIGNING_PASSWORD SIGNING_IN_MEMORY_KEY; do
-            if [ -z "${!v:-}" ]; then
-              echo "Missing secret: $v" >&2
-              missing=1
-            fi
-          done
-          if [ "$missing" -eq 0 ]; then
-            echo "can_publish=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "can_publish=false" >> "$GITHUB_OUTPUT"
-            echo "Release publish cannot proceed because required secrets are missing." >&2
-            exit 1
-          fi
+      - name: Validate docs static release
+        uses: ./.github/actions/validate-docs-static-release
+        with:
+          release-version: ${{ steps.version.outputs.release_version }}
+          source-sha: ${{ github.sha }}
+          docs-static-bucket: ${{ vars.DOCS_STATIC_BUCKET }}
+
+      - name: Prepare Maven publishing
+        uses: ./.github/actions/prepare-maven-publishing
+        with:
+          maven-central-username: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          maven-central-password: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+          signing-key-id: ${{ secrets.SIGNING_KEY_ID }}
+          signing-password: ${{ secrets.SIGNING_PASSWORD }}
+          signing-in-memory-key: ${{ secrets.SIGNING_IN_MEMORY_KEY }}
 
       - name: Create release tag locally with Axion
-        if: ${{ steps.secrets_check.outputs.can_publish == 'true' }}
         shell: bash
         run: |
           set -euo pipefail
           ./gradlew createRelease --no-daemon --stacktrace
 
       - name: Publish to Maven Central
-        if: ${{ steps.secrets_check.outputs.can_publish == 'true' }}
-        env:
-          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
-          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
-          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.SIGNING_IN_MEMORY_KEY }}
-          ORG_GRADLE_PROJECT_signingInMemoryKeyId: ${{ secrets.SIGNING_KEY_ID }}
-          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.SIGNING_PASSWORD }}
         run: |
           ./gradlew publishChartsModules \
             -PchartsReleaseVersion="${{ steps.version.outputs.release_version }}" \
             --no-daemon --no-build-cache --stacktrace
 
       - name: Push release tag with Axion
-        if: ${{ steps.secrets_check.outputs.can_publish == 'true' }}
         shell: bash
         run: |
           set -euo pipefail
           ./gradlew pushRelease --no-daemon --stacktrace
 
       - name: Comment on success
-        if: ${{ steps.secrets_check.outputs.can_publish == 'true' }}
         uses: actions/github-script@v7
         with:
           script: |

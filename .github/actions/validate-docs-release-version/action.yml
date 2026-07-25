@@ -1,0 +1,38 @@
+name: Validate docs release version
+description: Verify that a release version exists in the charts-docs versions registry.
+
+inputs:
+  release-version:
+    required: true
+    description: Release version expected in the charts-docs registry.
+  registry-path:
+    required: false
+    default: charts-docs-repo/registry/versions.json
+    description: Path to charts-docs registry/versions.json.
+
+runs:
+  using: composite
+  steps:
+    - name: Validate release version exists in charts-docs registry
+      shell: bash
+      env:
+        EXPECTED_VERSION: ${{ inputs.release-version }}
+        REGISTRY_PATH: ${{ inputs.registry-path }}
+      run: |
+        set -euo pipefail
+
+        if [[ ! -f "${REGISTRY_PATH}" ]]; then
+          echo "Missing charts-docs registry: ${REGISTRY_PATH}" >&2
+          exit 1
+        fi
+
+        if ! jq -e --arg expected "${EXPECTED_VERSION}" \
+          'any((.versions // [])[]?; .id == $expected)' "${REGISTRY_PATH}" >/dev/null; then
+          available_versions="$(
+            jq -r '[(.versions // [])[]? | .id | select(type == "string" and . != "")] | join(", ")' \
+              "${REGISTRY_PATH}"
+          )"
+          echo "Release version ${EXPECTED_VERSION} is not present in charts-docs registry." >&2
+          echo "Available registry versions: ${available_versions:-"(none)"}" >&2
+          exit 1
+        fi

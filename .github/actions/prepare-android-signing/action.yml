@@ -1,0 +1,66 @@
+name: Prepare Android signing
+description: Decode the Android release keystore and export Gradle signing environment variables.
+
+inputs:
+  keystore-base64:
+    required: true
+    description: Base64-encoded Android release keystore.
+  store-password:
+    required: true
+    description: Android release keystore password.
+  key-alias:
+    required: true
+    description: Android release key alias.
+  key-password:
+    required: true
+    description: Android release key password.
+  keystore-path:
+    required: false
+    default: androidApp/release.keystore
+    description: Path where the decoded keystore should be written.
+
+runs:
+  using: composite
+  steps:
+    - name: Decode keystore and export Gradle signing environment
+      shell: bash
+      env:
+        ANDROID_RELEASE_KEYSTORE_BASE64: ${{ inputs.keystore-base64 }}
+        ANDROID_RELEASE_STORE_PASSWORD: ${{ inputs.store-password }}
+        ANDROID_RELEASE_KEY_ALIAS: ${{ inputs.key-alias }}
+        ANDROID_RELEASE_KEY_PASSWORD: ${{ inputs.key-password }}
+        ANDROID_RELEASE_KEYSTORE_PATH: ${{ inputs.keystore-path }}
+      run: |
+        set -euo pipefail
+
+        missing=0
+        for v in ANDROID_RELEASE_KEYSTORE_BASE64 ANDROID_RELEASE_STORE_PASSWORD ANDROID_RELEASE_KEY_ALIAS ANDROID_RELEASE_KEY_PASSWORD; do
+          if [[ -z "${!v:-}" ]]; then
+            echo "Missing secret: ${v}" >&2
+            missing=1
+          fi
+        done
+
+        if [[ "${missing}" -ne 0 ]]; then
+          echo "Android signing cannot proceed because required secrets are missing." >&2
+          exit 1
+        fi
+
+        printf '%s' "${ANDROID_RELEASE_KEYSTORE_BASE64}" | base64 -d > "${ANDROID_RELEASE_KEYSTORE_PATH}"
+        chmod 600 "${ANDROID_RELEASE_KEYSTORE_PATH}"
+
+        write_env() {
+          local name="$1"
+          local value="$2"
+          local delimiter="EOF_$(date +%s%N)_${RANDOM}"
+          {
+            echo "${name}<<${delimiter}"
+            printf '%s\n' "${value}"
+            echo "${delimiter}"
+          } >> "${GITHUB_ENV}"
+        }
+
+        write_env ORG_GRADLE_PROJECT_ANDROID_RELEASE_STORE_FILE "${ANDROID_RELEASE_KEYSTORE_PATH}"
+        write_env ORG_GRADLE_PROJECT_ANDROID_RELEASE_STORE_PASSWORD "${ANDROID_RELEASE_STORE_PASSWORD}"
+        write_env ORG_GRADLE_PROJECT_ANDROID_RELEASE_KEY_ALIAS "${ANDROID_RELEASE_KEY_ALIAS}"
+        write_env ORG_GRADLE_PROJECT_ANDROID_RELEASE_KEY_PASSWORD "${ANDROID_RELEASE_KEY_PASSWORD}"
