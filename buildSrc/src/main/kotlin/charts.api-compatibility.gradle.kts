@@ -14,6 +14,8 @@ val apiCompatibilityBaselineFilePath = ".github/api-compatibility-baseline.txt"
 val apiCompatibilityDefaultBaselineJarsDir = "api-compatibility/baseline-jars"
 // japicmp --exclude expects wildcard expressions, not regex.
 val apiCompatibilityInternalExcludePattern = "*.internal.*"
+// Compose compiler implementation detail whose generated members can change between Kotlin versions.
+val apiCompatibilityComposeSingletonsExcludePattern = "*.ComposableSingletons\$*"
 
 fun Project.baselineJarsDir(): File =
     providers
@@ -162,6 +164,7 @@ val apiCompatibilityTasks =
             onlyBinaryIncompatibleModified = true
             failOnSourceIncompatibility = true
             packageExcludes = listOf(apiCompatibilityInternalExcludePattern)
+            classExcludes = listOf(apiCompatibilityComposeSingletonsExcludePattern)
             mdOutputFile.set(layout.buildDirectory.file("reports/api-compatibility/$artifactId.md"))
 
             val baselineJarsDirProvider = providers.provider { project.baselineJarsDir().absoluteFile }
