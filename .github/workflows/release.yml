@@ -95,6 +95,13 @@ jobs:
           signing-password: ${{ secrets.SIGNING_PASSWORD }}
           signing-in-memory-key: ${{ secrets.SIGNING_IN_MEMORY_KEY }}
 
+      - name: Remove temporary docs checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          # A second force is required because actions/checkout creates a nested Git repo.
+          git clean -ffd -- charts-docs-repo
+
       - name: Create release tag locally with Axion
         shell: bash
         run: |
