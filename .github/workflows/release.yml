@@ -106,7 +106,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          ./gradlew createRelease --no-daemon --stacktrace
+          ./gradlew createRelease \
+            -PchartsReleaseVersion="${{ steps.version.outputs.release_version }}" \
+            --no-daemon --stacktrace
 
       - name: Publish to Maven Central
         run: |
