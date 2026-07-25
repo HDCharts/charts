@@ -1,12 +1,12 @@
-# Workflow: dispatch the CodeQL scan once per week.
+# Workflow: dispatch the CodeQL scan once per month.
 # This is the scheduled security scan for the main charts repository.
 #
 # It exists to keep security coverage running on a regular cadence.
-name: Weekly Workflows
+name: Monthly Workflows
 on:
   schedule:
-    # Runs every Monday at 00:00 UTC.
-    - cron: "0 0 * * 1"
+    # Runs on the 1st of every month at 00:00 UTC.
+    - cron: "0 0 1 * *"
   workflow_dispatch:
 
 permissions:
