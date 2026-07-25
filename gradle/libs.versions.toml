@@ -63,7 +63,7 @@ ktlint = "14.2.0"
 axion-release = "1.21.1"
 # https://insert-koin.io
 # https://mvnrepository.com/artifact/io.insert-koin/koin-bom
-koin-bom = "4.1.1"
+koin-bom = "4.2.2"
 # https://plugins.gradle.org/plugin/me.champeau.gradle.japicmp
 japicmp-gradle-plugin = "0.4.6"
 
