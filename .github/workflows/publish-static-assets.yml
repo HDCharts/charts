@@ -229,7 +229,7 @@ jobs:
     needs: publish-shared-static-assets
     if: >-
       ${{
-        always() &&
+        !cancelled() &&
         needs.publish-shared-static-assets.result == 'success'
       }}
     environment: ${{ inputs.mode == 'release' && 'Production' || 'Snapshot' }}
