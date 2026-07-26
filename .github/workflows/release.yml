@@ -160,6 +160,15 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ needs.prepare-release.outputs.source_sha }}
+      - name: Prepare tracking branch for Axion
+        env:
+          SOURCE_SHA: ${{ needs.prepare-release.outputs.source_sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags
+          git switch --create release-source "${SOURCE_SHA}"
+          git branch --set-upstream-to=origin/main release-source
       - uses: actions/setup-java@v5
         with:
           java-version: 17
