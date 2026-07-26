@@ -160,15 +160,6 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ needs.prepare-release.outputs.source_sha }}
-      - name: Prepare tracking branch for Axion
-        env:
-          SOURCE_SHA: ${{ needs.prepare-release.outputs.source_sha }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          git fetch origin main --no-tags
-          git switch --create release-source "${SOURCE_SHA}"
-          git branch --set-upstream-to=origin/main release-source
       - uses: actions/setup-java@v5
         with:
           java-version: 17
@@ -193,7 +184,7 @@ jobs:
           signing-password: ${{ secrets.SIGNING_PASSWORD }}
           signing-in-memory-key: ${{ secrets.SIGNING_IN_MEMORY_KEY }}
       - name: Create release tag locally with Axion
-        run: ./gradlew createRelease -PchartsReleaseVersion="${{ needs.prepare-release.outputs.release_version }}" --no-daemon --stacktrace
+        run: ./gradlew createRelease -PchartsReleaseVersion="${{ needs.prepare-release.outputs.release_version }}" -Prelease.disableRemoteCheck --no-daemon --stacktrace
       - name: Publish to Maven Central
         uses: ./.github/actions/publish-charts-modules
         with:
@@ -205,7 +196,7 @@ jobs:
           gradle-arguments: -PchartsReleaseVersion=${{ needs.prepare-release.outputs.release_version }} --no-build-cache
           prepare-publishing: false
       - name: Push release tag with Axion
-        run: ./gradlew pushRelease --no-daemon --stacktrace
+        run: ./gradlew pushRelease -Prelease.pushTagsOnly --no-daemon --stacktrace
 
   build-android:
     name: Build Android Release
