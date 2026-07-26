@@ -227,6 +227,11 @@ jobs:
     name: Finalize static publication
     runs-on: ubuntu-latest
     needs: publish-shared-static-assets
+    if: >-
+      ${{
+        !cancelled() &&
+        needs.publish-shared-static-assets.result == 'success'
+      }}
     environment: ${{ inputs.mode == 'release' && 'Production' || 'Snapshot' }}
     steps:
       - uses: actions/checkout@v7
