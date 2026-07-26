@@ -1,14 +1,35 @@
-# Workflow: build and publish a snapshot release.
+# Coordinates Maven, static docs assets, and Android builds for one snapshot.
 # It runs when recent code changes justify a snapshot publish.
-#
-# This is the automated pre-release path used between full releases.
 name: Snapshot Release
 on:
-  workflow_dispatch:
+  workflow_call:
+    secrets:
+      AWS_ROLE_ARN:
+        required: true
+      CHARTS_WORKFLOW_TOKEN:
+        required: true
+      MAVEN_CENTRAL_USERNAME:
+        required: true
+      MAVEN_CENTRAL_PASSWORD:
+        required: true
+      SIGNING_KEY_ID:
+        required: true
+      SIGNING_PASSWORD:
+        required: true
+      SIGNING_IN_MEMORY_KEY:
+        required: true
+      ANDROID_RELEASE_KEYSTORE_BASE64:
+        required: true
+      ANDROID_RELEASE_STORE_PASSWORD:
+        required: true
+      ANDROID_RELEASE_KEY_ALIAS:
+        required: true
+      ANDROID_RELEASE_KEY_PASSWORD:
+        required: true
 
 permissions:
   contents: write
-  actions: write
+  id-token: write
 
 concurrency:
   group: snapshot-${{ github.ref }}
@@ -30,12 +51,6 @@ jobs:
         run: |
           set -euo pipefail
 
-          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ] && [ "${{ github.actor }}" != "github-actions[bot]" ]; then
-            echo "Manual workflow_dispatch run - proceeding regardless of recent changes."
-            echo "has_changes=true" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
           files=$(git log --since="24 hours ago" --name-only --pretty=format: | sort -u)
           if [ -z "${files:-}" ]; then
             echo "No commits in the last 24 hours."
@@ -43,7 +58,15 @@ jobs:
             exit 0
           fi
 
-          filtered=$(echo "$files" | grep -vE '(^docs/|\.md$)' || true)
+          filtered="$({
+            while IFS= read -r file; do
+              case "${file}" in
+                release-notes/*) printf '%s\n' "${file}" ;;
+                docs/*|*.md) ;;
+                *) printf '%s\n' "${file}" ;;
+              esac
+            done <<< "${files}"
+          } | sort -u)"
           if [ -z "${filtered:-}" ]; then
             echo "Only ignored paths changed in the last 24 hours."
             echo "has_changes=false" >> "$GITHUB_OUTPUT"
@@ -53,14 +76,17 @@ jobs:
             echo "has_changes=true" >> "$GITHUB_OUTPUT"
           fi
 
-  snapshot-release:
-    name: Publish Snapshot Release
+  prepare-snapshot:
+    name: Prepare Snapshot Release
     runs-on: ubuntu-latest
     needs: changes
-    if: ${{ github.repository_owner == 'HDCharts' && needs.changes.outputs.has_changes == 'true' }}
+    if: ${{ needs.changes.outputs.has_changes == 'true' }}
+    environment: Snapshot
     outputs:
       snapshot_version: ${{ steps.version.outputs.snapshot_version }}
+      release_notes_version: ${{ steps.version.outputs.release_notes_version }}
       is_snapshot: ${{ steps.version.outputs.is_snapshot }}
+      source_sha: ${{ steps.source.outputs.source_sha }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
@@ -95,11 +121,98 @@ jobs:
           fi
 
           echo "snapshot_version=${SNAPSHOT_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "release_notes_version=${SNAPSHOT_VERSION%-SNAPSHOT}" >> "$GITHUB_OUTPUT"
           echo "Config chartsVersion: ${SNAPSHOT_VERSION}"
 
-      - name: Prepare Maven publishing
+      - name: Record immutable snapshot source
+        id: source
+        shell: bash
+        run: echo "source_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Validate charts-docs workflow token
         if: ${{ steps.version.outputs.is_snapshot == 'true' }}
-        uses: ./.github/actions/prepare-maven-publishing
+        env:
+          CHARTS_WORKFLOW_TOKEN: ${{ secrets.CHARTS_WORKFLOW_TOKEN }}
+        shell: bash
+        run: |
+          if [[ -z "${CHARTS_WORKFLOW_TOKEN:-}" ]]; then
+            echo "Missing CHARTS_WORKFLOW_TOKEN. It must be a release-bot token with contents:write and ruleset-bypass access to HDCharts/charts-docs main." >&2
+            exit 1
+          fi
+
+  sync-release-notes:
+    name: Sync snapshot release notes
+    needs: prepare-snapshot
+    if: ${{ needs.prepare-snapshot.outputs.is_snapshot == 'true' }}
+    runs-on: ubuntu-latest
+    environment: Snapshot
+    steps:
+      - name: Checkout snapshot source
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
+          ref: ${{ needs.prepare-snapshot.outputs.source_sha }}
+      - name: Checkout charts-docs main
+        uses: actions/checkout@v7
+        with:
+          repository: HDCharts/charts-docs
+          ref: main
+          path: charts-docs-repo
+          fetch-depth: 0
+          token: ${{ secrets.CHARTS_WORKFLOW_TOKEN }}
+      - name: Mirror snapshot release notes
+        env:
+          ALLOW_MISSING_RELEASE_NOTES: "true"
+        run: bash .github/scripts/sync-release-notes.sh charts-docs-repo "${{ needs.prepare-snapshot.outputs.release_notes_version }}"
+      - name: Commit and push charts-docs main
+        working-directory: charts-docs-repo
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "charts-release-bot"
+          git config user.email "charts-release-bot@users.noreply.github.com"
+          git add release-notes
+          if git diff --cached --quiet; then
+            echo "Snapshot release notes are already current."
+          else
+            git commit -m "docs(snapshot): sync ${{ needs.prepare-snapshot.outputs.release_notes_version }} notes"
+            git push origin HEAD:main
+          fi
+
+  publish-static-assets:
+    name: Publish snapshot API reference and demo
+    needs: [prepare-snapshot, sync-release-notes]
+    if: ${{ needs.prepare-snapshot.outputs.is_snapshot == 'true' }}
+    uses: ./.github/workflows/publish-static-assets.yml
+    with:
+      mode: snapshot
+      charts-version: ${{ needs.prepare-snapshot.outputs.snapshot_version }}
+      source-sha: ${{ needs.prepare-snapshot.outputs.source_sha }}
+      source-ref: ${{ needs.prepare-snapshot.outputs.source_sha }}
+    secrets:
+      AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
+
+  publish-maven:
+    name: Publish Snapshot to Maven Central
+    needs: [prepare-snapshot, publish-static-assets]
+    if: ${{ needs.prepare-snapshot.outputs.is_snapshot == 'true' }}
+    runs-on: ubuntu-latest
+    environment: Snapshot
+    steps:
+      - name: Checkout snapshot source
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          ref: ${{ needs.prepare-snapshot.outputs.source_sha }}
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          java-version: 17
+          distribution: zulu
+          cache: gradle
+
+      - name: Publish snapshot to Maven Central
+        uses: ./.github/actions/publish-charts-modules
         with:
           maven-central-username: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
           maven-central-password: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
@@ -107,18 +220,17 @@ jobs:
           signing-password: ${{ secrets.SIGNING_PASSWORD }}
           signing-in-memory-key: ${{ secrets.SIGNING_IN_MEMORY_KEY }}
 
-      - name: Publish snapshot to Maven Central
-        if: ${{ steps.version.outputs.is_snapshot == 'true' }}
-        run: |
-          echo "Publishing snapshot version: ${{ steps.version.outputs.snapshot_version }}"
-          ./gradlew publishChartsModules --no-daemon --stacktrace
-
+  announce-snapshot:
+    name: Announce Snapshot Release
+    needs: [prepare-snapshot, publish-static-assets, publish-maven]
+    if: ${{ needs.prepare-snapshot.outputs.is_snapshot == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
       - name: Comment on commit
-        if: ${{ steps.version.outputs.is_snapshot == 'true' }}
         uses: actions/github-script@v9
         with:
           script: |
-            const version = '${{ steps.version.outputs.snapshot_version }}';
+            const version = '${{ needs.prepare-snapshot.outputs.snapshot_version }}';
             const message = [
               '🚀 **Snapshot Release Published**',
               '',
@@ -157,37 +269,25 @@ jobs:
               '```',
             ].join('\n');
 
-            github.rest.repos.createCommitComment({
+            await github.rest.repos.createCommitComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
               commit_sha: context.sha,
               body: message
             })
 
-  trigger-android-build:
-    name: Trigger Android Snapshot Build
-    runs-on: ubuntu-latest
-    needs: snapshot-release
-    if: ${{ needs.snapshot-release.outputs.is_snapshot == 'true' }}
-    steps:
-      - name: Trigger Android Snapshot Build workflow
-        uses: actions/github-script@v9
-        with:
-          script: |
-            const workflowId = 'android-snapshot-build.yml';
-            const owner = context.repo.owner;
-            const repo = context.repo.repo;
-            
-            await github.rest.actions.createWorkflowDispatch({
-              owner,
-              repo,
-              workflow_id: workflowId,
-              ref: context.ref,
-            });
-            
-            console.log(`Triggered ${workflowId} with version ${{ needs.snapshot-release.outputs.snapshot_version }}`);
-
-      - name: Publish run summary
-        run: |
-          echo "### Android Snapshot Build Triggered" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Version: \`${{ needs.snapshot-release.outputs.snapshot_version }}\`" >> "$GITHUB_STEP_SUMMARY"
+  build-android:
+    name: Build Android Snapshot
+    needs: [prepare-snapshot, publish-static-assets, publish-maven]
+    if: ${{ needs.prepare-snapshot.outputs.is_snapshot == 'true' }}
+    uses: ./.github/workflows/android-build.yml
+    with:
+      channel: snapshot
+      source-sha: ${{ needs.prepare-snapshot.outputs.source_sha }}
+      published-version: ${{ needs.prepare-snapshot.outputs.snapshot_version }}
+    secrets:
+      AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
+      ANDROID_RELEASE_KEYSTORE_BASE64: ${{ secrets.ANDROID_RELEASE_KEYSTORE_BASE64 }}
+      ANDROID_RELEASE_STORE_PASSWORD: ${{ secrets.ANDROID_RELEASE_STORE_PASSWORD }}
+      ANDROID_RELEASE_KEY_ALIAS: ${{ secrets.ANDROID_RELEASE_KEY_ALIAS }}
+      ANDROID_RELEASE_KEY_PASSWORD: ${{ secrets.ANDROID_RELEASE_KEY_PASSWORD }}

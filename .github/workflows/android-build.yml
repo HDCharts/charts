@@ -1,0 +1,169 @@
+# Reusable Android APK build for release and snapshot publications.
+name: Android Build
+
+on:
+  workflow_call:
+    inputs:
+      channel:
+        description: Publication channel (release or snapshot).
+        required: true
+        type: string
+      source-sha:
+        description: Charts commit represented by the Android build.
+        required: true
+        type: string
+      published-version:
+        description: Maven version consumed by the Android build.
+        required: true
+        type: string
+    secrets:
+      AWS_ROLE_ARN:
+        required: true
+      ANDROID_RELEASE_KEYSTORE_BASE64:
+        required: true
+      ANDROID_RELEASE_STORE_PASSWORD:
+        required: true
+      ANDROID_RELEASE_KEY_ALIAS:
+        required: true
+      ANDROID_RELEASE_KEY_PASSWORD:
+        required: true
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  android-build:
+    name: Assemble Android App (${{ inputs.channel }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: ${{ inputs.channel == 'release' && 'Production' || 'Snapshot' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.source-sha }}
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          java-version: 17
+          distribution: zulu
+          cache: gradle
+
+      - name: Resolve Android build policy
+        id: policy
+        env:
+          CHANNEL: ${{ inputs.channel }}
+          PUBLISHED_VERSION: ${{ inputs.published-version }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          case "${CHANNEL}" in
+            release)
+              if [[ ! "${PUBLISHED_VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+                echo "Expected a SemVer release version, got: ${PUBLISHED_VERSION}" >&2
+                exit 1
+              fi
+              echo "dependency_mode=maven" >> "$GITHUB_OUTPUT"
+              echo "apk_key=android/release/hdcharts-release.apk" >> "$GITHUB_OUTPUT"
+              echo "invalidate=true" >> "$GITHUB_OUTPUT"
+              ;;
+            snapshot)
+              if [[ "${PUBLISHED_VERSION}" != *"-SNAPSHOT" ]]; then
+                echo "Expected a -SNAPSHOT version, got: ${PUBLISHED_VERSION}" >&2
+                exit 1
+              fi
+              echo "dependency_mode=snapshot" >> "$GITHUB_OUTPUT"
+              echo "apk_key=android/snapshot/hdcharts-snapshot.apk" >> "$GITHUB_OUTPUT"
+              echo "invalidate=false" >> "$GITHUB_OUTPUT"
+              ;;
+            *)
+              echo "Unsupported Android publication channel: ${CHANNEL}" >&2
+              exit 1
+              ;;
+          esac
+
+      - name: Prepare Android signing
+        uses: ./.github/actions/prepare-android-signing
+        with:
+          keystore-base64: ${{ secrets.ANDROID_RELEASE_KEYSTORE_BASE64 }}
+          store-password: ${{ secrets.ANDROID_RELEASE_STORE_PASSWORD }}
+          key-alias: ${{ secrets.ANDROID_RELEASE_KEY_ALIAS }}
+          key-password: ${{ secrets.ANDROID_RELEASE_KEY_PASSWORD }}
+
+      - name: Assemble androidApp release
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./gradlew :androidApp:assembleRelease \
+            -PchartsDependencyMode=${{ steps.policy.outputs.dependency_mode }} \
+            -PchartsPublishedVersion=${{ inputs.published-version }} \
+            --no-daemon
+
+      - name: Remove Android signing keystore
+        if: always()
+        shell: bash
+        run: rm -f androidApp/release.keystore
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Upload APK to S3
+        env:
+          APK_KEY: ${{ steps.policy.outputs.apk_key }}
+          DOCS_STATIC_BUCKET: ${{ vars.DOCS_STATIC_BUCKET }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${DOCS_STATIC_BUCKET:-}" ]]; then
+            echo "Missing required repository variable: DOCS_STATIC_BUCKET" >&2
+            exit 1
+          fi
+
+          apk_path="androidApp/build/outputs/apk/release/androidApp-release.apk"
+          if [[ ! -f "${apk_path}" ]]; then
+            echo "APK not found at: ${apk_path}" >&2
+            exit 1
+          fi
+
+          aws s3 cp "${apk_path}" "s3://${DOCS_STATIC_BUCKET}/static/${APK_KEY}" \
+            --content-type "application/vnd.android.package-archive" \
+            --cache-control "no-store, max-age=0" \
+            --only-show-errors
+
+      - name: Invalidate release APK cache
+        if: ${{ steps.policy.outputs.invalidate == 'true' }}
+        env:
+          APK_KEY: ${{ steps.policy.outputs.apk_key }}
+          CLOUDFRONT_DISTRIBUTION_ID: ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "${CLOUDFRONT_DISTRIBUTION_ID:-}" ]]; then
+            echo "Missing required repository variable: CLOUDFRONT_DISTRIBUTION_ID" >&2
+            exit 1
+          fi
+          aws cloudfront create-invalidation \
+            --distribution-id "${CLOUDFRONT_DISTRIBUTION_ID}" \
+            --paths "/static/${APK_KEY}"
+
+      - name: Publish run summary
+        env:
+          APK_KEY: ${{ steps.policy.outputs.apk_key }}
+          CHANNEL: ${{ inputs.channel }}
+          DOCS_STATIC_BUCKET: ${{ vars.DOCS_STATIC_BUCKET }}
+          PUBLISHED_VERSION: ${{ inputs.published-version }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "### Android ${CHANNEL^} Build" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Published version: \`${PUBLISHED_VERSION}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Gradle task: \`:androidApp:assembleRelease\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- APK: \`s3://${DOCS_STATIC_BUCKET}/static/${APK_KEY}\`" >> "$GITHUB_STEP_SUMMARY"

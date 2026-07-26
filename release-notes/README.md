@@ -18,11 +18,11 @@ release-notes/<version>/
   breaking API changes.
 
 The target release is the value in `.version` without the `-SNAPSHOT` suffix.
-After changes under `release-notes/` merge to `main`, the
-`Sync Release Notes` workflow dispatches the charts-docs synchronization
-workflow. That workflow mirrors the complete version directory into
-`charts-docs/release-notes/<version>/`, updates its current-version pointer,
-and opens or updates a charts-docs pull request.
+When the target directory exists, `Snapshot Release` mirrors it into
+`charts-docs/release-notes/<version>/` and updates the current-version pointer.
+A missing target directory is allowed for snapshots because the next release
+version may not have been selected yet. Final releases still require their
+versioned release-note directory.
 
 Release directories remain in this repository as history. Keeping them
 versioned lets snapshot and released documentation consume the same immutable

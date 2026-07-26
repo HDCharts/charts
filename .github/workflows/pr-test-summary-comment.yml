@@ -1,7 +1,4 @@
-# Workflow: post the charts test summary back onto pull requests.
-# It runs after the Test workflow completes and reuses the shared summary helper.
-#
-# This keeps PR test results visible in the conversation thread.
+# Post the latest charts test summary on its pull request.
 name: PR Test Summary Comment
 on:
   workflow_run:
@@ -11,16 +8,127 @@ on:
 permissions:
   actions: read
   issues: write
-  pull-requests: write
+  pull-requests: read
+
+concurrency:
+  group: pr-test-summary-${{ github.event.workflow_run.head_sha }}
+  cancel-in-progress: false
 
 jobs:
   comment:
     if: ${{ github.event.workflow_run.event == 'pull_request' }}
-    uses: ./.github/workflows/pr-summary-comment.yml
-    with:
-      run_id: ${{ github.event.workflow_run.id }}
-      artifact_name: ci-test-summary
-      artifact_dir: ci-summary
-      summary_file: ci-test-summary.md
-      marker: <!-- ci-test-summary -->
-    secrets: inherit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve current pull request
+        id: pull_request
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const run = context.payload.workflow_run;
+            let pullRequestNumber = run.pull_requests?.[0]?.number;
+
+            if (!pullRequestNumber && run.head_sha) {
+              const associated = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+                owner,
+                repo,
+                commit_sha: run.head_sha,
+              });
+              const pullRequest =
+                associated.data.find((candidate) => candidate.state === 'open') ??
+                associated.data[0];
+              pullRequestNumber = pullRequest?.number;
+            }
+
+            if (!pullRequestNumber) {
+              const headOwner = run.head_repository?.owner?.login;
+              if (headOwner && run.head_branch) {
+                const byHead = await github.rest.pulls.list({
+                  owner,
+                  repo,
+                  state: 'open',
+                  head: `${headOwner}:${run.head_branch}`,
+                  per_page: 1,
+                });
+                pullRequestNumber = byHead.data[0]?.number;
+              }
+            }
+
+            if (!pullRequestNumber) {
+              core.info('No pull request could be resolved. Skipping comment.');
+              core.setOutput('current', 'false');
+              return;
+            }
+
+            const pullRequest = await github.rest.pulls.get({
+              owner,
+              repo,
+              pull_number: pullRequestNumber,
+            });
+            if (pullRequest.data.head.sha !== run.head_sha) {
+              core.info(
+                `Skipping stale test run ${run.id}: PR #${pullRequestNumber} is now at ${pullRequest.data.head.sha}.`,
+              );
+              core.setOutput('current', 'false');
+              return;
+            }
+
+            core.setOutput('current', 'true');
+            core.setOutput('number', String(pullRequestNumber));
+
+      - name: Download test summary
+        if: ${{ steps.pull_request.outputs.current == 'true' }}
+        uses: actions/download-artifact@v8
+        with:
+          name: ci-test-summary
+          path: ci-summary
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create or update PR comment
+        if: ${{ steps.pull_request.outputs.current == 'true' }}
+        env:
+          PR_NUMBER: ${{ steps.pull_request.outputs.number }}
+          SUMMARY_PATH: ci-summary/ci-test-summary.md
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const fs = require('fs');
+            const { owner, repo } = context.repo;
+            const pullRequestNumber = Number(process.env.PR_NUMBER);
+            const marker = '<!-- ci-test-summary -->';
+
+            if (!fs.existsSync(process.env.SUMMARY_PATH)) {
+              throw new Error(`Summary artifact file not found at ${process.env.SUMMARY_PATH}.`);
+            }
+
+            const summary = fs.readFileSync(process.env.SUMMARY_PATH, 'utf8').trim();
+            const body = `${marker}\n${summary}`;
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner,
+              repo,
+              issue_number: pullRequestNumber,
+              per_page: 100,
+            });
+            const existing = comments.find(
+              (comment) =>
+                comment.user?.login === 'github-actions[bot]' &&
+                typeof comment.body === 'string' &&
+                comment.body.includes(marker),
+            );
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner,
+                repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: pullRequestNumber,
+                body,
+              });
+            }

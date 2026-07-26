@@ -7,12 +7,6 @@ on:
   pull_request:
     branches: [main]
     types: [opened, synchronize, reopened, labeled, unlabeled]
-  workflow_dispatch:
-    inputs:
-      baseline_ref:
-        description: "Optional baseline ref for manual release audits, for example 2.2.0"
-        required: false
-        type: string
 
 permissions:
   contents: read
@@ -44,18 +38,11 @@ jobs:
         id: compatibility
         continue-on-error: true
         shell: bash
-        env:
-          BASELINE_REF: ${{ github.event.inputs.baseline_ref }}
         run: |
           set +e
           set -o pipefail
 
-          args=(apiCompatibilityCheck --no-daemon)
-          if [[ -n "${BASELINE_REF:-}" ]]; then
-            args+=("-PapiCompatibilityBaselineRef=${BASELINE_REF}")
-          fi
-
-          ./gradlew "${args[@]}" 2>&1 | tee api-compatibility.log
+          ./gradlew apiCompatibilityCheck --no-daemon 2>&1 | tee api-compatibility.log
           exit_code=${PIPESTATUS[0]}
           set -e
           echo "exit_code=${exit_code}" >> "$GITHUB_OUTPUT"
