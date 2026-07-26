@@ -53,9 +53,24 @@ jobs:
           echo "- Version: \`${{ steps.version.outputs.charts_version }}\`" >> "$GITHUB_STEP_SUMMARY"
           echo "- File: \`.version\`" >> "$GITHUB_STEP_SUMMARY"
 
+      # A dedicated bot token is required because this repository disables
+      # pull-request creation by the default GitHub Actions token.
+      - name: Validate pull request token
+        shell: bash
+        env:
+          CHARTS_WORKFLOW_TOKEN: ${{ secrets.CHARTS_WORKFLOW_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${CHARTS_WORKFLOW_TOKEN:-}" ]]; then
+            echo "Missing required secret: CHARTS_WORKFLOW_TOKEN." >&2
+            echo "It must be a bot token that can create pull requests in this repository." >&2
+            exit 1
+          fi
+
       - name: Create PR when .version changed
         uses: peter-evans/create-pull-request@v8
         with:
+          token: ${{ secrets.CHARTS_WORKFLOW_TOKEN }}
           add-paths: .version
           branch: chore/sync-version-file
           delete-branch: true
