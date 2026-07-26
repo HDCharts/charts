@@ -4,7 +4,7 @@ set -euo pipefail
 mode="${1:-}"
 asset="${2:-}"
 if [[ -z "${mode}" || -z "${asset}" ]]; then
-  echo "Usage: $0 <release|snapshot> <api|demo|shared|metadata>" >&2
+  echo "Usage: $0 <release|snapshot> <api|demo|playground|shared|metadata>" >&2
   exit 1
 fi
 
@@ -15,11 +15,11 @@ fi
 
 bucket_uri="s3://${DOCS_STATIC_BUCKET}/static"
 
-sync_subdir() {
-  local rel_path="$1"
-  local cache_control="$2"
-  local include_only_show_errors="${3:-false}"
-  local src="docs/static/${rel_path}"
+sync_source_dir() {
+  local src="$1"
+  local rel_path="$2"
+  local cache_control="$3"
+  local include_only_show_errors="${4:-false}"
   local dst="${bucket_uri}/${rel_path}"
 
   if [[ ! -d "${src}" ]]; then
@@ -37,6 +37,13 @@ sync_subdir() {
   fi
 
   "${args[@]}"
+}
+
+sync_subdir() {
+  local rel_path="$1"
+  local cache_control="$2"
+  local include_only_show_errors="${3:-false}"
+  sync_source_dir "docs/static/${rel_path}" "${rel_path}" "${cache_control}" "${include_only_show_errors}"
 }
 
 s3_prefix_has_objects() {
@@ -95,10 +102,11 @@ claim_release_asset() {
 }
 
 validate_asset() {
-  case "${asset}" in
-    api|demo|shared|metadata) ;;
+  case "${mode}:${asset}" in
+    release:api|release:demo|release:shared|release:metadata|\
+    snapshot:api|snapshot:demo|snapshot:playground|snapshot:shared|snapshot:metadata) ;;
     *)
-      echo "Unsupported static asset: ${asset}" >&2
+      echo "Unsupported mode/asset combination: ${mode} ${asset}" >&2
       exit 1
       ;;
   esac
@@ -147,6 +155,13 @@ case "${mode}" in
     case "${asset}" in
       api|demo)
         sync_subdir "${asset}/snapshot" "${cache_control_snapshot}" "true"
+        ;;
+      playground)
+        sync_source_dir \
+          "${PLAYGROUND_DIST_DIR:-playground/build/dist/js/developmentExecutable}" \
+          "playground/snapshot" \
+          "${cache_control_snapshot}" \
+          "true"
         ;;
       shared)
         if [[ -d docs/static ]]; then

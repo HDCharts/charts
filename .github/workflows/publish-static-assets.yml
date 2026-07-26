@@ -1,4 +1,5 @@
-# Reusable publication of the static API reference and demo.  Releases and
+# Reusable publication of the static API reference, demo, and snapshot
+# playground. Releases and
 # snapshots share the mechanics but retain separate callers and policies.
 name: Publish Static Assets
 
@@ -133,10 +134,78 @@ jobs:
         shell: bash
         run: bash .github/scripts/publish-docs-to-s3.sh "${{ inputs.mode }}" demo
 
+  publish-playground:
+    name: Publish playground
+    if: ${{ inputs.mode == 'snapshot' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: Snapshot
+    steps:
+      - name: Checkout charts source
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
+          ref: ${{ inputs.source-ref }}
+      - name: Checkout charts-playground
+        uses: actions/checkout@v7
+        with:
+          repository: HDCharts/charts-playground
+          ref: main
+          path: playground-repo
+          fetch-depth: 1
+      - uses: actions/setup-java@v5
+        with:
+          java-version: 17
+          distribution: zulu
+          cache: gradle
+      - name: Build playground static assets
+        working-directory: playground-repo
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./gradlew -DchartsLocalPath=.. :playground:jsBrowserDevelopmentExecutableDistribution \
+            --no-daemon --stacktrace --build-cache
+      - name: Validate playground static assets
+        working-directory: playground-repo
+        shell: bash
+        run: |
+          set -euo pipefail
+          required_files=(
+            playground/build/dist/js/developmentExecutable/index.html
+            playground/build/dist/js/developmentExecutable/Playground.js
+          )
+          for file in "${required_files[@]}"; do
+            if [[ ! -f "${file}" ]]; then
+              echo "Missing required playground file: ${file}" >&2
+              exit 1
+            fi
+          done
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+      - name: Publish playground snapshot
+        working-directory: playground-repo
+        env:
+          CHARTS_VERSION: ${{ inputs.charts-version }}
+          SOURCE_SHA: ${{ inputs.source-sha }}
+          DOCS_STATIC_BUCKET: ${{ vars.DOCS_STATIC_BUCKET }}
+          PLAYGROUND_DIST_DIR: playground/build/dist/js/developmentExecutable
+        shell: bash
+        run: bash ../.github/scripts/publish-docs-to-s3.sh snapshot playground
+
   publish-shared-static-assets:
     name: Publish shared static assets
     runs-on: ubuntu-latest
-    needs: [publish-api-reference, publish-demo]
+    needs: [publish-api-reference, publish-demo, publish-playground]
+    if: >-
+      ${{
+        always() &&
+        needs.publish-api-reference.result == 'success' &&
+        needs.publish-demo.result == 'success' &&
+        (needs.publish-playground.result == 'success' || needs.publish-playground.result == 'skipped')
+      }}
     environment: ${{ inputs.mode == 'release' && 'Production' || 'Snapshot' }}
     steps:
       - uses: actions/checkout@v7
