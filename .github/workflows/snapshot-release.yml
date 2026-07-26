@@ -26,6 +26,12 @@ on:
         required: true
       ANDROID_RELEASE_KEY_PASSWORD:
         required: true
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: Optional note for the manual snapshot run.
+        required: false
+        type: string
 
 permissions:
   contents: write
@@ -50,6 +56,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+
+          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+            echo "Manual snapshot run requested."
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
 
           files=$(git log --since="24 hours ago" --name-only --pretty=format: | sort -u)
           if [ -z "${files:-}" ]; then
