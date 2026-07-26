@@ -1,4 +1,4 @@
-# Workflow: dispatch the snapshot release workflow every night.
+# Workflow: run the snapshot release workflow every night.
 # This keeps snapshot publishing moving without a manual trigger.
 #
 # It is the nightly scheduler for release automation.
@@ -7,27 +7,24 @@ on:
   schedule:
     # Runs every day at 00:00 UTC.
     - cron: "0 0 * * *"
-  workflow_dispatch:
 
 permissions:
-  actions: write
-  contents: read
+  contents: write
+  id-token: write
 
 jobs:
-  dispatch-snapshot-release:
-    name: Dispatch Snapshot Release
-    if: ${{ github.repository_owner == 'HDCharts' }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Dispatch snapshot-release workflow
-        uses: actions/github-script@v9
-        with:
-          script: |
-            const ref = context.payload.repository?.default_branch ?? "main";
-            await github.rest.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: "snapshot-release.yml",
-              ref,
-            });
-            core.info(`Dispatched snapshot-release.yml on ${ref}`);
+  snapshot-release:
+    name: Run Snapshot Release
+    uses: ./.github/workflows/snapshot-release.yml
+    secrets:
+      AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
+      CHARTS_WORKFLOW_TOKEN: ${{ secrets.CHARTS_WORKFLOW_TOKEN }}
+      MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+      MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+      SIGNING_KEY_ID: ${{ secrets.SIGNING_KEY_ID }}
+      SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
+      SIGNING_IN_MEMORY_KEY: ${{ secrets.SIGNING_IN_MEMORY_KEY }}
+      ANDROID_RELEASE_KEYSTORE_BASE64: ${{ secrets.ANDROID_RELEASE_KEYSTORE_BASE64 }}
+      ANDROID_RELEASE_STORE_PASSWORD: ${{ secrets.ANDROID_RELEASE_STORE_PASSWORD }}
+      ANDROID_RELEASE_KEY_ALIAS: ${{ secrets.ANDROID_RELEASE_KEY_ALIAS }}
+      ANDROID_RELEASE_KEY_PASSWORD: ${{ secrets.ANDROID_RELEASE_KEY_PASSWORD }}

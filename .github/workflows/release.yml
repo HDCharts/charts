@@ -1,10 +1,14 @@
-# Workflow: publish a release build of charts.
-# It creates the git tag and publishes Maven artifacts.
-#
-# Use this for the final release path, not for snapshot or CI validation.
+# Coordinates every public release concern from one immutable charts commit.
 name: Release
+
 on:
   workflow_dispatch:
+    inputs:
+      replace_static_assets:
+        description: Replace existing static assets for this unreleased version.
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: write
@@ -17,75 +21,160 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  release:
-    name: Publish Release
+  prepare-release:
+    name: Validate release
     runs-on: ubuntu-latest
-    if: ${{ github.repository_owner == 'HDCharts' }}
+    if: ${{ github.ref == 'refs/heads/main' }}
+    outputs:
+      release_version: ${{ steps.version.outputs.release_version }}
+      source_sha: ${{ steps.source.outputs.source_sha }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v7
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v5
+      - uses: actions/setup-java@v5
         with:
           java-version: 17
-          distribution: 'zulu'
+          distribution: zulu
           cache: gradle
-
       - name: Resolve release version from Axion
         id: version
         shell: bash
         run: |
           set -euo pipefail
-          release_version="$(bash .github/scripts/resolve-release-version.sh)"
-          echo "release_version=${release_version}" >> "$GITHUB_OUTPUT"
-          echo "Resolved release version: ${release_version}"
-
+          version="$(bash .github/scripts/resolve-release-version.sh)"
+          echo "release_version=${version}" >> "$GITHUB_OUTPUT"
+      - name: Record immutable release source
+        id: source
+        shell: bash
+        run: echo "source_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
       - name: Verify release readiness with Axion
         shell: bash
         run: |
-          set -euo pipefail
-          ./gradlew verifyRelease \
-            -PchartsReleaseVersion="${{ steps.version.outputs.release_version }}" \
-            --no-daemon --stacktrace
-
+          ./gradlew verifyRelease -PchartsReleaseVersion="${{ steps.version.outputs.release_version }}" --no-daemon --stacktrace
       - name: Verify tag does not already exist
         shell: bash
         run: |
-          set -euo pipefail
-          VERSION="${{ steps.version.outputs.release_version }}"
-          if git rev-parse -q --verify "refs/tags/${VERSION}" >/dev/null; then
-            echo "Release tag already exists: ${VERSION}" >&2
+          if git rev-parse -q --verify "refs/tags/${{ steps.version.outputs.release_version }}" >/dev/null; then
+            echo "Release tag already exists: ${{ steps.version.outputs.release_version }}" >&2
             exit 1
           fi
+      - name: Audit API against previous release
+        shell: bash
+        run: |
+          set -euo pipefail
 
-      - name: Checkout charts-docs repository
+          previous_release="$(git tag --list --sort=-version:refname | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1 || true)"
+          if [[ -z "${previous_release}" ]]; then
+            echo "No previous SemVer release tag found; skipping release API audit."
+            echo "## Release API Audit" >> "$GITHUB_STEP_SUMMARY"
+            echo "- Result: skipped (no previous SemVer release tag)" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          set +e
+          set -o pipefail
+          ./gradlew apiCompatibilityCheck --no-daemon --continue \
+            "-PapiCompatibilityBaselineRef=${previous_release}" \
+            2>&1 | tee release-api-compatibility.log
+          exit_code=${PIPESTATUS[0]}
+          set -e
+
+          {
+            echo "## Release API Audit"
+            echo "- Baseline: \`${previous_release}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [[ "${exit_code}" == "0" ]]; then
+            echo "- Result: compatible" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          if grep -Eq "Detected binary changes\.|Detected source incompatible changes\." release-api-compatibility.log; then
+            echo "- Result: acknowledged API changes detected; see the job log" >> "$GITHUB_STEP_SUMMARY"
+            echo "::warning::Release contains API changes relative to ${previous_release}."
+            exit 0
+          fi
+
+          echo "- Result: audit failed" >> "$GITHUB_STEP_SUMMARY"
+          echo "API compatibility audit failed for a non-compatibility reason." >&2
+          exit "${exit_code}"
+      - name: Validate existing docs provenance
         uses: actions/checkout@v7
         with:
           repository: HDCharts/charts-docs
+          ref: main
           fetch-depth: 1
           path: charts-docs-repo
+      - name: Reject stale immutable docs promotion
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.release_version }}
+          SOURCE_SHA: ${{ steps.source.outputs.source_sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if jq -e --arg version "$RELEASE_VERSION" \
+            'any(.versions[]?; .id == $version)' charts-docs-repo/registry/versions.json >/dev/null; then
+            manifest="charts-docs-repo/docs-app/public/release-manifest.json"
+            if [[ ! -f "$manifest" && "$RELEASE_VERSION" == "2.3.0" ]]; then
+              echo "::warning::The legacy pre-promoted 2.3.0 docs release will receive its provenance manifest during promotion."
+            elif ! jq -e --arg version "$RELEASE_VERSION" --arg sha "$SOURCE_SHA" \
+              '.releaseVersion == $version and .chartsCommit == $sha' "$manifest" >/dev/null; then
+              echo "Existing docs release ${RELEASE_VERSION} has no matching charts provenance marker." >&2
+              exit 1
+            fi
+          fi
 
-      - name: Validate docs release version
-        uses: ./.github/actions/validate-docs-release-version
+  approve-release:
+    name: Approve Release
+    needs: prepare-release
+    runs-on: ubuntu-latest
+    environment: Release Approval
+    steps:
+      - name: Record approval
+        run: |
+          echo "## Release Approval" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Version: \`${{ needs.prepare-release.outputs.release_version }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Source: \`${{ needs.prepare-release.outputs.source_sha }}\`" >> "$GITHUB_STEP_SUMMARY"
+
+  publish-static-assets:
+    name: Publish API reference and demo
+    needs: [prepare-release, approve-release]
+    uses: ./.github/workflows/publish-static-assets.yml
+    with:
+      mode: release
+      charts-version: ${{ needs.prepare-release.outputs.release_version }}
+      source-sha: ${{ needs.prepare-release.outputs.source_sha }}
+      source-ref: ${{ needs.prepare-release.outputs.source_sha }}
+      replace-static-assets: ${{ inputs.replace_static_assets }}
+    secrets:
+      AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
+
+  publish-maven:
+    name: Publish Maven release
+    needs: [prepare-release, publish-static-assets]
+    runs-on: ubuntu-latest
+    environment: Production
+    steps:
+      - uses: actions/checkout@v7
         with:
-          release-version: ${{ steps.version.outputs.release_version }}
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v6
+          fetch-depth: 0
+          ref: ${{ needs.prepare-release.outputs.source_sha }}
+      - uses: actions/setup-java@v5
+        with:
+          java-version: 17
+          distribution: zulu
+          cache: gradle
+      - uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ vars.AWS_REGION }}
-
-      - name: Validate docs static release
+      - name: Verify published API and demo assets
         uses: ./.github/actions/validate-docs-static-release
         with:
-          release-version: ${{ steps.version.outputs.release_version }}
-          source-sha: ${{ github.sha }}
+          release-version: ${{ needs.prepare-release.outputs.release_version }}
+          source-sha: ${{ needs.prepare-release.outputs.source_sha }}
           docs-static-bucket: ${{ vars.DOCS_STATIC_BUCKET }}
-
       - name: Prepare Maven publishing
         uses: ./.github/actions/prepare-maven-publishing
         with:
@@ -94,46 +183,129 @@ jobs:
           signing-key-id: ${{ secrets.SIGNING_KEY_ID }}
           signing-password: ${{ secrets.SIGNING_PASSWORD }}
           signing-in-memory-key: ${{ secrets.SIGNING_IN_MEMORY_KEY }}
-
-      - name: Remove temporary docs checkout
-        shell: bash
-        run: |
-          set -euo pipefail
-          # A second force is required because actions/checkout creates a nested Git repo.
-          git clean -ffd -- charts-docs-repo
-
       - name: Create release tag locally with Axion
-        shell: bash
-        run: |
-          set -euo pipefail
-          ./gradlew createRelease \
-            -PchartsReleaseVersion="${{ steps.version.outputs.release_version }}" \
-            --no-daemon --stacktrace
-
+        run: ./gradlew createRelease -PchartsReleaseVersion="${{ needs.prepare-release.outputs.release_version }}" --no-daemon --stacktrace
       - name: Publish to Maven Central
-        run: |
-          ./gradlew publishChartsModules \
-            -PchartsReleaseVersion="${{ steps.version.outputs.release_version }}" \
-            --no-daemon --no-build-cache --stacktrace
-
+        uses: ./.github/actions/publish-charts-modules
+        with:
+          maven-central-username: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          maven-central-password: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+          signing-key-id: ${{ secrets.SIGNING_KEY_ID }}
+          signing-password: ${{ secrets.SIGNING_PASSWORD }}
+          signing-in-memory-key: ${{ secrets.SIGNING_IN_MEMORY_KEY }}
+          gradle-arguments: -PchartsReleaseVersion=${{ needs.prepare-release.outputs.release_version }} --no-build-cache
+          prepare-publishing: false
       - name: Push release tag with Axion
+        run: ./gradlew pushRelease --no-daemon --stacktrace
+
+  build-android:
+    name: Build Android Release
+    needs: [prepare-release, publish-maven]
+    uses: ./.github/workflows/android-build.yml
+    with:
+      channel: release
+      source-sha: ${{ needs.prepare-release.outputs.source_sha }}
+      published-version: ${{ needs.prepare-release.outputs.release_version }}
+    secrets:
+      AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
+      ANDROID_RELEASE_KEYSTORE_BASE64: ${{ secrets.ANDROID_RELEASE_KEYSTORE_BASE64 }}
+      ANDROID_RELEASE_STORE_PASSWORD: ${{ secrets.ANDROID_RELEASE_STORE_PASSWORD }}
+      ANDROID_RELEASE_KEY_ALIAS: ${{ secrets.ANDROID_RELEASE_KEY_ALIAS }}
+      ANDROID_RELEASE_KEY_PASSWORD: ${{ secrets.ANDROID_RELEASE_KEY_PASSWORD }}
+
+  promote-docs:
+    name: Sync notes and promote docs on main
+    needs: [prepare-release, publish-maven, build-android]
+    runs-on: ubuntu-latest
+    environment: Production
+    outputs:
+      docs_sha: ${{ steps.push.outputs.docs_sha }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
+          ref: ${{ needs.prepare-release.outputs.source_sha }}
+      - name: Validate charts-docs release bot token
+        env:
+          CHARTS_WORKFLOW_TOKEN: ${{ secrets.CHARTS_WORKFLOW_TOKEN }}
         shell: bash
         run: |
           set -euo pipefail
-          ./gradlew pushRelease --no-daemon --stacktrace
+          if [[ -z "${CHARTS_WORKFLOW_TOKEN:-}" ]]; then
+            echo "Missing CHARTS_WORKFLOW_TOKEN. It must be a release-bot token with contents:write and ruleset-bypass access to HDCharts/charts-docs main." >&2
+            exit 1
+          fi
+      - name: Checkout charts-docs main
+        uses: actions/checkout@v7
+        with:
+          repository: HDCharts/charts-docs
+          ref: main
+          path: charts-docs-repo
+          fetch-depth: 0
+          token: ${{ secrets.CHARTS_WORKFLOW_TOKEN }}
+      - name: Sync release notes and promote version
+        run: bash .github/scripts/promote-release-docs.sh charts-docs-repo "${{ needs.prepare-release.outputs.release_version }}" "${{ needs.prepare-release.outputs.source_sha }}"
+      - name: Commit and push charts-docs main
+        id: push
+        working-directory: charts-docs-repo
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "charts-release-bot"
+          git config user.email "charts-release-bot@users.noreply.github.com"
+          git add content registry release-notes docs-app/public/release-manifest.json
+          if git diff --cached --quiet; then
+            echo "No charts-docs changes required."
+          else
+            git commit -m "chore(release): publish ${{ needs.prepare-release.outputs.release_version }}"
+            git push origin HEAD:main
+          fi
+          echo "docs_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
-      - name: Comment on success
-        uses: actions/github-script@v9
+  verify-docs-deployment:
+    name: Verify public docs deployment
+    needs: [prepare-release, promote-docs]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for the deployment manifest and public routes
+        env:
+          DOCS_APP_URL: ${{ vars.DOCS_APP_URL }}
+          RELEASE_VERSION: ${{ needs.prepare-release.outputs.release_version }}
+          CHARTS_SHA: ${{ needs.prepare-release.outputs.source_sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ -n "${DOCS_APP_URL:-}" ]] || { echo "Missing required repository variable: DOCS_APP_URL" >&2; exit 1; }
+          base_url="${DOCS_APP_URL%/}"
+          deadline=$((SECONDS + 1200))
+          while (( SECONDS < deadline )); do
+            manifest="$(curl --fail --silent --show-error --max-time 20 "${base_url}/release-manifest.json?release=${RELEASE_VERSION}&attempt=${SECONDS}" || true)"
+            if jq -e --arg version "$RELEASE_VERSION" --arg sha "$CHARTS_SHA" \
+              '.releaseVersion == $version and .chartsCommit == $sha' <<<"${manifest}" >/dev/null 2>&1 \
+              && curl --fail --silent --show-error --max-time 20 "${base_url}/${RELEASE_VERSION}/wiki" >/dev/null \
+              && curl --fail --silent --show-error --max-time 20 "${base_url}/${RELEASE_VERSION}/api" >/dev/null \
+              && curl --fail --silent --show-error --max-time 20 "${base_url}/demo/${RELEASE_VERSION}/" >/dev/null; then
+              echo "Verified docs deployment for ${RELEASE_VERSION}."
+              exit 0
+            fi
+            sleep 20
+          done
+          echo "Timed out waiting for docs deployment of ${RELEASE_VERSION}." >&2
+          exit 1
+
+  announce-release:
+    name: Announce release
+    needs: [prepare-release, publish-maven, promote-docs, verify-docs-deployment]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v9
         with:
           script: |
-            const version = '${{ steps.version.outputs.release_version }}';
+            const version = '${{ needs.prepare-release.outputs.release_version }}';
             const message = [
               '🎉 **Release Published Successfully!**',
               '',
               `Version: \`${version}\``,
-              '',
-              '✅ Published to Maven Central',
-              '✅ Git tag created',
               '',
               'Umbrella artifact:',
               '```kotlin',
@@ -163,14 +335,12 @@ jobs:
               'implementation("io.github.dautovicharis:charts-radar")',
               '```',
               '',
-              '📚 [Documentation](https://charts.harisdautovic.com/)',
+              `📚 [Documentation](https://charts.harisdautovic.com/)`,
               `📦 [Maven Central](https://central.sonatype.com/artifact/io.github.dautovicharis/charts/${version})`,
             ].join('\n');
-
-            // Create a comment on the commit
-            github.rest.repos.createCommitComment({
+            await github.rest.repos.createCommitComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
               commit_sha: context.sha,
-              body: message
+              body: message,
             });

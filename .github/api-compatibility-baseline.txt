@@ -1,4 +1,4 @@
 # Baseline commit used by API compatibility workflow.
-# Updated via workflow_dispatch: set-api-baseline.
+# Updated automatically by the set-api-baseline workflow.
 # source: baseline_ref:main
 091dc940d467535c335019431dd6ce3f8f256ade

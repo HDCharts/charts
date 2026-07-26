@@ -18,17 +18,18 @@ flowchart TD
   F --> B
 ```
 
-If a breaking change is acknowledged and merged, always run the post-merge baseline update flow below.
+If a breaking change is acknowledged and merged, the post-merge baseline update
+flow below runs automatically.
 
 ## Release Audit Flow
 
-For release readiness, compare against the previous published release tag, not
-necessarily the checked-in `.github/api-compatibility-baseline.txt`. The checked-in
-baseline may be advanced after accepted breaking-change PRs merge, so it can be
-newer than the previous release.
+`Release` automatically compares the pinned release source against the latest
+published SemVer tag. The checked-in
+`.github/api-compatibility-baseline.txt` may already have advanced after
+accepted breaking-change PRs merge, so the release audit intentionally uses the
+previous tag instead.
 
-Run the manual workflow with `baseline_ref` set to the previous release tag, or
-run Gradle locally with:
+To reproduce the audit locally, run:
 
 ```bash
 ./gradlew apiCompatibilityCheck --no-daemon --continue -PapiCompatibilityBaselineRef=<previous-release-tag>
@@ -44,9 +45,9 @@ Example for a `2.3.0` release whose previous release is `2.2.0`:
 
 ```mermaid
 flowchart TD
-  A["Breaking-change PR is merged to main"] --> B["Required: run Set API Baseline (charts/.github/workflows/set-api-baseline.yml)"]
-  B --> C["Set baseline_ref to the merged commit or tag"]
+  A["Breaking-change PR is merged to main"] --> B["Set API Baseline runs automatically"]
+  B --> C["Use the merge commit as the immutable baseline"]
   C --> D["Workflow creates baseline-update PR"]
-  D --> E["Merge baseline-update PR"]
+  D --> E["Review and merge baseline-update PR"]
   E --> F["Future API compatibility checks use the new baseline"]
 ```

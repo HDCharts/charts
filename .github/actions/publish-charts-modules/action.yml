@@ -1,0 +1,38 @@
+name: Publish charts modules
+description: Set up signing and publish the charts Maven modules for a release channel.
+
+inputs:
+  maven-central-username:
+    required: true
+  maven-central-password:
+    required: true
+  signing-key-id:
+    required: true
+  signing-password:
+    required: true
+  signing-in-memory-key:
+    required: true
+  gradle-arguments:
+    description: Extra arguments passed to publishChartsModules.
+    required: false
+    default: ""
+  prepare-publishing:
+    description: Configure Maven credentials and signing before publishing.
+    required: false
+    default: "true"
+
+runs:
+  using: composite
+  steps:
+    - name: Prepare Maven publishing
+      if: ${{ inputs.prepare-publishing == 'true' }}
+      uses: ./.github/actions/prepare-maven-publishing
+      with:
+        maven-central-username: ${{ inputs.maven-central-username }}
+        maven-central-password: ${{ inputs.maven-central-password }}
+        signing-key-id: ${{ inputs.signing-key-id }}
+        signing-password: ${{ inputs.signing-password }}
+        signing-in-memory-key: ${{ inputs.signing-in-memory-key }}
+    - name: Publish charts modules
+      shell: bash
+      run: ./gradlew publishChartsModules ${{ inputs.gradle-arguments }} --no-daemon --stacktrace

@@ -159,11 +159,18 @@ tasks.register<Sync>("generateJsDemo") {
     }
 }
 
+tasks.register("generateApiDocs") {
+    group = "Charts"
+    description = "Generate Dokka API reference to docs/static/api/<target-version>"
+
+    dependsOn("charts:dokkaGenerate")
+}
+
 tasks.register("generateDocs") {
     group = "Charts"
     description = "Generate Dokka API docs and JS demo to docs/static/"
 
-    dependsOn("charts:dokkaGenerate")
+    dependsOn("generateApiDocs")
     dependsOn("generateJsDemo")
 
     doLast {

@@ -1,4 +1,4 @@
-# Workflow: dispatch the CodeQL scan once per month.
+# Workflow: run the CodeQL scan once per month.
 # This is the scheduled security scan for the main charts repository.
 #
 # It exists to keep security coverage running on a regular cadence.
@@ -7,27 +7,13 @@ on:
   schedule:
     # Runs on the 1st of every month at 00:00 UTC.
     - cron: "0 0 1 * *"
-  workflow_dispatch:
 
 permissions:
-  actions: write
+  security-events: write
+  actions: read
   contents: read
 
 jobs:
-  dispatch-codeql:
-    name: Dispatch CodeQL Scan
-    if: ${{ github.repository_owner == 'HDCharts' }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Dispatch codeql workflow
-        uses: actions/github-script@v9
-        with:
-          script: |
-            const ref = context.payload.repository?.default_branch ?? "main";
-            await github.rest.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: "codeql.yml",
-              ref,
-            });
-            core.info(`Dispatched codeql.yml on ${ref}`);
+  codeql:
+    name: Run CodeQL Scan
+    uses: ./.github/workflows/codeql.yml

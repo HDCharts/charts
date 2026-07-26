@@ -19,7 +19,6 @@ jobs:
   sync-version:
     name: Sync .version from Axion currentVersion
     runs-on: ubuntu-latest
-    if: ${{ github.repository_owner == 'HDCharts' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
