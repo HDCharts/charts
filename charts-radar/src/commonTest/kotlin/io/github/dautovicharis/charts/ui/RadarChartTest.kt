@@ -5,7 +5,7 @@ import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.test.v2.runComposeUiTest
 import io.github.dautovicharis.charts.RadarChart
 import io.github.dautovicharis.charts.internal.TestTags
 import io.github.dautovicharis.charts.internal.ValidationErrors.MIN_REQUIRED_RADAR
