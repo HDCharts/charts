@@ -9,11 +9,6 @@
     "failures": {{android_screenshot_failures}},
     "errors": {{android_screenshot_errors}}
   },
-  "ci_behavior": {
-    "tests": {{ci_behavior_tests}},
-    "failures": {{ci_behavior_failures}},
-    "errors": {{ci_behavior_errors}}
-  },
   "total": {
     "tests": {{total_tests}},
     "failures": {{total_failures}},
