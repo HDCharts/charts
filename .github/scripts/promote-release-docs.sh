@@ -19,12 +19,10 @@ fi
 if jq -e --arg version "${release_version}" \
   'any(.versions[]?; .id == $version)' "${docs_dir}/registry/versions.json" >/dev/null; then
   manifest_path="${docs_dir}/docs-app/public/release-manifest.json"
-  if [[ ! -f "${manifest_path}" && "${release_version}" == "2.3.0" ]]; then
-    echo "Bootstrapping provenance for the legacy pre-promoted docs release ${release_version}."
-  elif [[ ! -f "${manifest_path}" ]] || ! jq -e \
+  if [[ ! -f "${manifest_path}" ]] || ! jq -e \
       --arg version "${release_version}" \
       --arg sha "${charts_sha}" \
-      '.releaseVersion == $version and .chartsCommit == $sha' \
+      '.charts_version == $version and .source_sha == $sha' \
       "${manifest_path}" >/dev/null; then
     echo "Existing docs release ${release_version} has no matching charts provenance marker." >&2
     echo "Refusing to reuse immutable release content for charts SHA ${charts_sha}." >&2
@@ -38,6 +36,6 @@ bash .github/scripts/sync-release-notes.sh "${docs_dir}" "${release_version}"
 
 mkdir -p "${docs_dir}/docs-app/public"
 published_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-printf '{"releaseVersion":"%s","chartsCommit":"%s","deployedAt":"%s"}\n' \
-  "${release_version}" "${charts_sha}" "${published_at}" \
+printf '{"source_sha":"%s","charts_version":"%s","published_at":"%s"}\n' \
+  "${charts_sha}" "${release_version}" "${published_at}" \
   > "${docs_dir}/docs-app/public/release-manifest.json"

@@ -161,9 +161,18 @@ jobs:
       - name: Build playground static assets
         working-directory: playground-repo
         shell: bash
+        env:
+          SOURCE_SHA: ${{ inputs.source-sha }}
+          CHARTS_VERSION: ${{ inputs.charts-version }}
         run: |
           set -euo pipefail
+          PUBLISHED_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          PLAYGROUND_SHA="$(git rev-parse HEAD)"
           ./gradlew -DchartsLocalPath=.. :playground:jsBrowserDevelopmentExecutableDistribution \
+            -PsnapshotMetadataChartsSha="${SOURCE_SHA}" \
+            -PsnapshotMetadataPlaygroundSha="${PLAYGROUND_SHA}" \
+            -PsnapshotMetadataChartsVersion="${CHARTS_VERSION}" \
+            -PsnapshotMetadataPublishedAt="${PUBLISHED_AT}" \
             --no-daemon --stacktrace --build-cache
       - name: Validate playground static assets
         working-directory: playground-repo

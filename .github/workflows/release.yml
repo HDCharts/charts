@@ -116,10 +116,9 @@ jobs:
           if jq -e --arg version "$RELEASE_VERSION" \
             'any(.versions[]?; .id == $version)' charts-docs-repo/registry/versions.json >/dev/null; then
             manifest="charts-docs-repo/docs-app/public/release-manifest.json"
-            if [[ ! -f "$manifest" && "$RELEASE_VERSION" == "2.3.0" ]]; then
-              echo "::warning::The legacy pre-promoted 2.3.0 docs release will receive its provenance manifest during promotion."
-            elif ! jq -e --arg version "$RELEASE_VERSION" --arg sha "$SOURCE_SHA" \
-              '.releaseVersion == $version and .chartsCommit == $sha' "$manifest" >/dev/null; then
+            if [[ ! -f "$manifest" ]] || ! jq -e \
+              --arg version "$RELEASE_VERSION" --arg sha "$SOURCE_SHA" \
+              '.charts_version == $version and .source_sha == $sha' "$manifest" >/dev/null; then
               echo "Existing docs release ${RELEASE_VERSION} has no matching charts provenance marker." >&2
               exit 1
             fi
@@ -280,8 +279,9 @@ jobs:
           deadline=$((SECONDS + 1200))
           while (( SECONDS < deadline )); do
             manifest="$(curl --fail --silent --show-error --max-time 20 "${base_url}/release-manifest.json?release=${RELEASE_VERSION}&attempt=${SECONDS}" || true)"
-            if jq -e --arg version "$RELEASE_VERSION" --arg sha "$CHARTS_SHA" \
-              '.releaseVersion == $version and .chartsCommit == $sha' <<<"${manifest}" >/dev/null 2>&1 \
+            if jq -e \
+              --arg version "$RELEASE_VERSION" --arg sha "$CHARTS_SHA" \
+              '.charts_version == $version and .source_sha == $sha' <<<"${manifest}" >/dev/null 2>&1 \
               && curl --fail --silent --show-error --max-time 20 "${base_url}/${RELEASE_VERSION}/wiki" >/dev/null \
               && curl --fail --silent --show-error --max-time 20 "${base_url}/${RELEASE_VERSION}/api" >/dev/null \
               && curl --fail --silent --show-error --max-time 20 "${base_url}/demo/${RELEASE_VERSION}/" >/dev/null; then
