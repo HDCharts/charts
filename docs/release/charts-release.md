@@ -27,7 +27,3 @@ exists, the workflow fails before publishing.
 resolved version; leave it disabled for normal releases. The workflow must pass
 the protected `Release Approval` environment before any production publication
 begins.
-
-The already-promoted `2.3.0` docs release predates deployment manifests. Its
-first coordinated release run bootstraps the manifest from the pinned charts
-source SHA. This one-time compatibility path does not apply to later versions.
