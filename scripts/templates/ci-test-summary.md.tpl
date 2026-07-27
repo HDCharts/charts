@@ -1,11 +1,9 @@
-## ✅ Test Summary
+## {{summary_status}} Test Summary
 
-### Modules
-{{charts_line}}
-{{android_screenshot_line}}
+| Suite | Status | Tests | Failed | Errors | Skipped |
+| --- | --- | ---: | ---: | ---: | ---: |
+{{charts_row}}
+{{android_screenshot_row}}
+| **Total** | **{{total_status}}** | **{{total_tests}}** | **{{total_failures}}** | **{{total_errors}}** | **{{total_skipped}}** |
 
-### CI Behavior
-{{ci_behavior_total_line}}
-
-### Overall
-{{total_line}}
+{{total_note}}

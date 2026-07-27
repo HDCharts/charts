@@ -26,14 +26,6 @@ CHARTS_RESULT_DIRS=(
 )
 ANDROID_SCREENSHOT_RESULT_DIRS=(androidApp/build/test-results/validateDebugScreenshotTest)
 
-test_word() {
-  if (($1 == 1)); then
-    printf 'test'
-  else
-    printf 'tests'
-  fi
-}
-
 # Parse JUnit XML and return: tests failures errors skipped
 # If an aggregate <testsuites ...> node is present, use it to avoid double-counting nested suites.
 sum_junit_xml_file() {
@@ -110,70 +102,34 @@ collect_suite_counts() {
   collect_counts_for_dirs "$@"
 }
 
-line_text() {
-  local label="$1" tests="$2" failures="$3" errors="$4" skipped="${5:-0}"
+status_text() {
+  local tests="$1" failures="$2" errors="$3" skipped="$4"
   local broken=$((failures + errors))
-  local icon="✅"
-  local word text
 
   if [[ "$SHOULD_RUN_TESTS" != "true" ]]; then
-    printf -- '- ⚪ %s: Tests skipped' "$label"
-    return
-  fi
-
-  word="$(test_word "$tests")"
-  text="${tests} ${word} completed"
-
-  if ((tests == 0)); then
-    icon="⚪"
-    text="0 ${word} completed"
+    printf '⚪ Skipped'
   elif ((broken > 0)); then
-    icon="❌"
-    if ((skipped > 0)); then
-      text="${tests} ${word} completed (${broken} failed, ${skipped} skipped)"
-    else
-      text="${tests} ${word} completed (${broken} failed)"
-    fi
+    printf '❌ Failed'
+  elif ((tests == 0)); then
+    printf '⚪ No results'
   elif ((skipped > 0)); then
-    text="${tests} ${word} completed (${skipped} skipped)"
+    printf '⚠️ Passed'
+  else
+    printf '✅ Passed'
   fi
-
-  printf -- '- %s %s: %s' "$icon" "$label" "$text"
 }
 
-counts_for_step_outcome() {
-  local outcome="$1"
-  case "$outcome" in
-    success)
-      printf '1 0\n'
-      ;;
-    failure|cancelled|timed_out|action_required)
-      printf '1 1\n'
-      ;;
-    *)
-      printf '0 0\n'
-      ;;
-  esac
-}
+table_row() {
+  local label="$1" tests="$2" failures="$3" errors="$4" skipped="$5"
+  local status
+  status="$(status_text "$tests" "$failures" "$errors" "$skipped")"
 
-collect_behavior_counts() {
-  local tests=0 failures=0 errors=0
-
-  if [[ "$FORCE_ZERO" != "true" ]]; then
-    local publish_docs_static_outcome="${CI_BEHAVIOR_PUBLISH_DOCS_STATIC_OUTCOME:-}"
-    local docs_release_links_outcome="${CI_BEHAVIOR_DOCS_RELEASE_LINKS_OUTCOME:-}"
-    local t1 f1 t2 f2
-    read -r t1 f1 < <(counts_for_step_outcome "$publish_docs_static_outcome")
-    read -r t2 f2 < <(counts_for_step_outcome "$docs_release_links_outcome")
-    tests=$((t1 + t2))
-    failures=$((f1 + f2))
-  fi
-
-  printf '%s %s %s\n' "$tests" "$failures" "$errors"
+  printf '| %s | %s | %s | %s | %s | %s |' \
+    "$label" "$status" "$tests" "$failures" "$errors" "$skipped"
 }
 
 gradle_step_broken() {
-  if [[ "$FORCE_ZERO" == "true" || "$SHOULD_RUN_TESTS" != "true" ]]; then
+  if [[ "$SHOULD_RUN_TESTS" != "true" ]]; then
     printf '0\n'
     return
   fi
@@ -188,36 +144,32 @@ gradle_step_broken() {
   esac
 }
 
-total_line_text() {
+total_status_text() {
   local total_tests="$1" total_failures="$2" total_errors="$3" total_skipped="$4" gradle_broken="$5"
   local total_broken=$((total_failures + total_errors))
-  local effective_broken=$((total_broken + gradle_broken))
-  local word
-  word="$(test_word "$total_tests")"
 
   if [[ "$SHOULD_RUN_TESTS" != "true" ]]; then
-    printf -- '- ⚪ Total: Tests skipped'
-    return
-  fi
-
-  if ((effective_broken == 0)); then
-    if ((total_skipped > 0)); then
-      printf -- '- ✅ Total: %s %s completed successfully (%s skipped)' "$total_tests" "$word" "$total_skipped"
-    else
-      printf -- '- ✅ Total: %s %s completed successfully' "$total_tests" "$word"
-    fi
-    return
-  fi
-
-  if ((total_broken == 0 && gradle_broken == 1)); then
-    printf -- '- ❌ Total: test workflow failed before complete test results were produced'
-    return
-  fi
-
-  if ((total_skipped > 0)); then
-    printf -- '- ❌ Total: %s %s completed, %s failed (%s skipped)' "$total_tests" "$word" "$effective_broken" "$total_skipped"
+    printf '⚪ Skipped'
+  elif ((gradle_broken == 1)); then
+    printf '❌ Incomplete'
+  elif ((total_broken > 0)); then
+    printf '❌ Failed'
+  elif ((total_tests == 0)); then
+    printf '⚪ No results'
+  elif ((total_skipped > 0)); then
+    printf '⚠️ Passed'
   else
-    printf -- '- ❌ Total: %s %s completed, %s failed' "$total_tests" "$word" "$effective_broken"
+    printf '✅ Passed'
+  fi
+}
+
+total_note_text() {
+  local gradle_broken="$1"
+
+  if [[ "$SHOULD_RUN_TESTS" != "true" ]]; then
+    printf '> Tests were skipped for docs-only changes.'
+  elif ((gradle_broken == 1)); then
+    printf '> Test workflow failed before complete results were produced.'
   fi
 }
 
@@ -263,29 +215,31 @@ main() {
   read -r charts_tests charts_failures charts_errors charts_skipped < <(collect_suite_counts "${CHARTS_RESULT_DIRS[@]}")
   read -r android_tests android_failures android_errors android_skipped < <(collect_suite_counts "${ANDROID_SCREENSHOT_RESULT_DIRS[@]}")
 
-  local behavior_tests behavior_failures behavior_errors
-  read -r behavior_tests behavior_failures behavior_errors < <(collect_behavior_counts)
-
-  local gradle_broken total_tests total_failures total_errors total_skipped total_line
-  total_tests=$((charts_tests + android_tests + behavior_tests))
-  total_failures=$((charts_failures + android_failures + behavior_failures))
-  total_errors=$((charts_errors + android_errors + behavior_errors))
+  local gradle_broken total_tests total_failures total_errors total_skipped total_status total_note
+  total_tests=$((charts_tests + android_tests))
+  total_failures=$((charts_failures + android_failures))
+  total_errors=$((charts_errors + android_errors))
   total_skipped=$((charts_skipped + android_skipped))
   gradle_broken="$(gradle_step_broken)"
-  total_line="$(total_line_text "$total_tests" "$total_failures" "$total_errors" "$total_skipped" "$gradle_broken")"
+  total_status="$(total_status_text "$total_tests" "$total_failures" "$total_errors" "$total_skipped" "$gradle_broken")"
+  total_note="$(total_note_text "$gradle_broken")"
 
-  local charts_line android_line behavior_line
-  charts_line="$(line_text "Charts" "$charts_tests" "$charts_failures" "$charts_errors" "$charts_skipped")"
-  android_line="$(line_text "Android screenshot" "$android_tests" "$android_failures" "$android_errors" "$android_skipped")"
-  behavior_line="$(line_text "CI behavior (total)" "$behavior_tests" "$behavior_failures" "$behavior_errors" 0)"
+  local charts_row android_row
+  charts_row="$(table_row "Charts JVM" "$charts_tests" "$charts_failures" "$charts_errors" "$charts_skipped")"
+  android_row="$(table_row "Android screenshots" "$android_tests" "$android_failures" "$android_errors" "$android_skipped")"
 
   render_template \
     "$SUMMARY_TEMPLATE_MD" \
     "$SUMMARY_FILE" \
-    charts_line "$charts_line" \
-    android_screenshot_line "$android_line" \
-    ci_behavior_total_line "$behavior_line" \
-    total_line "$total_line"
+    summary_status "$total_status" \
+    charts_row "$charts_row" \
+    android_screenshot_row "$android_row" \
+    total_tests "$total_tests" \
+    total_failures "$((total_failures + gradle_broken))" \
+    total_errors "$total_errors" \
+    total_skipped "$total_skipped" \
+    total_status "$total_status" \
+    total_note "$total_note"
 
   render_template \
     "$SUMMARY_TEMPLATE_JSON" \
@@ -296,9 +250,6 @@ main() {
     android_screenshot_tests "$android_tests" \
     android_screenshot_failures "$android_failures" \
     android_screenshot_errors "$android_errors" \
-    ci_behavior_tests "$behavior_tests" \
-    ci_behavior_failures "$behavior_failures" \
-    ci_behavior_errors "$behavior_errors" \
     total_tests "$total_tests" \
     total_failures "$((total_failures + gradle_broken))" \
     total_errors "$total_errors"

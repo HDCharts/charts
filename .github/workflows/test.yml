@@ -42,10 +42,21 @@ jobs:
         run: ./gradlew chartsTest
       - name: Test summary
         if: always()
+        continue-on-error: true
         env:
           CI_GRADLE_TEST_OUTCOME: ${{ steps.gradle_tests.outcome }}
           CI_SHOULD_RUN: ${{ steps.changes.outputs.should_run }}
         run: bash scripts/ci-test-summary.sh
+      - name: Ensure summary files exist
+        if: always()
+        run: |
+          if [ ! -s ci-test-summary.md ] || [ ! -s ci-test-summary.json ]; then
+            CI_TEST_SUMMARY_FORCE_ZERO=true \
+            CI_TEST_SUMMARY_SKIP_STEP_SUMMARY=true \
+            CI_GRADLE_TEST_OUTCOME="${{ steps.gradle_tests.outcome }}" \
+            CI_SHOULD_RUN="${{ steps.changes.outputs.should_run }}" \
+            bash scripts/ci-test-summary.sh
+          fi
       - name: Upload test summary artifact
         if: always()
         uses: actions/upload-artifact@v7
