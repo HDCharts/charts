@@ -1,7 +1,7 @@
 package io.github.dautovicharis.charts.unit.common
 
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.test.v2.runComposeUiTest
 import io.github.dautovicharis.charts.internal.common.composable.rememberAnimationState
 import io.github.dautovicharis.charts.internal.common.composable.rememberShowState
 import kotlin.test.Test

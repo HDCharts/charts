@@ -6,7 +6,7 @@ import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTouchInput
-import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.IntSize
 import io.github.dautovicharis.charts.PIE_SELECTION_AUTO_DESELECT_TIMEOUT_MS
 import io.github.dautovicharis.charts.PieChart

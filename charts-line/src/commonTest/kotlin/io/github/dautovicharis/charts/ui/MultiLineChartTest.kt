@@ -8,7 +8,7 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.test.v2.runComposeUiTest
 import io.github.dautovicharis.charts.LineChart
 import io.github.dautovicharis.charts.LineChartRenderMode
 import io.github.dautovicharis.charts.internal.TestTags
