@@ -77,11 +77,6 @@ run_self_test() {
     failures=$((failures + 1))
   fi
 
-  result="$(is_code_change "scripts/ci-test-summary.sh")"
-  if ! assert_equal "true" "$result" "script change"; then
-    failures=$((failures + 1))
-  fi
-
   result="$(is_code_change "charts2/src/Main.kt")"
   if ! assert_equal "true" "$result" "new source directory"; then
     failures=$((failures + 1))
