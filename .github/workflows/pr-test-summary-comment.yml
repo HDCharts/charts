@@ -27,7 +27,7 @@ jobs:
         id: pull_request
         uses: actions/github-script@v9
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.CHARTS_WORKFLOW_TOKEN }}
           script: |
             const { owner, repo } = context.repo;
             const run = context.payload.workflow_run;
@@ -102,7 +102,7 @@ jobs:
           SUMMARY_PATH: ${{ runner.temp }}/ci-summary/ci-test-summary.md
         uses: actions/github-script@v9
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.CHARTS_WORKFLOW_TOKEN }}
           script: |
             const fs = require('fs');
             const { owner, repo } = context.repo;
@@ -149,7 +149,7 @@ jobs:
           PR_HEAD_SHA: ${{ steps.pull_request.outputs.head_sha }}
         uses: actions/github-script@v9
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.CHARTS_WORKFLOW_TOKEN }}
           script: |
             const { owner, repo } = context.repo;
             const pullRequestNumber = Number(process.env.PR_NUMBER);
