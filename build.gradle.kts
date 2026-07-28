@@ -138,24 +138,22 @@ tasks.register("publishChartsModulesToMavenLocal") {
     dependsOn(ChartsModules.publishable.map { "$it:publishToMavenLocal" })
 }
 
-tasks.register<Sync>("generateJsDemo") {
+tasks.register<Sync>("generateWebDemo") {
     group = "Charts"
-    description = "Builds the JS app and copies files to docs/static/demo/<target-version>"
+    description = "Builds the Wasm web app and copies files to docs/static/demo/<target-version>"
 
     val docsVersionDir =
         providers.provider {
             if (project.version.toString().endsWith("-SNAPSHOT")) "snapshot" else project.version.toString()
         }
 
-    // Only the demo app distribution is needed for docs/static/demo.
-    // Depending on all jsBrowserDistribution tasks triggers unnecessary production JS builds
-    // in every module and can make generateDocs appear to hang.
-    dependsOn(":app:jsBrowserDistribution")
-    from(layout.projectDirectory.dir("app/build/dist/js/productionExecutable"))
+    // Only the leaf demo app distribution is needed for docs/static/demo.
+    dependsOn(":app:wasmJsBrowserDistribution")
+    from(layout.projectDirectory.dir("app/build/dist/wasmJs/productionExecutable"))
     into(docsVersionDir.map { layout.projectDirectory.dir("docs/static/demo/$it") })
 
     doLast {
-        logger.lifecycle("✅ JS demo updated (${project.version})")
+        logger.lifecycle("✅ Wasm web demo updated (${project.version})")
     }
 }
 
@@ -168,10 +166,10 @@ tasks.register("generateApiDocs") {
 
 tasks.register("generateDocs") {
     group = "Charts"
-    description = "Generate Dokka API docs and JS demo to docs/static/"
+    description = "Generate Dokka API docs and Wasm web demo to docs/static/"
 
     dependsOn("generateApiDocs")
-    dependsOn("generateJsDemo")
+    dependsOn("generateWebDemo")
 
     doLast {
         logger.lifecycle("✅ Docs updated (${project.version})")
@@ -203,7 +201,8 @@ tasks.register("ciCompile") {
     group = "Charts"
     description = "CI-focused compile task set without packaging"
     dependsOn(ChartsModules.ciKmpCompile.map { "$it:compileKotlinJvm" })
-    dependsOn(ChartsModules.ciKmpCompile.map { "$it:compileKotlinJs" })
+    dependsOn((ChartsModules.library + ChartsModules.DEMO_SHARED).map { "$it:compileKotlinJs" })
+    dependsOn(ChartsModules.ciKmpCompile.map { "$it:compileKotlinWasmJs" })
     dependsOn(ChartsModules.ciAndroidCompile.map { "$it:compileAndroidMain" })
     dependsOn(":smoke-line:compileKotlinJvm")
 }
@@ -217,6 +216,6 @@ tasks.register("ciAssemble") {
     dependsOn(ChartsModules.library.map { "$it:jvmJar" })
     dependsOn(":charts-bom:assemble")
     dependsOn(ChartsModules.ciAndroidCompile.map { "$it:assembleAndroidMain" })
-    dependsOn(":app:jsBrowserDevelopmentExecutableDistribution")
+    dependsOn(":app:wasmJsBrowserDevelopmentExecutableDistribution")
     dependsOn(":smoke-line:assemble")
 }
