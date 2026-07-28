@@ -1,37 +1,39 @@
-# Workflow: check the public API against the current release baseline.
-# Pull requests can be marked breaking-change to allow intentional incompatibilities.
-#
-# This is the API compatibility gate for release safety.
+# Reusable public API compatibility check for pull request orchestration.
 name: API Compatibility
+
 on:
-  pull_request:
-    branches: [main]
-    types: [opened, synchronize, reopened, labeled, unlabeled]
+  workflow_call:
+    inputs:
+      has-breaking-label:
+        description: Whether the pull request has the breaking-change label.
+        required: true
+        type: boolean
+      source-sha:
+        description: Immutable merge revision being checked.
+        required: true
+        type: string
 
 permissions:
   contents: read
-
-concurrency:
-  group: api-compatibility-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
   api-compatibility:
     name: Compare Public API Against Release
     runs-on: ubuntu-latest
     env:
-      HAS_BREAKING_LABEL: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'breaking-change') }}
+      HAS_BREAKING_LABEL: ${{ inputs.has-breaking-label }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
         with:
           fetch-depth: 0
+          ref: ${{ inputs.source-sha }}
 
       - name: Set up JDK 17
         uses: actions/setup-java@v5
         with:
           java-version: 17
-          distribution: "temurin"
+          distribution: 'zulu'
           cache: gradle
 
       - name: Run API compatibility check
@@ -48,11 +50,9 @@ jobs:
           echo "exit_code=${exit_code}" >> "$GITHUB_OUTPUT"
 
       - name: API compatibility summary
-        id: summary
         if: always()
         shell: bash
         env:
-          EVENT_NAME: ${{ github.event_name }}
           EXIT_CODE: ${{ steps.compatibility.outputs.exit_code }}
         run: |
           set -euo pipefail
@@ -84,13 +84,6 @@ jobs:
             else
               result="incompatible (breaking-change label missing)"
             fi
-          fi
-
-          if [[ "${EVENT_NAME}" != "pull_request" ]]; then
-            {
-              echo "## API Compatibility"
-              echo "- Result: ${result}"
-            } >> "$GITHUB_STEP_SUMMARY"
           fi
 
           echo "result=${result}" >> "$GITHUB_OUTPUT"

@@ -1,18 +1,20 @@
-# Workflow: run the charts test suite on pull requests.
-# It uploads a summary artifact and skips work for docs-only changes.
-#
-# This is the main automated test gate for PRs.
+# Reusable charts test suite for pull request orchestration.
 name: Test
+
 on:
-  pull_request:
-    types: [opened, synchronize, reopened]
+  workflow_call:
+    inputs:
+      should-run:
+        description: Whether the pull request contains code or build changes.
+        required: true
+        type: boolean
+      source-sha:
+        description: Immutable merge revision being checked.
+        required: true
+        type: string
 
 permissions:
   contents: read
-
-concurrency:
-  group: ci-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
   test:
@@ -22,15 +24,9 @@ jobs:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - name: Detect code changes
-        id: changes
-        run: |
-          BASE_SHA="${{ github.event.pull_request.base.sha }}"
-          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
-          SHOULD_RUN="$(bash scripts/ci-has-code-changes.sh "$BASE_SHA" "$HEAD_SHA")"
-          echo "should_run=$SHOULD_RUN" >> "$GITHUB_OUTPUT"
+          ref: ${{ inputs.source-sha }}
       - name: Set up JDK 17
-        if: steps.changes.outputs.should_run == 'true'
+        if: ${{ inputs.should-run }}
         uses: actions/setup-java@v5
         with:
           java-version: 17
@@ -38,14 +34,14 @@ jobs:
           cache: gradle
       - name: Test
         id: gradle_tests
-        if: steps.changes.outputs.should_run == 'true'
+        if: ${{ inputs.should-run }}
         run: ./gradlew chartsTest
       - name: Test summary
         if: always()
         continue-on-error: true
         env:
           CI_GRADLE_TEST_OUTCOME: ${{ steps.gradle_tests.outcome }}
-          CI_SHOULD_RUN: ${{ steps.changes.outputs.should_run }}
+          CI_SHOULD_RUN: ${{ inputs.should-run }}
         run: bash scripts/ci-test-summary.sh
       - name: Ensure summary files exist
         if: always()
@@ -54,7 +50,7 @@ jobs:
             CI_TEST_SUMMARY_FORCE_ZERO=true \
             CI_TEST_SUMMARY_SKIP_STEP_SUMMARY=true \
             CI_GRADLE_TEST_OUTCOME="${{ steps.gradle_tests.outcome }}" \
-            CI_SHOULD_RUN="${{ steps.changes.outputs.should_run }}" \
+            CI_SHOULD_RUN="${{ inputs.should-run }}" \
             bash scripts/ci-test-summary.sh
           fi
       - name: Upload test summary artifact
@@ -67,5 +63,5 @@ jobs:
             ci-test-summary.md
             ci-test-summary.json
       - name: Skip tests for docs-only changes
-        if: steps.changes.outputs.should_run != 'true'
+        if: ${{ !inputs.should-run }}
         run: echo "No code/build changes detected. Skipping tests."

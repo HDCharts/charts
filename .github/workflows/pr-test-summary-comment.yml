@@ -1,18 +1,22 @@
-# Post the latest charts test summary on its pull request.
+# Post the latest charts test summary on the pull request.
+# This workflow is intentionally triggered by workflow_run so fork PRs get a
+# base-repository token without executing pull-request code with write access.
 name: PR Test Summary Comment
+
 on:
   workflow_run:
-    workflows: ["Test"]
+    workflows: ["Pull Request"]
     types: [completed]
 
 permissions:
   actions: read
+  checks: write
   issues: write
-  pull-requests: write
+  pull-requests: read
 
 concurrency:
   group: pr-test-summary-${{ github.event.workflow_run.head_sha }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   comment:
@@ -23,6 +27,7 @@ jobs:
         id: pull_request
         uses: actions/github-script@v9
         with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const { owner, repo } = context.repo;
             const run = context.payload.workflow_run;
@@ -65,43 +70,44 @@ jobs:
               repo,
               pull_number: pullRequestNumber,
             });
-            if (pullRequest.data.head.sha !== run.head_sha) {
-              core.info(
-                `Skipping stale test run ${run.id}: PR #${pullRequestNumber} is now at ${pullRequest.data.head.sha}.`,
-              );
+
+            if (
+              pullRequest.data.state !== 'open' ||
+              pullRequest.data.head.sha !== run.head_sha
+            ) {
+              core.info('PR changed while resolving; skipping comment.');
               core.setOutput('current', 'false');
               return;
             }
 
-            core.setOutput('current', 'true');
             core.setOutput('number', String(pullRequestNumber));
+            core.setOutput('current', 'true');
+            core.setOutput('state', String(pullRequest.data.state));
+            core.setOutput('head_sha', String(pullRequest.data.head.sha));
+            core.setOutput('merge_commit_sha', String(pullRequest.data.merge_commit_sha));
 
       - name: Download test summary
         if: ${{ steps.pull_request.outputs.current == 'true' }}
         uses: actions/download-artifact@v8
         with:
           name: ci-test-summary
-          path: ci-summary
+          path: ${{ runner.temp }}/ci-summary
           run-id: ${{ github.event.workflow_run.id }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create or update PR comment
+        id: publish_comment
         if: ${{ steps.pull_request.outputs.current == 'true' }}
         env:
           PR_NUMBER: ${{ steps.pull_request.outputs.number }}
-          SUMMARY_PATH: ci-summary/ci-test-summary.md
+          SUMMARY_PATH: ${{ runner.temp }}/ci-summary/ci-test-summary.md
         uses: actions/github-script@v9
         with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
             const { owner, repo } = context.repo;
             const pullRequestNumber = Number(process.env.PR_NUMBER);
             const marker = '<!-- ci-test-summary -->';
-
-            if (!fs.existsSync(process.env.SUMMARY_PATH)) {
-              throw new Error(`Summary artifact file not found at ${process.env.SUMMARY_PATH}.`);
-            }
-
             const summary = fs.readFileSync(process.env.SUMMARY_PATH, 'utf8').trim();
             const body = `${marker}\n${summary}`;
             const comments = await github.paginate(github.rest.issues.listComments, {
@@ -130,5 +136,70 @@ jobs:
                 repo,
                 issue_number: pullRequestNumber,
                 body,
+              });
+            }
+
+      - name: Publish PR summary check
+        if: ${{ always() && steps.pull_request.outputs.current == 'true' }}
+        env:
+          COMMENT_OUTCOME: ${{ steps.publish_comment.outcome }}
+          RUN_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+          PR_NUMBER: ${{ steps.pull_request.outputs.number }}
+          PR_STATE: ${{ steps.pull_request.outputs.state }}
+          PR_HEAD_SHA: ${{ steps.pull_request.outputs.head_sha }}
+        uses: actions/github-script@v9
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { owner, repo } = context.repo;
+            const pullRequestNumber = Number(process.env.PR_NUMBER);
+            const checkName = 'PR summary report';
+            const run = context.payload.workflow_run;
+
+            if (
+              process.env.PR_STATE !== 'open' ||
+              process.env.PR_HEAD_SHA !== run.head_sha
+            ) {
+              core.info('PR changed while publishing the summary; skipping stale check.');
+              return;
+            }
+
+            const commentPublished = process.env.COMMENT_OUTCOME === 'success';
+            const parentPassed = process.env.RUN_CONCLUSION === 'success';
+            const passed = commentPublished && parentPassed;
+            const output = {
+              title: 'PR summary report',
+              summary: 'The complete PR summary report was published as a comment.',
+            };
+            const checkRun = {
+              name: checkName,
+              head_sha: run.head_sha,
+              status: 'completed',
+              conclusion: passed ? 'success' : 'failure',
+              output,
+            };
+            const existingChecks = await github.paginate(github.rest.checks.listForRef, {
+              owner,
+              repo,
+              ref: checkRun.head_sha,
+              check_name: checkName,
+              per_page: 100,
+            });
+            const existing = existingChecks.find(
+              (check) => check.app?.slug === 'github-actions',
+            );
+
+            if (existing) {
+              await github.rest.checks.update({
+                owner,
+                repo,
+                check_run_id: existing.id,
+                ...checkRun,
+              });
+            } else {
+              await github.rest.checks.create({
+                owner,
+                repo,
+                ...checkRun,
               });
             }
