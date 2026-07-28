@@ -42,10 +42,6 @@ DerivedData/
 Pods/
 
 # CI generated summary files
-ci-test-summary.md
-ci-test-summary.json
-.ci-test-summary.md
-.ci-test-summary.json
 .vscode/settings.json
 *.aab
 

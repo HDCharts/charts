@@ -33,35 +33,17 @@ jobs:
           distribution: 'zulu'
           cache: gradle
       - name: Test
-        id: gradle_tests
         if: ${{ inputs.should-run }}
         run: ./gradlew chartsTest
-      - name: Test summary
-        if: always()
-        continue-on-error: true
-        env:
-          CI_GRADLE_TEST_OUTCOME: ${{ steps.gradle_tests.outcome }}
-          CI_SHOULD_RUN: ${{ inputs.should-run }}
-        run: bash scripts/ci-test-summary.sh
-      - name: Ensure summary files exist
-        if: always()
-        run: |
-          if [ ! -s ci-test-summary.md ] || [ ! -s ci-test-summary.json ]; then
-            CI_TEST_SUMMARY_FORCE_ZERO=true \
-            CI_TEST_SUMMARY_SKIP_STEP_SUMMARY=true \
-            CI_GRADLE_TEST_OUTCOME="${{ steps.gradle_tests.outcome }}" \
-            CI_SHOULD_RUN="${{ inputs.should-run }}" \
-            bash scripts/ci-test-summary.sh
-          fi
-      - name: Upload test summary artifact
-        if: always()
+      - name: Upload Gradle test reports
+        if: ${{ always() && inputs.should-run }}
         uses: actions/upload-artifact@v7
         with:
-          name: ci-test-summary
-          if-no-files-found: error
+          name: gradle-test-reports
+          if-no-files-found: warn
           path: |
-            ci-test-summary.md
-            ci-test-summary.json
+            **/build/reports/tests/**
+            **/build/test-results/**
       - name: Skip tests for docs-only changes
         if: ${{ !inputs.should-run }}
         run: echo "No code/build changes detected. Skipping tests."
