@@ -43,21 +43,21 @@ jobs:
         run: echo "has_breaking_label=$HAS_BREAKING_LABEL" >> "$GITHUB_OUTPUT"
 
   assemble:
-    name: Assemble
+    name: PR Assemble
     needs: prepare
     uses: ./.github/workflows/assemble.yml
     with:
       source-sha: ${{ needs.prepare.outputs.source_sha }}
 
   compile:
-    name: Compile
+    name: PR Compile
     needs: prepare
     uses: ./.github/workflows/compile.yml
     with:
       source-sha: ${{ needs.prepare.outputs.source_sha }}
 
   lint:
-    name: Lint
+    name: PR Lint
     needs: prepare
     uses: ./.github/workflows/lint.yml
     with:
@@ -65,7 +65,7 @@ jobs:
       source-sha: ${{ needs.prepare.outputs.source_sha }}
 
   test:
-    name: Test
+    name: PR Test
     needs: prepare
     uses: ./.github/workflows/test.yml
     with:
@@ -73,7 +73,7 @@ jobs:
       source-sha: ${{ needs.prepare.outputs.source_sha }}
 
   api-compatibility:
-    name: Compare Public API Against Release
+    name: PR Compare Public API Against Release
     needs: prepare
     uses: ./.github/workflows/api-compatibility.yml
     with:
