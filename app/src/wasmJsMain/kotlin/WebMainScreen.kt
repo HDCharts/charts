@@ -32,8 +32,8 @@ import chartsproject.app.generated.resources.Res as AppRes
 import chartsproject.charts_demo_shared.generated.resources.Res as SharedRes
 
 @Composable
-internal fun JsMainScreen() {
-    val startupReady = rememberJsDemoStartupResourcesReady()
+internal fun WebMainScreen() {
+    val startupReady = rememberWebDemoStartupResourcesReady()
 
     AppTheme(
         theme = docsSlate,
@@ -53,7 +53,7 @@ internal fun JsMainScreen() {
 }
 
 @Composable
-private fun rememberJsDemoStartupResourcesReady(): Boolean {
+private fun rememberWebDemoStartupResourcesReady(): Boolean {
     val galleryDestinations =
         remember {
             listOf(

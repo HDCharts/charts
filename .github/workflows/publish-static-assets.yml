@@ -110,7 +110,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          ./gradlew generateJsDemo -PchartsReleaseVersion="${{ inputs.charts-version }}" --no-daemon --stacktrace --build-cache
+          ./gradlew generateWebDemo -PchartsReleaseVersion="${{ inputs.charts-version }}" --no-daemon --stacktrace --build-cache
       - name: Validate demo
         shell: bash
         run: |
