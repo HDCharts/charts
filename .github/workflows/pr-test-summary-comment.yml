@@ -93,6 +93,7 @@ jobs:
           name: ci-test-summary
           path: ${{ runner.temp }}/ci-summary
           run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create or update PR comment
         id: publish_comment
