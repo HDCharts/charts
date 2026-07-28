@@ -1,18 +1,16 @@
-# Workflow: compile the charts project for pull requests.
-# Use this as a lighter check than test to catch build errors early.
-#
-# This is a fast validation step, not the full test suite.
+# Reusable compile check for pull request orchestration.
 name: Compile
+
 on:
-  pull_request:
-    types: [opened, synchronize, reopened]
+  workflow_call:
+    inputs:
+      source-sha:
+        description: Immutable merge revision being checked.
+        required: true
+        type: string
 
 permissions:
   contents: read
-
-concurrency:
-  group: ci-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
   compile:
@@ -22,6 +20,7 @@ jobs:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 1
+          ref: ${{ inputs.source-sha }}
       - uses: actions/setup-java@v5
         with:
           java-version: 17

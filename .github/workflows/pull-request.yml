@@ -1,0 +1,81 @@
+# Coordinates every pull request check from one immutable merge revision.
+name: Pull Request
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  prepare:
+    name: Prepare PR
+    runs-on: ubuntu-latest
+    outputs:
+      source_sha: ${{ github.sha }}
+      should_run: ${{ steps.changes.outputs.should_run }}
+      has_breaking_label: ${{ steps.metadata.outputs.has_breaking_label }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Detect code changes
+        id: changes
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          should_run="$(bash scripts/ci-has-code-changes.sh "$BASE_SHA" "$HEAD_SHA")"
+          echo "should_run=$should_run" >> "$GITHUB_OUTPUT"
+
+      - name: Capture PR metadata
+        id: metadata
+        env:
+          HAS_BREAKING_LABEL: ${{ contains(github.event.pull_request.labels.*.name, 'breaking-change') }}
+        run: echo "has_breaking_label=$HAS_BREAKING_LABEL" >> "$GITHUB_OUTPUT"
+
+  assemble:
+    name: PR Assemble
+    needs: prepare
+    uses: ./.github/workflows/assemble.yml
+    with:
+      source-sha: ${{ needs.prepare.outputs.source_sha }}
+
+  compile:
+    name: PR Compile
+    needs: prepare
+    uses: ./.github/workflows/compile.yml
+    with:
+      source-sha: ${{ needs.prepare.outputs.source_sha }}
+
+  lint:
+    name: PR Lint
+    needs: prepare
+    uses: ./.github/workflows/lint.yml
+    with:
+      should-run: ${{ needs.prepare.outputs.should_run == 'true' }}
+      source-sha: ${{ needs.prepare.outputs.source_sha }}
+
+  test:
+    name: PR Test
+    needs: prepare
+    uses: ./.github/workflows/test.yml
+    with:
+      should-run: ${{ needs.prepare.outputs.should_run == 'true' }}
+      source-sha: ${{ needs.prepare.outputs.source_sha }}
+
+  api-compatibility:
+    name: PR Compare Public API Against Release
+    needs: prepare
+    uses: ./.github/workflows/api-compatibility.yml
+    with:
+      has-breaking-label: ${{ needs.prepare.outputs.has_breaking_label == 'true' }}
+      source-sha: ${{ needs.prepare.outputs.source_sha }}
