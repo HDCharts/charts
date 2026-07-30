@@ -512,8 +512,8 @@ class MultiChatDataTest {
     @Test
     fun multiChartDataSet_stringFloatList_correctDataReturned() {
         // Arrange
-        val firstList = listOf("-1f", "2f", "3f")
-        val secondList = listOf("3f", "4f", "5f")
+        val firstList = listOf("-1.0", "2.0", "3.0")
+        val secondList = listOf("3.0", "4.0", "5.0")
         val categories = listOf("Jan", "Feb", "Mar")
 
         // Act

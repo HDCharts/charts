@@ -45,6 +45,7 @@ import io.github.dautovicharis.charts.internal.common.axis.AxisXPlanRequest
 import io.github.dautovicharis.charts.internal.common.axis.estimateXAxisLabelFootprintPx
 import io.github.dautovicharis.charts.internal.common.axis.estimateYAxisLabelWidthPx
 import io.github.dautovicharis.charts.internal.common.axis.planAxisXLabels
+import io.github.dautovicharis.charts.internal.common.bezier.cubicControlPointsForSegment
 import io.github.dautovicharis.charts.internal.common.composable.rememberDenseExpandedState
 import io.github.dautovicharis.charts.internal.common.composable.rememberShowState
 import io.github.dautovicharis.charts.internal.common.composable.rememberZoomScaleState
@@ -801,44 +802,4 @@ private fun Path.appendSeriesPath(
             )
         }
     }
-}
-
-private const val STACKED_AREA_BEZIER_TENSION = 0.95f
-
-private data class CubicControlPoints(
-    val first: Offset,
-    val second: Offset,
-)
-
-private fun cubicControlPointsForSegment(
-    points: List<Offset>,
-    segmentStartIndex: Int,
-    tension: Float = STACKED_AREA_BEZIER_TENSION,
-): CubicControlPoints {
-    val p1 = points[segmentStartIndex]
-    val p2 = points[segmentStartIndex + 1]
-    val p0 =
-        when {
-            segmentStartIndex > 0 -> points[segmentStartIndex - 1]
-            else -> p1
-        }
-    val p3 =
-        when {
-            segmentStartIndex + 2 < points.size -> points[segmentStartIndex + 2]
-            else -> p2
-        }
-
-    val factor = tension / 6f
-    val control1 =
-        Offset(
-            x = p1.x + (p2.x - p0.x) * factor,
-            y = p1.y + (p2.y - p0.y) * factor,
-        )
-    val control2 =
-        Offset(
-            x = p2.x - (p3.x - p1.x) * factor,
-            y = p2.y - (p3.y - p1.y) * factor,
-        )
-
-    return CubicControlPoints(first = control1, second = control2)
 }

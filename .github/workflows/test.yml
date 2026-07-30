@@ -17,33 +17,137 @@ permissions:
   contents: read
 
 jobs:
-  test:
-    name: Test
+  jvm-tests:
+    name: JVM Tests
+    if: ${{ inputs.should-run }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
         with:
-          fetch-depth: 0
+          fetch-depth: 1
           ref: ${{ inputs.source-sha }}
+
       - name: Set up JDK 17
-        if: ${{ inputs.should-run }}
         uses: actions/setup-java@v5
         with:
           java-version: 17
           distribution: 'zulu'
           cache: gradle
-      - name: Test
-        if: ${{ inputs.should-run }}
-        run: ./gradlew chartsTest
-      - name: Upload Gradle test reports
-        if: ${{ always() && inputs.should-run }}
+
+      - name: Run JVM tests
+        run: ./gradlew ciTestJvm --no-daemon
+
+      - name: Upload JVM test reports
+        if: ${{ always() }}
         uses: actions/upload-artifact@v7
         with:
-          name: gradle-test-reports
+          name: jvm-test-reports
           if-no-files-found: warn
           path: |
             **/build/reports/tests/**
             **/build/test-results/**
-      - name: Skip tests for docs-only changes
-        if: ${{ !inputs.should-run }}
-        run: echo "No code/build changes detected. Skipping tests."
+
+  android-tests:
+    name: Android Tests
+    if: ${{ inputs.should-run }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
+          ref: ${{ inputs.source-sha }}
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          java-version: 17
+          distribution: 'zulu'
+          cache: gradle
+
+      - name: Enable KVM for the Android emulator
+        run: |
+          echo 'KERNEL=="kvm", MODE="0666", GROUP="kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Run Android tests on emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: Nexus 6
+          emulator-options: -no-window -no-audio -gpu swiftshader_indirect -no-snapshot
+          script: ./gradlew ciTestAndroid --no-daemon
+
+      - name: Upload Android test reports
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: android-test-reports
+          if-no-files-found: warn
+          path: |
+            **/build/reports/tests/**
+            **/build/test-results/**
+            androidApp/build/reports/**
+
+  web-tests:
+    name: Wasm Tests
+    if: ${{ inputs.should-run }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
+          ref: ${{ inputs.source-sha }}
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          java-version: 17
+          distribution: 'zulu'
+          cache: gradle
+
+      - name: Run Wasm tests
+        run: ./gradlew ciTestWeb --no-daemon
+
+      - name: Upload Wasm test reports
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: wasm-test-reports
+          if-no-files-found: warn
+          path: |
+            **/build/reports/tests/**
+            **/build/test-results/**
+
+  ios-tests:
+    name: iOS Tests
+    if: ${{ inputs.should-run }}
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
+          ref: ${{ inputs.source-sha }}
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          java-version: 17
+          distribution: 'zulu'
+          cache: gradle
+
+      - name: Run iOS tests
+        run: ./gradlew ciTestIos --no-daemon
+
+      - name: Upload iOS test reports
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: ios-test-reports
+          if-no-files-found: warn
+          path: |
+            **/build/reports/iosSimulatorArm64Test/**
+            **/build/test-results/iosSimulatorArm64Test/**
+

@@ -2,13 +2,13 @@ package io.github.dautovicharis.charts.unit.helpers
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import io.github.dautovicharis.charts.internal.common.bezier.cubicControlPointsForSegment
 import io.github.dautovicharis.charts.internal.common.model.ChartDataItem
 import io.github.dautovicharis.charts.internal.common.model.MultiChartData
 import io.github.dautovicharis.charts.internal.common.model.toChartData
 import io.github.dautovicharis.charts.internal.linechart.aggregateForCompactDensity
 import io.github.dautovicharis.charts.internal.linechart.buildLineXAxisTicks
 import io.github.dautovicharis.charts.internal.linechart.buildLineYAxisTicks
-import io.github.dautovicharis.charts.internal.linechart.cubicControlPointsForSegment
 import io.github.dautovicharis.charts.internal.linechart.findNearestPoint
 import io.github.dautovicharis.charts.internal.linechart.resolveLineXAxisLabels
 import io.github.dautovicharis.charts.internal.linechart.scaleValues

@@ -3,6 +3,8 @@ package io.github.dautovicharis.charts.internal.linechart
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.util.lerp
+import io.github.dautovicharis.charts.internal.common.bezier.DEFAULT_BEZIER_TENSION
+import io.github.dautovicharis.charts.internal.common.bezier.cubicControlPointsForSegment
 import io.github.dautovicharis.charts.internal.common.model.ChartDataItem
 import io.github.dautovicharis.charts.internal.common.model.MultiChartData
 import io.github.dautovicharis.charts.internal.common.model.toChartData
@@ -12,7 +14,6 @@ import io.github.dautovicharis.charts.internal.common.density.bucketSizeForTarge
 import io.github.dautovicharis.charts.internal.common.density.buildBucketRanges as buildBucketRangesCore
 import io.github.dautovicharis.charts.internal.common.density.shouldUseScrollableDensity as shouldUseScrollableDensityCore
 
-internal const val LINE_CHART_BEZIER_TENSION = 0.95f
 internal const val LINE_DENSE_THRESHOLD = 50
 
 internal fun shouldUseScrollableDensity(pointsCount: Int): Boolean =
@@ -54,55 +55,13 @@ internal fun aggregateForCompactDensity(
     )
 }
 
-internal data class CubicControlPoints(
-    val first: Offset,
-    val second: Offset,
-)
-
-internal fun cubicControlPointsForSegment(
-    points: List<Offset>,
-    segmentStartIndex: Int,
-    tension: Float = LINE_CHART_BEZIER_TENSION,
-    minY: Float = Float.NEGATIVE_INFINITY,
-    maxY: Float = Float.POSITIVE_INFINITY,
-): CubicControlPoints {
-    val p1 = points[segmentStartIndex]
-    val p2 = points[segmentStartIndex + 1]
-    val p0 =
-        when {
-            segmentStartIndex > 0 -> points[segmentStartIndex - 1]
-            else -> p1
-        }
-    val p3 =
-        when {
-            segmentStartIndex + 2 < points.size -> points[segmentStartIndex + 2]
-            else -> p2
-        }
-
-    val factor = tension / 6f
-    val lowerYBound = minY.coerceAtMost(maxY)
-    val upperYBound = maxY.coerceAtLeast(minY)
-    val control1 =
-        Offset(
-            x = p1.x + (p2.x - p0.x) * factor,
-            y = (p1.y + (p2.y - p0.y) * factor).coerceIn(lowerYBound, upperYBound),
-        )
-    val control2 =
-        Offset(
-            x = p2.x - (p3.x - p1.x) * factor,
-            y = (p2.y - (p3.y - p1.y) * factor).coerceIn(lowerYBound, upperYBound),
-        )
-
-    return CubicControlPoints(first = control1, second = control2)
-}
-
 internal fun findNearestPoint(
     touchX: Float,
     scaledValues: List<Float>,
     size: Size,
     bezier: Boolean,
     verticalInset: Float = 0f,
-    bezierTension: Float = LINE_CHART_BEZIER_TENSION,
+    bezierTension: Float = DEFAULT_BEZIER_TENSION,
 ): Offset {
     if (scaledValues.isEmpty()) {
         return Offset(0f, 0f)

@@ -1,3 +1,10 @@
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import org.jetbrains.kotlin.gradle.plugin.mpp.DisableCacheInKotlinVersion
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeCacheApi
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
+import org.jetbrains.kotlin.gradle.plugin.mpp.TestExecutable
+import org.jetbrains.kotlin.gradle.targets.js.testing.karma.KotlinKarma
+
 plugins {
     alias(libs.plugins.androidApplication) apply false
     alias(libs.plugins.androidLibrary) apply false
@@ -52,6 +59,7 @@ configurations.configureProjectSecurityOverrides(
     versionCatalog = versionCatalog,
 )
 
+@OptIn(KotlinNativeCacheApi::class)
 subprojects {
     version = rootProject.version
 
@@ -66,27 +74,78 @@ subprojects {
         versionCatalog = versionCatalog,
         includeCommonsLang = true,
     )
+
+    // Compose UI tests in a browser may intentionally wait up to three seconds for
+    // a state change. Karma/Mocha's two-second default therefore aborts valid Wasm
+    // tests before their own timeout can produce a useful result.
+    tasks.withType<org.jetbrains.kotlin.gradle.targets.js.testing.KotlinJsTest>().configureEach {
+        if (!name.startsWith("wasmJs")) return@configureEach
+
+        onTestFrameworkSet {
+            (
+                this as? KotlinKarma
+            )?.useConfigDirectory(
+                rootProject.layout.projectDirectory
+                    .dir("karma.config.d")
+                    .asFile,
+            )
+        }
+    }
+
+    // Hosted macOS can supply Kotlin/Native dependency caches built with a newer
+    // iOS Simulator SDK than this project's iOS deployment target. Linking those
+    // caches then fails on symbols unavailable to the deployment target.
+    //
+    // Disable only simulator *test* binary caches; this does not change published
+    // libraries or device targets. Re-enable caching after a Kotlin/Compose update
+    // provides deployment-target-compatible caches (or after an intentional minimum
+    // iOS version increase). The version marker makes that review mandatory on
+    // Kotlin upgrades.
+    plugins.withId("org.jetbrains.kotlin.multiplatform") {
+        if (path !in ChartsModules.library) return@withId
+
+        extensions.configure<KotlinMultiplatformExtension>("kotlin") {
+            targets.withType<KotlinNativeTarget>().configureEach {
+                if (name != "iosSimulatorArm64") return@configureEach
+
+                binaries.withType<TestExecutable>().configureEach {
+                    disableNativeCache(
+                        version = DisableCacheInKotlinVersion.`2_4_10`,
+                        reason =
+                            "Hosted macOS caches can target a newer simulator SDK than the test deployment target.",
+                    )
+                }
+            }
+        }
+    }
 }
 
-tasks.register("chartsTest") {
-    group = "Charts"
-    description = "Relevant tests for the charts project"
-    dependsOn("charts:jvmTest")
-    dependsOn(project(":androidApp").tasks.named("validateDebugScreenshotTest"))
-    dependsOn("chartsModulesTest")
-}
-
-tasks.register("chartsModulesTest") {
-    group = "Charts"
-    description = "Runs JVM tests for all modular chart artifacts and the umbrella module"
+tasks.register("chartsTestJvm") {
+    group = "verification"
+    description = "Runs JVM tests for all chart modules"
     dependsOn(ChartsModules.library.map { "$it:jvmTest" })
-    dependsOn("smokeLineCompile")
 }
 
-tasks.register("smokeLineCompile") {
-    group = "Charts"
-    description = "Smoke compile of a module that depends only on charts-line"
-    dependsOn(":smoke-line:compileKotlinJvm")
+tasks.register("chartsTestIos") {
+    group = "verification"
+    description = "Runs iOS simulator tests for all chart modules"
+    dependsOn(ChartsModules.library.map { "$it:iosSimulatorArm64Test" })
+}
+
+tasks.register("chartsTestWasm") {
+    group = "verification"
+    description = "Runs Wasm tests for all chart modules"
+    dependsOn(ChartsModules.library.map { "$it:wasmJsTest" })
+}
+
+tasks.register("chartsTestAndroid") {
+    group = "verification"
+    description = "Runs Android instrumented tests for chart modules"
+    dependsOn(
+        ChartsModules.library
+            .filter { it != ":charts-core" }
+            .map { "$it:connectedAndroidTest" },
+    )
 }
 
 tasks.register("updateScreenshots") {
@@ -100,10 +159,10 @@ tasks.register("chartsCheck") {
     description = "Build and tests for the charts project"
     dependsOn(getTasksByName("ktlintCheck", true))
     dependsOn("build")
-    dependsOn("chartsTest")
+    dependsOn("chartsTestJvm")
 
     tasks.findByName("build")?.mustRunAfter(getTasksByName("ktlintCheck", true))
-    tasks.findByName("chartsTest")?.mustRunAfter("build")
+    tasks.findByName("chartsTestJvm")?.mustRunAfter("build")
 }
 
 tasks.register<Exec>("buildSrcKtlintCheck") {
@@ -196,10 +255,40 @@ tasks.register("recordDocsGifs") {
     dependsOn(":androidApp:recordGifsDebug")
 }
 
-// Fast PR/main signal: compile coverage across key targets without packaging outputs.
+// CI entry points for reusable workflows.
+// The `chartsTest*` tasks are platform-specific commands for local use.
+// The `ciTest*`, `ciCompile`, and `ciAssemble` tasks are CI entry points;
+// they define the exact scope invoked by the reusable workflows.
+// The `smoke-line` consumer compile belongs only to `ciCompile`, not to a test task.
+
+tasks.register("ciTestJvm") {
+    group = "CI"
+    description = "CI entry point for JVM tests"
+    dependsOn("chartsTestJvm")
+}
+
+tasks.register("ciTestAndroid") {
+    group = "CI"
+    description = "CI entry point for Android tests"
+    dependsOn(":androidApp:validateDebugScreenshotTest")
+    dependsOn("chartsTestAndroid")
+}
+
+tasks.register("ciTestWeb") {
+    group = "CI"
+    description = "CI entry point for Wasm browser tests"
+    dependsOn("chartsTestWasm")
+}
+
+tasks.register("ciTestIos") {
+    group = "CI"
+    description = "CI entry point for iOS simulator tests"
+    dependsOn("chartsTestIos")
+}
+
 tasks.register("ciCompile") {
-    group = "Charts"
-    description = "CI-focused compile task set without packaging"
+    group = "CI"
+    description = "Compiles all CI targets without packaging outputs"
     dependsOn(ChartsModules.ciKmpCompile.map { "$it:compileKotlinJvm" })
     dependsOn((ChartsModules.library + ChartsModules.DEMO_SHARED).map { "$it:compileKotlinJs" })
     dependsOn(ChartsModules.ciKmpCompile.map { "$it:compileKotlinWasmJs" })
@@ -207,12 +296,9 @@ tasks.register("ciCompile") {
     dependsOn(":smoke-line:compileKotlinJvm")
 }
 
-// Output validation path used by CI, intentionally kept on dev/debug tasks where possible:
-// - avoids expensive production JS pipelines
-// - avoids duplicating compile-only checks already covered by ciCompile
 tasks.register("ciAssemble") {
-    group = "Charts"
-    description = "CI-focused assemble task set using dev/debug outputs"
+    group = "CI"
+    description = "Assembles CI validation artifacts using dev/debug outputs"
     dependsOn(ChartsModules.library.map { "$it:jvmJar" })
     dependsOn(":charts-bom:assemble")
     dependsOn(ChartsModules.ciAndroidCompile.map { "$it:assembleAndroidMain" })

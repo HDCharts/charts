@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -21,11 +22,15 @@ kotlin {
         namespace = Config.CHARTS_HISTOGRAM_NAMESPACE
         compileSdk = Config.COMPILE_SDK
         minSdk = Config.MIN_SDK
+        androidResources.enable = true
         compilerOptions {
             jvmTarget.set(
-                org.jetbrains.kotlin.gradle.dsl.JvmTarget
+                JvmTarget
                     .fromTarget(libs.versions.java.get()),
             )
+        }
+        withDeviceTestBuilder {
+            sourceSetTreeName = "test"
         }
     }
 
