@@ -53,7 +53,10 @@ The `protect main` branch ruleset should require the validation checks:
 PR Assemble / Assemble
 PR Compile / Compile
 PR Lint / Lint
-PR Test / Test
+PR Test / JVM Tests
+PR Test / Android Tests
+PR Test / Wasm Tests
+PR Test / iOS Tests
 PR Compare Public API Against Release / Compare Public API Against Release
 ```
 
@@ -80,7 +83,7 @@ lightweight build checks.
 - **The PR cannot merge:** inspect the required status-check names in the
   `protect main` ruleset. Reusable workflows can expose check names differently
   after the first rollout, so use the exact names shown on the PR checks page.
-- **Tests fail:** inspect the relevant `PR Test` job logs and download its test-report artifact for Gradle's HTML and XML reports.
+- **Tests fail:** inspect the relevant `PR Test` job logs (JVM, Android, Wasm, or iOS) and download its test-report artifact for Gradle's HTML and XML reports.
 - **API compatibility fails:** add the `breaking-change` label only when the
   API break is intentional; unrelated Gradle or compatibility errors are not
   bypassed by the label.
