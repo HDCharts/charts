@@ -45,6 +45,7 @@ import io.github.dautovicharis.charts.internal.common.axis.baselineYForRange
 import io.github.dautovicharis.charts.internal.common.axis.estimateXAxisLabelFootprintPx
 import io.github.dautovicharis.charts.internal.common.axis.estimateYAxisLabelWidthPx
 import io.github.dautovicharis.charts.internal.common.axis.planAxisXLabels
+import io.github.dautovicharis.charts.internal.common.bezier.DEFAULT_BEZIER_TENSION
 import io.github.dautovicharis.charts.internal.common.composable.rememberShowState
 import io.github.dautovicharis.charts.internal.common.interaction.buildHorizontalDragGestureModifier
 import io.github.dautovicharis.charts.internal.common.interaction.buildTapGestureModifier
@@ -138,7 +139,7 @@ internal fun LineChartContent(
     val hasForcedSelection = forcedSelectionIndex != NO_SELECTION
     val reportedSelection = remember(forcedSelectionIndex) { mutableIntStateOf(forcedSelectionIndex) }
     val seriesCount = rawSeries.size
-    val bezierTension = LINE_CHART_BEZIER_TENSION
+    val bezierTension = DEFAULT_BEZIER_TENSION
     val animatedValues =
         remember(seriesCount, pointsCount) {
             List(seriesCount) { seriesIndex ->

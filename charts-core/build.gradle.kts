@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -23,7 +24,7 @@ kotlin {
         minSdk = Config.MIN_SDK
         compilerOptions {
             jvmTarget.set(
-                org.jetbrains.kotlin.gradle.dsl.JvmTarget
+                JvmTarget
                     .fromTarget(libs.versions.java.get()),
             )
         }
