@@ -10,6 +10,7 @@ plugins {
     signing
     alias(libs.plugins.mavenPublish)
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.ktlint)
 }
 
 kotlin {
@@ -21,8 +22,14 @@ kotlin {
 
     android {
         namespace = Config.CHARTS_NAMESPACE
-        compileSdk = Config.COMPILE_SDK
-        minSdk = Config.MIN_SDK
+        compileSdk =
+            libs.versions.compile.sdk
+                .get()
+                .toInt()
+        minSdk =
+            libs.versions.min.sdk
+                .get()
+                .toInt()
         androidResources.enable = true
         compilerOptions {
             jvmTarget.set(
@@ -100,12 +107,25 @@ dokka {
     val snapshotOutputDir = file(project.rootDir.resolve("docs/static/api/snapshot"))
     val versionOutputDir = file(project.rootDir.resolve("docs/static/api/${project.version}"))
     val primaryOutputDir = if (isSnapshotVersion) snapshotOutputDir else versionOutputDir
+    val sourceLinkRef =
+        if (isSnapshotVersion) {
+            providers
+                .exec {
+                    commandLine("git", "rev-parse", "HEAD")
+                }.standardOutput.asText
+                .get()
+                .trim()
+        } else {
+            project.version.toString()
+        }
 
     dokkaSourceSets.commonMain {
+        sourceRoots.setFrom(emptyList<File>())
+        apiSourceRoots.filter { it.exists() }.forEach { sourceRoots.from(it) }
+
         sourceLink {
-            sourceRoots.setFrom(emptyList<File>())
-            apiSourceRoots.filter { it.exists() }.forEach { sourceRoots.from(it) }
-            remoteUrl("https://github.com/dautovicharis/charts/tree/${project.version}")
+            localDirectory.set(project.rootDir)
+            remoteUrl("${Config.PROJECT_URL}/tree/$sourceLinkRef")
             remoteLineSuffix.set("#L")
         }
 

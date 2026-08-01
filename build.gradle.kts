@@ -88,11 +88,11 @@ val verifySigningKey =
 subprojects {
     version = rootProject.version
 
-    apply(plugin = "org.jlleitschuh.gradle.ktlint")
-
-    extensions.configure<org.jlleitschuh.gradle.ktlint.KtlintExtension>("ktlint") {
-        android.set(true)
-        ignoreFailures.set(false)
+    plugins.withId("org.jlleitschuh.gradle.ktlint") {
+        extensions.configure<org.jlleitschuh.gradle.ktlint.KtlintExtension>("ktlint") {
+            android.set(true)
+            ignoreFailures.set(false)
+        }
     }
 
     // Fail before any artifact is signed with an expired, revoked, invalid, or

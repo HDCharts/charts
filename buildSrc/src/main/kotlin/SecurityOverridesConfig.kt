@@ -5,16 +5,12 @@ import org.gradle.api.artifacts.VersionCatalog
 fun ConfigurationContainer.configureBuildscriptSecurityOverrides(versionCatalog: VersionCatalog) {
     val protobufSecurityVersion = versionCatalog.requiredVersion("protobuf-security")
     val jdomSecurityVersion = versionCatalog.requiredVersion("jdom-security")
-    val nettySecurityVersion = versionCatalog.requiredVersion("netty-codec-http2-security")
     val commonsLang3SecurityVersion = versionCatalog.requiredVersion("commons-lang3-security")
     val httpClientSecurityVersion = versionCatalog.requiredVersion("httpclient-security")
     val jose4jSecurityVersion = versionCatalog.requiredVersion("jose4j-security")
     val jacksonCoreSecurityVersion = versionCatalog.requiredVersion("jackson-core-security")
     val protobufOverride = SecurityOverrideRule(protobufSecurityVersion, SecurityOverrides.PROTOBUF_REASON)
     val jdomOverride = SecurityOverrideRule(jdomSecurityVersion, SecurityOverrides.JDOM_REASON)
-    val nettyHttp2Override = SecurityOverrideRule(nettySecurityVersion, SecurityOverrides.NETTY_HTTP2_REASON)
-    val nettyCodecOverride = SecurityOverrideRule(nettySecurityVersion, SecurityOverrides.NETTY_CODEC_REASON)
-    val nettyHttpOverride = SecurityOverrideRule(nettySecurityVersion, SecurityOverrides.NETTY_HTTP_REASON)
     val commonsLangOverride = SecurityOverrideRule(commonsLang3SecurityVersion, SecurityOverrides.COMMONS_LANG3_REASON)
     val httpClientOverride = SecurityOverrideRule(httpClientSecurityVersion, SecurityOverrides.HTTP_CLIENT_REASON)
     val jose4jOverride = SecurityOverrideRule(jose4jSecurityVersion, SecurityOverrides.JOSE4J_REASON)
@@ -27,18 +23,6 @@ fun ConfigurationContainer.configureBuildscriptSecurityOverrides(versionCatalog:
                 },
             )
             put(DependencyCoordinate(SecurityOverrides.JDOM_GROUP, SecurityOverrides.JDOM_ARTIFACT), jdomOverride)
-            put(
-                DependencyCoordinate(SecurityOverrides.NETTY_GROUP, SecurityOverrides.NETTY_HTTP2_ARTIFACT),
-                nettyHttp2Override,
-            )
-            put(
-                DependencyCoordinate(SecurityOverrides.NETTY_GROUP, SecurityOverrides.NETTY_CODEC_ARTIFACT),
-                nettyCodecOverride,
-            )
-            put(
-                DependencyCoordinate(SecurityOverrides.NETTY_GROUP, SecurityOverrides.NETTY_HTTP_ARTIFACT),
-                nettyHttpOverride,
-            )
             put(
                 DependencyCoordinate(SecurityOverrides.COMMONS_LANG_GROUP, SecurityOverrides.COMMONS_LANG3_ARTIFACT),
                 commonsLangOverride,
@@ -117,13 +101,11 @@ private data class SecurityOverrideRule(
 fun Project.configureJsSecurityOverrides(versionCatalog: VersionCatalog) {
     val serializeJavascriptSecurityVersion = versionCatalog.requiredVersion("serialize-javascript-security")
     val uuidSecurityVersion = versionCatalog.requiredVersion("uuid-security")
-    val webpackDevServerSecurityVersion = versionCatalog.requiredVersion("webpack-dev-server-security")
     val yarnRootExtension = resolveYarnRootExtension()
 
     // Keep Kotlin/JS transitive dependencies patched in kotlin-js-store/yarn.lock.
     yarnRootExtension.applyResolution("serialize-javascript", serializeJavascriptSecurityVersion)
     yarnRootExtension.applyResolution("uuid", uuidSecurityVersion)
-    yarnRootExtension.applyResolution("webpack-dev-server", webpackDevServerSecurityVersion)
 }
 
 private fun Project.resolveYarnRootExtension(): Any {

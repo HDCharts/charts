@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.composeScreenshot)
     alias(libs.plugins.ksp)
     alias(libs.plugins.composeGifRecorder)
+    alias(libs.plugins.ktlint)
 }
 
 val chartsDependencies = resolveChartsDependencyResolution()
@@ -60,9 +61,6 @@ val gifContentRoot =
 val protobufSecurityVersion =
     libs.versions.protobuf.security
         .get()
-val nettySecurityVersion =
-    libs.versions.netty.codec.http2.security
-        .get()
 val httpClientSecurityVersion =
     libs.versions.httpclient.security
         .get()
@@ -78,24 +76,6 @@ configurations.configureEach {
             ) {
                 useVersion(protobufSecurityVersion)
                 because(SecurityOverrides.PROTOBUF_REASON)
-            }
-            if (requested.group == SecurityOverrides.NETTY_GROUP &&
-                requested.name == SecurityOverrides.NETTY_HTTP2_ARTIFACT
-            ) {
-                useVersion(nettySecurityVersion)
-                because(SecurityOverrides.NETTY_HTTP2_REASON)
-            }
-            if (requested.group == SecurityOverrides.NETTY_GROUP &&
-                requested.name == SecurityOverrides.NETTY_CODEC_ARTIFACT
-            ) {
-                useVersion(nettySecurityVersion)
-                because(SecurityOverrides.NETTY_CODEC_REASON)
-            }
-            if (requested.group == SecurityOverrides.NETTY_GROUP &&
-                requested.name == SecurityOverrides.NETTY_HTTP_ARTIFACT
-            ) {
-                useVersion(nettySecurityVersion)
-                because(SecurityOverrides.NETTY_HTTP_REASON)
             }
             if (requested.group == SecurityOverrides.HTTP_COMPONENTS_GROUP &&
                 requested.name == SecurityOverrides.HTTP_CLIENT_ARTIFACT
@@ -115,12 +95,21 @@ configurations.configureEach {
 
 android {
     namespace = Config.DEMO_NAMESPACE
-    compileSdk = Config.COMPILE_SDK
+    compileSdk =
+        libs.versions.compile.sdk
+            .get()
+            .toInt()
 
     defaultConfig {
         applicationId = Config.DEMO_NAMESPACE
-        minSdk = Config.MIN_SDK
-        targetSdk = Config.TARGET_SDK
+        minSdk =
+            libs.versions.min.sdk
+                .get()
+                .toInt()
+        targetSdk =
+            libs.versions.target.sdk
+                .get()
+                .toInt()
         versionCode = Config.DEMO_VERSION_CODE
         versionName = Config.DEMO_VERSION_NAME
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
