@@ -42,8 +42,9 @@ the exact scope invoked by the reusable workflows. The `smoke-line` consumer
 compile belongs only to `ciCompile`, not to a test task.
 
 The reusable workflows receive `source-sha` from `Prepare PR`, so each check
-uses the same merge result even if a later PR event starts another run. Lint
-and test also receive the shared code-change decision from `Prepare PR`.
+uses the same merge result even if a later PR event starts another run. Every
+validation workflow also receives the shared code-change decision from
+`Prepare PR` and skips its job when the change is documentation-only.
 
 ## Merge protection
 
@@ -74,9 +75,9 @@ access and must not execute untrusted PR code.
 ## Docs-only changes
 
 `scripts/ci-has-code-changes.sh` treats documentation and release-note-only
-changes as non-code changes. Lint and test steps are skipped in that case, but
-the jobs still finish successfully. Assemble and compile continue to run as
-lightweight build checks.
+changes as non-code changes. `Prepare PR` still runs, while the assemble,
+compile, lint, test, and API compatibility jobs are skipped before their
+runners start. Their required checks report success as skipped jobs.
 
 ## Troubleshooting
 

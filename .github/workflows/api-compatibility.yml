@@ -8,6 +8,10 @@ on:
         description: Whether the pull request has the breaking-change label.
         required: true
         type: boolean
+      should-run:
+        description: Whether the pull request contains code or build changes.
+        required: true
+        type: boolean
       source-sha:
         description: Immutable merge revision being checked.
         required: true
@@ -19,6 +23,7 @@ permissions:
 jobs:
   api-compatibility:
     name: Compare Public API Against Release
+    if: ${{ inputs.should-run }}
     runs-on: ubuntu-latest
     env:
       HAS_BREAKING_LABEL: ${{ inputs.has-breaking-label }}
