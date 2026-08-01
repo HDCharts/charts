@@ -47,6 +47,7 @@ jobs:
     needs: prepare
     uses: ./.github/workflows/assemble.yml
     with:
+      should-run: ${{ needs.prepare.outputs.should_run == 'true' }}
       source-sha: ${{ needs.prepare.outputs.source_sha }}
 
   compile:
@@ -54,6 +55,7 @@ jobs:
     needs: prepare
     uses: ./.github/workflows/compile.yml
     with:
+      should-run: ${{ needs.prepare.outputs.should_run == 'true' }}
       source-sha: ${{ needs.prepare.outputs.source_sha }}
 
   lint:
@@ -78,4 +80,5 @@ jobs:
     uses: ./.github/workflows/api-compatibility.yml
     with:
       has-breaking-label: ${{ needs.prepare.outputs.has_breaking_label == 'true' }}
+      should-run: ${{ needs.prepare.outputs.should_run == 'true' }}
       source-sha: ${{ needs.prepare.outputs.source_sha }}

@@ -4,6 +4,10 @@ name: Assemble
 on:
   workflow_call:
     inputs:
+      should-run:
+        description: Whether the pull request contains code or build changes.
+        required: true
+        type: boolean
       source-sha:
         description: Immutable merge revision being checked.
         required: true
@@ -15,6 +19,7 @@ permissions:
 jobs:
   assemble:
     name: Assemble
+    if: ${{ inputs.should-run }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
