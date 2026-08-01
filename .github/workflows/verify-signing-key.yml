@@ -1,0 +1,21 @@
+name: Verify Signing Key
+
+on:
+  workflow_dispatch:
+
+jobs:
+  verify-signing-key:
+    name: Verify signing key
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
+      - name: Verify signing key is not expired
+        env:
+          SIGNING_IN_MEMORY_KEY: ${{ secrets.SIGNING_IN_MEMORY_KEY }}
+        run: |
+          set -euo pipefail
+          bash .github/scripts/verify-signing-key.sh

@@ -91,7 +91,7 @@ class ChartDataTest {
     @Test
     fun chartDataSet_stringFloatList_correctDataReturned() {
         // Arrange
-        val items = listOf("-1.0f", "2.0f", "3.0f")
+        val items = listOf("-1.0", "2.0", "3.0")
         val itemsType = ChartDataType.StringData(items)
 
         // Act

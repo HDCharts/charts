@@ -61,3 +61,7 @@ runs:
         write_env ORG_GRADLE_PROJECT_signingInMemoryKey "${SIGNING_IN_MEMORY_KEY}"
         write_env ORG_GRADLE_PROJECT_signingInMemoryKeyId "${SIGNING_KEY_ID}"
         write_env ORG_GRADLE_PROJECT_signingInMemoryKeyPassword "${SIGNING_PASSWORD}"
+        write_env ORG_GRADLE_PROJECT_mavenCentralPublishing "true"
+        write_env ORG_GRADLE_PROJECT_mavenCentralAutomaticPublishing "true"
+        write_env ORG_GRADLE_PROJECT_mavenCentralDeploymentValidation "PUBLISHED"
+        write_env ORG_GRADLE_PROJECT_signAllPublications "true"

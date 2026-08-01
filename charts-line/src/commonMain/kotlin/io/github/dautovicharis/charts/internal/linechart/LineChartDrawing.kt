@@ -10,6 +10,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipRect
 import io.github.dautovicharis.charts.internal.ANIMATION_TARGET
 import io.github.dautovicharis.charts.internal.NO_SELECTION
+import io.github.dautovicharis.charts.internal.common.bezier.cubicControlPointsForSegment
 import io.github.dautovicharis.charts.style.LineChartStyle
 import kotlinx.collections.immutable.ImmutableList
 

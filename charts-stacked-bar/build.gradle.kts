@@ -1,3 +1,6 @@
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidKotlinMultiplatformLibrary)
@@ -19,20 +22,28 @@ kotlin {
         namespace = Config.CHARTS_STACKED_BAR_NAMESPACE
         compileSdk = Config.COMPILE_SDK
         minSdk = Config.MIN_SDK
+        androidResources.enable = true
         compilerOptions {
             jvmTarget.set(
-                org.jetbrains.kotlin.gradle.dsl.JvmTarget
+                JvmTarget
                     .fromTarget(libs.versions.java.get()),
             )
+        }
+        withDeviceTestBuilder {
+            sourceSetTreeName = "test"
         }
     }
 
     iosArm64()
     iosSimulatorArm64()
 
-    js(IR) {
+    js {
         browser()
-        binaries.executable()
+    }
+
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmJs {
+        browser()
     }
 
     jvm()

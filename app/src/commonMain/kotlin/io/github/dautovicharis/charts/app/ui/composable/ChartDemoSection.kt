@@ -95,10 +95,8 @@ fun StyleDetailsTable(
     styleItems: StyleItems,
     modifier: Modifier = Modifier,
 ) {
-    val columnWeight = 0.5f
     StyleDetailsTableContent(
         items = styleItems.items,
-        columnWeight = columnWeight,
         modifier = modifier,
     )
 }
@@ -106,7 +104,6 @@ fun StyleDetailsTable(
 @Composable
 private fun StyleDetailsTableContent(
     items: List<StyleItem>,
-    columnWeight: Float,
     modifier: Modifier = Modifier,
 ) {
     val modifiedItems = items.filter { it.status == StyleItemStatus.Modified }
@@ -123,7 +120,7 @@ private fun StyleDetailsTableContent(
                 count = modifiedItems.size,
             )
             modifiedItems.forEach { item ->
-                StyleDetailsTableRow(item = item, columnWeight = columnWeight)
+                StyleDetailsTableRow(item = item)
             }
         }
 
@@ -133,7 +130,7 @@ private fun StyleDetailsTableContent(
                 count = defaultItems.size,
             )
             defaultItems.forEach { item ->
-                StyleDetailsTableRow(item = item, columnWeight = columnWeight)
+                StyleDetailsTableRow(item = item)
             }
         }
 
@@ -143,7 +140,7 @@ private fun StyleDetailsTableContent(
                 count = unusedItems.size,
             )
             unusedItems.forEach { item ->
-                StyleDetailsTableRow(item = item, columnWeight = columnWeight)
+                StyleDetailsTableRow(item = item)
             }
         }
     }
@@ -170,10 +167,7 @@ private fun StyleDetailsSectionTitle(
 }
 
 @Composable
-private fun StyleDetailsTableRow(
-    item: StyleItem,
-    columnWeight: Float,
-) {
+private fun StyleDetailsTableRow(item: StyleItem) {
     Column(
         Modifier
             .fillMaxWidth()
@@ -183,11 +177,10 @@ private fun StyleDetailsTableRow(
             ),
     ) {
         Row(modifier = Modifier.fillMaxWidth()) {
-            StyleDetailsTableCell(text = item.name, weight = columnWeight)
+            StyleDetailsTableCell(text = item.name)
             Spacer(modifier = Modifier.width(1.dp))
             StyleDetailsTableCell(
                 text = item.value,
-                weight = columnWeight,
                 color = item.color,
                 colorChips = item.colors,
             )
@@ -224,7 +217,6 @@ private fun StyleDetailsTableRow(
 @Composable
 private fun RowScope.StyleDetailsTableCell(
     text: String,
-    weight: Float,
     fontWeight: FontWeight = FontWeight.Normal,
     color: Color? = null,
     colorChips: List<Color> = emptyList(),
@@ -232,7 +224,7 @@ private fun RowScope.StyleDetailsTableCell(
     Column(
         modifier =
             Modifier
-                .weight(weight)
+                .weight(0.5f)
                 .padding(5.dp),
         verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {

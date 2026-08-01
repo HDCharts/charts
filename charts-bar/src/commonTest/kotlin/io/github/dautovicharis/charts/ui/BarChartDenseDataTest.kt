@@ -59,16 +59,16 @@ class BarChartDenseDataTest {
     fun barChart_smallDataset_tapUpdatesTitleWithLabelAndValue() =
         runComposeUiTest {
             setContent {
-                BarChart(dataSet = smallDataSet())
+                BarChart(
+                    dataSet = smallDataSet(),
+                    animateOnStart = false,
+                )
             }
 
-            val chartSize = onNodeWithTag(TestTags.BAR_CHART).fetchSemanticsNode().size
-            val chartBounds = onNodeWithTag(TestTags.BAR_CHART).fetchSemanticsNode().boundsInRoot
-            val yAxisBounds = onNodeWithTag(TestTags.BAR_CHART_Y_AXIS_LABELS).fetchSemanticsNode().boundsInRoot
-            val tapX = (yAxisBounds.right - chartBounds.left) + 20f
-            onNodeWithTag(TestTags.BAR_CHART).performTouchInput {
-                down(Offset(x = tapX, y = chartSize.height / 2f))
-                up()
+            val plot = onNodeWithTag(TestTags.BAR_CHART_PLOT)
+            val plotSize = plot.fetchSemanticsNode().size
+            plot.performTouchInput {
+                click(Offset(x = 20f, y = plotSize.height / 2f))
             }
 
             waitUntil(timeoutMillis = 3_000L) {
@@ -129,16 +129,16 @@ class BarChartDenseDataTest {
         runComposeUiTest {
             val dataSet = largeDataSet()
             setContent {
-                BarChart(dataSet = dataSet)
+                BarChart(
+                    dataSet = dataSet,
+                    animateOnStart = false,
+                )
             }
 
-            val chartSize = onNodeWithTag(TestTags.BAR_CHART).fetchSemanticsNode().size
-            val chartBounds = onNodeWithTag(TestTags.BAR_CHART).fetchSemanticsNode().boundsInRoot
-            val yAxisBounds = onNodeWithTag(TestTags.BAR_CHART_Y_AXIS_LABELS).fetchSemanticsNode().boundsInRoot
-            val tapX = (yAxisBounds.right - chartBounds.left) + 20f
-            onNodeWithTag(TestTags.BAR_CHART).performTouchInput {
-                down(Offset(x = tapX, y = chartSize.height / 2f))
-                up()
+            val plot = onNodeWithTag(TestTags.BAR_CHART_PLOT)
+            val plotSize = plot.fetchSemanticsNode().size
+            plot.performTouchInput {
+                click(Offset(x = 20f, y = plotSize.height / 2f))
             }
 
             waitUntil(timeoutMillis = 3_000L) {

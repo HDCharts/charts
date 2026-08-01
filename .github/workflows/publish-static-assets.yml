@@ -110,7 +110,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          ./gradlew generateJsDemo -PchartsReleaseVersion="${{ inputs.charts-version }}" --no-daemon --stacktrace --build-cache
+          ./gradlew generateWebDemo -PchartsReleaseVersion="${{ inputs.charts-version }}" --no-daemon --stacktrace --build-cache
       - name: Validate demo
         shell: bash
         run: |
@@ -168,7 +168,7 @@ jobs:
           set -euo pipefail
           PUBLISHED_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
           PLAYGROUND_SHA="$(git rev-parse HEAD)"
-          ./gradlew -DchartsLocalPath=.. :playground:jsBrowserDevelopmentExecutableDistribution \
+          ./gradlew -DchartsLocalPath=.. :playground:wasmJsBrowserDistribution \
             -PsnapshotMetadataChartsSha="${SOURCE_SHA}" \
             -PsnapshotMetadataPlaygroundSha="${PLAYGROUND_SHA}" \
             -PsnapshotMetadataChartsVersion="${CHARTS_VERSION}" \
@@ -180,8 +180,8 @@ jobs:
         run: |
           set -euo pipefail
           required_files=(
-            playground/build/dist/js/developmentExecutable/index.html
-            playground/build/dist/js/developmentExecutable/Playground.js
+            playground/build/dist/wasmJs/productionExecutable/index.html
+            playground/build/dist/wasmJs/productionExecutable/Playground.js
           )
           for file in "${required_files[@]}"; do
             if [[ ! -f "${file}" ]]; then
@@ -200,7 +200,7 @@ jobs:
           CHARTS_VERSION: ${{ inputs.charts-version }}
           SOURCE_SHA: ${{ inputs.source-sha }}
           DOCS_STATIC_BUCKET: ${{ vars.DOCS_STATIC_BUCKET }}
-          PLAYGROUND_DIST_DIR: playground/build/dist/js/developmentExecutable
+          PLAYGROUND_DIST_DIR: playground/build/dist/wasmJs/productionExecutable
         shell: bash
         run: bash ../.github/scripts/publish-docs-to-s3.sh snapshot playground
 

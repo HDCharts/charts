@@ -1,4 +1,6 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
 
 plugins {
@@ -26,7 +28,7 @@ kotlin {
         }
         compilerOptions {
             jvmTarget.set(
-                org.jetbrains.kotlin.gradle.dsl.JvmTarget
+                JvmTarget
                     .fromTarget(libs.versions.java.get()),
             )
         }
@@ -40,7 +42,8 @@ kotlin {
             isStatic = true
         }
     }
-    js(IR) {
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmJs {
         browser {
             commonWebpackConfig {
                 outputFileName = "Charts.js"
