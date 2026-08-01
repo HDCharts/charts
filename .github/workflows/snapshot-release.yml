@@ -106,7 +106,7 @@ jobs:
           fetch-depth: 0
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v5.6.0
         with:
           java-version: 17
           distribution: 'zulu'
@@ -217,7 +217,7 @@ jobs:
           fetch-depth: 0
           ref: ${{ needs.prepare-snapshot.outputs.source_sha }}
       - name: Set up JDK 17
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v5.6.0
         with:
           java-version: 17
           distribution: zulu

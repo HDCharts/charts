@@ -50,7 +50,7 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ inputs.source-ref }}
-      - uses: actions/setup-java@v5
+      - uses: actions/setup-java@v5.6.0
         with:
           java-version: 17
           distribution: zulu
@@ -97,7 +97,7 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ inputs.source-ref }}
-      - uses: actions/setup-java@v5
+      - uses: actions/setup-java@v5.6.0
         with:
           java-version: 17
           distribution: zulu
@@ -153,7 +153,7 @@ jobs:
           ref: main
           path: playground-repo
           fetch-depth: 1
-      - uses: actions/setup-java@v5
+      - uses: actions/setup-java@v5.6.0
         with:
           java-version: 17
           distribution: zulu
