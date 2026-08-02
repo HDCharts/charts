@@ -9,6 +9,7 @@ plugins {
     signing
     alias(libs.plugins.mavenPublish)
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.ktlint)
 }
 
 kotlin {
@@ -20,8 +21,14 @@ kotlin {
 
     android {
         namespace = Config.CHARTS_PIE_NAMESPACE
-        compileSdk = Config.COMPILE_SDK
-        minSdk = Config.MIN_SDK
+        compileSdk =
+            libs.versions.compile.sdk
+                .get()
+                .toInt()
+        minSdk =
+            libs.versions.min.sdk
+                .get()
+                .toInt()
         androidResources.enable = true
         compilerOptions {
             jvmTarget.set(

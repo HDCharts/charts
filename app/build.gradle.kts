@@ -9,6 +9,7 @@ plugins {
     alias(libs.plugins.jetbrainsCompose)
     alias(libs.plugins.build.config)
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.ktlint)
 }
 
 val chartsDependencies = resolveChartsDependencyResolution()
@@ -21,8 +22,14 @@ kotlin {
     )
     android {
         namespace = Config.DEMO_LIBRARY_NAMESPACE
-        compileSdk = Config.COMPILE_SDK
-        minSdk = Config.MIN_SDK
+        compileSdk =
+            libs.versions.compile.sdk
+                .get()
+                .toInt()
+        minSdk =
+            libs.versions.min.sdk
+                .get()
+                .toInt()
         androidResources {
             enable = true
         }

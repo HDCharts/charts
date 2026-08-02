@@ -2,6 +2,11 @@
 # Java version
 java = "17"
 
+# Android SDK versions
+compile-sdk = "37"
+min-sdk = "24"
+target-sdk = "37"
+
 # Android gradle plugin version
 agp = "9.3.1"
 
@@ -30,23 +35,16 @@ compose-gif-recorder = "0.1.2"
 protobuf-security = "3.25.5"
 # https://www.cve.org/CVERecord?id=CVE-2021-33813
 jdom-security = "2.0.6.1"
-# https://www.cve.org/CVERecord?id=CVE-2025-55163
-# https://www.cve.org/CVERecord?id=CVE-2025-58057
-# https://www.cve.org/CVERecord?id=CVE-2025-67735
-netty-codec-http2-security = "4.1.129.Final"
 # https://www.cve.org/CVERecord?id=CVE-2025-48924
 commons-lang3-security = "3.18.0"
-# https://www.cve.org/CVERecord?id=CVE-2025-11226
-logback-core-security = "1.3.16"
+# https://github.com/advisories/GHSA-qqpg-mvqg-649v
+logback-core-security = "1.5.25"
 # https://www.cve.org/CVERecord?id=CVE-2020-13956
 httpclient-security = "4.5.14"
 # https://github.com/advisories/GHSA-qj8w-gfj5-8c6v
 serialize-javascript-security = "7.0.7"
 # https://github.com/advisories/GHSA-w5hq-g745-h8pq
 uuid-security = "11.1.1"
-# https://github.com/advisories/GHSA-79cf-xcqc-c78w
-# https://github.com/advisories/GHSA-mx8g-39q3-5c79
-webpack-dev-server-security = "5.2.6"
 # https://www.cve.org/CVERecord?id=CVE-2024-29371
 jose4j-security = "0.9.6"
 # https://github.com/advisories/GHSA-72hv-8253-57qq

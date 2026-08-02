@@ -3,6 +3,7 @@ plugins {
     `maven-publish`
     signing
     alias(libs.plugins.mavenPublish)
+    alias(libs.plugins.ktlint)
 }
 
 javaPlatform {
