@@ -123,6 +123,16 @@ jobs:
               exit 1
             fi
           fi
+      - name: Require matching snapshot provenance
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.release_version }}
+          SOURCE_SHA: ${{ steps.source.outputs.source_sha }}
+        shell: bash
+        run: |
+          bash .github/scripts/validate-snapshot-provenance.sh \
+            charts-docs-repo/docs-app/public/snapshot-manifest.json \
+            "$RELEASE_VERSION" \
+            "$SOURCE_SHA"
 
   approve-release:
     name: Approve Release

@@ -12,6 +12,11 @@ val isSnapshotMode = chartsDependencyMode == "snapshot"
 pluginManagement {
     repositories {
         google()
+        maven(url = uri("https://central.sonatype.com/repository/maven-snapshots/")) {
+            mavenContent {
+                snapshotsOnly()
+            }
+        }
         gradlePluginPortal()
         mavenCentral()
     }
@@ -43,6 +48,11 @@ buildscript {
 dependencyResolutionManagement {
     repositories {
         google()
+        maven(url = uri("https://central.sonatype.com/repository/maven-snapshots/")) {
+            mavenContent {
+                snapshotsOnly()
+            }
+        }
         mavenCentral()
         if (isSnapshotMode) {
             exclusiveContent {
