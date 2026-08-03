@@ -17,6 +17,14 @@ permissions:
   contents: read
 
 jobs:
+  skipped:
+    name: Skipped (no code changes)
+    if: ${{ !inputs.should-run }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Report skipped compile
+        run: echo 'No code changes require the compile check.'
+
   compile:
     name: Compile
     if: ${{ inputs.should-run }}

@@ -1,0 +1,57 @@
+# Coordinates opt-in GIF baseline validation for pull requests.
+name: Pull Request GIF Validation
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: >-
+    ${{
+      (
+        github.event.action == 'opened' ||
+        github.event.action == 'synchronize' ||
+        github.event.action == 'reopened' ||
+        (
+          github.event.action == 'labeled' &&
+          github.event.label.name == 'run-gif-validation'
+        ) ||
+        (
+          github.event.action == 'unlabeled' &&
+          github.event.label.name == 'run-gif-validation'
+        )
+      ) &&
+      format('pr-gif-{0}', github.event.pull_request.number) ||
+      format('pr-gif-ignored-{0}', github.run_id)
+    }}
+  cancel-in-progress: true
+
+jobs:
+  gif-validation:
+    # Optional: keep this out of the required-status-check ruleset.
+    name: PR GIF Baseline Validation
+    if: >-
+      ${{
+        (
+          (
+            github.event.action == 'opened' ||
+            github.event.action == 'synchronize' ||
+            github.event.action == 'reopened'
+          ) &&
+          contains(github.event.pull_request.labels.*.name, 'run-gif-validation')
+        ) ||
+        (
+          github.event.action == 'labeled' &&
+          github.event.label.name == 'run-gif-validation' &&
+          contains(github.event.pull_request.labels.*.name, 'run-gif-validation')
+        )
+      }}
+    uses: ./.github/workflows/validate-gifs.yml
+    with:
+      should-run: true
+      source-sha: ${{ github.sha }}

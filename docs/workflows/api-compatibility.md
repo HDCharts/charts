@@ -1,25 +1,35 @@
 # API Compatibility
 
 Workflows:
-- `API Compatibility` — `charts/.github/workflows/api-compatibility.yml`
+- `Pull Request API Compatibility` — `charts/.github/workflows/pull-request-api.yml` (pull-request orchestration)
+- `API Compatibility` — `charts/.github/workflows/api-compatibility.yml` (reusable compatibility check)
 - `Set API Baseline` — `charts/.github/workflows/set-api-baseline.yml` (post-merge baseline update)
 
 ## PR Compatibility Flow
 
 ```mermaid
 flowchart TD
-  A["Contributor opens or updates PR to main"] --> B["Run API Compatibility (charts/.github/workflows/api-compatibility.yml)"]
-  B --> C{"Breaking API change detected?"}
-  C -- No --> D["Pass: API remains compatible"]
-  C -- Yes --> E{"PR has breaking-change label?"}
-  E -- No --> F["Fail: add label or restore compatibility"]
-  E -- Yes --> G["Pass: breaking change is explicitly acknowledged"]
+  A["PR opened, synchronized, or reopened"] --> B["Pull Request API Compatibility"]
+  L["breaking-change label added or removed"] --> B
+  B --> C["Run API Compatibility when required"]
+  C --> D{"Breaking API change detected?"}
+  D -- No --> E["Pass: API remains compatible"]
+  D -- Yes --> F{"PR has breaking-change label?"}
+  F -- No --> G["Fail: add breaking-change label or restore compatibility"]
+  F -- Yes --> H["Pass: breaking change is explicitly acknowledged"]
 
-  F --> B
+  G --> B
 ```
 
-If a breaking change is acknowledged and merged, the post-merge baseline update
-flow below runs automatically.
+The `Pull Request API Compatibility` workflow runs for the `opened`,
+`synchronize`, and `reopened` pull-request actions. It also runs when the
+`breaking-change` label is added or removed. Events for other labels do not
+allocate an API runner. The reusable `API Compatibility` workflow runs the
+Gradle check when the pull request contains code/build changes or when a
+`breaking-change` label event forces the check.
+
+If a breaking change is acknowledged with the `breaking-change` label and
+merged, the post-merge baseline update flow below runs automatically.
 
 ## Release Audit Flow
 
@@ -45,7 +55,7 @@ Example for a `2.3.0` release whose previous release is `2.2.0`:
 
 ```mermaid
 flowchart TD
-  A["Breaking-change PR is merged to main"] --> B["Set API Baseline runs automatically"]
+  A["PR with the breaking-change label is merged to main"] --> B["Set API Baseline runs automatically"]
   B --> C["Use the merge commit as the immutable baseline"]
   C --> D["Workflow creates baseline-update PR"]
   D --> E["Review and merge baseline-update PR"]

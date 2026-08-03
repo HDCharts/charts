@@ -1,0 +1,102 @@
+# Coordinates public API compatibility checks for pull requests.
+name: Pull Request API Compatibility
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: >-
+    ${{
+      (
+        github.event.action == 'opened' ||
+        github.event.action == 'synchronize' ||
+        github.event.action == 'reopened' ||
+        (
+          (github.event.action == 'labeled' || github.event.action == 'unlabeled') &&
+          github.event.label.name == 'breaking-change'
+        )
+      ) &&
+      format('pr-api-{0}', github.event.pull_request.number) ||
+      format('pr-api-ignored-{0}', github.run_id)
+    }}
+  cancel-in-progress: true
+
+jobs:
+  prepare-api:
+    name: Prepare API Compatibility
+    if: >-
+      ${{
+        github.event.action == 'opened' ||
+        github.event.action == 'synchronize' ||
+        github.event.action == 'reopened' ||
+        (
+          (github.event.action == 'labeled' || github.event.action == 'unlabeled') &&
+          github.event.label.name == 'breaking-change'
+        )
+      }}
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.changes.outputs.should_run }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Detect code changes
+        id: changes
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          should_run="$(bash scripts/ci-has-code-changes.sh "$BASE_SHA" "$HEAD_SHA")"
+          echo "should_run=$should_run" >> "$GITHUB_OUTPUT"
+
+  api-compatibility:
+    name: Internal API Compatibility
+    needs: prepare-api
+    uses: ./.github/workflows/api-compatibility.yml
+    with:
+      has-breaking-label: ${{ contains(github.event.pull_request.labels.*.name, 'breaking-change') }}
+      should-run: >-
+        ${{
+          needs.prepare-api.outputs.should_run == 'true' ||
+          (
+            (github.event.action == 'labeled' || github.event.action == 'unlabeled') &&
+            github.event.label.name == 'breaking-change'
+          )
+        }}
+      source-sha: ${{ github.sha }}
+
+  api-result:
+    name: >-
+      ${{
+          needs.prepare-api.result != 'skipped' &&
+          'PR API Compatibility' ||
+          'API compatibility not requested'
+      }}
+    if: ${{ always() && needs.prepare-api.result != 'skipped' }}
+    needs:
+      - prepare-api
+      - api-compatibility
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify API compatibility
+        env:
+          PREPARE_RESULT: ${{ needs.prepare-api.result }}
+          API_RESULT: ${{ needs.api-compatibility.result }}
+        run: |
+          for result in \
+            "$PREPARE_RESULT" \
+            "$API_RESULT"
+          do
+            if [ "$result" != "success" ]; then
+              echo "A required API check did not succeed: $result"
+              exit 1
+            fi
+          done

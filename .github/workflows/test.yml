@@ -17,6 +17,14 @@ permissions:
   contents: read
 
 jobs:
+  skipped:
+    name: Skipped (no code changes)
+    if: ${{ !inputs.should-run }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Report skipped tests
+        run: echo 'No code changes require the test suite.'
+
   jvm-tests:
     name: JVM Tests
     if: ${{ inputs.should-run }}
@@ -150,4 +158,3 @@ jobs:
           path: |
             **/build/reports/iosSimulatorArm64Test/**
             **/build/test-results/iosSimulatorArm64Test/**
-

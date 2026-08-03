@@ -21,6 +21,14 @@ permissions:
   contents: read
 
 jobs:
+  skipped:
+    name: Skipped (no code changes)
+    if: ${{ !inputs.should-run }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Report skipped API compatibility
+        run: echo 'No code changes require the API compatibility check.'
+
   api-compatibility:
     name: Compare Public API Against Release
     if: ${{ inputs.should-run }}
