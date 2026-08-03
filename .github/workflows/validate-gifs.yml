@@ -8,7 +8,7 @@ on:
   workflow_call:
     inputs:
       should-run:
-        description: Whether the pull request can change rendered GIF output.
+        description: Whether the pull request has explicitly requested GIF validation.
         required: true
         type: boolean
       source-sha:
