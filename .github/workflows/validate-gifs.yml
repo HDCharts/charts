@@ -1,0 +1,111 @@
+# Reusable workflow that validates the committed Charts GIF baselines.
+#
+# Generated GIFs and the comparison report are uploaded for manual review. This
+# workflow never modifies the pull request or repository contents.
+name: GIF Baseline Validation
+
+on:
+  workflow_call:
+    inputs:
+      should-run:
+        description: Whether the pull request can change rendered GIF output.
+        required: true
+        type: boolean
+      source-sha:
+        description: Immutable revision being checked.
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate GIF baselines
+    if: ${{ inputs.should-run }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      FFMPEG_VERSION: 6.1.1
+      GIFSICLE_VERSION: 1.94
+      GIF_OUTPUT_DIR: build/gif-validation/gifs
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
+          ref: ${{ inputs.source-sha }}
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5.6.0
+        with:
+          java-version: 17
+          distribution: zulu
+          cache: gradle
+
+      - name: Enable KVM for the Android emulator
+        run: |
+          echo 'KERNEL=="kvm", MODE="0666", GROUP="kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Install GIF tools
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install --yes ffmpeg gifsicle
+          ffmpeg -version | sed -n '1p' | grep -F "ffmpeg version ${FFMPEG_VERSION}"
+          gifsicle --version | grep -F "LCDF Gifsicle ${GIFSICLE_VERSION}"
+
+      - name: Clear generated GIF outputs
+        run: |
+          rm -rf "$GIF_OUTPUT_DIR"
+          mkdir -p "$GIF_OUTPUT_DIR"
+
+      - name: Validate GIF baselines on Android emulator
+        uses: reactivecircus/android-emulator-runner@v2.38.0
+        with:
+          # Keep the device API below compile/target SDK to exercise the
+          # recorder on a supported older Android runtime.
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: Nexus 6
+          emulator-options: -no-window -no-audio -gpu swiftshader_indirect -no-snapshot
+          script: ./gradlew validateDocsGifBaselines -PgifOutputDir="$GIF_OUTPUT_DIR" --no-daemon --stacktrace
+
+      - name: Report GIF baseline mismatches
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          report="androidApp/build/reports/gif-validation/summary.txt"
+          if [[ ! -f "$report" ]]; then
+            echo "::warning title=GIF validation report missing::No GIF validation summary was produced at $report"
+            exit 0
+          fi
+
+          {
+            echo "### GIF baseline validation"
+            echo
+            cat "$report"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          while IFS= read -r line; do
+            [[ "$line" == "- "* ]] || continue
+            mismatch="${line#- }"
+            file="${mismatch%%:*}"
+            reason="${mismatch#*: }"
+            echo "::error file=gif-baselines/$file,title=GIF baseline mismatch::$reason"
+          done < "$report"
+
+      - name: Upload GIF validation artifacts
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: gif-validation-${{ github.run_id }}
+          path: |
+            build/gif-validation/gifs/*.gif
+            androidApp/build/reports/gif-validation/**
+          if-no-files-found: warn
+          retention-days: 14

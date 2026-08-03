@@ -295,6 +295,12 @@ tasks.register("recordDocsGifs") {
     dependsOn(":androidApp:recordGifsDebug")
 }
 
+tasks.register("validateDocsGifBaselines") {
+    group = "Charts"
+    description = "Validates Android docs GIF output against gif-baselines"
+    dependsOn(":androidApp:validateGifBaselines")
+}
+
 // CI entry points for reusable workflows.
 // The `chartsTest*` tasks are platform-specific commands for local use.
 // The `ciTest*`, `ciCompile`, and `ciAssemble` tasks are CI entry points;

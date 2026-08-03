@@ -21,6 +21,7 @@ jobs:
     outputs:
       source_sha: ${{ github.sha }}
       should_run: ${{ steps.changes.outputs.should_run }}
+      should_run_gif_validation: ${{ steps.changes.outputs.should_run_gif_validation }}
       has_breaking_label: ${{ steps.metadata.outputs.has_breaking_label }}
     steps:
       - uses: actions/checkout@v7
@@ -35,6 +36,11 @@ jobs:
         run: |
           should_run="$(bash scripts/ci-has-code-changes.sh "$BASE_SHA" "$HEAD_SHA")"
           echo "should_run=$should_run" >> "$GITHUB_OUTPUT"
+          bash scripts/ci-should-run-gif-validation.sh --self-test
+          bash .github/scripts/sync-gif-baselines.sh --self-test
+          bash .github/scripts/validate-snapshot-provenance.sh --self-test
+          should_run_gif_validation="$(bash scripts/ci-should-run-gif-validation.sh "$BASE_SHA" "$HEAD_SHA")"
+          echo "should_run_gif_validation=$should_run_gif_validation" >> "$GITHUB_OUTPUT"
 
       - name: Capture PR metadata
         id: metadata
@@ -81,4 +87,12 @@ jobs:
     with:
       has-breaking-label: ${{ needs.prepare.outputs.has_breaking_label == 'true' }}
       should-run: ${{ needs.prepare.outputs.should_run == 'true' }}
+      source-sha: ${{ needs.prepare.outputs.source_sha }}
+
+  gif-validation:
+    name: PR GIF Baseline Validation
+    needs: prepare
+    uses: ./.github/workflows/validate-gifs.yml
+    with:
+      should-run: ${{ needs.prepare.outputs.should_run_gif_validation == 'true' }}
       source-sha: ${{ needs.prepare.outputs.source_sha }}

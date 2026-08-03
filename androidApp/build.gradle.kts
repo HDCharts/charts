@@ -58,6 +58,15 @@ val gifContentRoot =
             if (migratedDocsContent.exists()) "../charts-docs/content" else "docs/content"
         },
     )
+val gifOutputDir = providers.gradleProperty("gifOutputDir")
+val compileSdkVersion =
+    libs.versions.compile.sdk
+        .get()
+        .toInt()
+val compileSdkMinorApiLevel =
+    libs.versions.android.compile.sdk.minor
+        .get()
+        .toInt()
 val protobufSecurityVersion =
     libs.versions.protobuf.security
         .get()
@@ -95,10 +104,12 @@ configurations.configureEach {
 
 android {
     namespace = Config.DEMO_NAMESPACE
-    compileSdk =
-        libs.versions.compile.sdk
-            .get()
-            .toInt()
+    compileSdk {
+        version =
+            release(compileSdkVersion) {
+                minorApiLevel = compileSdkMinorApiLevel
+            }
+    }
 
     defaultConfig {
         applicationId = Config.DEMO_NAMESPACE
@@ -168,10 +179,15 @@ android {
 gifRecorder {
     applicationId.set(Config.DEMO_NAMESPACE)
     outputDir.set(
-        gifContentRoot.zip(gifDocsVersion) { contentRoot, docsVersion ->
-            rootProject.layout.projectDirectory.dir("$contentRoot/$docsVersion/wiki/assets")
-        },
+        gifOutputDir
+            .map { outputDir -> rootProject.layout.projectDirectory.dir(outputDir) }
+            .orElse(
+                gifContentRoot.zip(gifDocsVersion) { contentRoot, docsVersion ->
+                    rootProject.layout.projectDirectory.dir("$contentRoot/$docsVersion/wiki/assets")
+                },
+            ),
     )
+    baselineDir.set(rootProject.layout.projectDirectory.dir("gif-baselines"))
 }
 
 dependencies {

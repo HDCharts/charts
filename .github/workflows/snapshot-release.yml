@@ -153,7 +153,7 @@ jobs:
           fi
 
   sync-release-notes:
-    name: Sync snapshot release notes
+    name: Sync snapshot release notes and GIF baselines
     needs: prepare-snapshot
     if: ${{ needs.prepare-snapshot.outputs.is_snapshot == 'true' }}
     runs-on: ubuntu-latest
@@ -176,6 +176,19 @@ jobs:
         env:
           ALLOW_MISSING_RELEASE_NOTES: "true"
         run: bash .github/scripts/sync-release-notes.sh charts-docs-repo "${{ needs.prepare-snapshot.outputs.release_notes_version }}"
+      - name: Sync snapshot GIF baselines
+        run: bash .github/scripts/sync-gif-baselines.sh charts-docs-repo
+      - name: Write snapshot provenance
+        env:
+          SNAPSHOT_VERSION: ${{ needs.prepare-snapshot.outputs.snapshot_version }}
+          SOURCE_SHA: ${{ needs.prepare-snapshot.outputs.source_sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p charts-docs-repo/docs-app/public
+          printf '{"source_sha":"%s","charts_version":"%s"}\n' \
+            "$SOURCE_SHA" "$SNAPSHOT_VERSION" \
+            > charts-docs-repo/docs-app/public/snapshot-manifest.json
       - name: Commit and push charts-docs main
         working-directory: charts-docs-repo
         shell: bash
@@ -183,11 +196,11 @@ jobs:
           set -euo pipefail
           git config user.name "charts-release-bot"
           git config user.email "charts-release-bot@users.noreply.github.com"
-          git add release-notes
+          git add release-notes content/snapshot/wiki/assets docs-app/public/snapshot-manifest.json
           if git diff --cached --quiet; then
-            echo "Snapshot release notes are already current."
+            echo "Snapshot release notes, GIF baselines, and provenance are already current."
           else
-            git commit -m "docs(snapshot): sync ${{ needs.prepare-snapshot.outputs.release_notes_version }} notes"
+            git commit -m "docs(snapshot): sync release notes, GIF baselines, and provenance"
             git push origin HEAD:main
           fi
 
