@@ -28,6 +28,12 @@ allocate an API runner. The reusable `API Compatibility` workflow runs the
 Gradle check when the pull request contains code/build changes or when a
 `breaking-change` label event forces the check.
 
+The reusable workflow exposes both the real compatibility job and a
+`Docs-only no-op` job. GitHub displays the inactive job as
+skipped even when the real compatibility job is running. That row is only the
+unselected alternative; it does not mean that this pull request lacks code
+changes.
+
 If a breaking change is acknowledged with the `breaking-change` label and
 merged, the post-merge baseline update flow below runs automatically.
 

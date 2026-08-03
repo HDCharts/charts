@@ -18,11 +18,11 @@ permissions:
 
 jobs:
   skipped:
-    name: Skipped (no code changes)
+    name: Docs-only no-op
     if: ${{ !inputs.should-run }}
     runs-on: ubuntu-latest
     steps:
-      - name: Report skipped compile
+      - name: Report docs-only no-op
         run: echo 'No code changes require the compile check.'
 
   compile:

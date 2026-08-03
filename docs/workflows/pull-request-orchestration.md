@@ -117,6 +117,29 @@ core and API reusable workflows take their successful no-op paths. A
 compatibility even for a docs-only pull request. Events for other labels skip
 API preparation and do not allocate an API runner.
 
+## Reusable workflow status display
+
+The reusable core and API workflows define two mutually exclusive paths for
+some checks:
+
+- the real validation job, such as `Assemble` or `Compare Public API Against
+  Release`;
+- an explicit docs-only no-op job named `Docs-only no-op`.
+
+GitHub displays both job definitions in the run, even though only one path is
+selected. Therefore, a code-changing pull request can show
+`Docs-only no-op` while the real validation job is running and
+passing. That skipped row is the inactive alternative; it does not mean that
+the pull request had no code changes and is not an additional required check.
+
+For a docs-only pull request, the no-op job succeeds and the real validation
+job is skipped. The aggregate `PR Core Checks` and `PR API Compatibility` jobs
+then verify the result of the selected path.
+
+The optional `PR GIF Baseline Validation` job is different: when it is skipped,
+the `run-gif-validation` label was not present and GIF validation was not
+requested.
+
 ## Troubleshooting
 
 - **The PR cannot merge:** inspect the required status-check names in the
