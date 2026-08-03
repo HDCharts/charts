@@ -1,73 +1,108 @@
 # Pull Request Orchestration
 
-The pull-request CI is coordinated by
-`.github/workflows/pull-request.yml`. It runs all PR checks against the same
-immutable merge revision.
+Pull-request CI is split into three independently triggered workflows: core
+checks, API compatibility, and optional GIF validation. Core checks and API
+compatibility use separate concurrency groups so events for one label cannot
+cancel unrelated work. Each workflow uses the immutable `github.sha` for the
+pull-request event that started it.
+
+## Labels
+
+- `breaking-change` marks an intentional public API incompatibility. Adding or
+  removing this label runs API compatibility, even when the pull request only
+  changes documentation or release notes. The label does not start or cancel
+  core checks.
+- `run-gif-validation` opts a pull request into GIF baseline validation. The
+  validation runs for normal pull-request events while this label is present,
+  starts when the label is added, and is cancelled when the label is removed.
+  It is informational and is not a required status check.
 
 ## Flow
 
 ```mermaid
 flowchart TD
-  A["PR opened, updated, reopened, or relabeled"] --> B["Prepare PR"]
-  B --> C["Assemble"]
-  B --> D["Compile"]
-  B --> E["Lint"]
-  B --> F["Test"]
-  B --> G["Compare Public API Against Release"]
-  C --> H["Pull Request workflow completes"]
-  D --> H
-  E --> H
-  F --> H
-  G --> H
+  A["PR opened, synchronized, or reopened"] --> B["Core workflow"]
+  B --> C["Assemble, Compile, Lint, Test"]
+  C --> D["PR Core Checks"]
+  A --> E["API workflow"]
+  E --> F["API compatibility"]
+  F --> G["PR API Compatibility"]
+  A --> H{"run-gif-validation label present?"}
+  H -- Yes --> I["GIF validation"]
 ```
 
-`Assemble`, `Compile`, `Lint`, `Test`, and API compatibility run in parallel
-after `Prepare PR`. The parent workflow completes only after all of them have
-finished, and its result reflects any failed, cancelled, or skipped job.
+The core workflow runs only for the `opened`, `synchronize`, and `reopened`
+pull-request actions. Its `PR Core Checks` gate fails if preparation or any
+dependent core check fails or is cancelled. Documentation-only changes still
+use the reusable workflows' successful no-op path.
+
+The API workflow listens for the same three pull-request actions plus
+`labeled` and `unlabeled`. For label actions, only an event for the
+`breaking-change` label is relevant. Events for other labels skip `Prepare API
+Compatibility` before a runner is allocated. The API result gate derives its
+required name and execution eligibility from that preparation result rather
+than repeating the event expression.
+
+The GIF workflow is optional. It runs on the three normal pull-request actions
+only when the `run-gif-validation` label is present, or when that label is
+added. Its `pr-gif-<PR number>` concurrency group cancels an active validation
+when the `run-gif-validation` label is removed; the removal event itself does
+not start a new validation.
 
 ## Workflow responsibilities
 
 | Workflow or job | Responsibility |
 | --- | --- |
-| `Prepare PR` | Checks out the repository, detects code changes, records the merge revision, and reads the `breaking-change` label. |
+| `Prepare PR` | Checks out the repository, detects code changes, and records the merge revision for core checks. |
 | `Assemble` | Runs `./gradlew ciAssemble`. |
 | `Compile` | Runs `./gradlew ciCompile`. |
 | `Lint` | Runs Kotlin and build-logic lint when the PR contains code/build changes. |
 | `Test` | Runs `ciTestJvm`, `ciTestAndroid`, `ciTestWeb`, and `ciTestIos` when needed; uploads Gradle's native HTML and XML reports. |
-| `Compare Public API Against Release` | Runs `./gradlew apiCompatibilityCheck`; a detected breaking change requires the `breaking-change` label. |
+| `Prepare API Compatibility` | Routes normal pull-request actions and changes to the `breaking-change` label, detects code changes, and prevents events for other labels from allocating a runner. |
+| `API compatibility` | Runs `./gradlew apiCompatibilityCheck`; a detected public API incompatibility requires the `breaking-change` label. |
+| `GIF validation` | Runs the opt-in GIF baseline workflow while the `run-gif-validation` label is present. |
 
 Gradle's `chartsTest*` tasks are platform-specific commands for local use. The
 `ciTest*`, `ciCompile`, and `ciAssemble` tasks are CI entry points; they define
 the exact scope invoked by the reusable workflows. The `smoke-line` consumer
 compile belongs only to `ciCompile`, not to a test task.
 
-The reusable workflows receive `source-sha` from `Prepare PR`, so each check
-uses the same merge result even if a later PR event starts another run. Every
-validation workflow also receives the shared code-change decision from
-`Prepare PR` and skips its job when the change is documentation-only.
+The core reusable workflows receive `source-sha` from `Prepare PR`. API and
+GIF validation receive the triggering event's `github.sha`, so each check uses
+the immutable merge result for that event. Core and API workflows retain their
+code-change optimization, while changes to the `breaking-change` label force
+API compatibility even when no code change is detected.
+
+The repeated API event condition is intentional in only these places:
+
+- `concurrency.group`: relevant API events share `pr-api-<PR number>` and
+  events for other labels receive an isolated group.
+- `prepare-api.if`: events for other labels do not allocate an API runner.
+- the `api-compatibility` reusable-workflow `should-run` input: adding or
+  removing `breaking-change` forces the compatibility check.
+
+Downstream API jobs use `needs.prepare-api.result` instead of repeating the
+event condition.
 
 ## Merge protection
 
-The `protect main` branch ruleset should require the validation checks:
+The `protect main` branch ruleset requires only these stable final gates:
 
 ```text
-PR Assemble / Assemble
-PR Compile / Compile
-PR Lint / Lint
-PR Test / JVM Tests
-PR Test / Android Tests
-PR Test / Wasm Tests
-PR Test / iOS Tests
-PR Compare Public API Against Release / Compare Public API Against Release
+PR Core Checks
+PR API Compatibility
 ```
 
-These checks directly represent the work that protects the branch. Reporting
-and artifact publication are informational and must not be merge gates.
+Do not require `Prepare PR`, `Prepare API Compatibility`, individual
+implementation jobs, or `PR GIF Baseline Validation`; GIF validation is
+optional. Rulesets match status-check contexts literally, so keep the required
+names exactly as shown above.
 
 ## Fork PR security boundary
 
-The `Pull Request` workflow runs on `pull_request` with read-only repository
-permissions. This is where untrusted PR code is checked out and executed.
+All three pull-request workflows run on `pull_request` with read-only
+repository permissions. This is where untrusted PR code is checked out and
+executed.
 
 Do not move build or test steps to `pull_request_target`; that event has write
 access and must not execute untrusted PR code.
@@ -75,9 +110,35 @@ access and must not execute untrusted PR code.
 ## Docs-only changes
 
 `scripts/ci-has-code-changes.sh` treats documentation and release-note-only
-changes as non-code changes. `Prepare PR` still runs, while the assemble,
-compile, lint, test, and API compatibility jobs are skipped before their
-runners start. Their required checks report success as skipped jobs.
+changes as non-code changes. For the normal `opened`, `synchronize`, and
+`reopened` actions, `Prepare PR` and `Prepare API Compatibility` run, while the
+core and API reusable workflows take their successful no-op paths. A
+`breaking-change` label addition or removal is the exception: it forces API
+compatibility even for a docs-only pull request. Events for other labels skip
+API preparation and do not allocate an API runner.
+
+## Reusable workflow status display
+
+The reusable core and API workflows define two mutually exclusive paths for
+some checks:
+
+- the real validation job, such as `Assemble` or `Compare Public API Against
+  Release`;
+- an explicit docs-only no-op job named `Docs-only no-op`.
+
+GitHub displays both job definitions in the run, even though only one path is
+selected. Therefore, a code-changing pull request can show
+`Docs-only no-op` while the real validation job is running and
+passing. That skipped row is the inactive alternative; it does not mean that
+the pull request had no code changes and is not an additional required check.
+
+For a docs-only pull request, the no-op job succeeds and the real validation
+job is skipped. The aggregate `PR Core Checks` and `PR API Compatibility` jobs
+then verify the result of the selected path.
+
+The optional `PR GIF Baseline Validation` job is different: when it is skipped,
+the `run-gif-validation` label was not present and GIF validation was not
+requested.
 
 ## Troubleshooting
 
@@ -85,6 +146,6 @@ runners start. Their required checks report success as skipped jobs.
   `protect main` ruleset. Reusable workflows can expose check names differently
   after the first rollout, so use the exact names shown on the PR checks page.
 - **Tests fail:** inspect the relevant `PR Test` job logs (JVM, Android, Wasm, or iOS) and download its test-report artifact for Gradle's HTML and XML reports.
-- **API compatibility fails:** add the `breaking-change` label only when the
-  API break is intentional; unrelated Gradle or compatibility errors are not
-  bypassed by the label.
+- **API compatibility fails:** add the `breaking-change` label only when a
+  detected public API incompatibility is intentional; unrelated Gradle or
+  compatibility errors are not bypassed by this label.

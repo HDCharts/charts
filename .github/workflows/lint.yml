@@ -17,6 +17,14 @@ permissions:
   contents: read
 
 jobs:
+  skipped:
+    name: Docs-only no-op
+    if: ${{ !inputs.should-run }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Report docs-only no-op
+        run: echo 'No code changes require the lint check.'
+
   lint:
     name: Lint
     if: ${{ inputs.should-run }}
