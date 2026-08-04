@@ -9,12 +9,14 @@ scmVersion {
     tag {
         prefix.set("")
     }
-    versionIncrementer("incrementMinor")
+    versionIncrementer(providers.gradleProperty("chartsVersionIncrementer").get())
 }
 ```
 
-This means the normal development line increments the minor version after a
-release tag.
+The increment strategy comes from the `chartsVersionIncrementer` property in
+`gradle.properties` (`incrementMajor`, `incrementMinor`, or `incrementPatch`).
+The build fails if the property is missing. This means the normal development
+line increments the minor version after a release tag.
 
 Example:
 
@@ -22,12 +24,10 @@ Example:
 2. `Release` publishes and tags `2.3.0`.
 3. After the `2.3.0` tag exists, Axion resolves the next development version as
    `2.4.0-SNAPSHOT`.
-4. `Sync Version File` opens a PR to update `.version` to that new snapshot
-   version.
 
-Manual release workflows resolve the version from Axion at runtime.
-Release-note synchronization reads `.version` as the checked-in target snapshot
-marker.
+Manual release workflows resolve the version from Axion at runtime
+(`./gradlew -q currentVersion`). Release-note synchronization uses that
+Axion-resolved snapshot version as the target release marker.
 
 ## Patch Releases
 
@@ -38,13 +38,14 @@ next development version becomes `2.4.0-SNAPSHOT`. It does not automatically
 create `2.3.1-SNAPSHOT`.
 
 Before cutting patch or hotfix releases, choose and document the intended
-strategy. Common options are:
+strategy. The incrementer is already configurable via the `chartsVersionIncrementer`
+property in `gradle.properties`; setting it to `incrementPatch` selects a patch
+line. Other options are:
 
-- Change the project default to `versionIncrementer("incrementPatch")`.
-- Add an explicit Gradle property override for the incrementer and wire release
-  workflows to pass it.
+- Keep `incrementMinor` and cut patches from a dedicated hotfix branch with its
+  own versioning rules.
 - Use a dedicated hotfix branch policy where patch releases are prepared from a
   release branch with its own versioning rules.
 
-Until one of those strategies is implemented, treat the release workflow as
+Until a patch/hotfix policy is documented, treat the release workflow as
 minor-line release automation.
