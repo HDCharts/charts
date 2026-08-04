@@ -17,8 +17,9 @@ release-notes/<version>/
 - `migrations/` contains one migration fragment for each pull request with
   breaking API changes.
 
-The target release is the value in `.version` without the `-SNAPSHOT` suffix.
-When the target directory exists, `Snapshot Release` mirrors it into
+The target release is the current Axion-resolved snapshot version (the
+`currentVersion` value without the `-SNAPSHOT` suffix). When the target directory
+exists, `Snapshot Release` mirrors it into
 `charts-docs/release-notes/<version>/` and updates the current-version pointer.
 A missing target directory is allowed for snapshots because the next release
 version may not have been selected yet. Final releases still require their

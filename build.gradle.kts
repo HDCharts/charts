@@ -30,7 +30,9 @@ scmVersion {
     tag {
         prefix.set("")
     }
-    versionIncrementer("incrementMinor")
+    versionIncrementer(
+        providers.gradleProperty("chartsVersionIncrementer").get(),
+    )
 }
 
 val chartsReleaseVersion = providers.gradleProperty("chartsReleaseVersion").orNull?.takeIf { it.isNotBlank() }
