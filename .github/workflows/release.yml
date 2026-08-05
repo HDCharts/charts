@@ -308,6 +308,9 @@ jobs:
     needs: [prepare-release, publish-maven, promote-docs, verify-docs-deployment]
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
       - name: Publish GitHub release with highlights
         id: publish
         uses: ./.github/actions/publish-github-release
