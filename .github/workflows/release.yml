@@ -349,7 +349,7 @@ jobs:
               'implementation("io.github.dautovicharis:charts-radar")',
               '```',
               '',
-              `📚 [Documentation](https://charts.harisdautovic.com/)`,
+              `📚 [Documentation](https://charts.hdcode.dev/)`,
               `📦 [Maven Central](https://central.sonatype.com/artifact/io.github.dautovicharis/charts/${version})`,
             ].join('\n');
             const release = await github.rest.repos.createRelease({
