@@ -251,6 +251,9 @@ jobs:
     if: ${{ needs.prepare-snapshot.outputs.is_snapshot == 'true' }}
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
       - name: Publish GitHub prerelease with highlights
         id: publish
         uses: ./.github/actions/publish-github-prerelease
