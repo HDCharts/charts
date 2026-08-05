@@ -46,6 +46,6 @@ if (( ${#migrations[@]} )); then
     printf -- '- `%s`\n' "${m}"
   done
   echo
-  echo "📖 Migration guide: https://charts.hdcode.dev/${version}/wiki/migration"
+  echo "⚠️ Migration guide: https://charts.hdcode.dev/${version}/wiki/migration"
   echo
 fi
