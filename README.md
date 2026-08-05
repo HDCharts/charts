@@ -29,16 +29,16 @@
 ---
 
 ## 📚 Documentation
-https://charts.harisdautovic.com/
+https://charts.hdcode.dev/
 
 ## 🟢 Production Demo
-https://charts.harisdautovic.com/demo
+https://charts.hdcode.dev/demo
 
 ## ✨ Snapshot Demo
-https://charts.harisdautovic.com/demo/snapshot/
+https://charts.hdcode.dev/demo/snapshot/
 
 ## 🏀 Playground
-https://charts.harisdautovic.com/playground
+https://charts.hdcode.dev/playground
 
 ## Get Started
 
