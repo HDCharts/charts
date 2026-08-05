@@ -167,7 +167,7 @@ jobs:
           set -euo pipefail
           PUBLISHED_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
           PLAYGROUND_SHA="$(git rev-parse HEAD)"
-          ./gradlew :playground:wasmJsBrowserDistribution \
+          ./gradlew -DchartsLocalPath=.. :playground:wasmJsBrowserDistribution \
             -PchartsDisplayVersion="${{ inputs.charts-version }}" \
             -PsnapshotMetadataChartsSha="${SOURCE_SHA}" \
             -PsnapshotMetadataPlaygroundSha="${PLAYGROUND_SHA}" \
