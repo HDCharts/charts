@@ -251,11 +251,22 @@ jobs:
     if: ${{ needs.prepare-snapshot.outputs.is_snapshot == 'true' }}
     runs-on: ubuntu-latest
     steps:
+      - name: Publish GitHub prerelease with highlights
+        id: publish
+        uses: ./.github/actions/publish-github-prerelease
+        with:
+          source-sha: ${{ needs.prepare-snapshot.outputs.source_sha }}
+          version: ${{ needs.prepare-snapshot.outputs.release_notes_version }}
       - name: Comment on commit
         uses: actions/github-script@v9
+        env:
+          SNAPSHOT_VERSION: ${{ needs.prepare-snapshot.outputs.snapshot_version }}
+          RELEASE_URL: ${{ steps.publish.outputs.release-url }}
         with:
           script: |
-            const version = '${{ needs.prepare-snapshot.outputs.snapshot_version }}';
+            const version = process.env.SNAPSHOT_VERSION;
+            const releaseUrl = process.env.RELEASE_URL;
+
             const message = [
               '🚀 **Snapshot Release Published**',
               '',
@@ -298,8 +309,8 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               commit_sha: context.sha,
-              body: message
-            })
+              body: `${message}\n\n🔗 [GitHub Pre-Release](${releaseUrl})`,
+            });
 
   build-android:
     name: Build Android Snapshot

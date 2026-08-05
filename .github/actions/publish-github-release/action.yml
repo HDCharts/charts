@@ -1,0 +1,89 @@
+name: Publish GitHub release with highlights
+description: |
+  Build release-note highlights from release-notes/<version> and publish a GitHub
+  release. The composite checks out source-sha before building the release highlights.
+
+inputs:
+  source-sha:
+    description: Commit SHA to attach the release tag to.
+    required: true
+  version:
+    description: Version whose release-notes/<version> directory is rendered as highlights.
+    required: true
+
+outputs:
+  release-url:
+    description: HTML URL of the published release.
+    value: ${{ steps.publish.outputs.release-url }}
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout source
+      uses: actions/checkout@v7
+      with:
+        fetch-depth: 1
+        ref: ${{ inputs.source-sha }}
+    - name: Build release highlights
+      id: highlights
+      shell: bash
+      env:
+        VERSION: ${{ inputs.version }}
+      run: |
+        delimiter="HIGHLIGHTS_$(uuidgen | tr '[:upper:]' '[:lower:]')"
+        {
+          echo "body<<${delimiter}"
+          bash scripts/build-release-body.sh "$VERSION"
+          echo "${delimiter}"
+        } >> "$GITHUB_OUTPUT"
+    - name: Publish release with highlights
+      id: publish
+      uses: actions/github-script@v9
+      env:
+        SOURCE_SHA: ${{ inputs.source-sha }}
+        HIGHLIGHTS: ${{ steps.highlights.outputs.body }}
+        VERSION: ${{ inputs.version }}
+      with:
+        script: |
+          const { owner, repo } = context.repo;
+          const highlights = process.env.HIGHLIGHTS || '';
+          const version = process.env.VERSION;
+
+          let existing = null;
+          try {
+            existing = await github.rest.repos.getReleaseByTag({ owner, repo, tag: version });
+          } catch (err) {
+            if (err.status !== 404) throw err;
+          }
+
+          const generated = await github.rest.repos.generateReleaseNotes({
+            owner, repo, tag_name: version,
+          });
+
+          const separator = '\n\n---\n\n';
+          const autoNotes = generated.data.body || '';
+          const body = highlights
+            ? `${highlights}${separator}${autoNotes}`
+            : autoNotes;
+
+          const releaseParams = {
+            owner, repo,
+            tag_name: version,
+            target_commitish: process.env.SOURCE_SHA,
+            name: `Charts ${version}`,
+            body,
+            draft: false,
+            prerelease: false,
+          };
+
+          let release;
+          if (existing) {
+            release = await github.rest.repos.updateRelease({
+              ...releaseParams,
+              release_id: existing.data.id,
+            });
+          } else {
+            release = await github.rest.repos.createRelease(releaseParams);
+          }
+
+          core.setOutput('release-url', release.data.html_url);
