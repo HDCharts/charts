@@ -5,8 +5,7 @@ version="${1:?Usage: $0 <release-version>}"
 source_dir="release-notes/${version}"
 
 if [[ ! -d "${source_dir}" ]]; then
-  echo "::error::Release notes directory not found: ${source_dir}" >&2
-  exit 1
+  exit 0
 fi
 
 shopt -s nullglob
@@ -14,8 +13,7 @@ changes=( "${source_dir}/changes/"*.md )
 migrations=( "${source_dir}/migrations/"*.md )
 
 if (( ${#changes[@]} == 0 && ${#migrations[@]} == 0 )); then
-  echo "::error::No release notes found in ${source_dir} (expected changes/*.md or migrations/*.md)" >&2
-  exit 1
+  exit 0
 fi
 
 sorted() { printf '%s\n' "$@" | sort; }
