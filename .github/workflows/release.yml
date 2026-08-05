@@ -308,14 +308,22 @@ jobs:
     needs: [prepare-release, publish-maven, promote-docs, verify-docs-deployment]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/github-script@v9
+      - name: Publish GitHub release with highlights
+        id: publish
+        uses: ./.github/actions/publish-github-release
+        with:
+          source-sha: ${{ needs.prepare-release.outputs.source_sha }}
+          version: ${{ needs.prepare-release.outputs.release_version }}
+      - name: Comment on commit
+        uses: actions/github-script@v9
         env:
           RELEASE_VERSION: ${{ needs.prepare-release.outputs.release_version }}
-          SOURCE_SHA: ${{ needs.prepare-release.outputs.source_sha }}
+          RELEASE_URL: ${{ steps.publish.outputs.release-url }}
         with:
           script: |
             const version = process.env.RELEASE_VERSION;
-            const sourceSha = process.env.SOURCE_SHA;
+            const releaseUrl = process.env.RELEASE_URL;
+
             const message = [
               '🎉 **Release Published Successfully!**',
               '',
@@ -352,20 +360,10 @@ jobs:
               `📚 [Documentation](https://charts.hdcode.dev/)`,
               `📦 [Maven Central](https://central.sonatype.com/artifact/io.github.dautovicharis/charts/${version})`,
             ].join('\n');
-            const release = await github.rest.repos.createRelease({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              tag_name: version,
-              target_commitish: sourceSha,
-              name: `Charts ${version}`,
-              body: message,
-              generate_release_notes: true,
-              draft: false,
-              prerelease: false,
-            });
+
             await github.rest.repos.createCommitComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
               commit_sha: context.sha,
-              body: `${message}\n\n🔗 [GitHub Release](${release.data.html_url})`,
+              body: `${message}\n\n🔗 [GitHub Release](${releaseUrl})`,
             });
