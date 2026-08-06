@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-version="${1:?Usage: $0 <release-version>}"
+version="${1:?Usage: $0 <release-version> [migration-base-url]}"
 source_dir="release-notes/${version}"
+migration_base="${2:-${version}}"
 
 if [[ ! -d "${source_dir}" ]]; then
   exit 0
@@ -38,12 +39,6 @@ fi
 if (( ${#migrations[@]} )); then
   echo "## Migrations"
   echo
-  echo "**Breaking changes:** this release includes API migrations. Review the migration guide before upgrading:"
-  echo
-  grep -hE '^## ' "${migrations[@]}" | sed -E 's/^##[[:space:]]+//' | sort -u | while IFS= read -r m; do
-    printf -- '- `%s`\n' "${m}"
-  done
-  echo
-  echo "⚠️ Migration guide: https://charts.hdcode.dev/${version}/wiki/migration"
+  echo "⚠️ Breaking changes: Review the migration guide before upgrading: https://charts.hdcode.dev/${migration_base}/wiki/migration"
   echo
 fi

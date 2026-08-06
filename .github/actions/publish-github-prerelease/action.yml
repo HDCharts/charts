@@ -33,7 +33,7 @@ runs:
         delimiter="HIGHLIGHTS_$(uuidgen | tr '[:upper:]' '[:lower:]')"
         {
           echo "body<<${delimiter}"
-          bash scripts/build-release-body.sh "$VERSION"
+          bash scripts/build-release-body.sh "$VERSION" snapshot
           echo "${delimiter}"
         } >> "$GITHUB_OUTPUT"
     - name: Publish rolling release with highlights
