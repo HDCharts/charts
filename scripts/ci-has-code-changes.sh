@@ -8,7 +8,7 @@ is_code_change() {
   while IFS= read -r changed_file; do
     [[ -n "$changed_file" ]] || continue
     case "$changed_file" in
-      docs/*|release-notes/*|gif-baselines/*|.editorconfig|*.md|LICENSE|LICENSE.*) ;;
+      docs/*|release-notes/*|gif-baselines/*|scripts/*|.editorconfig|*.md|LICENSE|LICENSE.*) ;;
       *)
         echo "true"
         return
@@ -87,8 +87,13 @@ run_self_test() {
     failures=$((failures + 1))
   fi
 
+  result="$(is_code_change $'README.md\nscripts/build-release-body.sh')"
+  if ! assert_equal "false" "$result" "ci/release script change"; then
+    failures=$((failures + 1))
+  fi
+
   result="$(is_code_change "scripts/ci-has-code-changes.sh")"
-  if ! assert_equal "true" "$result" "ci script change is a code change"; then
+  if ! assert_equal "false" "$result" "skip script change"; then
     failures=$((failures + 1))
   fi
 
