@@ -8,7 +8,7 @@ is_code_change() {
   while IFS= read -r changed_file; do
     [[ -n "$changed_file" ]] || continue
     case "$changed_file" in
-      docs/*|release-notes/*|*.md|LICENSE|LICENSE.*) ;;
+      docs/*|release-notes/*|gif-baselines/*|scripts/*|.editorconfig|*.md|LICENSE|LICENSE.*) ;;
       *)
         echo "true"
         return
@@ -79,6 +79,26 @@ run_self_test() {
 
   result="$(is_code_change "charts2/src/Main.kt")"
   if ! assert_equal "true" "$result" "new source directory"; then
+    failures=$((failures + 1))
+  fi
+
+  result="$(is_code_change $'README.md\ngif-baselines/bar.png')"
+  if ! assert_equal "false" "$result" "gif baseline change"; then
+    failures=$((failures + 1))
+  fi
+
+  result="$(is_code_change $'README.md\nscripts/build-release-body.sh')"
+  if ! assert_equal "false" "$result" "ci/release script change"; then
+    failures=$((failures + 1))
+  fi
+
+  result="$(is_code_change "scripts/ci-has-code-changes.sh")"
+  if ! assert_equal "false" "$result" "skip script change"; then
+    failures=$((failures + 1))
+  fi
+
+  result="$(is_code_change ".editorconfig")"
+  if ! assert_equal "false" "$result" "editor config change"; then
     failures=$((failures + 1))
   fi
 
