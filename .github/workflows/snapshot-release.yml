@@ -263,49 +263,14 @@ jobs:
       - name: Comment on commit
         uses: actions/github-script@v9
         env:
-          SNAPSHOT_VERSION: ${{ needs.prepare-snapshot.outputs.snapshot_version }}
           RELEASE_URL: ${{ steps.publish.outputs.release-url }}
         with:
           script: |
-            const version = process.env.SNAPSHOT_VERSION;
             const releaseUrl = process.env.RELEASE_URL;
 
             const message = [
-              '🚀 **Snapshot Release Published**',
-              '',
-              `Version: \`${version}\``,
-              '',
-              'The snapshot is now available on Maven Central Snapshots repository.',
-              '',
-              'https://central.sonatype.com/repository/maven-snapshots/io/github/dautovicharis/charts/maven-metadata.xml',
-              '',
-              'Umbrella artifact:',
-              '```kotlin',
-              `implementation("io.github.dautovicharis:charts:${version}")`,
-              '```',
-              '',
-              'Modular artifacts:',
-              '```kotlin',
-              `implementation("io.github.dautovicharis:charts-core:${version}")`,
-              `implementation("io.github.dautovicharis:charts-line:${version}")`,
-              `implementation("io.github.dautovicharis:charts-pie:${version}")`,
-              `implementation("io.github.dautovicharis:charts-bar:${version}")`,
-              `implementation("io.github.dautovicharis:charts-stacked-bar:${version}")`,
-              `implementation("io.github.dautovicharis:charts-stacked-area:${version}")`,
-              `implementation("io.github.dautovicharis:charts-radar:${version}")`,
-              '```',
-              '',
-              'BOM alignment (for Gradle platforms):',
-              '```kotlin',
-              `implementation(platform("io.github.dautovicharis:charts-bom:${version}"))`,
-              'implementation("io.github.dautovicharis:charts-core")',
-              'implementation("io.github.dautovicharis:charts-line")',
-              'implementation("io.github.dautovicharis:charts-pie")',
-              'implementation("io.github.dautovicharis:charts-bar")',
-              'implementation("io.github.dautovicharis:charts-stacked-bar")',
-              'implementation("io.github.dautovicharis:charts-stacked-area")',
-              'implementation("io.github.dautovicharis:charts-radar")',
-              '```',
+              `📚 [Documentation](https://charts.hdcode.dev/)`,
+              `📦 [Maven Central](https://central.sonatype.com/repository/maven-snapshots/io/github/dautovicharis/charts/maven-metadata.xml)`,
             ].join('\n');
 
             await github.rest.repos.createCommitComment({
