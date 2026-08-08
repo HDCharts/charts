@@ -24,6 +24,9 @@ fun validatePieData(
         if (value.isNaN()) {
             val validationError = ValidationErrors.RULE_DATA_POINT_NOT_NUMBER.format(index)
             validationErrors.add(validationError)
+        } else if (value < 0) {
+            val validationError = ValidationErrors.RULE_DATA_POINT_NEGATIVE.format(index)
+            validationErrors.add(validationError)
         }
     }
 

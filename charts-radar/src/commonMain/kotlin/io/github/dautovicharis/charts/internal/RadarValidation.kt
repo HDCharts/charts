@@ -4,7 +4,8 @@ import io.github.dautovicharis.charts.internal.ValidationErrors.MIN_REQUIRED_RAD
 import io.github.dautovicharis.charts.internal.common.model.MultiChartData
 import io.github.dautovicharis.charts.style.RadarChartStyle
 
-internal fun validateRadarData(
+@InternalChartsApi
+fun validateRadarData(
     data: MultiChartData,
     style: RadarChartStyle,
 ): List<String> {
