@@ -194,7 +194,7 @@ fun RadarDefaultGifScenario() {
 
 @Composable
 private fun DocsGifScene(chartContent: @Composable () -> Unit) {
-    AppTheme(theme = docsSlate, darkTheme = true, useDynamicColors = false) {
+    AppTheme(theme = docsSlate, darkTheme = false, useDynamicColors = false) {
         Box(
             modifier =
                 Modifier
