@@ -69,7 +69,7 @@ object ChartViewDefaults {
      * @param outerPadding The outer padding of the chart view. Defaults to 20.dp.
      * @param innerPadding The inner padding of the chart view. Defaults to 15.dp.
      * @param cornerRadius The corner radius of the chart view. Defaults to 20.dp.
-     * @param shadow The shadow of the chart view. Defaults to 2.dp.
+     * @param shadow The shadow of the chart view. Defaults to 1.dp.
      * @param backgroundColor The background color of the chart view. Defaults to a subtle blend of surface and primaryContainer that adapts to dark mode.
      * @param modifierChart The modifier applied to chart drawing content. Defaults to a square aspect ratio.
      */
@@ -99,9 +99,10 @@ object ChartViewDefaults {
                     shape = RoundedCornerShape(cornerRadius),
                 )
 
+        // Dp.Infinity (the default) means the chart wraps its content width; an explicit
+        // finite width constrains the chart to that width.
         val updatedModifierMain =
             when (width) {
-                // TODO: Double check this logic
                 Dp.Infinity -> modifierMain.wrapContentWidth()
                 else -> modifierMain.width(width)
             }

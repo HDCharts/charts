@@ -4,6 +4,7 @@ import io.github.dautovicharis.charts.internal.common.model.ChartData
 import io.github.dautovicharis.charts.internal.common.model.ChartDataType
 import io.github.dautovicharis.charts.mock.MockTest
 import io.github.dautovicharis.charts.model.ChartDataSet
+import io.github.dautovicharis.charts.model.toChartDataSet
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
@@ -125,5 +126,19 @@ class ChartDataTest {
         assertContentEquals(actual = inputDataSet.data.item.points, expected = listOf(-1.0, 2.0, 3.0))
         assertContentEquals(actual = inputDataSet.data.item.labels, expected = listOf("-1", "2", "3"))
         assertEquals(actual = inputDataSet.data.label, expected = MockTest.TITLE)
+    }
+
+    // Explicit labels
+    @Test
+    fun chartDataSet_explicitLabels_usesProvidedLabels() {
+        // Arrange
+        val items = listOf(1f, 2f, 3f)
+        val labels = listOf("One", "Two", "Three")
+
+        // Act
+        val inputDataSet = items.toChartDataSet(title = MockTest.TITLE, labels = labels)
+
+        // Assert
+        assertContentEquals(actual = inputDataSet.data.item.labels, expected = labels)
     }
 }

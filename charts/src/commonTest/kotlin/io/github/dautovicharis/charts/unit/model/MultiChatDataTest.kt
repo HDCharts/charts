@@ -8,6 +8,7 @@ import io.github.dautovicharis.charts.internal.common.model.normalizeByMinMax
 import io.github.dautovicharis.charts.internal.common.model.toChartData
 import io.github.dautovicharis.charts.mock.MockTest
 import io.github.dautovicharis.charts.model.MultiChartDataSet
+import io.github.dautovicharis.charts.model.toMultiChartDataSet
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
@@ -603,5 +604,59 @@ class MultiChatDataTest {
         )
         assertEquals(actual = inputDataSet.data.categories, expected = categories)
         assertEquals(actual = inputDataSet.data.title, expected = MockTest.TITLE)
+    }
+
+    @Test
+    fun toMultiChartDataSet_stringFloatList_correctDataReturned() {
+        // Arrange
+        val categories = listOf("Jan", "Feb", "Mar")
+
+        // Act
+        val inputDataSet =
+            listOf(
+                "Label1" to listOf("1.0", "2.0", "3.0"),
+                "Label2" to listOf("3.0", "4.0", "5.0"),
+            ).toMultiChartDataSet(
+                title = MockTest.TITLE,
+                categories = categories,
+            )
+
+        // Assert
+        assertEquals(actual = inputDataSet.data.title, expected = MockTest.TITLE)
+        assertEquals(actual = inputDataSet.data.categories, expected = categories)
+        assertContentEquals(
+            actual =
+                inputDataSet.data.items[0]
+                    .item.points,
+            expected = listOf(1.0, 2.0, 3.0),
+        )
+        assertContentEquals(
+            actual =
+                inputDataSet.data.items[1]
+                    .item.points,
+            expected = listOf(3.0, 4.0, 5.0),
+        )
+    }
+
+    @Test
+    fun toMultiChartDataSet_stringFloatList_invalidValue_parsesAsNaN() {
+        // Arrange
+        val categories = listOf("Jan", "Feb", "Mar")
+
+        // Act
+        val inputDataSet =
+            listOf(
+                "Label1" to listOf("1.0", "NaN", "3.0"),
+            ).toMultiChartDataSet(
+                title = MockTest.TITLE,
+                categories = categories,
+            )
+
+        // Assert
+        assertTrue(
+            inputDataSet.data.items[0]
+                .item.points[1]
+                .isNaN(),
+        )
     }
 }

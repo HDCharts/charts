@@ -2,6 +2,7 @@ package io.github.dautovicharis.charts.unit.validation
 
 import io.github.dautovicharis.charts.internal.ValidationErrors
 import io.github.dautovicharis.charts.internal.ValidationErrors.MIN_REQUIRED_PIE
+import io.github.dautovicharis.charts.internal.ValidationErrors.RULE_DATA_POINT_NOT_NUMBER
 import io.github.dautovicharis.charts.internal.common.model.ChartDataType
 import io.github.dautovicharis.charts.internal.format
 import io.github.dautovicharis.charts.internal.validatePieData
@@ -67,6 +68,52 @@ class DataValidationPieTest {
         // Assert
         val expectedError =
             ValidationErrors.RULE_COLORS_SIZE_MISMATCH.format(colors.size, expectedColorSize)
+        assertTrue(validationErrors.isNotEmpty())
+        assertEquals(validationErrors.first(), expectedError)
+    }
+
+    @Test
+    fun validatePieData_nonNumericValue_validationErrorsPresent() {
+        // Arrange
+        val chartDataSet =
+            ChartDataSet(
+                items = ChartDataType.StringData(listOf("1.0", "NaN", "3.0")),
+                title = TITLE,
+            )
+        val pieChartStyle = mockPieChartStyle(colors.take(3))
+
+        // Act
+        val validationErrors =
+            validatePieData(
+                dataSet = chartDataSet,
+                style = pieChartStyle,
+            )
+
+        // Assert
+        val expectedError = RULE_DATA_POINT_NOT_NUMBER.format(1)
+        assertTrue(validationErrors.isNotEmpty())
+        assertEquals(validationErrors.first(), expectedError)
+    }
+
+    @Test
+    fun validatePieData_negativeValue_validationErrorsPresent() {
+        // Arrange
+        val chartDataSet =
+            ChartDataSet(
+                items = ChartDataType.FloatData(listOf(1f, -2f, 3f)),
+                title = TITLE,
+            )
+        val pieChartStyle = mockPieChartStyle(colors.take(3))
+
+        // Act
+        val validationErrors =
+            validatePieData(
+                dataSet = chartDataSet,
+                style = pieChartStyle,
+            )
+
+        // Assert
+        val expectedError = ValidationErrors.RULE_DATA_POINT_NEGATIVE.format(1)
         assertTrue(validationErrors.isNotEmpty())
         assertEquals(validationErrors.first(), expectedError)
     }

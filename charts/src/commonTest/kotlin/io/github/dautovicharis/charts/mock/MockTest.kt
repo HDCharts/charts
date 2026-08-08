@@ -13,6 +13,7 @@ import io.github.dautovicharis.charts.model.MultiChartDataSet
 import io.github.dautovicharis.charts.style.ChartViewStyle
 import io.github.dautovicharis.charts.style.LineChartStyle
 import io.github.dautovicharis.charts.style.PieChartStyle
+import io.github.dautovicharis.charts.style.RadarChartStyle
 import io.github.dautovicharis.charts.style.StackedAreaChartStyle
 import io.github.dautovicharis.charts.style.StackedBarChartStyle
 
@@ -30,6 +31,8 @@ internal object MockTest {
 
     private val categories = listOf("Jan", "Feb", "Mar", "Apr")
     val colors = listOf(Color.Red, Color.Green, Color.Cyan, Color.Black)
+    val colorsAsymmetric =
+        listOf(Color.Red, Color.Green, Color.Cyan, Color.Black, Color.Blue, Color.Yellow)
 
     private val dataItems =
         listOf(
@@ -49,6 +52,18 @@ internal object MockTest {
         MultiChartDataSet(
             items = dataItems,
             categories = categories,
+            title = TITLE,
+        )
+
+    val asymmetricMultiDataSet =
+        MultiChartDataSet(
+            items =
+                listOf(
+                    FIRST_ITEM_NAME to FloatData(FIRST_ITEM + 5f),
+                    SECOND_ITEM_NAME to FloatData(SECOND_ITEM + 5f),
+                    THIRD_ITEM_NAME to FloatData(THIRD_ITEM + 5f),
+                ),
+            categories = categories + "May",
             title = TITLE,
         )
 
@@ -210,6 +225,36 @@ internal object MockTest {
             borderWidth = 2f,
             legendVisible = true,
             chartViewStyle = mockChartViewStyle(),
+        )
+
+    fun mockRadarChartStyle(lineColors: List<Color> = colors): RadarChartStyle =
+        RadarChartStyle(
+            modifier = Modifier.fillMaxSize(),
+            chartViewStyle = mockChartViewStyle(),
+            gridColor = Color.Gray,
+            gridLineWidth = 1f,
+            gridSteps = 4,
+            gridVisible = true,
+            axisLineColor = Color.Gray,
+            axisLineWidth = 1f,
+            axisVisible = true,
+            axisLabelColor = Color.Gray,
+            axisLabelSize = 11.sp,
+            axisLabelPadding = Dp(4f),
+            axisLabelVisible = true,
+            categoryLegendVisible = true,
+            categoryColors = colors,
+            categoryPinSize = 4f,
+            categoryPinsVisible = true,
+            pointColorSameAsLine = true,
+            pointColor = Color.Red,
+            pointSize = 8f,
+            pointVisible = true,
+            lineColor = Color.Green,
+            lineColors = lineColors,
+            lineWidth = 2f,
+            fillAlpha = 0.3f,
+            fillVisible = true,
         )
 
     private fun mockChartViewStyle(): ChartViewStyle =
