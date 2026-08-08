@@ -130,7 +130,7 @@ class ChartDataTest {
 
     // Explicit labels
     @Test
-    fun `chart data set with explicit labels uses provided labels`() {
+    fun chartDataSet_explicitLabels_usesProvidedLabels() {
         // Arrange
         val items = listOf(1f, 2f, 3f)
         val labels = listOf("One", "Two", "Three")

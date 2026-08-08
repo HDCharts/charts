@@ -14,7 +14,7 @@ import kotlin.test.assertTrue
 
 class DataValidationBarSingleSeriesTest {
     @Test
-    fun `validate bar data with too few points has validation errors`() {
+    fun validateBarData_tooFewPoints_validationErrorsPresent() {
         val data = listOf(1f).toChartDataSet(title = TITLE).data.item
 
         val errors = validateBarData(data)
@@ -26,7 +26,7 @@ class DataValidationBarSingleSeriesTest {
     }
 
     @Test
-    fun `validate bar data with invalid colors has validation errors`() {
+    fun validateBarData_invalidColors_validationErrorsPresent() {
         val data = listOf(1f, 2f, 3f).toChartDataSet(title = TITLE).data.item
 
         val errors = validateBarData(data, colorsSize = 2)
@@ -37,7 +37,7 @@ class DataValidationBarSingleSeriesTest {
     }
 
     @Test
-    fun `validate bar data with non numeric value has validation errors`() {
+    fun validateBarData_nonNumericValue_validationErrorsPresent() {
         val dataSet =
             ChartDataSet(
                 items = ChartDataType.StringData(listOf("1.0", "NaN", "3.0")),

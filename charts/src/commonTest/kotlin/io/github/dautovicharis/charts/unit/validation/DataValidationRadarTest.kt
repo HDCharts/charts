@@ -16,13 +16,13 @@ import kotlin.test.assertTrue
 
 class DataValidationRadarTest {
     @Test
-    fun `validate radar data with valid data set has no validation errors`() {
+    fun validateRadarData_validDataSet_noValidationErrors() {
         val errors = validateRadarData(multiDataSet.data, mockRadarChartStyle())
         assertTrue(errors.isEmpty())
     }
 
     @Test
-    fun `validate radar data with invalid categories has validation errors`() {
+    fun validateRadarData_invalidCategories_validationErrorsPresent() {
         val dataSet = invalidDataSetCategories()
         val expectedCategoriesSize =
             dataSet.data.items
@@ -41,7 +41,7 @@ class DataValidationRadarTest {
     }
 
     @Test
-    fun `validate radar data with invalid colors has validation errors`() {
+    fun validateRadarData_invalidColors_validationErrorsPresent() {
         val dataSet = multiDataSet
         val style = mockRadarChartStyle(colors.drop(2))
 
@@ -57,7 +57,7 @@ class DataValidationRadarTest {
     }
 
     @Test
-    fun `validate radar data with too few points has validation errors`() {
+    fun validateRadarData_tooFewPoints_validationErrorsPresent() {
         val dataSet =
             listOf("A" to listOf(1f, 2f))
                 .toMultiChartDataSet(title = TITLE)
@@ -71,7 +71,7 @@ class DataValidationRadarTest {
     }
 
     @Test
-    fun `validate radar data with non numeric value has validation errors`() {
+    fun validateRadarData_nonNumericValue_validationErrorsPresent() {
         val dataSet =
             listOf("A" to listOf("1.0", "NaN", "3.0"))
                 .toMultiChartDataSet(title = TITLE)
@@ -85,7 +85,7 @@ class DataValidationRadarTest {
     }
 
     @Test
-    fun `validate radar data with mismatched item sizes has validation errors`() {
+    fun validateRadarData_mismatchedItemSizes_validationErrorsPresent() {
         val dataSet =
             listOf(
                 "A" to listOf(1f, 2f, 3f),

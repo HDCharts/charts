@@ -607,7 +607,7 @@ class MultiChatDataTest {
     }
 
     @Test
-    fun `toMultiChartDataSet string float overload parses values into points`() {
+    fun toMultiChartDataSet_stringFloatList_correctDataReturned() {
         // Arrange
         val categories = listOf("Jan", "Feb", "Mar")
 
@@ -639,7 +639,7 @@ class MultiChatDataTest {
     }
 
     @Test
-    fun `toMultiChartDataSet string overload with invalid value parses as NaN`() {
+    fun toMultiChartDataSet_stringFloatList_invalidValue_parsesAsNaN() {
         // Arrange
         val categories = listOf("Jan", "Feb", "Mar")
 

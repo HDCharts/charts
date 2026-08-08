@@ -14,13 +14,13 @@ import kotlin.test.assertTrue
 
 class DataValidationHistogramTest {
     @Test
-    fun `validate histogram data with valid data set has no validation errors`() {
+    fun validateHistogramData_validDataSet_noValidationErrors() {
         val data = listOf(1f, 2f, 3f).toChartDataSet(title = TITLE).data.item
         assertTrue(validateHistogramData(data).isEmpty())
     }
 
     @Test
-    fun `validate histogram data with too few points has validation errors`() {
+    fun validateHistogramData_tooFewPoints_validationErrorsPresent() {
         val data = listOf(1f).toChartDataSet(title = TITLE).data.item
 
         val errors = validateHistogramData(data)
@@ -32,7 +32,7 @@ class DataValidationHistogramTest {
     }
 
     @Test
-    fun `validate histogram data with negative value has validation errors`() {
+    fun validateHistogramData_negativeValue_validationErrorsPresent() {
         val data = listOf(1f, -2f, 3f).toChartDataSet(title = TITLE).data.item
 
         val errors = validateHistogramData(data)
@@ -43,7 +43,7 @@ class DataValidationHistogramTest {
     }
 
     @Test
-    fun `validate histogram data with invalid colors has validation errors`() {
+    fun validateHistogramData_invalidColors_validationErrorsPresent() {
         val data = listOf(1f, 2f, 3f).toChartDataSet(title = TITLE).data.item
 
         val errors = validateHistogramData(data, colorsSize = 2)
@@ -54,7 +54,7 @@ class DataValidationHistogramTest {
     }
 
     @Test
-    fun `validate histogram data with non numeric value has validation errors`() {
+    fun validateHistogramData_nonNumericValue_validationErrorsPresent() {
         val dataSet =
             ChartDataSet(
                 items = ChartDataType.StringData(listOf("1.0", "NaN", "3.0")),

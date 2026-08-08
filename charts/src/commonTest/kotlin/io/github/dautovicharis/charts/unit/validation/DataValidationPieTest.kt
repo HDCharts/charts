@@ -73,7 +73,7 @@ class DataValidationPieTest {
     }
 
     @Test
-    fun `validate pie data with non numeric value has validation errors`() {
+    fun validatePieData_nonNumericValue_validationErrorsPresent() {
         // Arrange
         val chartDataSet =
             ChartDataSet(
@@ -96,7 +96,7 @@ class DataValidationPieTest {
     }
 
     @Test
-    fun `validate pie data with negative value has validation errors`() {
+    fun validatePieData_negativeValue_validationErrorsPresent() {
         // Arrange
         val chartDataSet =
             ChartDataSet(

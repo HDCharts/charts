@@ -11,7 +11,7 @@ import kotlin.test.assertTrue
 
 class DataValidationColorSemanticsTest {
     @Test
-    fun `line chart expects one color per series`() {
+    fun lineChart_invalidColors_validationErrorsPresent() {
         val dataSet = asymmetricMultiDataSet
         val style = mockLineChartStyle(colorsAsymmetric.take(3))
 
@@ -19,7 +19,7 @@ class DataValidationColorSemanticsTest {
     }
 
     @Test
-    fun `stacked bar chart expects one color per point`() {
+    fun stackedBarChart_invalidColors_validationErrorsPresent() {
         val dataSet = asymmetricMultiDataSet
         val style = mockStackedBarChartStyle(colorsAsymmetric.take(5))
 
