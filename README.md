@@ -1,7 +1,8 @@
 <p align="center">
   <img
-    src="https://github.com/user-attachments/assets/4150f102-1b05-4fd7-ab01-63480d2e6d50"
+    src="./hdcharts-logo.svg"
     alt="HDCharts logo"
+    align="center"
     width="300"
   />
 </p>
