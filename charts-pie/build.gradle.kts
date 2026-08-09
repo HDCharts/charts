@@ -89,7 +89,7 @@ mavenPublishing {
         ChartsPublishing.configurePom(
             pom = this,
             moduleName = "Pie Chart",
-            moduleDescription = "Pie chart module for Charts.",
+            moduleDescription = "Pie chart module for HDCharts.",
         )
     }
 }

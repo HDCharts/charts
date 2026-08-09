@@ -89,7 +89,7 @@ mavenPublishing {
         ChartsPublishing.configurePom(
             pom = this,
             moduleName = "Radar Chart",
-            moduleDescription = "Radar chart module for Charts.",
+            moduleDescription = "Radar chart module for HDCharts.",
         )
     }
 }

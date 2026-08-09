@@ -361,7 +361,7 @@ fun MainScreenContent(
         ChartGallery(
             menuState = menuState,
             onChartSelected = onChartSelected,
-            versionLabel = "Charts: ${BuildConfig.CHARTS_VERSION}",
+            versionLabel = "HDCharts: ${BuildConfig.CHARTS_VERSION}",
             modifier =
                 Modifier
                     .fillMaxWidth()

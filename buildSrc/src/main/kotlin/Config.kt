@@ -29,7 +29,7 @@ object Config {
     const val DEMO_VERSION_NAME = "1.0.0"
     const val DEMO_VERSION_CODE = 8
 
-    // Charts library
+    // HDCharts library
     const val CHARTS_NAMESPACE = "$GROUP_ID.$ARTIFACT_ID"
     const val CHARTS_CORE_NAMESPACE = "$GROUP_ID.charts.core"
     const val CHARTS_LINE_NAMESPACE = "$GROUP_ID.charts.line"

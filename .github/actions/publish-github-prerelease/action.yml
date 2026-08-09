@@ -49,7 +49,7 @@ runs:
           const sourceSha = process.env.SOURCE_SHA;
           const highlights = process.env.HIGHLIGHTS || '';
           const tag = 'snapshot';
-          const name = `Charts ${process.env.VERSION}`;
+          const name = `HDCharts ${process.env.VERSION}`;
 
           let refExists = false;
           try {

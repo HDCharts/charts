@@ -41,7 +41,7 @@ fun ChartsPreviewTheme(content: @Composable () -> Unit) {
 private fun ChartsCoreContainerPreview() {
     ChartsPreviewTheme {
         Chart(chartViewsStyle = ChartViewDefaults.style()) {
-            Text("Charts Core Container")
+            Text("HDCharts Core Container")
         }
     }
 }

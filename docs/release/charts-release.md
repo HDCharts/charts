@@ -1,4 +1,4 @@
-# Charts Release
+# HDCharts Release
 
 Workflow: `charts/.github/workflows/release.yml`
 

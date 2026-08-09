@@ -1,7 +1,8 @@
 <p align="center">
   <img
-    src="https://github.com/dautovicharis/Charts/assets/7049715/4150f102-1b05-4fd7-ab01-63480d2e6d50"
-    alt="Charts logo"
+    src="./hdcharts-logo.svg"
+    alt="HDCharts logo"
+    align="center"
     width="300"
   />
 </p>
@@ -51,7 +52,7 @@ dependencyResolutionManagement {
 ```
 
 
-### All Charts
+### All chart types
 
 Use the umbrella artifact when you want all chart types with the simplest setup.
 
@@ -61,7 +62,7 @@ commonMain.dependencies {
 }
 ```
 
-### Independent Charts
+### Individual chart modules
 
 Use independent modules when you want only specific chart types and smaller dependency footprint.
 
@@ -74,8 +75,6 @@ commonMain.dependencies {
     implementation("io.github.dautovicharis:charts-stacked-bar:<version>")
     implementation("io.github.dautovicharis:charts-stacked-area:<version>")
     implementation("io.github.dautovicharis:charts-radar:<version>")
-    // Optional: add charts-core directly only if you need shared base APIs
-    implementation("io.github.dautovicharis:charts-core:<version>")
 }
 ```
 

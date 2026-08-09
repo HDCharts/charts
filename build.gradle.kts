@@ -191,14 +191,14 @@ tasks.register("chartsTestAndroid") {
 }
 
 tasks.register("updateScreenshots") {
-    group = "Charts"
+    group = "HDCharts"
     description = "Updates Android screenshot test baselines (debug variant)"
     dependsOn(":androidApp:updateDebugScreenshotTest")
 }
 
 tasks.register("chartsCheck") {
-    group = "Charts"
-    description = "Build and tests for the charts project"
+    group = "HDCharts"
+    description = "Build and tests for the HDCharts project"
     dependsOn(getTasksByName("ktlintCheck", true))
     dependsOn("build")
     dependsOn("chartsTestJvm")
@@ -229,18 +229,18 @@ tasks.named("ktlintFormat").configure {
 
 tasks.register("publishChartsModules") {
     group = "publishing"
-    description = "Publishes all charts modules and BOM to the configured Maven repository"
+    description = "Publishes all HDCharts modules and BOM to the configured Maven repository"
     dependsOn(ChartsModules.publishable.map { "$it:publish" })
 }
 
 tasks.register("publishChartsModulesToMavenLocal") {
     group = "publishing"
-    description = "Publishes all charts modules and BOM to Maven Local"
+    description = "Publishes all HDCharts modules and BOM to Maven Local"
     dependsOn(ChartsModules.publishable.map { "$it:publishToMavenLocal" })
 }
 
 tasks.register<Sync>("generateWebDemo") {
-    group = "Charts"
+    group = "HDCharts"
     description = "Builds the Wasm web app and copies files to docs/static/demo/<target-version>"
 
     val docsVersionDir =
@@ -259,14 +259,14 @@ tasks.register<Sync>("generateWebDemo") {
 }
 
 tasks.register("generateApiDocs") {
-    group = "Charts"
+    group = "HDCharts"
     description = "Generate Dokka API reference to docs/static/api/<target-version>"
 
     dependsOn("charts:dokkaGenerate")
 }
 
 tasks.register("generateDocs") {
-    group = "Charts"
+    group = "HDCharts"
     description = "Generate Dokka API docs and Wasm web demo to docs/static/"
 
     dependsOn("generateApiDocs")
@@ -278,27 +278,27 @@ tasks.register("generateDocs") {
 }
 
 tasks.register("listDocsGifScenarios") {
-    group = "Charts"
+    group = "HDCharts"
     description = "Lists available docs GIF scenarios discovered via @RecordGif in :androidApp"
     dependsOn(":androidApp:listGifScenarios")
 }
 
 tasks.register("recordDocsGif") {
-    group = "Charts"
+    group = "HDCharts"
     description =
         "Records one docs GIF scenario to <gifContentRoot>/<gifDocsVersion>/wiki/assets (set -PgifScenario=<name>, defaults to first)"
     dependsOn(":androidApp:recordGifDebug")
 }
 
 tasks.register("recordDocsGifs") {
-    group = "Charts"
+    group = "HDCharts"
     description =
         "Records all docs GIF scenarios to <gifContentRoot>/<gifDocsVersion>/wiki/assets (default version: snapshot)"
     dependsOn(":androidApp:recordGifsDebug")
 }
 
 tasks.register("validateDocsGifBaselines") {
-    group = "Charts"
+    group = "HDCharts"
     description = "Validates Android docs GIF output against gif-baselines"
     dependsOn(":androidApp:validateGifBaselines")
 }

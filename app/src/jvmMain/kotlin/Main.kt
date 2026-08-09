@@ -11,7 +11,7 @@ fun main() =
     application {
         initKoin()
         Window(
-            title = "Charts Desktop Demo",
+            title = "HDCharts Desktop Demo",
             state = rememberWindowState(width = 600.dp, height = 800.dp),
             onCloseRequest = ::exitApplication,
         ) {

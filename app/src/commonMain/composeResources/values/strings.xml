@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Charts</string>
+    <string name="app_name">HDCharts</string>
 
     <!-- Content descriptions -->
     <string name="github_url_content_description">GitHub repository</string>
@@ -48,7 +48,7 @@
     <string name="dark_mode_on">On</string>
     <string name="dark_mode_off">Off</string>
 
-    <!-- Charts title -->
+    <!-- HDCharts title -->
     <string name="pie_chart">Pie</string>
     <string name="line_chart">Line</string>
     <string name="bar_chart">Bar</string>
@@ -84,6 +84,6 @@
     <string name="style_status_default">Default</string>
     <string name="style_status_unused">Unused</string>
     <string name="style_status_count">(%1$d)</string>
-    <string translatable="false" name="github_url">https://github.com/dautovicharis/Charts</string>
+    <string translatable="false" name="github_url">https://github.com/HDCharts/charts</string>
 
 </resources>

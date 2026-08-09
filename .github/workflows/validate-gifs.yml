@@ -1,4 +1,4 @@
-# Reusable workflow that validates the committed Charts GIF baselines.
+# Reusable workflow that validates the committed HDCharts GIF baselines.
 #
 # Generated GIFs and the comparison report are uploaded for manual review. This
 # workflow never modifies the pull request or repository contents.
