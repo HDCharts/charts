@@ -188,6 +188,8 @@ gifRecorder {
             ),
     )
     baselineDir.set(rootProject.layout.projectDirectory.dir("gif-baselines"))
+    // Matches the Material 3 colorScheme.background used by DocsGifScene.
+    canvasBackgroundColor.set("0xFCFCFD")
 }
 
 dependencies {
