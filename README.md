@@ -75,8 +75,6 @@ commonMain.dependencies {
     implementation("io.github.dautovicharis:charts-stacked-bar:<version>")
     implementation("io.github.dautovicharis:charts-stacked-area:<version>")
     implementation("io.github.dautovicharis:charts-radar:<version>")
-    // Optional: add charts-core directly only if you need shared base APIs
-    implementation("io.github.dautovicharis:charts-core:<version>")
 }
 ```
 

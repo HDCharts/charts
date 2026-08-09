@@ -1,4 +1,4 @@
-rootProject.name = "HDChartsProject"
+rootProject.name = "ChartsProject"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 val chartsDependencyMode =

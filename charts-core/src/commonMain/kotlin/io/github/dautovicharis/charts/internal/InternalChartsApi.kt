@@ -6,7 +6,7 @@ package io.github.dautovicharis.charts.internal
  * These APIs are public for module interoperability but are not stable for direct consumer usage.
  */
 @RequiresOptIn(
-    message = "Internal HDCharts API. This may change without notice.",
+    message = "Internal Charts API. This may change without notice.",
     level = RequiresOptIn.Level.ERROR,
 )
 @Target(
