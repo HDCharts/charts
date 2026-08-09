@@ -90,8 +90,8 @@ mavenPublishing {
     pom {
         ChartsPublishing.configurePom(
             pom = this,
-            moduleName = "Charts Core",
-            moduleDescription = "Core components for Charts.",
+            moduleName = "HDCharts Core",
+            moduleDescription = "Core components for HDCharts.",
         )
     }
 }

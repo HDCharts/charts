@@ -89,7 +89,7 @@ mavenPublishing {
         ChartsPublishing.configurePom(
             pom = this,
             moduleName = "Stacked Area Chart",
-            moduleDescription = "Stacked area chart module for Charts.",
+            moduleDescription = "Stacked area chart module for HDCharts.",
         )
     }
 }

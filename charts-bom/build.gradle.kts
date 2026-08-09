@@ -34,8 +34,8 @@ mavenPublishing {
     pom {
         ChartsPublishing.configurePom(
             pom = this,
-            moduleName = "Charts BOM",
-            moduleDescription = "Bill of Materials (BOM) for aligning Charts module versions.",
+            moduleName = "HDCharts BOM",
+            moduleDescription = "Bill of Materials (BOM) for aligning HDCharts module versions.",
         )
     }
 }

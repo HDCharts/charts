@@ -160,8 +160,8 @@ mavenPublishing {
     pom {
         ChartsPublishing.configurePom(
             pom = this,
-            moduleName = "Charts",
-            moduleDescription = "Charts.",
+            moduleName = "HDCharts",
+            moduleDescription = "HDCharts library.",
         )
     }
 }

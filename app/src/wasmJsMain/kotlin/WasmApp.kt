@@ -5,7 +5,7 @@ import io.github.dautovicharis.charts.app.di.initKoin
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
     initKoin()
-    ComposeViewport("Charts") {
+    ComposeViewport("HDCharts") {
         WebMainScreen()
     }
 }

@@ -7,7 +7,7 @@ inputs:
     description: Release version expected in docs/static release assets.
   source-sha:
     required: true
-    description: Charts commit SHA expected in docs release metadata.
+    description: HDCharts commit SHA expected in docs release metadata.
   docs-static-bucket:
     required: true
     description: S3 bucket containing docs/static assets.

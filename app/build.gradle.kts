@@ -53,7 +53,7 @@ kotlin {
     wasmJs {
         browser {
             commonWebpackConfig {
-                outputFileName = "Charts.js"
+                outputFileName = "HDCharts.js"
                 devServer = (devServer ?: KotlinWebpackConfig.DevServer()).copy()
             }
             binaries.executable()

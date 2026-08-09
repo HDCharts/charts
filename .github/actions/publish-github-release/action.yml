@@ -70,7 +70,7 @@ runs:
             owner, repo,
             tag_name: version,
             target_commitish: process.env.SOURCE_SHA,
-            name: `Charts ${version}`,
+            name: `HDCharts ${version}`,
             body,
             draft: false,
             prerelease: false,

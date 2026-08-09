@@ -1,4 +1,4 @@
-# Charts Snapshot
+# HDCharts Snapshot
 
 Workflow: `charts/.github/workflows/snapshot-release.yml`
 

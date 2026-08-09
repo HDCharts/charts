@@ -9,7 +9,7 @@ on:
         required: true
         type: string
       source-sha:
-        description: Charts commit represented by the Android build.
+        description: HDCharts commit represented by the Android build.
         required: true
         type: string
       published-version:

@@ -90,7 +90,7 @@ mavenPublishing {
         ChartsPublishing.configurePom(
             pom = this,
             moduleName = "Histogram Chart",
-            moduleDescription = "Histogram chart module for Charts.",
+            moduleDescription = "Histogram chart module for HDCharts.",
         )
     }
 }

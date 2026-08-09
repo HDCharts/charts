@@ -89,7 +89,7 @@ mavenPublishing {
         ChartsPublishing.configurePom(
             pom = this,
             moduleName = "Line Chart",
-            moduleDescription = "Line chart module for Charts.",
+            moduleDescription = "Line chart module for HDCharts.",
         )
     }
 }

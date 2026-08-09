@@ -15,7 +15,7 @@ on:
         required: true
         type: string
       source-sha:
-        description: Charts commit represented by this publication.
+        description: HDCharts commit represented by this publication.
         required: true
         type: string
       source-ref:
