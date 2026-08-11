@@ -1,6 +1,12 @@
 <p align="center">
   <img
-    src="./hdcharts-logo.svg"
+    src="./readme-assets/hdcharts-logo-light.svg#gh-light-mode-only"
+    alt="HDCharts logo"
+    align="center"
+    width="300"
+  />
+  <img
+    src="./readme-assets/hdcharts-logo-dark.svg#gh-dark-mode-only"
     alt="HDCharts logo"
     align="center"
     width="300"

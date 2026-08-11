@@ -5,11 +5,6 @@
   <style>
     .wordmark-primary { fill: #1F2933; }
     .wordmark-brand { fill: #39777A; }
-
-    @media (prefers-color-scheme: dark) {
-      .wordmark-primary { fill: #F7F9F8; }
-      .wordmark-brand { fill: #9AD7D3; }
-    }
   </style>
 
   <g transform="translate(0 16) scale(0.8)">
