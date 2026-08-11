@@ -8,7 +8,7 @@ is_code_change() {
   while IFS= read -r changed_file; do
     [[ -n "$changed_file" ]] || continue
     case "$changed_file" in
-      docs/*|release-notes/*|gif-baselines/*|scripts/*|.editorconfig|*.md|LICENSE|LICENSE.*) ;;
+      docs/*|release-notes/*|gif-baselines/*|scripts/*|.editorconfig|*.md|LICENSE|LICENSE.*|readme-assets/*) ;;
       *)
         echo "true"
         return
