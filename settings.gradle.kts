@@ -74,7 +74,7 @@ dependencyResolutionManagement {
 include(":app")
 include(":androidApp")
 include(":charts")
-include(":charts-demo-shared")
+include(":sample-shared")
 include(":charts-core")
 include(":charts-bar")
 include(":charts-histogram")
@@ -85,3 +85,8 @@ include(":charts-stacked-bar")
 include(":charts-stacked-area")
 include(":charts-bom")
 include(":smoke-line")
+
+// Demo app modules live under sample/.
+project(":app").projectDir = file("sample/app")
+project(":androidApp").projectDir = file("sample/androidApp")
+project(":sample-shared").projectDir = file("sample/shared")

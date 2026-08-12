@@ -16,7 +16,7 @@ inputs:
     description: Android release key password.
   keystore-path:
     required: false
-    default: androidApp/release.keystore
+    default: sample/androidApp/release.keystore
     description: Path where the decoded keystore should be written.
 
 runs:

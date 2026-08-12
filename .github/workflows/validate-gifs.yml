@@ -79,7 +79,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          report="androidApp/build/reports/gif-validation/summary.txt"
+          report="sample/androidApp/build/reports/gif-validation/summary.txt"
           if [[ ! -f "$report" ]]; then
             echo "::warning title=GIF validation report missing::No GIF validation summary was produced at $report"
             exit 0
@@ -106,6 +106,6 @@ jobs:
           name: gif-validation-${{ github.run_id }}
           path: |
             build/gif-validation/gifs/*.gif
-            androidApp/build/reports/gif-validation/**
+            sample/androidApp/build/reports/gif-validation/**
           if-no-files-found: warn
           retention-days: 14

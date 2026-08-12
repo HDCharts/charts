@@ -97,7 +97,7 @@ jobs:
           path: |
             **/build/reports/tests/**
             **/build/test-results/**
-            androidApp/build/reports/**
+            sample/androidApp/build/reports/**
 
   web-tests:
     name: Wasm Tests

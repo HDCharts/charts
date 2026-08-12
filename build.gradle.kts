@@ -250,7 +250,7 @@ tasks.register<Sync>("generateWebDemo") {
 
     // Only the leaf demo app distribution is needed for docs/static/demo.
     dependsOn(":app:wasmJsBrowserDistribution")
-    from(layout.projectDirectory.dir("app/build/dist/wasmJs/productionExecutable"))
+    from(layout.projectDirectory.dir("sample/app/build/dist/wasmJs/productionExecutable"))
     into(docsVersionDir.map { layout.projectDirectory.dir("docs/static/demo/$it") })
 
     doLast {

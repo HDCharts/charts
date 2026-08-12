@@ -52,8 +52,8 @@ run_self_test() {
     failures=$((failures + 1))
   fi
 
-  result="$(is_code_change $'README.md\ncharts-demo-shared/src/commonMain/kotlin/Foo.kt')"
-  if ! assert_equal "true" "$result" "charts-demo-shared source change"; then
+  result="$(is_code_change $'README.md\nsample/shared/src/commonMain/kotlin/Foo.kt')"
+  if ! assert_equal "true" "$result" "sample-shared source change"; then
     failures=$((failures + 1))
   fi
 
