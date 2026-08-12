@@ -24,8 +24,8 @@ object Config {
     const val SCM_CONNECTION = "$PROJECT_URL.git"
 
     // Demo app
-    const val DEMO_NAMESPACE = "$GROUP_ID.$ARTIFACT_ID.app"
-    const val DEMO_LIBRARY_NAMESPACE = "$GROUP_ID.$ARTIFACT_ID.app.library"
+    const val DEMO_NAMESPACE = "dev.hdcode.charts.app"
+    const val DEMO_LIBRARY_NAMESPACE = "dev.hdcode.charts.app.library"
     const val DEMO_VERSION_NAME = "1.0.0"
     const val DEMO_VERSION_CODE = 8
 
@@ -39,5 +39,5 @@ object Config {
     const val CHARTS_STACKED_BAR_NAMESPACE = "$GROUP_ID.charts.stackedbar"
     const val CHARTS_STACKED_AREA_NAMESPACE = "$GROUP_ID.charts.stackedarea"
     const val CHARTS_RADAR_NAMESPACE = "$GROUP_ID.charts.radar"
-    const val CHARTS_DEMO_SHARED_NAMESPACE = "$GROUP_ID.charts.demoshared"
+    const val SAMPLE_SHARED_NAMESPACE = "dev.hdcode.charts.sampleshared"
 }

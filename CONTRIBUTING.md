@@ -24,12 +24,13 @@ HDCharts
 │   │   └── :charts-stacked-area
 │   ├── BOM
 │   │   └── :charts-bom
-│   ├── shared demo resources
-│   │   └── :charts-demo-shared
-│   └── apps
-│       ├── :app (common)
-│       ├── :androidApp
-│       └── :iosApp
+│   └── sample
+│       ├── shared demo resources
+│       │   └── :sample-shared
+│       └── apps
+│           ├── :app (common)
+│           ├── :androidApp
+│           └── :iosApp
 ├── charts-playground (<a href="https://github.com/HDCharts/charts-playground">https://github.com/HDCharts/charts-playground</a>)
 ├── charts-docs (<a href="https://github.com/HDCharts/charts-docs">https://github.com/HDCharts/charts-docs</a>)
 └── charts-gif-recorder (<a href="https://github.com/hdcodedev/compose-gif-recorder">https://github.com/hdcodedev/compose-gif-recorder</a>)

@@ -1,0 +1,42 @@
+package dev.hdcode.charts.app.demo.line
+
+import androidx.compose.runtime.Composable
+import dev.hdcode.charts.app.ui.composable.ChartAspectRatioPreset
+import dev.hdcode.charts.app.ui.composable.ChartStyleItems
+import dev.hdcode.charts.app.ui.composable.StyleItems
+import dev.hdcode.charts.app.ui.composable.toChartModifier
+import dev.hdcode.charts.sampleshared.fixtures.ChartTestStyleFixtures
+import io.github.dautovicharis.charts.style.ChartViewDefaults
+import io.github.dautovicharis.charts.style.LineChartDefaults
+import io.github.dautovicharis.charts.style.LineChartStyle
+
+object LineChartStyleItems {
+    @Composable
+    fun defaultStyle(aspectRatioPreset: ChartAspectRatioPreset = ChartAspectRatioPreset.Square) =
+        LineChartDefaults.style(chartViewStyle = chartViewStyle(aspectRatioPreset))
+
+    @Composable
+    fun customStyle(aspectRatioPreset: ChartAspectRatioPreset = ChartAspectRatioPreset.Square) =
+        ChartTestStyleFixtures.lineCustomStyle(chartViewStyle = chartViewStyle(aspectRatioPreset))
+
+    @Composable
+    fun custom(aspectRatioPreset: ChartAspectRatioPreset = ChartAspectRatioPreset.Square): StyleItems =
+        lineChartTableItems(
+            currentStyle = customStyle(aspectRatioPreset),
+            defaultStyle = defaultStyle(),
+        )
+
+    @Composable
+    private fun chartViewStyle(aspectRatioPreset: ChartAspectRatioPreset) =
+        ChartViewDefaults.style(modifierChart = aspectRatioPreset.toChartModifier())
+}
+
+@Composable
+fun lineChartTableItems(
+    currentStyle: LineChartStyle,
+    defaultStyle: LineChartStyle = LineChartDefaults.style(),
+): StyleItems =
+    ChartStyleItems(
+        currentStyle = currentStyle,
+        defaultStyle = defaultStyle,
+    )

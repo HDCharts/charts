@@ -106,7 +106,7 @@ jobs:
       - name: Remove Android signing keystore
         if: always()
         shell: bash
-        run: rm -f androidApp/release.keystore
+        run: rm -f sample/androidApp/release.keystore
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v6
@@ -127,7 +127,7 @@ jobs:
             exit 1
           fi
 
-          apk_path="androidApp/build/outputs/apk/release/androidApp-release.apk"
+          apk_path="sample/androidApp/build/outputs/apk/release/androidApp-release.apk"
           if [[ ! -f "${apk_path}" ]]; then
             echo "APK not found at: ${apk_path}" >&2
             exit 1
