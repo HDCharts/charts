@@ -52,28 +52,7 @@ class StackedAreaChartStyle(
     val xAxisLabelColor: Color,
     val xAxisLabelSize: TextUnit,
     val xAxisLabelMaxCount: Int,
-) : Style {
-    override fun getProperties(): List<Pair<String, Any>> =
-        listOf(
-            StackedAreaChartStyle::areaColor.name to areaColor,
-            StackedAreaChartStyle::areaColors.name to areaColors,
-            StackedAreaChartStyle::fillAlpha.name to fillAlpha,
-            StackedAreaChartStyle::lineVisible.name to lineVisible,
-            StackedAreaChartStyle::lineColor.name to lineColor,
-            StackedAreaChartStyle::lineColors.name to lineColors,
-            StackedAreaChartStyle::lineWidth.name to lineWidth,
-            StackedAreaChartStyle::bezier.name to bezier,
-            StackedAreaChartStyle::zoomControlsVisible.name to zoomControlsVisible,
-            StackedAreaChartStyle::yAxisLabelsVisible.name to yAxisLabelsVisible,
-            StackedAreaChartStyle::yAxisLabelColor.name to yAxisLabelColor,
-            StackedAreaChartStyle::yAxisLabelSize.name to yAxisLabelSize,
-            StackedAreaChartStyle::yAxisLabelCount.name to yAxisLabelCount,
-            StackedAreaChartStyle::xAxisLabelsVisible.name to xAxisLabelsVisible,
-            StackedAreaChartStyle::xAxisLabelColor.name to xAxisLabelColor,
-            StackedAreaChartStyle::xAxisLabelSize.name to xAxisLabelSize,
-            StackedAreaChartStyle::xAxisLabelMaxCount.name to xAxisLabelMaxCount,
-        )
-}
+)
 
 object StackedAreaChartDefaults {
     @Composable

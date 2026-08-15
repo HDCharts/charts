@@ -34,25 +34,27 @@ import dev.hdcode.charts.app.ui.composable.ChartAspectRatioToggle
 import dev.hdcode.charts.app.ui.composable.ChartDemo
 import dev.hdcode.charts.app.ui.composable.ChartPreset
 import dev.hdcode.charts.app.ui.composable.ChartPresetToggle
-import dev.hdcode.charts.app.ui.composable.StyleItems
+import dev.hdcode.charts.app.ui.composable.toChartModifier
+import dev.hdcode.charts.sampleshared.fixtures.ChartTestStyleFixtures
 import dev.hdcode.charts.sampleshared.theme.LocalChartColors
 import dev.hdcode.charts.sampleshared.theme.seriesColors
 import io.github.dautovicharis.charts.StackedBarChart
+import io.github.dautovicharis.charts.style.ChartContainerDefaults
+import io.github.dautovicharis.charts.style.StackedBarChartDefaults
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.math.roundToInt
 
 @Composable
-fun StackedBarChartDemo(
-    viewModel: StackedBarChartViewModel = koinViewModel(),
-    onStyleItemsChanged: (StyleItems?) -> Unit = {},
-) {
+fun StackedBarChartDemo(viewModel: StackedBarChartViewModel = koinViewModel()) {
     val dataSet by viewModel.dataSet.collectAsStateWithLifecycle()
     val isPlaying by viewModel.isPlaying.collectAsStateWithLifecycle()
     val controlsState by viewModel.controlsState.collectAsStateWithLifecycle()
     val chartColors = LocalChartColors.current
     var preset by remember { mutableStateOf(ChartPreset.Default) }
     var aspectRatioPreset by remember { mutableStateOf(ChartAspectRatioPreset.Square) }
+    val chartContainerStyle =
+        ChartContainerDefaults.style(modifierChart = aspectRatioPreset.toChartModifier())
     val barColors =
         remember(dataSet.segmentKeys, chartColors) {
             chartColors.seriesColors(dataSet.segmentKeys.size)
@@ -60,16 +62,8 @@ fun StackedBarChartDemo(
 
     val refresh: () -> Unit = viewModel::refresh
 
-    val styleItems =
-        when (preset) {
-            ChartPreset.Default -> StackedBarChartStyleItems.default(aspectRatioPreset)
-            ChartPreset.Custom -> StackedBarChartStyleItems.custom(barColors, aspectRatioPreset)
-        }
-
     ChartDemo(
-        styleItems = styleItems,
         onRefresh = refresh,
-        onStyleItemsChanged = onStyleItemsChanged,
         presetContent = {
             Column(
                 verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -114,14 +108,18 @@ fun StackedBarChartDemo(
                 ChartPreset.Default -> {
                     StackedBarChart(
                         dataSet = dataSet.dataSet,
-                        style = StackedBarChartStyleItems.defaultStyle(aspectRatioPreset),
+                        style = StackedBarChartDefaults.style(chartContainerStyle = chartContainerStyle),
                     )
                 }
 
                 ChartPreset.Custom -> {
                     StackedBarChart(
                         dataSet = dataSet.dataSet,
-                        style = StackedBarChartStyleItems.customStyle(barColors, aspectRatioPreset),
+                        style =
+                            ChartTestStyleFixtures.stackedBarCustomStyle(
+                                chartContainerStyle = chartContainerStyle,
+                                segmentCount = barColors.size,
+                            ),
                     )
                 }
             }

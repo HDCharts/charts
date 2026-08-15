@@ -54,31 +54,7 @@ class StackedBarChartStyle(
     val selectionLineVisible: Boolean,
     val selectionLineColor: Color,
     val selectionLineWidth: Float,
-) : Style {
-    /**
-     * Returns a list of the properties of the StackedBarChartStyle.
-     */
-    override fun getProperties(): List<Pair<String, Any>> =
-        listOf(
-            StackedBarChartStyle::barColor.name to barColor,
-            StackedBarChartStyle::barAlpha.name to barAlpha,
-            StackedBarChartStyle::space.name to space,
-            StackedBarChartStyle::barColors.name to barColors,
-            StackedBarChartStyle::minBarWidth.name to minBarWidth,
-            StackedBarChartStyle::zoomControlsVisible.name to zoomControlsVisible,
-            StackedBarChartStyle::yAxisLabelsVisible.name to yAxisLabelsVisible,
-            StackedBarChartStyle::yAxisLabelColor.name to yAxisLabelColor,
-            StackedBarChartStyle::yAxisLabelSize.name to yAxisLabelSize,
-            StackedBarChartStyle::yAxisLabelCount.name to yAxisLabelCount,
-            StackedBarChartStyle::xAxisLabelsVisible.name to xAxisLabelsVisible,
-            StackedBarChartStyle::xAxisLabelColor.name to xAxisLabelColor,
-            StackedBarChartStyle::xAxisLabelSize.name to xAxisLabelSize,
-            StackedBarChartStyle::xAxisLabelMaxCount.name to xAxisLabelMaxCount,
-            StackedBarChartStyle::selectionLineVisible.name to selectionLineVisible,
-            StackedBarChartStyle::selectionLineColor.name to selectionLineColor,
-            StackedBarChartStyle::selectionLineWidth.name to selectionLineWidth,
-        )
-}
+)
 
 /**
  * An object that provides default styles for a Stacked Bar Chart.

@@ -45,34 +45,27 @@ import dev.hdcode.charts.app.demo.timeline.timelineAnimationDurationMillis
 import dev.hdcode.charts.app.ui.composable.ChartAspectRatioPreset
 import dev.hdcode.charts.app.ui.composable.ChartAspectRatioToggle
 import dev.hdcode.charts.app.ui.composable.ChartDemo
-import dev.hdcode.charts.app.ui.composable.StyleItems
+import dev.hdcode.charts.app.ui.composable.toChartModifier
+import dev.hdcode.charts.sampleshared.fixtures.ChartTestStyleFixtures
 import io.github.dautovicharis.charts.LineChart
 import io.github.dautovicharis.charts.LineChartRenderMode
+import io.github.dautovicharis.charts.style.ChartContainerDefaults
+import io.github.dautovicharis.charts.style.LineChartDefaults
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.math.roundToInt
 
 @Composable
-fun LineChartDemo(
-    viewModel: LineChartViewModel = koinViewModel(),
-    onStyleItemsChanged: (StyleItems?) -> Unit = {},
-) {
+fun LineChartDemo(viewModel: LineChartViewModel = koinViewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val timelineAnimationDuration = timelineAnimationDurationMillis(uiState.timelineControlsState.updateIntervalMs)
     var aspectRatioPreset by remember { mutableStateOf(ChartAspectRatioPreset.Square) }
-
-    val styleItems =
-        when (uiState.preset) {
-            LineDemoPreset.Default -> lineChartTableItems(LineChartStyleItems.defaultStyle(aspectRatioPreset))
-            LineDemoPreset.Timeline -> lineChartTableItems(LineChartStyleItems.defaultStyle(aspectRatioPreset))
-            LineDemoPreset.Custom -> LineChartStyleItems.custom(aspectRatioPreset)
-        }
+    val chartContainerStyle =
+        ChartContainerDefaults.style(modifierChart = aspectRatioPreset.toChartModifier())
 
     ChartDemo(
-        styleItems = styleItems,
         onRefresh = viewModel::refreshForSelectedPreset,
         refreshVisible = uiState.preset != LineDemoPreset.Timeline,
-        onStyleItemsChanged = onStyleItemsChanged,
         presetContent = {
             Column(
                 verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -130,14 +123,14 @@ fun LineChartDemo(
             LineDemoPreset.Default -> {
                 LineChart(
                     dataSet = uiState.dataSet,
-                    style = LineChartStyleItems.defaultStyle(aspectRatioPreset),
+                    style = LineChartDefaults.style(chartContainerStyle = chartContainerStyle),
                 )
             }
 
             LineDemoPreset.Timeline -> {
                 LineChart(
                     dataSet = uiState.dataSet,
-                    style = LineChartStyleItems.defaultStyle(aspectRatioPreset),
+                    style = LineChartDefaults.style(chartContainerStyle = chartContainerStyle),
                     renderMode = LineChartRenderMode.Timeline,
                     animationDurationMillis = timelineAnimationDuration,
                 )
@@ -146,7 +139,7 @@ fun LineChartDemo(
             LineDemoPreset.Custom -> {
                 LineChart(
                     dataSet = uiState.dataSet,
-                    style = LineChartStyleItems.customStyle(aspectRatioPreset),
+                    style = ChartTestStyleFixtures.lineCustomStyle(chartContainerStyle = chartContainerStyle),
                 )
             }
         }

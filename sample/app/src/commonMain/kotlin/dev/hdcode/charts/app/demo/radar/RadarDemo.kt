@@ -15,32 +15,22 @@ import chartsproject.app.generated.resources.cd_play_live_updates
 import dev.hdcode.charts.app.ui.composable.ChartDemo
 import dev.hdcode.charts.app.ui.composable.ChartPreset
 import dev.hdcode.charts.app.ui.composable.ChartPresetToggle
-import dev.hdcode.charts.app.ui.composable.StyleItems
+import dev.hdcode.charts.sampleshared.fixtures.ChartTestStyleFixtures
 import io.github.dautovicharis.charts.RadarChart
+import io.github.dautovicharis.charts.style.ChartContainerDefaults
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun RadarChartDemo(
-    viewModel: RadarChartViewModel = koinViewModel(),
-    onStyleItemsChanged: (StyleItems?) -> Unit = {},
-) {
+fun RadarChartDemo(viewModel: RadarChartViewModel = koinViewModel()) {
     val dataSet by viewModel.dataSet.collectAsStateWithLifecycle()
     val isPlaying by viewModel.isPlaying.collectAsStateWithLifecycle()
     val seriesKeys = dataSet.seriesKeys
 
     val refresh: () -> Unit = viewModel::refresh
 
-    val styleItems =
-        when (dataSet.preset) {
-            ChartPreset.Default -> RadarChartStyleItems.default()
-            ChartPreset.Custom -> RadarChartStyleItems.custom(seriesKeys)
-        }
-
     ChartDemo(
-        styleItems = styleItems,
         onRefresh = refresh,
-        onStyleItemsChanged = onStyleItemsChanged,
         presetContent = {
             ChartPresetToggle(
                 selectedPreset = dataSet.preset,
@@ -72,7 +62,11 @@ fun RadarChartDemo(
             ChartPreset.Custom -> {
                 RadarChart(
                     dataSet = dataSet.customDataSet,
-                    style = RadarChartStyleItems.customStyle(seriesKeys),
+                    style =
+                        ChartTestStyleFixtures.radarCustomStyle(
+                            chartContainerStyle = ChartContainerDefaults.style(),
+                            seriesKeys = seriesKeys,
+                        ),
                 )
             }
         }
