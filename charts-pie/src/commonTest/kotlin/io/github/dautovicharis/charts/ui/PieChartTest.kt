@@ -13,6 +13,7 @@ import io.github.dautovicharis.charts.PieChart
 import io.github.dautovicharis.charts.internal.TestTags
 import io.github.dautovicharis.charts.internal.ValidationErrors.MIN_REQUIRED_PIE
 import io.github.dautovicharis.charts.internal.ValidationErrors.RULE_DATA_POINTS_LESS_THAN_MIN
+import io.github.dautovicharis.charts.internal.format
 import io.github.dautovicharis.charts.internal.piechart.calculatePercentages
 import io.github.dautovicharis.charts.mock.MockTest.TITLE
 import io.github.dautovicharis.charts.mock.MockTest.colors
