@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.sp
  * A class that defines the style for a Radar Chart.
  *
  * @property modifier The modifier to be applied to the chart.
- * @property chartViewStyle The style to be applied to the chart view.
+ * @property chartContainerStyle The style to be applied to the chart view.
  * @property gridColor The color of the grid lines.
  * @property gridLineWidth The width of the grid lines.
  * @property gridSteps The number of grid rings.
@@ -46,7 +46,7 @@ import androidx.compose.ui.unit.sp
 @Immutable
 class RadarChartStyle(
     val modifier: Modifier,
-    val chartViewStyle: ChartViewStyle,
+    val chartContainerStyle: ChartContainerStyle,
     val gridColor: Color,
     val gridLineWidth: Float,
     val gridSteps: Int,
@@ -147,12 +147,12 @@ object RadarChartDefaults {
         lineWidth: Float = 3f,
         fillAlpha: Float = defaultChartAlpha(light = 0.25f, dark = 0.2f),
         fillVisible: Boolean = true,
-        chartViewStyle: ChartViewStyle = ChartViewDefaults.style(),
+        chartContainerStyle: ChartContainerStyle = ChartContainerDefaults.style(),
     ): RadarChartStyle {
         val modifier: Modifier =
             Modifier
                 .wrapContentSize()
-                .padding(chartViewStyle.innerPadding)
+                .padding(chartContainerStyle.innerPadding)
                 .aspectRatio(1f)
 
         val pointColorSameAsLine = pointColor == defaultPointColor()
@@ -165,7 +165,7 @@ object RadarChartDefaults {
 
         return RadarChartStyle(
             modifier = modifier,
-            chartViewStyle = chartViewStyle,
+            chartContainerStyle = chartContainerStyle,
             gridColor = gridColor,
             gridLineWidth = gridLineWidth,
             gridSteps = gridSteps,

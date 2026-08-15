@@ -121,7 +121,7 @@ internal fun LineChartImpl(
         val showCompactToggle = isDenseMorphData
         val showZoomControlsInHeader = isDenseMorphMode && style.zoomControlsVisible
         val showHeader = title.isNotBlank() || showCompactToggle || showZoomControlsInHeader
-        Chart(chartViewsStyle = style.chartViewStyle) {
+        Chart(chartContainerStyle = style.chartContainerStyle) {
             if (showHeader) {
                 LineChartHeader(
                     title = title,
@@ -143,10 +143,10 @@ internal fun LineChartImpl(
                         Modifier
                             .fillMaxWidth()
                             .padding(
-                                top = style.chartViewStyle.innerPadding,
-                                start = style.chartViewStyle.innerPadding,
-                                end = style.chartViewStyle.innerPadding,
-                                bottom = if (showZoomControlsInHeader) style.chartViewStyle.innerPadding else 0.dp,
+                                top = style.chartContainerStyle.innerPadding,
+                                start = style.chartContainerStyle.innerPadding,
+                                end = style.chartContainerStyle.innerPadding,
+                                bottom = if (showZoomControlsInHeader) style.chartContainerStyle.innerPadding else 0.dp,
                             ),
                 )
             }
@@ -171,7 +171,7 @@ internal fun LineChartImpl(
 
             if (renderData.hasCategories() || isTimelineMode) {
                 Legend(
-                    chartViewsStyle = style.chartViewStyle,
+                    chartContainerStyle = style.chartContainerStyle,
                     legend = renderData.items.map { it.label }.toImmutableList(),
                     colors = lineColors,
                     labels = labels,
@@ -179,6 +179,6 @@ internal fun LineChartImpl(
             }
         }
     } else {
-        ChartErrors(style = style.chartViewStyle, errors = errors.toImmutableList())
+        ChartErrors(style = style.chartContainerStyle, errors = errors.toImmutableList())
     }
 }

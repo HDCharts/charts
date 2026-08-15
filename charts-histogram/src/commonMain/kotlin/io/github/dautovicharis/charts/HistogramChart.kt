@@ -46,6 +46,6 @@ fun HistogramChart(
             )
         }
     } else {
-        ChartErrors(style = style.chartViewStyle, errors = errors.toImmutableList())
+        ChartErrors(style = style.chartContainerStyle, errors = errors.toImmutableList())
     }
 }

@@ -25,7 +25,7 @@ internal fun BarChartHeader(
 ) {
     ChartHeaderLayout(
         title = title,
-        titleTextStyle = style.chartViewStyle.styleTitle,
+        titleTextStyle = style.chartContainerStyle.styleTitle,
         showControls = showDensityToggle || showZoomControls,
         modifier = modifier,
     ) {

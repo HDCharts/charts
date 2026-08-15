@@ -46,7 +46,7 @@ fun BarChart(
             selectedBarIndex = selectedBarIndex,
         )
     } else {
-        ChartErrors(style = style.chartViewStyle, errors = errors.toImmutableList())
+        ChartErrors(style = style.chartContainerStyle, errors = errors.toImmutableList())
     }
 }
 
@@ -58,7 +58,7 @@ private fun BarChartContent(
     animateOnStart: Boolean,
     selectedBarIndex: Int,
 ) {
-    Chart(chartViewsStyle = style.chartViewStyle) {
+    Chart(chartContainerStyle = style.chartContainerStyle) {
         BarChart(
             chartData = dataSet.data.item,
             title = dataSet.data.label,

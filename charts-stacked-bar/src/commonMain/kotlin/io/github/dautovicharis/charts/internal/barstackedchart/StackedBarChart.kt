@@ -292,7 +292,7 @@ internal fun StackedBarChart(
                     Modifier
                         .fillMaxWidth()
                         .weight(1f)
-                        .padding(top = if (showHeader) style.chartViewStyle.innerPadding else 0.dp),
+                        .padding(top = if (showHeader) style.chartContainerStyle.innerPadding else 0.dp),
             )
         }
     }

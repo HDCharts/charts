@@ -10,7 +10,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import io.github.dautovicharis.charts.internal.common.composable.Chart
 import io.github.dautovicharis.charts.internal.common.composable.ChartErrors
 import io.github.dautovicharis.charts.internal.common.theme.ChartsDefaultTheme
-import io.github.dautovicharis.charts.style.ChartViewDefaults
+import io.github.dautovicharis.charts.style.ChartContainerDefaults
 import kotlinx.collections.immutable.persistentListOf
 
 @Retention(AnnotationRetention.BINARY)
@@ -40,7 +40,7 @@ fun ChartsPreviewTheme(content: @Composable () -> Unit) {
 @Composable
 private fun ChartsCoreContainerPreview() {
     ChartsPreviewTheme {
-        Chart(chartViewsStyle = ChartViewDefaults.style()) {
+        Chart(chartContainerStyle = ChartContainerDefaults.style()) {
             Text("HDCharts Core Container")
         }
     }
@@ -51,7 +51,7 @@ private fun ChartsCoreContainerPreview() {
 private fun ChartsCoreErrorsPreview() {
     ChartsPreviewTheme {
         ChartErrors(
-            style = ChartViewDefaults.style(),
+            style = ChartContainerDefaults.style(),
             errors =
                 persistentListOf(
                     "Error: at least two values are required.",

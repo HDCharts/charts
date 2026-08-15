@@ -15,12 +15,12 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import io.github.dautovicharis.charts.internal.TestTags
 import io.github.dautovicharis.charts.internal.common.theme.ChartsDefaultTheme
-import io.github.dautovicharis.charts.style.ChartViewStyle
+import io.github.dautovicharis.charts.style.ChartContainerStyle
 import kotlinx.collections.immutable.ImmutableList
 
 @Composable
 fun ChartErrors(
-    style: ChartViewStyle,
+    style: ChartContainerStyle,
     errors: ImmutableList<String>,
 ) {
     ChartsDefaultTheme(content = {

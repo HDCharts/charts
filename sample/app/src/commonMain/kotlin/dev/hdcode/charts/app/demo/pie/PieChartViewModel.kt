@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.hdcode.charts.app.ui.composable.ChartPreset
 import dev.hdcode.charts.sampleshared.data.PieSampleUseCase
-import io.github.dautovicharis.charts.model.ChartDataSet
+import io.github.dautovicharis.charts.model.PieSlice
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,8 +17,8 @@ import kotlinx.coroutines.launch
 private const val LIVE_UPDATE_INTERVAL_MS = 2000L
 
 data class PieChartState(
-    val dataSet: ChartDataSet,
-    val segmentKeys: List<String> = emptyList(),
+    val slices: List<PieSlice>,
+    val title: String,
     val preset: ChartPreset = ChartPreset.Default,
 )
 
@@ -28,15 +28,15 @@ class PieChartViewModel(
     private val initialDefaultSample = pieSampleUseCase.initialPieSample()
     private val initialCustomSample = pieSampleUseCase.initialPieCustomSample()
     private val refreshRange = pieSampleUseCase.pieRefreshRange()
-    private val defaultSegmentCount = initialDefaultSample.segmentKeys.size
+    private val defaultSegmentCount = initialDefaultSample.slices.size
     private var liveUpdatesJob: Job? = null
 
     private val _dataSet =
         MutableStateFlow(
             initialDefaultSample.let { sample ->
                 PieChartState(
-                    dataSet = sample.dataSet,
-                    segmentKeys = sample.segmentKeys,
+                    slices = sample.slices,
+                    title = sample.title,
                     preset = ChartPreset.Default,
                 )
             },
@@ -60,8 +60,8 @@ class PieChartViewModel(
             )
         _dataSet.update {
             it.copy(
-                dataSet = sample.dataSet,
-                segmentKeys = sample.segmentKeys,
+                slices = sample.slices,
+                title = sample.title,
             )
         }
     }
@@ -71,8 +71,8 @@ class PieChartViewModel(
             pieSampleUseCase.pieCustomSample(range)
         _dataSet.update {
             it.copy(
-                dataSet = sample.dataSet,
-                segmentKeys = sample.segmentKeys,
+                slices = sample.slices,
+                title = sample.title,
             )
         }
     }
@@ -103,8 +103,8 @@ class PieChartViewModel(
             }
         _dataSet.update {
             it.copy(
-                dataSet = sample.dataSet,
-                segmentKeys = sample.segmentKeys,
+                slices = sample.slices,
+                title = sample.title,
             )
         }
     }

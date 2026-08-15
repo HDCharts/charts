@@ -19,13 +19,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import io.github.dautovicharis.charts.style.ChartViewStyle
+import io.github.dautovicharis.charts.style.ChartContainerStyle
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
 @Composable
 fun Legend(
-    chartViewsStyle: ChartViewStyle,
+    chartContainerStyle: ChartContainerStyle,
     legend: ImmutableList<String>,
     colors: ImmutableList<Color>,
     labels: ImmutableList<String> = persistentListOf(),
@@ -34,9 +34,9 @@ fun Legend(
         items = legend,
         colors = colors,
         fallbackColor = MaterialTheme.colorScheme.primary,
-        itemPadding = chartViewsStyle.innerPadding,
+        itemPadding = chartContainerStyle.innerPadding,
         modifier =
-            chartViewsStyle.modifierLegend.animateContentSize(
+            chartContainerStyle.modifierLegend.animateContentSize(
                 animationSpec =
                     tween(
                         durationMillis = 300,

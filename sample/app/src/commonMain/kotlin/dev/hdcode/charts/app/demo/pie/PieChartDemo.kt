@@ -33,9 +33,14 @@ fun PieChartDemo(
     val state by viewModel.dataSet.collectAsStateWithLifecycle()
     val isPlaying by viewModel.isPlaying.collectAsStateWithLifecycle()
     val chartColors = LocalChartColors.current
-    val pieColors =
-        remember(state.segmentKeys, chartColors) {
-            chartColors.seriesColors(state.segmentKeys.size)
+    val slices =
+        when (state.preset) {
+            ChartPreset.Default -> state.slices
+            ChartPreset.Custom ->
+                remember(state.slices, chartColors) {
+                    val palette = chartColors.seriesColors(state.slices.size)
+                    state.slices.mapIndexed { index, slice -> slice.copy(color = palette[index]) }
+                }
         }
 
     val styleItems =
@@ -45,7 +50,7 @@ fun PieChartDemo(
                     currentStyle = PieChartDefaults.style(),
                     defaultStyle = PieChartDefaults.style(),
                 )
-            ChartPreset.Custom -> PieChartStyleItems.custom(pieColors)
+            ChartPreset.Custom -> PieChartStyleItems.custom()
         }
 
     ChartDemo(
@@ -73,19 +78,17 @@ fun PieChartDemo(
             }
         },
     ) {
-        when (state.preset) {
-            ChartPreset.Default -> {
-                PieChart(
-                    dataSet = state.dataSet,
-                )
-            }
-
-            ChartPreset.Custom -> {
-                PieChart(
-                    dataSet = state.dataSet,
-                    style = PieChartStyleItems.customStyle(pieColors),
-                )
-            }
-        }
+        PieChart(
+            data = slices,
+            title = state.title,
+            style =
+                if (state.preset ==
+                    ChartPreset.Default
+                ) {
+                    PieChartDefaults.style()
+                } else {
+                    PieChartStyleItems.customStyle()
+                },
+        )
     }
 }

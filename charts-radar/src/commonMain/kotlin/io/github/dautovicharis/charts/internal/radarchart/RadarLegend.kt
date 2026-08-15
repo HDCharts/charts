@@ -12,12 +12,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import io.github.dautovicharis.charts.internal.common.composable.LegendItems
-import io.github.dautovicharis.charts.style.ChartViewStyle
+import io.github.dautovicharis.charts.style.ChartContainerStyle
 import kotlinx.collections.immutable.ImmutableList
 
 @Composable
 internal fun RadarLegend(
-    chartViewsStyle: ChartViewStyle,
+    chartContainerStyle: ChartContainerStyle,
     series: ImmutableList<String>,
     seriesColors: ImmutableList<Color>,
     seriesLabels: ImmutableList<String>,
@@ -26,7 +26,7 @@ internal fun RadarLegend(
 ) {
     Column(
         modifier =
-            chartViewsStyle.modifierLegend.animateContentSize(
+            chartContainerStyle.modifierLegend.animateContentSize(
                 animationSpec =
                     tween(
                         durationMillis = 300,
@@ -36,12 +36,12 @@ internal fun RadarLegend(
     ) {
         if (series.isNotEmpty()) {
             LegendTitle("Series")
-            Spacer(modifier = Modifier.height(chartViewsStyle.innerPadding / 2f))
+            Spacer(modifier = Modifier.height(chartContainerStyle.innerPadding / 2f))
             LegendItems(
                 items = series,
                 colors = seriesColors,
                 fallbackColor = MaterialTheme.colorScheme.primary,
-                itemPadding = chartViewsStyle.innerPadding,
+                itemPadding = chartContainerStyle.innerPadding,
                 label = { index, seriesName ->
                     seriesLegendLabel(
                         seriesName = seriesName,
@@ -54,16 +54,16 @@ internal fun RadarLegend(
 
         if (categories.isNotEmpty()) {
             if (series.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(chartViewsStyle.innerPadding / 2f))
+                Spacer(modifier = Modifier.height(chartContainerStyle.innerPadding / 2f))
             }
             LegendTitle("Categories")
-            Spacer(modifier = Modifier.height(chartViewsStyle.innerPadding / 2f))
+            Spacer(modifier = Modifier.height(chartContainerStyle.innerPadding / 2f))
             val neutral = MaterialTheme.colorScheme.onSurfaceVariant
             LegendItems(
                 items = categories,
                 colors = categoryColors,
                 fallbackColor = neutral,
-                itemPadding = chartViewsStyle.innerPadding,
+                itemPadding = chartContainerStyle.innerPadding,
             )
         }
     }

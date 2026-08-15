@@ -86,7 +86,7 @@ internal fun getSelectedIndex(
     pointX: Float,
     pointY: Float,
     size: IntSize,
-    slices: List<PieSlice>,
+    slices: List<SliceGeometry>,
 ): Int =
     when (isPointInCircle(pointX = pointX, pointY = pointY, size = size)) {
         true -> {
@@ -99,19 +99,19 @@ internal fun getSelectedIndex(
         else -> NO_SELECTION
     }
 
-internal fun createPieSlices(data: ChartData): List<PieSlice> = createPieSlices(data.points)
+internal fun createPieSlices(data: ChartData): List<SliceGeometry> = createPieSlices(data.points)
 
-internal fun createPieSlices(values: List<Double>): List<PieSlice> =
-    mutableListOf<PieSlice>().apply {
+internal fun createPieSlices(values: List<Double>): List<SliceGeometry> =
+    mutableListOf<SliceGeometry>().apply {
         var lastEndDeg = 0.0
         val maxValue = values.sum()
         for (slice in values) {
-            val normalized = slice / maxValue
             val startDeg = lastEndDeg
+            val normalized = if (maxValue == 0.0) 0.0 else slice / maxValue
             val endDeg = lastEndDeg + (normalized * 360)
             lastEndDeg = endDeg
             add(
-                PieSlice(
+                SliceGeometry(
                     startDeg = startDeg.toFloat(),
                     endDeg = endDeg.toFloat(),
                     value = slice,
@@ -133,7 +133,7 @@ internal fun createPieSlices(values: List<Double>): List<PieSlice> =
 internal fun getCoordinatesForSlice(
     index: Int,
     size: IntSize,
-    slices: List<PieSlice>,
+    slices: List<SliceGeometry>,
 ): Offset {
     val slice = slices[index]
     val startAngle = slice.startDeg

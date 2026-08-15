@@ -1,11 +1,11 @@
 package dev.hdcode.charts.sampleshared.data
 
-import io.github.dautovicharis.charts.model.ChartDataSet
 import io.github.dautovicharis.charts.model.MultiChartDataSet
+import io.github.dautovicharis.charts.model.PieSlice
 
 data class PieSampleData(
-    val dataSet: ChartDataSet,
-    val segmentKeys: List<String>,
+    val slices: List<PieSlice>,
+    val title: String,
 )
 
 data class MultiLineSampleData(

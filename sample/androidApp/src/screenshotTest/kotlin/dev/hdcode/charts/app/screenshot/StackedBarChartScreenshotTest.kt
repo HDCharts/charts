@@ -8,7 +8,7 @@ import dev.hdcode.charts.app.screenshot.shared.ScreenshotPreview
 import dev.hdcode.charts.app.screenshot.shared.ScreenshotSurface
 import dev.hdcode.charts.sampleshared.fixtures.ChartTestStyleFixtures
 import io.github.dautovicharis.charts.StackedBarChart
-import io.github.dautovicharis.charts.style.ChartViewDefaults
+import io.github.dautovicharis.charts.style.ChartContainerDefaults
 
 @PreviewTest
 @ScreenshotPreview
@@ -31,7 +31,7 @@ fun StackedBarChartCustomPreview() {
             dataSet = SCREENSHOT_STACKED_BAR_SAMPLE_USE_CASE.initialStackedBarSample().dataSet,
             style =
                 ChartTestStyleFixtures.stackedBarCustomStyle(
-                    chartViewStyle = ChartViewDefaults.style(),
+                    chartContainerStyle = ChartContainerDefaults.style(),
                     segmentCount = 4,
                 ),
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,

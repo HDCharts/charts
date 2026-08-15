@@ -8,7 +8,7 @@ import dev.hdcode.charts.app.screenshot.shared.ScreenshotPreview
 import dev.hdcode.charts.app.screenshot.shared.ScreenshotSurface
 import dev.hdcode.charts.sampleshared.fixtures.ChartTestStyleFixtures
 import io.github.dautovicharis.charts.BarChart
-import io.github.dautovicharis.charts.style.ChartViewDefaults
+import io.github.dautovicharis.charts.style.ChartContainerDefaults
 
 @PreviewTest
 @ScreenshotPreview
@@ -30,7 +30,7 @@ fun BarChartCustomPreview() {
         val dataSet = SCREENSHOT_BAR_SAMPLE_USE_CASE.initialBarDataSet()
         BarChart(
             dataSet = dataSet,
-            style = ChartTestStyleFixtures.barCustomStyle(chartViewStyle = ChartViewDefaults.style()),
+            style = ChartTestStyleFixtures.barCustomStyle(chartContainerStyle = ChartContainerDefaults.style()),
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
         )
     }
@@ -46,7 +46,7 @@ fun BarChartCustomBarColorsPreview() {
             dataSet = dataSet,
             style =
                 ChartTestStyleFixtures.barCustomStyle(
-                    chartViewStyle = ChartViewDefaults.style(),
+                    chartContainerStyle = ChartContainerDefaults.style(),
                     barCount = dataSet.data.item.points.size,
                     useBarColors = true,
                 ),

@@ -6,18 +6,18 @@ import dev.hdcode.charts.app.ui.composable.ChartStyleItems
 import dev.hdcode.charts.app.ui.composable.StyleItems
 import dev.hdcode.charts.app.ui.composable.toChartModifier
 import dev.hdcode.charts.sampleshared.fixtures.ChartTestStyleFixtures
-import io.github.dautovicharis.charts.style.ChartViewDefaults
+import io.github.dautovicharis.charts.style.ChartContainerDefaults
 import io.github.dautovicharis.charts.style.LineChartDefaults
 import io.github.dautovicharis.charts.style.LineChartStyle
 
 object LineChartStyleItems {
     @Composable
     fun defaultStyle(aspectRatioPreset: ChartAspectRatioPreset = ChartAspectRatioPreset.Square) =
-        LineChartDefaults.style(chartViewStyle = chartViewStyle(aspectRatioPreset))
+        LineChartDefaults.style(chartContainerStyle = chartContainerStyle(aspectRatioPreset))
 
     @Composable
     fun customStyle(aspectRatioPreset: ChartAspectRatioPreset = ChartAspectRatioPreset.Square) =
-        ChartTestStyleFixtures.lineCustomStyle(chartViewStyle = chartViewStyle(aspectRatioPreset))
+        ChartTestStyleFixtures.lineCustomStyle(chartContainerStyle = chartContainerStyle(aspectRatioPreset))
 
     @Composable
     fun custom(aspectRatioPreset: ChartAspectRatioPreset = ChartAspectRatioPreset.Square): StyleItems =
@@ -27,8 +27,8 @@ object LineChartStyleItems {
         )
 
     @Composable
-    private fun chartViewStyle(aspectRatioPreset: ChartAspectRatioPreset) =
-        ChartViewDefaults.style(modifierChart = aspectRatioPreset.toChartModifier())
+    private fun chartContainerStyle(aspectRatioPreset: ChartAspectRatioPreset) =
+        ChartContainerDefaults.style(modifierChart = aspectRatioPreset.toChartModifier())
 }
 
 @Composable

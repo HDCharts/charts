@@ -12,7 +12,7 @@ import androidx.compose.ui.unit.sp
  * A class that defines the style for a Stacked Area Chart.
  *
  * @property modifier The modifier to be applied to the chart.
- * @property chartViewStyle The style to be applied to the chart container.
+ * @property chartContainerStyle The style to be applied to the chart container.
  * @property areaColor The fallback fill color used when `areaColors` is empty.
  * @property areaColors The explicit fill colors used for stacked areas.
  * @property fillAlpha The alpha value applied to area fills.
@@ -34,7 +34,7 @@ import androidx.compose.ui.unit.sp
 @Immutable
 class StackedAreaChartStyle(
     val modifier: Modifier,
-    val chartViewStyle: ChartViewStyle,
+    val chartContainerStyle: ChartContainerStyle,
     val areaColor: Color,
     val areaColors: List<Color>,
     val fillAlpha: Float,
@@ -93,7 +93,7 @@ object StackedAreaChartDefaults {
      * @param lineColors The explicit boundary line colors. Defaults to an empty list.
      * @param lineWidth The stroke width of boundary lines. Defaults to 4f.
      * @param bezier Whether curved lines are used for area boundaries. Defaults to false.
-     * @param chartViewStyle The style to be applied to the chart view. Defaults to `ChartViewDefaults.style()`.
+     * @param chartContainerStyle The style to be applied to the chart view. Defaults to `ChartContainerDefaults.style()`.
      * @param zoomControlsVisible Whether zoom controls are shown in expanded dense mode. Defaults to true.
      * @param yAxisLabelsVisible Whether Y-axis labels are shown. Defaults to true.
      * @param yAxisLabelColor The color of Y-axis labels. Defaults to a theme-based onSurface variant.
@@ -114,7 +114,7 @@ object StackedAreaChartDefaults {
         lineColors: List<Color> = emptyList(),
         lineWidth: Float = 4f,
         bezier: Boolean = false,
-        chartViewStyle: ChartViewStyle = ChartViewDefaults.style(),
+        chartContainerStyle: ChartContainerStyle = ChartContainerDefaults.style(),
         zoomControlsVisible: Boolean = true,
         yAxisLabelsVisible: Boolean = true,
         yAxisLabelColor: Color = defaultYAxisLabelColor(),
@@ -125,11 +125,11 @@ object StackedAreaChartDefaults {
         xAxisLabelSize: TextUnit = 11.sp,
         xAxisLabelMaxCount: Int = 6,
     ): StackedAreaChartStyle {
-        val modifier: Modifier = chartViewStyle.fillMaxSizeChartModifier()
+        val modifier: Modifier = chartContainerStyle.fillMaxSizeChartModifier()
 
         return StackedAreaChartStyle(
             modifier = modifier,
-            chartViewStyle = chartViewStyle,
+            chartContainerStyle = chartContainerStyle,
             areaColor = areaColor,
             areaColors = areaColors,
             fillAlpha = fillAlpha.coerceIn(0f, 1f),

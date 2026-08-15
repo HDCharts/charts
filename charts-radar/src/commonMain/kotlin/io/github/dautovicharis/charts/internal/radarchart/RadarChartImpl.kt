@@ -83,14 +83,14 @@ internal fun RadarChartImpl(
                     style.lineColors.toImmutableList()
                 }
             }
-        Chart(chartViewsStyle = style.chartViewStyle) {
+        Chart(chartContainerStyle = style.chartContainerStyle) {
             if (title.isNotBlank()) {
                 Text(
                     modifier =
-                        style.chartViewStyle.modifierTopTitle
+                        style.chartContainerStyle.modifierTopTitle
                             .testTag(TestTags.CHART_TITLE),
                     text = title,
-                    style = style.chartViewStyle.styleTitle,
+                    style = style.chartContainerStyle.styleTitle,
                 )
             }
 
@@ -179,7 +179,7 @@ internal fun RadarChartImpl(
                         ),
             ) {
                 RadarLegend(
-                    chartViewsStyle = style.chartViewStyle,
+                    chartContainerStyle = style.chartContainerStyle,
                     series = series,
                     seriesColors = lineColors,
                     seriesLabels = seriesLabels,
@@ -189,6 +189,6 @@ internal fun RadarChartImpl(
             }
         }
     } else {
-        ChartErrors(style = style.chartViewStyle, errors = errors.toImmutableList())
+        ChartErrors(style = style.chartContainerStyle, errors = errors.toImmutableList())
     }
 }

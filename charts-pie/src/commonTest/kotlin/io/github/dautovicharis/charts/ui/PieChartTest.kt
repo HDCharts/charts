@@ -12,15 +12,13 @@ import io.github.dautovicharis.charts.PIE_SELECTION_AUTO_DESELECT_TIMEOUT_MS
 import io.github.dautovicharis.charts.PieChart
 import io.github.dautovicharis.charts.internal.TestTags
 import io.github.dautovicharis.charts.internal.ValidationErrors.MIN_REQUIRED_PIE
-import io.github.dautovicharis.charts.internal.ValidationErrors.RULE_COLORS_SIZE_MISMATCH
 import io.github.dautovicharis.charts.internal.ValidationErrors.RULE_DATA_POINTS_LESS_THAN_MIN
-import io.github.dautovicharis.charts.internal.common.model.ChartDataType
 import io.github.dautovicharis.charts.internal.format
+import io.github.dautovicharis.charts.internal.piechart.calculatePercentages
 import io.github.dautovicharis.charts.mock.MockTest.TITLE
 import io.github.dautovicharis.charts.mock.MockTest.colors
-import io.github.dautovicharis.charts.mock.MockTest.dataSet
-import io.github.dautovicharis.charts.mock.MockTest.mockPieChartStyle
-import io.github.dautovicharis.charts.model.ChartDataSet
+import io.github.dautovicharis.charts.model.PieSlice
+import io.github.dautovicharis.charts.model.staticChartSelection
 import io.github.dautovicharis.charts.style.PieChartDefaults
 import kotlin.math.PI
 import kotlin.math.cos
@@ -29,43 +27,44 @@ import kotlin.math.sin
 import kotlin.test.Test
 
 class PieChartTest {
+    private val pieSlices =
+        listOf(
+            PieSlice(label = "A", value = 10f),
+            PieSlice(label = "B", value = 20f),
+            PieSlice(label = "C", value = 30f),
+            PieSlice(label = "D", value = 40f),
+        )
+    private val points: List<Double> = pieSlices.map { it.value.toDouble() }
+    private val labels: List<String> = pieSlices.map { it.label }
+
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun pieChart_withValidData_displaysChart() =
         runComposeUiTest {
-            // Arrange
-            val expectedTitle = dataSet.data.label
-
-            // Act
             setContent {
-                PieChart(dataSet, PieChartDefaults.style())
+                PieChart(pieSlices, title = TITLE)
             }
 
-            // Assert
             onNodeWithTag(TestTags.PIE_CHART).isDisplayed()
-            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(expectedTitle)
+            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(TITLE)
         }
 
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun pieChart_withValidData_displayAndInteractWithChart() =
         runComposeUiTest {
-            // Arrange
-            val slices = createPieSlices(dataSet.data.item.points)
-            val percentages = calculatePercentages(dataSet.data.item.points)
-            val expectedTitle = dataSet.data.label
+            val slices = createPieSlices(points)
+            val percentages = calculatePercentages(points)
 
-            // Act
             setContent {
-                PieChart(dataSet, PieChartDefaults.style())
+                PieChart(pieSlices, title = TITLE)
             }
 
-            // Assert
             onNodeWithTag(TestTags.PIE_CHART).isDisplayed()
-            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(expectedTitle)
+            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(TITLE)
             val size = onNodeWithTag(TestTags.PIE_CHART).fetchSemanticsNode().size
 
-            dataSet.data.item.labels.forEachIndexed { index, value ->
+            labels.forEachIndexed { index, value ->
                 val sliceMiddlePosition =
                     getCoordinatesForSlice(index = index, size = size, slices = slices)
                 onNodeWithTag(TestTags.PIE_CHART).performTouchInput {
@@ -81,20 +80,13 @@ class PieChartTest {
     @Test
     fun pieChart_withInvalidData_displaysError() =
         runComposeUiTest {
-            // Arrange
-            val dataSet =
-                ChartDataSet(
-                    items = ChartDataType.FloatData(listOf(1f)),
-                    title = TITLE,
-                )
+            val invalidSlices = listOf(PieSlice(label = "A", value = 1f))
             val expectedError = RULE_DATA_POINTS_LESS_THAN_MIN.format(MIN_REQUIRED_PIE)
 
-            // Act
             setContent {
-                PieChart(dataSet, PieChartDefaults.style())
+                PieChart(invalidSlices)
             }
 
-            // Assert
             onNodeWithTag(TestTags.PIE_CHART).assertDoesNotExist()
             onNodeWithTag(TestTags.CHART_ERROR).isDisplayed()
             onNodeWithText("${expectedError}\n").isDisplayed()
@@ -102,48 +94,41 @@ class PieChartTest {
 
     @OptIn(ExperimentalTestApi::class)
     @Test
-    fun pieChart_withInvalidColors_displaysError() =
+    fun pieChart_withSliceColors_rendersChart() =
         runComposeUiTest {
-            // Arrange
-            val colors = colors.drop(2)
-            val pieChartStyle = mockPieChartStyle(colors)
-            val expectedColorsSize = dataSet.data.item.points.size
-            val colorsSize = colors.size
-            val expectedError = RULE_COLORS_SIZE_MISMATCH.format(colorsSize, expectedColorsSize)
+            val slices =
+                pieSlices.mapIndexed { index, slice ->
+                    slice.copy(color = colors[index % colors.size])
+                }
 
-            // Act
             setContent {
-                PieChart(
-                    dataSet,
-                    pieChartStyle,
-                )
+                PieChart(data = slices)
             }
 
-            // Assert
-            onNodeWithTag(TestTags.PIE_CHART).assertDoesNotExist()
-            onNodeWithTag(TestTags.CHART_ERROR).isDisplayed()
-            onNodeWithText("${expectedError}\n").isDisplayed()
+            onNodeWithTag(TestTags.PIE_CHART).isDisplayed()
+            onNodeWithTag(TestTags.CHART_ERROR).assertDoesNotExist()
         }
 
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun pieChart_withDonutStyle_displaysCorrectly() =
         runComposeUiTest {
-            // Arrange
-            val slices = createPieSlices(dataSet.data.item.points)
-            val percentages = calculatePercentages(dataSet.data.item.points)
+            val slices = createPieSlices(points)
+            val percentages = calculatePercentages(points)
 
-            // Act
             setContent {
-                PieChart(dataSet, PieChartDefaults.style(donutPercentage = 0.5f))
+                PieChart(
+                    pieSlices,
+                    style = PieChartDefaults.style(donut = PieChartDefaults.donut(holePercentage = 0.5f)),
+                    title = TITLE,
+                )
             }
 
-            // Assert
             onNodeWithTag(TestTags.PIE_CHART).isDisplayed()
-            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(dataSet.data.label)
+            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(TITLE)
             val size = onNodeWithTag(TestTags.PIE_CHART).fetchSemanticsNode().size
 
-            dataSet.data.item.labels.forEachIndexed { index, value ->
+            labels.forEachIndexed { index, value ->
                 val sliceMiddlePosition =
                     getCoordinatesForSlice(index = index, size = size, slices = slices)
                 onNodeWithTag(TestTags.PIE_CHART).performTouchInput {
@@ -159,24 +144,19 @@ class PieChartTest {
     @Test
     fun pieChart_withSelectedSliceIndex_displaysSelectedSliceDetails() =
         runComposeUiTest {
-            // Arrange
             val selectedSliceIndex = 1
-            val expectedTitle = dataSet.data.item.labels[selectedSliceIndex]
+            val expectedTitle = labels[selectedSliceIndex]
             val expectedPercentage =
-                "${calculatePercentages(dataSet.data.item.points)[selectedSliceIndex]}%"
+                "${calculatePercentages(points)[selectedSliceIndex]}%"
 
-            // Act
             setContent {
                 PieChart(
-                    dataSet = dataSet,
-                    style = PieChartDefaults.style(),
-                    interactionEnabled = false,
-                    animateOnStart = false,
-                    selectedSliceIndex = selectedSliceIndex,
+                    pieSlices,
+                    style = PieChartDefaults.style(selection = staticChartSelection(selectedSliceIndex)),
+                    title = TITLE,
                 )
             }
 
-            // Assert
             onNodeWithTag(TestTags.PIE_CHART).isDisplayed()
             onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(expectedTitle)
             onNodeWithText(expectedPercentage).isDisplayed()
@@ -186,19 +166,16 @@ class PieChartTest {
     @Test
     fun pieChart_withTapSelection_autoDeselectsAfterTimeout() =
         runComposeUiTest {
-            // Arrange
-            val slices = createPieSlices(dataSet.data.item.points)
+            val slices = createPieSlices(points)
 
-            // Act
             setContent {
-                PieChart(dataSet, PieChartDefaults.style())
+                PieChart(pieSlices, title = TITLE)
             }
 
-            // Assert
+            val selectedLabel = labels[0]
             val size = onNodeWithTag(TestTags.PIE_CHART).fetchSemanticsNode().size
             val sliceMiddlePosition =
                 getCoordinatesForSlice(index = 0, size = size, slices = slices)
-            val selectedLabel = dataSet.data.item.labels[0]
             onNodeWithTag(TestTags.PIE_CHART).performTouchInput {
                 down(sliceMiddlePosition)
                 up()
@@ -207,18 +184,18 @@ class PieChartTest {
 
             waitUntil(timeoutMillis = PIE_SELECTION_AUTO_DESELECT_TIMEOUT_MS + 2_000L) {
                 runCatching {
-                    onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(dataSet.data.label)
+                    onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(TITLE)
                 }.isSuccess
             }
-            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(dataSet.data.label)
+            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(TITLE)
         }
 
-    private data class PieSlice(
+    private data class SliceGeometry(
         val startDeg: Float,
         val sweepAngle: Float,
     )
 
-    private fun createPieSlices(values: List<Double>): List<PieSlice> {
+    private fun createPieSlices(values: List<Double>): List<SliceGeometry> {
         val total = values.sum()
         var lastEndDeg = 0.0
         return values.map { slice ->
@@ -226,7 +203,7 @@ class PieChartTest {
             val startDeg = lastEndDeg
             val endDeg = lastEndDeg + (normalized * 360)
             lastEndDeg = endDeg
-            PieSlice(
+            SliceGeometry(
                 startDeg = startDeg.toFloat(),
                 sweepAngle = (endDeg - startDeg).toFloat(),
             )
@@ -236,15 +213,17 @@ class PieChartTest {
     private fun getCoordinatesForSlice(
         index: Int,
         size: IntSize,
-        slices: List<PieSlice>,
+        slices: List<SliceGeometry>,
     ): androidx.compose.ui.geometry.Offset {
         val slice = slices[index]
-        val radius = size.width / 2
+        val centerX = size.width / 2f
+        val centerY = size.height / 2f
+        val radius = minOf(size.width, size.height) / 2f
         val midAngle = slice.startDeg + (slice.sweepAngle / 2f)
         val radian = midAngle * (PI / 180)
         val middleRadius = radius / 2f
-        val x = radius + middleRadius * cos(radian).toFloat()
-        val y = radius + middleRadius * sin(radian).toFloat()
+        val x = centerX + middleRadius * cos(radian).toFloat()
+        val y = centerY + middleRadius * sin(radian).toFloat()
         return androidx.compose.ui.geometry
             .Offset(x, y)
     }

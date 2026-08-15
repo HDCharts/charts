@@ -8,7 +8,7 @@ import dev.hdcode.charts.app.screenshot.shared.ScreenshotPreview
 import dev.hdcode.charts.app.screenshot.shared.ScreenshotSurface
 import dev.hdcode.charts.sampleshared.fixtures.ChartTestStyleFixtures
 import io.github.dautovicharis.charts.RadarChart
-import io.github.dautovicharis.charts.style.ChartViewDefaults
+import io.github.dautovicharis.charts.style.ChartContainerDefaults
 import io.github.dautovicharis.charts.style.RadarChartDefaults
 
 @PreviewTest
@@ -32,7 +32,7 @@ fun RadarChartSingleAxisLabelsPreview() {
             dataSet = SCREENSHOT_RADAR_SAMPLE_USE_CASE.initialRadarDefaultDataSet(),
             style =
                 RadarChartDefaults.style(
-                    chartViewStyle = ChartViewDefaults.style(),
+                    chartContainerStyle = ChartContainerDefaults.style(),
                     axisLabelVisible = true,
                     categoryLegendVisible = false,
                     categoryPinsVisible = false,
@@ -64,7 +64,7 @@ fun RadarChartCustomPreview() {
             dataSet = sample.customDataSet,
             style =
                 ChartTestStyleFixtures.radarCustomStyle(
-                    chartViewStyle = ChartViewDefaults.style(),
+                    chartContainerStyle = ChartContainerDefaults.style(),
                     seriesKeys = sample.seriesKeys,
                 ),
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,

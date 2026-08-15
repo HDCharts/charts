@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.sp
  * A class that defines the style for a Bar Chart.
  *
  * @property modifier The modifier to be applied to the chart.
- * @property chartViewStyle The style to be applied to the chart view.
+ * @property chartContainerStyle The style to be applied to the chart view.
  * @property barColor The color to be used for the bars in the chart.
  * @property barColors Optional explicit colors used for individual bars.
  * @property barAlpha The alpha value applied to rendered bars.
@@ -45,7 +45,7 @@ import androidx.compose.ui.unit.sp
 @Immutable
 class BarChartStyle(
     val modifier: Modifier,
-    val chartViewStyle: ChartViewStyle,
+    val chartContainerStyle: ChartContainerStyle,
     val barColor: Color,
     val barColors: List<Color>,
     val barAlpha: Float,
@@ -151,7 +151,7 @@ object BarChartDefaults {
      * @param selectionLineVisible Whether the selected bar indicator line is shown. Defaults to true.
      * @param selectionLineColor The color of the selected bar indicator line. Defaults to a theme-based primary variant.
      * @param selectionLineWidth The stroke width of the selected bar indicator line. Defaults to 1f.
-     * @param chartViewStyle The style to be applied to the chart view. Defaults to the default style of ChartViewDefaults.
+     * @param chartContainerStyle The style to be applied to the chart view. Defaults to the default style of ChartContainerDefaults.
      * @param yAxisLabelsVisible Whether Y-axis labels are shown. Defaults to true.
      * @param yAxisLabelColor The color of Y-axis labels. Defaults to a theme-based onSurface variant.
      * @param yAxisLabelSize The text size of Y-axis labels. Defaults to 11.sp.
@@ -181,13 +181,13 @@ object BarChartDefaults {
         selectionLineVisible: Boolean = true,
         selectionLineColor: Color = defaultSelectionLineColor(),
         selectionLineWidth: Float = 1f,
-        chartViewStyle: ChartViewStyle = ChartViewDefaults.style(),
+        chartContainerStyle: ChartContainerStyle = ChartContainerDefaults.style(),
         yAxisLabelsVisible: Boolean = true,
         yAxisLabelColor: Color = defaultYAxisLabelColor(),
         yAxisLabelSize: TextUnit = 11.sp,
         yAxisLabelCount: Int = 5,
     ): BarChartStyle {
-        val modifier: Modifier = chartViewStyle.fillMaxSizeChartModifier()
+        val modifier: Modifier = chartContainerStyle.fillMaxSizeChartModifier()
 
         return BarChartStyle(
             modifier = modifier,
@@ -217,7 +217,7 @@ object BarChartDefaults {
             selectionLineVisible = selectionLineVisible,
             selectionLineColor = selectionLineColor,
             selectionLineWidth = selectionLineWidth,
-            chartViewStyle = chartViewStyle,
+            chartContainerStyle = chartContainerStyle,
         )
     }
 }
