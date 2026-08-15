@@ -8,7 +8,7 @@ is_code_change() {
   while IFS= read -r changed_file; do
     [[ -n "$changed_file" ]] || continue
     case "$changed_file" in
-      docs/*|release-notes/*|gif-baselines/*|scripts/*|.github/api-compatibility-baseline.txt|.editorconfig|*.md|LICENSE|LICENSE.*|readme-assets/*) ;;
+      docs/*|release-notes/*|gif-baselines/*|scripts/*|.github/api-compatibility-baseline.txt|.github/CODEOWNERS|.editorconfig|*.md|LICENSE|LICENSE.*|readme-assets/*) ;;
       *)
         echo "true"
         return
@@ -104,6 +104,11 @@ run_self_test() {
 
   result="$(is_code_change ".editorconfig")"
   if ! assert_equal "false" "$result" "editor config change"; then
+    failures=$((failures + 1))
+  fi
+
+  result="$(is_code_change $'README.md\n.github/CODEOWNERS')"
+  if ! assert_equal "false" "$result" "code owners change"; then
     failures=$((failures + 1))
   fi
 
