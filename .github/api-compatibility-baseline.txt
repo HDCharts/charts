@@ -1,4 +1,4 @@
 # Baseline commit used by API compatibility workflow.
 # Updated via set-api-baseline workflow.
-# source: pull_request_target:merge_commit_sha:528
-efe31a64998e22df0b52a80d6ed56e01d6077c9a
+# source: pull_request_target:merge_commit_sha:531
+62fc075941f0c408d7af54b2820d6ec3f091fbaf
