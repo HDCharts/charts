@@ -29,7 +29,6 @@ import dev.hdcode.charts.app.demo.pie.PieChartDemo
 import dev.hdcode.charts.app.demo.radar.RadarChartDemo
 import dev.hdcode.charts.app.demo.stackedarea.StackedAreaChartDemo
 import dev.hdcode.charts.app.demo.stackedbar.StackedBarChartDemo
-import dev.hdcode.charts.app.ui.composable.StyleItems
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import chartsproject.sample_shared.generated.resources.Res as SharedRes
@@ -105,7 +104,6 @@ fun Navigation(
     navController: NavHostController,
     menuState: MenuState,
     onChartSelected: (selected: ChartDestination) -> Unit,
-    onStyleItemsChanged: (StyleItems?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     NavHost(
@@ -120,35 +118,35 @@ fun Navigation(
             )
         }
         composable(ChartDestination.PieChartScreen.route) {
-            PieChartDemo(onStyleItemsChanged = onStyleItemsChanged)
+            PieChartDemo()
         }
 
         composable(ChartDestination.LineChartScreen.route) {
-            LineChartDemo(onStyleItemsChanged = onStyleItemsChanged)
+            LineChartDemo()
         }
 
         composable(ChartDestination.MultiLineChartScreen.route) {
-            MultiLineChartDemo(onStyleItemsChanged = onStyleItemsChanged)
+            MultiLineChartDemo()
         }
 
         composable(ChartDestination.StackedAreaChartScreen.route) {
-            StackedAreaChartDemo(onStyleItemsChanged = onStyleItemsChanged)
+            StackedAreaChartDemo()
         }
 
         composable(ChartDestination.BarChartScreen.route) {
-            BarChartDemo(onStyleItemsChanged = onStyleItemsChanged)
+            BarChartDemo()
         }
 
         composable(ChartDestination.StackedBarChartScreen.route) {
-            StackedBarChartDemo(onStyleItemsChanged = onStyleItemsChanged)
+            StackedBarChartDemo()
         }
 
         composable(ChartDestination.HistogramChartScreen.route) {
-            HistogramChartDemo(onStyleItemsChanged = onStyleItemsChanged)
+            HistogramChartDemo()
         }
 
         composable(ChartDestination.RadarChartScreen.route) {
-            RadarChartDemo(onStyleItemsChanged = onStyleItemsChanged)
+            RadarChartDemo()
         }
     }
 }

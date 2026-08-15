@@ -71,37 +71,7 @@ class RadarChartStyle(
     val lineWidth: Float,
     val fillAlpha: Float,
     val fillVisible: Boolean,
-) : Style {
-    /**
-     * Returns a list of the properties of the RadarChartStyle.
-     */
-    override fun getProperties(): List<Pair<String, Any>> =
-        listOf(
-            RadarChartStyle::gridColor.name to gridColor,
-            RadarChartStyle::gridLineWidth.name to gridLineWidth,
-            RadarChartStyle::gridSteps.name to gridSteps,
-            RadarChartStyle::gridVisible.name to gridVisible,
-            RadarChartStyle::axisLineColor.name to axisLineColor,
-            RadarChartStyle::axisLineWidth.name to axisLineWidth,
-            RadarChartStyle::axisVisible.name to axisVisible,
-            RadarChartStyle::axisLabelColor.name to axisLabelColor,
-            RadarChartStyle::axisLabelSize.name to axisLabelSize,
-            RadarChartStyle::axisLabelPadding.name to axisLabelPadding,
-            RadarChartStyle::axisLabelVisible.name to axisLabelVisible,
-            RadarChartStyle::categoryLegendVisible.name to categoryLegendVisible,
-            RadarChartStyle::categoryColors.name to categoryColors,
-            RadarChartStyle::categoryPinSize.name to categoryPinSize,
-            RadarChartStyle::categoryPinsVisible.name to categoryPinsVisible,
-            RadarChartStyle::pointColor.name to pointColor,
-            RadarChartStyle::pointSize.name to pointSize,
-            RadarChartStyle::pointVisible.name to pointVisible,
-            RadarChartStyle::lineColor.name to lineColor,
-            RadarChartStyle::lineColors.name to lineColors,
-            RadarChartStyle::lineWidth.name to lineWidth,
-            RadarChartStyle::fillAlpha.name to fillAlpha,
-            RadarChartStyle::fillVisible.name to fillVisible,
-        )
-}
+)
 
 /**
  * An object that provides default styles for a Radar Chart.

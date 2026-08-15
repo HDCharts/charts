@@ -16,20 +16,17 @@ import chartsproject.app.generated.resources.cd_play_live_updates
 import dev.hdcode.charts.app.ui.composable.ChartDemo
 import dev.hdcode.charts.app.ui.composable.ChartPreset
 import dev.hdcode.charts.app.ui.composable.ChartPresetToggle
-import dev.hdcode.charts.app.ui.composable.ChartStyleItems
-import dev.hdcode.charts.app.ui.composable.StyleItems
+import dev.hdcode.charts.sampleshared.fixtures.ChartTestStyleFixtures
 import dev.hdcode.charts.sampleshared.theme.LocalChartColors
 import dev.hdcode.charts.sampleshared.theme.seriesColors
 import io.github.dautovicharis.charts.PieChart
+import io.github.dautovicharis.charts.style.ChartContainerDefaults
 import io.github.dautovicharis.charts.style.PieChartDefaults
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun PieChartDemo(
-    viewModel: PieChartViewModel = koinViewModel(),
-    onStyleItemsChanged: (StyleItems?) -> Unit = {},
-) {
+fun PieChartDemo(viewModel: PieChartViewModel = koinViewModel()) {
     val state by viewModel.dataSet.collectAsStateWithLifecycle()
     val isPlaying by viewModel.isPlaying.collectAsStateWithLifecycle()
     val chartColors = LocalChartColors.current
@@ -43,20 +40,8 @@ fun PieChartDemo(
                 }
         }
 
-    val styleItems =
-        when (state.preset) {
-            ChartPreset.Default ->
-                ChartStyleItems(
-                    currentStyle = PieChartDefaults.style(),
-                    defaultStyle = PieChartDefaults.style(),
-                )
-            ChartPreset.Custom -> PieChartStyleItems.custom()
-        }
-
     ChartDemo(
-        styleItems = styleItems,
         onRefresh = viewModel::refresh,
-        onStyleItemsChanged = onStyleItemsChanged,
         presetContent = {
             ChartPresetToggle(
                 selectedPreset = state.preset,
@@ -87,7 +72,9 @@ fun PieChartDemo(
                 ) {
                     PieChartDefaults.style()
                 } else {
-                    PieChartStyleItems.customStyle()
+                    ChartTestStyleFixtures.pieCustomStyle(
+                        chartContainerStyle = ChartContainerDefaults.style(),
+                    )
                 },
         )
     }

@@ -72,40 +72,7 @@ class BarChartStyle(
     val selectionLineVisible: Boolean,
     val selectionLineColor: Color,
     val selectionLineWidth: Float,
-) : Style {
-    /**
-     * Returns a list of the properties of the BarChartStyle.
-     */
-    override fun getProperties(): List<Pair<String, Any>> =
-        listOf(
-            BarChartStyle::barColor.name to barColor,
-            BarChartStyle::barColors.name to barColors,
-            BarChartStyle::barAlpha.name to barAlpha,
-            BarChartStyle::space.name to space,
-            BarChartStyle::minValue.name to (minValue ?: "auto"),
-            BarChartStyle::maxValue.name to (maxValue ?: "auto"),
-            BarChartStyle::minBarWidth.name to minBarWidth,
-            BarChartStyle::zoomControlsVisible.name to zoomControlsVisible,
-            BarChartStyle::gridVisible.name to gridVisible,
-            BarChartStyle::gridSteps.name to gridSteps,
-            BarChartStyle::gridColor.name to gridColor,
-            BarChartStyle::gridLineWidth.name to gridLineWidth,
-            BarChartStyle::axisVisible.name to axisVisible,
-            BarChartStyle::axisColor.name to axisColor,
-            BarChartStyle::axisLineWidth.name to axisLineWidth,
-            BarChartStyle::yAxisLabelsVisible.name to yAxisLabelsVisible,
-            BarChartStyle::yAxisLabelColor.name to yAxisLabelColor,
-            BarChartStyle::yAxisLabelSize.name to yAxisLabelSize,
-            BarChartStyle::yAxisLabelCount.name to yAxisLabelCount,
-            BarChartStyle::xAxisLabelsVisible.name to xAxisLabelsVisible,
-            BarChartStyle::xAxisLabelColor.name to xAxisLabelColor,
-            BarChartStyle::xAxisLabelSize.name to xAxisLabelSize,
-            BarChartStyle::xAxisLabelMaxCount.name to xAxisLabelMaxCount,
-            BarChartStyle::selectionLineVisible.name to selectionLineVisible,
-            BarChartStyle::selectionLineColor.name to selectionLineColor,
-            BarChartStyle::selectionLineWidth.name to selectionLineWidth,
-        )
-}
+)
 
 /**
  * An object that provides default styles for a Bar Chart.

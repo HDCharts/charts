@@ -68,37 +68,7 @@ class LineChartStyle(
     val xAxisLabelSize: TextUnit,
     val xAxisLabelMaxCount: Int,
     val zoomControlsVisible: Boolean,
-) : Style {
-    /**
-     * Returns a list of the properties of the LineChartStyle.
-     */
-    override fun getProperties(): List<Pair<String, Any>> =
-        listOf(
-            LineChartStyle::pointColor.name to pointColor,
-            LineChartStyle::pointVisible.name to pointVisible,
-            LineChartStyle::pointSize.name to pointSize,
-            LineChartStyle::lineColor.name to lineColor,
-            LineChartStyle::lineAlpha.name to lineAlpha,
-            LineChartStyle::lineColors.name to lineColors,
-            LineChartStyle::bezier.name to bezier,
-            LineChartStyle::dragPointSize.name to dragPointSize,
-            LineChartStyle::dragPointVisible.name to dragPointVisible,
-            LineChartStyle::dragActivePointSize.name to dragActivePointSize,
-            LineChartStyle::dragPointColor.name to dragPointColor,
-            LineChartStyle::axisVisible.name to axisVisible,
-            LineChartStyle::axisColor.name to axisColor,
-            LineChartStyle::axisLineWidth.name to axisLineWidth,
-            LineChartStyle::yAxisLabelsVisible.name to yAxisLabelsVisible,
-            LineChartStyle::yAxisLabelColor.name to yAxisLabelColor,
-            LineChartStyle::yAxisLabelSize.name to yAxisLabelSize,
-            LineChartStyle::yAxisLabelCount.name to yAxisLabelCount,
-            LineChartStyle::xAxisLabelsVisible.name to xAxisLabelsVisible,
-            LineChartStyle::xAxisLabelColor.name to xAxisLabelColor,
-            LineChartStyle::xAxisLabelSize.name to xAxisLabelSize,
-            LineChartStyle::xAxisLabelMaxCount.name to xAxisLabelMaxCount,
-            LineChartStyle::zoomControlsVisible.name to zoomControlsVisible,
-        )
-}
+)
 
 /**
  * An object that provides default styles for a Line Chart.

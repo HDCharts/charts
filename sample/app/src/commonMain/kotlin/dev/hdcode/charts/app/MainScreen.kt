@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Brush
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -32,7 +31,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -47,12 +45,9 @@ import androidx.navigation.compose.rememberNavController
 import chartsproject.app.generated.resources.Res
 import chartsproject.app.generated.resources.cd_navigate_back
 import chartsproject.app.generated.resources.cd_open_settings
-import chartsproject.app.generated.resources.cd_open_style_details
 import dev.hdcode.charts.app.library.BuildConfig
 import dev.hdcode.charts.app.ui.composable.InteractiveSurfaceCallbacks
 import dev.hdcode.charts.app.ui.composable.LocalInteractiveSurfaceCallbacks
-import dev.hdcode.charts.app.ui.composable.StyleInfoDialog
-import dev.hdcode.charts.app.ui.composable.StyleItems
 import dev.hdcode.charts.sampleshared.theme.AppTheme
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
@@ -76,15 +71,13 @@ fun MainScreen(viewModel: MainViewModel = koinViewModel()) {
     val currentRoute = currentBackStackEntry?.destination?.route
     val canNavigateBack = currentBackStackEntry?.destination?.route != ChartDestination.MainScreen.ROUTE
     val isMainRoute = currentRoute == ChartDestination.MainScreen.ROUTE
-    var currentStyleItems by remember { mutableStateOf<StyleItems?>(null) }
     val topBarTitleByRoute = remember(menuState.menuItems) { menuState.menuItems.topBarTitleByRoute() }
     val topBarTitle =
         if (isMainRoute) {
             null
         } else {
-            currentStyleItems?.name ?: topBarTitleByRoute[currentRoute]?.let { stringResource(it) }
+            topBarTitleByRoute[currentRoute]?.let { stringResource(it) }
         }
-    var styleInfoDialogVisible by remember { mutableStateOf(false) }
     var activeInteractiveSurfaces by remember { mutableIntStateOf(0) }
     val interactionCallbacks =
         remember {
@@ -147,19 +140,13 @@ fun MainScreen(viewModel: MainViewModel = koinViewModel()) {
                                 canNavigateBack = canNavigateBack,
                                 topBarTitle = topBarTitle,
                                 showSettingsButton = false,
-                                showStyleInfoButton = canNavigateBack && currentStyleItems != null,
                                 onNavigateBack = { navController.popBackStack() },
                                 onOpenSettings = {},
-                                onOpenStyleInfo = { styleInfoDialogVisible = true },
                                 content = { innerPadding ->
                                     Navigation(
                                         navController = navController,
                                         menuState = menuState,
                                         onChartSelected = viewModel::onChartSelected,
-                                        onStyleItemsChanged = { styleItems ->
-                                            currentStyleItems = styleItems
-                                            if (styleItems == null) styleInfoDialogVisible = false
-                                        },
                                         modifier = Modifier.padding(innerPadding),
                                     )
                                 },
@@ -188,23 +175,17 @@ fun MainScreen(viewModel: MainViewModel = koinViewModel()) {
                                     canNavigateBack = canNavigateBack,
                                     topBarTitle = topBarTitle,
                                     showSettingsButton = true,
-                                    showStyleInfoButton = canNavigateBack && currentStyleItems != null,
                                     onNavigateBack = { navController.popBackStack() },
                                     onOpenSettings = {
                                         scope.launch {
                                             drawerState.open()
                                         }
                                     },
-                                    onOpenStyleInfo = { styleInfoDialogVisible = true },
                                     content = { innerPadding ->
                                         Navigation(
                                             navController = navController,
                                             menuState = menuState,
                                             onChartSelected = viewModel::onChartSelected,
-                                            onStyleItemsChanged = { styleItems ->
-                                                currentStyleItems = styleItems
-                                                if (styleItems == null) styleInfoDialogVisible = false
-                                            },
                                             modifier = Modifier.padding(innerPadding),
                                         )
                                     },
@@ -224,15 +205,6 @@ fun MainScreen(viewModel: MainViewModel = koinViewModel()) {
                 }
             }
         }
-
-        if (styleInfoDialogVisible) {
-            currentStyleItems?.let { styleItems ->
-                StyleInfoDialog(
-                    styleItems = styleItems,
-                    onDismissRequest = { styleInfoDialogVisible = false },
-                )
-            }
-        }
     }
 
     LaunchedEffect(menuState.selectedDestination) {
@@ -249,10 +221,8 @@ private fun MainScaffold(
     canNavigateBack: Boolean,
     topBarTitle: String?,
     showSettingsButton: Boolean,
-    showStyleInfoButton: Boolean,
     onNavigateBack: () -> Unit,
     onOpenSettings: () -> Unit,
-    onOpenStyleInfo: () -> Unit,
     content: @Composable (innerPadding: androidx.compose.foundation.layout.PaddingValues) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -276,14 +246,6 @@ private fun MainScaffold(
                     }
                 },
                 actions = {
-                    if (showStyleInfoButton) {
-                        IconButton(onClick = onOpenStyleInfo) {
-                            Icon(
-                                imageVector = Icons.Filled.Brush,
-                                contentDescription = stringResource(Res.string.cd_open_style_details),
-                            )
-                        }
-                    }
                     if (showSettingsButton) {
                         IconButton(onClick = onOpenSettings) {
                             Icon(

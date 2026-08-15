@@ -35,23 +35,7 @@ class PieChartStyle(
     val border: PieChartBorderStyle,
     val legend: LegendStyle,
     val selection: ChartSelection,
-) : Style {
-    /**
-     * Returns a flat list of the style properties.
-     *
-     * The keys mirror the legacy flat names so codegen snapshots keep working
-     * across the migration.
-     */
-    override fun getProperties(): List<Pair<String, Any>> =
-        listOf(
-            "donutPercentage" to donut.holePercentage,
-            "pieColor" to slices.baseColor,
-            "pieAlpha" to slices.alpha,
-            "borderColor" to border.color,
-            "borderWidth" to border.width,
-            "legendVisible" to legend.visible,
-        )
-}
+)
 
 /**
  * Donut configuration for a [PieChartStyle].

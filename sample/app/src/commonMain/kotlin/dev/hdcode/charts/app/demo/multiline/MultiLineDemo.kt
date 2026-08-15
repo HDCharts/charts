@@ -40,44 +40,36 @@ import chartsproject.app.generated.resources.chart_default
 import chartsproject.app.generated.resources.chart_timeline
 import chartsproject.app.generated.resources.line_data_points
 import chartsproject.app.generated.resources.line_data_points_range
-import dev.hdcode.charts.app.demo.line.lineChartTableItems
 import dev.hdcode.charts.app.demo.timeline.LiveTimelineControls
 import dev.hdcode.charts.app.demo.timeline.timelineAnimationDurationMillis
 import dev.hdcode.charts.app.ui.composable.ChartAspectRatioPreset
 import dev.hdcode.charts.app.ui.composable.ChartAspectRatioToggle
 import dev.hdcode.charts.app.ui.composable.ChartDemo
-import dev.hdcode.charts.app.ui.composable.StyleItems
+import dev.hdcode.charts.app.ui.composable.toChartModifier
+import dev.hdcode.charts.sampleshared.fixtures.ChartTestStyleFixtures
 import dev.hdcode.charts.sampleshared.theme.LocalChartColors
 import dev.hdcode.charts.sampleshared.theme.seriesColors
 import io.github.dautovicharis.charts.LineChart
 import io.github.dautovicharis.charts.LineChartRenderMode
+import io.github.dautovicharis.charts.style.ChartContainerDefaults
+import io.github.dautovicharis.charts.style.LineChartDefaults
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.math.roundToInt
 
 @Composable
-fun MultiLineChartDemo(
-    viewModel: MultiLineChartViewModel = koinViewModel(),
-    onStyleItemsChanged: (StyleItems?) -> Unit = {},
-) {
+fun MultiLineChartDemo(viewModel: MultiLineChartViewModel = koinViewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val chartColors = LocalChartColors.current
     val lineColors = chartColors.seriesColors(uiState.dataSet.seriesKeys.size)
     val timelineAnimationDuration = timelineAnimationDurationMillis(uiState.controlsState.updateIntervalMs)
     var aspectRatioPreset by remember { mutableStateOf(ChartAspectRatioPreset.Square) }
-
-    val styleItems =
-        when (uiState.preset) {
-            MultiLineDemoPreset.Default -> lineChartTableItems(MultiLineStyleItems.defaultStyle(aspectRatioPreset))
-            MultiLineDemoPreset.Timeline -> lineChartTableItems(MultiLineStyleItems.defaultStyle(aspectRatioPreset))
-            MultiLineDemoPreset.Custom -> MultiLineStyleItems.custom(lineColors, aspectRatioPreset)
-        }
+    val chartContainerStyle =
+        ChartContainerDefaults.style(modifierChart = aspectRatioPreset.toChartModifier())
 
     ChartDemo(
-        styleItems = styleItems,
         onRefresh = viewModel::refreshForSelectedPreset,
         refreshVisible = uiState.preset != MultiLineDemoPreset.Timeline,
-        onStyleItemsChanged = onStyleItemsChanged,
         presetContent = {
             Column(
                 verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -135,14 +127,14 @@ fun MultiLineChartDemo(
             MultiLineDemoPreset.Default -> {
                 LineChart(
                     dataSet = uiState.dataSet.dataSet,
-                    style = MultiLineStyleItems.defaultStyle(aspectRatioPreset),
+                    style = LineChartDefaults.style(chartContainerStyle = chartContainerStyle),
                 )
             }
 
             MultiLineDemoPreset.Timeline -> {
                 LineChart(
                     dataSet = uiState.dataSet.dataSet,
-                    style = MultiLineStyleItems.defaultStyle(aspectRatioPreset),
+                    style = LineChartDefaults.style(chartContainerStyle = chartContainerStyle),
                     renderMode = LineChartRenderMode.Timeline,
                     animationDurationMillis = timelineAnimationDuration,
                 )
@@ -150,8 +142,10 @@ fun MultiLineChartDemo(
 
             MultiLineDemoPreset.Custom -> {
                 val customStyle =
-                    MultiLineStyleItems
-                        .customStyle(lineColors, aspectRatioPreset)
+                    ChartTestStyleFixtures.multiLineCustomStyle(
+                        chartContainerStyle = chartContainerStyle,
+                        seriesCount = lineColors.size,
+                    )
                 LineChart(
                     dataSet = uiState.dataSet.dataSet,
                     style = customStyle,

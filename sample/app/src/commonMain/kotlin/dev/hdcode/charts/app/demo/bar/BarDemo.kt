@@ -34,40 +34,28 @@ import dev.hdcode.charts.app.ui.composable.ChartAspectRatioToggle
 import dev.hdcode.charts.app.ui.composable.ChartDemo
 import dev.hdcode.charts.app.ui.composable.ChartPreset
 import dev.hdcode.charts.app.ui.composable.ChartPresetToggle
-import dev.hdcode.charts.app.ui.composable.StyleItems
+import dev.hdcode.charts.app.ui.composable.toChartModifier
+import dev.hdcode.charts.sampleshared.fixtures.ChartTestStyleFixtures
 import io.github.dautovicharis.charts.BarChart
+import io.github.dautovicharis.charts.style.BarChartDefaults
+import io.github.dautovicharis.charts.style.ChartContainerDefaults
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.math.roundToInt
 
 @Composable
-fun BarChartDemo(
-    viewModel: BarChartViewModel = koinViewModel(),
-    onStyleItemsChanged: (StyleItems?) -> Unit = {},
-) {
+fun BarChartDemo(viewModel: BarChartViewModel = koinViewModel()) {
     val dataSet by viewModel.dataSet.collectAsStateWithLifecycle()
     val isPlaying by viewModel.isPlaying.collectAsStateWithLifecycle()
     val controlsState by viewModel.controlsState.collectAsStateWithLifecycle()
     var preset by remember { mutableStateOf(ChartPreset.Default) }
     var aspectRatioPreset by remember { mutableStateOf(ChartAspectRatioPreset.Square) }
+    val chartContainerStyle =
+        ChartContainerDefaults.style(modifierChart = aspectRatioPreset.toChartModifier())
     val refresh: () -> Unit = viewModel::refresh
 
-    val styleItems =
-        when (preset) {
-            ChartPreset.Default -> BarChartStyleItems.default(aspectRatioPreset)
-            ChartPreset.Custom ->
-                BarChartStyleItems.custom(
-                    barCount = dataSet.data.item.points.size,
-                    minValue = controlsState.minValue.toFloat(),
-                    maxValue = controlsState.maxValue.toFloat(),
-                    aspectRatioPreset = aspectRatioPreset,
-                )
-        }
-
     ChartDemo(
-        styleItems = styleItems,
         onRefresh = refresh,
-        onStyleItemsChanged = onStyleItemsChanged,
         presetContent = {
             Column(
                 verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -112,7 +100,7 @@ fun BarChartDemo(
                 ChartPreset.Default -> {
                     BarChart(
                         dataSet,
-                        style = BarChartStyleItems.defaultStyle(aspectRatioPreset),
+                        style = BarChartDefaults.style(chartContainerStyle = chartContainerStyle),
                     )
                 }
 
@@ -120,11 +108,12 @@ fun BarChartDemo(
                     BarChart(
                         dataSet = dataSet,
                         style =
-                            BarChartStyleItems.customStyle(
+                            ChartTestStyleFixtures.barCustomStyle(
+                                chartContainerStyle = chartContainerStyle,
                                 barCount = dataSet.data.item.points.size,
+                                useBarColors = true,
                                 minValue = controlsState.minValue.toFloat(),
                                 maxValue = controlsState.maxValue.toFloat(),
-                                aspectRatioPreset = aspectRatioPreset,
                             ),
                     )
                 }
