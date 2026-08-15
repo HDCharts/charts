@@ -37,9 +37,8 @@ import io.github.dautovicharis.charts.style.PieChartStyle
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-import kotlin.math.min
 
-internal data class PieSlice(
+internal data class SliceGeometry(
     val startDeg: Float,
     val endDeg: Float,
     val sweepAngle: Float,
@@ -122,7 +121,7 @@ internal fun PieChart(
         }
 
     val donutHoleAnimation by animateFloatAsState(
-        targetValue = if (show) style.donutPercentage else 0f,
+        targetValue = if (show) style.donut.holePercentage else 0f,
         animationSpec = AnimationSpec.pieChartDonut(),
         label = "donutHoleAnimation",
     )
@@ -154,17 +153,18 @@ internal fun PieChart(
                 .then(interactionModifier)
                 .drawWithCache {
                     val overflowInset = size.minDimension * (MAX_SCALE - DEFAULT_SCALE) / 2f
+                    val pieDiameter = size.minDimension - overflowInset * 2f
                     val pieBounds =
                         Rect(
-                            left = overflowInset,
-                            top = overflowInset,
-                            right = size.width - overflowInset,
-                            bottom = size.height - overflowInset,
+                            left = (size.width - pieDiameter) / 2f,
+                            top = (size.height - pieDiameter) / 2f,
+                            right = (size.width + pieDiameter) / 2f,
+                            bottom = (size.height + pieDiameter) / 2f,
                         )
                     val pieCenter = pieBounds.center
-                    val pieRadius = min(pieBounds.width, pieBounds.height) / 2f
+                    val pieRadius = pieBounds.width / 2f
                     val layerBounds = Rect(0f, 0f, size.width, size.height)
-                    val borderStroke = Stroke(width = style.borderWidth)
+                    val borderStroke = Stroke(width = style.border.width)
 
                     onDrawBehind {
                         val animatedSlices = createPieSlices(animatables.map { it.value.toDouble() })
@@ -192,7 +192,7 @@ internal fun PieChart(
                                     size = pieBounds.size,
                                 )
                                 drawArc(
-                                    color = style.borderColor,
+                                    color = style.border.color,
                                     startAngle = slice.startDeg,
                                     sweepAngle = slice.sweepAngle,
                                     useCenter = true,
@@ -212,7 +212,7 @@ internal fun PieChart(
                                 blendMode = BlendMode.Clear,
                             )
                             drawCircle(
-                                color = style.borderColor,
+                                color = style.border.color,
                                 radius = innerRadius,
                                 center = pieCenter,
                                 style = borderStroke,

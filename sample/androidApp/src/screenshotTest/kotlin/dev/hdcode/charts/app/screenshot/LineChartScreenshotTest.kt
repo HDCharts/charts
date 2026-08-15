@@ -10,7 +10,7 @@ import dev.hdcode.charts.app.screenshot.shared.ScreenshotSurface
 import dev.hdcode.charts.sampleshared.fixtures.ChartTestStyleFixtures
 import io.github.dautovicharis.charts.LineChart
 import io.github.dautovicharis.charts.model.toMultiChartDataSet
-import io.github.dautovicharis.charts.style.ChartViewDefaults
+import io.github.dautovicharis.charts.style.ChartContainerDefaults
 
 private const val MULTI_LINE_SELECTION_INDEX = 4
 
@@ -43,7 +43,7 @@ fun LineChartCustomPreview() {
     ScreenshotSurface {
         LineChart(
             dataSet = SCREENSHOT_LINE_SAMPLE_USE_CASE.initialLineDataSet(),
-            style = ChartTestStyleFixtures.lineCustomStyle(chartViewStyle = ChartViewDefaults.style()),
+            style = ChartTestStyleFixtures.lineCustomStyle(chartContainerStyle = ChartContainerDefaults.style()),
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
         )
     }
@@ -70,7 +70,7 @@ fun MultiLineChartCustomPreview() {
             dataSet = SCREENSHOT_MULTI_LINE_SAMPLE_USE_CASE.initialMultiLineSample().dataSet,
             style =
                 ChartTestStyleFixtures.multiLineCustomStyle(
-                    chartViewStyle = ChartViewDefaults.style(),
+                    chartContainerStyle = ChartContainerDefaults.style(),
                     seriesCount = 3,
                 ),
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
@@ -87,7 +87,7 @@ fun MultiLineChartSelectionLegendPreview() {
             dataSet = MULTI_LINE_SELECTION_DATA_SET,
             style =
                 ChartTestStyleFixtures.multiLineCustomStyle(
-                    chartViewStyle = ChartViewDefaults.style(),
+                    chartContainerStyle = ChartContainerDefaults.style(),
                     seriesCount = MULTI_LINE_SELECTION_DATA_SET.data.items.size,
                 ),
             interactionEnabled = false,

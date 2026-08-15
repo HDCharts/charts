@@ -54,7 +54,7 @@ fun StackedAreaChart(
             selectedPointIndex = selectedPointIndex,
         )
     } else {
-        ChartErrors(style = style.chartViewStyle, errors = errors.toImmutableList())
+        ChartErrors(style = style.chartContainerStyle, errors = errors.toImmutableList())
     }
 }
 
@@ -111,7 +111,7 @@ private fun StackedAreaChartContent(
                 style.lineColors.toImmutableList()
             }
         }
-    Chart(chartViewsStyle = style.chartViewStyle) {
+    Chart(chartContainerStyle = style.chartContainerStyle) {
         StackedAreaChart(
             data = dataSet.data,
             title = title,
@@ -140,7 +140,7 @@ private fun StackedAreaChartContent(
 
         if (dataSet.data.hasCategories()) {
             Legend(
-                chartViewsStyle = style.chartViewStyle,
+                chartContainerStyle = style.chartContainerStyle,
                 legend =
                     dataSet.data.items
                         .map { it.label }

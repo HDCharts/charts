@@ -47,8 +47,12 @@ import io.github.hdcodedev.composegif.annotations.RecordGif
 )
 @Composable
 fun PieDefaultGifScenario() {
+    val sample = pieSampleUseCase().initialPieSample()
     DocsGifScene {
-        PieChart(pieSampleUseCase().initialPieSample().dataSet)
+        PieChart(
+            data = sample.slices,
+            title = sample.title,
+        )
     }
 }
 

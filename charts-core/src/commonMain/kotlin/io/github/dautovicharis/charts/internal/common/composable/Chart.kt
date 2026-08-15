@@ -6,16 +6,17 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import io.github.dautovicharis.charts.internal.common.theme.ChartsDefaultTheme
-import io.github.dautovicharis.charts.style.ChartViewStyle
+import io.github.dautovicharis.charts.style.ChartContainerStyle
 
 @Composable
 fun Chart(
-    chartViewsStyle: ChartViewStyle,
+    chartContainerStyle: ChartContainerStyle,
+    modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
     ChartsDefaultTheme {
         Box(
-            modifier = chartViewsStyle.modifierMain,
+            modifier = modifier.then(chartContainerStyle.modifierMain),
         ) {
             Column(
                 modifier =

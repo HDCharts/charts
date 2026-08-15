@@ -15,18 +15,17 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import io.github.dautovicharis.charts.style.ChartViewDefaults
+import io.github.dautovicharis.charts.style.ChartContainerDefaults
 import kotlin.test.Test
-import kotlin.test.assertEquals
 
-class ChartViewDefaultsTest {
+class ChartContainerDefaultsTest {
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun chartViewDefaults_withExplicitWidth_constrainsChartWidth() =
         runComposeUiTest {
             setContent {
                 MaterialTheme {
-                    val style = ChartViewDefaults.style(width = 250.dp, modifierChart = Modifier)
+                    val style = ChartContainerDefaults.style(width = 250.dp, modifierChart = Modifier)
                     Box(modifier = style.modifierMain.semantics { testTag = "box" })
                 }
             }
@@ -36,14 +35,12 @@ class ChartViewDefaultsTest {
 
     @OptIn(ExperimentalTestApi::class)
     @Test
-    fun chartViewDefaults_withInfiniteWidth_wrapsContentAndKeepsInfinity() =
+    fun chartViewDefaults_withInfiniteWidth_wrapsContent() =
         runComposeUiTest {
-            var resolvedWidth: Dp = Dp.Unspecified
             setContent {
                 MaterialTheme {
                     val style =
-                        ChartViewDefaults.style(width = Dp.Infinity, modifierChart = Modifier)
-                    resolvedWidth = style.width
+                        ChartContainerDefaults.style(width = Dp.Infinity, modifierChart = Modifier)
                     Box(
                         modifier =
                             style.modifierMain.semantics { testTag = "box" },
@@ -55,7 +52,6 @@ class ChartViewDefaultsTest {
                 }
             }
 
-            assertEquals(Dp.Infinity, resolvedWidth)
             onNodeWithTag("box").assertWidthIsEqualTo(180.dp)
         }
 
@@ -65,7 +61,7 @@ class ChartViewDefaultsTest {
         runComposeUiTest {
             setContent {
                 MaterialTheme {
-                    val style = ChartViewDefaults.style(width = 200.dp)
+                    val style = ChartContainerDefaults.style(width = 200.dp)
                     Box(
                         modifier =
                             Modifier
@@ -88,7 +84,7 @@ class ChartViewDefaultsTest {
             setContent {
                 MaterialTheme {
                     val style =
-                        ChartViewDefaults.style(
+                        ChartContainerDefaults.style(
                             width = 200.dp,
                             modifierChart = Modifier.aspectRatio(2f),
                         )

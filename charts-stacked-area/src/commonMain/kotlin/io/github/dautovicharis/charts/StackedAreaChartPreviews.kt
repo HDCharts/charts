@@ -5,7 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import io.github.dautovicharis.charts.StackedAreaChart
 import io.github.dautovicharis.charts.model.toMultiChartDataSet
-import io.github.dautovicharis.charts.style.ChartViewDefaults
+import io.github.dautovicharis.charts.style.ChartContainerDefaults
 import io.github.dautovicharis.charts.style.StackedAreaChartDefaults
 
 private const val STACKED_AREA_CHART_TITLE = "Stacked Area Chart"
@@ -42,7 +42,7 @@ private fun StackedAreaChartPreviewContent() {
             lineColors = colors,
             fillAlpha = 0.32f,
             bezier = false,
-            chartViewStyle = ChartViewDefaults.style(width = 300.dp),
+            chartContainerStyle = ChartContainerDefaults.style(width = 300.dp),
         )
     StackedAreaChart(
         dataSet =

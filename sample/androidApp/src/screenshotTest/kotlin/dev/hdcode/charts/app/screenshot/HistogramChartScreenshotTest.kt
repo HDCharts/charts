@@ -8,7 +8,7 @@ import dev.hdcode.charts.app.screenshot.shared.ScreenshotPreview
 import dev.hdcode.charts.app.screenshot.shared.ScreenshotSurface
 import dev.hdcode.charts.sampleshared.fixtures.ChartTestStyleFixtures
 import io.github.dautovicharis.charts.HistogramChart
-import io.github.dautovicharis.charts.style.ChartViewDefaults
+import io.github.dautovicharis.charts.style.ChartContainerDefaults
 
 @PreviewTest
 @ScreenshotPreview
@@ -30,7 +30,7 @@ fun HistogramChartCustomPreview() {
         val dataSet = SCREENSHOT_HISTOGRAM_SAMPLE_USE_CASE.initialHistogramDataSet()
         HistogramChart(
             dataSet = dataSet,
-            style = ChartTestStyleFixtures.histogramCustomStyle(chartViewStyle = ChartViewDefaults.style()),
+            style = ChartTestStyleFixtures.histogramCustomStyle(chartContainerStyle = ChartContainerDefaults.style()),
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
         )
     }
@@ -46,7 +46,7 @@ fun HistogramChartCustomBarColorsPreview() {
             dataSet = dataSet,
             style =
                 ChartTestStyleFixtures.histogramCustomStyle(
-                    chartViewStyle = ChartViewDefaults.style(),
+                    chartContainerStyle = ChartContainerDefaults.style(),
                     barCount = dataSet.data.item.points.size,
                     useBarColors = true,
                 ),

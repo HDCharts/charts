@@ -12,7 +12,7 @@ import androidx.compose.ui.unit.sp
  * A class that defines the style for a Line Chart.
  *
  * @property modifier The modifier to be applied to the chart.
- * @property chartViewStyle The style to be applied to the chart view.
+ * @property chartContainerStyle The style to be applied to the chart view.
  * @property dragPointColorSameAsLine A boolean indicating whether the color of the drag point is the same as the line color.
  * @property pointColorSameAsLine A boolean indicating whether the color of the point is the same as the line color.
  * @property pointColor The color of the points on the line chart.
@@ -42,7 +42,7 @@ import androidx.compose.ui.unit.sp
 @Immutable
 class LineChartStyle(
     val modifier: Modifier,
-    val chartViewStyle: ChartViewStyle,
+    val chartContainerStyle: ChartContainerStyle,
     val dragPointColorSameAsLine: Boolean,
     val pointColorSameAsLine: Boolean,
     val pointColor: Color,
@@ -151,7 +151,7 @@ object LineChartDefaults {
      * @param xAxisLabelSize The text size of X-axis labels. Defaults to 11.sp.
      * @param xAxisLabelMaxCount Maximum number of X-axis labels to display. Defaults to 6.
      * @param zoomControlsVisible Whether dense-mode zoom controls are shown. Defaults to true.
-     * @param chartViewStyle The style to be applied to the chart view. Defaults to the default style of ChartViewDefaults.
+     * @param chartContainerStyle The style to be applied to the chart view. Defaults to the default style of ChartContainerDefaults.
      *
      * Dense zoom/scroll properties are applied in morph mode and ignored in timeline mode.
      */
@@ -180,9 +180,9 @@ object LineChartDefaults {
         xAxisLabelSize: TextUnit = 11.sp,
         xAxisLabelMaxCount: Int = 6,
         zoomControlsVisible: Boolean = true,
-        chartViewStyle: ChartViewStyle = ChartViewDefaults.style(),
+        chartContainerStyle: ChartContainerStyle = ChartContainerDefaults.style(),
     ): LineChartStyle {
-        val modifier: Modifier = chartViewStyle.wrapContentChartModifier()
+        val modifier: Modifier = chartContainerStyle.wrapContentChartModifier()
 
         val pointColorSameAsLine = pointColor == defaultPointColor()
         val dragPointColorSameAsLine = dragPointColor == defaultDragPointColor()
@@ -214,7 +214,7 @@ object LineChartDefaults {
             xAxisLabelSize = xAxisLabelSize,
             xAxisLabelMaxCount = xAxisLabelMaxCount,
             zoomControlsVisible = zoomControlsVisible,
-            chartViewStyle = chartViewStyle,
+            chartContainerStyle = chartContainerStyle,
         )
     }
 }

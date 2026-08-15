@@ -10,9 +10,8 @@ import androidx.compose.ui.unit.sp
 import io.github.dautovicharis.charts.internal.common.model.ChartDataType.FloatData
 import io.github.dautovicharis.charts.model.ChartDataSet
 import io.github.dautovicharis.charts.model.MultiChartDataSet
-import io.github.dautovicharis.charts.style.ChartViewStyle
+import io.github.dautovicharis.charts.style.ChartContainerStyle
 import io.github.dautovicharis.charts.style.LineChartStyle
-import io.github.dautovicharis.charts.style.PieChartStyle
 import io.github.dautovicharis.charts.style.RadarChartStyle
 import io.github.dautovicharis.charts.style.StackedAreaChartStyle
 import io.github.dautovicharis.charts.style.StackedBarChartStyle
@@ -139,7 +138,7 @@ internal object MockTest {
             xAxisLabelSize = 11.sp,
             xAxisLabelMaxCount = 6,
             zoomControlsVisible = true,
-            chartViewStyle = mockChartViewStyle(),
+            chartContainerStyle = mockChartContainerStyle(),
         )
 
     fun mockStackedBarChartStyle(barColors: List<Color> = colors): StackedBarChartStyle =
@@ -162,7 +161,7 @@ internal object MockTest {
             selectionLineVisible = true,
             selectionLineColor = Color.Magenta,
             selectionLineWidth = 1f,
-            chartViewStyle = mockChartViewStyle(),
+            chartContainerStyle = mockChartContainerStyle(),
         )
 
     fun mockStackedAreaChartStyle(
@@ -188,7 +187,7 @@ internal object MockTest {
             xAxisLabelColor = Color.Gray,
             xAxisLabelSize = 11.sp,
             xAxisLabelMaxCount = 6,
-            chartViewStyle = mockChartViewStyle(),
+            chartContainerStyle = mockChartContainerStyle(),
         )
 
     fun mockBarChartStyle(barColors: List<Color> = colors): StackedBarChartStyle =
@@ -211,26 +210,13 @@ internal object MockTest {
             selectionLineVisible = true,
             selectionLineColor = Color.Magenta,
             selectionLineWidth = 1f,
-            chartViewStyle = mockChartViewStyle(),
-        )
-
-    fun mockPieChartStyle(pieColors: List<Color> = colors): PieChartStyle =
-        PieChartStyle(
-            modifier = Modifier.fillMaxSize(),
-            pieColors = pieColors,
-            pieColor = Color.Red,
-            pieAlpha = 1f,
-            donutPercentage = 0.5f,
-            borderColor = Color.Black,
-            borderWidth = 2f,
-            legendVisible = true,
-            chartViewStyle = mockChartViewStyle(),
+            chartContainerStyle = mockChartContainerStyle(),
         )
 
     fun mockRadarChartStyle(lineColors: List<Color> = colors): RadarChartStyle =
         RadarChartStyle(
             modifier = Modifier.fillMaxSize(),
-            chartViewStyle = mockChartViewStyle(),
+            chartContainerStyle = mockChartContainerStyle(),
             gridColor = Color.Gray,
             gridLineWidth = 1f,
             gridSteps = 4,
@@ -257,15 +243,13 @@ internal object MockTest {
             fillVisible = true,
         )
 
-    private fun mockChartViewStyle(): ChartViewStyle =
-        ChartViewStyle(
+    private fun mockChartContainerStyle(): ChartContainerStyle =
+        ChartContainerStyle(
             modifierMain = Modifier.fillMaxSize(),
             styleTitle = TextStyle.Default,
             modifierLegend = Modifier.fillMaxSize(),
             modifierTopTitle = Modifier.fillMaxSize(),
             innerPadding = Dp(10f),
-            width = Dp.Infinity,
-            backgroundColor = Color.White,
             modifierChart = Modifier.aspectRatio(1f),
         )
 }

@@ -8,7 +8,7 @@ import dev.hdcode.charts.app.screenshot.shared.ScreenshotPreview
 import dev.hdcode.charts.app.screenshot.shared.ScreenshotSurface
 import dev.hdcode.charts.sampleshared.fixtures.ChartTestStyleFixtures
 import io.github.dautovicharis.charts.StackedAreaChart
-import io.github.dautovicharis.charts.style.ChartViewDefaults
+import io.github.dautovicharis.charts.style.ChartContainerDefaults
 
 @PreviewTest
 @ScreenshotPreview
@@ -31,7 +31,7 @@ fun StackedAreaChartCustomPreview() {
             dataSet = SCREENSHOT_STACKED_AREA_SAMPLE_USE_CASE.initialStackedAreaSample().dataSet,
             style =
                 ChartTestStyleFixtures.stackedAreaCustomStyle(
-                    chartViewStyle = ChartViewDefaults.style(),
+                    chartContainerStyle = ChartContainerDefaults.style(),
                     seriesCount = 3,
                 ),
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,

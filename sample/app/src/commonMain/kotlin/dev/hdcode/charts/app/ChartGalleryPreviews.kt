@@ -23,11 +23,12 @@ import io.github.dautovicharis.charts.PieChart
 import io.github.dautovicharis.charts.RadarChart
 import io.github.dautovicharis.charts.StackedAreaChart
 import io.github.dautovicharis.charts.StackedBarChart
+import io.github.dautovicharis.charts.model.PieSlice
 import io.github.dautovicharis.charts.model.toChartDataSet
 import io.github.dautovicharis.charts.model.toMultiChartDataSet
 import io.github.dautovicharis.charts.style.BarChartDefaults
-import io.github.dautovicharis.charts.style.ChartViewDefaults
-import io.github.dautovicharis.charts.style.ChartViewStyle
+import io.github.dautovicharis.charts.style.ChartContainerDefaults
+import io.github.dautovicharis.charts.style.ChartContainerStyle
 import io.github.dautovicharis.charts.style.HistogramChartDefaults
 import io.github.dautovicharis.charts.style.LineChartDefaults
 import io.github.dautovicharis.charts.style.PieChartDefaults
@@ -93,15 +94,19 @@ internal fun ChartPreview(
 
 @Composable
 private fun PieChartPreview(values: List<Float>) {
-    val dataSet =
+    val data =
         remember(values) {
-            values.toChartDataSet(title = "")
+            values.mapIndexed { index, value ->
+                PieSlice(label = "Segment ${index + 1}", value = value)
+            }
         }
     PieChart(
-        dataSet = dataSet,
-        style = PieChartDefaults.style(chartViewStyle = previewChartViewStyle(), legendVisible = false),
-        interactionEnabled = false,
-        animateOnStart = false,
+        data = data,
+        style =
+            PieChartDefaults.style(
+                chartContainerStyle = previewChartContainerStyle(),
+                legend = PieChartDefaults.legend(visible = false),
+            ),
     )
 }
 
@@ -115,7 +120,7 @@ private fun LineChartPreview(values: List<Float>) {
         dataSet = dataSet,
         style =
             LineChartDefaults.style(
-                chartViewStyle = previewChartViewStyle(),
+                chartContainerStyle = previewChartContainerStyle(),
                 xAxisLabelsVisible = false,
                 yAxisLabelsVisible = false,
             ),
@@ -134,7 +139,7 @@ private fun MultiLineChartPreview(series: List<Pair<String, List<Float>>>) {
         dataSet = dataSet,
         style =
             LineChartDefaults.style(
-                chartViewStyle = previewChartViewStyle(),
+                chartContainerStyle = previewChartContainerStyle(),
                 xAxisLabelsVisible = false,
                 yAxisLabelsVisible = false,
             ),
@@ -153,7 +158,7 @@ private fun StackedAreaChartPreview(series: List<Pair<String, List<Float>>>) {
         dataSet = dataSet,
         style =
             StackedAreaChartDefaults.style(
-                chartViewStyle = previewChartViewStyle(),
+                chartContainerStyle = previewChartContainerStyle(),
                 xAxisLabelsVisible = false,
                 yAxisLabelsVisible = false,
             ),
@@ -176,7 +181,7 @@ private fun BarChartPreview(values: List<Float>) {
                 maxValue = 100f,
                 xAxisLabelsVisible = false,
                 yAxisLabelsVisible = false,
-                chartViewStyle = previewChartViewStyle(),
+                chartContainerStyle = previewChartContainerStyle(),
             ),
         interactionEnabled = false,
         animateOnStart = false,
@@ -203,7 +208,7 @@ private fun HistogramChartPreview(values: List<Float>) {
                 minValue = 0f,
                 xAxisLabelsVisible = false,
                 yAxisLabelsVisible = false,
-                chartViewStyle = previewChartViewStyle(),
+                chartContainerStyle = previewChartContainerStyle(),
             ),
         interactionEnabled = false,
         animateOnStart = false,
@@ -220,7 +225,7 @@ private fun StackedBarChartPreview(series: List<Pair<String, List<Float>>>) {
         dataSet = dataSet,
         style =
             StackedBarChartDefaults.style(
-                chartViewStyle = previewChartViewStyle(),
+                chartContainerStyle = previewChartContainerStyle(),
                 xAxisLabelsVisible = false,
                 yAxisLabelsVisible = false,
             ),
@@ -266,7 +271,7 @@ private fun RadarChartPreview(series: List<Pair<String, List<Float>>>) {
         dataSet = dataSet,
         style =
             RadarChartDefaults.style(
-                chartViewStyle = previewChartViewStyle(),
+                chartContainerStyle = previewChartContainerStyle(),
                 categoryLegendVisible = false,
             ),
         interactionEnabled = false,
@@ -275,8 +280,8 @@ private fun RadarChartPreview(series: List<Pair<String, List<Float>>>) {
 }
 
 @Composable
-private fun previewChartViewStyle(): ChartViewStyle =
-    ChartViewDefaults.style(
+private fun previewChartContainerStyle(): ChartContainerStyle =
+    ChartContainerDefaults.style(
         width = PreviewChartSize,
         outerPadding = 0.dp,
         innerPadding = 4.dp,

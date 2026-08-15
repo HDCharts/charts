@@ -7,7 +7,7 @@ import androidx.compose.ui.unit.dp
 import io.github.dautovicharis.charts.LineChart
 import io.github.dautovicharis.charts.model.toChartDataSet
 import io.github.dautovicharis.charts.model.toMultiChartDataSet
-import io.github.dautovicharis.charts.style.ChartViewDefaults
+import io.github.dautovicharis.charts.style.ChartContainerDefaults
 import io.github.dautovicharis.charts.style.LineChartDefaults
 import io.github.dautovicharis.charts.style.LineChartStyle
 
@@ -41,7 +41,7 @@ private fun lineStyle(lineColors: List<Color>): LineChartStyle =
         lineColors = lineColors,
         dragPointSize = 5f,
         pointVisible = true,
-        chartViewStyle = ChartViewDefaults.style(width = 300.dp),
+        chartContainerStyle = ChartContainerDefaults.style(width = 300.dp),
     )
 
 @Composable

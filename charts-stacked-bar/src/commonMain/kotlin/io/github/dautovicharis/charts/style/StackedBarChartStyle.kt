@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.sp
  * A class that defines the style for a Stacked Bar Chart.
  *
  * @property modifier The modifier to be applied to the chart.
- * @property chartViewStyle The style to be applied to the chart container.
+ * @property chartContainerStyle The style to be applied to the chart container.
  * @property barColor The fallback base color used when `barColors` is empty.
  * @property barAlpha The alpha value applied to rendered bar segments.
  * @property space The space between bars in the chart.
@@ -36,7 +36,7 @@ import androidx.compose.ui.unit.sp
 @Immutable
 class StackedBarChartStyle(
     val modifier: Modifier,
-    val chartViewStyle: ChartViewStyle,
+    val chartContainerStyle: ChartContainerStyle,
     val barColor: Color,
     val barAlpha: Float,
     val space: Dp,
@@ -113,7 +113,7 @@ object StackedBarChartDefaults {
      * @param selectionLineVisible Whether the selection indicator line is shown. Defaults to true.
      * @param selectionLineColor The color of the selection indicator line. Defaults to a theme-based primary variant.
      * @param selectionLineWidth The stroke width of the selection indicator line. Defaults to 1f.
-     * @param chartViewStyle The style to be applied to the chart view. Defaults to the default style of ChartViewDefaults.
+     * @param chartContainerStyle The style to be applied to the chart view. Defaults to the default style of ChartContainerDefaults.
      */
     @Composable
     fun style(
@@ -121,7 +121,7 @@ object StackedBarChartDefaults {
         barAlpha: Float = defaultChartAlpha(),
         space: Dp = 10.dp,
         barColors: List<Color> = emptyList(),
-        chartViewStyle: ChartViewStyle = ChartViewDefaults.style(),
+        chartContainerStyle: ChartContainerStyle = ChartContainerDefaults.style(),
         minBarWidth: Dp = 10.dp,
         zoomControlsVisible: Boolean = true,
         yAxisLabelsVisible: Boolean = true,
@@ -136,7 +136,7 @@ object StackedBarChartDefaults {
         selectionLineColor: Color = defaultSelectionLineColor(),
         selectionLineWidth: Float = 1f,
     ): StackedBarChartStyle {
-        val modifier: Modifier = chartViewStyle.fillMaxSizeChartModifier()
+        val modifier: Modifier = chartContainerStyle.fillMaxSizeChartModifier()
 
         return StackedBarChartStyle(
             modifier = modifier,
@@ -157,7 +157,7 @@ object StackedBarChartDefaults {
             selectionLineVisible = selectionLineVisible,
             selectionLineColor = selectionLineColor,
             selectionLineWidth = selectionLineWidth,
-            chartViewStyle = chartViewStyle,
+            chartContainerStyle = chartContainerStyle,
         )
     }
 }

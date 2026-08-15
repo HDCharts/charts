@@ -2,13 +2,12 @@ package dev.hdcode.charts.sampleshared.data.impl
 
 import dev.hdcode.charts.sampleshared.data.PieSampleData
 import dev.hdcode.charts.sampleshared.data.PieSampleUseCase
-import io.github.dautovicharis.charts.model.toChartDataSet
+import io.github.dautovicharis.charts.model.PieSlice
 
 internal class DefaultPieSampleUseCase : PieSampleUseCase {
     companion object {
         private const val DEFAULT_TITLE = "Household Energy"
         private const val CUSTOM_TITLE = "Monthly Budget Allocation"
-        private const val DEFAULT_POSTFIX = "%"
         private val REFRESH_RANGE = 5..45
     }
 
@@ -20,25 +19,17 @@ internal class DefaultPieSampleUseCase : PieSampleUseCase {
         listOf("Housing", "Food", "Transport", "Healthcare", "Savings", "Leisure")
 
     override fun initialPieSample(): PieSampleData =
-        PieSampleData(
-            dataSet =
-                pieDefaultValues.toChartDataSet(
-                    title = DEFAULT_TITLE,
-                    postfix = DEFAULT_POSTFIX,
-                    labels = pieDefaultLabels,
-                ),
-            segmentKeys = pieDefaultLabels,
+        buildPieSample(
+            values = pieDefaultValues,
+            labels = pieDefaultLabels,
+            title = DEFAULT_TITLE,
         )
 
     override fun initialPieCustomSample(): PieSampleData =
-        PieSampleData(
-            dataSet =
-                pieCustomValues.toChartDataSet(
-                    title = CUSTOM_TITLE,
-                    postfix = DEFAULT_POSTFIX,
-                    labels = pieCustomLabels,
-                ),
-            segmentKeys = pieCustomLabels,
+        buildPieSample(
+            values = pieCustomValues,
+            labels = pieCustomLabels,
+            title = CUSTOM_TITLE,
         )
 
     override fun pieRefreshRange(): IntRange = REFRESH_RANGE
@@ -48,7 +39,7 @@ internal class DefaultPieSampleUseCase : PieSampleUseCase {
         numOfPoints: IntRange,
     ): PieSampleData {
         val points = numOfPoints.random()
-        val values = List(points) { range.random() }
+        val values = List(points) { range.random().toFloat() }
         return buildPieSample(
             values = values,
             labels = defaultLabels(points),
@@ -57,7 +48,7 @@ internal class DefaultPieSampleUseCase : PieSampleUseCase {
     }
 
     override fun pieCustomSample(range: IntRange): PieSampleData {
-        val values = List(pieCustomLabels.size) { range.random() }
+        val values = List(pieCustomLabels.size) { range.random().toFloat() }
         return buildPieSample(
             values = values,
             labels = pieCustomLabels,
@@ -66,24 +57,17 @@ internal class DefaultPieSampleUseCase : PieSampleUseCase {
     }
 
     private fun buildPieSample(
-        values: List<Int>,
+        values: List<Float>,
         labels: List<String>,
         title: String = DEFAULT_TITLE,
-        postfix: String = DEFAULT_POSTFIX,
     ): PieSampleData {
-        val dataSet =
-            values.toChartDataSet(
-                title = title,
-                postfix = postfix,
-                labels = labels,
-            )
-        val segmentKeys =
-            labels.ifEmpty {
-                List(values.size) { index -> "Segment ${index + 1}" }
+        val slices =
+            values.mapIndexed { index, value ->
+                PieSlice(label = labels.getOrNull(index) ?: "Segment ${index + 1}", value = value)
             }
         return PieSampleData(
-            dataSet = dataSet,
-            segmentKeys = segmentKeys,
+            slices = slices,
+            title = title,
         )
     }
 

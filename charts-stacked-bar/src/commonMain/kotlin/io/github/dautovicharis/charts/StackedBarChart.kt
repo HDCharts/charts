@@ -54,7 +54,7 @@ fun StackedBarChart(
             selectedBarIndex = selectedBarIndex,
         )
     } else {
-        ChartErrors(style = style.chartViewStyle, errors = errors.toImmutableList())
+        ChartErrors(style = style.chartContainerStyle, errors = errors.toImmutableList())
     }
 }
 
@@ -108,7 +108,7 @@ private fun StackedBarChartContent(
                     .toImmutableList()
             }
         }
-    Chart(chartViewsStyle = style.chartViewStyle) {
+    Chart(chartContainerStyle = style.chartContainerStyle) {
         StackedBarChart(
             data = dataSet.data,
             title = title,
@@ -141,7 +141,7 @@ private fun StackedBarChartContent(
 
         if (dataSet.data.hasCategories()) {
             Legend(
-                chartViewsStyle = style.chartViewStyle,
+                chartContainerStyle = style.chartContainerStyle,
                 colors = colors,
                 legend = dataSet.data.categories,
                 labels = labels,

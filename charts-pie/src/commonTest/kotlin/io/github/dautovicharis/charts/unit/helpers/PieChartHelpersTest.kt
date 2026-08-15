@@ -124,6 +124,21 @@ class PieChartHelpersTest {
     }
 
     @Test
+    fun createPieSlices_allZeroValues_producesFiniteGeometry() {
+        // Regression: an all-zero pie must not produce NaN angles
+        // (it should render as an empty/blank pie, not crash the draw loop).
+        val slices = createPieSlices(values = listOf(0.0, 0.0, 0.0))
+
+        assertTrue(slices.isNotEmpty())
+        slices.forEach {
+            assertTrue(it.startDeg.isFinite())
+            assertTrue(it.endDeg.isFinite())
+            assertTrue(it.sweepAngle.isFinite())
+            assertEquals(0f, it.sweepAngle)
+        }
+    }
+
+    @Test
     fun calculatePercentages_returnsCorrectPercentages() {
         // Arrange
         val testData =

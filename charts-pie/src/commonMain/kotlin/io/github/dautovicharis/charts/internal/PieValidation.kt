@@ -1,17 +1,12 @@
 package io.github.dautovicharis.charts.internal
 
 import io.github.dautovicharis.charts.internal.ValidationErrors.MIN_REQUIRED_PIE
-import io.github.dautovicharis.charts.model.ChartDataSet
-import io.github.dautovicharis.charts.style.PieChartStyle
+import io.github.dautovicharis.charts.model.PieSlice
 
 @InternalChartsApi
-fun validatePieData(
-    dataSet: ChartDataSet,
-    style: PieChartStyle,
-): List<String> {
+fun validatePieData(data: List<PieSlice>): List<String> {
     val validationErrors = mutableListOf<String>()
-    val pointsSize = dataSet.data.item.points.size
-    val colorsSize = style.pieColors.size
+    val pointsSize = data.size
 
     if (pointsSize < MIN_REQUIRED_PIE) {
         val validationError =
@@ -20,20 +15,14 @@ fun validatePieData(
         return validationErrors
     }
 
-    dataSet.data.item.points.forEachIndexed { index, value ->
-        if (value.isNaN()) {
+    data.forEachIndexed { index, slice ->
+        if (slice.value.isNaN()) {
             val validationError = ValidationErrors.RULE_DATA_POINT_NOT_NUMBER.format(index)
             validationErrors.add(validationError)
-        } else if (value < 0) {
+        } else if (slice.value < 0) {
             val validationError = ValidationErrors.RULE_DATA_POINT_NEGATIVE.format(index)
             validationErrors.add(validationError)
         }
-    }
-
-    if (colorsSize > 0 && colorsSize != pointsSize) {
-        val validationError =
-            ValidationErrors.RULE_COLORS_SIZE_MISMATCH.format(colorsSize, pointsSize)
-        validationErrors.add(validationError)
     }
     return validationErrors
 }

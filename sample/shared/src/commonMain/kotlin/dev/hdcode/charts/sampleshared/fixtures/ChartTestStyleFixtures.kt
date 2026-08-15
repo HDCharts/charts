@@ -6,9 +6,10 @@ import androidx.compose.ui.unit.dp
 import dev.hdcode.charts.sampleshared.theme.LocalChartColors
 import dev.hdcode.charts.sampleshared.theme.seriesColor
 import dev.hdcode.charts.sampleshared.theme.seriesColors
+import io.github.dautovicharis.charts.model.PieSlice
 import io.github.dautovicharis.charts.style.BarChartDefaults
 import io.github.dautovicharis.charts.style.BarChartStyle
-import io.github.dautovicharis.charts.style.ChartViewStyle
+import io.github.dautovicharis.charts.style.ChartContainerStyle
 import io.github.dautovicharis.charts.style.HistogramChartDefaults
 import io.github.dautovicharis.charts.style.HistogramChartStyle
 import io.github.dautovicharis.charts.style.LineChartDefaults
@@ -29,26 +30,37 @@ import io.github.dautovicharis.charts.style.StackedBarChartStyle
  */
 object ChartTestStyleFixtures {
     @Composable
-    fun pieCustomStyle(
-        chartViewStyle: ChartViewStyle,
-        segmentCount: Int = 6,
-    ): PieChartStyle {
-        val chartColors = LocalChartColors.current
-        return PieChartDefaults.style(
-            chartViewStyle = chartViewStyle,
-            borderColor = MaterialTheme.colorScheme.surface,
-            donutPercentage = 40f,
-            borderWidth = 5f,
-            legendVisible = true,
-            pieColors = chartColors.seriesColors(segmentCount),
+    fun pieCustomStyle(chartContainerStyle: ChartContainerStyle): PieChartStyle =
+        PieChartDefaults.style(
+            chartContainerStyle = chartContainerStyle,
+            donut = PieChartDefaults.donut(holePercentage = 40f),
+            border =
+                PieChartDefaults.border(
+                    color = MaterialTheme.colorScheme.surface,
+                    width = 5f,
+                ),
+            legend = PieChartDefaults.legend(visible = true),
         )
+
+    /**
+     * Applies the shared chart palette onto the custom pie slices so the preview renders
+     * the same colors as before, with the color living on the [PieSlice] data rather than
+     * the style object.
+     */
+    @Composable
+    fun pieCustomSlices(slices: List<PieSlice>): List<PieSlice> {
+        val chartColors = LocalChartColors.current
+        val palette = chartColors.seriesColors(slices.size)
+        return slices.mapIndexed { index, slice ->
+            slice.copy(color = palette.getOrElse(index) { slice.color ?: palette.first() })
+        }
     }
 
     @Composable
-    fun lineCustomStyle(chartViewStyle: ChartViewStyle): LineChartStyle {
+    fun lineCustomStyle(chartContainerStyle: ChartContainerStyle): LineChartStyle {
         val chartColors = LocalChartColors.current
         return LineChartDefaults.style(
-            chartViewStyle = chartViewStyle,
+            chartContainerStyle = chartContainerStyle,
             lineColor = chartColors.seriesColor(1),
             pointSize = 9f,
             bezier = false,
@@ -62,12 +74,12 @@ object ChartTestStyleFixtures {
 
     @Composable
     fun multiLineCustomStyle(
-        chartViewStyle: ChartViewStyle,
+        chartContainerStyle: ChartContainerStyle,
         seriesCount: Int,
     ): LineChartStyle {
         val chartColors = LocalChartColors.current
         return LineChartDefaults.style(
-            chartViewStyle = chartViewStyle,
+            chartContainerStyle = chartContainerStyle,
             lineColors = chartColors.seriesColors(seriesCount),
             bezier = false,
             pointVisible = true,
@@ -79,7 +91,7 @@ object ChartTestStyleFixtures {
 
     @Composable
     fun barCustomStyle(
-        chartViewStyle: ChartViewStyle,
+        chartContainerStyle: ChartContainerStyle,
         barCount: Int = 1,
         useBarColors: Boolean = false,
         minValue: Float? = null,
@@ -93,7 +105,7 @@ object ChartTestStyleFixtures {
                 emptyList()
             }
         return BarChartDefaults.style(
-            chartViewStyle = chartViewStyle,
+            chartContainerStyle = chartContainerStyle,
             barColor = chartColors.seriesColor(4),
             barColors = barColors,
             minValue = minValue,
@@ -109,7 +121,7 @@ object ChartTestStyleFixtures {
 
     @Composable
     fun histogramCustomStyle(
-        chartViewStyle: ChartViewStyle,
+        chartContainerStyle: ChartContainerStyle,
         barCount: Int = 1,
         useBarColors: Boolean = false,
         minValue: Float? = 0f,
@@ -123,7 +135,7 @@ object ChartTestStyleFixtures {
                 emptyList()
             }
         return HistogramChartDefaults.style(
-            chartViewStyle = chartViewStyle,
+            chartContainerStyle = chartContainerStyle,
             barColor = chartColors.seriesColor(4),
             barColors = barColors,
             minValue = minValue,
@@ -139,12 +151,12 @@ object ChartTestStyleFixtures {
 
     @Composable
     fun stackedBarCustomStyle(
-        chartViewStyle: ChartViewStyle,
+        chartContainerStyle: ChartContainerStyle,
         segmentCount: Int,
     ): StackedBarChartStyle {
         val chartColors = LocalChartColors.current
         return StackedBarChartDefaults.style(
-            chartViewStyle = chartViewStyle,
+            chartContainerStyle = chartContainerStyle,
             barColors = chartColors.seriesColors(segmentCount),
             space = 8.dp,
             zoomControlsVisible = true,
@@ -158,13 +170,13 @@ object ChartTestStyleFixtures {
 
     @Composable
     fun stackedAreaCustomStyle(
-        chartViewStyle: ChartViewStyle,
+        chartContainerStyle: ChartContainerStyle,
         seriesCount: Int,
     ): StackedAreaChartStyle {
         val chartColors = LocalChartColors.current
         val colors = chartColors.seriesColors(seriesCount)
         return StackedAreaChartDefaults.style(
-            chartViewStyle = chartViewStyle,
+            chartContainerStyle = chartContainerStyle,
             areaColors = colors,
             lineColors = colors,
             fillAlpha = 0.3f,
@@ -179,12 +191,12 @@ object ChartTestStyleFixtures {
 
     @Composable
     fun radarCustomStyle(
-        chartViewStyle: ChartViewStyle,
+        chartContainerStyle: ChartContainerStyle,
         seriesKeys: List<String>,
     ): RadarChartStyle {
         val chartColors = LocalChartColors.current
         return RadarChartDefaults.style(
-            chartViewStyle = chartViewStyle,
+            chartContainerStyle = chartContainerStyle,
             lineColors = chartColors.seriesColors(seriesKeys),
             lineWidth = 3.5f,
             pointColor = chartColors.highlight,

@@ -23,26 +23,23 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 /**
- * A class that defines the style for a Chart View.
+ * A class that defines the style for the chart container.
  *
- * @property modifierMain The main modifier to be applied to the chart view.
- * @property styleTitle The style to be applied to the title of the chart view.
- * @property modifierTopTitle The modifier to be applied to the top title of the chart view.
- * @property modifierLegend The modifier to be applied to the legend of the chart view.
- * @property innerPadding The inner padding of the chart view.
- * @property width The width of the chart view.
- * @property backgroundColor The background color of the chart view.
+ * @property modifierMain The main modifier to be applied to the chart container, including its
+ * background and (depending on the configured width) its wrapping or fixed width behavior.
+ * @property styleTitle The style to be applied to the title of the chart container.
+ * @property modifierTopTitle The modifier to be applied to the top title of the chart container.
+ * @property modifierLegend The modifier to be applied to the legend of the chart container.
+ * @property innerPadding The inner padding of the chart container.
  * @property modifierChart The modifier applied to chart drawing content.
  */
 @Immutable
-class ChartViewStyle(
+class ChartContainerStyle(
     val modifierMain: Modifier,
     val styleTitle: TextStyle,
     val modifierTopTitle: Modifier,
     val modifierLegend: Modifier,
     val innerPadding: Dp,
-    val width: Dp,
-    val backgroundColor: Color,
     val modifierChart: Modifier,
 ) {
     fun wrapContentChartModifier(contentPadding: Dp = innerPadding): Modifier =
@@ -59,18 +56,18 @@ class ChartViewStyle(
 }
 
 /**
- * An object that provides default styles for a Chart View.
+ * An object that provides default styles for a chart container.
  */
-object ChartViewDefaults {
+object ChartContainerDefaults {
     /**
-     * Returns a ChartViewStyle with the provided parameters or their default values.
+     * Returns a [ChartContainerStyle] with the provided parameters or their default values.
      *
-     * @param width The width of the chart view. Defaults to Dp.Infinity.
-     * @param outerPadding The outer padding of the chart view. Defaults to 20.dp.
-     * @param innerPadding The inner padding of the chart view. Defaults to 15.dp.
-     * @param cornerRadius The corner radius of the chart view. Defaults to 20.dp.
-     * @param shadow The shadow of the chart view. Defaults to 1.dp.
-     * @param backgroundColor The background color of the chart view. Defaults to a subtle blend of surface and primaryContainer that adapts to dark mode.
+     * @param width The width of the chart container. Defaults to Dp.Infinity.
+     * @param outerPadding The outer padding of the chart container. Defaults to 20.dp.
+     * @param innerPadding The inner padding of the chart container. Defaults to 15.dp.
+     * @param cornerRadius The corner radius of the chart container. Defaults to 20.dp.
+     * @param shadow The shadow of the chart container. Defaults to 1.dp.
+     * @param backgroundColor The background color of the chart container. Defaults to a subtle blend of surface and primaryContainer that adapts to dark mode.
      * @param modifierChart The modifier applied to chart drawing content. Defaults to a square aspect ratio.
      */
     @Composable
@@ -82,7 +79,7 @@ object ChartViewDefaults {
         shadow: Dp = 1.dp,
         backgroundColor: Color = defaultChartBackgroundColor(),
         modifierChart: Modifier = Modifier.aspectRatio(1f),
-    ): ChartViewStyle {
+    ): ChartContainerStyle {
         val modifierTitle: Modifier = Modifier.padding(top = innerPadding, start = innerPadding)
         val modifierLegend: Modifier =
             Modifier
@@ -110,19 +107,17 @@ object ChartViewDefaults {
         val titleStyle =
             TextStyle(
                 fontSize = 20.sp,
-                color = MaterialTheme.colorScheme.onBackground,
+                color = MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Start,
                 fontWeight = FontWeight.ExtraBold,
             )
 
-        return ChartViewStyle(
+        return ChartContainerStyle(
             modifierMain = updatedModifierMain,
             styleTitle = titleStyle,
             modifierTopTitle = modifierTitle,
             modifierLegend = modifierLegend,
             innerPadding = innerPadding,
-            width = width,
-            backgroundColor = backgroundColor,
             modifierChart = modifierChart,
         )
     }
