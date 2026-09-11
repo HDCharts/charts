@@ -105,7 +105,7 @@ private fun PieChartContent(
     var interactionSelection by remember(points, selection) { mutableStateOf<Int?>(null) }
     var interactionNonce by remember(points, selection) { mutableStateOf(0L) }
 
-    LaunchedEffect(interactionNonce) {
+    LaunchedEffect(points, selection, interactionNonce) {
         if (interactionSelection == null) return@LaunchedEffect
         delay(PIE_SELECTION_AUTO_DESELECT_TIMEOUT_MS)
         if (selection.selectedIndex == interactionSelection) {

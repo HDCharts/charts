@@ -11,6 +11,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
@@ -126,6 +127,7 @@ internal fun PieChart(
         label = "donutHoleAnimation",
     )
 
+    val currentOnSliceTouched by rememberUpdatedState(onSliceTouched)
     val interactionModifier =
         if (interactionEnabled) {
             Modifier
@@ -138,7 +140,7 @@ internal fun PieChart(
                                 size = size,
                                 slices = interactionSlices,
                             )
-                        onSliceTouched(selectedIndex)
+                        currentOnSliceTouched(selectedIndex)
                     }
                 }
         } else {

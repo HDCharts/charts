@@ -5,11 +5,16 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 
 /**
- * A unified chart data model.
+ * Immutable, indexed data shared by aligned-series charts.
  *
- * @param categories The indexed-dimension labels shared by all series (x-axis values for
- * bar/line charts, slice labels for pie charts, axes for radar charts).
- * @param series The series to render. Pie charts use exactly one series.
+ * Values at the same index in each series share a category. Categories are labels,
+ * not numeric coordinates. Replace data to update a chart rather than mutating input lists.
+ * Chart-specific validation determines permitted series counts, lengths, and values.
+ * Pie charts use their own slice model instead of this table.
+ *
+ * @param categories The indexed-dimension labels, such as bar labels or radar axes.
+ * Empty means no explicit labels; otherwise the count must match each series' value count.
+ * @param series The ordered series to render. Series must have aligned value counts.
  */
 @Immutable
 data class ChartData(
@@ -17,7 +22,7 @@ data class ChartData(
     val series: ImmutableList<ChartSeries>,
 ) {
     /**
-     * Convenience constructor accepting mutable lists.
+     * Convenience constructor that defensively copies the supplied lists.
      *
      * @param categories The indexed-dimension labels shared by all series.
      * @param series The series to render.
@@ -34,15 +39,16 @@ data class ChartData(
 /**
  * A single named series of values within a [ChartData].
  *
- * @param name Optional series name. Required for charts that render a legend with
- * per-series entries.
+ * @param name Optional display name, not a unique series identifier.
  * @param values The series values. Mutating the supplied list after construction is
- * unsupported; the values are copied into an immutable list.
+ * safe but does not update this series; values are copied into an immutable list.
+ * Raw values retain Double precision; drawing coordinates can be normalized separately.
+ * Convert other numeric types or parse strings before constructing the series.
  */
 @Immutable
 data class ChartSeries(
     val name: String? = null,
-    val values: ImmutableList<Float>,
+    val values: ImmutableList<Double>,
 ) {
     /**
      * Convenience constructor accepting a mutable list of values.
@@ -52,7 +58,7 @@ data class ChartSeries(
      */
     constructor(
         name: String? = null,
-        values: List<Float>,
+        values: List<Double>,
     ) : this(
         name = name,
         values = values.toImmutableList(),
@@ -62,11 +68,11 @@ data class ChartSeries(
 /**
  * Converts a list of values into single-series [ChartData].
  *
- * @param categories The indexed-dimension labels. Defaults to the string form of each index.
+ * @param categories The indexed-dimension labels. Empty by default (no explicit labels).
  * @param seriesName Optional series name.
  */
-fun List<Float>.toChartData(
-    categories: List<String> = indices.map(Int::toString),
+fun List<Double>.toChartData(
+    categories: List<String> = emptyList(),
     seriesName: String? = null,
 ): ChartData =
     ChartData(

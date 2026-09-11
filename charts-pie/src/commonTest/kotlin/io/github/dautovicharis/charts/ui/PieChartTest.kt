@@ -1,8 +1,11 @@
 package io.github.dautovicharis.charts.ui
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
-import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTouchInput
@@ -17,6 +20,7 @@ import io.github.dautovicharis.charts.internal.format
 import io.github.dautovicharis.charts.internal.piechart.calculatePercentages
 import io.github.dautovicharis.charts.mock.MockTest.TITLE
 import io.github.dautovicharis.charts.mock.MockTest.colors
+import io.github.dautovicharis.charts.model.ChartSelection
 import io.github.dautovicharis.charts.model.PieSlice
 import io.github.dautovicharis.charts.model.staticChartSelection
 import io.github.dautovicharis.charts.style.PieChartDefaults
@@ -25,6 +29,8 @@ import kotlin.math.cos
 import kotlin.math.round
 import kotlin.math.sin
 import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 class PieChartTest {
     private val pieSlices =
@@ -45,7 +51,7 @@ class PieChartTest {
                 PieChart(pieSlices, title = TITLE)
             }
 
-            onNodeWithTag(TestTags.PIE_CHART).isDisplayed()
+            onNodeWithTag(TestTags.PIE_CHART).assertIsDisplayed()
             onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(TITLE)
         }
 
@@ -60,7 +66,7 @@ class PieChartTest {
                 PieChart(pieSlices, title = TITLE)
             }
 
-            onNodeWithTag(TestTags.PIE_CHART).isDisplayed()
+            onNodeWithTag(TestTags.PIE_CHART).assertIsDisplayed()
             onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(TITLE)
             val size = onNodeWithTag(TestTags.PIE_CHART).fetchSemanticsNode().size
 
@@ -71,8 +77,8 @@ class PieChartTest {
                     down(sliceMiddlePosition)
                     up()
                 }
-                onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(value).isDisplayed()
-                onNodeWithText("${percentages[index]}%").isDisplayed()
+                onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(value).assertIsDisplayed()
+                onNodeWithText("${percentages[index]}%").assertIsDisplayed()
             }
         }
 
@@ -88,8 +94,8 @@ class PieChartTest {
             }
 
             onNodeWithTag(TestTags.PIE_CHART).assertDoesNotExist()
-            onNodeWithTag(TestTags.CHART_ERROR).isDisplayed()
-            onNodeWithText("${expectedError}\n").isDisplayed()
+            onNodeWithTag(TestTags.CHART_ERROR).assertIsDisplayed()
+            onNodeWithText("${expectedError}\n").assertIsDisplayed()
         }
 
     @OptIn(ExperimentalTestApi::class)
@@ -105,7 +111,7 @@ class PieChartTest {
                 PieChart(data = slices)
             }
 
-            onNodeWithTag(TestTags.PIE_CHART).isDisplayed()
+            onNodeWithTag(TestTags.PIE_CHART).assertIsDisplayed()
             onNodeWithTag(TestTags.CHART_ERROR).assertDoesNotExist()
         }
 
@@ -124,7 +130,7 @@ class PieChartTest {
                 )
             }
 
-            onNodeWithTag(TestTags.PIE_CHART).isDisplayed()
+            onNodeWithTag(TestTags.PIE_CHART).assertIsDisplayed()
             onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(TITLE)
             val size = onNodeWithTag(TestTags.PIE_CHART).fetchSemanticsNode().size
 
@@ -135,8 +141,8 @@ class PieChartTest {
                     down(sliceMiddlePosition)
                     up()
                 }
-                onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(value).isDisplayed()
-                onNodeWithText("${percentages[index]}%").isDisplayed()
+                onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(value).assertIsDisplayed()
+                onNodeWithText("${percentages[index]}%").assertIsDisplayed()
             }
         }
 
@@ -157,9 +163,9 @@ class PieChartTest {
                 )
             }
 
-            onNodeWithTag(TestTags.PIE_CHART).isDisplayed()
+            onNodeWithTag(TestTags.PIE_CHART).assertIsDisplayed()
             onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(expectedTitle)
-            onNodeWithText(expectedPercentage).isDisplayed()
+            onNodeWithText(expectedPercentage).assertIsDisplayed()
         }
 
     @OptIn(ExperimentalTestApi::class)
@@ -188,6 +194,120 @@ class PieChartTest {
                 }.isSuccess
             }
             onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(TITLE)
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun pieChart_externalSelectionAndClear_updateDetails() =
+        runComposeUiTest {
+            val selection = ChartSelection()
+            setContent {
+                PieChart(pieSlices, title = TITLE, style = PieChartDefaults.style(selection = selection))
+            }
+
+            runOnIdle { selection.select(1) }
+            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(labels[1])
+            onNodeWithText("20.0%").assertIsDisplayed()
+
+            runOnIdle { selection.clear() }
+            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(TITLE)
+            onNodeWithText("20.0%").assertDoesNotExist()
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun pieChart_repeatedTap_renewsTimeoutWithoutDuplicateNotification() =
+        runComposeUiTest {
+            val notifications = mutableListOf<Int?>()
+            val selection = ChartSelection { notifications.add(it) }
+            setContent {
+                PieChart(pieSlices, title = TITLE, style = PieChartDefaults.style(selection = selection))
+            }
+
+            waitForIdle()
+            mainClock.autoAdvance = false
+
+            fun tapFirstSlice() {
+                val node = onNodeWithTag(TestTags.PIE_CHART)
+                val position = getCoordinatesForSlice(0, node.fetchSemanticsNode().size, createPieSlices(points))
+                node.performTouchInput {
+                    down(position)
+                    up()
+                }
+                repeat(2) { mainClock.advanceTimeByFrame() }
+                waitForIdle()
+            }
+
+            fun assertSelectedOnce() {
+                runOnIdle {
+                    assertEquals(expected = 0, actual = selection.selectedIndex)
+                    assertEquals(expected = listOf<Int?>(0), actual = notifications)
+                }
+                onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(labels[0])
+            }
+
+            tapFirstSlice()
+            mainClock.advanceTimeBy(2_000L, ignoreFrameDuration = true)
+            assertSelectedOnce()
+            tapFirstSlice()
+
+            // Past the first tap's deadline, but before the renewed deadline.
+            mainClock.advanceTimeBy(1_500L, ignoreFrameDuration = true)
+            assertSelectedOnce()
+            mainClock.advanceTimeBy(1_000L, ignoreFrameDuration = true)
+            assertSelectedOnce()
+
+            mainClock.advanceTimeBy(600L, ignoreFrameDuration = true)
+            repeat(2) { mainClock.advanceTimeByFrame() }
+            waitForIdle()
+            runOnIdle {
+                assertNull(selection.selectedIndex)
+                assertEquals(expected = listOf(0, null), actual = notifications)
+            }
+            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(TITLE)
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun pieChart_replacedSelectionHolder_receivesGesturesAndOwnsTimeout() =
+        runComposeUiTest {
+            val oldSelection = ChartSelection()
+            val newSelection = ChartSelection()
+            var selection by mutableStateOf(oldSelection)
+            setContent {
+                PieChart(pieSlices, title = TITLE, style = PieChartDefaults.style(selection = selection))
+            }
+
+            var size = onNodeWithTag(TestTags.PIE_CHART).fetchSemanticsNode().size
+            val firstPosition = getCoordinatesForSlice(0, size, createPieSlices(points))
+            onNodeWithTag(TestTags.PIE_CHART).performTouchInput {
+                down(firstPosition)
+                up()
+            }
+            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(labels[0])
+
+            runOnIdle { selection = newSelection }
+            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(TITLE)
+            size = onNodeWithTag(TestTags.PIE_CHART).fetchSemanticsNode().size
+            val secondPosition = getCoordinatesForSlice(1, size, createPieSlices(points))
+            onNodeWithTag(TestTags.PIE_CHART).performTouchInput {
+                down(secondPosition)
+                up()
+            }
+            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(labels[1])
+            runOnIdle {
+                assertEquals(expected = 0, actual = oldSelection.selectedIndex)
+                assertEquals(expected = 1, actual = newSelection.selectedIndex)
+            }
+
+            waitUntil(timeoutMillis = PIE_SELECTION_AUTO_DESELECT_TIMEOUT_MS + 2_000L) {
+                newSelection.selectedIndex == null
+            }
+            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(TITLE)
+            runOnIdle {
+                assertEquals(expected = 0, actual = oldSelection.selectedIndex)
+                assertNull(newSelection.selectedIndex)
+            }
         }
 
     private data class SliceGeometry(
