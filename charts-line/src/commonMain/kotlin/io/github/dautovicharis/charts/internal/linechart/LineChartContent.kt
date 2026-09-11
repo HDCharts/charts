@@ -52,7 +52,8 @@ import io.github.dautovicharis.charts.internal.common.interaction.buildTapGestur
 import io.github.dautovicharis.charts.internal.common.model.MultiChartData
 import io.github.dautovicharis.charts.internal.common.model.minMax
 import io.github.dautovicharis.charts.internal.common.model.normalizeByMinMax
-import io.github.dautovicharis.charts.style.LineChartStyle
+import io.github.dautovicharis.charts.internal.linechart.LineChartInternalStyle
+import io.github.dautovicharis.charts.model.ChartValueFormatter
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
@@ -92,7 +93,7 @@ internal data class LineChartUpdateDecision(
 @Composable
 internal fun LineChartContent(
     data: MultiChartData,
-    style: LineChartStyle,
+    style: LineChartInternalStyle,
     colors: ImmutableList<Color>,
     interactionEnabled: Boolean,
     animateOnStart: Boolean,
@@ -103,6 +104,8 @@ internal fun LineChartContent(
     zoomScale: Float = 1f,
     selectedPointIndex: Int = NO_SELECTION,
     onValueChanged: (Int) -> Unit = {},
+    valueFormatter: ChartValueFormatter,
+    axisValueFormatter: ChartValueFormatter,
 ) {
     val isPreview = LocalInspectionMode.current
     var show by rememberShowState(isPreviewMode = isPreview || !animateOnStart)
@@ -136,6 +139,7 @@ internal fun LineChartContent(
     val targetNormalized = remember(rawSeries, minMax) { data.normalizeByMinMax(minMax, 0f) }
     val pointsCount = rawSeries.firstOrNull()?.size ?: 0
     val forcedSelectionIndex = selectedPointIndex.takeIf { it in 0 until pointsCount } ?: NO_SELECTION
+    // A preset is authoritative for initial rendering, but does not disable later interaction.
     val hasForcedSelection = forcedSelectionIndex != NO_SELECTION
     val reportedSelection = remember(forcedSelectionIndex) { mutableIntStateOf(forcedSelectionIndex) }
     val seriesCount = rawSeries.size
@@ -161,8 +165,8 @@ internal fun LineChartContent(
     val timelineRenderMinMax = remember { mutableStateOf<Pair<Double, Double>?>(null) }
     val isTimelineMode = renderMode == LineChartRenderMode.Timeline
     val denseMorphEnabled = isDenseMorphMode && !isTimelineMode
-    val dragInteractionEnabled = interactionEnabled && !isTimelineMode && !denseMorphEnabled && !hasForcedSelection
-    val tapInteractionEnabled = interactionEnabled && denseMorphEnabled && !hasForcedSelection
+    val dragInteractionEnabled = interactionEnabled && !isTimelineMode && !denseMorphEnabled
+    val tapInteractionEnabled = interactionEnabled && denseMorphEnabled
 
     LaunchedEffect(dragInteractionEnabled, tapInteractionEnabled, hasForcedSelection) {
         dragging.value = false
@@ -421,7 +425,14 @@ internal fun LineChartContent(
         val chartHeightPx = with(density) { chartHeight.toPx() }.coerceAtLeast(1f)
         val lineVerticalInsetPx = LINE_VERTICAL_SAFE_INSET.coerceAtMost(chartHeightPx / 2f)
         val yAxisTicks =
-            remember(minMax, chartHeightPx, style.yAxisLabelCount, showYAxisLabels, lineVerticalInsetPx) {
+            remember(
+                minMax,
+                chartHeightPx,
+                style.yAxisLabelCount,
+                showYAxisLabels,
+                lineVerticalInsetPx,
+                axisValueFormatter,
+            ) {
                 if (!showYAxisLabels) {
                     emptyList()
                 } else {
@@ -431,6 +442,7 @@ internal fun LineChartContent(
                         labelCount = style.yAxisLabelCount,
                         plotHeightPx = chartHeightPx,
                         verticalInsetPx = lineVerticalInsetPx,
+                        formatter = axisValueFormatter,
                     )
                 }
             }

@@ -13,6 +13,7 @@ import io.github.dautovicharis.charts.internal.common.axis.AxisYLayoutTick
 import io.github.dautovicharis.charts.internal.common.axis.buildNumericYAxisTicks
 import io.github.dautovicharis.charts.internal.common.axis.resolveAxisLabel
 import io.github.dautovicharis.charts.internal.common.model.MultiChartData
+import io.github.dautovicharis.charts.model.ChartValueFormatter
 
 internal data class LineAxisTick(
     val label: String,
@@ -64,6 +65,7 @@ internal fun resolveLineXAxisLabels(data: MultiChartData): List<String> =
                 ?.item
                 ?.labels
                 ?.toList()
+                ?.takeUnless { labels -> labels.all(String::isBlank) }
                 .orEmpty()
         data.hasCategories() -> data.categories.toList()
         else -> emptyList()
@@ -104,6 +106,12 @@ internal fun buildLineYAxisTicks(
     labelCount: Int,
     plotHeightPx: Float,
     verticalInsetPx: Float = 0f,
+    formatter: ChartValueFormatter =
+        ChartValueFormatter { value ->
+            io.github.dautovicharis.charts.model.ChartValueFormatters.Default
+                .format(value)
+                .removeSuffix(".0")
+        },
 ): List<LineYAxisTick> =
     buildNumericYAxisTicks(
         minValue = minValue,
@@ -113,7 +121,7 @@ internal fun buildLineYAxisTicks(
         verticalInsetPx = verticalInsetPx,
     ).map { tick ->
         LineYAxisTick(
-            label = tick.label,
+            label = tick.label.toDoubleOrNull()?.let(formatter::format) ?: tick.label,
             centerY = tick.centerY,
         )
     }

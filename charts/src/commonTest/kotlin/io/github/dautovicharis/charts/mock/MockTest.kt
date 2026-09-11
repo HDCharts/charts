@@ -8,10 +8,10 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.sp
 import io.github.dautovicharis.charts.internal.common.model.ChartDataType.FloatData
+import io.github.dautovicharis.charts.internal.linechart.LineChartInternalStyle
 import io.github.dautovicharis.charts.model.ChartDataSet
 import io.github.dautovicharis.charts.model.MultiChartDataSet
 import io.github.dautovicharis.charts.style.ChartContainerStyle
-import io.github.dautovicharis.charts.style.LineChartStyle
 import io.github.dautovicharis.charts.style.RadarChartStyle
 import io.github.dautovicharis.charts.style.StackedAreaChartStyle
 import io.github.dautovicharis.charts.style.StackedBarChartStyle
@@ -110,22 +110,24 @@ internal object MockTest {
         )
 
     // Mock styles
-    fun mockLineChartStyle(lineColors: List<Color> = colors): LineChartStyle =
-        LineChartStyle(
+    fun mockLineChartStyle(lineColors: List<Color> = colors): LineChartInternalStyle =
+        LineChartInternalStyle(
             modifier = Modifier.fillMaxSize(),
+            chartContainerStyle = mockChartContainerStyle(),
+            dragPointColorSameAsLine = true,
+            pointColorSameAsLine = true,
             pointColor = Color.Red,
-            pointSize = 10f,
             pointVisible = true,
+            pointSize = 10f,
             lineColor = Color.Green,
             lineAlpha = 1f,
             lineColors = lineColors,
             bezier = true,
+            lineStrokeWidth = 1f,
             dragPointSize = 7f,
             dragPointVisible = true,
             dragActivePointSize = 12f,
             dragPointColor = Color.Red,
-            dragPointColorSameAsLine = true,
-            pointColorSameAsLine = true,
             axisVisible = true,
             axisColor = Color.Gray,
             axisLineWidth = 1f,
@@ -138,7 +140,6 @@ internal object MockTest {
             xAxisLabelSize = 11.sp,
             xAxisLabelMaxCount = 6,
             zoomControlsVisible = true,
-            chartContainerStyle = mockChartContainerStyle(),
         )
 
     fun mockStackedBarChartStyle(barColors: List<Color> = colors): StackedBarChartStyle =

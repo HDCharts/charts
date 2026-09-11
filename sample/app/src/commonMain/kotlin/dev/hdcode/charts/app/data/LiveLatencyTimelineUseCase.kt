@@ -1,7 +1,6 @@
 package dev.hdcode.charts.app.data
 
-import io.github.dautovicharis.charts.model.ChartDataSet
-import io.github.dautovicharis.charts.model.MultiChartDataSet
+import io.github.dautovicharis.charts.model.ChartData
 
 data class LiveLatencySingleSeriesWindow(
     val values: List<Float>,
@@ -26,7 +25,7 @@ interface LiveLatencyTimelineUseCase {
 
     fun advanceSingleWindow(window: LiveLatencySingleSeriesWindow): LiveLatencySingleSeriesWindow
 
-    fun toSingleDataSet(window: LiveLatencySingleSeriesWindow): ChartDataSet
+    fun toSingleDataSet(window: LiveLatencySingleSeriesWindow): ChartData
 
     fun createMultiWindow(
         windowSize: Int,
@@ -35,5 +34,5 @@ interface LiveLatencyTimelineUseCase {
 
     fun advanceMultiWindow(window: LiveLatencyMultiSeriesWindow): LiveLatencyMultiSeriesWindow
 
-    fun toMultiDataSet(window: LiveLatencyMultiSeriesWindow): MultiChartDataSet
+    fun toMultiDataSet(window: LiveLatencyMultiSeriesWindow): ChartData
 }

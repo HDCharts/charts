@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -21,9 +20,8 @@ import io.github.dautovicharis.charts.internal.common.composable.zoomInScale
 import io.github.dautovicharis.charts.internal.common.composable.zoomOutScale
 import io.github.dautovicharis.charts.internal.common.model.MultiChartData
 import io.github.dautovicharis.charts.internal.common.palette.generateColorShades
+import io.github.dautovicharis.charts.internal.linechart.LineChartInternalStyle
 import io.github.dautovicharis.charts.internal.validateLineData
-import io.github.dautovicharis.charts.style.LineChartDefaults
-import io.github.dautovicharis.charts.style.LineChartStyle
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 
@@ -34,12 +32,16 @@ private const val LINE_ZOOM_STEP = 1.25f
 @Composable
 internal fun LineChartImpl(
     data: MultiChartData,
-    style: LineChartStyle = LineChartDefaults.style(),
+    style: LineChartInternalStyle,
     interactionEnabled: Boolean = true,
     animateOnStart: Boolean = true,
     renderMode: LineChartRenderMode = LineChartRenderMode.Morph,
     animationDurationMillis: Int = 420,
     selectedPointIndex: Int = NO_SELECTION,
+    onValueChanged: (Int) -> Unit = {},
+    valueFormatter: io.github.dautovicharis.charts.model.ChartValueFormatter,
+    axisValueFormatter: io.github.dautovicharis.charts.model.ChartValueFormatter,
+    selectedTitle: String? = null,
 ) {
     val errors =
         remember(data, style) {
@@ -51,7 +53,6 @@ internal fun LineChartImpl(
 
     if (errors.isEmpty()) {
         val isTimelineMode = renderMode == LineChartRenderMode.Timeline
-        var selectedIndexFromInteraction by remember(data) { mutableIntStateOf(NO_SELECTION) }
         val sourcePointsCount = remember(data) { data.getFirstPointsSize() }
         val isDenseMorphData =
             remember(renderMode, sourcePointsCount) {
@@ -68,23 +69,12 @@ internal fun LineChartImpl(
                 }
             }
         val renderDataPointsCount = renderData.getFirstPointsSize()
-        val forcedSelectedIndex =
-            if (isTimelineMode) {
-                NO_SELECTION
-            } else {
-                selectedPointIndex.takeIf { it in 0 until renderDataPointsCount }
-                    ?: NO_SELECTION
-            }
-        val selectedInteractionIndex =
-            selectedIndexFromInteraction.takeIf { it in 0 until renderDataPointsCount } ?: NO_SELECTION
-        val effectiveSelectedIndex =
-            when (forcedSelectedIndex) {
-                NO_SELECTION -> selectedInteractionIndex
-                else -> forcedSelectedIndex
-            }
+        val effectiveSelectedIndex = selectedPointIndex.takeIf { it in 0 until renderDataPointsCount } ?: NO_SELECTION
         val title =
-            remember(renderData, effectiveSelectedIndex) {
-                renderData.getLabel(effectiveSelectedIndex)
+            if (effectiveSelectedIndex != NO_SELECTION) {
+                selectedTitle ?: renderData.getLabel(effectiveSelectedIndex)
+            } else {
+                renderData.title
             }
         val labels =
             remember(renderData, effectiveSelectedIndex, isTimelineMode) {
@@ -162,12 +152,11 @@ internal fun LineChartImpl(
                 isDenseMorphMode = isDenseMorphMode,
                 scrollState = scrollState,
                 zoomScale = zoomScale,
-                selectedPointIndex = forcedSelectedIndex,
-            ) { selectedIndex ->
-                if (forcedSelectedIndex == NO_SELECTION && selectedIndexFromInteraction != selectedIndex) {
-                    selectedIndexFromInteraction = selectedIndex
-                }
-            }
+                selectedPointIndex = effectiveSelectedIndex,
+                valueFormatter = valueFormatter,
+                axisValueFormatter = axisValueFormatter,
+                onValueChanged = { selectedIndex -> onValueChanged(selectedIndex) },
+            )
 
             if (renderData.hasCategories() || isTimelineMode) {
                 Legend(

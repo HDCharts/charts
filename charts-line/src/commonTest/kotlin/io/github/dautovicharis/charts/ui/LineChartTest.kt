@@ -2,8 +2,8 @@ package io.github.dautovicharis.charts.ui
 
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
-import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
@@ -12,14 +12,11 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import io.github.dautovicharis.charts.LineChart
 import io.github.dautovicharis.charts.LineChartRenderMode
 import io.github.dautovicharis.charts.internal.TestTags
-import io.github.dautovicharis.charts.internal.ValidationErrors.MIN_REQUIRED_LINE
-import io.github.dautovicharis.charts.internal.ValidationErrors.RULE_DATA_POINTS_LESS_THAN_MIN
-import io.github.dautovicharis.charts.internal.common.model.ChartDataType
-import io.github.dautovicharis.charts.internal.format
 import io.github.dautovicharis.charts.mock.MockTest.TITLE
 import io.github.dautovicharis.charts.mock.MockTest.dataSet
-import io.github.dautovicharis.charts.model.ChartDataSet
-import io.github.dautovicharis.charts.model.toChartDataSet
+import io.github.dautovicharis.charts.model.ChartData
+import io.github.dautovicharis.charts.model.ChartSeries
+import io.github.dautovicharis.charts.model.toChartData
 import io.github.dautovicharis.charts.style.LineChartDefaults
 import kotlin.test.Test
 import kotlin.test.assertTrue
@@ -30,20 +27,24 @@ class LineChartTest {
     fun lineChart_withValidData_displaysChart() =
         runComposeUiTest {
             // Arrange
-            val expectedTitle = dataSet.data.label
+            val expectedTitle =
+                dataSet.series
+                    .first()
+                    .name
+                    .orEmpty()
 
             // Act
             setContent {
-                LineChart(dataSet)
+                LineChart(data = dataSet)
             }
 
             // Assert
-            onNodeWithTag(TestTags.LINE_CHART).isDisplayed()
+            onNodeWithTag(TestTags.LINE_CHART).assertIsDisplayed()
             onNodeWithTag(TestTags.CHART_TITLE)
                 .assertTextEquals(expectedTitle)
-                .isDisplayed()
-            onNodeWithTag(TestTags.LINE_CHART_X_AXIS_LABELS).isDisplayed()
-            onNodeWithTag(TestTags.LINE_CHART_Y_AXIS_LABELS).isDisplayed()
+                .assertIsDisplayed()
+            onAllNodesWithTag(TestTags.LINE_CHART_X_AXIS_LABELS).assertCountEquals(0)
+            onNodeWithTag(TestTags.LINE_CHART_Y_AXIS_LABELS).assertIsDisplayed()
         }
 
     @OptIn(ExperimentalTestApi::class)
@@ -51,25 +52,29 @@ class LineChartTest {
     fun lineChart_withTimelineRenderMode_displaysChart() =
         runComposeUiTest {
             // Arrange
-            val expectedTitle = dataSet.data.label
-            val expectedLegendCurrentValue = "${dataSet.data.label} - 40"
+            val expectedTitle =
+                dataSet.series
+                    .first()
+                    .name
+                    .orEmpty()
+            val expectedLegendCurrentValue = "$TITLE - 40.0"
 
             // Act
             setContent {
                 LineChart(
-                    dataSet = dataSet,
+                    data = dataSet,
                     renderMode = LineChartRenderMode.Timeline,
                 )
             }
 
             // Assert
-            onNodeWithTag(TestTags.LINE_CHART).isDisplayed()
+            onNodeWithTag(TestTags.LINE_CHART).assertIsDisplayed()
             onNodeWithTag(TestTags.CHART_TITLE)
                 .assertTextEquals(expectedTitle)
-                .isDisplayed()
+                .assertIsDisplayed()
             onAllNodesWithText(expectedLegendCurrentValue).assertCountEquals(0)
-            onNodeWithTag(TestTags.LINE_CHART_X_AXIS_LABELS).isDisplayed()
-            onNodeWithTag(TestTags.LINE_CHART_Y_AXIS_LABELS).isDisplayed()
+            onAllNodesWithTag(TestTags.LINE_CHART_X_AXIS_LABELS).assertCountEquals(0)
+            onNodeWithTag(TestTags.LINE_CHART_Y_AXIS_LABELS).assertIsDisplayed()
             onAllNodesWithTag(TestTags.LINE_CHART_ZOOM_OUT).assertCountEquals(0)
             onAllNodesWithTag(TestTags.LINE_CHART_ZOOM_IN).assertCountEquals(0)
         }
@@ -80,12 +85,12 @@ class LineChartTest {
         runComposeUiTest {
             setContent {
                 LineChart(
-                    dataSet = largeDataSet(),
+                    data = largeDataSet(),
                     renderMode = LineChartRenderMode.Timeline,
                 )
             }
 
-            onNodeWithTag(TestTags.LINE_CHART).isDisplayed()
+            onNodeWithTag(TestTags.LINE_CHART).assertIsDisplayed()
             onAllNodesWithTag(TestTags.LINE_CHART_ZOOM_OUT).assertCountEquals(0)
             onAllNodesWithTag(TestTags.LINE_CHART_ZOOM_IN).assertCountEquals(0)
         }
@@ -96,13 +101,16 @@ class LineChartTest {
         runComposeUiTest {
             setContent {
                 LineChart(
-                    dataSet = dataSet,
-                    style = LineChartDefaults.style(xAxisLabelsVisible = false),
+                    data = dataSet,
+                    style =
+                        LineChartDefaults.style(
+                            axis = LineChartDefaults.axis(xLabels = LineChartDefaults.xLabels(visible = false)),
+                        ),
                 )
             }
 
             onAllNodesWithTag(TestTags.LINE_CHART_X_AXIS_LABELS).assertCountEquals(0)
-            onNodeWithTag(TestTags.LINE_CHART_Y_AXIS_LABELS).isDisplayed()
+            onNodeWithTag(TestTags.LINE_CHART_Y_AXIS_LABELS).assertIsDisplayed()
         }
 
     @OptIn(ExperimentalTestApi::class)
@@ -111,12 +119,15 @@ class LineChartTest {
         runComposeUiTest {
             setContent {
                 LineChart(
-                    dataSet = dataSet,
-                    style = LineChartDefaults.style(yAxisLabelsVisible = false),
+                    data = dataSet,
+                    style =
+                        LineChartDefaults.style(
+                            axis = LineChartDefaults.axis(yLabels = LineChartDefaults.yLabels(visible = false)),
+                        ),
                 )
             }
 
-            onNodeWithTag(TestTags.LINE_CHART_X_AXIS_LABELS).isDisplayed()
+            onAllNodesWithTag(TestTags.LINE_CHART_X_AXIS_LABELS).assertCountEquals(0)
             onAllNodesWithTag(TestTags.LINE_CHART_Y_AXIS_LABELS).assertCountEquals(0)
         }
 
@@ -125,13 +136,15 @@ class LineChartTest {
     fun lineChart_lastXAxisLabel_hasRightEdgePadding() =
         runComposeUiTest {
             val edgeDataSet =
-                listOf(20f, 28f, 23f, 30f).toChartDataSet(
-                    title = "Quarterly Revenue by Region",
-                    labels = listOf("Region 4", "Region 36", "Region 68", "Region 100"),
-                )
+                listOf(20f, 28f, 23f, 30f)
+                    .map { it.toDouble() }
+                    .toChartData(
+                        seriesName = "Quarterly Revenue by Region",
+                        categories = listOf("Region 4", "Region 36", "Region 68", "Region 100"),
+                    )
 
             setContent {
-                LineChart(dataSet = edgeDataSet)
+                LineChart(data = edgeDataSet)
             }
 
             val axisBounds = onNodeWithTag(TestTags.LINE_CHART_X_AXIS_LABELS).fetchSemanticsNode().boundsInRoot
@@ -145,27 +158,19 @@ class LineChartTest {
     @Test
     fun lineChart_withInvalidData_displaysError() =
         runComposeUiTest {
-            val dataSet =
-                ChartDataSet(
-                    items = ChartDataType.FloatData(listOf(1f)),
-                    title = TITLE,
-                )
-            val expectedError = RULE_DATA_POINTS_LESS_THAN_MIN.format(MIN_REQUIRED_LINE)
+            val dataSet = ChartData(series = listOf(ChartSeries(name = TITLE, values = listOf(1.0))))
 
             setContent {
-                LineChart(dataSet)
+                LineChart(data = dataSet)
             }
 
-            onNodeWithTag(TestTags.CHART_ERROR).isDisplayed()
-            onNodeWithText("${expectedError}\n").isDisplayed()
+            onNodeWithTag(TestTags.CHART_ERROR).assertIsDisplayed()
+            onNodeWithText("At least two line values are required.", substring = true).assertIsDisplayed()
         }
 
-    private fun largeDataSet(points: Int = 120): ChartDataSet {
+    private fun largeDataSet(points: Int = 120): ChartData {
         val labels = List(points) { index -> "Point ${index + 1}" }
-        val values = List(points) { index -> (index % 25).toFloat() }
-        return values.toChartDataSet(
-            title = "Large Line Chart",
-            labels = labels,
-        )
+        val values = List(points) { index -> (index % 25).toDouble() }
+        return values.toChartData(categories = labels, seriesName = "Large Line Chart")
     }
 }

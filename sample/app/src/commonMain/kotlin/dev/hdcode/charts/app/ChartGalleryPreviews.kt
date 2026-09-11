@@ -23,9 +23,10 @@ import io.github.dautovicharis.charts.PieChart
 import io.github.dautovicharis.charts.RadarChart
 import io.github.dautovicharis.charts.StackedAreaChart
 import io.github.dautovicharis.charts.StackedBarChart
+import io.github.dautovicharis.charts.model.ChartSeries
 import io.github.dautovicharis.charts.model.PieSlice
+import io.github.dautovicharis.charts.model.chartDataOf
 import io.github.dautovicharis.charts.model.toChartData
-import io.github.dautovicharis.charts.model.toChartDataSet
 import io.github.dautovicharis.charts.model.toMultiChartDataSet
 import io.github.dautovicharis.charts.style.BarChartDefaults
 import io.github.dautovicharis.charts.style.ChartContainerDefaults
@@ -113,17 +114,20 @@ private fun PieChartPreview(values: List<Float>) {
 
 @Composable
 private fun LineChartPreview(values: List<Float>) {
-    val dataSet =
+    val data =
         remember(values) {
-            values.toChartDataSet(title = "")
+            values.map { it.toDouble() }.toChartData(seriesName = "")
         }
     LineChart(
-        dataSet = dataSet,
+        data = data,
         style =
             LineChartDefaults.style(
                 chartContainerStyle = previewChartContainerStyle(),
-                xAxisLabelsVisible = false,
-                yAxisLabelsVisible = false,
+                axis =
+                    LineChartDefaults.axis(
+                        xLabels = LineChartDefaults.xLabels(visible = false),
+                        yLabels = LineChartDefaults.yLabels(visible = false),
+                    ),
             ),
         interactionEnabled = false,
         animateOnStart = true,
@@ -132,17 +136,26 @@ private fun LineChartPreview(values: List<Float>) {
 
 @Composable
 private fun MultiLineChartPreview(series: List<Pair<String, List<Float>>>) {
-    val dataSet =
+    val data =
         remember(series) {
-            series.toMultiChartDataSet(title = "")
+            chartDataOf(
+                categories = emptyList(),
+                *series
+                    .map { (name, values) ->
+                        ChartSeries(name = name, values = values.map { it.toDouble() })
+                    }.toTypedArray(),
+            )
         }
     LineChart(
-        dataSet = dataSet,
+        data = data,
         style =
             LineChartDefaults.style(
                 chartContainerStyle = previewChartContainerStyle(),
-                xAxisLabelsVisible = false,
-                yAxisLabelsVisible = false,
+                axis =
+                    LineChartDefaults.axis(
+                        xLabels = LineChartDefaults.xLabels(visible = false),
+                        yLabels = LineChartDefaults.yLabels(visible = false),
+                    ),
             ),
         interactionEnabled = false,
         animateOnStart = true,

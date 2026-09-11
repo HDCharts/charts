@@ -6,12 +6,12 @@ import io.github.dautovicharis.charts.internal.TestTags
 import io.github.dautovicharis.charts.internal.common.composable.ChartHeaderLayout
 import io.github.dautovicharis.charts.internal.common.composable.DenseToggleControl
 import io.github.dautovicharis.charts.internal.common.composable.ZoomControls
-import io.github.dautovicharis.charts.style.LineChartStyle
+import io.github.dautovicharis.charts.internal.linechart.LineChartInternalStyle
 
 @Composable
 internal fun LineChartHeader(
     title: String,
-    style: LineChartStyle,
+    style: LineChartInternalStyle,
     showDensityToggle: Boolean,
     denseExpanded: Boolean,
     onToggleDensity: () -> Unit,

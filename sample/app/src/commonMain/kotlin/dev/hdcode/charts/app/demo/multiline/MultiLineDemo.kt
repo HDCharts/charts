@@ -51,6 +51,7 @@ import dev.hdcode.charts.sampleshared.theme.LocalChartColors
 import dev.hdcode.charts.sampleshared.theme.seriesColors
 import io.github.dautovicharis.charts.LineChart
 import io.github.dautovicharis.charts.LineChartRenderMode
+import io.github.dautovicharis.charts.model.ChartValueFormatters
 import io.github.dautovicharis.charts.style.ChartContainerDefaults
 import io.github.dautovicharis.charts.style.LineChartDefaults
 import org.jetbrains.compose.resources.stringResource
@@ -126,14 +127,18 @@ fun MultiLineChartDemo(viewModel: MultiLineChartViewModel = koinViewModel()) {
         when (uiState.preset) {
             MultiLineDemoPreset.Default -> {
                 LineChart(
-                    dataSet = uiState.dataSet.dataSet,
+                    data = uiState.dataSet.dataSet,
+                    title = uiState.dataSet.title,
+                    valueFormatter = ChartValueFormatters.suffix(" ms"),
                     style = LineChartDefaults.style(chartContainerStyle = chartContainerStyle),
                 )
             }
 
             MultiLineDemoPreset.Timeline -> {
                 LineChart(
-                    dataSet = uiState.dataSet.dataSet,
+                    data = uiState.dataSet.dataSet,
+                    title = uiState.dataSet.title,
+                    valueFormatter = ChartValueFormatters.suffix(" ms"),
                     style = LineChartDefaults.style(chartContainerStyle = chartContainerStyle),
                     renderMode = LineChartRenderMode.Timeline,
                     animationDurationMillis = timelineAnimationDuration,
@@ -147,7 +152,9 @@ fun MultiLineChartDemo(viewModel: MultiLineChartViewModel = koinViewModel()) {
                         seriesCount = lineColors.size,
                     )
                 LineChart(
-                    dataSet = uiState.dataSet.dataSet,
+                    data = uiState.dataSet.dataSet,
+                    title = uiState.dataSet.title,
+                    valueFormatter = ChartValueFormatters.suffix(" ms"),
                     style = customStyle,
                 )
             }
