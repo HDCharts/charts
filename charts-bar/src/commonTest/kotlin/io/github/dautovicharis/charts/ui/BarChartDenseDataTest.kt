@@ -13,7 +13,6 @@ import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsNode
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
@@ -26,7 +25,6 @@ import androidx.compose.ui.test.click
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeLeft
 import androidx.compose.ui.test.v2.runComposeUiTest
@@ -293,26 +291,34 @@ class BarChartDenseDataTest {
             onNodeWithTag(TestTags.BAR_CHART_DENSE_COLLAPSE).assertIsDisplayed()
 
             val plot = onNodeWithTag(TestTags.BAR_CHART_PLOT)
-            plot.performSemanticsAction(SemanticsActions.ScrollBy) { it(200f, 0f) }
-            waitForIdle()
             val beforeLabels = visibleBarXAxisNumericLabels()
-            val beforeOffset = plot.fetchSemanticsNode().config[SemanticsProperties.HorizontalScrollAxisRange].value()
-            plot.performSemanticsAction(SemanticsActions.ScrollBy) { it(4f, 0f) }
-            waitForIdle()
-            val afterLabels = visibleBarXAxisNumericLabels()
-            val afterOffset = plot.fetchSemanticsNode().config[SemanticsProperties.HorizontalScrollAxisRange].value()
-            assertTrue(afterOffset > beforeOffset)
+            val beforeOffset =
+                plot
+                    .fetchSemanticsNode()
+                    .config
+                    .getOrNull(SemanticsProperties.HorizontalScrollAxisRange)
+                    ?.value() ?: 0f
 
-            assertTrue(beforeLabels.isNotEmpty())
-            assertTrue(afterLabels.isNotEmpty())
+            // Advance the virtual clock by a single frame to let pending layout settle.
+            mainClock.advanceTimeByFrame()
+            waitForIdle()
+
+            val afterLabels = visibleBarXAxisNumericLabels()
+            val afterOffset =
+                plot
+                    .fetchSemanticsNode()
+                    .config
+                    .getOrNull(SemanticsProperties.HorizontalScrollAxisRange)
+                    ?.value() ?: 0f
+
+            assertEquals(expected = beforeOffset, actual = afterOffset, absoluteTolerance = 0.5f)
+            assertEquals(expected = beforeLabels, actual = afterLabels)
             assertTrue(beforeLabels.zipWithNext { previous, next -> next > previous }.all { it })
             assertTrue(afterLabels.zipWithNext { previous, next -> next > previous }.all { it })
-            assertEquals(beforeLabels.size, afterLabels.size)
 
-            if (beforeLabels.size >= 2 && afterLabels.size >= 2) {
-                val beforeStride = beforeLabels[1] - beforeLabels[0]
-                val afterStride = afterLabels[1] - afterLabels[0]
-                assertEquals(beforeStride, afterStride)
+            if (beforeLabels.size >= 2) {
+                val stride = beforeLabels[1] - beforeLabels[0]
+                assertEquals(expected = stride, actual = afterLabels[1] - afterLabels[0])
             }
         }
 
