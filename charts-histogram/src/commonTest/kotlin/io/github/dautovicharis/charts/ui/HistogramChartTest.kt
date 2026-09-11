@@ -12,29 +12,35 @@ import io.github.dautovicharis.charts.internal.TestTags
 import io.github.dautovicharis.charts.internal.ValidationErrors.RULE_COLORS_SIZE_MISMATCH
 import io.github.dautovicharis.charts.internal.ValidationErrors.RULE_DATA_POINT_NEGATIVE
 import io.github.dautovicharis.charts.internal.format
-import io.github.dautovicharis.charts.model.toChartDataSet
+import io.github.dautovicharis.charts.model.ChartData
+import io.github.dautovicharis.charts.model.staticChartSelection
+import io.github.dautovicharis.charts.model.toChartData
+import io.github.dautovicharis.charts.style.BarChartDefaults
 import io.github.dautovicharis.charts.style.HistogramChartDefaults
 import kotlin.test.Test
 
 class HistogramChartTest {
-    private val dataSet =
-        listOf(3f, 7f, 10f, 6f)
-            .toChartDataSet(
-                title = "Histogram",
-                labels = listOf("0-10", "10-20", "20-30", "30-40"),
+    private val data: ChartData =
+        listOf(3.0, 7.0, 10.0, 6.0)
+            .toChartData(
+                categories = listOf("0-10", "10-20", "20-30", "30-40"),
             )
+    private val title = "Histogram"
 
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun histogramChart_withValidData_displaysChart() =
         runComposeUiTest {
             setContent {
-                HistogramChart(dataSet)
+                HistogramChart(
+                    data = data,
+                    title = title,
+                )
             }
 
             onNodeWithTag(TestTags.HISTOGRAM_CHART).isDisplayed()
             onNodeWithTag(TestTags.CHART_TITLE)
-                .assertTextEquals(dataSet.data.label)
+                .assertTextEquals(title)
                 .isDisplayed()
         }
 
@@ -42,15 +48,16 @@ class HistogramChartTest {
     @Test
     fun histogramChart_withNegativeData_displaysError() =
         runComposeUiTest {
+            val negativeData =
+                listOf(2.0, -1.0, 4.0).toChartData(
+                    categories = listOf("0-10", "10-20", "20-30"),
+                )
             val expectedError = RULE_DATA_POINT_NEGATIVE.format(1)
 
             setContent {
                 HistogramChart(
-                    dataSet =
-                        listOf(2f, -1f, 4f).toChartDataSet(
-                            title = "Histogram",
-                            labels = listOf("0-10", "10-20", "20-30"),
-                        ),
+                    data = negativeData,
+                    title = title,
                 )
             }
 
@@ -63,16 +70,19 @@ class HistogramChartTest {
     fun histogramChart_withSelectedBarIndex_displaysSelectedBarDetails() =
         runComposeUiTest {
             val selectedBarIndex = 2
-            val expectedLabel = dataSet.data.item.labels[selectedBarIndex]
-            val expectedValue = dataSet.data.item.points[selectedBarIndex]
+            val categories = data.categories
+            val values = data.series.single().values
+            val expectedLabel = categories[selectedBarIndex]
+            val expectedValue = values[selectedBarIndex].toFloat()
             val expectedTitle = "$expectedLabel: $expectedValue"
 
             setContent {
                 HistogramChart(
-                    dataSet = dataSet,
+                    data = data,
+                    title = title,
+                    selection = staticChartSelection(selectedBarIndex),
                     interactionEnabled = false,
                     animateOnStart = false,
-                    selectedBarIndex = selectedBarIndex,
                 )
             }
 
@@ -86,16 +96,27 @@ class HistogramChartTest {
     @Test
     fun histogramChart_withInvalidBarColors_displaysError() =
         runComposeUiTest {
+            val pointsSize =
+                data.series
+                    .single()
+                    .values.size
             val expectedError =
                 RULE_COLORS_SIZE_MISMATCH.format(
                     2,
-                    dataSet.data.item.points.size,
+                    pointsSize,
                 )
 
             setContent {
-                val style = HistogramChartDefaults.style(barColors = listOf(Color.Red, Color.Green))
+                val style =
+                    HistogramChartDefaults.style(
+                        bars =
+                            BarChartDefaults.bars(
+                                colors = listOf(Color.Red, Color.Green),
+                            ),
+                    )
                 HistogramChart(
-                    dataSet = dataSet,
+                    data = data,
+                    title = title,
                     style = style,
                 )
             }

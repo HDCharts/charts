@@ -8,11 +8,11 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 import io.github.dautovicharis.charts.internal.NO_SELECTION
-import io.github.dautovicharis.charts.style.BarChartStyle
+import io.github.dautovicharis.charts.internal.barchart.BarChartInternalStyle
 import kotlin.math.abs
 
 internal fun DrawScope.drawBars(
-    style: BarChartStyle,
+    style: BarChartInternalStyle,
     animatedValues: List<Animatable<Float, AnimationVector1D>>,
     visibleRange: IntRange,
     selectedIndex: Int,

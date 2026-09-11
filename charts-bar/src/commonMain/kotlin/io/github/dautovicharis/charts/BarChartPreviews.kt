@@ -1,17 +1,16 @@
 package io.github.dautovicharis.charts
 
 import androidx.compose.runtime.Composable
-import io.github.dautovicharis.charts.BarChart
-import io.github.dautovicharis.charts.model.toChartDataSet
+import io.github.dautovicharis.charts.model.toChartData
 import io.github.dautovicharis.charts.style.BarChartDefaults
 
-private const val BAR_CHART_TITLE = "Bar Chart"
-private val BAR_VALUES = listOf(18f, 32f, 26f, 48f, 36f, 28f, 54f)
+private const val BAR_CHART_TITLE = "Daily Net Cash Flow"
 
 @Composable
 private fun BarChartPreviewContent() {
     BarChart(
-        dataSet = BAR_VALUES.toChartDataSet(title = BAR_CHART_TITLE),
+        data = listOf(18.0, 32.0, 26.0, 48.0, 36.0, 28.0, 54.0).toChartData(),
+        title = BAR_CHART_TITLE,
         style = BarChartDefaults.style(),
     )
 }
@@ -29,7 +28,7 @@ private fun BarChartPreview() {
 private fun BarChartErrorPreview() {
     ChartsPreviewTheme {
         BarChart(
-            dataSet = listOf(42f).toChartDataSet(title = BAR_CHART_TITLE),
+            data = listOf(42.0).toChartData(),
             style = BarChartDefaults.style(),
         )
     }

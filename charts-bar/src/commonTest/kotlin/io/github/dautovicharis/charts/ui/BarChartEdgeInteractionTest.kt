@@ -13,8 +13,8 @@ import androidx.compose.ui.test.swipeLeft
 import androidx.compose.ui.test.v2.runComposeUiTest
 import io.github.dautovicharis.charts.BarChart
 import io.github.dautovicharis.charts.internal.TestTags
-import io.github.dautovicharis.charts.model.ChartDataSet
-import io.github.dautovicharis.charts.model.toChartDataSet
+import io.github.dautovicharis.charts.model.ChartData
+import io.github.dautovicharis.charts.model.toChartData
 import kotlin.test.Test
 import kotlin.test.assertNotEquals
 
@@ -27,66 +27,81 @@ class BarChartEdgeInteractionTest {
     @Test
     fun barChart_secondTapOnSameBar_togglesSelectionOff() =
         runComposeUiTest {
-            val dataSet = largeDataSet()
+            val title = "Large Bar Chart"
+            val data = largeDataSet()
             setContent {
-                BarChart(dataSet = dataSet)
+                BarChart(
+                    data = data,
+                    title = title,
+                )
             }
 
             tapChartAt(x = 24f)
             waitUntil(timeoutMillis = 3_000L) {
-                currentTitle() != dataSet.data.label
+                currentChartTitle() != title
             }
 
             tapChartAt(x = 24f)
             waitUntil(timeoutMillis = 3_000L) {
-                currentTitle() == dataSet.data.label
+                currentChartTitle() == title
             }
-            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(dataSet.data.label)
+            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(title)
         }
 
     @Test
     fun barChart_datasetReload_resetsTitleToNewDatasetTitleAfterSelection() =
         runComposeUiTest {
-            val initialDataSet = largeDataSet(title = "Initial Bar Chart")
-            val reloadedDataSet = largeDataSet(title = "Reloaded Bar Chart", valueShift = 7)
-            val currentDataSet = mutableStateOf(initialDataSet)
+            val initialTitle = "Initial Bar Chart"
+            val reloadedTitle = "Reloaded Bar Chart"
+            val initialData = largeDataSet()
+            val reloadedData = largeDataSet(valueShift = 7)
+            val currentData = mutableStateOf(initialData)
+            val currentTitle = mutableStateOf(initialTitle)
 
             setContent {
-                BarChart(dataSet = currentDataSet.value)
+                BarChart(
+                    data = currentData.value,
+                    title = currentTitle.value,
+                )
             }
 
             tapChartAt(x = 24f)
             waitUntil(timeoutMillis = 3_000L) {
-                currentTitle() != initialDataSet.data.label
+                currentChartTitle() != initialTitle
             }
-            assertNotEquals(initialDataSet.data.label, currentTitle())
+            assertNotEquals(initialTitle, currentChartTitle())
 
             runOnIdle {
-                currentDataSet.value = reloadedDataSet
+                currentData.value = reloadedData
+                currentTitle.value = reloadedTitle
             }
             waitUntil(timeoutMillis = 3_000L) {
                 runCatching {
-                    onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(reloadedDataSet.data.label)
+                    onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(reloadedTitle)
                 }.isSuccess
             }
-            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(reloadedDataSet.data.label)
+            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(reloadedTitle)
         }
 
     @Test
     fun barChart_scrollThenTap_changesSelectedLabelAtSameViewportX() =
         runComposeUiTest {
-            val dataSet = largeDataSet(title = "Scrollable Bar Chart")
+            val title = "Scrollable Bar Chart"
+            val data = largeDataSet()
             setContent {
-                BarChart(dataSet = dataSet)
+                BarChart(
+                    data = data,
+                    title = title,
+                )
             }
 
             onNodeWithTag(TestTags.BAR_CHART_DENSE_EXPAND).performTouchInput { click() }
 
             tapChartAt(x = 24f)
             waitUntil(timeoutMillis = 3_000L) {
-                currentTitle() != dataSet.data.label
+                currentChartTitle() != title
             }
-            val beforeScrollTitle = currentTitle()
+            val beforeScrollTitle = currentChartTitle()
 
             onNodeWithTag(TestTags.BAR_CHART).performTouchInput {
                 swipeLeft()
@@ -95,16 +110,16 @@ class BarChartEdgeInteractionTest {
 
             tapChartAt(x = 24f)
             waitUntil(timeoutMillis = 3_000L) {
-                val title = currentTitle()
-                title != beforeScrollTitle && title != dataSet.data.label
+                val t = currentChartTitle()
+                t != beforeScrollTitle && t != title
             }
-            val afterScrollTitle = currentTitle()
+            val afterScrollTitle = currentChartTitle()
 
             assertNotEquals(beforeScrollTitle, afterScrollTitle)
-            assertNotEquals(dataSet.data.label, afterScrollTitle)
+            assertNotEquals(title, afterScrollTitle)
         }
 
-    private fun ComposeUiTest.currentTitle(): String {
+    private fun ComposeUiTest.currentChartTitle(): String {
         val semanticsNode = onNodeWithTag(TestTags.CHART_TITLE).fetchSemanticsNode()
         return semanticsNode.config[SemanticsProperties.Text]
             .joinToString(separator = "") { item -> item.text }
@@ -128,18 +143,14 @@ class BarChartEdgeInteractionTest {
 
     private fun largeDataSet(
         points: Int = 120,
-        title: String = "Large Bar Chart",
         valueShift: Int = 0,
-    ): ChartDataSet {
+    ): ChartData {
         val labels = dateLabels(points)
         val values =
             List(points) { index ->
-                (((index + valueShift) % 30) - 15).toFloat()
+                (((index + valueShift) % 30) - 15).toDouble()
             }
-        return values.toChartDataSet(
-            title = title,
-            labels = labels,
-        )
+        return values.toChartData(categories = labels)
     }
 
     private fun dateLabels(points: Int): List<String> {

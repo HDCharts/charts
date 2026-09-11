@@ -3,7 +3,7 @@ package dev.hdcode.charts.app.demo.bar
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.hdcode.charts.sampleshared.data.BarSampleUseCase
-import io.github.dautovicharis.charts.model.ChartDataSet
+import io.github.dautovicharis.charts.model.ChartData
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -50,7 +50,7 @@ class BarChartViewModel(
             ),
         )
 
-    val dataSet: StateFlow<ChartDataSet> = _dataSet.asStateFlow()
+    val dataSet: StateFlow<ChartData> = _dataSet.asStateFlow()
     private val _isPlaying = MutableStateFlow(false)
     val isPlaying: StateFlow<Boolean> = _isPlaying.asStateFlow()
     private var liveUpdatesJob: Job? = null

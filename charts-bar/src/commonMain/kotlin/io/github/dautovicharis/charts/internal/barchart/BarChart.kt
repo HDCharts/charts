@@ -18,6 +18,7 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.dautovicharis.charts.internal.NO_SELECTION
+import io.github.dautovicharis.charts.internal.barchart.BarChartInternalStyle
 import io.github.dautovicharis.charts.internal.common.composable.rememberDenseExpandedState
 import io.github.dautovicharis.charts.internal.common.composable.rememberZoomScaleState
 import io.github.dautovicharis.charts.internal.common.composable.zoomInScale
@@ -25,7 +26,6 @@ import io.github.dautovicharis.charts.internal.common.composable.zoomOutScale
 import io.github.dautovicharis.charts.internal.common.model.ChartData
 import io.github.dautovicharis.charts.internal.common.model.normalizeBarValues
 import io.github.dautovicharis.charts.internal.common.model.resolveBarRange
-import io.github.dautovicharis.charts.style.BarChartStyle
 
 private const val ZOOM_MIN = 1f
 private const val ZOOM_MAX = 4f
@@ -36,7 +36,7 @@ private val Y_AXIS_CHART_GAP: Dp = 10.dp
 internal fun BarChart(
     chartData: ChartData,
     title: String,
-    style: BarChartStyle,
+    style: BarChartInternalStyle,
     interactionEnabled: Boolean,
     animateOnStart: Boolean,
     selectedBarIndex: Int = NO_SELECTION,

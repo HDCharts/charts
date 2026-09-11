@@ -1,8 +1,8 @@
 package dev.hdcode.charts.sampleshared.data.impl
 
 import dev.hdcode.charts.sampleshared.data.HistogramSampleUseCase
-import io.github.dautovicharis.charts.model.ChartDataSet
-import io.github.dautovicharis.charts.model.toChartDataSet
+import io.github.dautovicharis.charts.model.ChartData
+import io.github.dautovicharis.charts.model.toChartData
 
 internal class DefaultHistogramSampleUseCase : HistogramSampleUseCase {
     companion object {
@@ -11,10 +11,10 @@ internal class DefaultHistogramSampleUseCase : HistogramSampleUseCase {
         private val DEFAULT_RANGE = 0..120
     }
 
-    override fun initialHistogramDataSet(): ChartDataSet =
-        listOf(3f, 6f, 11f, 16f, 14f, 9f, 5f).toChartDataSet(
-            title = DEFAULT_TITLE,
-            labels = listOf("0-50ms", "50-100ms", "100-150ms", "150-200ms", "200-250ms", "250-300ms", "300ms+"),
+    override fun initialHistogramDataSet(): ChartData =
+        listOf(3.0, 6.0, 11.0, 16.0, 14.0, 9.0, 5.0).toChartData(
+            categories = listOf("0-50ms", "50-100ms", "100-150ms", "150-200ms", "200-250ms", "250-300ms", "300ms+"),
+            seriesName = DEFAULT_TITLE,
         )
 
     override fun histogramDefaultPoints(): Int = DEFAULT_POINTS
@@ -24,15 +24,15 @@ internal class DefaultHistogramSampleUseCase : HistogramSampleUseCase {
     override fun histogramDataSet(
         points: Int,
         range: IntRange,
-    ): ChartDataSet {
+    ): ChartData {
         val safePoints = points.coerceAtLeast(2)
         val safeRangeStart = range.first.coerceAtLeast(0)
         val safeRangeEnd = range.last.coerceAtLeast(safeRangeStart)
-        val values = List(safePoints) { (safeRangeStart..safeRangeEnd).random().toFloat() }
+        val values = List(safePoints) { (safeRangeStart..safeRangeEnd).random().toDouble() }
         val labels = List(safePoints) { index -> "B${index + 1}" }
-        return values.toChartDataSet(
-            title = DEFAULT_TITLE,
-            labels = labels,
+        return values.toChartData(
+            categories = labels,
+            seriesName = DEFAULT_TITLE,
         )
     }
 }

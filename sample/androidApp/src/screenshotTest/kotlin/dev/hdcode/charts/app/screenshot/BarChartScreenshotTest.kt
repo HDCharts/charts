@@ -8,6 +8,7 @@ import dev.hdcode.charts.app.screenshot.shared.ScreenshotPreview
 import dev.hdcode.charts.app.screenshot.shared.ScreenshotSurface
 import dev.hdcode.charts.sampleshared.fixtures.ChartTestStyleFixtures
 import io.github.dautovicharis.charts.BarChart
+import io.github.dautovicharis.charts.model.staticChartSelection
 import io.github.dautovicharis.charts.style.ChartContainerDefaults
 
 @PreviewTest
@@ -15,8 +16,10 @@ import io.github.dautovicharis.charts.style.ChartContainerDefaults
 @Composable
 fun BarChartDefaultPreview() {
     ScreenshotSurface {
+        val data = SCREENSHOT_BAR_SAMPLE_USE_CASE.initialBarDataSet()
         BarChart(
-            dataSet = SCREENSHOT_BAR_SAMPLE_USE_CASE.initialBarDataSet(),
+            data = data,
+            title = data.series.single().name,
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
         )
     }
@@ -27,9 +30,10 @@ fun BarChartDefaultPreview() {
 @Composable
 fun BarChartCustomPreview() {
     ScreenshotSurface {
-        val dataSet = SCREENSHOT_BAR_SAMPLE_USE_CASE.initialBarDataSet()
+        val data = SCREENSHOT_BAR_SAMPLE_USE_CASE.initialBarDataSet()
         BarChart(
-            dataSet = dataSet,
+            data = data,
+            title = data.series.single().name,
             style = ChartTestStyleFixtures.barCustomStyle(chartContainerStyle = ChartContainerDefaults.style()),
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
         )
@@ -41,13 +45,14 @@ fun BarChartCustomPreview() {
 @Composable
 fun BarChartCustomBarColorsPreview() {
     ScreenshotSurface {
-        val dataSet = SCREENSHOT_BAR_SAMPLE_USE_CASE.initialBarDataSet()
+        val data = SCREENSHOT_BAR_SAMPLE_USE_CASE.initialBarDataSet()
         BarChart(
-            dataSet = dataSet,
+            data = data,
+            title = data.series.single().name,
             style =
                 ChartTestStyleFixtures.barCustomStyle(
                     chartContainerStyle = ChartContainerDefaults.style(),
-                    barCount = dataSet.data.item.points.size,
+                    barCount = data.series.single().values.size,
                     useBarColors = true,
                 ),
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
@@ -60,11 +65,13 @@ fun BarChartCustomBarColorsPreview() {
 @Composable
 fun BarChartSelectedBarPreview() {
     ScreenshotSurface {
+        val data = SCREENSHOT_BAR_SAMPLE_USE_CASE.initialBarDataSet()
         BarChart(
-            dataSet = SCREENSHOT_BAR_SAMPLE_USE_CASE.initialBarDataSet(),
+            data = data,
+            title = data.series.single().name,
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
             interactionEnabled = false,
-            selectedBarIndex = 1,
+            selection = staticChartSelection(1),
         )
     }
 }

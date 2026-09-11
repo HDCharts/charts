@@ -106,16 +106,24 @@ object ChartTestStyleFixtures {
             }
         return BarChartDefaults.style(
             chartContainerStyle = chartContainerStyle,
-            barColor = chartColors.seriesColor(4),
-            barColors = barColors,
-            minValue = minValue,
-            maxValue = maxValue,
-            gridColor = chartColors.gridLine,
-            axisColor = chartColors.axisLine,
-            xAxisLabelColor = chartColors.axisLabel,
-            selectionLineVisible = true,
-            selectionLineColor = chartColors.selection,
-            selectionLineWidth = 2f,
+            bars =
+                BarChartDefaults.bars(
+                    color = chartColors.seriesColor(4),
+                    colors = barColors,
+                ),
+            range = BarChartDefaults.range(min = minValue, max = maxValue),
+            grid = BarChartDefaults.grid(color = chartColors.gridLine),
+            axis =
+                BarChartDefaults.axis(
+                    color = chartColors.axisLine,
+                    xLabels = BarChartDefaults.xLabels(color = chartColors.axisLabel),
+                ),
+            selectionLine =
+                BarChartDefaults.selectionLine(
+                    visible = true,
+                    color = chartColors.selection,
+                    width = 2f,
+                ),
         )
     }
 
@@ -136,16 +144,24 @@ object ChartTestStyleFixtures {
             }
         return HistogramChartDefaults.style(
             chartContainerStyle = chartContainerStyle,
-            barColor = chartColors.seriesColor(4),
-            barColors = barColors,
-            minValue = minValue,
-            maxValue = maxValue,
-            gridColor = chartColors.gridLine,
-            axisColor = chartColors.axisLine,
-            xAxisLabelColor = chartColors.axisLabel,
-            selectionLineVisible = true,
-            selectionLineColor = chartColors.selection,
-            selectionLineWidth = 2f,
+            bars =
+                BarChartDefaults.bars(
+                    color = chartColors.seriesColor(4),
+                    colors = barColors,
+                ),
+            range = BarChartDefaults.range(min = minValue, max = maxValue),
+            grid = BarChartDefaults.grid(color = chartColors.gridLine),
+            axis =
+                BarChartDefaults.axis(
+                    color = chartColors.axisLine,
+                    xLabels = BarChartDefaults.xLabels(color = chartColors.axisLabel),
+                ),
+            selectionLine =
+                BarChartDefaults.selectionLine(
+                    visible = true,
+                    color = chartColors.selection,
+                    width = 2f,
+                ),
         )
     }
 

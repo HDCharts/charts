@@ -17,20 +17,27 @@ import androidx.compose.ui.test.swipeLeft
 import androidx.compose.ui.test.v2.runComposeUiTest
 import io.github.dautovicharis.charts.BarChart
 import io.github.dautovicharis.charts.internal.TestTags
-import io.github.dautovicharis.charts.model.ChartDataSet
-import io.github.dautovicharis.charts.model.toChartDataSet
+import io.github.dautovicharis.charts.model.ChartData
+import io.github.dautovicharis.charts.model.toChartData
 import io.github.dautovicharis.charts.style.BarChartDefaults
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class BarChartDenseDataTest {
+    private companion object {
+        const val DEFAULT_TITLE = "Default Bar Chart"
+    }
+
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun barChart_withLargeDataset_showsCompactToggleByDefault() =
         runComposeUiTest {
             setContent {
-                BarChart(dataSet = largeDataSet())
+                BarChart(
+                    data = largeDataSet(),
+                    title = DEFAULT_TITLE,
+                )
             }
 
             onNodeWithTag(TestTags.BAR_CHART).isDisplayed()
@@ -46,7 +53,10 @@ class BarChartDenseDataTest {
     fun barChart_smallDataset_doesNotShowZoomControls() =
         runComposeUiTest {
             setContent {
-                BarChart(dataSet = smallDataSet())
+                BarChart(
+                    data = smallDataSet(),
+                    title = DEFAULT_TITLE,
+                )
             }
 
             onNodeWithTag(TestTags.BAR_CHART).isDisplayed()
@@ -58,9 +68,11 @@ class BarChartDenseDataTest {
     @Test
     fun barChart_smallDataset_tapUpdatesTitleWithLabelAndValue() =
         runComposeUiTest {
+            val title = "Small Bar Chart"
             setContent {
                 BarChart(
-                    dataSet = smallDataSet(),
+                    data = smallDataSet(),
+                    title = title,
                     animateOnStart = false,
                 )
             }
@@ -85,7 +97,8 @@ class BarChartDenseDataTest {
         runComposeUiTest {
             setContent {
                 BarChart(
-                    dataSet = smallDataSet(points = 8),
+                    data = smallDataSet(points = 8),
+                    title = DEFAULT_TITLE,
                 )
             }
 
@@ -100,7 +113,8 @@ class BarChartDenseDataTest {
         runComposeUiTest {
             setContent {
                 BarChart(
-                    dataSet = largeDataSet(points = 40),
+                    data = largeDataSet(points = 40),
+                    title = DEFAULT_TITLE,
                 )
             }
 
@@ -114,7 +128,10 @@ class BarChartDenseDataTest {
     fun barChart_withLargeDataset_expandShowsZoomControls() =
         runComposeUiTest {
             setContent {
-                BarChart(dataSet = largeDataSet())
+                BarChart(
+                    data = largeDataSet(),
+                    title = DEFAULT_TITLE,
+                )
             }
 
             onNodeWithTag(TestTags.BAR_CHART_DENSE_EXPAND).performTouchInput { click() }
@@ -127,10 +144,11 @@ class BarChartDenseDataTest {
     @Test
     fun barChart_withLargeDataset_tapUpdatesTitleWithLabelAndValue() =
         runComposeUiTest {
-            val dataSet = largeDataSet()
+            val data = largeDataSet()
             setContent {
                 BarChart(
-                    dataSet = dataSet,
+                    data = data,
+                    title = DEFAULT_TITLE,
                     animateOnStart = false,
                 )
             }
@@ -142,7 +160,7 @@ class BarChartDenseDataTest {
             }
 
             waitUntil(timeoutMillis = 3_000L) {
-                currentTitle() != dataSet.data.label
+                currentTitle() != DEFAULT_TITLE
             }
             onNodeWithTag(TestTags.CHART_TITLE).isDisplayed()
         }
@@ -153,7 +171,8 @@ class BarChartDenseDataTest {
         runComposeUiTest {
             setContent {
                 BarChart(
-                    dataSet = largeDataSet(),
+                    data = largeDataSet(),
+                    title = DEFAULT_TITLE,
                     style = BarChartDefaults.style(zoomControlsVisible = false),
                 )
             }
@@ -169,8 +188,15 @@ class BarChartDenseDataTest {
         runComposeUiTest {
             setContent {
                 BarChart(
-                    dataSet = largeDataSet(),
-                    style = BarChartDefaults.style(xAxisLabelsVisible = false),
+                    data = largeDataSet(),
+                    title = DEFAULT_TITLE,
+                    style =
+                        BarChartDefaults.style(
+                            axis =
+                                BarChartDefaults.axis(
+                                    xLabels = BarChartDefaults.xLabels(visible = false),
+                                ),
+                        ),
                 )
             }
 
@@ -183,8 +209,15 @@ class BarChartDenseDataTest {
         runComposeUiTest {
             setContent {
                 BarChart(
-                    dataSet = largeDataSet(),
-                    style = BarChartDefaults.style(yAxisLabelsVisible = false),
+                    data = largeDataSet(),
+                    title = DEFAULT_TITLE,
+                    style =
+                        BarChartDefaults.style(
+                            axis =
+                                BarChartDefaults.axis(
+                                    yLabels = BarChartDefaults.yLabels(visible = false),
+                                ),
+                        ),
                 )
             }
 
@@ -196,7 +229,10 @@ class BarChartDenseDataTest {
     fun barChart_zoomControls_areAbovePlotArea() =
         runComposeUiTest {
             setContent {
-                BarChart(dataSet = largeDataSet())
+                BarChart(
+                    data = largeDataSet(),
+                    title = DEFAULT_TITLE,
+                )
             }
 
             onNodeWithTag(TestTags.BAR_CHART_DENSE_EXPAND).performTouchInput { click() }
@@ -210,7 +246,10 @@ class BarChartDenseDataTest {
     fun barChart_resetControl_isNotRendered() =
         runComposeUiTest {
             setContent {
-                BarChart(dataSet = largeDataSet())
+                BarChart(
+                    data = largeDataSet(),
+                    title = DEFAULT_TITLE,
+                )
             }
 
             onAllNodesWithText("Reset").assertCountEquals(0)
@@ -221,7 +260,10 @@ class BarChartDenseDataTest {
     fun barChart_denseExpanded_smallScrollDelta_keepsXAxisLabelCadenceStable() =
         runComposeUiTest {
             setContent {
-                BarChart(dataSet = numericLargeDataSet())
+                BarChart(
+                    data = numericLargeDataSet(),
+                    title = DEFAULT_TITLE,
+                )
             }
 
             onNodeWithTag(TestTags.BAR_CHART_DENSE_EXPAND).performTouchInput { click() }
@@ -289,36 +331,24 @@ class BarChartDenseDataTest {
         }
     }
 
-    private fun smallDataSet(points: Int = 12): ChartDataSet {
+    private fun smallDataSet(points: Int = 12): ChartData {
         val labels = dateLabels(points)
-        val values = values(points)
-        return values.toChartDataSet(
-            title = "Small Bar Chart",
-            labels = labels,
-        )
+        return values(points).toChartData(categories = labels)
     }
 
-    private fun largeDataSet(points: Int = 120): ChartDataSet {
+    private fun largeDataSet(points: Int = 120): ChartData {
         val labels = dateLabels(points)
-        val values = values(points)
-        return values.toChartDataSet(
-            title = "Large Bar Chart",
-            labels = labels,
-        )
+        return values(points).toChartData(categories = labels)
     }
 
-    private fun numericLargeDataSet(points: Int = 120): ChartDataSet {
+    private fun numericLargeDataSet(points: Int = 120): ChartData {
         val labels = List(points) { index -> (index + 1).toString() }
-        val values = values(points)
-        return values.toChartDataSet(
-            title = "Numeric Large Bar Chart",
-            labels = labels,
-        )
+        return values(points).toChartData(categories = labels)
     }
 
-    private fun values(points: Int): List<Float> =
+    private fun values(points: Int): List<Double> =
         List(points) { index ->
-            ((index % 30) - 15).toFloat()
+            ((index % 30) - 15).toDouble()
         }
 
     private fun dateLabels(points: Int): List<String> {

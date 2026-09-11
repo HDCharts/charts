@@ -25,9 +25,9 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import io.github.dautovicharis.charts.internal.AXIS_LABEL_CHART_GAP
 import io.github.dautovicharis.charts.internal.TestTags
+import io.github.dautovicharis.charts.internal.barchart.BarChartInternalStyle
 import io.github.dautovicharis.charts.internal.common.axis.AxisXPlanRequest
 import io.github.dautovicharis.charts.internal.common.model.ChartData
-import io.github.dautovicharis.charts.style.BarChartStyle
 import kotlin.math.roundToInt
 
 // X Axis label layout constants
@@ -36,7 +36,7 @@ private const val FIXED_X_AXIS_LABEL_TILT_DEGREES = 34f
 @Composable
 internal fun BarChartContent(
     chartData: ChartData,
-    style: BarChartStyle,
+    style: BarChartInternalStyle,
     interactionEnabled: Boolean,
     dragSelectionEnabled: Boolean,
     animatedValues: List<Animatable<Float, AnimationVector1D>>,

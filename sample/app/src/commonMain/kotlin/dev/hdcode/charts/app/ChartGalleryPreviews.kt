@@ -24,6 +24,7 @@ import io.github.dautovicharis.charts.RadarChart
 import io.github.dautovicharis.charts.StackedAreaChart
 import io.github.dautovicharis.charts.StackedBarChart
 import io.github.dautovicharis.charts.model.PieSlice
+import io.github.dautovicharis.charts.model.toChartData
 import io.github.dautovicharis.charts.model.toChartDataSet
 import io.github.dautovicharis.charts.model.toMultiChartDataSet
 import io.github.dautovicharis.charts.style.BarChartDefaults
@@ -169,18 +170,25 @@ private fun StackedAreaChartPreview(series: List<Pair<String, List<Float>>>) {
 
 @Composable
 private fun BarChartPreview(values: List<Float>) {
-    val dataSet =
+    val data =
         remember(values) {
-            values.toChartDataSet(title = "")
+            values.map { it.toDouble() }.toChartData(seriesName = "")
         }
     BarChart(
-        dataSet = dataSet,
+        data = data,
+        title = "",
         style =
             BarChartDefaults.style(
-                minValue = 0f,
-                maxValue = 100f,
-                xAxisLabelsVisible = false,
-                yAxisLabelsVisible = false,
+                range =
+                    BarChartDefaults.range(
+                        min = 0f,
+                        max = 100f,
+                    ),
+                axis =
+                    BarChartDefaults.axis(
+                        xLabels = BarChartDefaults.xLabels(visible = false),
+                        yLabels = BarChartDefaults.yLabels(visible = false),
+                    ),
                 chartContainerStyle = previewChartContainerStyle(),
             ),
         interactionEnabled = false,
@@ -194,20 +202,24 @@ private fun HistogramChartPreview(values: List<Float>) {
         remember(values) {
             List(values.size) { index -> "B${index + 1}" }
         }
-    val dataSet =
+    val data =
         remember(values, labels) {
-            values.toChartDataSet(
-                title = "",
-                labels = labels,
+            values.map { it.toDouble() }.toChartData(
+                categories = labels,
+                seriesName = "",
             )
         }
     HistogramChart(
-        dataSet = dataSet,
+        data = data,
+        title = "",
         style =
             HistogramChartDefaults.style(
-                minValue = 0f,
-                xAxisLabelsVisible = false,
-                yAxisLabelsVisible = false,
+                range = BarChartDefaults.range(min = 0f),
+                axis =
+                    BarChartDefaults.axis(
+                        xLabels = BarChartDefaults.xLabels(visible = false),
+                        yLabels = BarChartDefaults.yLabels(visible = false),
+                    ),
                 chartContainerStyle = previewChartContainerStyle(),
             ),
         interactionEnabled = false,

@@ -12,12 +12,11 @@ import io.github.dautovicharis.charts.internal.TestTags
 import io.github.dautovicharis.charts.internal.ValidationErrors.MIN_REQUIRED_BAR
 import io.github.dautovicharis.charts.internal.ValidationErrors.RULE_COLORS_SIZE_MISMATCH
 import io.github.dautovicharis.charts.internal.ValidationErrors.RULE_DATA_POINTS_LESS_THAN_MIN
-import io.github.dautovicharis.charts.internal.common.model.ChartDataType
 import io.github.dautovicharis.charts.internal.format
 import io.github.dautovicharis.charts.mock.MockTest.TITLE
-import io.github.dautovicharis.charts.mock.MockTest.dataSet
-import io.github.dautovicharis.charts.model.ChartDataSet
-import io.github.dautovicharis.charts.model.toChartDataSet
+import io.github.dautovicharis.charts.mock.MockTest.data
+import io.github.dautovicharis.charts.model.staticChartSelection
+import io.github.dautovicharis.charts.model.toChartData
 import io.github.dautovicharis.charts.style.BarChartDefaults
 import kotlin.test.Test
 import kotlin.test.assertTrue
@@ -28,11 +27,14 @@ class BarChartTest {
     fun barChart_withValidData_displaysChart() =
         runComposeUiTest {
             // Arrange
-            val expectedTitle = dataSet.data.label
+            val expectedTitle = TITLE
 
             // Act
             setContent {
-                BarChart(dataSet)
+                BarChart(
+                    data = data,
+                    title = TITLE,
+                )
             }
 
             // Assert
@@ -46,15 +48,14 @@ class BarChartTest {
     @Test
     fun barChart_withInvalidData_displaysError() =
         runComposeUiTest {
-            val dataSet =
-                ChartDataSet(
-                    items = ChartDataType.FloatData(listOf(1f)),
-                    title = TITLE,
-                )
+            val invalidData = listOf(1.0).toChartData()
             val expectedError = RULE_DATA_POINTS_LESS_THAN_MIN.format(MIN_REQUIRED_BAR)
 
             setContent {
-                BarChart(dataSet)
+                BarChart(
+                    data = invalidData,
+                    title = TITLE,
+                )
             }
 
             onNodeWithTag(TestTags.CHART_ERROR).isDisplayed()
@@ -67,17 +68,18 @@ class BarChartTest {
         runComposeUiTest {
             // Arrange
             val selectedBarIndex = 1
-            val expectedLabel = dataSet.data.item.labels[selectedBarIndex]
-            val expectedValue = dataSet.data.item.points[selectedBarIndex]
-            val expectedTitle = "$expectedLabel: $expectedValue"
+            val values = data.series.single().values
+            val expectedValue = values[selectedBarIndex].toFloat()
+            val expectedTitle = "$TITLE${selectedBarIndex + 1}: $expectedValue"
 
             // Act
             setContent {
                 BarChart(
-                    dataSet = dataSet,
+                    data = data,
+                    title = TITLE,
+                    selection = staticChartSelection(selectedBarIndex),
                     interactionEnabled = false,
                     animateOnStart = false,
-                    selectedBarIndex = selectedBarIndex,
                 )
             }
 
@@ -92,14 +94,16 @@ class BarChartTest {
     @Test
     fun barChart_lastXAxisLabel_hasRightEdgePadding() =
         runComposeUiTest {
-            val edgeDataSet =
-                listOf(320f, 280f, 260f, 300f).toChartDataSet(
-                    title = "Quarterly Revenue by Region",
-                    labels = listOf("Region 4", "Region 36", "Region 68", "Region 100"),
+            val edgeData =
+                listOf(320.0, 280.0, 260.0, 300.0).toChartData(
+                    categories = listOf("Region 4", "Region 36", "Region 68", "Region 100"),
                 )
 
             setContent {
-                BarChart(dataSet = edgeDataSet)
+                BarChart(
+                    data = edgeData,
+                    title = "Quarterly Revenue by Region",
+                )
             }
 
             val axisBounds = onNodeWithTag(TestTags.BAR_CHART_X_AXIS_LABELS).fetchSemanticsNode().boundsInRoot
@@ -115,10 +119,14 @@ class BarChartTest {
             setContent {
                 val style =
                     BarChartDefaults.style(
-                        barColors = listOf(Color.Red, Color.Green, Color.Blue, Color.Cyan),
+                        bars =
+                            BarChartDefaults.bars(
+                                colors = listOf(Color.Red, Color.Green, Color.Blue, Color.Cyan),
+                            ),
                     )
                 BarChart(
-                    dataSet = dataSet,
+                    data = data,
+                    title = TITLE,
                     style = style,
                 )
             }
@@ -130,19 +138,27 @@ class BarChartTest {
     @Test
     fun barChart_withInvalidBarColors_displaysError() =
         runComposeUiTest {
+            val pointsSize =
+                data.series
+                    .single()
+                    .values.size
             val expectedError =
                 RULE_COLORS_SIZE_MISMATCH.format(
                     2,
-                    dataSet.data.item.points.size,
+                    pointsSize,
                 )
 
             setContent {
                 val style =
                     BarChartDefaults.style(
-                        barColors = listOf(Color.Red, Color.Green),
+                        bars =
+                            BarChartDefaults.bars(
+                                colors = listOf(Color.Red, Color.Green),
+                            ),
                     )
                 BarChart(
-                    dataSet = dataSet,
+                    data = data,
+                    title = TITLE,
                     style = style,
                 )
             }
