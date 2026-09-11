@@ -109,7 +109,11 @@ fun MultiLineDefaultGifScenario() {
 @Composable
 fun BarDefaultGifScenario() {
     DocsGifScene {
-        BarChart(barSampleUseCase().initialBarDataSet())
+        val data = barSampleUseCase().initialBarDataSet()
+        BarChart(
+            data = data,
+            title = data.series.single().name,
+        )
     }
 }
 
@@ -125,7 +129,11 @@ fun BarDefaultGifScenario() {
 @Composable
 fun HistogramDefaultGifScenario() {
     DocsGifScene {
-        HistogramChart(histogramSampleUseCase().initialHistogramDataSet())
+        val data = histogramSampleUseCase().initialHistogramDataSet()
+        HistogramChart(
+            data = data,
+            title = data.series.single().name,
+        )
     }
 }
 

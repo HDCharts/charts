@@ -1,6 +1,7 @@
 package io.github.dautovicharis.charts.internal.common.composable
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -22,27 +23,25 @@ import kotlinx.collections.immutable.ImmutableList
 fun ChartErrors(
     style: ChartContainerStyle,
     errors: ImmutableList<String>,
+    modifier: Modifier = Modifier,
 ) {
     ChartsDefaultTheme(content = {
-        Column(
-            modifier =
-                style.modifierMain
-                    .padding(15.dp)
-                    .testTag(TestTags.CHART_ERROR),
-        ) {
-            errors.forEach { error ->
-                Text(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .background(
-                                color = MaterialTheme.colorScheme.errorContainer,
-                                shape = RoundedCornerShape(5.dp),
-                            ).padding(5.dp),
-                    text = "$error\n",
-                    color = MaterialTheme.colorScheme.onErrorContainer,
-                )
-                Spacer(modifier = Modifier.height(5.dp))
+        Box(modifier = modifier.then(style.modifierMain)) {
+            Column(modifier = Modifier.padding(15.dp).testTag(TestTags.CHART_ERROR)) {
+                errors.forEach { error ->
+                    Text(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .background(
+                                    color = MaterialTheme.colorScheme.errorContainer,
+                                    shape = RoundedCornerShape(5.dp),
+                                ).padding(5.dp),
+                        text = "$error\n",
+                        color = MaterialTheme.colorScheme.onErrorContainer,
+                    )
+                    Spacer(modifier = Modifier.height(5.dp))
+                }
             }
         }
     })

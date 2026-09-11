@@ -1,6 +1,6 @@
 package io.github.dautovicharis.charts.internal
 
-import io.github.dautovicharis.charts.internal.common.model.ChartData
+import io.github.dautovicharis.charts.model.ChartData
 
 @InternalChartsApi
 fun validateHistogramData(
@@ -9,7 +9,7 @@ fun validateHistogramData(
 ): List<String> {
     val validationErrors = validateBarData(data = data, colorsSize = colorsSize).toMutableList()
 
-    data.points.forEachIndexed { index, value ->
+    data.series.singleOrNull()?.values?.forEachIndexed { index, value ->
         if (value < 0) {
             validationErrors.add(ValidationErrors.RULE_DATA_POINT_NEGATIVE.format(index))
         }

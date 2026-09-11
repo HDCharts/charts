@@ -3,6 +3,7 @@ package io.github.dautovicharis.charts.unit.helpers
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.IntSize
 import io.github.dautovicharis.charts.internal.barchart.YAxisTick
+import io.github.dautovicharis.charts.internal.barchart.aggregateForCompactDensity
 import io.github.dautovicharis.charts.internal.barchart.buildYAxisTicks
 import io.github.dautovicharis.charts.internal.barchart.compactDensityCenterIndices
 import io.github.dautovicharis.charts.internal.barchart.contentWidth
@@ -17,6 +18,7 @@ import io.github.dautovicharis.charts.internal.barchart.scrollableLabelIndices
 import io.github.dautovicharis.charts.internal.barchart.shouldUseScrollableDensity
 import io.github.dautovicharis.charts.internal.barchart.unitWidth
 import io.github.dautovicharis.charts.internal.barchart.visibleIndexRange
+import io.github.dautovicharis.charts.internal.common.model.ChartData
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -156,6 +158,18 @@ class BarChartHelpersTest {
             )
 
         assertEquals(expected = listOf(1, 4, 7, 9), actual = centers)
+    }
+
+    @Test
+    fun compactDensity_capacityOne_aggregatesToOneBucketAndItsCenterSourceIndex() {
+        val data = ChartData(List(10) { index -> "B$index" to (index + 1.0) })
+
+        val aggregated = aggregateForCompactDensity(data = data, targetPoints = 1)
+        val centers = compactDensityCenterIndices(sourcePointsCount = 10, targetPoints = 1)
+
+        assertEquals(expected = listOf(5.5), actual = aggregated.points)
+        assertEquals(expected = listOf("B4"), actual = aggregated.labels)
+        assertEquals(expected = listOf(4), actual = centers)
     }
 
     @Test

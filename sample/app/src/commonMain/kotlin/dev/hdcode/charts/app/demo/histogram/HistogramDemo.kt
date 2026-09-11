@@ -99,21 +99,26 @@ fun HistogramChartDemo(viewModel: HistogramChartViewModel = koinViewModel()) {
             when (preset) {
                 ChartPreset.Default -> {
                     HistogramChart(
-                        dataSet,
+                        data = dataSet,
+                        title = dataSet.series.single().name,
                         style = HistogramChartDefaults.style(chartContainerStyle = chartContainerStyle),
                     )
                 }
 
                 ChartPreset.Custom -> {
                     HistogramChart(
-                        dataSet = dataSet,
+                        data = dataSet,
+                        title = dataSet.series.single().name,
                         style =
                             ChartTestStyleFixtures.histogramCustomStyle(
                                 chartContainerStyle = chartContainerStyle,
-                                barCount = dataSet.data.item.points.size,
+                                barCount =
+                                    dataSet.series
+                                        .single()
+                                        .values.size,
                                 useBarColors = true,
-                                minValue = controlsState.minValue.toFloat(),
-                                maxValue = controlsState.maxValue.toFloat(),
+                                minValue = controlsState.minValue.toDouble(),
+                                maxValue = controlsState.maxValue.toDouble(),
                             ),
                     )
                 }

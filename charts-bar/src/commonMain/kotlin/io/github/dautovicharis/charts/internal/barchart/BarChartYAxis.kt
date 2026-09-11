@@ -8,8 +8,8 @@ import androidx.compose.ui.unit.TextUnit
 import io.github.dautovicharis.charts.internal.TestTags
 import io.github.dautovicharis.charts.internal.common.axis.AxisYLabelsLayout
 import io.github.dautovicharis.charts.internal.common.axis.AxisYLayoutTick
-import io.github.dautovicharis.charts.internal.common.axis.buildNumericYAxisTicks
-import io.github.dautovicharis.charts.internal.common.axis.formatNumericAxisValue
+import io.github.dautovicharis.charts.model.ChartValueFormatter
+import io.github.dautovicharis.charts.style.BarChartDefaults
 
 internal data class YAxisTick(
     val label: String,
@@ -36,18 +36,19 @@ internal fun buildYAxisTicks(
     maxValue: Double,
     labelCount: Int,
     chartHeightPx: Float,
-): List<YAxisTick> =
-    buildNumericYAxisTicks(
-        minValue = minValue,
-        maxValue = maxValue,
-        labelCount = labelCount,
-        plotHeightPx = chartHeightPx,
-        verticalInsetPx = 0f,
-    ).map { tick ->
+    formatter: ChartValueFormatter = BarChartDefaults.axisValueFormatter,
+): List<YAxisTick> {
+    if (chartHeightPx <= 0f) return emptyList()
+    val steps = labelCount.coerceAtLeast(2) - 1
+    return (0..steps).map { step ->
+        val progress = step.toDouble() / steps
+        // A convex combination avoids overflowing (max - min) for extreme signed data.
+        val value = maxValue * (1.0 - progress) + minValue * progress
         YAxisTick(
-            label = tick.label,
-            centerY = tick.centerY,
+            label = formatter.format(value),
+            centerY = chartHeightPx * progress.toFloat(),
         )
     }
+}
 
-internal fun formatAxisValue(value: Double): String = formatNumericAxisValue(value)
+internal fun formatAxisValue(value: Double): String = BarChartDefaults.axisValueFormatter.format(value)

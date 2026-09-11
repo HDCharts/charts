@@ -36,7 +36,7 @@ internal fun rememberBarChartAnimatedValues(
         }
     val hasInitialized = remember { mutableStateOf(false) }
 
-    LaunchedEffect(targetNormalized) {
+    LaunchedEffect(targetNormalized, animatedValues, isPreview, animateOnStart) {
         if (chartData.points.isEmpty()) return@LaunchedEffect
         val shouldAnimate = !isPreview && (animateOnStart || hasInitialized.value)
         val useCascadeAnimation = shouldAnimate && dataSize <= CASCADE_MAX_POINTS

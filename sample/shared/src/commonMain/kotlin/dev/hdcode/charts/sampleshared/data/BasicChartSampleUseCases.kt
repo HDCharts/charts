@@ -1,5 +1,6 @@
 package dev.hdcode.charts.sampleshared.data
 
+import io.github.dautovicharis.charts.model.ChartData
 import io.github.dautovicharis.charts.model.ChartDataSet
 
 interface PieSampleUseCase {
@@ -31,7 +32,7 @@ interface LineSampleUseCase {
 }
 
 interface BarSampleUseCase {
-    fun initialBarDataSet(): ChartDataSet
+    fun initialBarDataSet(): ChartData
 
     fun barDefaultPoints(): Int
 
@@ -40,11 +41,11 @@ interface BarSampleUseCase {
     fun barDataSet(
         points: Int,
         range: IntRange,
-    ): ChartDataSet
+    ): ChartData
 }
 
 interface HistogramSampleUseCase {
-    fun initialHistogramDataSet(): ChartDataSet
+    fun initialHistogramDataSet(): ChartData
 
     fun histogramDefaultPoints(): Int
 
@@ -53,5 +54,5 @@ interface HistogramSampleUseCase {
     fun histogramDataSet(
         points: Int,
         range: IntRange,
-    ): ChartDataSet
+    ): ChartData
 }

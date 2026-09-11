@@ -8,6 +8,7 @@ import dev.hdcode.charts.app.screenshot.shared.ScreenshotPreview
 import dev.hdcode.charts.app.screenshot.shared.ScreenshotSurface
 import dev.hdcode.charts.sampleshared.fixtures.ChartTestStyleFixtures
 import io.github.dautovicharis.charts.HistogramChart
+import io.github.dautovicharis.charts.model.staticChartSelection
 import io.github.dautovicharis.charts.style.ChartContainerDefaults
 
 @PreviewTest
@@ -15,8 +16,10 @@ import io.github.dautovicharis.charts.style.ChartContainerDefaults
 @Composable
 fun HistogramChartDefaultPreview() {
     ScreenshotSurface {
+        val data = SCREENSHOT_HISTOGRAM_SAMPLE_USE_CASE.initialHistogramDataSet()
         HistogramChart(
-            dataSet = SCREENSHOT_HISTOGRAM_SAMPLE_USE_CASE.initialHistogramDataSet(),
+            data = data,
+            title = data.series.single().name,
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
         )
     }
@@ -27,9 +30,10 @@ fun HistogramChartDefaultPreview() {
 @Composable
 fun HistogramChartCustomPreview() {
     ScreenshotSurface {
-        val dataSet = SCREENSHOT_HISTOGRAM_SAMPLE_USE_CASE.initialHistogramDataSet()
+        val data = SCREENSHOT_HISTOGRAM_SAMPLE_USE_CASE.initialHistogramDataSet()
         HistogramChart(
-            dataSet = dataSet,
+            data = data,
+            title = data.series.single().name,
             style = ChartTestStyleFixtures.histogramCustomStyle(chartContainerStyle = ChartContainerDefaults.style()),
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
         )
@@ -41,13 +45,17 @@ fun HistogramChartCustomPreview() {
 @Composable
 fun HistogramChartCustomBarColorsPreview() {
     ScreenshotSurface {
-        val dataSet = SCREENSHOT_HISTOGRAM_SAMPLE_USE_CASE.initialHistogramDataSet()
+        val data = SCREENSHOT_HISTOGRAM_SAMPLE_USE_CASE.initialHistogramDataSet()
         HistogramChart(
-            dataSet = dataSet,
+            data = data,
+            title = data.series.single().name,
             style =
                 ChartTestStyleFixtures.histogramCustomStyle(
                     chartContainerStyle = ChartContainerDefaults.style(),
-                    barCount = dataSet.data.item.points.size,
+                    barCount =
+                        data.series
+                            .single()
+                            .values.size,
                     useBarColors = true,
                 ),
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
@@ -60,11 +68,13 @@ fun HistogramChartCustomBarColorsPreview() {
 @Composable
 fun HistogramChartSelectedBarPreview() {
     ScreenshotSurface {
+        val data = SCREENSHOT_HISTOGRAM_SAMPLE_USE_CASE.initialHistogramDataSet()
         HistogramChart(
-            dataSet = SCREENSHOT_HISTOGRAM_SAMPLE_USE_CASE.initialHistogramDataSet(),
+            data = data,
+            title = data.series.single().name,
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
             interactionEnabled = false,
-            selectedBarIndex = 1,
+            selection = staticChartSelection(1),
         )
     }
 }

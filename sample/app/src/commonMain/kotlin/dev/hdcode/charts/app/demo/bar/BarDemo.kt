@@ -99,21 +99,26 @@ fun BarChartDemo(viewModel: BarChartViewModel = koinViewModel()) {
             when (preset) {
                 ChartPreset.Default -> {
                     BarChart(
-                        dataSet,
+                        data = dataSet,
+                        title = dataSet.series.single().name,
                         style = BarChartDefaults.style(chartContainerStyle = chartContainerStyle),
                     )
                 }
 
                 ChartPreset.Custom -> {
                     BarChart(
-                        dataSet = dataSet,
+                        data = dataSet,
+                        title = dataSet.series.single().name,
                         style =
                             ChartTestStyleFixtures.barCustomStyle(
                                 chartContainerStyle = chartContainerStyle,
-                                barCount = dataSet.data.item.points.size,
+                                barCount =
+                                    dataSet.series
+                                        .single()
+                                        .values.size,
                                 useBarColors = true,
-                                minValue = controlsState.minValue.toFloat(),
-                                maxValue = controlsState.maxValue.toFloat(),
+                                minValue = controlsState.minValue.toDouble(),
+                                maxValue = controlsState.maxValue.toDouble(),
                             ),
                     )
                 }
