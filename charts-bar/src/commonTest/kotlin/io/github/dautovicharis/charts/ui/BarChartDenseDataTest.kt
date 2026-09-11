@@ -291,6 +291,7 @@ class BarChartDenseDataTest {
             onNodeWithTag(TestTags.BAR_CHART_DENSE_COLLAPSE).assertIsDisplayed()
 
             val plot = onNodeWithTag(TestTags.BAR_CHART_PLOT)
+            waitForIdle()
             val beforeLabels = visibleBarXAxisNumericLabels()
             val beforeOffset =
                 plot
@@ -299,10 +300,8 @@ class BarChartDenseDataTest {
                     .getOrNull(SemanticsProperties.HorizontalScrollAxisRange)
                     ?.value() ?: 0f
 
-            // Advance the virtual clock by a single frame to let pending layout settle.
-            mainClock.advanceTimeByFrame()
+            // No user interaction, so a second idle pass must keep the visible window identical.
             waitForIdle()
-
             val afterLabels = visibleBarXAxisNumericLabels()
             val afterOffset =
                 plot
