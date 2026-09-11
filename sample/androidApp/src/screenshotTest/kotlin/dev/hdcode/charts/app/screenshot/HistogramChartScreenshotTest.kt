@@ -52,7 +52,10 @@ fun HistogramChartCustomBarColorsPreview() {
             style =
                 ChartTestStyleFixtures.histogramCustomStyle(
                     chartContainerStyle = ChartContainerDefaults.style(),
-                    barCount = data.series.single().values.size,
+                    barCount =
+                        data.series
+                            .single()
+                            .values.size,
                     useBarColors = true,
                 ),
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
