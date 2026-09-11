@@ -2,12 +2,12 @@ package dev.hdcode.charts.sampleshared.data.impl
 
 import dev.hdcode.charts.sampleshared.data.MultiLineSampleData
 import dev.hdcode.charts.sampleshared.data.MultiLineSampleUseCase
-import io.github.dautovicharis.charts.model.toMultiChartDataSet
+import io.github.dautovicharis.charts.model.ChartSeries
+import io.github.dautovicharis.charts.model.chartDataOf
 
 internal class DefaultMultiLineSampleUseCase : MultiLineSampleUseCase {
     companion object {
         private const val DEFAULT_TITLE = "Weekly Revenue by Channel"
-        private const val DEFAULT_PREFIX = "$"
         private val REFRESH_RANGE = 100..1000
     }
 
@@ -23,12 +23,15 @@ internal class DefaultMultiLineSampleUseCase : MultiLineSampleUseCase {
     override fun initialMultiLineSample(): MultiLineSampleData =
         MultiLineSampleData(
             dataSet =
-                multiLineItems.toMultiChartDataSet(
-                    title = DEFAULT_TITLE,
-                    prefix = DEFAULT_PREFIX,
+                chartDataOf(
                     categories = multiLineCategories,
+                    *multiLineItems
+                        .map { (name, values) ->
+                            ChartSeries(name = name, values = values.map { it.toDouble() })
+                        }.toTypedArray(),
                 ),
             seriesKeys = multiLineItems.map { it.first },
+            title = DEFAULT_TITLE,
         )
 
     override fun multiLineRefreshRange(): IntRange = REFRESH_RANGE
@@ -39,14 +42,17 @@ internal class DefaultMultiLineSampleUseCase : MultiLineSampleUseCase {
                 name to values.map { range.random().toFloat() }
             }
         val dataSet =
-            newItems.toMultiChartDataSet(
-                prefix = DEFAULT_PREFIX,
+            chartDataOf(
                 categories = multiLineCategories,
-                title = DEFAULT_TITLE,
+                *newItems
+                    .map { (name, values) ->
+                        ChartSeries(name = name, values = values.map { it.toDouble() })
+                    }.toTypedArray(),
             )
         return MultiLineSampleData(
             dataSet = dataSet,
             seriesKeys = newItems.map { it.first },
+            title = DEFAULT_TITLE,
         )
     }
 }

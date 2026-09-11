@@ -1,10 +1,10 @@
 package io.github.dautovicharis.charts.mock
 
 import androidx.compose.ui.graphics.Color
-import io.github.dautovicharis.charts.model.ChartDataSet
-import io.github.dautovicharis.charts.model.MultiChartDataSet
-import io.github.dautovicharis.charts.model.toChartDataSet
-import io.github.dautovicharis.charts.model.toMultiChartDataSet
+import io.github.dautovicharis.charts.model.ChartData
+import io.github.dautovicharis.charts.model.ChartSeries
+import io.github.dautovicharis.charts.model.chartDataOf
+import io.github.dautovicharis.charts.model.toChartData
 
 internal object MockTest {
     const val TITLE = "Title"
@@ -17,31 +17,30 @@ internal object MockTest {
     private val categories = listOf("Jan", "Feb", "Mar", "Apr")
     val colors = listOf(Color.Red, Color.Green, Color.Cyan, Color.Black)
 
-    val dataSet: ChartDataSet =
-        listOf(10f, 20f, 30f, 40f).toChartDataSet(
-            title = TITLE,
-        )
+    val dataSet: ChartData =
+        listOf(10f, 20f, 30f, 40f)
+            .map { it.toDouble() }
+            .toChartData(seriesName = TITLE)
 
-    val multiDataSet: MultiChartDataSet =
-        listOf(
-            "Item 1" to firstItem,
-            "Item 2" to secondItem,
-            "Item 3" to thirdItem,
-            "Item 4" to fourthItem,
-        ).toMultiChartDataSet(
-            title = TITLE,
+    val multiDataSet: ChartData =
+        chartDataOf(
             categories = categories,
+            *arrayOf(
+                ChartSeries(name = "Item 1", values = firstItem.map { it.toDouble() }),
+                ChartSeries(name = "Item 2", values = secondItem.map { it.toDouble() }),
+                ChartSeries(name = "Item 3", values = thirdItem.map { it.toDouble() }),
+                ChartSeries(name = "Item 4", values = fourthItem.map { it.toDouble() }),
+            ),
         )
 
-    fun invalidMultiDataSet(): MultiChartDataSet =
-        listOf(
-            "Item 1" to firstItem.dropLast(1),
-            "Item 2" to secondItem,
-            "Item 3" to thirdItem.dropLast(1),
-            "Item 4" to fourthItem,
-        ).toMultiChartDataSet(
-            title = TITLE,
+    fun invalidMultiDataSet(): ChartData =
+        chartDataOf(
             categories = categories.dropLast(1),
-            prefix = "$",
+            *arrayOf(
+                ChartSeries(name = "Item 1", values = firstItem.dropLast(1).map { it.toDouble() }),
+                ChartSeries(name = "Item 2", values = secondItem.map { it.toDouble() }),
+                ChartSeries(name = "Item 3", values = thirdItem.dropLast(1).map { it.toDouble() }),
+                ChartSeries(name = "Item 4", values = fourthItem.map { it.toDouble() }),
+            ),
         )
 }

@@ -6,8 +6,9 @@ import dev.hdcode.charts.app.data.LiveLatencyMultiSeriesWindow
 import dev.hdcode.charts.app.data.LiveLatencyTimelineUseCase
 import dev.hdcode.charts.app.demo.timeline.LiveTimelineControlsState
 import dev.hdcode.charts.app.demo.timeline.LiveTimelineDefaults
-import io.github.dautovicharis.charts.model.MultiChartDataSet
-import io.github.dautovicharis.charts.model.toMultiChartDataSet
+import io.github.dautovicharis.charts.model.ChartData
+import io.github.dautovicharis.charts.model.ChartSeries
+import io.github.dautovicharis.charts.model.chartDataOf
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,8 +19,9 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 data class MultiLineChartState(
-    val dataSet: MultiChartDataSet,
+    val dataSet: ChartData,
     val seriesKeys: List<String> = emptyList(),
+    val title: String,
 )
 
 data class MultiLineChartDataControlsState(
@@ -52,7 +54,7 @@ class MultiLineChartViewModel(
         const val MAX_SUPPORTED_VALUE = 400
         private const val DEFAULT_MIN_VALUE = 90
         private const val DEFAULT_MAX_VALUE = 220
-        private const val VALUE_POSTFIX = " ms"
+        private const val CHART_TITLE = "API Latency (P50 vs P95)"
     }
 
     private val initialControlsState = LiveTimelineControlsState()
@@ -239,6 +241,7 @@ class MultiLineChartViewModel(
         MultiLineChartState(
             dataSet = liveLatencyTimelineUseCase.toMultiDataSet(window),
             seriesKeys = liveLatencyTimelineUseCase.multiSeriesKeys,
+            title = CHART_TITLE,
         )
 
     private fun setPlaying(playing: Boolean) {
@@ -285,7 +288,6 @@ class MultiLineChartViewModel(
                 windowSize = controls.points,
                 endTick = timelineWindow.endTick,
             )
-        val baseDataSet = liveLatencyTimelineUseCase.toMultiDataSet(baseWindow)
         val labels = baseWindow.labels.toList()
         val safeMin = controls.minValue.toDouble()
         val safeMax = controls.maxValue.toDouble().coerceAtLeast(safeMin + 1.0)
@@ -308,18 +310,22 @@ class MultiLineChartViewModel(
         val p95Values = normalize(baseWindow.p95Values)
         val seriesKeys = liveLatencyTimelineUseCase.multiSeriesKeys
         val multiDataSet =
-            listOf(
-                seriesKeys.getOrElse(0) { "P50 Latency" } to p50Values,
-                seriesKeys.getOrElse(1) { "P95 Latency" } to p95Values,
-            ).toMultiChartDataSet(
-                title = baseDataSet.data.title,
+            chartDataOf(
                 categories = labels,
-                postfix = VALUE_POSTFIX,
+                ChartSeries(
+                    name = seriesKeys.getOrElse(0) { "P50 Latency" },
+                    values = p50Values.map { it.toDouble() },
+                ),
+                ChartSeries(
+                    name = seriesKeys.getOrElse(1) { "P95 Latency" },
+                    values = p95Values.map { it.toDouble() },
+                ),
             )
 
         return MultiLineChartState(
             dataSet = multiDataSet,
             seriesKeys = seriesKeys,
+            title = CHART_TITLE,
         )
     }
 }

@@ -3,10 +3,10 @@ package dev.hdcode.charts.app.data.impl
 import dev.hdcode.charts.app.data.LiveLatencyMultiSeriesWindow
 import dev.hdcode.charts.app.data.LiveLatencySingleSeriesWindow
 import dev.hdcode.charts.app.data.LiveLatencyTimelineUseCase
-import io.github.dautovicharis.charts.model.ChartDataSet
-import io.github.dautovicharis.charts.model.MultiChartDataSet
-import io.github.dautovicharis.charts.model.toChartDataSet
-import io.github.dautovicharis.charts.model.toMultiChartDataSet
+import io.github.dautovicharis.charts.model.ChartData
+import io.github.dautovicharis.charts.model.ChartSeries
+import io.github.dautovicharis.charts.model.chartDataOf
+import io.github.dautovicharis.charts.model.toChartData
 import kotlin.math.sin
 import kotlin.random.Random
 
@@ -23,8 +23,7 @@ class DefaultLiveLatencyTimelineUseCase : LiveLatencyTimelineUseCase {
     override fun advanceSingleWindow(window: LiveLatencySingleSeriesWindow): LiveLatencySingleSeriesWindow =
         generator.advanceSingleWindow(window)
 
-    override fun toSingleDataSet(window: LiveLatencySingleSeriesWindow): ChartDataSet =
-        generator.toSingleDataSet(window)
+    override fun toSingleDataSet(window: LiveLatencySingleSeriesWindow): ChartData = generator.toSingleDataSet(window)
 
     override fun createMultiWindow(
         windowSize: Int,
@@ -34,8 +33,7 @@ class DefaultLiveLatencyTimelineUseCase : LiveLatencyTimelineUseCase {
     override fun advanceMultiWindow(window: LiveLatencyMultiSeriesWindow): LiveLatencyMultiSeriesWindow =
         generator.advanceMultiWindow(window)
 
-    override fun toMultiDataSet(window: LiveLatencyMultiSeriesWindow): MultiChartDataSet =
-        generator.toMultiDataSet(window)
+    override fun toMultiDataSet(window: LiveLatencyMultiSeriesWindow): ChartData = generator.toMultiDataSet(window)
 }
 
 private class LiveLatencyTimelineGenerator {
@@ -44,10 +42,8 @@ private class LiveLatencyTimelineGenerator {
         private const val SECONDS_PER_DAY = 24 * 60 * 60
         private const val BASE_SECOND_OF_DAY = 14 * 60 * 60
         private const val SINGLE_TITLE = "API Gateway P95 Latency"
-        private const val MULTI_TITLE = "API Latency (P50 vs P95)"
         private const val P50_SERIES_LABEL = "P50 Latency"
         private const val P95_SERIES_LABEL = "P95 Latency"
-        private const val VALUE_POSTFIX = " ms"
     }
 
     val multiSeriesKeys: List<String> = listOf(P50_SERIES_LABEL, P95_SERIES_LABEL)
@@ -83,11 +79,10 @@ private class LiveLatencyTimelineGenerator {
         )
     }
 
-    fun toSingleDataSet(window: LiveLatencySingleSeriesWindow): ChartDataSet =
-        window.values.toChartDataSet(
-            title = SINGLE_TITLE,
-            labels = window.labels,
-        )
+    fun toSingleDataSet(window: LiveLatencySingleSeriesWindow): ChartData =
+        window.values
+            .map { it.toDouble() }
+            .toChartData(categories = window.labels, seriesName = SINGLE_TITLE)
 
     fun createMultiWindow(
         windowSize: Int,
@@ -126,14 +121,13 @@ private class LiveLatencyTimelineGenerator {
         )
     }
 
-    fun toMultiDataSet(window: LiveLatencyMultiSeriesWindow): MultiChartDataSet =
-        listOf(
-            P50_SERIES_LABEL to window.p50Values,
-            P95_SERIES_LABEL to window.p95Values,
-        ).toMultiChartDataSet(
-            title = MULTI_TITLE,
+    fun toMultiDataSet(window: LiveLatencyMultiSeriesWindow): ChartData =
+        chartDataOf(
             categories = window.labels,
-            postfix = VALUE_POSTFIX,
+            *arrayOf(
+                ChartSeries(name = P50_SERIES_LABEL, values = window.p50Values.map { it.toDouble() }),
+                ChartSeries(name = P95_SERIES_LABEL, values = window.p95Values.map { it.toDouble() }),
+            ),
         )
 
     private fun resolveEndTick(

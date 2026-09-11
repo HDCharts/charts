@@ -6,8 +6,8 @@ import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.click
-import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performTouchInput
@@ -15,8 +15,8 @@ import androidx.compose.ui.test.swipeLeft
 import androidx.compose.ui.test.v2.runComposeUiTest
 import io.github.dautovicharis.charts.LineChart
 import io.github.dautovicharis.charts.internal.TestTags
-import io.github.dautovicharis.charts.model.ChartDataSet
-import io.github.dautovicharis.charts.model.toChartDataSet
+import io.github.dautovicharis.charts.model.ChartData
+import io.github.dautovicharis.charts.model.toChartData
 import io.github.dautovicharis.charts.style.LineChartDefaults
 import kotlin.test.Test
 import kotlin.test.assertNotEquals
@@ -31,11 +31,11 @@ class LineChartDenseDataTest {
     fun lineChart_withLargeDataset_showsCompactToggleByDefault() =
         runComposeUiTest {
             setContent {
-                LineChart(dataSet = largeDataSet())
+                LineChart(data = largeDataSet())
             }
 
-            onNodeWithTag(TestTags.LINE_CHART).isDisplayed()
-            onNodeWithTag(TestTags.LINE_CHART_DENSE_EXPAND).isDisplayed()
+            onNodeWithTag(TestTags.LINE_CHART).assertIsDisplayed()
+            onNodeWithTag(TestTags.LINE_CHART_DENSE_EXPAND).assertIsDisplayed()
             onAllNodesWithTag(TestTags.LINE_CHART_ZOOM_OUT).assertCountEquals(0)
             onAllNodesWithTag(TestTags.LINE_CHART_ZOOM_IN).assertCountEquals(0)
         }
@@ -44,10 +44,10 @@ class LineChartDenseDataTest {
     fun lineChart_smallDataset_doesNotShowZoomControls() =
         runComposeUiTest {
             setContent {
-                LineChart(dataSet = smallDataSet())
+                LineChart(data = smallDataSet())
             }
 
-            onNodeWithTag(TestTags.LINE_CHART).isDisplayed()
+            onNodeWithTag(TestTags.LINE_CHART).assertIsDisplayed()
             onAllNodesWithTag(TestTags.LINE_CHART_ZOOM_OUT).assertCountEquals(0)
             onAllNodesWithTag(TestTags.LINE_CHART_ZOOM_IN).assertCountEquals(0)
         }
@@ -57,7 +57,7 @@ class LineChartDenseDataTest {
         runComposeUiTest {
             setContent {
                 LineChart(
-                    dataSet = largeDataSet(),
+                    data = largeDataSet(),
                     style = LineChartDefaults.style(zoomControlsVisible = false),
                 )
             }
@@ -72,17 +72,21 @@ class LineChartDenseDataTest {
             val dataSet = largeDataSet(title = "Dense Line Chart")
             val currentDataSet = mutableStateOf(dataSet)
             setContent {
-                LineChart(dataSet = currentDataSet.value)
+                LineChart(data = currentDataSet.value)
             }
 
             onNodeWithTag(TestTags.LINE_CHART_DENSE_EXPAND).performTouchInput { click() }
-            onNodeWithTag(TestTags.LINE_CHART_DENSE_COLLAPSE).isDisplayed()
-            onNodeWithTag(TestTags.LINE_CHART_ZOOM_OUT).isDisplayed()
-            onNodeWithTag(TestTags.LINE_CHART_ZOOM_IN).isDisplayed()
+            onNodeWithTag(TestTags.LINE_CHART_DENSE_COLLAPSE).assertIsDisplayed()
+            onNodeWithTag(TestTags.LINE_CHART_ZOOM_OUT).assertIsDisplayed()
+            onNodeWithTag(TestTags.LINE_CHART_ZOOM_IN).assertIsDisplayed()
 
             tapChartAt(x = 24f)
             waitUntil(timeoutMillis = 3_000L) {
-                currentTitle() != dataSet.data.label
+                currentTitle() !=
+                    dataSet.series
+                        .first()
+                        .name
+                        .orEmpty()
             }
             val beforeScrollTitle = currentTitle()
 
@@ -94,12 +98,23 @@ class LineChartDenseDataTest {
             tapChartAt(x = 24f)
             waitUntil(timeoutMillis = 3_000L) {
                 val title = currentTitle()
-                title != beforeScrollTitle && title != dataSet.data.label
+                title != beforeScrollTitle &&
+                    title !=
+                    dataSet.series
+                        .first()
+                        .name
+                        .orEmpty()
             }
             val afterScrollTitle = currentTitle()
 
             assertNotEquals(beforeScrollTitle, afterScrollTitle)
-            assertNotEquals(dataSet.data.label, afterScrollTitle)
+            assertNotEquals(
+                dataSet.series
+                    .first()
+                    .name
+                    .orEmpty(),
+                afterScrollTitle,
+            )
         }
 
     private fun ComposeUiTest.currentTitle(): String {
@@ -124,30 +139,24 @@ class LineChartDenseDataTest {
         }
     }
 
-    private fun smallDataSet(points: Int = 12): ChartDataSet {
+    private fun smallDataSet(points: Int = 12): ChartData {
         val labels = dateLabels(points)
         val values = values(points)
-        return values.toChartDataSet(
-            title = "Small Line Chart",
-            labels = labels,
-        )
+        return values.toChartData(categories = labels, seriesName = "Small Line Chart")
     }
 
     private fun largeDataSet(
         points: Int = 120,
         title: String = "Large Line Chart",
-    ): ChartDataSet {
+    ): ChartData {
         val labels = dateLabels(points)
         val values = values(points)
-        return values.toChartDataSet(
-            title = title,
-            labels = labels,
-        )
+        return values.toChartData(categories = labels, seriesName = title)
     }
 
-    private fun values(points: Int): List<Float> =
+    private fun values(points: Int): List<Double> =
         List(points) { index ->
-            ((index % 30) - 10).toFloat()
+            ((index % 30) - 10).toDouble()
         }
 
     private fun dateLabels(points: Int): List<String> {

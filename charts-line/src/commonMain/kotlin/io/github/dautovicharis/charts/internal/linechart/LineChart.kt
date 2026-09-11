@@ -6,13 +6,14 @@ import androidx.compose.ui.graphics.Color
 import io.github.dautovicharis.charts.LineChartRenderMode
 import io.github.dautovicharis.charts.internal.NO_SELECTION
 import io.github.dautovicharis.charts.internal.common.model.MultiChartData
-import io.github.dautovicharis.charts.style.LineChartStyle
+import io.github.dautovicharis.charts.internal.linechart.LineChartInternalStyle
+import io.github.dautovicharis.charts.model.ChartValueFormatter
 import kotlinx.collections.immutable.ImmutableList
 
 @Composable
 internal fun LineChart(
     data: MultiChartData,
-    style: LineChartStyle,
+    style: LineChartInternalStyle,
     colors: ImmutableList<Color>,
     interactionEnabled: Boolean,
     animateOnStart: Boolean,
@@ -23,6 +24,8 @@ internal fun LineChart(
     zoomScale: Float = 1f,
     selectedPointIndex: Int = NO_SELECTION,
     onValueChanged: (Int) -> Unit = {},
+    valueFormatter: ChartValueFormatter,
+    axisValueFormatter: ChartValueFormatter,
 ) {
     LineChartContent(
         data = data,
@@ -37,5 +40,7 @@ internal fun LineChart(
         zoomScale = zoomScale,
         selectedPointIndex = selectedPointIndex,
         onValueChanged = onValueChanged,
+        valueFormatter = valueFormatter,
+        axisValueFormatter = axisValueFormatter,
     )
 }

@@ -1,8 +1,8 @@
 package dev.hdcode.charts.sampleshared.data.impl
 
 import dev.hdcode.charts.sampleshared.data.LineSampleUseCase
-import io.github.dautovicharis.charts.model.ChartDataSet
-import io.github.dautovicharis.charts.model.toChartDataSet
+import io.github.dautovicharis.charts.model.ChartData
+import io.github.dautovicharis.charts.model.toChartData
 
 internal class DefaultLineSampleUseCase : LineSampleUseCase {
     companion object {
@@ -13,11 +13,10 @@ internal class DefaultLineSampleUseCase : LineSampleUseCase {
     private val defaultValues = listOf(42f, 38f, 45f, 51f, 47f, 54f, 49f)
     private val defaultLabels = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
 
-    override fun initialLineDataSet(): ChartDataSet =
-        defaultValues.toChartDataSet(
-            title = DEFAULT_TITLE,
-            labels = defaultLabels,
-        )
+    override fun initialLineDataSet(): ChartData =
+        defaultValues
+            .map { it.toDouble() }
+            .toChartData(categories = defaultLabels, seriesName = DEFAULT_TITLE)
 
     override fun lineRefreshRange(): IntRange = REFRESH_RANGE
 
@@ -26,13 +25,12 @@ internal class DefaultLineSampleUseCase : LineSampleUseCase {
     override fun lineDataSet(
         range: IntRange,
         numOfPoints: IntRange,
-    ): ChartDataSet {
+    ): ChartData {
         val points = numOfPoints.random()
         val values = List(points) { range.random() }
-        return values.toChartDataSet(
-            title = DEFAULT_TITLE,
-            labels = labelsForPoints(points),
-        )
+        return values
+            .map { it.toDouble() }
+            .toChartData(categories = labelsForPoints(points), seriesName = DEFAULT_TITLE)
     }
 
     private fun labelsForPoints(points: Int): List<String> {

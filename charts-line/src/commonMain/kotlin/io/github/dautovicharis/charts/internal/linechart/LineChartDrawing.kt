@@ -11,12 +11,12 @@ import androidx.compose.ui.graphics.drawscope.clipRect
 import io.github.dautovicharis.charts.internal.ANIMATION_TARGET
 import io.github.dautovicharis.charts.internal.NO_SELECTION
 import io.github.dautovicharis.charts.internal.common.bezier.cubicControlPointsForSegment
-import io.github.dautovicharis.charts.style.LineChartStyle
+import io.github.dautovicharis.charts.internal.linechart.LineChartInternalStyle
 import kotlinx.collections.immutable.ImmutableList
 
 internal fun DrawScope.drawChartPath(
     values: List<Float>,
-    style: LineChartStyle,
+    style: LineChartInternalStyle,
     lineAnimationProgress: Float,
     markerRevealProgress: Float,
     bezierTension: Float,
@@ -105,7 +105,7 @@ internal fun DrawScope.drawChartPath(
 
     val lineStroke =
         Stroke(
-            width = LINE_STROKE_WIDTH,
+            width = style.lineStrokeWidth.coerceAtLeast(0.5f),
             cap = StrokeCap.Round,
             join = StrokeJoin.Round,
         )
@@ -151,7 +151,7 @@ internal fun DrawScope.drawChartPath(
 
 private fun DrawScope.tryDrawPathPoints(
     values: List<Float>,
-    style: LineChartStyle,
+    style: LineChartInternalStyle,
     lineColor: Color,
     markerRevealProgress: Float,
     stepX: Float,
@@ -188,7 +188,7 @@ private fun DrawScope.tryDrawPathPoints(
 internal fun DrawScope.drawDragMarker(
     touchX: Float,
     values: List<Float>,
-    style: LineChartStyle,
+    style: LineChartInternalStyle,
     lineColor: Color,
     bezierTension: Float,
 ) {
@@ -252,7 +252,7 @@ internal fun DrawScope.drawDragMarker(
 }
 
 internal fun resolveSelectionLineColor(
-    style: LineChartStyle,
+    style: LineChartInternalStyle,
     colors: ImmutableList<Color>,
 ): Color =
     when (style.dragPointColorSameAsLine) {

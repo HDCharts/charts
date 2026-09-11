@@ -9,19 +9,27 @@ import dev.hdcode.charts.app.screenshot.shared.ScreenshotPreview
 import dev.hdcode.charts.app.screenshot.shared.ScreenshotSurface
 import dev.hdcode.charts.sampleshared.fixtures.ChartTestStyleFixtures
 import io.github.dautovicharis.charts.LineChart
-import io.github.dautovicharis.charts.model.toMultiChartDataSet
+import io.github.dautovicharis.charts.model.ChartSeries
+import io.github.dautovicharis.charts.model.ChartValueFormatters
+import io.github.dautovicharis.charts.model.chartDataOf
+import io.github.dautovicharis.charts.model.staticChartSelection
 import io.github.dautovicharis.charts.style.ChartContainerDefaults
 
 private const val MULTI_LINE_SELECTION_INDEX = 4
 
-private val MULTI_LINE_SELECTION_DATA_SET =
-    listOf(
-        "P50 Latency" to listOf(122.5, 149.125, 134.333, 126.75, 101.322397132296, 114.667, 129.75),
-        "P95 Latency" to listOf(167.75, 219.2, 176.85, 161.45, 151.31476088115193, 166.42, 188.95),
-    ).toMultiChartDataSet(
-        title = "14:00:28",
+private val MULTI_LINE_SELECTION_DATA =
+    chartDataOf(
         categories = listOf("14:00:00", "14:00:07", "14:00:14", "14:00:21", "14:00:28", "14:00:35", "14:00:42"),
-        postfix = " ms",
+        *arrayOf(
+            ChartSeries(
+                name = "P50 Latency",
+                values = listOf(122.5, 149.125, 134.333, 126.75, 101.322397132296, 114.667, 129.75),
+            ),
+            ChartSeries(
+                name = "P95 Latency",
+                values = listOf(167.75, 219.2, 176.85, 161.45, 151.31476088115193, 166.42, 188.95),
+            ),
+        ),
     )
 
 @PreviewTest
@@ -30,7 +38,7 @@ private val MULTI_LINE_SELECTION_DATA_SET =
 fun LineChartDefaultPreview() {
     ScreenshotSurface {
         LineChart(
-            dataSet = SCREENSHOT_LINE_SAMPLE_USE_CASE.initialLineDataSet(),
+            data = SCREENSHOT_LINE_SAMPLE_USE_CASE.initialLineDataSet(),
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
         )
     }
@@ -42,7 +50,7 @@ fun LineChartDefaultPreview() {
 fun LineChartCustomPreview() {
     ScreenshotSurface {
         LineChart(
-            dataSet = SCREENSHOT_LINE_SAMPLE_USE_CASE.initialLineDataSet(),
+            data = SCREENSHOT_LINE_SAMPLE_USE_CASE.initialLineDataSet(),
             style = ChartTestStyleFixtures.lineCustomStyle(chartContainerStyle = ChartContainerDefaults.style()),
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
         )
@@ -55,7 +63,9 @@ fun LineChartCustomPreview() {
 fun MultiLineChartDefaultPreview() {
     ScreenshotSurface {
         LineChart(
-            dataSet = SCREENSHOT_MULTI_LINE_SAMPLE_USE_CASE.initialMultiLineSample().dataSet,
+            data = SCREENSHOT_MULTI_LINE_SAMPLE_USE_CASE.initialMultiLineSample().dataSet,
+            title = SCREENSHOT_MULTI_LINE_SAMPLE_USE_CASE.initialMultiLineSample().title,
+            valueFormatter = ChartValueFormatters.prefix("$"),
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
         )
     }
@@ -67,7 +77,9 @@ fun MultiLineChartDefaultPreview() {
 fun MultiLineChartCustomPreview() {
     ScreenshotSurface {
         LineChart(
-            dataSet = SCREENSHOT_MULTI_LINE_SAMPLE_USE_CASE.initialMultiLineSample().dataSet,
+            data = SCREENSHOT_MULTI_LINE_SAMPLE_USE_CASE.initialMultiLineSample().dataSet,
+            title = SCREENSHOT_MULTI_LINE_SAMPLE_USE_CASE.initialMultiLineSample().title,
+            valueFormatter = ChartValueFormatters.prefix("$"),
             style =
                 ChartTestStyleFixtures.multiLineCustomStyle(
                     chartContainerStyle = ChartContainerDefaults.style(),
@@ -84,15 +96,17 @@ fun MultiLineChartCustomPreview() {
 fun MultiLineChartSelectionLegendPreview() {
     ScreenshotSurface {
         LineChart(
-            dataSet = MULTI_LINE_SELECTION_DATA_SET,
+            data = MULTI_LINE_SELECTION_DATA,
+            title = "14:00:28",
+            valueFormatter = ChartValueFormatters.suffix(" ms"),
             style =
                 ChartTestStyleFixtures.multiLineCustomStyle(
                     chartContainerStyle = ChartContainerDefaults.style(),
-                    seriesCount = MULTI_LINE_SELECTION_DATA_SET.data.items.size,
+                    seriesCount = MULTI_LINE_SELECTION_DATA.series.size,
                 ),
             interactionEnabled = false,
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
-            selectedPointIndex = MULTI_LINE_SELECTION_INDEX,
+            selection = staticChartSelection(MULTI_LINE_SELECTION_INDEX),
         )
     }
 }

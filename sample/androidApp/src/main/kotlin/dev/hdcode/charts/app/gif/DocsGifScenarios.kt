@@ -25,6 +25,7 @@ import io.github.dautovicharis.charts.PieChart
 import io.github.dautovicharis.charts.RadarChart
 import io.github.dautovicharis.charts.StackedAreaChart
 import io.github.dautovicharis.charts.StackedBarChart
+import io.github.dautovicharis.charts.model.ChartValueFormatters
 import io.github.hdcodedev.composegif.annotations.GifFractionPoint
 import io.github.hdcodedev.composegif.annotations.GifGestureStep
 import io.github.hdcodedev.composegif.annotations.GifGestureType
@@ -71,7 +72,7 @@ fun PieDefaultGifScenario() {
 @Composable
 fun LineDefaultGifScenario() {
     DocsGifScene {
-        LineChart(lineSampleUseCase().initialLineDataSet())
+        LineChart(data = lineSampleUseCase().initialLineDataSet())
     }
 }
 
@@ -93,7 +94,8 @@ fun LineDefaultGifScenario() {
 @Composable
 fun MultiLineDefaultGifScenario() {
     DocsGifScene {
-        LineChart(multiLineSampleUseCase().initialMultiLineSample().dataSet)
+        val sample = multiLineSampleUseCase().initialMultiLineSample()
+        LineChart(data = sample.dataSet, title = sample.title, valueFormatter = ChartValueFormatters.prefix("$"))
     }
 }
 

@@ -2,12 +2,12 @@ package io.github.dautovicharis.charts.internal
 
 import io.github.dautovicharis.charts.internal.ValidationErrors.MIN_REQUIRED_LINE
 import io.github.dautovicharis.charts.internal.common.model.MultiChartData
-import io.github.dautovicharis.charts.style.LineChartStyle
+import io.github.dautovicharis.charts.internal.linechart.LineChartInternalStyle
 
 @InternalChartsApi
 fun validateLineData(
     data: MultiChartData,
-    style: LineChartStyle,
+    style: LineChartInternalStyle,
 ): List<String> {
     val firstPointsSize =
         data.items

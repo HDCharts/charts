@@ -122,14 +122,14 @@ fun LineChartDemo(viewModel: LineChartViewModel = koinViewModel()) {
         when (uiState.preset) {
             LineDemoPreset.Default -> {
                 LineChart(
-                    dataSet = uiState.dataSet,
+                    data = uiState.dataSet,
                     style = LineChartDefaults.style(chartContainerStyle = chartContainerStyle),
                 )
             }
 
             LineDemoPreset.Timeline -> {
                 LineChart(
-                    dataSet = uiState.dataSet,
+                    data = uiState.dataSet,
                     style = LineChartDefaults.style(chartContainerStyle = chartContainerStyle),
                     renderMode = LineChartRenderMode.Timeline,
                     animationDurationMillis = timelineAnimationDuration,
@@ -138,7 +138,7 @@ fun LineChartDemo(viewModel: LineChartViewModel = koinViewModel()) {
 
             LineDemoPreset.Custom -> {
                 LineChart(
-                    dataSet = uiState.dataSet,
+                    data = uiState.dataSet,
                     style = ChartTestStyleFixtures.lineCustomStyle(chartContainerStyle = chartContainerStyle),
                 )
             }

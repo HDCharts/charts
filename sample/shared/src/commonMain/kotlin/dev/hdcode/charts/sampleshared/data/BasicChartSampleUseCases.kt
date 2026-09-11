@@ -1,7 +1,6 @@
 package dev.hdcode.charts.sampleshared.data
 
 import io.github.dautovicharis.charts.model.ChartData
-import io.github.dautovicharis.charts.model.ChartDataSet
 
 interface PieSampleUseCase {
     fun initialPieSample(): PieSampleData
@@ -19,7 +18,7 @@ interface PieSampleUseCase {
 }
 
 interface LineSampleUseCase {
-    fun initialLineDataSet(): ChartDataSet
+    fun initialLineDataSet(): ChartData
 
     fun lineRefreshRange(): IntRange
 
@@ -28,7 +27,7 @@ interface LineSampleUseCase {
     fun lineDataSet(
         range: IntRange,
         numOfPoints: IntRange,
-    ): ChartDataSet
+    ): ChartData
 }
 
 interface BarSampleUseCase {

@@ -23,6 +23,7 @@ import io.github.dautovicharis.charts.style.StackedAreaChartDefaults
 import io.github.dautovicharis.charts.style.StackedAreaChartStyle
 import io.github.dautovicharis.charts.style.StackedBarChartDefaults
 import io.github.dautovicharis.charts.style.StackedBarChartStyle
+import io.github.dautovicharis.charts.style.defaultChartAlpha as chartDefaultAlpha
 
 /**
  * Shared custom style fixtures used by:
@@ -62,14 +63,20 @@ object ChartTestStyleFixtures {
         val chartColors = LocalChartColors.current
         return LineChartDefaults.style(
             chartContainerStyle = chartContainerStyle,
-            lineColor = chartColors.seriesColor(1),
-            pointSize = 9f,
-            bezier = false,
-            dragPointVisible = true,
-            pointVisible = true,
-            dragPointColor = chartColors.selection,
-            dragPointSize = 8f,
-            dragActivePointSize = 10f,
+            line = LineChartDefaults.line(color = chartColors.seriesColor(1), bezier = false),
+            points =
+                LineChartDefaults.points(
+                    color = chartColors.seriesColor(1).copy(alpha = chartDefaultAlpha()),
+                    size = 9.dp,
+                    visible = true,
+                ),
+            selection =
+                LineChartDefaults.selection(
+                    color = chartColors.selection,
+                    size = 8.dp,
+                    activeSize = 10.dp,
+                    visible = true,
+                ),
         )
     }
 
@@ -81,12 +88,17 @@ object ChartTestStyleFixtures {
         val chartColors = LocalChartColors.current
         return LineChartDefaults.style(
             chartContainerStyle = chartContainerStyle,
-            lineColors = chartColors.seriesColors(seriesCount),
-            bezier = false,
-            pointVisible = true,
-            dragPointVisible = false,
-            pointColor = chartColors.highlight,
-            dragPointColor = chartColors.selection,
+            line = LineChartDefaults.line(colors = chartColors.seriesColors(seriesCount), bezier = false),
+            points =
+                LineChartDefaults.points(
+                    color = chartColors.highlight,
+                    visible = true,
+                ),
+            selection =
+                LineChartDefaults.selection(
+                    color = chartColors.selection,
+                    visible = false,
+                ),
         )
     }
 

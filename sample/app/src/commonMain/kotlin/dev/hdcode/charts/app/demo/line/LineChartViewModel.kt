@@ -6,8 +6,8 @@ import dev.hdcode.charts.app.data.LiveLatencySingleSeriesWindow
 import dev.hdcode.charts.app.data.LiveLatencyTimelineUseCase
 import dev.hdcode.charts.app.demo.timeline.LiveTimelineControlsState
 import dev.hdcode.charts.app.demo.timeline.LiveTimelineDefaults
-import io.github.dautovicharis.charts.model.ChartDataSet
-import io.github.dautovicharis.charts.model.toChartDataSet
+import io.github.dautovicharis.charts.model.ChartData
+import io.github.dautovicharis.charts.model.toChartData
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,7 +30,7 @@ enum class LineDemoPreset {
 }
 
 data class LineChartUiState(
-    val dataSet: ChartDataSet,
+    val dataSet: ChartData,
     val dataControlsState: LineChartDataControlsState,
     val timelineControlsState: LiveTimelineControlsState,
     val preset: LineDemoPreset = LineDemoPreset.Default,
@@ -262,17 +262,15 @@ class LineChartViewModel(
         liveUpdatesJob = null
     }
 
-    private fun buildGeneratedDataSet(controls: LineChartDataControlsState): ChartDataSet {
+    private fun buildGeneratedDataSet(controls: LineChartDataControlsState): ChartData {
         val baseWindow =
             liveLatencyTimelineUseCase.createSingleWindow(
                 windowSize = controls.points,
                 endTick = timelineWindow.endTick,
             )
         val baseDataSet = liveLatencyTimelineUseCase.toSingleDataSet(baseWindow)
-        val basePoints = baseDataSet.data.item.points
-        val labels =
-            baseDataSet.data.item.labels
-                .toList()
+        val basePoints = baseDataSet.series.first().values
+        val labels = baseDataSet.categories.toList()
         val safeMin = controls.minValue.toDouble()
         val safeMax = controls.maxValue.toDouble().coerceAtLeast(safeMin + 1.0)
         val sourceMin = basePoints.minOrNull() ?: 0.0
@@ -281,17 +279,14 @@ class LineChartViewModel(
 
         val normalizedValues =
             if (sourceRange == 0.0) {
-                List(basePoints.size) { safeMin.toFloat() }
+                List(basePoints.size) { safeMin }
             } else {
                 basePoints.map { point ->
                     val normalized = ((point - sourceMin) / sourceRange).coerceIn(0.0, 1.0)
-                    (safeMin + normalized * (safeMax - safeMin)).toFloat()
+                    safeMin + normalized * (safeMax - safeMin)
                 }
             }
 
-        return normalizedValues.toChartDataSet(
-            title = baseDataSet.data.label,
-            labels = labels,
-        )
+        return normalizedValues.toChartData(categories = labels, seriesName = baseDataSet.series.first().name)
     }
 }

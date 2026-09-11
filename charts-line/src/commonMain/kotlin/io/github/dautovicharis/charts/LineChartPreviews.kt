@@ -4,9 +4,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import io.github.dautovicharis.charts.LineChart
-import io.github.dautovicharis.charts.model.toChartDataSet
-import io.github.dautovicharis.charts.model.toMultiChartDataSet
+import io.github.dautovicharis.charts.model.ChartSeries
+import io.github.dautovicharis.charts.model.chartDataOf
+import io.github.dautovicharis.charts.model.toChartData
 import io.github.dautovicharis.charts.style.ChartContainerDefaults
 import io.github.dautovicharis.charts.style.LineChartDefaults
 import io.github.dautovicharis.charts.style.LineChartStyle
@@ -37,17 +37,16 @@ private val MULTI_LINE_INVALID_VALUES =
 @Composable
 private fun lineStyle(lineColors: List<Color>): LineChartStyle =
     LineChartDefaults.style(
-        bezier = true,
-        lineColors = lineColors,
-        dragPointSize = 5f,
-        pointVisible = true,
+        line = LineChartDefaults.line(colors = lineColors, bezier = true),
+        points = LineChartDefaults.points(size = 9.dp, visible = true),
+        selection = LineChartDefaults.selection(size = 5.dp),
         chartContainerStyle = ChartContainerDefaults.style(width = 300.dp),
     )
 
 @Composable
 private fun LineChartPreviewContent() {
     LineChart(
-        dataSet = SIMPLE_LINE_VALUES.toChartDataSet(title = LINE_CHART_TITLE),
+        data = SIMPLE_LINE_VALUES.map(Float::toDouble).toChartData(seriesName = LINE_CHART_TITLE),
         style = lineStyle(lineColors = listOf(MaterialTheme.colorScheme.primary)),
     )
 }
@@ -62,11 +61,13 @@ private fun MultiLineChartPreviewContent() {
             MaterialTheme.colorScheme.error,
         )
     LineChart(
-        dataSet =
-            MULTI_LINE_VALUES.toMultiChartDataSet(
-                title = LINE_CHART_TITLE,
+        data =
+            chartDataOf(
                 categories = CATEGORIES,
-                prefix = VALUE_PREFIX,
+                *MULTI_LINE_VALUES
+                    .map { (name, values) ->
+                        ChartSeries(name, values.map(Float::toDouble))
+                    }.toTypedArray(),
             ),
         style = lineStyle(lineColors = colors),
     )
@@ -99,11 +100,13 @@ private fun MultiLineChartErrorPreview() {
         )
     ChartsPreviewTheme {
         LineChart(
-            dataSet =
-                MULTI_LINE_INVALID_VALUES.toMultiChartDataSet(
-                    title = LINE_CHART_TITLE,
+            data =
+                chartDataOf(
                     categories = CATEGORIES.dropLast(1),
-                    prefix = VALUE_PREFIX,
+                    *MULTI_LINE_INVALID_VALUES
+                        .map { (name, values) ->
+                            ChartSeries(name, values.map(Float::toDouble))
+                        }.toTypedArray(),
                 ),
             style = lineStyle(lineColors = colors),
         )
