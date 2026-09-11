@@ -1,5 +1,7 @@
 package io.github.dautovicharis.charts.internal.barchart
 
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalDensity
 import io.github.dautovicharis.charts.internal.InternalChartsApi
 import io.github.dautovicharis.charts.style.BarChartStyle
 
@@ -10,8 +12,10 @@ import io.github.dautovicharis.charts.style.BarChartStyle
  * directly.
  */
 @InternalChartsApi
-fun BarChartStyle.toInternal(): BarChartInternalStyle =
-    BarChartInternalStyle(
+@Composable
+fun BarChartStyle.toInternal(): BarChartInternalStyle {
+    val density = LocalDensity.current
+    return BarChartInternalStyle(
         modifier = chartContainerStyle.fillMaxSizeChartModifier(),
         chartContainerStyle = chartContainerStyle,
         barColor = bars.color,
@@ -25,10 +29,10 @@ fun BarChartStyle.toInternal(): BarChartInternalStyle =
         gridVisible = grid.visible,
         gridSteps = grid.steps,
         gridColor = grid.color,
-        gridLineWidth = grid.lineWidth,
+        gridLineWidth = with(density) { grid.lineWidth.toPx() },
         axisVisible = axis.visible,
         axisColor = axis.color,
-        axisLineWidth = axis.lineWidth,
+        axisLineWidth = with(density) { axis.lineWidth.toPx() },
         yAxisLabelsVisible = axis.yLabels.visible,
         yAxisLabelColor = axis.yLabels.color,
         yAxisLabelSize = axis.yLabels.size,
@@ -39,5 +43,6 @@ fun BarChartStyle.toInternal(): BarChartInternalStyle =
         xAxisLabelMaxCount = axis.xLabels.count,
         selectionLineVisible = selectionLine.visible,
         selectionLineColor = selectionLine.color,
-        selectionLineWidth = selectionLine.width,
+        selectionLineWidth = with(density) { selectionLine.width.toPx() },
     )
+}

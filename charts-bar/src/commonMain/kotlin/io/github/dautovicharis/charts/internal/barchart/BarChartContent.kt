@@ -16,18 +16,21 @@ import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.unit.dp
 import io.github.dautovicharis.charts.internal.AXIS_LABEL_CHART_GAP
 import io.github.dautovicharis.charts.internal.TestTags
-import io.github.dautovicharis.charts.internal.barchart.BarChartInternalStyle
 import io.github.dautovicharis.charts.internal.common.axis.AxisXPlanRequest
+import io.github.dautovicharis.charts.internal.common.composable.ChartErrors
 import io.github.dautovicharis.charts.internal.common.model.ChartData
+import io.github.dautovicharis.charts.model.ChartValueFormatter
+import kotlinx.collections.immutable.persistentListOf
 import kotlin.math.roundToInt
 
 // X Axis label layout constants
@@ -44,6 +47,7 @@ internal fun BarChartContent(
     defaultBarColor: Color,
     fixedMin: Double,
     fixedMax: Double,
+    axisValueFormatter: ChartValueFormatter,
     isScrollable: Boolean,
     spacingPx: Float,
     minBarWidthPx: Float,
@@ -60,6 +64,12 @@ internal fun BarChartContent(
     modifier: Modifier = Modifier,
 ) {
     val dataSize = chartData.points.size
+    val showXLabels = style.xAxisLabelsVisible && chartData.labels.any { it.isNotBlank() }
+    val currentToggleSelection by rememberUpdatedState(onToggleSelection)
+    val currentSelectIndex by rememberUpdatedState(onSelectIndex)
+    val currentClearSelection by rememberUpdatedState(onClearSelection)
+    val currentZoomScale by rememberUpdatedState(zoomScale)
+    val currentZoomChange by rememberUpdatedState(onZoomScaleChange)
 
     BoxWithConstraints(modifier = modifier) {
         val density = LocalDensity.current
@@ -74,53 +84,87 @@ internal fun BarChartContent(
                     tiltDegrees = xAxisTilt,
                 )
             }
-        val xAxisHeight =
-            if (!style.xAxisLabelsVisible) {
-                0.dp
+        val xAxisHeightPx =
+            if (!showXLabels) {
+                0
             } else {
-                with(density) {
-                    (xAxisLabelFootprintPx.height + AXIS_LABEL_CHART_GAP.toPx()).toDp()
-                }
+                (xAxisLabelFootprintPx.height + with(density) { AXIS_LABEL_CHART_GAP.toPx() })
+                    .roundToInt()
+                    .coerceIn(0, constraints.maxHeight)
             }
-        val chartHeight = (maxHeight - xAxisHeight).coerceAtLeast(0.dp)
-        val chartHeightPx = with(density) { chartHeight.toPx() }.coerceAtLeast(1f)
+        val xAxisHeight = with(density) { xAxisHeightPx.toDp() }
+        val chartHeightPx = (constraints.maxHeight - xAxisHeightPx).coerceAtLeast(0).toFloat()
+        val chartHeight = with(density) { chartHeightPx.toDp() }
         val yAxisTicks =
-            remember(fixedMin, fixedMax, chartHeightPx, style.yAxisLabelCount) {
+            remember(fixedMin, fixedMax, chartHeightPx, style.yAxisLabelCount, axisValueFormatter) {
                 buildYAxisTicks(
                     minValue = fixedMin,
                     maxValue = fixedMax,
                     labelCount = style.yAxisLabelCount,
                     chartHeightPx = chartHeightPx,
+                    formatter = axisValueFormatter,
                 )
             }
         val yAxisWidthPx =
             if (style.yAxisLabelsVisible) {
-                estimateYAxisLabelWidthPx(
+                barYAxisWidthPx(
                     ticks = yAxisTicks,
                     fontSizePx = with(density) { style.yAxisLabelSize.toPx() },
+                    availableWidthPx = constraints.maxWidth,
                 )
             } else {
                 0f
             }
-        val yAxisGapPx = if (style.yAxisLabelsVisible) with(density) { AXIS_LABEL_CHART_GAP.toPx() } else 0f
+        val yAxisGapPx =
+            if (style.yAxisLabelsVisible) {
+                with(density) { AXIS_LABEL_CHART_GAP.roundToPx().toFloat() }.coerceAtMost(
+                    (
+                        constraints.maxWidth -
+                            yAxisWidthPx -
+                            1f
+                    ).coerceAtLeast(0f),
+                )
+            } else {
+                0f
+            }
         val yAxisWidth = with(density) { yAxisWidthPx.toDp() }
         val plotStartPadding = with(density) { (yAxisWidthPx + yAxisGapPx).toDp() }
         val viewportWidthPx =
             (constraints.maxWidth.toFloat() - yAxisWidthPx - yAxisGapPx).coerceAtLeast(1f)
 
+        // Preserve subpixel bins in fit mode, and reduce excessive spacing in narrow parents.
+        val effectiveSpacingPx =
+            if (isScrollable) {
+                spacingPx
+            } else {
+                spacingPx.coerceAtMost(
+                    viewportWidthPx / (dataSize.coerceAtLeast(1) * 2f),
+                )
+            }
         val barWidthPx =
             when {
                 isScrollable -> (minBarWidthPx * zoomScale).coerceAtLeast(1f)
                 dataSize <= 0 -> viewportWidthPx
-                else -> ((viewportWidthPx - spacingPx * (dataSize - 1)) / dataSize).coerceAtLeast(1f)
+                else ->
+                    ((viewportWidthPx - effectiveSpacingPx * (dataSize - 1)) / dataSize).coerceAtLeast(
+                        Float.MIN_VALUE,
+                    )
             }
-        val unitWidthPx = unitWidth(barWidthPx, spacingPx)
+        val unitWidthPx = unitWidth(barWidthPx, effectiveSpacingPx)
         val contentWidthPx =
             if (isScrollable) {
-                contentWidth(dataSize, unitWidthPx, spacingPx).coerceAtLeast(viewportWidthPx)
+                contentWidth(dataSize, unitWidthPx, effectiveSpacingPx).coerceAtLeast(viewportWidthPx)
             } else {
                 viewportWidthPx
             }
+        if (!barCanvasFits(contentWidthPx, chartHeightPx)) {
+            ChartErrors(
+                style = style.chartContainerStyle,
+                errors = persistentListOf("Chart exceeds layout limits. Reduce zoom, minimum bar width, or spacing."),
+                modifier = Modifier.fillMaxWidth(),
+            )
+            return@BoxWithConstraints
+        }
         val canvasWidth = with(density) { contentWidthPx.toDp() }
         val scrollOffsetPx = if (isScrollable) scrollState.value.toFloat() else 0f
 
@@ -138,10 +182,10 @@ internal fun BarChartContent(
                 interactionEnabled = interactionEnabled,
                 isScrollable = isScrollable,
                 dataSize = dataSize,
-                spacingPx = spacingPx,
+                spacingPx = effectiveSpacingPx,
                 viewportWidthPx = viewportWidthPx,
                 chartHeightPx = chartHeightPx,
-                onTapIndex = onToggleSelection,
+                onTapIndex = { currentToggleSelection(it) },
             )
 
         val fitDragModifier =
@@ -150,11 +194,11 @@ internal fun BarChartContent(
                 dragSelectionEnabled = dragSelectionEnabled,
                 isScrollable = isScrollable,
                 dataSize = dataSize,
-                spacingPx = spacingPx,
+                spacingPx = effectiveSpacingPx,
                 viewportWidthPx = viewportWidthPx,
                 chartHeightPx = chartHeightPx,
-                onDragIndex = onSelectIndex,
-                onDragFinished = onClearSelection,
+                onDragIndex = { currentSelectIndex(it) },
+                onDragFinished = { currentClearSelection() },
             )
 
         val scrollTapModifier =
@@ -164,20 +208,20 @@ internal fun BarChartContent(
                 dataSize = dataSize,
                 unitWidthPx = unitWidthPx,
                 scrollState = scrollState,
-                onTapIndex = onToggleSelection,
+                onTapIndex = { currentToggleSelection(it) },
                 onDoubleTap = {
-                    onZoomScaleChange((zoomScale * zoomStep).coerceIn(zoomMin, zoomMax))
+                    currentZoomChange((currentZoomScale * zoomStep).coerceIn(zoomMin, zoomMax))
                 },
             )
 
         val pinchModifier =
             buildPinchModifier(
-                isScrollable = isScrollable,
+                isScrollable = isScrollable && interactionEnabled,
                 dataSize = dataSize,
                 zoomMin = zoomMin,
                 zoomMax = zoomMax,
-                getZoomScale = { zoomScale },
-                setZoomScale = onZoomScaleChange,
+                getZoomScale = { currentZoomScale },
+                setZoomScale = { currentZoomChange(it) },
             )
 
         val selectedCenterXContent =
@@ -270,7 +314,7 @@ internal fun BarChartContent(
                             .fillMaxSize()
                             .testTag(TestTags.BAR_CHART_PLOT)
                             .then(interactionModifier)
-                            .horizontalScroll(state = scrollState, enabled = isScrollable),
+                            .horizontalScroll(state = scrollState, enabled = isScrollable && interactionEnabled),
                 ) {
                     Canvas(
                         modifier =
@@ -288,7 +332,7 @@ internal fun BarChartContent(
                                 maxValue = fixedMax,
                                 minValue = fixedMin,
                                 barWidthPx = barWidthPx,
-                                spacingPx = spacingPx,
+                                spacingPx = effectiveSpacingPx,
                                 selectedCenterX = selectedCenterXContent,
                             )
                         },
@@ -297,7 +341,7 @@ internal fun BarChartContent(
             }
         }
 
-        if (style.xAxisLabelsVisible) {
+        if (showXLabels) {
             BarXAxisLabels(
                 ticks = ticks,
                 color = style.xAxisLabelColor,

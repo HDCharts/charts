@@ -1,7 +1,10 @@
 package io.github.dautovicharis.charts.style
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 /**
@@ -13,8 +16,8 @@ import androidx.compose.ui.unit.dp
  * top-level composable parameter, not part of this style.
  *
  * @property chartContainerStyle The shared container presentation.
- * @property bars Bar visual block. Default [BarChartDefaults.bars] produces adjacent
- * bins (zero spacing) and a 0.dp minimum bar width; call sites can override.
+ * @property bars Bar visual block. Default [HistogramChartDefaults.bars] produces adjacent
+ * bins (zero spacing) and a 10.dp minimum bar width; call sites can override.
  * @property range Optional fixed Y-axis range. Defaults to a zero minimum so a bin
  * count of zero renders at the baseline.
  * @property grid Horizontal grid configuration.
@@ -44,8 +47,8 @@ object HistogramChartDefaults {
     @Composable
     fun style(
         chartContainerStyle: ChartContainerStyle = ChartContainerDefaults.style(),
-        bars: BarBarsStyle = BarChartDefaults.bars(space = 0.dp, minBarWidth = 0.dp),
-        range: BarRangeStyle = BarChartDefaults.range(min = 0f),
+        bars: BarBarsStyle = bars(),
+        range: BarRangeStyle = BarChartDefaults.range(min = 0.0),
         grid: BarGridStyle = BarChartDefaults.grid(),
         axis: BarAxisStyle = BarChartDefaults.axis(),
         selectionLine: BarSelectionLineStyle = BarChartDefaults.selectionLine(),
@@ -59,5 +62,30 @@ object HistogramChartDefaults {
             axis = axis,
             selectionLine = selectionLine,
             zoomControlsVisible = zoomControlsVisible,
+        )
+
+    /**
+     * Returns a [BarBarsStyle] with adjacent histogram bins by default.
+     *
+     * @param color The fallback bar color.
+     * @param colors Optional explicit per-bin colors; must match bin count or be empty.
+     * @param alpha The bar alpha. Defaults to `defaultChartAlpha()`.
+     * @param space The spacing between bins. Defaults to 0.dp.
+     * @param minBarWidth The minimum width of each bin. Defaults to 10.dp.
+     */
+    @Composable
+    fun bars(
+        color: Color = MaterialTheme.colorScheme.primary,
+        colors: List<Color> = emptyList(),
+        alpha: Float = defaultChartAlpha(),
+        space: Dp = 0.dp,
+        minBarWidth: Dp = 10.dp,
+    ): BarBarsStyle =
+        BarChartDefaults.bars(
+            color = color,
+            colors = colors,
+            alpha = alpha,
+            space = space,
+            minBarWidth = minBarWidth,
         )
 }

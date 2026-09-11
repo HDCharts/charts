@@ -2,4 +2,4 @@
 
 - type: `feat`
 - module: `charts-core`
-- release_note: `Migrated BarChart and HistogramChart to the shared v3 API: new `BarChart(data: ChartData, ...)` and `HistogramChart(data: ChartData, ...)` composables with top-level `Modifier`, optional `title`, hoisted `ChartSelection`, and grouped `BarChartStyle`/`HistogramChartStyle` blocks (bars, range, grid, axis, selectionLine). Legacy `ChartDataSet` overloads and the flat BarChartStyle are removed; only Double values are accepted, categories are explicit, and histogram defaults enforce contiguous bins with a zero baseline.`
+- release_note: `Migrated BarChart and HistogramChart to Double-only ChartData with independent titles, explicit category labels, grouped styles, separate value/axis formatters, and source-index selection. Bar compact mode keeps the source value range; histogram fit mode preserves every bin without aggregation. Removed the v2 bar/histogram composable overloads and flat public styles; shared legacy dataset APIs remain for other charts.`

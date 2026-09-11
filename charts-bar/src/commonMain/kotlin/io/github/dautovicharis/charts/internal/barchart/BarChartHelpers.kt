@@ -1,14 +1,15 @@
 package io.github.dautovicharis.charts.internal.barchart
 
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntSize
 import io.github.dautovicharis.charts.internal.common.axis.AxisLabelFootprintPx
 import io.github.dautovicharis.charts.internal.common.axis.AxisXPlanRequest
 import io.github.dautovicharis.charts.internal.common.axis.AxisXPlanResult
 import io.github.dautovicharis.charts.internal.common.model.ChartData
-import io.github.dautovicharis.charts.internal.common.model.toChartData
+import kotlin.math.abs
 import kotlin.math.max
-import io.github.dautovicharis.charts.internal.common.axis.baselineYForRange as baselineYForRangeCore
+import kotlin.math.roundToInt
 import io.github.dautovicharis.charts.internal.common.axis.centeredLabelIndexRange as centeredLabelIndexRangeCore
 import io.github.dautovicharis.charts.internal.common.axis.estimateXAxisLabelFootprintPx as estimateXAxisLabelFootprintPxCore
 import io.github.dautovicharis.charts.internal.common.axis.estimateYAxisLabelWidthPx as estimateYAxisLabelWidthPxCore
@@ -18,12 +19,9 @@ import io.github.dautovicharis.charts.internal.common.axis.sampledLabelIndices a
 import io.github.dautovicharis.charts.internal.common.axis.scrollableLabelIndices as scrollableLabelIndicesCore
 import io.github.dautovicharis.charts.internal.common.axis.visibleIndexRange as visibleIndexRangeCore
 import io.github.dautovicharis.charts.internal.common.density.aggregateLabelsByCenterValue as aggregateLabelsByCenterValueCore
-import io.github.dautovicharis.charts.internal.common.density.aggregatePointsByAverage as aggregatePointsByAverageCore
 import io.github.dautovicharis.charts.internal.common.density.bucketSizeForTarget as bucketSizeForTargetCore
 import io.github.dautovicharis.charts.internal.common.density.buildBucketRanges as buildBucketRangesCore
 import io.github.dautovicharis.charts.internal.common.density.shouldUseScrollableDensity as shouldUseScrollableDensityCore
-import io.github.dautovicharis.charts.internal.common.interaction.selectedIndexForBarFit as selectedIndexForBarFitCore
-import io.github.dautovicharis.charts.internal.common.interaction.selectedIndexForContentX as selectedIndexForContentXCore
 
 internal const val BAR_DENSE_THRESHOLD = 50
 
@@ -54,31 +52,33 @@ internal fun estimateYAxisLabelWidthPx(
         fontSizePx = fontSizePx,
     )
 
+internal fun barYAxisWidthPx(
+    ticks: List<YAxisTick>,
+    fontSizePx: Float,
+    availableWidthPx: Int,
+): Float =
+    estimateYAxisLabelWidthPx(ticks, fontSizePx)
+        .coerceIn(0f, availableWidthPx.coerceAtLeast(0) * 0.4f)
+        .roundToInt()
+        .toFloat()
+
 internal fun getSelectedIndex(
     position: Offset,
     dataSize: Int,
     canvasSize: IntSize,
     spacingPx: Float,
 ): Int =
-    selectedIndexForBarFitCore(
-        positionX = position.x,
+    getSelectedIndexForContentX(
+        contentX = position.x,
         dataSize = dataSize,
-        canvasWidthPx = canvasSize.width.toFloat(),
-        spacingPx = spacingPx,
-        invalidIndex = 0,
+        unitWidthPx = (canvasSize.width + spacingPx) / dataSize.coerceAtLeast(1),
     )
 
 internal fun getSelectedIndexForContentX(
     contentX: Float,
     dataSize: Int,
     unitWidthPx: Float,
-): Int =
-    selectedIndexForContentXCore(
-        contentX = contentX,
-        dataSize = dataSize,
-        unitWidthPx = unitWidthPx,
-        invalidIndex = 0,
-    )
+): Int = if (dataSize <= 0 || unitWidthPx <= 0f) 0 else (contentX / unitWidthPx).toInt().coerceIn(0, dataSize - 1)
 
 internal fun shouldUseScrollableDensity(pointsCount: Int): Boolean =
     shouldUseScrollableDensityCore(
@@ -90,28 +90,38 @@ internal fun aggregateForCompactDensity(
     data: ChartData,
     targetPoints: Int = BAR_DENSE_THRESHOLD,
 ): ChartData {
-    if (targetPoints <= 1) return data
     val sourcePointsCount = data.points.size
-    if (sourcePointsCount <= targetPoints) return data
+    if (sourcePointsCount <= targetPoints.coerceAtLeast(1)) return data
 
-    val bucketSize = bucketSizeForTargetCore(totalPoints = sourcePointsCount, targetPoints = targetPoints)
-    val bucketRanges = buildBucketRangesCore(totalPoints = sourcePointsCount, bucketSize = bucketSize)
-    val aggregatedPoints = aggregatePointsByAverageCore(data.points, bucketRanges)
+    val bucketRanges = compactDensityRanges(sourcePointsCount, targetPoints)
+    val aggregatedPoints =
+        bucketRanges.map { range ->
+            val sum = range.sumOf { data.points[it] }
+            if (sum.isFinite()) {
+                sum / range.count()
+            } else {
+                val scale = range.maxOf { abs(data.points[it]) }
+                (range.sumOf { data.points[it] / scale } / range.count()).coerceIn(-1.0, 1.0) * scale
+            }
+        }
     val aggregatedLabels = aggregateLabelsByCenterValueCore(data.labels, bucketRanges)
-    return aggregatedPoints.toChartData(labels = aggregatedLabels)
+    return ChartData(aggregatedLabels.zip(aggregatedPoints))
+}
+
+internal fun compactDensityRanges(
+    sourcePointsCount: Int,
+    targetPoints: Int,
+): List<IntRange> {
+    if (sourcePointsCount <= 0) return emptyList()
+    val bucketSize = bucketSizeForTargetCore(sourcePointsCount, targetPoints.coerceAtLeast(1))
+    return buildBucketRangesCore(sourcePointsCount, bucketSize)
 }
 
 internal fun compactDensityCenterIndices(
     sourcePointsCount: Int,
     targetPoints: Int = BAR_DENSE_THRESHOLD,
 ): List<Int> {
-    if (sourcePointsCount <= 0) return emptyList()
-    if (targetPoints <= 1 || sourcePointsCount <= targetPoints) {
-        return List(sourcePointsCount) { index -> index }
-    }
-
-    val bucketSize = bucketSizeForTargetCore(totalPoints = sourcePointsCount, targetPoints = targetPoints)
-    val bucketRanges = buildBucketRangesCore(totalPoints = sourcePointsCount, bucketSize = bucketSize)
+    val bucketRanges = compactDensityRanges(sourcePointsCount, targetPoints)
     return bucketRanges.map { range ->
         range.first + ((range.last - range.first) / 2)
     }
@@ -132,7 +142,7 @@ internal fun maxBarsThatFit(
 internal fun unitWidth(
     barWidthPx: Float,
     spacingPx: Float,
-): Float = max(1f, barWidthPx + spacingPx)
+): Float = max(Float.MIN_VALUE, barWidthPx + spacingPx)
 
 internal fun contentWidth(
     dataSize: Int,
@@ -143,16 +153,50 @@ internal fun contentWidth(
     return max(1f, dataSize * unitWidthPx - spacingPx)
 }
 
+internal fun barCanvasFits(
+    widthPx: Float,
+    heightPx: Float,
+): Boolean {
+    if (!widthPx.isFinite() || !heightPx.isFinite() || widthPx < 0f || heightPx < 0f) return false
+    // Compose shares a packed bit budget between width and height, so check the pair.
+    return runCatching { Constraints.fixed(widthPx.roundToInt(), heightPx.roundToInt()) }.isSuccess
+}
+
 internal fun baselineYForRange(
     minValue: Double,
     maxValue: Double,
     heightPx: Float,
-): Float =
-    baselineYForRangeCore(
-        minValue = minValue,
-        maxValue = maxValue,
-        heightPx = heightPx,
-    )
+): Float = barValueYFraction(0.0, minValue, maxValue).toFloat() * heightPx.coerceAtLeast(0f)
+
+/** One zero-inclusive source domain for bars, ticks and both density modes. */
+internal fun ChartData.resolveBarRange(
+    minValue: Double?,
+    maxValue: Double?,
+): Pair<Double, Double> {
+    val autoMin = minOf(0.0, points.min())
+    val autoMax = maxOf(0.0, points.max())
+    val fallback = if (autoMin == autoMax) 0.0 to 1.0 else autoMin to autoMax
+    val min = minValue ?: fallback.first
+    val max = maxValue ?: fallback.second
+    return if (max <= min) fallback else min to max
+}
+
+/** Overflow-safe mapping; Float conversion happens only at the drawing boundary. */
+internal fun barValueYFraction(
+    value: Double,
+    min: Double,
+    max: Double,
+): Double {
+    if (min == max) return if (max < 0.0) 0.0 else 1.0
+    val clamped = value.coerceIn(min, max)
+    val span = max - min
+    return if (span.isFinite()) {
+        (max - clamped) / span
+    } else {
+        val scale = maxOf(abs(min), abs(max))
+        (max / scale - clamped / scale) / (max / scale - min / scale)
+    }.coerceIn(0.0, 1.0)
+}
 
 internal fun visibleIndexRange(
     dataSize: Int,

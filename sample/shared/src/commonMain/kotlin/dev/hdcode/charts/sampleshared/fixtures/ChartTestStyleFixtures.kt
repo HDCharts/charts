@@ -2,6 +2,7 @@ package dev.hdcode.charts.sampleshared.fixtures
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import dev.hdcode.charts.sampleshared.theme.LocalChartColors
 import dev.hdcode.charts.sampleshared.theme.seriesColor
@@ -94,8 +95,8 @@ object ChartTestStyleFixtures {
         chartContainerStyle: ChartContainerStyle,
         barCount: Int = 1,
         useBarColors: Boolean = false,
-        minValue: Float? = null,
-        maxValue: Float? = null,
+        minValue: Double? = null,
+        maxValue: Double? = null,
     ): BarChartStyle {
         val chartColors = LocalChartColors.current
         val barColors =
@@ -122,7 +123,7 @@ object ChartTestStyleFixtures {
                 BarChartDefaults.selectionLine(
                     visible = true,
                     color = chartColors.selection,
-                    width = 2f,
+                    width = with(LocalDensity.current) { 2f.toDp() },
                 ),
         )
     }
@@ -132,8 +133,8 @@ object ChartTestStyleFixtures {
         chartContainerStyle: ChartContainerStyle,
         barCount: Int = 1,
         useBarColors: Boolean = false,
-        minValue: Float? = 0f,
-        maxValue: Float? = null,
+        minValue: Double? = 0.0,
+        maxValue: Double? = null,
     ): HistogramChartStyle {
         val chartColors = LocalChartColors.current
         val barColors =
@@ -145,7 +146,7 @@ object ChartTestStyleFixtures {
         return HistogramChartDefaults.style(
             chartContainerStyle = chartContainerStyle,
             bars =
-                BarChartDefaults.bars(
+                HistogramChartDefaults.bars(
                     color = chartColors.seriesColor(4),
                     colors = barColors,
                 ),
@@ -160,7 +161,7 @@ object ChartTestStyleFixtures {
                 BarChartDefaults.selectionLine(
                     visible = true,
                     color = chartColors.selection,
-                    width = 2f,
+                    width = with(LocalDensity.current) { 2f.toDp() },
                 ),
         )
     }

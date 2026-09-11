@@ -181,8 +181,8 @@ private fun BarChartPreview(values: List<Float>) {
             BarChartDefaults.style(
                 range =
                     BarChartDefaults.range(
-                        min = 0f,
-                        max = 100f,
+                        min = 0.0,
+                        max = 100.0,
                     ),
                 axis =
                     BarChartDefaults.axis(
@@ -214,7 +214,7 @@ private fun HistogramChartPreview(values: List<Float>) {
         title = "",
         style =
             HistogramChartDefaults.style(
-                range = BarChartDefaults.range(min = 0f),
+                range = BarChartDefaults.range(min = 0.0),
                 axis =
                     BarChartDefaults.axis(
                         xLabels = BarChartDefaults.xLabels(visible = false),

@@ -2,11 +2,9 @@ package io.github.dautovicharis.charts.internal.barchart
 
 import androidx.compose.foundation.ScrollState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.IntSize
 import io.github.dautovicharis.charts.internal.common.interaction.buildHorizontalDragGestureModifier
 import io.github.dautovicharis.charts.internal.common.interaction.buildPinchZoomModifier
 import io.github.dautovicharis.charts.internal.common.interaction.buildTapGestureModifier
-import kotlin.math.roundToInt
 
 internal fun buildFitTapModifier(
     interactionEnabled: Boolean,
@@ -25,15 +23,10 @@ internal fun buildFitTapModifier(
         chartHeightPx,
         onTap = { offset ->
             val index =
-                getSelectedIndex(
-                    position = offset,
+                getSelectedIndexForContentX(
+                    contentX = offset.x,
                     dataSize = dataSize,
-                    canvasSize =
-                        IntSize(
-                            width = viewportWidthPx.roundToInt(),
-                            height = chartHeightPx.roundToInt(),
-                        ),
-                    spacingPx = spacingPx,
+                    unitWidthPx = (viewportWidthPx + spacingPx) / dataSize.coerceAtLeast(1),
                 )
             onTapIndex(index)
         },
@@ -58,29 +51,19 @@ internal fun buildFitDragModifier(
         chartHeightPx,
         onDragStart = { offset ->
             val index =
-                getSelectedIndex(
-                    position = offset,
+                getSelectedIndexForContentX(
+                    contentX = offset.x,
                     dataSize = dataSize,
-                    canvasSize =
-                        IntSize(
-                            width = viewportWidthPx.roundToInt(),
-                            height = chartHeightPx.roundToInt(),
-                        ),
-                    spacingPx = spacingPx,
+                    unitWidthPx = (viewportWidthPx + spacingPx) / dataSize.coerceAtLeast(1),
                 )
             onDragIndex(index)
         },
         onHorizontalDrag = { position ->
             val index =
-                getSelectedIndex(
-                    position = position,
+                getSelectedIndexForContentX(
+                    contentX = position.x,
                     dataSize = dataSize,
-                    canvasSize =
-                        IntSize(
-                            width = viewportWidthPx.roundToInt(),
-                            height = chartHeightPx.roundToInt(),
-                        ),
-                    spacingPx = spacingPx,
+                    unitWidthPx = (viewportWidthPx + spacingPx) / dataSize.coerceAtLeast(1),
                 )
             onDragIndex(index)
         },

@@ -5,6 +5,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.onNodeWithTag
@@ -14,9 +15,13 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import io.github.dautovicharis.charts.BarChart
 import io.github.dautovicharis.charts.internal.TestTags
 import io.github.dautovicharis.charts.model.ChartData
+import io.github.dautovicharis.charts.model.ChartSelection
+import io.github.dautovicharis.charts.model.rememberChartSelection
 import io.github.dautovicharis.charts.model.toChartData
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
+import kotlin.test.assertNull
 
 @OptIn(ExperimentalTestApi::class)
 class BarChartEdgeInteractionTest {
@@ -118,6 +123,128 @@ class BarChartEdgeInteractionTest {
             assertNotEquals(beforeScrollTitle, afterScrollTitle)
             assertNotEquals(title, afterScrollTitle)
         }
+
+    @Test
+    fun barChart_externalSelectAndClear_remainAuthoritativeWithoutLockingTaps() =
+        runComposeUiTest {
+            val events = mutableListOf<Int?>()
+            val selection = ChartSelection(onSelectionChanged = { events.add(it) })
+            val data = listOf(1.25, 2.5, 3.75, 5.0).toChartData(categories = listOf("A", "B", "C", "D"))
+            setContent {
+                BarChart(data = data, title = "Bars", selection = selection, animateOnStart = false)
+            }
+
+            runOnIdle { selection.select(2) }
+            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("C: 3.75").assertIsDisplayed()
+            runOnIdle { selection.clear() }
+            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("Bars").assertIsDisplayed()
+            tapPlotAtFraction(0.125f)
+            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("A: 1.25").assertIsDisplayed()
+            tapPlotAtFraction(0.375f)
+            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("B: 2.5").assertIsDisplayed()
+            runOnIdle { selection.clear() }
+            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("Bars").assertIsDisplayed()
+            tapPlotAtFraction(0.375f)
+            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("B: 2.5").assertIsDisplayed()
+            tapPlotAtFraction(0.375f)
+            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("Bars").assertIsDisplayed()
+            runOnIdle {
+                assertNull(selection.selectedIndex)
+                assertEquals(listOf(2, null, 0, 1, null, 1, null), events)
+            }
+        }
+
+    @Test
+    fun barChart_replacingSelectionHolderWithUnchangedData_usesNewPresetAndCallback() =
+        runComposeUiTest {
+            val oldEvents = mutableListOf<Int?>()
+            val newEvents = mutableListOf<Int?>()
+            val oldSelection = ChartSelection(initialIndex = 0, onSelectionChanged = { oldEvents.add(it) })
+            val newSelection = ChartSelection(initialIndex = 2, onSelectionChanged = { newEvents.add(it) })
+            val currentSelection = mutableStateOf(oldSelection)
+            val data = listOf(1.25, 2.5, 3.75, 5.0).toChartData(categories = listOf("A", "B", "C", "D"))
+            setContent {
+                BarChart(data = data, title = "Bars", selection = currentSelection.value, animateOnStart = false)
+            }
+
+            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("A: 1.25").assertIsDisplayed()
+            runOnIdle { currentSelection.value = newSelection }
+            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("C: 3.75").assertIsDisplayed()
+            tapPlotAtFraction(0.375f)
+            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("B: 2.5").assertIsDisplayed()
+            tapPlotAtFraction(0.375f)
+            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("Bars").assertIsDisplayed()
+            runOnIdle {
+                assertEquals(0, oldSelection.selectedIndex)
+                assertEquals(emptyList(), oldEvents)
+                assertNull(newSelection.selectedIndex)
+                assertEquals(listOf(1, null), newEvents)
+            }
+        }
+
+    @Test
+    fun barChart_callbackOnlyUpdate_notifiesLatestCallback() =
+        runComposeUiTest {
+            val oldEvents = mutableListOf<Int?>()
+            val newEvents = mutableListOf<Int?>()
+            val callback = mutableStateOf<(Int?) -> Unit>({ oldEvents.add(it) })
+            val data = listOf(1.25, 2.5).toChartData(categories = listOf("A", "B"))
+            setContent {
+                BarChart(
+                    data = data,
+                    title = "Bars",
+                    selection = rememberChartSelection(onSelectionChanged = callback.value),
+                    animateOnStart = false,
+                )
+            }
+
+            tapPlotAtFraction(0.25f)
+            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("A: 1.25").assertIsDisplayed()
+            runOnIdle { callback.value = { newEvents.add(it) } }
+            tapPlotAtFraction(0.25f)
+            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("Bars").assertIsDisplayed()
+            runOnIdle {
+                assertEquals(listOf<Int?>(0), oldEvents)
+                assertEquals(listOf<Int?>(null), newEvents)
+            }
+        }
+
+    @Test
+    fun barChart_reloadAndShrink_clearHoistedSelectionAndNotifyNull() =
+        runComposeUiTest {
+            val events = mutableListOf<Int?>()
+            val selection = ChartSelection(initialIndex = 3, onSelectionChanged = { events.add(it) })
+            val currentData = mutableStateOf(listOf(1.0, 2.0, 3.0, 4.0).toChartData())
+            setContent {
+                BarChart(data = currentData.value, title = "Bars", selection = selection, animateOnStart = false)
+            }
+
+            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("4.0").assertIsDisplayed()
+            runOnIdle {
+                assertEquals(emptyList(), events)
+                currentData.value = listOf(10.0, 20.0, 30.0, 40.0).toChartData()
+            }
+            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("Bars").assertIsDisplayed()
+            runOnIdle {
+                assertNull(selection.selectedIndex)
+                assertEquals(listOf<Int?>(null), events)
+                selection.select(3)
+            }
+            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("40.0").assertIsDisplayed()
+            runOnIdle { currentData.value = listOf(7.0, 8.0).toChartData() }
+            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("Bars").assertIsDisplayed()
+            onNodeWithTag(TestTags.BAR_CHART).assertIsDisplayed()
+            runOnIdle {
+                assertNull(selection.selectedIndex)
+                assertEquals(listOf(null, 3, null), events)
+            }
+        }
+
+    private fun ComposeUiTest.tapPlotAtFraction(fraction: Float) {
+        onNodeWithTag(TestTags.BAR_CHART_PLOT).performTouchInput {
+            click(Offset(x = width * fraction, y = height / 2f))
+        }
+    }
 
     private fun ComposeUiTest.currentChartTitle(): String {
         val semanticsNode = onNodeWithTag(TestTags.CHART_TITLE).fetchSemanticsNode()

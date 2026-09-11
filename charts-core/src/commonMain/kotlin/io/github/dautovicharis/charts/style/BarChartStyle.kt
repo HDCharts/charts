@@ -4,8 +4,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.dautovicharis.charts.model.ChartValueFormatter
+import io.github.dautovicharis.charts.model.ChartValueFormatters
 
 /**
  * Immutable v3 style for vertical [io.github.dautovicharis.charts.BarChart].
@@ -37,6 +41,13 @@ class BarChartStyle(
  * Defaults factory for [BarChartStyle]. All parameters have theme-aware defaults.
  */
 object BarChartDefaults {
+    /** Default formatter for chart value readouts. */
+    val valueFormatter: ChartValueFormatter = ChartValueFormatters.Default
+
+    /** Default axis formatter, omitting only the terminal `.0` on whole values. */
+    val axisValueFormatter: ChartValueFormatter =
+        ChartValueFormatter { ChartValueFormatters.Default.format(it).removeSuffix(".0") }
+
     /**
      * Returns a [BarChartStyle] with the provided parameters or their default values.
      */
@@ -74,13 +85,13 @@ object BarChartDefaults {
         color: Color = MaterialTheme.colorScheme.primary,
         colors: List<Color> = emptyList(),
         alpha: Float = defaultChartAlpha(),
-        space: androidx.compose.ui.unit.Dp = 10.dp,
-        minBarWidth: androidx.compose.ui.unit.Dp = 10.dp,
+        space: Dp = 10.dp,
+        minBarWidth: Dp = 10.dp,
     ): BarBarsStyle =
         BarBarsStyle(
             color = color,
             colors = colors,
-            alpha = alpha.coerceIn(0f, 1f),
+            alpha = alpha,
             space = space,
             minBarWidth = minBarWidth,
         )
@@ -88,14 +99,14 @@ object BarChartDefaults {
     /**
      * Returns a [BarRangeStyle] for the optional fixed Y-axis range.
      */
-    @Composable
     fun range(
-        min: Float? = null,
-        max: Float? = null,
+        min: Double? = null,
+        max: Double? = null,
     ): BarRangeStyle = BarRangeStyle(min = min, max = max)
 
     /**
      * Returns a [BarGridStyle] for horizontal grid configuration.
+     * The default stroke width preserves one physical pixel at the current density.
      */
     @Composable
     fun grid(
@@ -104,7 +115,7 @@ object BarChartDefaults {
         color: Color =
             androidx.compose.material3.MaterialTheme.colorScheme.onSurface
                 .copy(alpha = 0.15f),
-        lineWidth: Float = 1f,
+        lineWidth: Dp = with(LocalDensity.current) { 1f.toDp() },
     ): BarGridStyle =
         BarGridStyle(
             visible = visible,
@@ -115,6 +126,7 @@ object BarChartDefaults {
 
     /**
      * Returns a [BarAxisStyle] for axis and label configuration.
+     * The default stroke width preserves one physical pixel at the current density.
      */
     @Composable
     fun axis(
@@ -122,7 +134,7 @@ object BarChartDefaults {
         color: Color =
             androidx.compose.material3.MaterialTheme.colorScheme.onSurface
                 .copy(alpha = 0.3f),
-        lineWidth: Float = 1f,
+        lineWidth: Dp = with(LocalDensity.current) { 1f.toDp() },
         xLabels: AxisLabelStyle = xLabels(),
         yLabels: AxisLabelStyle = yLabels(),
     ): BarAxisStyle =
@@ -174,6 +186,7 @@ object BarChartDefaults {
 
     /**
      * Returns a [BarSelectionLineStyle] for the selection indicator.
+     * The default stroke width preserves one physical pixel at the current density.
      */
     @Composable
     fun selectionLine(
@@ -181,7 +194,7 @@ object BarChartDefaults {
         color: Color =
             androidx.compose.material3.MaterialTheme.colorScheme.primary
                 .copy(alpha = 0.6f),
-        width: Float = 1f,
+        width: Dp = with(LocalDensity.current) { 1f.toDp() },
     ): BarSelectionLineStyle =
         BarSelectionLineStyle(
             visible = visible,

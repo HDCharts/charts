@@ -117,8 +117,8 @@ fun HistogramChartDemo(viewModel: HistogramChartViewModel = koinViewModel()) {
                                         .single()
                                         .values.size,
                                 useBarColors = true,
-                                minValue = controlsState.minValue.toFloat(),
-                                maxValue = controlsState.maxValue.toFloat(),
+                                minValue = controlsState.minValue.toDouble(),
+                                maxValue = controlsState.maxValue.toDouble(),
                             ),
                     )
                 }

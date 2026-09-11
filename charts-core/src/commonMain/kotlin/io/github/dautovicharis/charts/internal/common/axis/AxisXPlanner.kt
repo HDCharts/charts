@@ -39,7 +39,7 @@ fun planAxisXLabels(request: AxisXPlanRequest): AxisXPlanResult {
     }
 
     val clampedScrollOffset = if (request.isScrollable) request.scrollOffsetPx.coerceAtLeast(0f) else 0f
-    val safeUnitWidth = request.unitWidthPx.coerceAtLeast(1f)
+    val safeUnitWidth = request.unitWidthPx.coerceAtLeast(Float.MIN_VALUE)
     val safeLabelWidth = request.labelWidthPx.coerceAtLeast(1f)
     val visibleRange =
         if (request.isScrollable) {
@@ -202,7 +202,7 @@ private fun resolveMaxXAxisLabelCount(
     if (labelsInRange <= AXIS_X_SMALL_DATASET_LABEL_THRESHOLD) return labelsInRange
 
     val requested = requestedMaxCount.coerceAtLeast(2).coerceAtMost(labelsInRange)
-    val safeUnitWidth = unitWidthPx.coerceAtLeast(1f)
+    val safeUnitWidth = unitWidthPx.coerceAtLeast(Float.MIN_VALUE)
     val safeLabelWidth = labelWidthPx.coerceAtLeast(1f)
     val requiredSpacingPx = (safeLabelWidth * AXIS_X_MIN_SPACING_FACTOR).coerceAtLeast(1f)
     val spanPx = (labelsInRange - 1) * safeUnitWidth
@@ -226,7 +226,7 @@ private fun resolveStableVisibleLabelCount(
     if (maxCenterX < minCenterX) return 0
 
     val spanPx = (maxCenterX - minCenterX).coerceAtLeast(0f)
-    val safeUnitWidth = unitWidthPx.coerceAtLeast(1f)
+    val safeUnitWidth = unitWidthPx.coerceAtLeast(Float.MIN_VALUE)
     val count = (spanPx / safeUnitWidth).toInt() + 1
     return count.coerceIn(1, dataSize)
 }
@@ -421,7 +421,7 @@ private fun expandEdgeLabelsIfSpacingAllows(
 
     val requiredIndexSpacing =
         ceil(
-            ((labelWidthPx.coerceAtLeast(1f) * AXIS_X_MIN_SPACING_FACTOR) / unitWidthPx.coerceAtLeast(1f))
+            ((labelWidthPx.coerceAtLeast(1f) * AXIS_X_MIN_SPACING_FACTOR) / unitWidthPx.coerceAtLeast(Float.MIN_VALUE))
                 .coerceAtLeast(1f),
         ).toInt().coerceAtLeast(1)
     val expanded = indices.distinct().sorted().toMutableList()
