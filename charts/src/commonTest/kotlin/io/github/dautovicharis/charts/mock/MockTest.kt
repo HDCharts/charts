@@ -11,10 +11,15 @@ import io.github.dautovicharis.charts.internal.common.model.ChartDataType.FloatD
 import io.github.dautovicharis.charts.internal.linechart.LineChartInternalStyle
 import io.github.dautovicharis.charts.model.ChartDataSet
 import io.github.dautovicharis.charts.model.MultiChartDataSet
+import io.github.dautovicharis.charts.style.AxisLabelStyle
 import io.github.dautovicharis.charts.style.ChartContainerStyle
 import io.github.dautovicharis.charts.style.RadarChartStyle
 import io.github.dautovicharis.charts.style.StackedAreaChartStyle
+import io.github.dautovicharis.charts.style.StackedBarAxisStyle
 import io.github.dautovicharis.charts.style.StackedBarChartStyle
+import io.github.dautovicharis.charts.style.StackedBarLayoutStyle
+import io.github.dautovicharis.charts.style.StackedBarSegmentStyle
+import io.github.dautovicharis.charts.style.StackedBarSelectionStyle
 
 internal object MockTest {
     const val TITLE = "Title"
@@ -144,25 +149,16 @@ internal object MockTest {
 
     fun mockStackedBarChartStyle(barColors: List<Color> = colors): StackedBarChartStyle =
         StackedBarChartStyle(
-            modifier = Modifier.fillMaxSize(),
-            barColors = barColors,
-            barColor = Color.Red,
-            barAlpha = 1f,
-            space = Dp(10f),
-            minBarWidth = Dp(10f),
-            zoomControlsVisible = true,
-            yAxisLabelsVisible = true,
-            yAxisLabelColor = Color.Gray,
-            yAxisLabelSize = 11.sp,
-            yAxisLabelCount = 5,
-            xAxisLabelsVisible = true,
-            xAxisLabelColor = Color.Gray,
-            xAxisLabelSize = 11.sp,
-            xAxisLabelMaxCount = 6,
-            selectionLineVisible = true,
-            selectionLineColor = Color.Magenta,
-            selectionLineWidth = 1f,
             chartContainerStyle = mockChartContainerStyle(),
+            segments = StackedBarSegmentStyle(color = Color.Red, colors = barColors, alpha = 1f),
+            layout = StackedBarLayoutStyle(space = Dp(10f), minBarWidth = Dp(10f)),
+            axis =
+                StackedBarAxisStyle(
+                    xLabels = AxisLabelStyle(visible = true, color = Color.Gray, size = 11.sp, count = 6),
+                    yLabels = AxisLabelStyle(visible = true, color = Color.Gray, size = 11.sp, count = 5),
+                ),
+            selection = StackedBarSelectionStyle(visible = true, color = Color.Magenta, width = Dp(1f)),
+            zoomControlsVisible = true,
         )
 
     fun mockStackedAreaChartStyle(
@@ -193,25 +189,16 @@ internal object MockTest {
 
     fun mockBarChartStyle(barColors: List<Color> = colors): StackedBarChartStyle =
         StackedBarChartStyle(
-            modifier = Modifier.fillMaxSize(),
-            barColors = barColors,
-            barColor = Color.Red,
-            barAlpha = 1f,
-            space = Dp(10f),
-            minBarWidth = Dp(10f),
-            zoomControlsVisible = true,
-            yAxisLabelsVisible = true,
-            yAxisLabelColor = Color.Gray,
-            yAxisLabelSize = 11.sp,
-            yAxisLabelCount = 5,
-            xAxisLabelsVisible = true,
-            xAxisLabelColor = Color.Gray,
-            xAxisLabelSize = 11.sp,
-            xAxisLabelMaxCount = 6,
-            selectionLineVisible = true,
-            selectionLineColor = Color.Magenta,
-            selectionLineWidth = 1f,
             chartContainerStyle = mockChartContainerStyle(),
+            segments = StackedBarSegmentStyle(color = Color.Red, colors = barColors, alpha = 1f),
+            layout = StackedBarLayoutStyle(space = Dp(10f), minBarWidth = Dp(10f)),
+            axis =
+                StackedBarAxisStyle(
+                    xLabels = AxisLabelStyle(visible = true, color = Color.Gray, size = 11.sp, count = 6),
+                    yLabels = AxisLabelStyle(visible = true, color = Color.Gray, size = 11.sp, count = 5),
+                ),
+            selection = StackedBarSelectionStyle(visible = true, color = Color.Magenta, width = Dp(1f)),
+            zoomControlsVisible = true,
         )
 
     fun mockRadarChartStyle(lineColors: List<Color> = colors): RadarChartStyle =

@@ -3,7 +3,7 @@ package dev.hdcode.charts.app.demo.stackedbar
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.hdcode.charts.sampleshared.data.StackedBarSampleUseCase
-import io.github.dautovicharis.charts.model.MultiChartDataSet
+import io.github.dautovicharis.charts.model.ChartData
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,8 +21,9 @@ data class StackedBarChartControlsState(
 )
 
 data class StackedBarChartState(
-    val dataSet: MultiChartDataSet,
+    val dataSet: ChartData,
     val segmentKeys: List<String> = emptyList(),
+    val title: String = "",
 )
 
 class StackedBarChartViewModel(
@@ -40,8 +41,7 @@ class StackedBarChartViewModel(
     private val defaultPoints =
         initialSample
             .dataSet
-            .data
-            .items
+            .categories
             .size
             .coerceIn(MIN_SUPPORTED_POINTS, MAX_SUPPORTED_POINTS)
     private val defaultRange =
@@ -57,6 +57,7 @@ class StackedBarChartViewModel(
                 StackedBarChartState(
                     dataSet = sample.dataSet,
                     segmentKeys = sample.segmentKeys,
+                    title = sample.title,
                 )
             },
         )
@@ -95,6 +96,7 @@ class StackedBarChartViewModel(
             StackedBarChartState(
                 dataSet = sample.dataSet,
                 segmentKeys = sample.segmentKeys,
+                title = sample.title,
             )
     }
 

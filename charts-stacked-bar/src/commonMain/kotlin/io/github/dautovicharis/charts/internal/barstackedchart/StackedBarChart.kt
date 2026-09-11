@@ -39,6 +39,7 @@ import io.github.dautovicharis.charts.internal.AXIS_LABEL_CHART_GAP
 import io.github.dautovicharis.charts.internal.AnimationSpec
 import io.github.dautovicharis.charts.internal.NO_SELECTION
 import io.github.dautovicharis.charts.internal.TestTags
+import io.github.dautovicharis.charts.internal.barstackedchart.StackedBarInternalStyle
 import io.github.dautovicharis.charts.internal.common.axis.AxisXPlanRequest
 import io.github.dautovicharis.charts.internal.common.axis.estimateXAxisLabelFootprintPx
 import io.github.dautovicharis.charts.internal.common.axis.estimateYAxisLabelWidthPx
@@ -49,7 +50,6 @@ import io.github.dautovicharis.charts.internal.common.composable.zoomInScale
 import io.github.dautovicharis.charts.internal.common.composable.zoomOutScale
 import io.github.dautovicharis.charts.internal.common.model.MultiChartData
 import io.github.dautovicharis.charts.internal.common.model.normalizeStackedValues
-import io.github.dautovicharis.charts.style.StackedBarChartStyle
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
@@ -64,7 +64,7 @@ private const val FIXED_X_AXIS_LABEL_TILT_DEGREES = 34f
 internal fun StackedBarChart(
     data: MultiChartData,
     title: String,
-    style: StackedBarChartStyle,
+    style: StackedBarInternalStyle,
     colors: ImmutableList<Color>,
     interactionEnabled: Boolean,
     animateOnStart: Boolean,
@@ -212,25 +212,19 @@ internal fun StackedBarChart(
             }
 
         val onSelectRenderIndex: (Int) -> Unit = { renderIndex ->
-            if (!hasForcedSelection) {
-                val resolvedSourceIndex =
-                    when (renderIndex) {
-                        in 0 until renderDataSize -> renderDataBundle.resolveSourceIndex(renderIndex)
-                        else -> NO_SELECTION
-                    }
-                if (selectedSourceIndexFromInteraction != resolvedSourceIndex) {
-                    selectedSourceIndexFromInteraction = resolvedSourceIndex
-                    onValueChanged(resolvedSourceIndex)
+            val resolvedSourceIndex =
+                when (renderIndex) {
+                    in 0 until renderDataSize -> renderDataBundle.resolveSourceIndex(renderIndex)
+                    else -> NO_SELECTION
                 }
+            if (selectedSourceIndexFromInteraction != resolvedSourceIndex) {
+                selectedSourceIndexFromInteraction = resolvedSourceIndex
+                onValueChanged(resolvedSourceIndex)
             }
         }
 
         val onToggleSelection: (Int) -> Unit = { renderIndex ->
-            val currentRenderIndex =
-                when (hasForcedSelection) {
-                    true -> renderDataBundle.resolveRenderIndex(forcedSelectedSourceIndex)
-                    false -> renderDataBundle.resolveRenderIndex(selectedSourceIndexFromInteraction)
-                }
+            val currentRenderIndex = effectiveSelectedRenderIndex
             if (currentRenderIndex == renderIndex && currentRenderIndex != NO_SELECTION) {
                 onSelectRenderIndex(NO_SELECTION)
             } else {
@@ -238,8 +232,8 @@ internal fun StackedBarChart(
             }
         }
 
-        val showZoomControlsInHeader = isScrollable && style.zoomControlsVisible
-        val showCompactToggle = isDenseData
+        val showZoomControlsInHeader = interactionEnabled && isScrollable && style.zoomControlsVisible
+        val showCompactToggle = interactionEnabled && isDenseData
         val showHeader = title.isNotBlank() || showCompactToggle || showZoomControlsInHeader
 
         Column(modifier = Modifier.fillMaxSize()) {
@@ -301,7 +295,7 @@ internal fun StackedBarChart(
 @Composable
 private fun StackedBarChartContent(
     data: MultiChartData,
-    style: StackedBarChartStyle,
+    style: StackedBarInternalStyle,
     colors: ImmutableList<Color>,
     interactionEnabled: Boolean,
     dragSelectionEnabled: Boolean,
@@ -571,7 +565,7 @@ private fun StackedBarChartContent(
 
 private fun DrawScope.drawStackedBars(
     data: MultiChartData,
-    style: StackedBarChartStyle,
+    style: StackedBarInternalStyle,
     progress: List<Animatable<Float, AnimationVector1D>>,
     selectedIndex: Int,
     selectedCenterX: Float,

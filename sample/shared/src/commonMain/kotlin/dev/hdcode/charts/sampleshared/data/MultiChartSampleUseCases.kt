@@ -14,7 +14,7 @@ interface MultiLineSampleUseCase {
 interface StackedBarSampleUseCase {
     fun initialStackedBarSample(): StackedBarSampleData
 
-    fun initialStackedBarNoCategoriesDataSet(): MultiChartDataSet
+    fun initialStackedBarNoCategoriesDataSet(): StackedBarSampleData
 
     fun stackedBarRefreshRange(): IntRange
 

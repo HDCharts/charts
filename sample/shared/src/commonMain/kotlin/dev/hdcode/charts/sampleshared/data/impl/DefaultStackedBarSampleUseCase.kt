@@ -2,43 +2,47 @@ package dev.hdcode.charts.sampleshared.data.impl
 
 import dev.hdcode.charts.sampleshared.data.StackedBarSampleData
 import dev.hdcode.charts.sampleshared.data.StackedBarSampleUseCase
-import io.github.dautovicharis.charts.model.MultiChartDataSet
-import io.github.dautovicharis.charts.model.toMultiChartDataSet
+import io.github.dautovicharis.charts.model.ChartData
+import io.github.dautovicharis.charts.model.ChartSeries
+import io.github.dautovicharis.charts.model.chartDataOf
 
 internal class DefaultStackedBarSampleUseCase : StackedBarSampleUseCase {
     companion object {
         private const val DEFAULT_TITLE = "Quarterly Revenue by Region"
-        private const val DEFAULT_PREFIX = "$"
         private val REFRESH_RANGE = 100..1000
     }
 
     private val stackedCategories = listOf("Q1", "Q2", "Q3", "Q4")
     private val stackedItems =
         listOf(
-            "North America" to listOf(320f, 340f, 360f, 390f),
-            "Europe" to listOf(210f, 230f, 245f, 260f),
-            "Asia Pacific" to listOf(180f, 205f, 225f, 250f),
+            "North America" to listOf(320.0, 340.0, 360.0, 390.0),
+            "Europe" to listOf(210.0, 230.0, 245.0, 260.0),
+            "Asia Pacific" to listOf(180.0, 205.0, 225.0, 250.0),
         )
     private val noCategoriesItems =
         listOf(
-            "Online" to listOf(220f, 260f, 300f),
-            "Retail" to listOf(180f, 210f, 240f),
-            "Enterprise" to listOf(140f, 160f, 190f),
+            "Online" to listOf(220.0, 260.0, 300.0),
+            "Retail" to listOf(180.0, 210.0, 240.0),
+            "Enterprise" to listOf(140.0, 160.0, 190.0),
         )
 
     override fun initialStackedBarSample(): StackedBarSampleData =
         StackedBarSampleData(
             dataSet =
-                stackedItems.toMultiChartDataSet(
-                    title = DEFAULT_TITLE,
-                    prefix = DEFAULT_PREFIX,
-                    categories = stackedCategories,
+                stackedBarData(
+                    rows = stackedItems,
+                    segmentNames = stackedCategories,
                 ),
             segmentKeys = stackedCategories,
+            title = DEFAULT_TITLE,
         )
 
-    override fun initialStackedBarNoCategoriesDataSet(): MultiChartDataSet =
-        noCategoriesItems.toMultiChartDataSet(title = "Revenue Streams (No Period Labels)")
+    override fun initialStackedBarNoCategoriesDataSet(): StackedBarSampleData =
+        StackedBarSampleData(
+            dataSet = stackedBarData(noCategoriesItems),
+            segmentKeys = emptyList(),
+            title = "Revenue Streams (No Period Labels)",
+        )
 
     override fun stackedBarRefreshRange(): IntRange = REFRESH_RANGE
 
@@ -55,19 +59,32 @@ internal class DefaultStackedBarSampleUseCase : StackedBarSampleUseCase {
         val safeRange = safeRangeStart..safeRangeEnd
         val newItems =
             List(safePoints) { index ->
-                stackedBarLabel(index) to List(stackedCategories.size) { safeRange.random().toFloat() }
+                stackedBarLabel(index) to List(stackedCategories.size) { safeRange.random().toDouble() }
             }
-        val dataSet =
-            newItems.toMultiChartDataSet(
-                title = DEFAULT_TITLE,
-                prefix = DEFAULT_PREFIX,
-                categories = stackedCategories,
-            )
+        val dataSet = stackedBarData(rows = newItems, segmentNames = stackedCategories)
         return StackedBarSampleData(
             dataSet = dataSet,
             segmentKeys = stackedCategories,
+            title = DEFAULT_TITLE,
         )
     }
 
     private fun stackedBarLabel(index: Int): String = stackedItems.getOrNull(index)?.first ?: "Region ${index + 1}"
+
+    private fun stackedBarData(
+        rows: List<Pair<String, List<Double>>>,
+        segmentNames: List<String>? = null,
+        categories: List<String>? = null,
+    ): ChartData {
+        val segmentCount = rows.maxOfOrNull { row -> row.second.size } ?: 0
+        return chartDataOf(
+            categories = categories ?: rows.map { row -> row.first },
+            *List(segmentCount) { segmentIndex ->
+                ChartSeries(
+                    name = segmentNames?.getOrNull(segmentIndex),
+                    values = rows.map { row -> row.second.getOrNull(segmentIndex)?.toDouble() ?: Double.NaN },
+                )
+            }.toTypedArray(),
+        )
+    }
 }

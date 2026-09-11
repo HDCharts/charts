@@ -154,7 +154,8 @@ fun HistogramDefaultGifScenario() {
 @Composable
 fun StackedBarDefaultGifScenario() {
     DocsGifScene {
-        StackedBarChart(stackedBarSampleUseCase().initialStackedBarSample().dataSet)
+        val sample = stackedBarSampleUseCase().initialStackedBarSample()
+        StackedBarChart(data = sample.dataSet, title = sample.title)
     }
 }
 
