@@ -29,9 +29,9 @@ kotlin-multiplatform = "2.4.10"
 compose-screenshot = "0.0.1-alpha16"
 # Coroutines version
 kotlinx-coroutines = "1.11.0"
-kotlinx-collections-immutable = "0.5.1"
-ksp = "2.3.10"
-compose-gif-recorder = "0.1.5-SNAPSHOT"
+kotlinx-collections-immutable = "0.5.2"
+ksp = "2.3.11"
+compose-gif-recorder = "0.1.5"
 # https://www.cve.org/CVERecord?id=CVE-2024-7254
 protobuf-security = "3.25.5"
 # https://www.cve.org/CVERecord?id=CVE-2021-33813
@@ -59,7 +59,7 @@ mavenPublish = "0.37.0"
 buildConfig = "6.0.10"
 # https://github.com/JLLeitschuh/ktlint-gradle
 ktlint = "14.2.0"
-axion-release = "1.21.2"
+axion-release = "1.21.3"
 # https://insert-koin.io
 # https://mvnrepository.com/artifact/io.insert-koin/koin-bom
 koin-bom = "4.2.2"
