@@ -22,8 +22,9 @@ data class StackedBarSampleData(
 )
 
 data class StackedAreaSampleData(
-    val dataSet: MultiChartDataSet,
+    val data: ChartData,
     val seriesKeys: List<String>,
+    val title: String,
 )
 
 data class RadarSampleData(

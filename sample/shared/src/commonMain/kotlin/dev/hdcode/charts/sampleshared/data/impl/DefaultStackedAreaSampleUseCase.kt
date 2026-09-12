@@ -2,48 +2,48 @@ package dev.hdcode.charts.sampleshared.data.impl
 
 import dev.hdcode.charts.sampleshared.data.StackedAreaSampleData
 import dev.hdcode.charts.sampleshared.data.StackedAreaSampleUseCase
-import io.github.dautovicharis.charts.model.MultiChartDataSet
-import io.github.dautovicharis.charts.model.toMultiChartDataSet
+import io.github.dautovicharis.charts.model.ChartData
+import io.github.dautovicharis.charts.model.ChartSeries
+import io.github.dautovicharis.charts.model.chartDataOf
 
 internal class DefaultStackedAreaSampleUseCase : StackedAreaSampleUseCase {
     companion object {
         private const val DEFAULT_TITLE = "Monthly Active Subscribers by Plan"
-        private const val DEFAULT_PREFIX = ""
         private val REFRESH_RANGE = 100..1000
     }
 
     private val stackedAreaCategories = listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun")
-    private val stackedAreaItems =
+    private val stackedAreaSeries =
         listOf(
-            "Free Plan" to listOf(620f, 650f, 690f, 720f, 760f, 800f),
-            "Standard Plan" to listOf(240f, 260f, 285f, 310f, 340f, 365f),
-            "Premium Plan" to listOf(90f, 95f, 105f, 118f, 130f, 142f),
+            "Free Plan" to listOf(620.0, 650.0, 690.0, 720.0, 760.0, 800.0),
+            "Standard Plan" to listOf(240.0, 260.0, 285.0, 310.0, 340.0, 365.0),
+            "Premium Plan" to listOf(90.0, 95.0, 105.0, 118.0, 130.0, 142.0),
         )
-    private val noCategoriesItems =
+    private val noCategoriesSeries =
         listOf(
-            "Free Plan" to listOf(540f, 600f, 660f, 720f),
-            "Standard Plan" to listOf(200f, 230f, 260f, 290f),
-            "Premium Plan" to listOf(80f, 92f, 105f, 118f),
+            "Free Plan" to listOf(540.0, 600.0, 660.0, 720.0),
+            "Standard Plan" to listOf(200.0, 230.0, 260.0, 290.0),
+            "Premium Plan" to listOf(80.0, 92.0, 105.0, 118.0),
         )
 
     override fun initialStackedAreaSample(): StackedAreaSampleData =
         StackedAreaSampleData(
-            dataSet =
-                stackedAreaItems.toMultiChartDataSet(
-                    title = DEFAULT_TITLE,
-                    prefix = DEFAULT_PREFIX,
-                    categories = stackedAreaCategories,
-                ),
-            seriesKeys = stackedAreaItems.map { it.first },
+            data = stackedAreaData(stackedAreaSeries, stackedAreaCategories),
+            seriesKeys = stackedAreaSeries.map { it.first },
+            title = DEFAULT_TITLE,
         )
 
-    override fun initialStackedAreaNoCategoriesDataSet(): MultiChartDataSet =
-        noCategoriesItems.toMultiChartDataSet(title = "Subscriber Mix (No Time Labels)")
+    override fun initialStackedAreaNoCategoriesData(): StackedAreaSampleData =
+        StackedAreaSampleData(
+            data = stackedAreaData(noCategoriesSeries, emptyList()),
+            seriesKeys = noCategoriesSeries.map { it.first },
+            title = "Subscriber Mix (No Time Labels)",
+        )
 
     override fun stackedAreaRefreshRange(): IntRange = REFRESH_RANGE
 
     override fun stackedAreaSample(range: IntRange): StackedAreaSampleData =
-        stackedAreaSample(points = stackedAreaCategories.size, range = range)
+        stackedAreaSample(points = stackedAreaSeries.size, range = range)
 
     override fun stackedAreaSample(
         points: Int,
@@ -54,21 +54,25 @@ internal class DefaultStackedAreaSampleUseCase : StackedAreaSampleUseCase {
         val safeRangeEnd = maxOf(range.first, range.last).coerceAtLeast(safeRangeStart)
         val safeRange = safeRangeStart..safeRangeEnd
         val categories = stackedAreaCategoriesFor(points = safePoints)
-        val newItems =
-            stackedAreaItems.map { (name, _) ->
-                name to List(safePoints) { safeRange.random().toFloat() }
+        val newSeries =
+            stackedAreaSeries.map { (name, _) ->
+                name to List(safePoints) { safeRange.random().toDouble() }
             }
-        val dataSet =
-            newItems.toMultiChartDataSet(
-                prefix = DEFAULT_PREFIX,
-                categories = categories,
-                title = DEFAULT_TITLE,
-            )
         return StackedAreaSampleData(
-            dataSet = dataSet,
-            seriesKeys = newItems.map { it.first },
+            data = stackedAreaData(newSeries, categories),
+            seriesKeys = newSeries.map { it.first },
+            title = DEFAULT_TITLE,
         )
     }
+
+    private fun stackedAreaData(
+        series: List<Pair<String, List<Double>>>,
+        categories: List<String>,
+    ): ChartData =
+        chartDataOf(
+            categories = categories,
+            *series.map { (name, values) -> ChartSeries(name = name, values = values) }.toTypedArray(),
+        )
 
     private fun stackedAreaCategoriesFor(points: Int): List<String> {
         if (points <= stackedAreaCategories.size) {

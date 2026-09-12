@@ -164,17 +164,27 @@ private fun MultiLineChartPreview(series: List<Pair<String, List<Float>>>) {
 
 @Composable
 private fun StackedAreaChartPreview(series: List<Pair<String, List<Float>>>) {
-    val dataSet =
+    val data =
         remember(series) {
-            series.toMultiChartDataSet(title = "")
+            chartDataOf(
+                categories = emptyList(),
+                *series
+                    .map { (name, values) ->
+                        ChartSeries(name = name, values = values.map { it.toDouble() })
+                    }.toTypedArray(),
+            )
         }
     StackedAreaChart(
-        dataSet = dataSet,
+        data = data,
+        title = "",
         style =
             StackedAreaChartDefaults.style(
                 chartContainerStyle = previewChartContainerStyle(),
-                xAxisLabelsVisible = false,
-                yAxisLabelsVisible = false,
+                axis =
+                    StackedAreaChartDefaults.axis(
+                        xLabels = StackedAreaChartDefaults.xLabels(visible = false),
+                        yLabels = StackedAreaChartDefaults.yLabels(visible = false),
+                    ),
             ),
         interactionEnabled = false,
         animateOnStart = false,

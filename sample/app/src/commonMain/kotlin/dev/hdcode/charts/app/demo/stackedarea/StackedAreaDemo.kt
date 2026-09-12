@@ -107,14 +107,16 @@ fun StackedAreaChartDemo(viewModel: StackedAreaChartViewModel = koinViewModel())
             when (preset) {
                 ChartPreset.Default -> {
                     StackedAreaChart(
-                        dataSet = dataSet.dataSet,
+                        data = dataSet.data,
+                        title = dataSet.title,
                         style = StackedAreaChartDefaults.style(chartContainerStyle = chartContainerStyle),
                     )
                 }
 
                 ChartPreset.Custom -> {
                     StackedAreaChart(
-                        dataSet = dataSet.dataSet,
+                        data = dataSet.data,
+                        title = dataSet.title,
                         style =
                             ChartTestStyleFixtures.stackedAreaCustomStyle(
                                 chartContainerStyle = chartContainerStyle,

@@ -212,15 +212,20 @@ object ChartTestStyleFixtures {
         val colors = chartColors.seriesColors(seriesCount)
         return StackedAreaChartDefaults.style(
             chartContainerStyle = chartContainerStyle,
-            areaColors = colors,
-            lineColors = colors,
-            fillAlpha = 0.3f,
-            lineVisible = true,
-            lineWidth = 3.5f,
-            bezier = false,
+            fill = StackedAreaChartDefaults.fill(colors = colors, alpha = 0.3f),
+            boundary =
+                StackedAreaChartDefaults.boundary(
+                    visible = true,
+                    colors = colors,
+                    width = 3.5.dp,
+                    bezier = false,
+                ),
+            axis =
+                StackedAreaChartDefaults.axis(
+                    xLabels = StackedAreaChartDefaults.xLabels(color = chartColors.axisLabel),
+                    yLabels = StackedAreaChartDefaults.yLabels(color = chartColors.axisLabel),
+                ),
             zoomControlsVisible = true,
-            xAxisLabelColor = chartColors.axisLabel,
-            yAxisLabelColor = chartColors.axisLabel,
         )
     }
 

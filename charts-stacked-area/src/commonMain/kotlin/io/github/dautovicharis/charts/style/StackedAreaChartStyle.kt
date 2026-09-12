@@ -3,129 +3,124 @@ package io.github.dautovicharis.charts.style
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 
-/**
- * A class that defines the style for a Stacked Area Chart.
- *
- * @property modifier The modifier to be applied to the chart.
- * @property chartContainerStyle The style to be applied to the chart container.
- * @property areaColor The fallback fill color used when `areaColors` is empty.
- * @property areaColors The explicit fill colors used for stacked areas.
- * @property fillAlpha The alpha value applied to area fills.
- * @property lineVisible Whether boundary lines are shown on top of filled areas.
- * @property lineColor The fallback boundary line color when `lineColors` is empty.
- * @property lineColors The explicit boundary line colors.
- * @property lineWidth The stroke width of boundary lines.
- * @property bezier Whether curved lines are used for area boundaries.
- * @property zoomControlsVisible Whether zoom controls are shown in expanded dense mode.
- * @property yAxisLabelsVisible Whether Y-axis labels are shown.
- * @property yAxisLabelColor The color of Y-axis labels.
- * @property yAxisLabelSize The text size of Y-axis labels.
- * @property yAxisLabelCount Number of Y-axis labels.
- * @property xAxisLabelsVisible Whether X-axis labels are shown.
- * @property xAxisLabelColor The color of X-axis labels.
- * @property xAxisLabelSize The text size of X-axis labels.
- * @property xAxisLabelMaxCount Maximum number of X-axis labels to display.
- */
+@Immutable
+data class StackedAreaFillStyle(
+    val color: Color,
+    val colors: ImmutableList<Color>,
+    val alpha: Float,
+) {
+    constructor(color: Color, colors: List<Color>, alpha: Float) : this(color, colors.toImmutableList(), alpha)
+}
+
+@Immutable
+data class StackedAreaBoundaryStyle(
+    val visible: Boolean,
+    val color: Color,
+    val colors: ImmutableList<Color>,
+    val width: Dp,
+    val bezier: Boolean,
+) {
+    constructor(
+        visible: Boolean,
+        color: Color,
+        colors: List<Color>,
+        width: Dp,
+        bezier: Boolean,
+    ) : this(visible, color, colors.toImmutableList(), width, bezier)
+}
+
+@Immutable
+data class StackedAreaAxisStyle(
+    val xLabels: AxisLabelStyle,
+    val yLabels: AxisLabelStyle,
+)
+
+@Immutable
+data class StackedAreaSelectionStyle(
+    val visible: Boolean,
+    val color: Color,
+    val width: Dp,
+)
+
 @Immutable
 class StackedAreaChartStyle(
-    val modifier: Modifier,
     val chartContainerStyle: ChartContainerStyle,
-    val areaColor: Color,
-    val areaColors: List<Color>,
-    val fillAlpha: Float,
-    val lineVisible: Boolean,
-    val lineColor: Color,
-    val lineColors: List<Color>,
-    val lineWidth: Float,
-    val bezier: Boolean,
+    val fill: StackedAreaFillStyle,
+    val boundary: StackedAreaBoundaryStyle,
+    val axis: StackedAreaAxisStyle,
+    val selection: StackedAreaSelectionStyle,
     val zoomControlsVisible: Boolean,
-    val yAxisLabelsVisible: Boolean,
-    val yAxisLabelColor: Color,
-    val yAxisLabelSize: TextUnit,
-    val yAxisLabelCount: Int,
-    val xAxisLabelsVisible: Boolean,
-    val xAxisLabelColor: Color,
-    val xAxisLabelSize: TextUnit,
-    val xAxisLabelMaxCount: Int,
 )
 
 object StackedAreaChartDefaults {
     @Composable
-    private fun defaultXAxisLabelColor() = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
-
-    @Composable
-    private fun defaultYAxisLabelColor() = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
-
-    /**
-     * Returns a StackedAreaChartStyle with the provided parameters or their default values.
-     *
-     * @param areaColor The fallback fill color used when `areaColors` is empty. Defaults to the primary theme color.
-     * @param areaColors The explicit fill colors used for stacked areas. Defaults to an empty list.
-     * @param fillAlpha The alpha value applied to area fills. Defaults to 0.4f in light theme and 0.6f in dark theme.
-     * @param lineVisible Whether boundary lines are shown on top of filled areas. Defaults to true.
-     * @param lineColor The fallback boundary line color used when `lineColors` is empty. Defaults to the primary theme color.
-     * @param lineColors The explicit boundary line colors. Defaults to an empty list.
-     * @param lineWidth The stroke width of boundary lines. Defaults to 4f.
-     * @param bezier Whether curved lines are used for area boundaries. Defaults to false.
-     * @param chartContainerStyle The style to be applied to the chart view. Defaults to `ChartContainerDefaults.style()`.
-     * @param zoomControlsVisible Whether zoom controls are shown in expanded dense mode. Defaults to true.
-     * @param yAxisLabelsVisible Whether Y-axis labels are shown. Defaults to true.
-     * @param yAxisLabelColor The color of Y-axis labels. Defaults to a theme-based onSurface variant.
-     * @param yAxisLabelSize The text size of Y-axis labels. Defaults to 11.sp.
-     * @param yAxisLabelCount Number of Y-axis labels. Defaults to 5.
-     * @param xAxisLabelsVisible Whether X-axis labels are shown. Defaults to true.
-     * @param xAxisLabelColor The color of X-axis labels. Defaults to a theme-based onSurface variant.
-     * @param xAxisLabelSize The text size of X-axis labels. Defaults to 11.sp.
-     * @param xAxisLabelMaxCount Maximum number of X-axis labels to display. Defaults to 6.
-     */
-    @Composable
     fun style(
-        areaColor: Color = MaterialTheme.colorScheme.primary,
-        areaColors: List<Color> = emptyList(),
-        fillAlpha: Float = defaultChartAlpha(),
-        lineVisible: Boolean = true,
-        lineColor: Color = MaterialTheme.colorScheme.primary,
-        lineColors: List<Color> = emptyList(),
-        lineWidth: Float = 4f,
-        bezier: Boolean = false,
         chartContainerStyle: ChartContainerStyle = ChartContainerDefaults.style(),
+        fill: StackedAreaFillStyle = fill(),
+        boundary: StackedAreaBoundaryStyle = boundary(),
+        axis: StackedAreaAxisStyle = axis(),
+        selection: StackedAreaSelectionStyle = selection(),
         zoomControlsVisible: Boolean = true,
-        yAxisLabelsVisible: Boolean = true,
-        yAxisLabelColor: Color = defaultYAxisLabelColor(),
-        yAxisLabelSize: TextUnit = 11.sp,
-        yAxisLabelCount: Int = 5,
-        xAxisLabelsVisible: Boolean = true,
-        xAxisLabelColor: Color = defaultXAxisLabelColor(),
-        xAxisLabelSize: TextUnit = 11.sp,
-        xAxisLabelMaxCount: Int = 6,
-    ): StackedAreaChartStyle {
-        val modifier: Modifier = chartContainerStyle.fillMaxSizeChartModifier()
-
-        return StackedAreaChartStyle(
-            modifier = modifier,
+    ): StackedAreaChartStyle =
+        StackedAreaChartStyle(
             chartContainerStyle = chartContainerStyle,
-            areaColor = areaColor,
-            areaColors = areaColors,
-            fillAlpha = fillAlpha.coerceIn(0f, 1f),
-            lineVisible = lineVisible,
-            lineColor = lineColor,
-            lineColors = lineColors,
-            lineWidth = lineWidth.coerceAtLeast(0f),
-            bezier = bezier,
+            fill = fill,
+            boundary = boundary,
+            axis = axis,
+            selection = selection,
             zoomControlsVisible = zoomControlsVisible,
-            yAxisLabelsVisible = yAxisLabelsVisible,
-            yAxisLabelColor = yAxisLabelColor,
-            yAxisLabelSize = yAxisLabelSize,
-            yAxisLabelCount = yAxisLabelCount,
-            xAxisLabelsVisible = xAxisLabelsVisible,
-            xAxisLabelColor = xAxisLabelColor,
-            xAxisLabelSize = xAxisLabelSize,
-            xAxisLabelMaxCount = xAxisLabelMaxCount,
         )
-    }
+
+    @Composable
+    fun fill(
+        color: Color = MaterialTheme.colorScheme.primary,
+        colors: List<Color> = emptyList(),
+        alpha: Float = defaultChartAlpha(),
+    ): StackedAreaFillStyle = StackedAreaFillStyle(color, colors, alpha.coerceIn(0f, 1f))
+
+    @Composable
+    fun boundary(
+        visible: Boolean = true,
+        color: Color = MaterialTheme.colorScheme.primary,
+        colors: List<Color> = emptyList(),
+        width: Dp = 1.dp,
+        bezier: Boolean = false,
+    ): StackedAreaBoundaryStyle = StackedAreaBoundaryStyle(visible, color, colors, width.coerceAtLeast(0.dp), bezier)
+
+    @Composable
+    fun axis(
+        xLabels: AxisLabelStyle = xLabels(),
+        yLabels: AxisLabelStyle = yLabels(),
+    ): StackedAreaAxisStyle = StackedAreaAxisStyle(xLabels, yLabels)
+
+    @Composable
+    fun xLabels(
+        visible: Boolean = true,
+        color: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f),
+        size: TextUnit = 11.sp,
+        count: Int = 6,
+    ): AxisLabelStyle = AxisLabelStyle(visible, color, size, count)
+
+    @Composable
+    fun yLabels(
+        visible: Boolean = true,
+        color: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f),
+        size: TextUnit = 11.sp,
+        count: Int = 5,
+    ): AxisLabelStyle = AxisLabelStyle(visible, color, size, count)
+
+    @Composable
+    fun selection(
+        visible: Boolean = true,
+        color: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+        width: Dp = 1.dp,
+    ): StackedAreaSelectionStyle = StackedAreaSelectionStyle(visible, color, width.coerceAtLeast(0.dp))
 }

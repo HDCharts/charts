@@ -2,12 +2,12 @@ package io.github.dautovicharis.charts.internal
 
 import io.github.dautovicharis.charts.internal.ValidationErrors.MIN_REQUIRED_STACKED_AREA
 import io.github.dautovicharis.charts.internal.common.model.MultiChartData
-import io.github.dautovicharis.charts.style.StackedAreaChartStyle
+import io.github.dautovicharis.charts.internal.stackedareachart.StackedAreaInternalStyle
 
 @InternalChartsApi
 fun validateStackedAreaData(
     data: MultiChartData,
-    style: StackedAreaChartStyle,
+    style: StackedAreaInternalStyle,
 ): List<String> {
     val firstPointsSize =
         data.items

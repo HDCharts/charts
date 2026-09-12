@@ -13,11 +13,10 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.v2.runComposeUiTest
 import io.github.dautovicharis.charts.StackedAreaChart
 import io.github.dautovicharis.charts.internal.TestTags
-import io.github.dautovicharis.charts.internal.ValidationErrors.MIN_REQUIRED_STACKED_AREA
-import io.github.dautovicharis.charts.internal.ValidationErrors.RULE_DATA_POINTS_LESS_THAN_MIN
-import io.github.dautovicharis.charts.internal.format
 import io.github.dautovicharis.charts.mock.MockTest.multiDataSet
-import io.github.dautovicharis.charts.model.toMultiChartDataSet
+import io.github.dautovicharis.charts.model.ChartSeries
+import io.github.dautovicharis.charts.model.chartDataOf
+import io.github.dautovicharis.charts.model.staticChartSelection
 import io.github.dautovicharis.charts.style.StackedAreaChartDefaults
 import kotlin.test.Test
 import kotlin.test.assertTrue
@@ -27,19 +26,13 @@ class StackedAreaChartTest {
     @Test
     fun stackedAreaChart_withValidData_displaysChart() =
         runComposeUiTest {
-            // Arrange
-            val expectedTitle = multiDataSet.data.title
-
             // Act
             setContent {
-                StackedAreaChart(multiDataSet)
+                StackedAreaChart(data = multiDataSet)
             }
 
             // Assert
             onNodeWithTag(TestTags.STACKED_AREA_CHART).isDisplayed()
-            onNodeWithTag(TestTags.CHART_TITLE)
-                .assertTextEquals(expectedTitle)
-                .isDisplayed()
             onNodeWithTag(TestTags.STACKED_AREA_CHART_X_AXIS_LABELS).isDisplayed()
             onNodeWithTag(TestTags.STACKED_AREA_CHART_Y_AXIS_LABELS).isDisplayed()
         }
@@ -49,22 +42,21 @@ class StackedAreaChartTest {
     fun stackedAreaChart_withInvalidData_displaysError() =
         runComposeUiTest {
             // Arrange
-            val dataSet =
-                listOf("Series" to listOf(10f)).toMultiChartDataSet(
-                    title = "Stacked Area",
+            val data =
+                chartDataOf(
                     categories = listOf("Q1"),
+                    ChartSeries(name = "Series A", values = listOf(10.0, 20.0)),
+                    ChartSeries(name = "Series B", values = listOf(8.0)),
                 )
-            val expectedError =
-                RULE_DATA_POINTS_LESS_THAN_MIN.format(MIN_REQUIRED_STACKED_AREA)
 
             // Act
             setContent {
-                StackedAreaChart(dataSet)
+                StackedAreaChart(data = data)
             }
 
             // Assert
             onNodeWithTag(TestTags.CHART_ERROR).isDisplayed()
-            onNodeWithText("${expectedError}\n").isDisplayed()
+            onNodeWithText("Series 1 is not aligned with the first series.\n").isDisplayed()
         }
 
     @OptIn(ExperimentalTestApi::class)
@@ -73,15 +65,15 @@ class StackedAreaChartTest {
         runComposeUiTest {
             // Arrange
             val selectedPointIndex = 1
-            val expectedTitle = multiDataSet.data.getLabel(selectedPointIndex)
+            val expectedTitle = multiDataSet.categories[selectedPointIndex]
 
             // Act
             setContent {
                 StackedAreaChart(
-                    dataSet = multiDataSet,
+                    data = multiDataSet,
+                    selection = staticChartSelection(selectedPointIndex),
                     interactionEnabled = false,
                     animateOnStart = false,
-                    selectedPointIndex = selectedPointIndex,
                 )
             }
 
@@ -98,8 +90,14 @@ class StackedAreaChartTest {
         runComposeUiTest {
             setContent {
                 StackedAreaChart(
-                    dataSet = multiDataSet,
-                    style = StackedAreaChartDefaults.style(xAxisLabelsVisible = false),
+                    data = multiDataSet,
+                    style =
+                        StackedAreaChartDefaults.style(
+                            axis =
+                                StackedAreaChartDefaults.axis(
+                                    xLabels = StackedAreaChartDefaults.xLabels(visible = false),
+                                ),
+                        ),
                 )
             }
 
@@ -113,8 +111,14 @@ class StackedAreaChartTest {
         runComposeUiTest {
             setContent {
                 StackedAreaChart(
-                    dataSet = multiDataSet,
-                    style = StackedAreaChartDefaults.style(yAxisLabelsVisible = false),
+                    data = multiDataSet,
+                    style =
+                        StackedAreaChartDefaults.style(
+                            axis =
+                                StackedAreaChartDefaults.axis(
+                                    yLabels = StackedAreaChartDefaults.yLabels(visible = false),
+                                ),
+                        ),
                 )
             }
 
@@ -126,16 +130,15 @@ class StackedAreaChartTest {
     @Test
     fun stackedAreaChart_withoutCategories_hidesXAxisLayer() =
         runComposeUiTest {
-            val dataSet =
-                listOf(
-                    "Series A" to listOf(10f, 20f, 30f, 25f),
-                    "Series B" to listOf(5f, 15f, 20f, 18f),
-                ).toMultiChartDataSet(
-                    title = "No Categories",
+            val data =
+                chartDataOf(
+                    categories = emptyList(),
+                    ChartSeries(name = "Series A", values = listOf(10.0, 20.0, 30.0, 25.0)),
+                    ChartSeries(name = "Series B", values = listOf(5.0, 15.0, 20.0, 18.0)),
                 )
 
             setContent {
-                StackedAreaChart(dataSet = dataSet)
+                StackedAreaChart(data = data, title = "No Categories")
             }
 
             onAllNodesWithTag(TestTags.STACKED_AREA_CHART_X_AXIS_LABELS).assertCountEquals(0)
@@ -147,7 +150,7 @@ class StackedAreaChartTest {
     fun stackedAreaChart_withLargeDataset_showsCompactToggleByDefault() =
         runComposeUiTest {
             setContent {
-                StackedAreaChart(dataSet = denseStackedAreaDataSet())
+                StackedAreaChart(data = denseStackedAreaData(), title = "Dense Stacked Area")
             }
 
             onNodeWithTag(TestTags.STACKED_AREA_CHART).isDisplayed()
@@ -161,7 +164,7 @@ class StackedAreaChartTest {
     fun stackedAreaChart_withLargeDataset_expandShowsZoomControls() =
         runComposeUiTest {
             setContent {
-                StackedAreaChart(dataSet = denseStackedAreaDataSet())
+                StackedAreaChart(data = denseStackedAreaData(), title = "Dense Stacked Area")
             }
 
             onNodeWithTag(TestTags.STACKED_AREA_CHART_DENSE_EXPAND).performTouchInput { click() }
@@ -176,7 +179,8 @@ class StackedAreaChartTest {
         runComposeUiTest {
             setContent {
                 StackedAreaChart(
-                    dataSet = denseStackedAreaDataSet(),
+                    data = denseStackedAreaData(),
+                    title = "Dense Stacked Area",
                     style = StackedAreaChartDefaults.style(zoomControlsVisible = false),
                 )
             }
@@ -188,20 +192,55 @@ class StackedAreaChartTest {
 
     @OptIn(ExperimentalTestApi::class)
     @Test
-    fun stackedAreaChart_lastXAxisLabel_hasRightEdgePadding() =
+    fun stackedAreaChart_withInvalidColors_displaysError() =
         runComposeUiTest {
-            val edgeDataSet =
-                listOf(
-                    "Q1" to listOf(320f, 280f, 260f, 300f),
-                    "Q2" to listOf(180f, 210f, 190f, 220f),
-                    "Q3" to listOf(120f, 140f, 130f, 150f),
-                ).toMultiChartDataSet(
-                    title = "Quarterly Revenue by Region",
-                    categories = listOf("Region 4", "Region 36", "Region 68", "Region 100"),
+            setContent {
+                StackedAreaChart(
+                    data = multiDataSet,
+                    style =
+                        StackedAreaChartDefaults.style(
+                            fill = StackedAreaChartDefaults.fill(colors = listOf(seriesColors[0], seriesColors[1])),
+                        ),
+                )
+            }
+
+            onNodeWithTag(TestTags.CHART_ERROR).isDisplayed()
+            onNodeWithText("Fill color count must match series count (4).\n").isDisplayed()
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun stackedAreaChart_withNegativeData_displaysError() =
+        runComposeUiTest {
+            val data =
+                chartDataOf(
+                    categories = listOf("Q1", "Q2"),
+                    ChartSeries(name = "Series A", values = listOf(10.0, -2.0)),
+                    ChartSeries(name = "Series B", values = listOf(5.0, 8.0)),
                 )
 
             setContent {
-                StackedAreaChart(dataSet = edgeDataSet)
+                StackedAreaChart(data = data)
+            }
+
+            onNodeWithTag(TestTags.CHART_ERROR).isDisplayed()
+            onNodeWithText("Series 0 contains a negative or non-finite contribution.\n").isDisplayed()
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun stackedAreaChart_lastXAxisLabel_hasRightEdgePadding() =
+        runComposeUiTest {
+            val edgeData =
+                chartDataOf(
+                    categories = listOf("Region 4", "Region 36", "Region 68", "Region 100"),
+                    ChartSeries(name = "Q1", values = listOf(320.0, 280.0, 260.0, 300.0)),
+                    ChartSeries(name = "Q2", values = listOf(180.0, 210.0, 190.0, 220.0)),
+                    ChartSeries(name = "Q3", values = listOf(120.0, 140.0, 130.0, 150.0)),
+                )
+
+            setContent {
+                StackedAreaChart(data = edgeData, title = "Quarterly Revenue by Region")
             }
 
             val axisBounds = onNodeWithTag(TestTags.STACKED_AREA_CHART_X_AXIS_LABELS).fetchSemanticsNode().boundsInRoot
@@ -211,13 +250,19 @@ class StackedAreaChartTest {
             assertTrue(rightMostVisibleLabelBounds.right <= axisBounds.right - 1f)
         }
 
-    private fun denseStackedAreaDataSet(points: Int = 120) =
+    private val seriesColors =
         listOf(
-            "Series A" to List(points) { index -> 40f + (index % 8) },
-            "Series B" to List(points) { index -> 25f + (index % 6) },
-            "Series C" to List(points) { index -> 15f + (index % 5) },
-        ).toMultiChartDataSet(
-            title = "Dense Stacked Area",
+            androidx.compose.ui.graphics.Color.Red,
+            androidx.compose.ui.graphics.Color.Green,
+            androidx.compose.ui.graphics.Color.Blue,
+            androidx.compose.ui.graphics.Color.Yellow,
+        )
+
+    private fun denseStackedAreaData(points: Int = 120) =
+        chartDataOf(
             categories = List(points) { index -> "P${index + 1}" },
+            ChartSeries(name = "Series A", values = List(points) { index -> 40.0 + (index % 8) }),
+            ChartSeries(name = "Series B", values = List(points) { index -> 25.0 + (index % 6) }),
+            ChartSeries(name = "Series C", values = List(points) { index -> 15.0 + (index % 5) }),
         )
 }
