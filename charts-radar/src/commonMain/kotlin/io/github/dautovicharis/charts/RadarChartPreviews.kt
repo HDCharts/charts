@@ -2,22 +2,34 @@ package io.github.dautovicharis.charts
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import io.github.dautovicharis.charts.RadarChart
-import io.github.dautovicharis.charts.model.toChartDataSet
-import io.github.dautovicharis.charts.model.toMultiChartDataSet
+import io.github.dautovicharis.charts.model.ChartSeries
+import io.github.dautovicharis.charts.model.chartDataOf
 import io.github.dautovicharis.charts.style.RadarChartDefaults
 
 private const val RADAR_CHART_TITLE = "Radar Chart"
 
-private val RADAR_CATEGORIES = listOf("Speed", "Strength", "Agility", "Stamina", "Skill", "Luck")
+private val RADAR_CATEGORIES =
+    listOf("Speed", "Strength", "Agility", "Stamina", "Skill", "Luck")
 
-private val RADAR_MULTI_SERIES =
+private val RADAR_MULTI_VALUES =
     listOf(
-        "Falcon" to listOf(78f, 62f, 90f, 55f, 70f, 80f),
-        "Tiger" to listOf(65f, 88f, 60f, 82f, 55f, 68f),
+        ChartSeries(
+            name = "Falcon",
+            values = listOf(78.0, 62.0, 90.0, 55.0, 70.0, 80.0),
+        ),
+        ChartSeries(
+            name = "Tiger",
+            values = listOf(65.0, 88.0, 60.0, 82.0, 55.0, 68.0),
+        ),
     )
 
-private val RADAR_SINGLE_SERIES = listOf(78f, 62f, 90f, 55f, 70f, 80f)
+private val RADAR_SINGLE_VALUES =
+    listOf(
+        ChartSeries(
+            name = "Falcon",
+            values = listOf(78.0, 62.0, 90.0, 55.0, 70.0, 80.0),
+        ),
+    )
 
 @Composable
 private fun RadarChartMultiSeriesPreviewContent(
@@ -26,21 +38,28 @@ private fun RadarChartMultiSeriesPreviewContent(
 ) {
     val style =
         RadarChartDefaults.style(
-            lineColors =
-                listOf(
-                    MaterialTheme.colorScheme.primary,
-                    MaterialTheme.colorScheme.tertiary,
+            polygon =
+                RadarChartDefaults.polygon(
+                    lineColors =
+                        listOf(
+                            MaterialTheme.colorScheme.primary,
+                            MaterialTheme.colorScheme.tertiary,
+                        ),
                 ),
-            categoryLegendVisible = categoryLegendVisible,
-            categoryPinsVisible = categoryPinsVisible,
+            categories =
+                RadarChartDefaults.categories(
+                    legendVisible = categoryLegendVisible,
+                    pinsVisible = categoryPinsVisible,
+                ),
         )
 
     RadarChart(
-        dataSet =
-            RADAR_MULTI_SERIES.toMultiChartDataSet(
-                title = RADAR_CHART_TITLE,
+        data =
+            chartDataOf(
                 categories = RADAR_CATEGORIES,
+                *RADAR_MULTI_VALUES.toTypedArray(),
             ),
+        title = RADAR_CHART_TITLE,
         style = style,
     )
 }
@@ -48,12 +67,17 @@ private fun RadarChartMultiSeriesPreviewContent(
 @Composable
 private fun RadarChartSingleSeriesPreviewContent() {
     RadarChart(
-        dataSet =
-            RADAR_SINGLE_SERIES.toChartDataSet(
-                title = RADAR_CHART_TITLE,
-                labels = RADAR_CATEGORIES,
+        data =
+            chartDataOf(
+                categories = RADAR_CATEGORIES,
+                *RADAR_SINGLE_VALUES.toTypedArray(),
             ),
-        style = RadarChartDefaults.style(lineColors = listOf(MaterialTheme.colorScheme.primary)),
+        title = RADAR_CHART_TITLE,
+        style =
+            RadarChartDefaults.style(
+                polygon =
+                    RadarChartDefaults.polygon(lineColors = listOf(MaterialTheme.colorScheme.primary)),
+            ),
     )
 }
 
@@ -77,7 +101,10 @@ private fun RadarChartSinglePreview() {
 @Composable
 private fun RadarChartHiddenLegendPreview() {
     ChartsPreviewTheme {
-        RadarChartMultiSeriesPreviewContent(categoryLegendVisible = false, categoryPinsVisible = false)
+        RadarChartMultiSeriesPreviewContent(
+            categoryLegendVisible = false,
+            categoryPinsVisible = false,
+        )
     }
 }
 
@@ -86,11 +113,12 @@ private fun RadarChartHiddenLegendPreview() {
 private fun RadarChartErrorPreview() {
     ChartsPreviewTheme {
         RadarChart(
-            dataSet =
-                listOf(10f, 12f).toChartDataSet(
-                    title = RADAR_CHART_TITLE,
-                    labels = listOf("A", "B"),
+            data =
+                chartDataOf(
+                    categories = listOf("A", "B"),
+                    ChartSeries(name = "Series", values = listOf(10.0, 12.0)),
                 ),
+            title = RADAR_CHART_TITLE,
             style = RadarChartDefaults.style(),
         )
     }

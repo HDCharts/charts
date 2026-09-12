@@ -3,10 +3,9 @@ package dev.hdcode.charts.sampleshared.data.impl
 import dev.hdcode.charts.sampleshared.data.RadarCustomSampleData
 import dev.hdcode.charts.sampleshared.data.RadarSampleData
 import dev.hdcode.charts.sampleshared.data.RadarSampleUseCase
-import io.github.dautovicharis.charts.model.ChartDataSet
-import io.github.dautovicharis.charts.model.MultiChartDataSet
-import io.github.dautovicharis.charts.model.toChartDataSet
-import io.github.dautovicharis.charts.model.toMultiChartDataSet
+import io.github.dautovicharis.charts.model.ChartData
+import io.github.dautovicharis.charts.model.ChartSeries
+import io.github.dautovicharis.charts.model.chartDataOf
 
 internal class DefaultRadarSampleUseCase : RadarSampleUseCase {
     companion object {
@@ -23,90 +22,109 @@ internal class DefaultRadarSampleUseCase : RadarSampleUseCase {
             "Scalability",
             "Observability",
         )
-    private val radarDefaultValues = listOf(84f, 79f, 76f, 88f, 82f, 74f)
+    private val radarDefaultValues = listOf(84.0, 79.0, 76.0, 88.0, 82.0, 74.0)
     private val radarBasicItems =
         listOf(
-            "Release 2.2" to listOf(80f, 75f, 72f, 85f, 79f, 70f),
-            "Release 2.3" to listOf(86f, 82f, 78f, 89f, 84f, 77f),
+            "Release 2.2" to listOf(80.0, 75.0, 72.0, 85.0, 79.0, 70.0),
+            "Release 2.3" to listOf(86.0, 82.0, 78.0, 89.0, 84.0, 77.0),
         )
     private val radarInitialItems =
         listOf(
-            "Android App" to listOf(88f, 81f, 79f, 90f, 83f, 76f),
-            "iOS App" to listOf(84f, 86f, 82f, 88f, 80f, 79f),
-            "Web App" to listOf(78f, 74f, 85f, 83f, 88f, 84f),
+            "Android App" to listOf(88.0, 81.0, 79.0, 90.0, 83.0, 76.0),
+            "iOS App" to listOf(84.0, 86.0, 82.0, 88.0, 80.0, 79.0),
+            "Web App" to listOf(78.0, 74.0, 85.0, 83.0, 88.0, 84.0),
         )
-    private val radarEdgeValues = listOf(40f, 55f, 100f, 45f, 70f, 60f)
+    private val radarEdgeValues = listOf(40.0, 55.0, 100.0, 45.0, 70.0, 60.0)
 
     override fun initialRadarSample(): RadarSampleData =
         RadarSampleData(
-            basicDataSet =
-                radarBasicItems.toMultiChartDataSet(
-                    title = DEFAULT_TITLE,
+            basicData =
+                chartDataOf(
                     categories = radarCategories,
+                    *radarBasicItems
+                        .map { (name, values) ->
+                            ChartSeries(name = name, values = values)
+                        }.toTypedArray(),
                 ),
-            customDataSet =
-                radarInitialItems.toMultiChartDataSet(
-                    title = DEFAULT_TITLE,
+            customData =
+                chartDataOf(
                     categories = radarCategories,
+                    *radarInitialItems
+                        .map { (name, values) ->
+                            ChartSeries(name = name, values = values)
+                        }.toTypedArray(),
                 ),
             seriesKeys = radarInitialItems.map { it.first },
-        )
-
-    override fun initialRadarDefaultDataSet(): ChartDataSet =
-        radarDefaultValues.toChartDataSet(
             title = DEFAULT_TITLE,
-            labels = radarCategories,
         )
 
-    override fun initialRadarEdgeDataSet(): ChartDataSet =
-        radarEdgeValues.toChartDataSet(
-            title = "Stress-Test Profile",
-            labels = radarCategories,
+    override fun initialRadarDefaultData(): ChartData =
+        chartDataOf(
+            categories = radarCategories,
+            ChartSeries(name = "Current", values = radarDefaultValues),
         )
 
-    override fun initialRadarMultiNoCategoriesDataSet(): MultiChartDataSet =
-        radarInitialItems.toMultiChartDataSet(title = DEFAULT_TITLE)
+    override fun initialRadarEdgeData(): ChartData =
+        chartDataOf(
+            categories = radarCategories,
+            ChartSeries(name = "Edge", values = radarEdgeValues),
+        )
+
+    override fun initialRadarMultiNoCategoriesData(): ChartData =
+        chartDataOf(
+            categories = emptyList(),
+            *radarInitialItems
+                .map { (name, values) ->
+                    ChartSeries(name = name, values = values)
+                }.toTypedArray(),
+        )
 
     override fun radarRefreshRange(): IntRange = REFRESH_RANGE
 
-    override fun radarDefaultDataSet(range: IntRange): ChartDataSet {
-        val min = range.first.toFloat()
-        val max = range.last.toFloat()
+    override fun radarDefaultData(range: IntRange): ChartData {
+        val min = range.first.toDouble()
+        val max = range.last.toDouble()
         val newValues =
             radarDefaultValues.map { base ->
                 (base + (-10..10).random()).coerceIn(min, max)
             }
-        return newValues.toChartDataSet(
-            title = DEFAULT_TITLE,
-            labels = radarCategories,
+        return chartDataOf(
+            categories = radarCategories,
+            ChartSeries(name = "Current", values = newValues),
         )
     }
 
-    override fun radarBasicDataSet(range: IntRange): MultiChartDataSet {
-        val min = range.first.toFloat()
-        val max = range.last.toFloat()
+    override fun radarBasicData(range: IntRange): ChartData {
+        val min = range.first.toDouble()
+        val max = range.last.toDouble()
         val newItems =
             radarBasicItems.map { (name, values) ->
                 name to values.map { base -> (base + (-10..10).random()).coerceIn(min, max) }
             }
-        return newItems.toMultiChartDataSet(
-            title = DEFAULT_TITLE,
+        return chartDataOf(
             categories = radarCategories,
+            *newItems
+                .map { (name, values) ->
+                    ChartSeries(name = name, values = values)
+                }.toTypedArray(),
         )
     }
 
     override fun radarCustomSample(range: IntRange): RadarCustomSampleData {
         val newItems =
             radarInitialItems.map { (name, values) ->
-                name to values.map { range.random().toFloat() }
+                name to values.map { range.random().toDouble() }
             }
-        val dataSet =
-            newItems.toMultiChartDataSet(
-                title = DEFAULT_TITLE,
+        val data =
+            chartDataOf(
                 categories = radarCategories,
+                *newItems
+                    .map { (name, values) ->
+                        ChartSeries(name = name, values = values)
+                    }.toTypedArray(),
             )
         return RadarCustomSampleData(
-            dataSet = dataSet,
+            data = data,
             seriesKeys = newItems.map { it.first },
         )
     }

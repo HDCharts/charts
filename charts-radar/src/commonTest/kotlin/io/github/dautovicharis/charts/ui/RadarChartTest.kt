@@ -8,13 +8,12 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.v2.runComposeUiTest
 import io.github.dautovicharis.charts.RadarChart
 import io.github.dautovicharis.charts.internal.TestTags
-import io.github.dautovicharis.charts.internal.ValidationErrors.MIN_REQUIRED_RADAR
-import io.github.dautovicharis.charts.internal.ValidationErrors.RULE_DATA_POINTS_LESS_THAN_MIN
-import io.github.dautovicharis.charts.internal.common.model.ChartDataType
-import io.github.dautovicharis.charts.internal.format
 import io.github.dautovicharis.charts.mock.MockTest.TITLE
-import io.github.dautovicharis.charts.mock.MockTest.dataSet
-import io.github.dautovicharis.charts.model.ChartDataSet
+import io.github.dautovicharis.charts.mock.MockTest.data
+import io.github.dautovicharis.charts.model.ChartSeries
+import io.github.dautovicharis.charts.model.chartDataOf
+import io.github.dautovicharis.charts.model.staticChartSelection
+import io.github.dautovicharis.charts.style.RadarChartDefaults
 import kotlin.test.Test
 
 class RadarChartTest {
@@ -22,15 +21,16 @@ class RadarChartTest {
     @Test
     fun radarChart_withValidData_displaysChart() =
         runComposeUiTest {
-            val expectedTitle = dataSet.data.label
-
             setContent {
-                RadarChart(dataSet)
+                RadarChart(
+                    data = data,
+                    title = TITLE,
+                )
             }
 
             onNodeWithTag(TestTags.RADAR_CHART).isDisplayed()
             onNodeWithTag(TestTags.CHART_TITLE)
-                .assertTextEquals(expectedTitle)
+                .assertTextEquals(TITLE)
                 .isDisplayed()
         }
 
@@ -38,43 +38,66 @@ class RadarChartTest {
     @Test
     fun radarChart_withInvalidData_displaysError() =
         runComposeUiTest {
-            val dataSet =
-                ChartDataSet(
-                    items = ChartDataType.FloatData(listOf(1f, 2f)),
-                    title = TITLE,
+            val data =
+                chartDataOf(
+                    categories = listOf("A", "B"),
+                    ChartSeries(name = "Series", values = listOf(1.0, 2.0)),
                 )
-            val expectedError = RULE_DATA_POINTS_LESS_THAN_MIN.format(MIN_REQUIRED_RADAR)
 
             setContent {
-                RadarChart(dataSet)
+                RadarChart(data = data, title = TITLE)
             }
 
             onNodeWithTag(TestTags.CHART_ERROR).isDisplayed()
-            onNodeWithText("${expectedError}\n").isDisplayed()
+            onNodeWithText("Data points size should be greater than or equal to 3.\n").isDisplayed()
         }
 
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun radarChart_withSelectedAxisIndex_displaysSelectedAxisDetails() =
         runComposeUiTest {
-            // Arrange
             val selectedAxisIndex = 1
-            val expectedTitle = dataSet.data.item.labels[selectedAxisIndex]
+            val expectedTitle = data.categories[selectedAxisIndex]
 
-            // Act
             setContent {
                 RadarChart(
-                    dataSet = dataSet,
+                    data = data,
+                    title = TITLE,
                     interactionEnabled = false,
                     animateOnStart = false,
-                    selectedAxisIndex = selectedAxisIndex,
+                    selection = staticChartSelection(selectedAxisIndex),
                 )
             }
 
-            // Assert
             onNodeWithTag(TestTags.RADAR_CHART).isDisplayed()
             onNodeWithTag(TestTags.CHART_TITLE)
                 .assertTextEquals(expectedTitle)
                 .isDisplayed()
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun radarChart_withoutCategories_hidesAxisLabels() =
+        runComposeUiTest {
+            val data =
+                chartDataOf(
+                    categories = emptyList(),
+                    ChartSeries(
+                        name = "Series",
+                        values = listOf(10.0, 20.0, 30.0, 40.0, 50.0, 60.0),
+                    ),
+                )
+            setContent {
+                RadarChart(
+                    data = data,
+                    title = TITLE,
+                    style =
+                        RadarChartDefaults.style(
+                            axes = RadarChartDefaults.axes(labelVisible = true),
+                        ),
+                )
+            }
+
+            onNodeWithTag(TestTags.RADAR_CHART).isDisplayed()
         }
 }

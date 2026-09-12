@@ -36,7 +36,6 @@ import io.github.dautovicharis.charts.internal.common.composable.rememberShowSta
 import io.github.dautovicharis.charts.internal.common.model.MultiChartData
 import io.github.dautovicharis.charts.internal.common.model.minMax
 import io.github.dautovicharis.charts.internal.common.model.normalizeByMinMax
-import io.github.dautovicharis.charts.style.RadarChartStyle
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.coroutineScope
@@ -50,7 +49,7 @@ import kotlin.math.sin
 @Composable
 internal fun RadarChart(
     data: MultiChartData,
-    style: RadarChartStyle,
+    style: RadarInternalStyle,
     colors: ImmutableList<Color>,
     categoryColors: ImmutableList<Color>,
     axisLabels: ImmutableList<String> = persistentListOf(),
@@ -76,7 +75,7 @@ internal fun RadarChart(
             else -> forcedSelectedIndex
         }
 
-    BoxWithConstraints(modifier = style.modifier) {
+    BoxWithConstraints(modifier = style.chartContainerStyle.fillMaxSizeChartModifier()) {
         val density = LocalDensity.current
         val widthPx = with(density) { maxWidth.toPx() }
         val heightPx = with(density) { maxHeight.toPx() }
@@ -140,8 +139,8 @@ internal fun RadarChart(
             }
 
         val labelRadius =
-            remember(radius, style.axisLabelPadding, density) {
-                radius + with(density) { style.axisLabelPadding.toPx() }
+            remember(radius, style.axisLabelPadding) {
+                radius + style.axisLabelPadding
             }
 
         val labelPositions =
@@ -225,7 +224,7 @@ internal fun RadarChart(
 
 private fun DrawScope.drawRadar(
     data: MultiChartData,
-    style: RadarChartStyle,
+    style: RadarInternalStyle,
     colors: ImmutableList<Color>,
     categoryColors: ImmutableList<Color>,
     axisCount: Int,
@@ -292,11 +291,13 @@ private fun DrawScope.drawRadar(
             )
         }
 
-        drawPath(
-            path = path,
-            color = lineColor,
-            style = Stroke(width = style.lineWidth),
-        )
+        if (style.lineWidth > 0f) {
+            drawPath(
+                path = path,
+                color = lineColor,
+                style = Stroke(width = style.lineWidth),
+            )
+        }
     }
 
     if (style.pointVisible) {

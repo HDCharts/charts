@@ -55,13 +55,15 @@ fun RadarChartDemo(viewModel: RadarChartViewModel = koinViewModel()) {
         when (dataSet.preset) {
             ChartPreset.Default -> {
                 RadarChart(
-                    dataSet = dataSet.basicDataSet,
+                    data = dataSet.basicData,
+                    title = dataSet.title,
                 )
             }
 
             ChartPreset.Custom -> {
                 RadarChart(
-                    dataSet = dataSet.customDataSet,
+                    data = dataSet.customData,
+                    title = dataSet.title,
                     style =
                         ChartTestStyleFixtures.radarCustomStyle(
                             chartContainerStyle = ChartContainerDefaults.style(),

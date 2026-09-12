@@ -1,7 +1,6 @@
 package dev.hdcode.charts.sampleshared.data
 
 import io.github.dautovicharis.charts.model.ChartData
-import io.github.dautovicharis.charts.model.MultiChartDataSet
 import io.github.dautovicharis.charts.model.PieSlice
 
 data class PieSampleData(
@@ -28,12 +27,13 @@ data class StackedAreaSampleData(
 )
 
 data class RadarSampleData(
-    val basicDataSet: MultiChartDataSet,
-    val customDataSet: MultiChartDataSet,
+    val basicData: ChartData,
+    val customData: ChartData,
     val seriesKeys: List<String>,
+    val title: String,
 )
 
 data class RadarCustomSampleData(
-    val dataSet: MultiChartDataSet,
+    val data: ChartData,
     val seriesKeys: List<String>,
 )
