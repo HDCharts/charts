@@ -6,12 +6,11 @@ import io.github.dautovicharis.charts.internal.TestTags
 import io.github.dautovicharis.charts.internal.common.composable.ChartHeaderLayout
 import io.github.dautovicharis.charts.internal.common.composable.DenseToggleControl
 import io.github.dautovicharis.charts.internal.common.composable.ZoomControls
-import io.github.dautovicharis.charts.style.StackedAreaChartStyle
 
 @Composable
 internal fun StackedAreaChartHeader(
     title: String,
-    style: StackedAreaChartStyle,
+    style: StackedAreaInternalStyle,
     showDensityToggle: Boolean,
     denseExpanded: Boolean,
     onToggleDensity: () -> Unit,

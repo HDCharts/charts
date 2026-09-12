@@ -29,7 +29,7 @@ interface StackedBarSampleUseCase {
 interface StackedAreaSampleUseCase {
     fun initialStackedAreaSample(): StackedAreaSampleData
 
-    fun initialStackedAreaNoCategoriesDataSet(): MultiChartDataSet
+    fun initialStackedAreaNoCategoriesData(): StackedAreaSampleData
 
     fun stackedAreaRefreshRange(): IntRange
 

@@ -9,12 +9,19 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.sp
 import io.github.dautovicharis.charts.internal.common.model.ChartDataType.FloatData
 import io.github.dautovicharis.charts.internal.linechart.LineChartInternalStyle
+import io.github.dautovicharis.charts.model.ChartData
 import io.github.dautovicharis.charts.model.ChartDataSet
+import io.github.dautovicharis.charts.model.ChartSeries
 import io.github.dautovicharis.charts.model.MultiChartDataSet
+import io.github.dautovicharis.charts.model.chartDataOf
 import io.github.dautovicharis.charts.style.AxisLabelStyle
 import io.github.dautovicharis.charts.style.ChartContainerStyle
 import io.github.dautovicharis.charts.style.RadarChartStyle
+import io.github.dautovicharis.charts.style.StackedAreaAxisStyle
+import io.github.dautovicharis.charts.style.StackedAreaBoundaryStyle
 import io.github.dautovicharis.charts.style.StackedAreaChartStyle
+import io.github.dautovicharis.charts.style.StackedAreaFillStyle
+import io.github.dautovicharis.charts.style.StackedAreaSelectionStyle
 import io.github.dautovicharis.charts.style.StackedBarAxisStyle
 import io.github.dautovicharis.charts.style.StackedBarChartStyle
 import io.github.dautovicharis.charts.style.StackedBarLayoutStyle
@@ -114,6 +121,58 @@ internal object MockTest {
             title = TITLE,
         )
 
+    // ChartData helpers for stacked-area tests
+    val multiDataSetItems: ChartData =
+        chartDataOf(
+            categories = categories,
+            ChartSeries(name = FIRST_ITEM_NAME, values = FIRST_ITEM.map { it.toDouble() }),
+            ChartSeries(name = SECOND_ITEM_NAME, values = SECOND_ITEM.map { it.toDouble() }),
+            ChartSeries(name = THIRD_ITEM_NAME, values = THIRD_ITEM.map { it.toDouble() }),
+            ChartSeries(name = FOURTH_ITEM_NAME, values = FOURTH_ITEM.map { it.toDouble() }),
+        )
+
+    fun invalidMultiDataSetItemsCategories(): ChartData =
+        chartDataOf(
+            categories = categories.drop(1),
+            ChartSeries(name = FIRST_ITEM_NAME, values = FIRST_ITEM.map { it.toDouble() }),
+            ChartSeries(name = SECOND_ITEM_NAME, values = SECOND_ITEM.map { it.toDouble() }),
+            ChartSeries(name = THIRD_ITEM_NAME, values = THIRD_ITEM.map { it.toDouble() }),
+            ChartSeries(name = FOURTH_ITEM_NAME, values = FOURTH_ITEM.map { it.toDouble() }),
+        )
+
+    fun invalidRaggedMultiDataSetItems(index: Int): ChartData {
+        val seriesList =
+            listOf(FIRST_ITEM, SECOND_ITEM, THIRD_ITEM, FOURTH_ITEM).mapIndexed { i, values ->
+                val name =
+                    listOf(
+                        FIRST_ITEM_NAME,
+                        SECOND_ITEM_NAME,
+                        THIRD_ITEM_NAME,
+                        FOURTH_ITEM_NAME,
+                    )[i]
+                val seriesValues =
+                    if (i == index) {
+                        values.drop(2).map { it.toDouble() }
+                    } else {
+                        values.map { it.toDouble() }
+                    }
+                ChartSeries(name = name, values = seriesValues)
+            }
+        return chartDataOf(
+            categories = categories,
+            *seriesList.toTypedArray(),
+        )
+    }
+
+    fun invalidSinglePointMultiDataSetItems(index: Int): ChartData =
+        chartDataOf(
+            categories = listOf("Jan"),
+            ChartSeries(name = FIRST_ITEM_NAME, values = listOf(FIRST_ITEM.first().toDouble())),
+            ChartSeries(name = SECOND_ITEM_NAME, values = SECOND_ITEM.map { it.toDouble() }),
+            ChartSeries(name = THIRD_ITEM_NAME, values = THIRD_ITEM.map { it.toDouble() }),
+            ChartSeries(name = FOURTH_ITEM_NAME, values = FOURTH_ITEM.map { it.toDouble() }),
+        )
+
     // Mock styles
     fun mockLineChartStyle(lineColors: List<Color> = colors): LineChartInternalStyle =
         LineChartInternalStyle(
@@ -166,25 +225,33 @@ internal object MockTest {
         lineColors: List<Color> = colors,
     ): StackedAreaChartStyle =
         StackedAreaChartStyle(
-            modifier = Modifier.fillMaxSize(),
-            areaColor = Color.Red,
-            areaColors = areaColors,
-            fillAlpha = 0.35f,
-            lineVisible = true,
-            lineColor = Color.Red,
-            lineColors = lineColors,
-            lineWidth = 4f,
-            bezier = false,
-            zoomControlsVisible = true,
-            yAxisLabelsVisible = true,
-            yAxisLabelColor = Color.Gray,
-            yAxisLabelSize = 11.sp,
-            yAxisLabelCount = 5,
-            xAxisLabelsVisible = true,
-            xAxisLabelColor = Color.Gray,
-            xAxisLabelSize = 11.sp,
-            xAxisLabelMaxCount = 6,
             chartContainerStyle = mockChartContainerStyle(),
+            fill =
+                StackedAreaFillStyle(
+                    color = Color.Red,
+                    colors = areaColors,
+                    alpha = 0.35f,
+                ),
+            boundary =
+                StackedAreaBoundaryStyle(
+                    visible = true,
+                    color = Color.Red,
+                    colors = lineColors,
+                    width = Dp(4f),
+                    bezier = false,
+                ),
+            axis =
+                StackedAreaAxisStyle(
+                    xLabels = AxisLabelStyle(visible = true, color = Color.Gray, size = 11.sp, count = 6),
+                    yLabels = AxisLabelStyle(visible = true, color = Color.Gray, size = 11.sp, count = 5),
+                ),
+            selection =
+                StackedAreaSelectionStyle(
+                    visible = true,
+                    color = Color.Gray,
+                    width = Dp(1f),
+                ),
+            zoomControlsVisible = true,
         )
 
     fun mockBarChartStyle(barColors: List<Color> = colors): StackedBarChartStyle =

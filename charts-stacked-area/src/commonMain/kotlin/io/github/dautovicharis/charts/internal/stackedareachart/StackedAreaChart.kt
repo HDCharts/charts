@@ -56,7 +56,6 @@ import io.github.dautovicharis.charts.internal.common.interaction.buildPinchZoom
 import io.github.dautovicharis.charts.internal.common.interaction.buildTapGestureModifier
 import io.github.dautovicharis.charts.internal.common.model.MultiChartData
 import io.github.dautovicharis.charts.internal.common.model.normalizeStackedAreaValues
-import io.github.dautovicharis.charts.style.StackedAreaChartStyle
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
@@ -72,7 +71,7 @@ private const val FIXED_X_AXIS_LABEL_TILT_DEGREES = 34f
 internal fun StackedAreaChart(
     data: MultiChartData,
     title: String,
-    style: StackedAreaChartStyle,
+    style: StackedAreaInternalStyle,
     areaColors: ImmutableList<Color>,
     lineColors: ImmutableList<Color>,
     interactionEnabled: Boolean,
@@ -218,25 +217,19 @@ internal fun StackedAreaChart(
         }
 
     val onSelectRenderIndex: (Int) -> Unit = { renderIndex ->
-        if (!hasForcedSelection) {
-            val resolvedSourceIndex =
-                when (renderIndex) {
-                    in 0 until pointsCount -> renderDataBundle.resolveSourceIndex(renderIndex)
-                    else -> NO_SELECTION
-                }
-            if (selectedSourceIndexFromInteraction != resolvedSourceIndex) {
-                selectedSourceIndexFromInteraction = resolvedSourceIndex
-                onValueChanged(resolvedSourceIndex)
+        val resolvedSourceIndex =
+            when (renderIndex) {
+                in 0 until pointsCount -> renderDataBundle.resolveSourceIndex(renderIndex)
+                else -> NO_SELECTION
             }
+        if (selectedSourceIndexFromInteraction != resolvedSourceIndex) {
+            selectedSourceIndexFromInteraction = resolvedSourceIndex
+            onValueChanged(resolvedSourceIndex)
         }
     }
 
     val onToggleSelection: (Int) -> Unit = { renderIndex ->
-        val currentRenderIndex =
-            when (hasForcedSelection) {
-                true -> renderDataBundle.resolveRenderIndex(forcedSelectedSourceIndex)
-                false -> renderDataBundle.resolveRenderIndex(selectedSourceIndexFromInteraction)
-            }
+        val currentRenderIndex = effectiveSelectedRenderIndex
         if (currentRenderIndex == renderIndex && currentRenderIndex != NO_SELECTION) {
             onSelectRenderIndex(NO_SELECTION)
         } else {
@@ -244,8 +237,8 @@ internal fun StackedAreaChart(
         }
     }
 
-    val showZoomControlsInHeader = isScrollable && style.zoomControlsVisible
-    val showCompactToggle = isDenseData
+    val showZoomControlsInHeader = interactionEnabled && isScrollable && style.zoomControlsVisible
+    val showCompactToggle = interactionEnabled && isDenseData
     val showHeader = title.isNotBlank() || showCompactToggle || showZoomControlsInHeader
 
     Column(
@@ -281,7 +274,6 @@ internal fun StackedAreaChart(
             lineColors = lineColors,
             interactionEnabled = interactionEnabled,
             isScrollable = isScrollable,
-            hasForcedSelection = hasForcedSelection,
             animatedValues = animatedValues,
             revealProgress = revealProgress,
             pointsCount = pointsCount,
@@ -309,12 +301,11 @@ internal fun StackedAreaChart(
 @Composable
 private fun StackedAreaChartContent(
     data: MultiChartData,
-    style: StackedAreaChartStyle,
+    style: StackedAreaInternalStyle,
     areaColors: ImmutableList<Color>,
     lineColors: ImmutableList<Color>,
     interactionEnabled: Boolean,
     isScrollable: Boolean,
-    hasForcedSelection: Boolean,
     animatedValues: List<List<Animatable<Float, *>>>,
     revealProgress: Float,
     pointsCount: Int,
@@ -333,8 +324,8 @@ private fun StackedAreaChartContent(
     val xAxisLabels = remember(data) { if (data.hasCategories()) data.categories.toList() else emptyList() }
     val showYAxisLabels = style.yAxisLabelsVisible
     val showXAxisLabelsCandidate = style.xAxisLabelsVisible && xAxisLabels.isNotEmpty()
-    val dragInteractionEnabled = interactionEnabled && !isScrollable && !hasForcedSelection
-    val tapInteractionEnabled = interactionEnabled && isScrollable && !hasForcedSelection
+    val dragInteractionEnabled = interactionEnabled && !isScrollable
+    val tapInteractionEnabled = interactionEnabled && isScrollable
 
     BoxWithConstraints(modifier = modifier) {
         val density = LocalDensity.current
@@ -599,6 +590,8 @@ private fun StackedAreaChartContent(
                                 series.map { value -> value.value * size.height }
                             }
                         val emptyLower = List(pointsCount) { 0f }
+                        val lineWidthPx = style.lineWidth.toPx()
+                        val selectionLineWidthPx = style.selectionLineWidth.toPx()
 
                         val clampedVisibleRange =
                             when {
@@ -628,14 +621,14 @@ private fun StackedAreaChartContent(
                                 visibleStart = rangeStart,
                                 visibleEnd = rangeEnd,
                             )
-                            if (style.lineVisible && style.lineWidth > 0f) {
+                            if (style.lineVisible && lineWidthPx > 0f) {
                                 drawStackedAreaLine(
                                     upperSeries = upperSeries,
                                     lineColor =
                                         lineColors.getOrElse(index) {
                                             lineColors.lastOrNull() ?: Color.Transparent
                                         },
-                                    lineWidth = style.lineWidth,
+                                    lineWidth = lineWidthPx,
                                     bezier = style.bezier,
                                     revealProgress = revealProgress,
                                     visibleStart = rangeStart,
@@ -644,16 +637,16 @@ private fun StackedAreaChartContent(
                             }
                         }
 
-                        if (selectedIndex != NO_SELECTION && pointsCount > 1) {
+                        if (style.selectionLineVisible && selectedIndex != NO_SELECTION && pointsCount > 1) {
                             val safeIndex = selectedIndex.coerceIn(0, pointsCount - 1)
                             val stepX = if (isScrollable) denseStepX else fitStepX
                             if (stepX > 0f) {
                                 val selectedX = safeIndex * stepX
                                 drawLine(
-                                    color = style.yAxisLabelColor.copy(alpha = 0.4f),
+                                    color = style.selectionLineColor,
                                     start = Offset(selectedX, 0f),
                                     end = Offset(selectedX, size.height),
-                                    strokeWidth = 1f,
+                                    strokeWidth = selectionLineWidthPx,
                                 )
                             }
                         }

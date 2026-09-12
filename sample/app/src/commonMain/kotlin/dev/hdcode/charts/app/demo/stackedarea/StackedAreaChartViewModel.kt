@@ -3,7 +3,7 @@ package dev.hdcode.charts.app.demo.stackedarea
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.hdcode.charts.sampleshared.data.StackedAreaSampleUseCase
-import io.github.dautovicharis.charts.model.MultiChartDataSet
+import io.github.dautovicharis.charts.model.ChartData
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,8 +21,9 @@ data class StackedAreaChartControlsState(
 )
 
 data class StackedAreaChartState(
-    val dataSet: MultiChartDataSet,
+    val data: ChartData,
     val seriesKeys: List<String> = emptyList(),
+    val title: String = "",
 )
 
 class StackedAreaChartViewModel(
@@ -39,12 +40,10 @@ class StackedAreaChartViewModel(
     private val initialSample = stackedAreaSampleUseCase.initialStackedAreaSample()
     private val defaultPoints =
         initialSample
-            .dataSet
             .data
-            .items
+            .series
             .firstOrNull()
-            ?.item
-            ?.points
+            ?.values
             ?.size
             ?.coerceIn(MIN_SUPPORTED_POINTS, MAX_SUPPORTED_POINTS) ?: MIN_SUPPORTED_POINTS
     private val defaultRange =
@@ -56,12 +55,11 @@ class StackedAreaChartViewModel(
 
     private val _dataSet =
         MutableStateFlow(
-            initialSample.let { sample ->
-                StackedAreaChartState(
-                    dataSet = sample.dataSet,
-                    seriesKeys = sample.seriesKeys,
-                )
-            },
+            StackedAreaChartState(
+                data = initialSample.data,
+                seriesKeys = initialSample.seriesKeys,
+                title = initialSample.title,
+            ),
         )
 
     val dataSet: StateFlow<StackedAreaChartState> = _dataSet.asStateFlow()
@@ -96,8 +94,9 @@ class StackedAreaChartViewModel(
             )
         _dataSet.value =
             StackedAreaChartState(
-                dataSet = sample.dataSet,
+                data = sample.data,
                 seriesKeys = sample.seriesKeys,
+                title = sample.title,
             )
     }
 

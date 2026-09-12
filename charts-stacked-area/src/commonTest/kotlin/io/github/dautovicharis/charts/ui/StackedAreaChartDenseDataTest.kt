@@ -14,8 +14,9 @@ import androidx.compose.ui.test.swipeLeft
 import androidx.compose.ui.test.v2.runComposeUiTest
 import io.github.dautovicharis.charts.StackedAreaChart
 import io.github.dautovicharis.charts.internal.TestTags
-import io.github.dautovicharis.charts.model.MultiChartDataSet
-import io.github.dautovicharis.charts.model.toMultiChartDataSet
+import io.github.dautovicharis.charts.model.ChartData
+import io.github.dautovicharis.charts.model.ChartSeries
+import io.github.dautovicharis.charts.model.chartDataOf
 import kotlin.test.Test
 import kotlin.test.assertNotEquals
 
@@ -28,9 +29,9 @@ class StackedAreaChartDenseDataTest {
     @Test
     fun stackedAreaChart_scrollThenTap_changesSelectedLabelAtSameViewportX() =
         runComposeUiTest {
-            val dataSet = denseStackedAreaDataSet()
+            val data = denseStackedAreaData()
             setContent {
-                StackedAreaChart(dataSet = dataSet)
+                StackedAreaChart(data = data, title = "Dense Stacked Area")
             }
 
             onNodeWithTag(TestTags.STACKED_AREA_CHART_DENSE_EXPAND).performTouchInput { click() }
@@ -40,7 +41,7 @@ class StackedAreaChartDenseDataTest {
 
             tapChartAt(x = 24f)
             waitUntil(timeoutMillis = 3_000L) {
-                currentTitle() != dataSet.data.title
+                currentTitle() != "Dense Stacked Area"
             }
             val beforeScrollTitle = currentTitle()
 
@@ -52,19 +53,19 @@ class StackedAreaChartDenseDataTest {
             tapChartAt(x = 24f)
             waitUntil(timeoutMillis = 3_000L) {
                 val title = currentTitle()
-                title != beforeScrollTitle && title != dataSet.data.title
+                title != beforeScrollTitle && title != "Dense Stacked Area"
             }
             val afterScrollTitle = currentTitle()
 
             assertNotEquals(beforeScrollTitle, afterScrollTitle)
-            assertNotEquals(dataSet.data.title, afterScrollTitle)
+            assertNotEquals("Dense Stacked Area", afterScrollTitle)
         }
 
     @Test
     fun stackedAreaChart_withSmallDataset_doesNotShowDenseControls() =
         runComposeUiTest {
             setContent {
-                StackedAreaChart(dataSet = smallStackedAreaDataSet())
+                StackedAreaChart(data = smallStackedAreaData(), title = "Small Stacked Area")
             }
 
             onNodeWithTag(TestTags.STACKED_AREA_CHART).isDisplayed()
@@ -95,23 +96,19 @@ class StackedAreaChartDenseDataTest {
         }
     }
 
-    private fun denseStackedAreaDataSet(points: Int = 120): MultiChartDataSet =
-        listOf(
-            "Series A" to List(points) { index -> 40f + (index % 8) },
-            "Series B" to List(points) { index -> 25f + (index % 6) },
-            "Series C" to List(points) { index -> 15f + (index % 5) },
-        ).toMultiChartDataSet(
-            title = "Dense Stacked Area",
+    private fun denseStackedAreaData(points: Int = 120): ChartData =
+        chartDataOf(
             categories = List(points) { index -> "P${index + 1}" },
+            ChartSeries(name = "Series A", values = List(points) { index -> 40.0 + (index % 8) }),
+            ChartSeries(name = "Series B", values = List(points) { index -> 25.0 + (index % 6) }),
+            ChartSeries(name = "Series C", values = List(points) { index -> 15.0 + (index % 5) }),
         )
 
-    private fun smallStackedAreaDataSet(points: Int = 8): MultiChartDataSet =
-        listOf(
-            "Series A" to List(points) { index -> 20f + index },
-            "Series B" to List(points) { index -> 14f + (index % 4) },
-            "Series C" to List(points) { index -> 8f + (index % 3) },
-        ).toMultiChartDataSet(
-            title = "Small Stacked Area",
+    private fun smallStackedAreaData(points: Int = 8): ChartData =
+        chartDataOf(
             categories = List(points) { index -> "P${index + 1}" },
+            ChartSeries(name = "Series A", values = List(points) { index -> 20.0 + index }),
+            ChartSeries(name = "Series B", values = List(points) { index -> 14.0 + (index % 4) }),
+            ChartSeries(name = "Series C", values = List(points) { index -> 8.0 + (index % 3) }),
         )
 }

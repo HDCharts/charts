@@ -8,6 +8,7 @@ import dev.hdcode.charts.app.screenshot.shared.ScreenshotPreview
 import dev.hdcode.charts.app.screenshot.shared.ScreenshotSurface
 import dev.hdcode.charts.sampleshared.fixtures.ChartTestStyleFixtures
 import io.github.dautovicharis.charts.StackedAreaChart
+import io.github.dautovicharis.charts.model.staticChartSelection
 import io.github.dautovicharis.charts.style.ChartContainerDefaults
 
 @PreviewTest
@@ -15,8 +16,10 @@ import io.github.dautovicharis.charts.style.ChartContainerDefaults
 @Composable
 fun StackedAreaChartDefaultPreview() {
     ScreenshotSurface {
+        val sample = SCREENSHOT_STACKED_AREA_SAMPLE_USE_CASE.initialStackedAreaSample()
         StackedAreaChart(
-            dataSet = SCREENSHOT_STACKED_AREA_SAMPLE_USE_CASE.initialStackedAreaSample().dataSet,
+            data = sample.data,
+            title = sample.title,
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
         )
     }
@@ -27,8 +30,10 @@ fun StackedAreaChartDefaultPreview() {
 @Composable
 fun StackedAreaChartCustomPreview() {
     ScreenshotSurface {
+        val sample = SCREENSHOT_STACKED_AREA_SAMPLE_USE_CASE.initialStackedAreaSample()
         StackedAreaChart(
-            dataSet = SCREENSHOT_STACKED_AREA_SAMPLE_USE_CASE.initialStackedAreaSample().dataSet,
+            data = sample.data,
+            title = sample.title,
             style =
                 ChartTestStyleFixtures.stackedAreaCustomStyle(
                     chartContainerStyle = ChartContainerDefaults.style(),
@@ -44,8 +49,10 @@ fun StackedAreaChartCustomPreview() {
 @Composable
 fun StackedAreaChartNoCategoriesPreview() {
     ScreenshotSurface {
+        val sample = SCREENSHOT_STACKED_AREA_SAMPLE_USE_CASE.initialStackedAreaNoCategoriesData()
         StackedAreaChart(
-            dataSet = SCREENSHOT_STACKED_AREA_SAMPLE_USE_CASE.initialStackedAreaNoCategoriesDataSet(),
+            data = sample.data,
+            title = sample.title,
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
         )
     }
@@ -56,11 +63,13 @@ fun StackedAreaChartNoCategoriesPreview() {
 @Composable
 fun StackedAreaChartSelectedPointPreview() {
     ScreenshotSurface {
+        val sample = SCREENSHOT_STACKED_AREA_SAMPLE_USE_CASE.initialStackedAreaSample()
         StackedAreaChart(
-            dataSet = SCREENSHOT_STACKED_AREA_SAMPLE_USE_CASE.initialStackedAreaSample().dataSet,
+            data = sample.data,
+            title = sample.data.categories[1],
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
             interactionEnabled = false,
-            selectedPointIndex = 1,
+            selection = staticChartSelection(1),
         )
     }
 }

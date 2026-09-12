@@ -177,7 +177,8 @@ fun StackedBarDefaultGifScenario() {
 @Composable
 fun StackedAreaDefaultGifScenario() {
     DocsGifScene {
-        StackedAreaChart(stackedAreaSampleUseCase().initialStackedAreaSample().dataSet)
+        val sample = stackedAreaSampleUseCase().initialStackedAreaSample()
+        StackedAreaChart(data = sample.data, title = sample.title)
     }
 }
 
