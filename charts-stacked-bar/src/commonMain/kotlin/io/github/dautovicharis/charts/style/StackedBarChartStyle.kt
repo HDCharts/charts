@@ -3,137 +3,103 @@ package io.github.dautovicharis.charts.style
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 
-/**
- * A class that defines the style for a Stacked Bar Chart.
- *
- * @property modifier The modifier to be applied to the chart.
- * @property chartContainerStyle The style to be applied to the chart container.
- * @property barColor The fallback base color used when `barColors` is empty.
- * @property barAlpha The alpha value applied to rendered bar segments.
- * @property space The space between bars in the chart.
- * @property barColors The explicit colors used for stacked segments.
- * @property minBarWidth The minimum width of each bar, used for dense/expand behavior.
- * @property zoomControlsVisible Whether zoom controls are shown in expanded dense mode.
- * @property yAxisLabelsVisible Whether Y-axis labels are shown.
- * @property yAxisLabelColor The color of Y-axis labels.
- * @property yAxisLabelSize The text size of Y-axis labels.
- * @property yAxisLabelCount Number of Y-axis labels.
- * @property xAxisLabelsVisible Whether X-axis labels are shown.
- * @property xAxisLabelColor The color of X-axis labels.
- * @property xAxisLabelSize The text size of X-axis labels.
- * @property xAxisLabelMaxCount Maximum number of X-axis labels to display.
- * @property selectionLineVisible Whether the selection indicator line is shown.
- * @property selectionLineColor The color of the selection indicator line.
- * @property selectionLineWidth The stroke width of the selection indicator line.
- */
 @Immutable
-class StackedBarChartStyle(
-    val modifier: Modifier,
-    val chartContainerStyle: ChartContainerStyle,
-    val barColor: Color,
-    val barAlpha: Float,
+data class StackedBarSegmentStyle(
+    val color: Color,
+    val colors: ImmutableList<Color>,
+    val alpha: Float,
+) {
+    constructor(color: Color, colors: List<Color>, alpha: Float) : this(color, colors.toImmutableList(), alpha)
+}
+
+@Immutable
+data class StackedBarLayoutStyle(
     val space: Dp,
-    val barColors: List<Color>,
     val minBarWidth: Dp,
-    val zoomControlsVisible: Boolean,
-    val yAxisLabelsVisible: Boolean,
-    val yAxisLabelColor: Color,
-    val yAxisLabelSize: TextUnit,
-    val yAxisLabelCount: Int,
-    val xAxisLabelsVisible: Boolean,
-    val xAxisLabelColor: Color,
-    val xAxisLabelSize: TextUnit,
-    val xAxisLabelMaxCount: Int,
-    val selectionLineVisible: Boolean,
-    val selectionLineColor: Color,
-    val selectionLineWidth: Float,
 )
 
-/**
- * An object that provides default styles for a Stacked Bar Chart.
- */
+@Immutable
+data class StackedBarAxisStyle(
+    val xLabels: AxisLabelStyle,
+    val yLabels: AxisLabelStyle,
+)
+
+@Immutable
+data class StackedBarSelectionStyle(
+    val visible: Boolean,
+    val color: Color,
+    val width: Dp,
+)
+
+@Immutable
+class StackedBarChartStyle(
+    val chartContainerStyle: ChartContainerStyle,
+    val segments: StackedBarSegmentStyle,
+    val layout: StackedBarLayoutStyle,
+    val axis: StackedBarAxisStyle,
+    val selection: StackedBarSelectionStyle,
+    val zoomControlsVisible: Boolean,
+)
+
 object StackedBarChartDefaults {
     @Composable
-    private fun defaultXAxisLabelColor() = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
-
-    @Composable
-    private fun defaultYAxisLabelColor() = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
-
-    @Composable
-    private fun defaultSelectionLineColor() = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
-
-    /**
-     * Returns a StackedBarChartStyle with the provided parameters or their default values.
-     *
-     * @param barColor The color to be used for the bars in the chart. Defaults to the primary color of the MaterialTheme.
-     * @param barAlpha The alpha value applied to rendered bar segments. Defaults to 0.4f in light theme and 0.6f in dark theme.
-     * @param space The space between the bars in the chart. Defaults to 10.dp.
-     * @param barColors The colors to be used for the bars in the chart. Defaults to an empty list.
-     * @param minBarWidth The minimum width of each bar. Defaults to 10.dp.
-     * @param zoomControlsVisible Whether zoom controls are shown in expanded dense mode. Defaults to true.
-     * @param yAxisLabelsVisible Whether Y-axis labels are shown. Defaults to true.
-     * @param yAxisLabelColor The color of Y-axis labels. Defaults to a theme-based onSurface variant.
-     * @param yAxisLabelSize The text size of Y-axis labels. Defaults to 11.sp.
-     * @param yAxisLabelCount Number of Y-axis labels. Defaults to 5.
-     * @param xAxisLabelsVisible Whether X-axis labels are shown. Defaults to true.
-     * @param xAxisLabelColor The color of X-axis labels. Defaults to a theme-based onSurface variant.
-     * @param xAxisLabelSize The text size of X-axis labels. Defaults to 11.sp.
-     * @param xAxisLabelMaxCount Maximum number of X-axis labels to display. Defaults to 6.
-     * @param selectionLineVisible Whether the selection indicator line is shown. Defaults to true.
-     * @param selectionLineColor The color of the selection indicator line. Defaults to a theme-based primary variant.
-     * @param selectionLineWidth The stroke width of the selection indicator line. Defaults to 1f.
-     * @param chartContainerStyle The style to be applied to the chart view. Defaults to the default style of ChartContainerDefaults.
-     */
-    @Composable
     fun style(
-        barColor: Color = MaterialTheme.colorScheme.primary,
-        barAlpha: Float = defaultChartAlpha(),
-        space: Dp = 10.dp,
-        barColors: List<Color> = emptyList(),
         chartContainerStyle: ChartContainerStyle = ChartContainerDefaults.style(),
-        minBarWidth: Dp = 10.dp,
+        segments: StackedBarSegmentStyle = segments(),
+        layout: StackedBarLayoutStyle = layout(),
+        axis: StackedBarAxisStyle = axis(),
+        selection: StackedBarSelectionStyle = selection(),
         zoomControlsVisible: Boolean = true,
-        yAxisLabelsVisible: Boolean = true,
-        yAxisLabelColor: Color = defaultYAxisLabelColor(),
-        yAxisLabelSize: TextUnit = 11.sp,
-        yAxisLabelCount: Int = 5,
-        xAxisLabelsVisible: Boolean = true,
-        xAxisLabelColor: Color = defaultXAxisLabelColor(),
-        xAxisLabelSize: TextUnit = 11.sp,
-        xAxisLabelMaxCount: Int = 6,
-        selectionLineVisible: Boolean = true,
-        selectionLineColor: Color = defaultSelectionLineColor(),
-        selectionLineWidth: Float = 1f,
-    ): StackedBarChartStyle {
-        val modifier: Modifier = chartContainerStyle.fillMaxSizeChartModifier()
+    ): StackedBarChartStyle =
+        StackedBarChartStyle(chartContainerStyle, segments, layout, axis, selection, zoomControlsVisible)
 
-        return StackedBarChartStyle(
-            modifier = modifier,
-            barColor = barColor,
-            barAlpha = barAlpha.coerceIn(0f, 1f),
-            space = space,
-            barColors = barColors,
-            minBarWidth = minBarWidth,
-            zoomControlsVisible = zoomControlsVisible,
-            yAxisLabelsVisible = yAxisLabelsVisible,
-            yAxisLabelColor = yAxisLabelColor,
-            yAxisLabelSize = yAxisLabelSize,
-            yAxisLabelCount = yAxisLabelCount,
-            xAxisLabelsVisible = xAxisLabelsVisible,
-            xAxisLabelColor = xAxisLabelColor,
-            xAxisLabelSize = xAxisLabelSize,
-            xAxisLabelMaxCount = xAxisLabelMaxCount,
-            selectionLineVisible = selectionLineVisible,
-            selectionLineColor = selectionLineColor,
-            selectionLineWidth = selectionLineWidth,
-            chartContainerStyle = chartContainerStyle,
-        )
-    }
+    @Composable
+    fun segments(
+        color: Color = MaterialTheme.colorScheme.primary,
+        colors: List<Color> = emptyList(),
+        alpha: Float = defaultChartAlpha(),
+    ): StackedBarSegmentStyle = StackedBarSegmentStyle(color, colors, alpha.coerceIn(0f, 1f))
+
+    @Composable
+    fun layout(
+        space: Dp = 10.dp,
+        minBarWidth: Dp = 10.dp,
+    ): StackedBarLayoutStyle = StackedBarLayoutStyle(space, minBarWidth)
+
+    @Composable
+    fun axis(
+        xLabels: AxisLabelStyle = xLabels(),
+        yLabels: AxisLabelStyle = yLabels(),
+    ): StackedBarAxisStyle = StackedBarAxisStyle(xLabels, yLabels)
+
+    @Composable
+    fun xLabels(
+        visible: Boolean = true,
+        color: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f),
+        size: TextUnit = 11.sp,
+        count: Int = 6,
+    ): AxisLabelStyle = AxisLabelStyle(visible, color, size, count)
+
+    @Composable
+    fun yLabels(
+        visible: Boolean = true,
+        color: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f),
+        size: TextUnit = 11.sp,
+        count: Int = 5,
+    ): AxisLabelStyle = AxisLabelStyle(visible, color, size, count)
+
+    @Composable
+    fun selection(
+        visible: Boolean = true,
+        color: Color = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
+        width: Dp = 1.dp,
+    ): StackedBarSelectionStyle = StackedBarSelectionStyle(visible, color, width)
 }

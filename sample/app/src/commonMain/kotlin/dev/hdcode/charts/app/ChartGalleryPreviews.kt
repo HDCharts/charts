@@ -244,15 +244,26 @@ private fun HistogramChartPreview(values: List<Float>) {
 private fun StackedBarChartPreview(series: List<Pair<String, List<Float>>>) {
     val dataSet =
         remember(series) {
-            series.toMultiChartDataSet(title = "")
+            chartDataOf(
+                categories = series.map { (barLabel, _) -> barLabel },
+                *List(series.maxOfOrNull { (_, values) -> values.size } ?: 0) { segmentIndex ->
+                    ChartSeries(
+                        name = "Segment ${segmentIndex + 1}",
+                        values = series.map { (_, values) -> values.getOrNull(segmentIndex)?.toDouble() ?: Double.NaN },
+                    )
+                }.toTypedArray(),
+            )
         }
     StackedBarChart(
-        dataSet = dataSet,
+        data = dataSet,
         style =
             StackedBarChartDefaults.style(
                 chartContainerStyle = previewChartContainerStyle(),
-                xAxisLabelsVisible = false,
-                yAxisLabelsVisible = false,
+                axis =
+                    StackedBarChartDefaults.axis(
+                        xLabels = StackedBarChartDefaults.xLabels(visible = false),
+                        yLabels = StackedBarChartDefaults.yLabels(visible = false),
+                    ),
             ),
         interactionEnabled = false,
         animateOnStart = false,

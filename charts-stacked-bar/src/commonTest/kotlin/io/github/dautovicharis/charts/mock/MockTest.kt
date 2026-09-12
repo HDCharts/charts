@@ -1,8 +1,9 @@
 package io.github.dautovicharis.charts.mock
 
 import androidx.compose.ui.graphics.Color
-import io.github.dautovicharis.charts.model.MultiChartDataSet
-import io.github.dautovicharis.charts.model.toMultiChartDataSet
+import io.github.dautovicharis.charts.model.ChartData
+import io.github.dautovicharis.charts.model.ChartSeries
+import io.github.dautovicharis.charts.model.chartDataOf
 
 internal object MockTest {
     private val firstItem = listOf(26000.68f, 28000.34f, 32000.57f, 45000.57f)
@@ -13,26 +14,42 @@ internal object MockTest {
     private val categories = listOf("Jan", "Feb", "Mar", "Apr")
     val colors = listOf(Color.Red, Color.Green, Color.Cyan, Color.Black)
 
-    val multiDataSet: MultiChartDataSet =
-        listOf(
-            "Item 1" to firstItem,
-            "Item 2" to secondItem,
-            "Item 3" to thirdItem,
-            "Item 4" to fourthItem,
-        ).toMultiChartDataSet(
-            title = "Title",
-            categories = categories,
+    val stackedBarData: ChartData =
+        transpose(
+            rows =
+                listOf(
+                    "Item 1" to firstItem,
+                    "Item 2" to secondItem,
+                    "Item 3" to thirdItem,
+                    "Item 4" to fourthItem,
+                ),
+            segmentNames = categories,
         )
 
-    fun invalidMultiDataSet(): MultiChartDataSet =
-        listOf(
-            "Item 1" to firstItem.dropLast(1),
-            "Item 2" to secondItem,
-            "Item 3" to thirdItem.dropLast(1),
-            "Item 4" to fourthItem,
-        ).toMultiChartDataSet(
-            title = "Title",
-            categories = categories.dropLast(1),
-            prefix = "$",
+    fun invalidStackedBarData(): ChartData =
+        transpose(
+            rows =
+                listOf(
+                    "Item 1" to firstItem,
+                    "Item 2" to secondItem.dropLast(1),
+                    "Item 3" to thirdItem,
+                    "Item 4" to fourthItem.dropLast(1),
+                ),
+            segmentNames = categories,
+        )
+
+    private fun transpose(
+        rows: List<Pair<String, List<Float>>>,
+        segmentNames: List<String>,
+    ): ChartData =
+        chartDataOf(
+            categories = rows.map { (barLabel, _) -> barLabel },
+            *segmentNames
+                .mapIndexed { segmentIndex, segmentName ->
+                    ChartSeries(
+                        name = segmentName,
+                        values = rows.map { (_, values) -> values.getOrNull(segmentIndex)?.toDouble() ?: Double.NaN },
+                    )
+                }.toTypedArray(),
         )
 }

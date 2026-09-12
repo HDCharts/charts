@@ -8,6 +8,7 @@ import dev.hdcode.charts.app.screenshot.shared.ScreenshotPreview
 import dev.hdcode.charts.app.screenshot.shared.ScreenshotSurface
 import dev.hdcode.charts.sampleshared.fixtures.ChartTestStyleFixtures
 import io.github.dautovicharis.charts.StackedBarChart
+import io.github.dautovicharis.charts.model.staticChartSelection
 import io.github.dautovicharis.charts.style.ChartContainerDefaults
 
 @PreviewTest
@@ -15,8 +16,10 @@ import io.github.dautovicharis.charts.style.ChartContainerDefaults
 @Composable
 fun StackedBarChartDefaultPreview() {
     ScreenshotSurface {
+        val sample = SCREENSHOT_STACKED_BAR_SAMPLE_USE_CASE.initialStackedBarSample()
         StackedBarChart(
-            dataSet = SCREENSHOT_STACKED_BAR_SAMPLE_USE_CASE.initialStackedBarSample().dataSet,
+            data = sample.dataSet,
+            title = sample.title,
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
         )
     }
@@ -27,8 +30,10 @@ fun StackedBarChartDefaultPreview() {
 @Composable
 fun StackedBarChartCustomPreview() {
     ScreenshotSurface {
+        val sample = SCREENSHOT_STACKED_BAR_SAMPLE_USE_CASE.initialStackedBarSample()
         StackedBarChart(
-            dataSet = SCREENSHOT_STACKED_BAR_SAMPLE_USE_CASE.initialStackedBarSample().dataSet,
+            data = sample.dataSet,
+            title = sample.title,
             style =
                 ChartTestStyleFixtures.stackedBarCustomStyle(
                     chartContainerStyle = ChartContainerDefaults.style(),
@@ -44,8 +49,10 @@ fun StackedBarChartCustomPreview() {
 @Composable
 fun StackedBarChartNoCategoriesPreview() {
     ScreenshotSurface {
+        val sample = SCREENSHOT_STACKED_BAR_SAMPLE_USE_CASE.initialStackedBarNoCategoriesDataSet()
         StackedBarChart(
-            dataSet = SCREENSHOT_STACKED_BAR_SAMPLE_USE_CASE.initialStackedBarNoCategoriesDataSet(),
+            data = sample.dataSet,
+            title = sample.title,
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
         )
     }
@@ -56,11 +63,13 @@ fun StackedBarChartNoCategoriesPreview() {
 @Composable
 fun StackedBarChartSelectedBarPreview() {
     ScreenshotSurface {
+        val sample = SCREENSHOT_STACKED_BAR_SAMPLE_USE_CASE.initialStackedBarSample()
         StackedBarChart(
-            dataSet = SCREENSHOT_STACKED_BAR_SAMPLE_USE_CASE.initialStackedBarSample().dataSet,
+            data = sample.dataSet,
+            title = sample.dataSet.categories[1],
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
             interactionEnabled = false,
-            selectedBarIndex = 1,
+            selection = staticChartSelection(1),
         )
     }
 }

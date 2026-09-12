@@ -16,8 +16,9 @@ data class MultiLineSampleData(
 )
 
 data class StackedBarSampleData(
-    val dataSet: MultiChartDataSet,
+    val dataSet: ChartData,
     val segmentKeys: List<String>,
+    val title: String,
 )
 
 data class StackedAreaSampleData(

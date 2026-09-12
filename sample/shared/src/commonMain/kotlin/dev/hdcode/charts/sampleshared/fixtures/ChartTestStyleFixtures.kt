@@ -186,14 +186,20 @@ object ChartTestStyleFixtures {
         val chartColors = LocalChartColors.current
         return StackedBarChartDefaults.style(
             chartContainerStyle = chartContainerStyle,
-            barColors = chartColors.seriesColors(segmentCount),
-            space = 8.dp,
+            segments = StackedBarChartDefaults.segments(colors = chartColors.seriesColors(segmentCount)),
+            layout = StackedBarChartDefaults.layout(space = 8.dp),
+            axis =
+                StackedBarChartDefaults.axis(
+                    xLabels = StackedBarChartDefaults.xLabels(color = chartColors.axisLabel),
+                    yLabels = StackedBarChartDefaults.yLabels(color = chartColors.axisLabel),
+                ),
             zoomControlsVisible = true,
-            xAxisLabelColor = chartColors.axisLabel,
-            yAxisLabelColor = chartColors.axisLabel,
-            selectionLineVisible = true,
-            selectionLineColor = chartColors.selection,
-            selectionLineWidth = 2f,
+            selection =
+                StackedBarChartDefaults.selection(
+                    visible = true,
+                    color = chartColors.selection,
+                    width = 2.dp,
+                ),
         )
     }
 
