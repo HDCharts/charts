@@ -204,7 +204,11 @@ fun StackedAreaDefaultGifScenario() {
 @Composable
 fun RadarDefaultGifScenario() {
     DocsGifScene {
-        RadarChart(radarSampleUseCase().initialRadarDefaultDataSet())
+        val data = radarSampleUseCase().initialRadarDefaultData()
+        RadarChart(
+            data = data,
+            title = data.series.single().name,
+        )
     }
 }
 

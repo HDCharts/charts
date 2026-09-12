@@ -4,8 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.hdcode.charts.app.ui.composable.ChartPreset
 import dev.hdcode.charts.sampleshared.data.RadarSampleUseCase
-import io.github.dautovicharis.charts.model.ChartDataSet
-import io.github.dautovicharis.charts.model.MultiChartDataSet
+import io.github.dautovicharis.charts.model.ChartData
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,9 +17,10 @@ import kotlinx.coroutines.launch
 private const val LIVE_UPDATE_INTERVAL_MS = 2000L
 
 data class RadarChartState(
-    val basicDataSet: ChartDataSet,
-    val customDataSet: MultiChartDataSet,
+    val basicData: ChartData,
+    val customData: ChartData,
     val seriesKeys: List<String> = emptyList(),
+    val title: String,
     val preset: ChartPreset = ChartPreset.Default,
 )
 
@@ -28,16 +28,17 @@ class RadarChartViewModel(
     private val radarSampleUseCase: RadarSampleUseCase,
 ) : ViewModel() {
     private val initialSample = radarSampleUseCase.initialRadarSample()
-    private val initialDefaultDataSet = radarSampleUseCase.initialRadarDefaultDataSet()
+    private val initialDefaultData = radarSampleUseCase.initialRadarDefaultData()
     private val refreshRange = radarSampleUseCase.radarRefreshRange()
     private var liveUpdatesJob: Job? = null
 
     private val _dataSet =
         MutableStateFlow(
             RadarChartState(
-                basicDataSet = initialDefaultDataSet,
-                customDataSet = initialSample.customDataSet,
+                basicData = initialDefaultData,
+                customData = initialSample.customData,
                 seriesKeys = initialSample.seriesKeys,
+                title = initialSample.title,
                 preset = ChartPreset.Default,
             ),
         )
@@ -52,18 +53,18 @@ class RadarChartViewModel(
         applyInitialPresetData(preset)
     }
 
-    fun regenerateBasicDataSet(range: IntRange = refreshRange) {
-        val dataSet = radarSampleUseCase.radarDefaultDataSet(range = range)
+    fun regenerateBasicData(range: IntRange = refreshRange) {
+        val data = radarSampleUseCase.radarDefaultData(range = range)
         _dataSet.update {
-            it.copy(basicDataSet = dataSet)
+            it.copy(basicData = data)
         }
     }
 
-    fun regenerateCustomDataSet(range: IntRange = refreshRange) {
+    fun regenerateCustomData(range: IntRange = refreshRange) {
         val sample = radarSampleUseCase.radarCustomSample(range = range)
         _dataSet.update {
             it.copy(
-                customDataSet = sample.dataSet,
+                customData = sample.data,
                 seriesKeys = sample.seriesKeys,
             )
         }
@@ -71,8 +72,8 @@ class RadarChartViewModel(
 
     fun refresh() {
         when (_dataSet.value.preset) {
-            ChartPreset.Default -> regenerateBasicDataSet()
-            ChartPreset.Custom -> regenerateCustomDataSet()
+            ChartPreset.Default -> regenerateBasicData()
+            ChartPreset.Custom -> regenerateCustomData()
         }
     }
 
@@ -80,16 +81,14 @@ class RadarChartViewModel(
         when (preset) {
             ChartPreset.Default -> {
                 _dataSet.update {
-                    it.copy(
-                        basicDataSet = initialDefaultDataSet,
-                    )
+                    it.copy(basicData = initialDefaultData)
                 }
             }
 
             ChartPreset.Custom -> {
                 _dataSet.update {
                     it.copy(
-                        customDataSet = initialSample.customDataSet,
+                        customData = initialSample.customData,
                         seriesKeys = initialSample.seriesKeys,
                     )
                 }

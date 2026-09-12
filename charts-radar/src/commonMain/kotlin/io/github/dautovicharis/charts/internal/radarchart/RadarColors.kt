@@ -1,7 +1,6 @@
 package io.github.dautovicharis.charts.internal.radarchart
 
 import androidx.compose.ui.graphics.Color
-import io.github.dautovicharis.charts.style.RadarChartStyle
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 
@@ -26,7 +25,7 @@ private val DefaultCategoryColors =
     )
 
 internal fun categoryColors(
-    style: RadarChartStyle,
+    style: RadarInternalStyle,
     count: Int,
 ): ImmutableList<Color> {
     if (count <= 0) return emptyList<Color>().toImmutableList()

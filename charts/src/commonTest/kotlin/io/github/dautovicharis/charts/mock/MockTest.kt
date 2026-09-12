@@ -16,7 +16,12 @@ import io.github.dautovicharis.charts.model.MultiChartDataSet
 import io.github.dautovicharis.charts.model.chartDataOf
 import io.github.dautovicharis.charts.style.AxisLabelStyle
 import io.github.dautovicharis.charts.style.ChartContainerStyle
+import io.github.dautovicharis.charts.style.RadarAxesStyle
+import io.github.dautovicharis.charts.style.RadarCategoryStyle
 import io.github.dautovicharis.charts.style.RadarChartStyle
+import io.github.dautovicharis.charts.style.RadarGridStyle
+import io.github.dautovicharis.charts.style.RadarPointStyle
+import io.github.dautovicharis.charts.style.RadarPolygonStyle
 import io.github.dautovicharis.charts.style.StackedAreaAxisStyle
 import io.github.dautovicharis.charts.style.StackedAreaBoundaryStyle
 import io.github.dautovicharis.charts.style.StackedAreaChartStyle
@@ -27,6 +32,7 @@ import io.github.dautovicharis.charts.style.StackedBarChartStyle
 import io.github.dautovicharis.charts.style.StackedBarLayoutStyle
 import io.github.dautovicharis.charts.style.StackedBarSegmentStyle
 import io.github.dautovicharis.charts.style.StackedBarSelectionStyle
+import kotlinx.collections.immutable.toImmutableList
 
 internal object MockTest {
     const val TITLE = "Title"
@@ -270,32 +276,46 @@ internal object MockTest {
 
     fun mockRadarChartStyle(lineColors: List<Color> = colors): RadarChartStyle =
         RadarChartStyle(
-            modifier = Modifier.fillMaxSize(),
             chartContainerStyle = mockChartContainerStyle(),
-            gridColor = Color.Gray,
-            gridLineWidth = 1f,
-            gridSteps = 4,
-            gridVisible = true,
-            axisLineColor = Color.Gray,
-            axisLineWidth = 1f,
-            axisVisible = true,
-            axisLabelColor = Color.Gray,
-            axisLabelSize = 11.sp,
-            axisLabelPadding = Dp(4f),
-            axisLabelVisible = true,
-            categoryLegendVisible = true,
-            categoryColors = colors,
-            categoryPinSize = 4f,
-            categoryPinsVisible = true,
-            pointColorSameAsLine = true,
-            pointColor = Color.Red,
-            pointSize = 8f,
-            pointVisible = true,
-            lineColor = Color.Green,
-            lineColors = lineColors,
-            lineWidth = 2f,
-            fillAlpha = 0.3f,
-            fillVisible = true,
+            grid =
+                RadarGridStyle(
+                    visible = true,
+                    color = Color.Gray,
+                    lineWidth = 1f,
+                    steps = 4,
+                ),
+            axes =
+                RadarAxesStyle(
+                    visible = true,
+                    lineColor = Color.Gray,
+                    lineWidth = 1f,
+                    labelColor = Color.Gray,
+                    labelSize = 11.sp,
+                    labelPadding = 4f,
+                    labelVisible = true,
+                ),
+            polygon =
+                RadarPolygonStyle(
+                    fillVisible = true,
+                    fillAlpha = 0.3f,
+                    lineColor = Color.Green,
+                    lineColors = lineColors,
+                    lineWidth = 2f,
+                ),
+            points =
+                RadarPointStyle(
+                    visible = true,
+                    color = Color.Red,
+                    colorSameAsLine = true,
+                    size = 8f,
+                ),
+            categories =
+                RadarCategoryStyle(
+                    legendVisible = true,
+                    pinsVisible = true,
+                    colors = colors.toImmutableList(),
+                    pinSize = 4f,
+                ),
         )
 
     private fun mockChartContainerStyle(): ChartContainerStyle =

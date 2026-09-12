@@ -1,7 +1,6 @@
 package dev.hdcode.charts.sampleshared.data
 
-import io.github.dautovicharis.charts.model.ChartDataSet
-import io.github.dautovicharis.charts.model.MultiChartDataSet
+import io.github.dautovicharis.charts.model.ChartData
 
 interface MultiLineSampleUseCase {
     fun initialMultiLineSample(): MultiLineSampleData
@@ -44,17 +43,17 @@ interface StackedAreaSampleUseCase {
 interface RadarSampleUseCase {
     fun initialRadarSample(): RadarSampleData
 
-    fun initialRadarDefaultDataSet(): ChartDataSet
+    fun initialRadarDefaultData(): ChartData
 
-    fun initialRadarEdgeDataSet(): ChartDataSet
+    fun initialRadarEdgeData(): ChartData
 
-    fun initialRadarMultiNoCategoriesDataSet(): MultiChartDataSet
+    fun initialRadarMultiNoCategoriesData(): ChartData
 
     fun radarRefreshRange(): IntRange
 
-    fun radarDefaultDataSet(range: IntRange): ChartDataSet
+    fun radarDefaultData(range: IntRange): ChartData
 
-    fun radarBasicDataSet(range: IntRange): MultiChartDataSet
+    fun radarBasicData(range: IntRange): ChartData
 
     fun radarCustomSample(range: IntRange): RadarCustomSampleData
 }

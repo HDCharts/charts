@@ -237,17 +237,29 @@ object ChartTestStyleFixtures {
         val chartColors = LocalChartColors.current
         return RadarChartDefaults.style(
             chartContainerStyle = chartContainerStyle,
-            lineColors = chartColors.seriesColors(seriesKeys),
-            lineWidth = 3.5f,
-            pointColor = chartColors.highlight,
-            pointSize = 5f,
-            gridSteps = 6,
-            gridLineWidth = 1.4f,
-            axisLineColor = chartColors.axisLine,
-            axisLineWidth = 1.2f,
-            axisLabelColor = chartColors.axisLabel,
-            fillAlpha = 0.2f,
-            categoryLegendVisible = false,
+            grid =
+                RadarChartDefaults.grid(
+                    lineWidth = 1.4f,
+                    steps = 6,
+                ),
+            axes =
+                RadarChartDefaults.axes(
+                    lineWidth = 1.2f,
+                    labelColor = chartColors.axisLabel,
+                    lineColor = chartColors.axisLine,
+                ),
+            polygon =
+                RadarChartDefaults.polygon(
+                    lineColors = chartColors.seriesColors(seriesKeys),
+                    lineWidth = 3.5f,
+                    fillAlpha = 0.2f,
+                ),
+            points =
+                RadarChartDefaults.points(
+                    color = chartColors.highlight,
+                    size = 5f,
+                ),
+            categories = RadarChartDefaults.categories(legendVisible = false),
         )
     }
 }

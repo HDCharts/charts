@@ -27,7 +27,6 @@ import io.github.dautovicharis.charts.model.ChartSeries
 import io.github.dautovicharis.charts.model.PieSlice
 import io.github.dautovicharis.charts.model.chartDataOf
 import io.github.dautovicharis.charts.model.toChartData
-import io.github.dautovicharis.charts.model.toMultiChartDataSet
 import io.github.dautovicharis.charts.style.BarChartDefaults
 import io.github.dautovicharis.charts.style.ChartContainerDefaults
 import io.github.dautovicharis.charts.style.ChartContainerStyle
@@ -305,20 +304,24 @@ private fun RadarChartPreview(series: List<Pair<String, List<Float>>>) {
             }
         }
 
-    val dataSet =
+    val data =
         remember(previewSeries) {
-            previewSeries.toMultiChartDataSet(
-                title = "",
+            chartDataOf(
                 categories = categories,
+                *previewSeries
+                    .map { (name, values) ->
+                        ChartSeries(name = name, values = values.map { it.toDouble() })
+                    }.toTypedArray(),
             )
         }
 
     RadarChart(
-        dataSet = dataSet,
+        data = data,
+        title = "",
         style =
             RadarChartDefaults.style(
                 chartContainerStyle = previewChartContainerStyle(),
-                categoryLegendVisible = false,
+                categories = RadarChartDefaults.categories(legendVisible = false),
             ),
         interactionEnabled = false,
         animateOnStart = false,
