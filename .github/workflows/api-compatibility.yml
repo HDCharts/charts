@@ -4,14 +4,6 @@ name: API Compatibility
 on:
   workflow_call:
     inputs:
-      has-breaking-label:
-        description: Whether the pull request has the breaking-change label.
-        required: true
-        type: boolean
-      should-run:
-        description: Whether the pull request contains code or build changes.
-        required: true
-        type: boolean
       source-sha:
         description: Immutable merge revision being checked.
         required: true
@@ -19,23 +11,26 @@ on:
 
 permissions:
   contents: read
+  pull-requests: read
 
 jobs:
-  skipped:
-    name: Docs-only no-op
-    if: ${{ !inputs.should-run }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Report docs-only no-op
-        run: echo 'No code changes require the API compatibility check.'
-
   api-compatibility:
     name: Compare Public API Against Release
-    if: ${{ inputs.should-run }}
     runs-on: ubuntu-latest
-    env:
-      HAS_BREAKING_LABEL: ${{ inputs.has-breaking-label }}
     steps:
+      - name: Fetch current PR labels
+        id: labels
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          has_breaking_label="$(gh api --paginate \
+            "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/labels?per_page=100" |
+            jq -s 'any(.[][]; .name == "breaking-change")')"
+          echo "has_breaking_label=${has_breaking_label}" >> "$GITHUB_OUTPUT"
+
       - name: Checkout code
         uses: actions/checkout@v7
         with:
@@ -57,7 +52,7 @@ jobs:
           set +e
           set -o pipefail
 
-          ./gradlew apiCompatibilityCheck --no-daemon 2>&1 | tee api-compatibility.log
+          ./gradlew apiCompatibilityCheck --no-daemon --console=plain 2>&1 | tee api-compatibility.log
           exit_code=${PIPESTATUS[0]}
           set -e
           echo "exit_code=${exit_code}" >> "$GITHUB_OUTPUT"
@@ -67,6 +62,7 @@ jobs:
         shell: bash
         env:
           EXIT_CODE: ${{ steps.compatibility.outputs.exit_code }}
+          HAS_BREAKING_LABEL: ${{ steps.labels.outputs.has_breaking_label }}
         run: |
           set -euo pipefail
 
@@ -108,6 +104,7 @@ jobs:
         shell: bash
         env:
           EXIT_CODE: ${{ steps.compatibility.outputs.exit_code }}
+          HAS_BREAKING_LABEL: ${{ steps.labels.outputs.has_breaking_label }}
         run: |
           set -euo pipefail
           if [[ -z "${EXIT_CODE}" ]]; then

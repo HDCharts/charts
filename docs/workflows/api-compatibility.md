@@ -10,8 +10,7 @@ Workflows:
 ```mermaid
 flowchart TD
   A["PR opened, synchronized, or reopened"] --> B["Pull Request API Compatibility"]
-  L["breaking-change label added or removed"] --> B
-  B --> C["Run API Compatibility when required"]
+  B --> C["Run API Compatibility"]
   C --> D{"Breaking API change detected?"}
   D -- No --> E["Pass: API remains compatible"]
   D -- Yes --> F{"PR has breaking-change label?"}
@@ -22,17 +21,15 @@ flowchart TD
 ```
 
 The `Pull Request API Compatibility` workflow runs for the `opened`,
-`synchronize`, and `reopened` pull-request actions. It also runs when the
-`breaking-change` label is added or removed. Events for other labels do not
-allocate an API runner. The reusable `API Compatibility` workflow runs the
-Gradle check when the pull request contains code/build changes or when a
-`breaking-change` label event forces the check.
+`synchronize`, and `reopened` pull-request actions. It runs the Gradle
+compatibility check for every such event, including documentation-only changes.
+The `breaking-change` label is evaluated as policy input: it allows an
+intentional API break but does not trigger a separate workflow run.
 
-The reusable workflow exposes both the real compatibility job and a
-`Docs-only no-op` job. GitHub displays the inactive job as
-skipped even when the real compatibility job is running. That row is only the
-unselected alternative; it does not mean that this pull request lacks code
-changes.
+The compatibility job fetches current PR labels from the GitHub API on each
+attempt rather than using the original event's label snapshot. After adding
+`breaking-change` for an intentional incompatibility, use **Re-run failed jobs**
+or **Re-run all jobs** to evaluate it without pushing another commit.
 
 If a breaking change is acknowledged with the `breaking-change` label and
 merged, the post-merge baseline update flow below runs automatically.
