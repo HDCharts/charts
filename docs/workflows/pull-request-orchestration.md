@@ -2,20 +2,24 @@
 
 Pull-request CI is split into three independently triggered workflows: core
 checks, API compatibility, and optional GIF validation. Core checks and API
-compatibility use separate concurrency groups so events for one label cannot
-cancel unrelated work. Each workflow uses the immutable `github.sha` for the
-pull-request event that started it.
+compatibility use separate concurrency groups. Each workflow uses the immutable
+`github.sha` for the pull-request event that started it.
 
 ## Labels
 
-- `breaking-change` marks an intentional public API incompatibility. Adding or
-  removing this label runs API compatibility, even when the pull request only
-  changes documentation or release notes. The label does not start or cancel
-  core checks.
+- `breaking-change` marks an intentional public API incompatibility. The API
+  compatibility job fetches current labels from the GitHub API on every attempt,
+  including failed-job reruns. Adding or removing it does not trigger a separate
+  API run.
 - `run-gif-validation` opts a pull request into GIF baseline validation. The
-  validation runs for normal pull-request events while this label is present,
-  starts when the label is added, and is cancelled when the label is removed.
-  It is informational and is not a required status check.
+  validation runs for normal pull-request events while this label is present.
+  Adding or removing the label does not trigger a separate validation run. It
+  is informational and is not a required status check.
+
+After changing `breaking-change`, rerun the failed API jobs or all jobs. After
+changing `run-gif-validation`, use **Re-run all jobs** in the GIF workflow so its
+label-check job fetches the current labels before deciding whether to validate.
+Failed-job-only reruns reuse the output of a previously successful label check.
 
 ## Flow
 
@@ -36,18 +40,16 @@ pull-request actions. Its `PR Core Checks` gate fails if preparation or any
 dependent core check fails or is cancelled. Documentation-only changes still
 use the reusable workflows' successful no-op path.
 
-The API workflow listens for the same three pull-request actions plus
-`labeled` and `unlabeled`. For label actions, only an event for the
-`breaking-change` label is relevant. Events for other labels skip `Prepare API
-Compatibility` before a runner is allocated. The API result gate derives its
-required name and execution eligibility from that preparation result rather
-than repeating the event expression.
+The API workflow listens for the same three pull-request actions as the core
+workflow and always runs the compatibility check. Its `PR API Compatibility`
+gate reports the reusable workflow result as the required status check.
 
-The GIF workflow is optional. It runs on the three normal pull-request actions
-only when the `run-gif-validation` label is present, or when that label is
-added. Its `pr-gif-<PR number>` concurrency group cancels an active validation
-when the `run-gif-validation` label is removed; the removal event itself does
-not start a new validation.
+The GIF workflow is optional. Its label-check job runs on the three normal
+pull-request actions and fetches current labels from the GitHub API; the
+validation job runs only when `run-gif-validation` is present. Its
+`pr-gif-<PR number>` concurrency group cancels an active validation when a new
+commit supersedes it. Adding or removing the label alone does not start or
+cancel validation.
 
 ## Workflow responsibilities
 
@@ -58,7 +60,7 @@ not start a new validation.
 | `Compile` | Runs `./gradlew ciCompile`. |
 | `Lint` | Runs Kotlin and build-logic lint when the PR contains code/build changes. |
 | `Test` | Runs `ciTestJvm`, `ciTestAndroid`, `ciTestWeb`, and `ciTestIos` when needed; uploads Gradle's native HTML and XML reports. |
-| `Prepare API Compatibility` | Routes normal pull-request actions and changes to the `breaking-change` label, detects code changes, and prevents events for other labels from allocating a runner. |
+| `PR API Compatibility` | Runs the API compatibility check for every normal pull-request event and reports the required result. |
 | `API compatibility` | Runs `./gradlew apiCompatibilityCheck`; a detected public API incompatibility requires the `breaking-change` label. |
 | `GIF validation` | Runs the opt-in GIF baseline workflow while the `run-gif-validation` label is present. |
 
@@ -69,20 +71,9 @@ compile belongs only to `ciCompile`, not to a test task.
 
 The core reusable workflows receive `source-sha` from `Prepare PR`. API and
 GIF validation receive the triggering event's `github.sha`, so each check uses
-the immutable merge result for that event. Core and API workflows retain their
-code-change optimization, while changes to the `breaking-change` label force
-API compatibility even when no code change is detected.
-
-The repeated API event condition is intentional in only these places:
-
-- `concurrency.group`: relevant API events share `pr-api-<PR number>` and
-  events for other labels receive an isolated group.
-- `prepare-api.if`: events for other labels do not allocate an API runner.
-- the `api-compatibility` reusable-workflow `should-run` input: adding or
-  removing `breaking-change` forces the compatibility check.
-
-Downstream API jobs use `needs.prepare-api.result` instead of repeating the
-event condition.
+the immutable merge result for that event. Core checks retain their
+code-change optimization; API compatibility always runs for normal
+pull-request events and uses the `breaking-change` label only as policy input.
 
 ## Merge protection
 
@@ -93,10 +84,9 @@ PR Core Checks
 PR API Compatibility
 ```
 
-Do not require `Prepare PR`, `Prepare API Compatibility`, individual
-implementation jobs, or `PR GIF Baseline Validation`; GIF validation is
-optional. Rulesets match status-check contexts literally, so keep the required
-names exactly as shown above.
+Do not require `Prepare PR`, individual implementation jobs, or `PR GIF Baseline
+Validation`; GIF validation is optional. Rulesets match status-check contexts
+literally, so keep the required names exactly as shown above.
 
 ## Fork PR security boundary
 
@@ -110,20 +100,16 @@ access and must not execute untrusted PR code.
 ## Docs-only changes
 
 `scripts/ci-has-code-changes.sh` treats documentation and release-note-only
-changes as non-code changes. For the normal `opened`, `synchronize`, and
-`reopened` actions, `Prepare PR` and `Prepare API Compatibility` run, while the
-core and API reusable workflows take their successful no-op paths. A
-`breaking-change` label addition or removal is the exception: it forces API
-compatibility even for a docs-only pull request. Events for other labels skip
-API preparation and do not allocate an API runner.
+changes as non-code changes for the core workflow. The API compatibility
+workflow still runs for those changes because it always checks the current
+public API against the baseline.
 
 ## Reusable workflow status display
 
-The reusable core and API workflows define two mutually exclusive paths for
-some checks:
+The reusable core workflows define two mutually exclusive paths for some
+checks:
 
-- the real validation job, such as `Assemble` or `Compare Public API Against
-  Release`;
+- the real validation job, such as `Assemble`;
 - an explicit docs-only no-op job named `Docs-only no-op`.
 
 GitHub displays both job definitions in the run, even though only one path is
@@ -133,8 +119,9 @@ passing. That skipped row is the inactive alternative; it does not mean that
 the pull request had no code changes and is not an additional required check.
 
 For a docs-only pull request, the no-op job succeeds and the real validation
-job is skipped. The aggregate `PR Core Checks` and `PR API Compatibility` jobs
-then verify the result of the selected path.
+job is skipped for the core workflow, while API compatibility still runs. The
+aggregate `PR Core Checks` job verifies the core no-op path, and
+`PR API Compatibility` verifies the API result.
 
 The optional `PR GIF Baseline Validation` job is different: when it is skipped,
 the `run-gif-validation` label was not present and GIF validation was not
