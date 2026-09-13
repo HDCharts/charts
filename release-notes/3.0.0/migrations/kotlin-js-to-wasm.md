@@ -1,13 +1,24 @@
 # Kotlin/JS to Kotlin/Wasm migration
 
-Published HDCharts modules use Kotlin/Wasm (`wasmJs`) for web applications.
+Use Kotlin/Wasm (`wasmJs`) for web applications that consume HDCharts.
 
-## Use
+## Before
 
-Configure the web target as Kotlin/Wasm (`wasmJs`) when consuming HDCharts in a
-web application. JVM, Android, iOS, and Kotlin/Wasm consumers use their existing
-platform targets.
+```kotlin
+js {
+    browser()
+}
+```
 
-## Validation
+## After
 
-Build and test the web target with the repository's Kotlin/Wasm Gradle tasks.
+Replace the Kotlin/JS web target with `wasmJs`:
+
+```kotlin
+@OptIn(ExperimentalWasmDsl::class)
+wasmJs {
+    browser()
+}
+```
+
+JVM, Android, and iOS targets are unchanged.

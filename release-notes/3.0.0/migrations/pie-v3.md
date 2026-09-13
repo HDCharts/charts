@@ -1,13 +1,24 @@
 # Pie chart v3 migration
 
-`PieChart` uses `Double` slice values and includes stable validation, geometry,
-selection, and percentage-readout behavior for v3 applications.
+Use finite, nonnegative `Double` values when constructing `PieSlice` instances.
 
-## Public API
-
-Use `Double` values when constructing `PieSlice` instances:
+## Before
 
 ```kotlin
+PieChart(
+    dataSet = listOf(80f, 20f).toChartDataSet(
+        title = "Progress",
+        labels = listOf("Completed", "Remaining"),
+    ),
+    selectedSliceIndex = 0,
+)
+```
+
+## After
+
+```kotlin
+val selection = rememberChartSelection(initialIndex = 0)
+
 PieChart(
     data = listOf(
         PieSlice(label = "Completed", value = 80.0),
@@ -17,6 +28,7 @@ PieChart(
     title = "Progress",
     style = PieChartDefaults.style(
         donut = PieChartDefaults.donut(holePercentage = 50f),
+        selection = selection,
     ),
 )
 ```
@@ -29,34 +41,20 @@ val slices = sourceSlices.map { slice ->
 }
 ```
 
-The public `PieChart` call shape and Pie styles remain available with the v3
-numeric contract.
-
-## Validation and rendering
-
-- `PieSlice.value` accepts finite, nonnegative `Double` values.
-- `NaN`, positive infinity, and negative infinity produce dedicated validation
-  messages.
-- All-zero data renders finite geometry and displays `0` for every percentage.
-- Slice alpha uses the configured style alpha, and raw value precision remains
-  available until percentage normalization.
-- Hit testing follows the drawn pie radius, excludes the donut hole, ignores
-  zero-sweep slices, and assigns each angular boundary to one slice.
-- The caller `Modifier` is preserved when validation renders the error UI.
+The v3 API replaces the old `ChartDataSet` input with a list of `PieSlice`
+values. `PieSlice.value` uses `Double`; invalid or negative values are rejected
+by the chart.
 
 ## Selection and interaction
 
-- Programmatic selection remains visible when `interactionEnabled` is `false`.
-- User taps and the auto-deselect timeout are disabled when interaction is
-  disabled.
-- Repeated taps renew the interaction timeout without producing duplicate
-  selection notifications.
-- A delayed timeout checks the current selection holder and selected index before
-  clearing, so an older timeout cannot clear a newer selection.
+Pass a `ChartSelection` through `PieChartDefaults.style` when selection must be
+controlled by the application:
 
-## Migration coverage
+```kotlin
+val selection = rememberChartSelection()
+val style = PieChartDefaults.style(selection = selection)
+PieChart(data = slices, style = style)
+```
 
-Update Pie call sites, previews, screenshots, and tests to use `Double` values.
-Cover non-finite and all-zero data, drawn-radius and donut-hole hit testing,
-zero-sweep slices, selection timeout renewal, selection-holder replacement, and
-modifier forwarding on validation errors.
+Programmatic selection remains visible when `interactionEnabled` is `false`; in
+that mode, user taps and automatic deselection are disabled.
