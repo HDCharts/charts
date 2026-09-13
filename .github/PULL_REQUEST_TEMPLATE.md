@@ -4,11 +4,7 @@
 
 -
 
-## Breaking Change
-
-<!-- Describe the breaking change and required migration, or write "None". -->
-
-## Validation
+## Local Validation
 
 <!-- Mark each local gradlew command run for this change. -->
 

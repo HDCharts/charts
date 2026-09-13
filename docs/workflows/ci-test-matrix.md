@@ -22,6 +22,7 @@ Use the smallest applicable command:
 | Kotlin or build logic | `./gradlew ktlintCheck` |
 | Compile gate | `./gradlew ciCompile` |
 | Repository checks | `./gradlew chartsCheck` |
+| Public API compatibility | `./gradlew apiCompatibilityCheck` |
 | Compose or screenshots | `./gradlew :androidApp:validateDebugScreenshotTest` |
 | Intentional screenshot updates | `./gradlew updateScreenshots` |
 
