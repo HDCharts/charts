@@ -1,7 +1,35 @@
 ---
 name: hdc-pr
-description: Create or update a pull request for this repository when the user explicitly asks to create, open, publish, or ship a PR.
+description: Create or update a pull request for this repository only after the user explicitly asks to create, open, publish, or ship a PR. Do NOT commit, push, or open a PR on your own.
 ---
+
+## Guardrails
+
+- Never commit, push, force-push, amend, create branches, or open a pull
+  request on your own. Each action requires an explicit user request.
+- Loading or invoking this skill does **not** grant permission. The skill
+  describes the workflow to follow **once** the user has asked to ship.
+- Before every destructive or external git action, use the `question` tool to
+  show the proposed command (and the diff summary for commits) and wait for
+  an explicit "yes". Never assume consent.
+- Preserve unrelated working-tree changes; isolate only the intended work.
+- Reuse an existing pull request and avoid duplicates.
+
+### Git-actions questionnaire
+
+Use the `question` tool with the proposed command summary and wait for an
+explicit yes before each of these actions:
+
+- **create branch** — `git checkout -b <branch> from <base>`
+- **commit** — `git commit` (show the staged diff summary and the proposed
+  commit subject)
+- **push** — `git push` (show the branch name and remote)
+- **force-push / amend** — `git push --force*`, `git push -f`, or
+  `git commit --amend` (always requires explicit yes; never default)
+- **open PR** — `gh pr create` (show the proposed title and body)
+
+When several actions are queued, batch them into a single `question` prompt
+so the user can approve the whole sequence at once.
 
 ## Branch and commit naming
 
@@ -38,13 +66,11 @@ locally: they are machine-dependent, slow, and run on CI when required.
 ## Workflow
 
 1. Determine the changeset status with the user-impact gate in
-   [hdc-changeset](../hdc-changeset/SKILL.md).
-2. When the gate requires a changeset, ask the user for confirmation before
-   creating it.
-3. After confirmation, invoke `hdc-changeset` to create the changeset.
-4. Confirm the validation scope with the Validation questionnaire and run the
-   selected checks.
-5. Commit and push the intended changes after the user asks to ship them.
-6. Find or create the pull request for the current repository, targeting `main`,
-   using `.github/PULL_REQUEST_TEMPLATE.md` for the body.
-7. Report the pull request URL and changeset status.
+   [hdc-changeset](../hdc-changeset/SKILL.md). If a changeset is required,
+   ask the user for confirmation before creating it.
+2. Run the Validation questionnaire and execute the selected checks.
+3. Show the proposed branch + commit + push + PR commands as one batched
+   `question` prompt (per the Git-actions questionnaire in Guardrails) and
+   wait for an explicit "yes" before executing any of them.
+4. After all actions succeed, report the pull request URL and changeset
+   status.

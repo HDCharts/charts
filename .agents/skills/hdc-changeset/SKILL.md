@@ -5,8 +5,15 @@ description: Create or update a release changeset for the current repository. Us
 
 # Create release changesets
 
-Scope: the current repository. Commit and push actions require an explicit user
-request.
+Scope: the current repository.
+
+## Guardrails
+
+Follow the commit, push, and pull-request policy — including the
+git-actions questionnaire — in the Guardrails section of
+[hdc-pr](../hdc-pr/SKILL.md). Creating the changeset file in the working
+tree does NOT grant permission to commit, push, or open a PR; wait for an
+explicit ship request.
 
 ## User-impact gate
 

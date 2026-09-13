@@ -8,10 +8,11 @@
 
 ## Commit, push, and pull-request policy
 
-- Never commit, push, force-push, amend, or open a pull request on your own.
-  These actions require an explicit request from the user.
-- Loading or invoking a skill (including `hdc-pr` and `hdc-changeset`) does
-  **not** grant permission to commit, push, or open a PR. Skills describe the
-  workflow to follow **once** the user has asked to ship the change.
-- Before any commit, push, or PR action, confirm with the user that the
-  current working-tree changes are the intended ones to ship.
+The single source of truth is the **Guardrails** section of
+[`.agents/skills/hdc-pr/SKILL.md`](.agents/skills/hdc-pr/SKILL.md)
+(including the git-actions questionnaire).
+
+Summary: never commit, push, force-push, amend, create branches, or open a
+pull request without an explicit user request. Loading a skill does not grant
+permission. Use the `question` tool before every destructive or external git
+action.
