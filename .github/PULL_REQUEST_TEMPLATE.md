@@ -18,8 +18,10 @@
      ./gradlew ciCompile                        compile all CI targets
      ./gradlew :androidApp:validateDebugScreenshotTest   screenshot baselines
      ./gradlew updateScreenshots                update screenshot baselines
-     ./gradlew validateDocsGifBaselines         docs GIF baselines
      ./gradlew apiCompatibilityCheck            public API compatibility
+
+     Do not run GIF baseline validation or instrumented Android tests locally;
+     they are machine-dependent and run on CI when required.
 -->
 
 - [ ] `./gradlew ktlintCheck`
