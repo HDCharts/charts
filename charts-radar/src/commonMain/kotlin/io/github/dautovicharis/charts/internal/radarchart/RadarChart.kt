@@ -75,6 +75,10 @@ internal fun RadarChart(
             else -> forcedSelectedIndex
         }
 
+    LaunchedEffect(forcedSelectedIndex) {
+        selectedIndex.intValue = forcedSelectedIndex
+    }
+
     BoxWithConstraints(modifier = style.chartContainerStyle.fillMaxSizeChartModifier()) {
         val density = LocalDensity.current
         val widthPx = with(density) { maxWidth.toPx() }
@@ -154,7 +158,7 @@ internal fun RadarChart(
 
         Box(modifier = Modifier.fillMaxSize()) {
             val interactionModifier =
-                if (interactionEnabled && !hasForcedSelection) {
+                if (interactionEnabled) {
                     Modifier.pointerInput(axisCount) {
                         detectDragGestures(
                             onDragStart = { offset ->
@@ -171,13 +175,9 @@ internal fun RadarChart(
                             },
                             onDragEnd = {
                                 dragging = false
-                                selectedIndex.intValue = NO_SELECTION
-                                onValueChanged(NO_SELECTION)
                             },
                             onDragCancel = {
                                 dragging = false
-                                selectedIndex.intValue = NO_SELECTION
-                                onValueChanged(NO_SELECTION)
                             },
                         )
                     }

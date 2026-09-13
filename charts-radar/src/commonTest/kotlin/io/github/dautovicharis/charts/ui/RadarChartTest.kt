@@ -1,20 +1,27 @@
 package io.github.dautovicharis.charts.ui
 
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.v2.runComposeUiTest
+import androidx.compose.ui.unit.dp
 import io.github.dautovicharis.charts.RadarChart
 import io.github.dautovicharis.charts.internal.TestTags
 import io.github.dautovicharis.charts.mock.MockTest.TITLE
 import io.github.dautovicharis.charts.mock.MockTest.data
+import io.github.dautovicharis.charts.model.ChartSelection
 import io.github.dautovicharis.charts.model.ChartSeries
 import io.github.dautovicharis.charts.model.chartDataOf
 import io.github.dautovicharis.charts.model.staticChartSelection
 import io.github.dautovicharis.charts.style.RadarChartDefaults
 import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class RadarChartTest {
     @OptIn(ExperimentalTestApi::class)
@@ -73,6 +80,45 @@ class RadarChartTest {
             onNodeWithTag(TestTags.CHART_TITLE)
                 .assertTextEquals(expectedTitle)
                 .isDisplayed()
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun radarChart_dragSelection_persistsAfterReleaseAndCanBeChanged() =
+        runComposeUiTest {
+            val events = mutableListOf<Int?>()
+            val selection = ChartSelection(onSelectionChanged = { events.add(it) })
+            setContent {
+                RadarChart(
+                    data = data,
+                    modifier = Modifier.size(240.dp),
+                    title = TITLE,
+                    selection = selection,
+                    animateOnStart = false,
+                )
+            }
+
+            val chart = onNodeWithTag(TestTags.RADAR_CHART)
+            chart.performTouchInput {
+                down(Offset(x = 8f, y = height / 2f))
+                moveTo(Offset(x = width - 8f, y = height / 2f))
+                up()
+            }
+            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("B").isDisplayed()
+
+            chart.performTouchInput {
+                down(Offset(x = width / 2f, y = 8f))
+                moveTo(Offset(x = width / 2f, y = height - 8f))
+                up()
+            }
+            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("C").isDisplayed()
+
+            runOnIdle {
+                assertEquals(2, selection.selectedIndex)
+                assertEquals(listOf<Int?>(1, 2), events)
+                selection.clear()
+            }
+            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(TITLE).isDisplayed()
         }
 
     @OptIn(ExperimentalTestApi::class)
