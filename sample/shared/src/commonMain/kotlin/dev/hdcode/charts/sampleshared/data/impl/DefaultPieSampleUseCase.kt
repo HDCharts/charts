@@ -11,10 +11,10 @@ internal class DefaultPieSampleUseCase : PieSampleUseCase {
         private val REFRESH_RANGE = 5..45
     }
 
-    private val pieDefaultValues = listOf(32f, 21f, 24f, 14f, 9f)
+    private val pieDefaultValues = listOf(32.0, 21.0, 24.0, 14.0, 9.0)
     private val pieDefaultLabels =
         listOf("Heating", "Cooling", "Appliances", "Water Heating", "Lighting")
-    private val pieCustomValues = listOf(35f, 20f, 12f, 8f, 18f, 7f)
+    private val pieCustomValues = listOf(35.0, 20.0, 12.0, 8.0, 18.0, 7.0)
     private val pieCustomLabels =
         listOf("Housing", "Food", "Transport", "Healthcare", "Savings", "Leisure")
 
@@ -39,7 +39,7 @@ internal class DefaultPieSampleUseCase : PieSampleUseCase {
         numOfPoints: IntRange,
     ): PieSampleData {
         val points = numOfPoints.random()
-        val values = List(points) { range.random().toFloat() }
+        val values = List(points) { range.random().toDouble() }
         return buildPieSample(
             values = values,
             labels = defaultLabels(points),
@@ -48,7 +48,7 @@ internal class DefaultPieSampleUseCase : PieSampleUseCase {
     }
 
     override fun pieCustomSample(range: IntRange): PieSampleData {
-        val values = List(pieCustomLabels.size) { range.random().toFloat() }
+        val values = List(pieCustomLabels.size) { range.random().toDouble() }
         return buildPieSample(
             values = values,
             labels = pieCustomLabels,
@@ -57,7 +57,7 @@ internal class DefaultPieSampleUseCase : PieSampleUseCase {
     }
 
     private fun buildPieSample(
-        values: List<Float>,
+        values: List<Double>,
         labels: List<String>,
         title: String = DEFAULT_TITLE,
     ): PieSampleData {

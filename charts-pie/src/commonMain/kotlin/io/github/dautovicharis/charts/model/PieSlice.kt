@@ -11,13 +11,15 @@ import androidx.compose.ui.graphics.Color
  * impossible to supply a color count that does not match the slice count.
  *
  * @param label The slice label, shown in the legend and while the slice is selected.
- * @param value The slice value. The rendered arc is proportional to this value.
+ * @param value The slice value. The rendered arc is proportional to this value. Values are
+ * `Double` so callers can mix large totals with tiny contributions without rounding loss.
+ * Finite numbers are required; `NaN`, `+Infinity`, and `-Infinity` are rejected by validation.
  * @param color The slice color. When `null`, a shade is generated from the style's
  * base color.
  */
 @Immutable
 data class PieSlice(
     val label: String,
-    val value: Float,
+    val value: Double,
     val color: Color? = null,
 )

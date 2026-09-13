@@ -38,6 +38,7 @@ import io.github.dautovicharis.charts.style.PieChartStyle
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import kotlin.math.min
 
 internal data class SliceGeometry(
     val startDeg: Float,
@@ -133,12 +134,20 @@ internal fun PieChart(
             Modifier
                 .pointerInput(interactionSlices) {
                     detectTapGestures { offset ->
+                        val canvasMinDimension = min(size.width, size.height).toFloat()
+                        val overflowInset =
+                            canvasMinDimension * (MAX_SCALE - DEFAULT_SCALE) / 2f
+                        val pieRadius = canvasMinDimension / 2f - overflowInset
+                        val donutHoleRadius =
+                            if (donutHoleAnimation > 0f) pieRadius * (donutHoleAnimation / 100f) else 0f
                         selectedIndex =
                             getSelectedIndex(
                                 pointX = offset.x,
                                 pointY = offset.y,
                                 size = size,
                                 slices = interactionSlices,
+                                overflowInset = overflowInset,
+                                donutHoleRadius = donutHoleRadius,
                             )
                         currentOnSliceTouched(selectedIndex)
                     }
@@ -154,8 +163,9 @@ internal fun PieChart(
                 .onGloballyPositioned { show = true }
                 .then(interactionModifier)
                 .drawWithCache {
-                    val overflowInset = size.minDimension * (MAX_SCALE - DEFAULT_SCALE) / 2f
-                    val pieDiameter = size.minDimension - overflowInset * 2f
+                    val canvasMinDimension = size.minDimension
+                    val overflowInset = canvasMinDimension * (MAX_SCALE - DEFAULT_SCALE) / 2f
+                    val pieDiameter = canvasMinDimension - overflowInset * 2f
                     val pieBounds =
                         Rect(
                             left = (size.width - pieDiameter) / 2f,

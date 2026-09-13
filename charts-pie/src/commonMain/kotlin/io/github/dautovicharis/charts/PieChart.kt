@@ -43,7 +43,8 @@ internal const val PIE_SELECTION_AUTO_DESELECT_TIMEOUT_MS = 3000L
  * @param data The chart data to display. Each [PieSlice] renders as a slice with its own
  * label, value, and optional color. Slices without a color fall back to shades generated
  * from the style's base color.
- * @param modifier The modifier to be applied to the chart.
+ * @param modifier The modifier to be applied to the chart. Also forwarded to the error
+ * branch when the data fails validation.
  * @param style The style to be applied to the chart. If not provided, the default style will be used.
  * @param title Optional chart title displayed when no slice is selected.
  */
@@ -60,7 +61,11 @@ fun PieChart(
         }
 
     if (validationErrors.isNotEmpty()) {
-        ChartErrors(style = style.chartContainerStyle, errors = validationErrors.toImmutableList())
+        ChartErrors(
+            style = style.chartContainerStyle,
+            errors = validationErrors.toImmutableList(),
+            modifier = modifier,
+        )
         return
     }
 
@@ -73,7 +78,7 @@ fun PieChart(
             )
         }
     val labels = remember(data) { data.map { it.label }.toImmutableList() }
-    val points = remember(data) { data.map { it.value.toDouble() }.toImmutableList() }
+    val points = remember(data) { data.map { it.value }.toImmutableList() }
 
     PieChartContent(
         modifier = modifier,
@@ -106,9 +111,9 @@ private fun PieChartContent(
     var interactionNonce by remember(points, selection) { mutableStateOf(0L) }
 
     LaunchedEffect(points, selection, interactionNonce) {
-        if (interactionSelection == null) return@LaunchedEffect
+        val pending = interactionSelection ?: return@LaunchedEffect
         delay(PIE_SELECTION_AUTO_DESELECT_TIMEOUT_MS)
-        if (selection.selectedIndex == interactionSelection) {
+        if (selection.selectedIndex == pending) {
             selection.clear()
         }
         interactionSelection = null
