@@ -3,9 +3,13 @@ package io.github.dautovicharis.charts.ui
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTouchInput
@@ -198,6 +202,64 @@ class PieChartTest {
 
     @OptIn(ExperimentalTestApi::class)
     @Test
+    fun pieChart_donutTapInsideHole_doesNotSelect() =
+        runComposeUiTest {
+            // 50% donut — tapping the dead center must not select any slice.
+            setContent {
+                PieChart(
+                    pieSlices,
+                    style = PieChartDefaults.style(donut = PieChartDefaults.donut(holePercentage = 50f)),
+                    title = TITLE,
+                )
+            }
+
+            val size = onNodeWithTag(TestTags.PIE_CHART).fetchSemanticsNode().size
+            onNodeWithTag(TestTags.PIE_CHART).performTouchInput {
+                down(
+                    androidx.compose.ui.geometry
+                        .Offset(size.width / 2f, size.height / 2f),
+                )
+                up()
+            }
+            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(TITLE)
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun pieChart_allZeroValues_rendersBlankWithoutNaN() =
+        runComposeUiTest {
+            val zeroSlices =
+                listOf(
+                    PieSlice(label = "Empty", value = 0.0),
+                    PieSlice(label = "Nothing", value = 0.0),
+                )
+            setContent {
+                PieChart(data = zeroSlices, title = TITLE)
+            }
+
+            onNodeWithTag(TestTags.PIE_CHART).assertIsDisplayed()
+            onNodeWithText("NaN").assertDoesNotExist()
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun pieChart_modifierForwardedToErrorBranch() =
+        runComposeUiTest {
+            // Forwarding the public modifier to the error branch is part of the hardening:
+            // the error composable must respect caller-supplied layout (asserted here via testTag).
+            setContent {
+                PieChart(
+                    data = listOf(PieSlice(label = "A", value = 1.0)),
+                    modifier = Modifier.testTag(TestTags.CHART_ERROR),
+                )
+            }
+
+            onAllNodesWithTag(TestTags.CHART_ERROR).assertCountEquals(2)
+            onNodeWithTag(TestTags.PIE_CHART).assertDoesNotExist()
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
     fun pieChart_externalSelectionAndClear_updateDetails() =
         runComposeUiTest {
             val selection = ChartSelection()
@@ -350,8 +412,9 @@ class PieChartTest {
 
     private fun calculatePercentages(values: List<Double>): List<String> {
         val total = values.sum()
+        if (total == 0.0 || !total.isFinite()) return List(values.size) { "0" }
         return values.map { value ->
-            val percentage = (if (total == 0.0) Double.NaN else value / total) * 100
+            val percentage = (value / total) * 100
             val rounded = round(percentage * 100) / 100
             "$rounded"
         }

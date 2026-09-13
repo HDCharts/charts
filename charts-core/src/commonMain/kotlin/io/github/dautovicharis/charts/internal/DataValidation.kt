@@ -14,6 +14,8 @@ object ValidationErrors {
         "Data points size should be greater than or equal to %d."
     const val RULE_DATA_POINT_NOT_NUMBER: String =
         "Data point at index %d is not a valid number."
+    const val RULE_DATA_POINT_NOT_FINITE: String =
+        "Data point at index %d is not finite."
     const val RULE_DATA_POINT_NEGATIVE: String =
         "Data point at index %d must be non-negative."
     const val RULE_ITEM_POINT_NEGATIVE: String =

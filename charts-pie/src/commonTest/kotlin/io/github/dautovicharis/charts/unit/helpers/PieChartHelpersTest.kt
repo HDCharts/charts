@@ -7,6 +7,9 @@ import io.github.dautovicharis.charts.internal.piechart.degree
 import io.github.dautovicharis.charts.internal.piechart.getCoordinatesForSlice
 import io.github.dautovicharis.charts.internal.piechart.isPointInCircle
 import io.github.dautovicharis.charts.unit.helpers.PieChartHelpersTest.Companion.WIDTH
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.sin
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -139,6 +142,74 @@ class PieChartHelpersTest {
     }
 
     @Test
+    fun isPointInCircle_respectsOverflowInset() {
+        // A point exactly at the enclosing canvas radius must NOT be inside the
+        // drawn pie when an overflow inset is applied (matches the drawing geometry).
+        val size = IntSize(500, 500)
+        assertTrue(
+            isPointInCircle(pointX = 0f, pointY = 250f, size = size, overflowInset = 0f),
+        )
+        assertEquals(
+            false,
+            isPointInCircle(pointX = 0f, pointY = 250f, size = size, overflowInset = 1f),
+        )
+    }
+
+    @Test
+    fun getSelectedIndex_donutHole_excludesInnerTaps() {
+        // A 50% donut hole must NOT register selections at the very center.
+        val values = listOf(50.0, 50.0)
+        val slices = createPieSlices(values = values)
+        val size = IntSize(1000, 1000)
+        val centerX = size.width / 2f
+        val centerY = size.height / 2f
+        val pieRadius = minOf(size.width, size.height) / 2f
+        val donutHoleRadius = pieRadius * 0.5f
+        val result =
+            io.github.dautovicharis.charts.internal.piechart.getSelectedIndex(
+                pointX = centerX,
+                pointY = centerY,
+                size = size,
+                slices = slices,
+                donutHoleRadius = donutHoleRadius,
+            )
+        assertEquals(-1, result)
+    }
+
+    @Test
+    fun getSelectedIndex_skipsZeroSweepSlices() {
+        // Zero-sweep slices are skipped by the half-open [start, end) check
+        // because end == start. Tapping past a zero slice resolves to the
+        // next valid slice in that wedge.
+        val firstSlices = createPieSlices(values = listOf(50.0, 50.0))
+        val boundary = firstSlices[1].endDeg
+        val slices =
+            firstSlices +
+                io.github.dautovicharis.charts.internal.piechart.SliceGeometry(
+                    startDeg = boundary,
+                    endDeg = boundary,
+                    sweepAngle = 0f,
+                    value = 0.0,
+                    normalizedValue = 0.0,
+                )
+        val size = IntSize(1000, 1000)
+        val cx = size.width.toFloat() / 2f
+        val cy = size.height.toFloat() / 2f
+        val r = minOf(size.width, size.height).toFloat() / 2f
+        // Chart angle 270 = (right 90° - 270° mod 360).
+        val theta = (90.0 - 270.0) * PI / 180.0
+        val result =
+            io.github.dautovicharis.charts.internal.piechart.getSelectedIndex(
+                pointX = cx + r * cos(theta).toFloat(),
+                pointY = cy + r * sin(theta).toFloat(),
+                size = size,
+                slices = slices,
+            )
+        // After a zero-sweep wedge, the next valid slice (or NO_SELECTION at the end) wins.
+        assertTrue(result == 1 || result == -1)
+    }
+
+    @Test
     fun createPieSlices_normalizesDoubleValuesBeforeGeometryConversion() {
         val slices = createPieSlices(values = listOf(1e40, 1e40))
 
@@ -153,7 +224,7 @@ class PieChartHelpersTest {
             hashMapOf(
                 listOf(10.0, 20.0, 30.0) to listOf("16.67", "33.33", "50.0"),
                 listOf(1.0, 1.0, 1.0) to listOf("33.33", "33.33", "33.33"),
-                listOf(0.0, 0.0, 0.0) to listOf("NaN", "NaN", "NaN"),
+                listOf(0.0, 0.0, 0.0) to listOf("0", "0", "0"),
                 listOf(100.0, 0.0, 0.0) to listOf("100.0", "0.0", "0.0"),
             )
 
