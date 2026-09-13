@@ -63,7 +63,7 @@ internal fun PieChart(
     val values = chartData.points
     val interactionSlices = remember(values) { createPieSlices(values) }
     val animatables =
-        remember(interactionSlices, isPreview, animateOnStart) {
+        remember(interactionSlices.size, isPreview, animateOnStart) {
             List(interactionSlices.size) { index ->
                 val initialValue =
                     if (isPreview || !animateOnStart) {

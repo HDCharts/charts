@@ -40,6 +40,10 @@ internal const val PIE_SELECTION_AUTO_DESELECT_TIMEOUT_MS = 3000L
 /**
  * A composable function that displays a Pie Chart.
  *
+ * [interactionEnabled] disables all user controls (tap-to-select and the auto-deselect
+ * timeout), but programmatic selection still renders. [animateOnStart] controls the
+ * initial reveal, not subsequent update animations.
+ *
  * @param data The chart data to display. Each [PieSlice] renders as a slice with its own
  * label, value, and optional color. Slices without a color fall back to shades generated
  * from the style's base color.
@@ -47,6 +51,9 @@ internal const val PIE_SELECTION_AUTO_DESELECT_TIMEOUT_MS = 3000L
  * branch when the data fails validation.
  * @param style The style to be applied to the chart. If not provided, the default style will be used.
  * @param title Optional chart title displayed when no slice is selected.
+ * @param interactionEnabled When `false`, disables tap-to-select and the auto-deselect timeout.
+ * @param animateOnStart When `false`, renders the chart in its final state without the
+ *   initial reveal animation.
  */
 @Composable
 fun PieChart(
@@ -54,6 +61,8 @@ fun PieChart(
     modifier: Modifier = Modifier,
     style: PieChartStyle = PieChartDefaults.style(),
     title: String? = null,
+    interactionEnabled: Boolean = true,
+    animateOnStart: Boolean = true,
 ) {
     val validationErrors =
         remember(data) {
@@ -87,6 +96,8 @@ fun PieChart(
         points = points,
         colors = colors,
         style = style,
+        interactionEnabled = interactionEnabled,
+        animateOnStart = animateOnStart,
     )
 }
 
@@ -98,6 +109,8 @@ private fun PieChartContent(
     points: ImmutableList<Double>,
     colors: ImmutableList<Color>,
     style: PieChartStyle,
+    interactionEnabled: Boolean,
+    animateOnStart: Boolean,
 ) {
     val selection = style.selection
     val piePercentages =
@@ -166,8 +179,8 @@ private fun PieChartContent(
             chartData = chartData,
             colors = colors,
             style = style,
-            interactionEnabled = true,
-            animateOnStart = true,
+            interactionEnabled = interactionEnabled,
+            animateOnStart = animateOnStart,
             selectedSliceIndex = forcedSelectedIndex,
         ) { index ->
             if (index != NO_SELECTION) {

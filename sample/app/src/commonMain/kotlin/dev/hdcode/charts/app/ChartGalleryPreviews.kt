@@ -108,6 +108,8 @@ private fun PieChartPreview(values: List<Float>) {
                 chartContainerStyle = previewChartContainerStyle(),
                 legend = PieChartDefaults.legend(visible = false),
             ),
+        interactionEnabled = false,
+        animateOnStart = false,
     )
 }
 
