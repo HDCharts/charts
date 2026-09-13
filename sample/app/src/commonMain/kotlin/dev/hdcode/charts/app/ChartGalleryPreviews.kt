@@ -145,6 +145,7 @@ private fun MultiLineChartPreview(series: List<Pair<String, List<Float>>>) {
         }
     LineChart(
         data = data,
+        title = "",
         style =
             LineChartDefaults.style(
                 chartContainerStyle = previewChartContainerStyle(),
@@ -252,13 +253,14 @@ private fun StackedBarChartPreview(series: List<Pair<String, List<Float>>>) {
                 *List(series.maxOfOrNull { (_, values) -> values.size } ?: 0) { segmentIndex ->
                     ChartSeries(
                         name = "Segment ${segmentIndex + 1}",
-                        values = series.map { (_, values) -> values.getOrNull(segmentIndex)?.toDouble() ?: Double.NaN },
+                        values = series.map { (_, values) -> values.getOrNull(segmentIndex)?.toDouble() ?: 0.0 },
                     )
                 }.toTypedArray(),
             )
         }
     StackedBarChart(
         data = dataSet,
+        title = "",
         style =
             StackedBarChartDefaults.style(
                 chartContainerStyle = previewChartContainerStyle(),
