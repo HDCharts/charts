@@ -9,13 +9,15 @@ release-notes/<version>/
 └── migrations/
 ```
 
-- `changes/` contains one short changeset for each public, user-facing charts
-  pull request. Only put text in `release_note` when it belongs in the public
-  "What's New" section. Internal release automation, CI, refactors, and
-  maintenance-only changes should either omit a changeset or keep
-  `release_note` empty.
-- `migrations/` contains one migration fragment for each pull request with
-  breaking API changes.
+- `changes/` contains concise release notes for coherent public, user-facing
+  topics. Merge related API, behavior, and hardening work into one note when it
+  describes one user outcome. Only put text in `release_note` when it belongs
+  in the public "What's New" section. Internal release automation, CI,
+  refactors, and maintenance-only changes should omit a release note.
+- `migrations/` contains one concise migration document for each coherent
+  breaking API topic. Merge related changes into the topic's canonical file;
+  do not create separate fragments for expected cleanup within the same API
+  transition.
 
 The target release is the current Axion-resolved snapshot version (the
 `currentVersion` value without the `-SNAPSHOT` suffix). When the target directory

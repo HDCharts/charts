@@ -1,22 +1,57 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+is_ignored_path() {
+  local profile="$1"
+  local changed_file="$2"
+
+  case "$changed_file" in
+    release-notes/*)
+      if [[ "$profile" == "core" ]]; then
+        return 0
+      fi
+      return 1
+      ;;
+    docs/*|.agents/*|.kilo/*|.claude/*|.gitignore|*.md)
+      return 0
+      ;;
+    gif-baselines/*|scripts/*|.github/api-compatibility-baseline.txt|.github/CODEOWNERS|.github/FUNDING.yml|.editorconfig|LICENSE|LICENSE.*|readme-assets/*)
+      if [[ "$profile" == "core" ]]; then
+        return 0
+      fi
+      return 1
+      ;;
+  esac
+
+  return 1
+}
+
 is_code_change() {
   local changed_files="$1"
   local changed_file
 
   while IFS= read -r changed_file; do
     [[ -n "$changed_file" ]] || continue
-    case "$changed_file" in
-      docs/*|release-notes/*|gif-baselines/*|scripts/*|.github/api-compatibility-baseline.txt|.github/CODEOWNERS|.github/FUNDING.yml|.editorconfig|*.md|LICENSE|LICENSE.*|readme-assets/*) ;;
-      *)
-        echo "true"
-        return
-        ;;
-    esac
+    if ! is_ignored_path core "$changed_file"; then
+      echo "true"
+      return
+    fi
   done <<<"$changed_files"
 
   echo "false"
+}
+
+filter_changes() {
+  local profile="$1"
+  local changed_files="$2"
+  local changed_file
+
+  while IFS= read -r changed_file; do
+    [[ -n "$changed_file" ]] || continue
+    if ! is_ignored_path "$profile" "$changed_file"; then
+      printf '%s\n' "$changed_file"
+    fi
+  done <<<"$changed_files"
 }
 
 collect_changed_files() {
@@ -102,6 +137,16 @@ run_self_test() {
     failures=$((failures + 1))
   fi
 
+  result="$(is_code_change $'.agents/skills/hdc-review/SKILL.md\n.agents/skills/hdc-pr/agents/openai.yaml\n.kilo/skills/hdc-review\n.claude/skills/hdc-review\n.gitignore')"
+  if ! assert_equal "false" "$result" "agent guidance and gitignore changes"; then
+    failures=$((failures + 1))
+  fi
+
+  result="$(filter_changes snapshot $'.agents/skills/hdc-review/SKILL.md\n.agents/skills/hdc-pr/agents/openai.yaml\n.kilo/skills/hdc-review\n.claude/skills/hdc-review\n.gitignore\ndocs/workflows/ci.md\nREADME.md\nrelease-notes/3.0.0/changes/example.md\ngif-baselines/example.gif\nscripts/build-release-body.sh')"
+  if ! assert_equal $'release-notes/3.0.0/changes/example.md\ngif-baselines/example.gif\nscripts/build-release-body.sh' "$result" "snapshot change filter"; then
+    failures=$((failures + 1))
+  fi
+
   result="$(is_code_change ".editorconfig")"
   if ! assert_equal "false" "$result" "editor config change"; then
     failures=$((failures + 1))
@@ -128,6 +173,14 @@ run_self_test() {
 main() {
   if [[ "${1:-}" == "--self-test" ]]; then
     run_self_test
+    return
+  fi
+
+  if [[ "${1:-}" == "--filter" ]]; then
+    local profile="${2:?filter profile is required}"
+    local changed_files
+    changed_files="$(cat)"
+    filter_changes "$profile" "$changed_files"
     return
   fi
 

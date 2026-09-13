@@ -97,12 +97,16 @@ executed.
 Do not move build or test steps to `pull_request_target`; that event has write
 access and must not execute untrusted PR code.
 
-## Docs-only changes
+## Non-code changes
 
-`scripts/ci-has-code-changes.sh` treats documentation and release-note-only
-changes as non-code changes for the core workflow. The API compatibility
-workflow still runs for those changes because it always checks the current
-public API against the baseline.
+`scripts/ci-has-code-changes.sh` treats documentation, release-note, agent
+guidance, and repository-metadata-only changes as non-code changes for the core
+workflow. The API compatibility workflow still runs for those changes because
+it always checks the current public API against the baseline.
+
+The snapshot release workflow uses the same script with the `snapshot` profile.
+Release notes, GIF baselines, scripts, and other release-relevant changes remain
+snapshot triggers.
 
 ## Reusable workflow status display
 

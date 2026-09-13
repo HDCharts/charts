@@ -1,88 +1,88 @@
 ---
 name: hdc-rc
-description: Run the configured HDCharts binary API compatibility check and generate concise per-PR migration fragments in charts. Use when the user asks to inspect breaking API changes, check snapshot or release compatibility, or update release migration notes.
+description: Inspect HDCharts binary API compatibility and maintain concise, stable migration topics for the current release.
 ---
 
-# Check HDCharts release compatibility
+# Check HDCharts Release Compatibility
 
-Generate incremental migration guidance from the library's API compatibility
-reports. Use the configured compatibility baseline for normal PR checks. Use
-the previous release tag for release audits. Migration fragments accumulate for
-the target release. The docs sync mirrors these fragments unchanged and the
-docs app assembles them at build time. Generate per-fragment migration guidance
-for the target release.
+Generate user migration guidance from API compatibility reports. Keep one
+coherent public API topic per migration document.
 
 ## Guardrails
 
-Follow [AGENTS.md](../../AGENTS.md) Guardrails.
+Follow [AGENTS.md](../../AGENTS.md). The user invokes this skill directly.
+Inspect every generated report and distinguish API incompatibilities from
+infrastructure failures.
 
-Inspect generated reports for every command result and distinguish reported
-incompatibilities from infrastructure failures.
+Write direct migration prose with the supported API and required user action.
 
+## Migration Topic Policy
+
+- Inspect existing migration files before creating one. Merge overlapping
+  symbols, examples, and behavior into the canonical topic.
+- Document an API removal with its replacement in the same topic.
+- Use concise topic filenames such as `pie-v3.md`, `line-v3.md`, or
+  `shared-chart-contracts.md`.
+- Keep unrelated release history stable.
 
 ## Workflow
 
-1. Read `charts/.version`, require
-   `<major>.<minor>.<patch>-SNAPSHOT`, remove the suffix to obtain
-   `release_version`, and use:
+1. Resolve `release_version` with the repository helper:
 
-   ```text
-   charts/release-notes/<release_version>/migrations/
+   ```bash
+   bash ./.github/scripts/resolve-release-version.sh
    ```
 
-2. Resolve the current `HDCharts/charts` pull request number. Search the target
-   migration directory for `<pr-number>-*.md`:
-   - exactly one matching fragment: reuse that path;
-   - multiple matching fragments: report the ambiguity before writing;
-   - no matching fragment: resolve a concise kebab-case summary and create:
+   Use the helper output as the version directory name:
+   `release-notes/<release_version>/migrations/`.
 
-   ```text
-   <pr-number>-<short-kebab>.md
-   ```
-
-   Use an explicit user value when creating the first fragment. Complete the
-   compatibility inspection and omit writing when no stable fragment identity
-   exists.
+2. Inspect existing migration files and map the reported symbols to stable
+   migration topics. Reuse the canonical topic file when it exists. Merge
+   overlapping fragments before adding a new topic.
 3. Resolve the baseline ref:
    - release audits: use the previous release tag provided by the user or
-     inferred from the release history;
-   - standard checks: read the configured baseline ref from
-     `charts/.github/api-compatibility-baseline.txt`.
-4. Remove the generated
-   `charts/build/reports/api-compatibility/` directory before running the check.
-5. Run from `charts`:
+     inferred from release history;
+   - standard checks: read `.github/api-compatibility-baseline.txt`.
+4. Remove the generated `build/reports/api-compatibility/` directory.
+5. Run from the repository root:
 
-   ```text
+   ```bash
    ./gradlew apiCompatibilityCheck --no-daemon --continue
    ```
 
-   For release audits, pass the previous release tag as the baseline:
+   For release audits, pass the previous release tag:
 
-   ```text
+   ```bash
    ./gradlew apiCompatibilityCheck --no-daemon --continue -PapiCompatibilityBaselineRef=<previous-release-tag>
    ```
 
-6. Capture the command's exit status and output. Classify API incompatibilities
-   separately from build, dependency, tool, and other infrastructure failures.
-   Report infrastructure failures and leave release notes unchanged.
-7. Read every Markdown report generated under
-   `build/reports/api-compatibility/`. Verify that every configured library
-   module expected to run produced a current report. Record modules whose
-   baseline artifact is unavailable and report those modules in the results.
-   Report failures for missing, stale, or incomplete reports and leave release
-   notes unchanged.
-8. For each module with a breaking change, determine:
-   - source call sites requiring edits;
-   - the user-visible API change;
-   - a minimal Kotlin before/after migration for required source edits.
-9. Update the current pull request's fragment using
-   [assets/migration-fragment.md](assets/migration-fragment.md):
-   - breaking modules: write one section per module with applicable migration
-     content;
-   - no breaking modules with an existing current fragment: remove the stale
-     fragment;
-   - no breaking modules with no current fragment: leave release notes
-     unchanged.
-10. Validate that no placeholders remain and that examples match the reports.
+6. Capture the command status and classify API incompatibilities separately
+   from infrastructure failures.
+7. Verify that every configured module produced a current Markdown report.
+8. For each breaking module, determine the affected call sites, user-visible
+   API change, supported replacement, and minimal migration example.
+9. For breaking modules, update the canonical topic file using this structure:
+
+   ```markdown
+   # <Topic> migration
+
+   <Direct description of the supported API and user outcome.>
+
+   ## Use
+
+   <Current API example and required application-boundary conversion.>
+
+   ## Behavior
+
+   <Important validation, selection, rendering, or compatibility behavior.>
+
+   ## Validation
+
+   <Focused tests and remaining platform or CI gates.>
+   ```
+
+10. Validate examples against the reports and check for placeholders or
+    overlapping topics. Leave migration files unchanged when no breaking module
+    is reported.
 11. Report the release version, baseline ref, command result, breaking modules,
-    and fragment path or no-write reason.
+    canonical topic paths, and any duplicate files removed.

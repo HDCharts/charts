@@ -1,6 +1,7 @@
 # Bar and Histogram v3 migration
 
-This PR migrates BarChart and HistogramChart to the shared v3 contracts from merged PR #541. It is the first Cartesian chart migration.
+BarChart and HistogramChart use the shared v3 contracts as the first Cartesian
+chart migration.
 
 ## What changed
 
