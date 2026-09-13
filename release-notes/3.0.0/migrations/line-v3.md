@@ -19,7 +19,7 @@ LineChart(
 )
 ```
 
-`chartData` is shared `ChartData` with `List<Double>` values. Use `List<Double>.toChartData(categories = ..., seriesName = ...)` for one series or `chartDataOf(categories = ..., ChartSeries(...), ...)` for multiple series. Categories are explicit labels, not numeric X coordinates; empty categories hide the X-label layer and do not create index-string labels.
+`chartData` is shared `ChartData` with `List<Double>` values. Use `List<Double>.toChartData(categories = ..., seriesName = ...)` for one series or `List<Pair<String, List<Double>>>.toChartData(categories = ...)` for the concise multi-series form. Use `chartDataOf(categories = ..., ChartSeries(...), ...)` when explicit series construction is useful. Categories are explicit labels, not numeric X coordinates; empty categories hide the X-label layer and do not create index-string labels.
 
 The old `LineChart(dataSet: ChartDataSet, ...)` and `LineChart(dataSet: MultiChartDataSet, ...)` entry points are removed. `selectedPointIndex` is removed; use `selection = staticChartSelection(index)` for screenshots and deterministic previews. Selection is a source X index shared by every line. Replacing data clears selection, while resize, scrolling, compact/expanded changes, and external callback replacement preserve the current source selection where it remains valid.
 
@@ -45,7 +45,7 @@ Malformed data is rejected before internal conversion: empty data, fewer than tw
 
 ## Sample and test migration
 
-Line samples, previews, screenshot call sites, GIF scenarios, the smoke consumer, UI tests, dense-data tests, and shared validation fixtures now construct `ChartData`/`ChartSeries` explicitly. Legacy dataset models remain in `charts-core` because Radar, Stacked Bar, and Stacked Area still consume them; they are deleted only after their last consumer migrates.
+Line samples, previews, screenshot call sites, GIF scenarios, the smoke consumer, UI tests, dense-data tests, and shared validation fixtures now construct v3 `ChartData`, using the concise pair-list builder where the source data is already name-to-values shaped. Legacy dataset models remain in `charts-core` because Radar, Stacked Bar, and Stacked Area still consume them; they are deleted only after their last consumer migrates.
 
 ## Validation
 

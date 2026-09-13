@@ -66,6 +66,42 @@ class ChartDataModelTest {
     }
 
     @Test
+    fun toChartData_pairs_buildsMultiSeriesChartData() {
+        val data =
+            listOf(
+                "Revenue" to listOf(10.0, 20.0),
+                "Costs" to listOf(4.0, 8.0),
+            ).toChartData(categories = listOf("Jan", "Feb"))
+
+        assertContentEquals(actual = data.categories, expected = listOf("Jan", "Feb"))
+        assertEquals(actual = data.series.size, expected = 2)
+        assertEquals(actual = data.series[0].name, expected = "Revenue")
+        assertContentEquals(actual = data.series[0].values, expected = listOf(10.0, 20.0))
+        assertEquals(actual = data.series[1].name, expected = "Costs")
+        assertContentEquals(actual = data.series[1].values, expected = listOf(4.0, 8.0))
+    }
+
+    @Test
+    fun toChartData_pairs_emptyCategories_usesEmptyLabels() {
+        val data = listOf("Revenue" to listOf(10.0, 20.0)).toChartData()
+
+        assertContentEquals(actual = data.categories, expected = emptyList())
+        assertContentEquals(actual = data.series.single().values, expected = listOf(10.0, 20.0))
+    }
+
+    @Test
+    fun toChartData_pairs_raggedSeriesValues_passThrough() {
+        val data =
+            listOf(
+                "Revenue" to listOf(10.0, 20.0),
+                "Costs" to listOf(4.0),
+            ).toChartData(categories = listOf("Jan", "Feb"))
+
+        assertContentEquals(actual = data.series[0].values, expected = listOf(10.0, 20.0))
+        assertContentEquals(actual = data.series[1].values, expected = listOf(4.0))
+    }
+
+    @Test
     fun chartSeries_mutableList_isCopied() {
         // Arrange
         val mutable = mutableListOf(1.0, 2.0)

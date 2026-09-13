@@ -4,8 +4,6 @@ import dev.hdcode.charts.app.data.LiveLatencyMultiSeriesWindow
 import dev.hdcode.charts.app.data.LiveLatencySingleSeriesWindow
 import dev.hdcode.charts.app.data.LiveLatencyTimelineUseCase
 import io.github.dautovicharis.charts.model.ChartData
-import io.github.dautovicharis.charts.model.ChartSeries
-import io.github.dautovicharis.charts.model.chartDataOf
 import io.github.dautovicharis.charts.model.toChartData
 import kotlin.math.sin
 import kotlin.random.Random
@@ -122,13 +120,10 @@ private class LiveLatencyTimelineGenerator {
     }
 
     fun toMultiDataSet(window: LiveLatencyMultiSeriesWindow): ChartData =
-        chartDataOf(
-            categories = window.labels,
-            *arrayOf(
-                ChartSeries(name = P50_SERIES_LABEL, values = window.p50Values.map { it.toDouble() }),
-                ChartSeries(name = P95_SERIES_LABEL, values = window.p95Values.map { it.toDouble() }),
-            ),
-        )
+        listOf(
+            P50_SERIES_LABEL to window.p50Values.map { it.toDouble() },
+            P95_SERIES_LABEL to window.p95Values.map { it.toDouble() },
+        ).toChartData(categories = window.labels)
 
     private fun resolveEndTick(
         windowSize: Int,

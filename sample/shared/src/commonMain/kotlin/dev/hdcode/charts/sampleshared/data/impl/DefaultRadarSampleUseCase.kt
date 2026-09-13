@@ -6,6 +6,7 @@ import dev.hdcode.charts.sampleshared.data.RadarSampleUseCase
 import io.github.dautovicharis.charts.model.ChartData
 import io.github.dautovicharis.charts.model.ChartSeries
 import io.github.dautovicharis.charts.model.chartDataOf
+import io.github.dautovicharis.charts.model.toChartData
 
 internal class DefaultRadarSampleUseCase : RadarSampleUseCase {
     companion object {
@@ -39,21 +40,9 @@ internal class DefaultRadarSampleUseCase : RadarSampleUseCase {
     override fun initialRadarSample(): RadarSampleData =
         RadarSampleData(
             basicData =
-                chartDataOf(
-                    categories = radarCategories,
-                    *radarBasicItems
-                        .map { (name, values) ->
-                            ChartSeries(name = name, values = values)
-                        }.toTypedArray(),
-                ),
+                radarBasicItems.toChartData(categories = radarCategories),
             customData =
-                chartDataOf(
-                    categories = radarCategories,
-                    *radarInitialItems
-                        .map { (name, values) ->
-                            ChartSeries(name = name, values = values)
-                        }.toTypedArray(),
-                ),
+                radarInitialItems.toChartData(categories = radarCategories),
             seriesKeys = radarInitialItems.map { it.first },
             title = DEFAULT_TITLE,
         )
@@ -70,14 +59,7 @@ internal class DefaultRadarSampleUseCase : RadarSampleUseCase {
             ChartSeries(name = "Edge", values = radarEdgeValues),
         )
 
-    override fun initialRadarMultiNoCategoriesData(): ChartData =
-        chartDataOf(
-            categories = emptyList(),
-            *radarInitialItems
-                .map { (name, values) ->
-                    ChartSeries(name = name, values = values)
-                }.toTypedArray(),
-        )
+    override fun initialRadarMultiNoCategoriesData(): ChartData = radarInitialItems.toChartData()
 
     override fun radarRefreshRange(): IntRange = REFRESH_RANGE
 
@@ -101,13 +83,7 @@ internal class DefaultRadarSampleUseCase : RadarSampleUseCase {
             radarBasicItems.map { (name, values) ->
                 name to values.map { base -> (base + (-10..10).random()).coerceIn(min, max) }
             }
-        return chartDataOf(
-            categories = radarCategories,
-            *newItems
-                .map { (name, values) ->
-                    ChartSeries(name = name, values = values)
-                }.toTypedArray(),
-        )
+        return newItems.toChartData(categories = radarCategories)
     }
 
     override fun radarCustomSample(range: IntRange): RadarCustomSampleData {
@@ -116,13 +92,7 @@ internal class DefaultRadarSampleUseCase : RadarSampleUseCase {
                 name to values.map { range.random().toDouble() }
             }
         val data =
-            chartDataOf(
-                categories = radarCategories,
-                *newItems
-                    .map { (name, values) ->
-                        ChartSeries(name = name, values = values)
-                    }.toTypedArray(),
-            )
+            newItems.toChartData(categories = radarCategories)
         return RadarCustomSampleData(
             data = data,
             seriesKeys = newItems.map { it.first },

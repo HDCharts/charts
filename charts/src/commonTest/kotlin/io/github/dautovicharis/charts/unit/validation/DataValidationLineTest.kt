@@ -23,7 +23,7 @@ class DataValidationLineTest {
         val lineChartStyle = mockLineChartStyle()
 
         // Act
-        val lineErrors = validateLineData(dataSet.data, lineChartStyle)
+        val lineErrors = validateLineData(dataSet, lineChartStyle)
 
         // Assert
         assertTrue(lineErrors.isEmpty())
@@ -36,17 +36,17 @@ class DataValidationLineTest {
 
         val lineChartStyle = mockLineChartStyle()
         val expectedCategoriesSize =
-            dataSet.data.items
+            dataSet.items
                 .first()
                 .item.points.size
 
         // Act
-        val validationErrors = validateLineData(dataSet.data, lineChartStyle)
+        val validationErrors = validateLineData(dataSet, lineChartStyle)
 
         // Assert
         val expectedError =
             ValidationErrors.RULE_CATEGORIES_SIZE_MISMATCH.format(
-                dataSet.data.categories.size,
+                dataSet.categories.size,
                 expectedCategoriesSize,
             )
         assertTrue(validationErrors.isNotEmpty())
@@ -59,10 +59,10 @@ class DataValidationLineTest {
         val colors = colors.drop(2)
         val dataSet = multiDataSet
         val lineChartStyle = mockLineChartStyle(colors)
-        val expectedColorSize = dataSet.data.items.size
+        val expectedColorSize = dataSet.items.size
 
         // Act
-        val validationErrors = validateLineData(dataSet.data, lineChartStyle)
+        val validationErrors = validateLineData(dataSet, lineChartStyle)
 
         // Assert
         val expectedError =
@@ -80,15 +80,15 @@ class DataValidationLineTest {
         val lineChartStyle = mockLineChartStyle()
 
         val expectedPoints =
-            dataSet.data.items
+            dataSet.items
                 .first()
                 .item.points.size
         val pointsSize =
-            dataSet.data.items[index]
+            dataSet.items[index]
                 .item.points.size
 
         // Act
-        val validationErrors = validateLineData(dataSet.data, lineChartStyle)
+        val validationErrors = validateLineData(dataSet, lineChartStyle)
 
         // Assert
         val expectedError =
@@ -105,7 +105,7 @@ class DataValidationLineTest {
         val lineChartStyle = mockLineChartStyle()
 
         // Act
-        val validationErrors = validateLineData(dataSet.data, lineChartStyle)
+        val validationErrors = validateLineData(dataSet, lineChartStyle)
 
         // Assert
         val expectedError =

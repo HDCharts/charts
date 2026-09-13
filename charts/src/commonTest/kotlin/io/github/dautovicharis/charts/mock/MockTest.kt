@@ -7,12 +7,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.sp
-import io.github.dautovicharis.charts.internal.common.model.ChartDataType.FloatData
+import io.github.dautovicharis.charts.internal.common.model.ChartDataItem
+import io.github.dautovicharis.charts.internal.common.model.MultiChartData
+import io.github.dautovicharis.charts.internal.common.model.toChartData
 import io.github.dautovicharis.charts.internal.linechart.LineChartInternalStyle
 import io.github.dautovicharis.charts.model.ChartData
-import io.github.dautovicharis.charts.model.ChartDataSet
 import io.github.dautovicharis.charts.model.ChartSeries
-import io.github.dautovicharis.charts.model.MultiChartDataSet
 import io.github.dautovicharis.charts.model.chartDataOf
 import io.github.dautovicharis.charts.style.AxisLabelStyle
 import io.github.dautovicharis.charts.style.ChartContainerStyle
@@ -53,75 +53,65 @@ internal object MockTest {
 
     private val dataItems =
         listOf(
-            FIRST_ITEM_NAME to FloatData(FIRST_ITEM),
-            SECOND_ITEM_NAME to FloatData(SECOND_ITEM),
-            THIRD_ITEM_NAME to FloatData(THIRD_ITEM),
-            FOURTH_ITEM_NAME to FloatData(FOURTH_ITEM),
-        )
-
-    val dataSet =
-        ChartDataSet(
-            items = FloatData(listOf(10f, 20f, 30f, 40f)),
-            title = TITLE,
+            ChartDataItem(FIRST_ITEM_NAME, FIRST_ITEM.toChartData()),
+            ChartDataItem(SECOND_ITEM_NAME, SECOND_ITEM.toChartData()),
+            ChartDataItem(THIRD_ITEM_NAME, THIRD_ITEM.toChartData()),
+            ChartDataItem(FOURTH_ITEM_NAME, FOURTH_ITEM.toChartData()),
         )
 
     val multiDataSet =
-        MultiChartDataSet(
+        MultiChartData(
             items = dataItems,
             categories = categories,
             title = TITLE,
         )
 
     val asymmetricMultiDataSet =
-        MultiChartDataSet(
+        MultiChartData(
             items =
                 listOf(
-                    FIRST_ITEM_NAME to FloatData(FIRST_ITEM + 5f),
-                    SECOND_ITEM_NAME to FloatData(SECOND_ITEM + 5f),
-                    THIRD_ITEM_NAME to FloatData(THIRD_ITEM + 5f),
+                    ChartDataItem(FIRST_ITEM_NAME, (FIRST_ITEM + 5f).toChartData()),
+                    ChartDataItem(SECOND_ITEM_NAME, (SECOND_ITEM + 5f).toChartData()),
+                    ChartDataItem(THIRD_ITEM_NAME, (THIRD_ITEM + 5f).toChartData()),
                 ),
             categories = categories + "May",
             title = TITLE,
         )
 
-    fun invalidMultiDataSet(): MultiChartDataSet {
+    fun invalidMultiDataSet(): MultiChartData {
         val items =
             listOf(
-                FIRST_ITEM_NAME to FloatData(FIRST_ITEM.dropLast(1)),
-                SECOND_ITEM_NAME to FloatData(SECOND_ITEM),
-                THIRD_ITEM_NAME to FloatData(THIRD_ITEM.dropLast(1)),
-                FOURTH_ITEM_NAME to FloatData(FOURTH_ITEM),
+                ChartDataItem(FIRST_ITEM_NAME, FIRST_ITEM.dropLast(1).toChartData()),
+                ChartDataItem(SECOND_ITEM_NAME, SECOND_ITEM.toChartData()),
+                ChartDataItem(THIRD_ITEM_NAME, THIRD_ITEM.dropLast(1).toChartData()),
+                ChartDataItem(FOURTH_ITEM_NAME, FOURTH_ITEM.toChartData()),
             )
 
-        return MultiChartDataSet(
+        return MultiChartData(
             items = items,
             categories = categories.dropLast(1),
             title = TITLE,
-            prefix = "$",
         )
     }
 
     fun invalidMultiDataSet(
         index: Int,
         empty: Boolean = false,
-    ): MultiChartDataSet {
+    ): MultiChartData {
         val updatedDataItems = dataItems.toMutableList()
-        updatedDataItems[index] =
-            if (empty) {
-                updatedDataItems[index].copy(second = FloatData(emptyList()))
-            } else {
-                updatedDataItems[index].copy(second = FloatData(updatedDataItems[index].second.values.drop(2)))
-            }
+        val current = updatedDataItems[index]
+        val values = if (empty) emptyList() else current.item.points.drop(2)
+        updatedDataItems[index] = current.copy(item = values.toChartData())
 
-        return MultiChartDataSet(
+        return MultiChartData(
             items = updatedDataItems,
             categories = categories,
             title = TITLE,
         )
     }
 
-    fun invalidDataSetCategories(): MultiChartDataSet =
-        MultiChartDataSet(
+    fun invalidDataSetCategories(): MultiChartData =
+        MultiChartData(
             items = dataItems,
             categories = categories.drop(1),
             title = TITLE,

@@ -2,8 +2,7 @@ package dev.hdcode.charts.sampleshared.data.impl
 
 import dev.hdcode.charts.sampleshared.data.MultiLineSampleData
 import dev.hdcode.charts.sampleshared.data.MultiLineSampleUseCase
-import io.github.dautovicharis.charts.model.ChartSeries
-import io.github.dautovicharis.charts.model.chartDataOf
+import io.github.dautovicharis.charts.model.toChartData
 
 internal class DefaultMultiLineSampleUseCase : MultiLineSampleUseCase {
     companion object {
@@ -23,13 +22,9 @@ internal class DefaultMultiLineSampleUseCase : MultiLineSampleUseCase {
     override fun initialMultiLineSample(): MultiLineSampleData =
         MultiLineSampleData(
             dataSet =
-                chartDataOf(
-                    categories = multiLineCategories,
-                    *multiLineItems
-                        .map { (name, values) ->
-                            ChartSeries(name = name, values = values.map { it.toDouble() })
-                        }.toTypedArray(),
-                ),
+                multiLineItems
+                    .map { (name, values) -> name to values.map { it.toDouble() } }
+                    .toChartData(categories = multiLineCategories),
             seriesKeys = multiLineItems.map { it.first },
             title = DEFAULT_TITLE,
         )
@@ -39,16 +34,10 @@ internal class DefaultMultiLineSampleUseCase : MultiLineSampleUseCase {
     override fun multiLineSample(range: IntRange): MultiLineSampleData {
         val newItems =
             multiLineItems.map { (name, values) ->
-                name to values.map { range.random().toFloat() }
+                name to values.map { range.random().toDouble() }
             }
         val dataSet =
-            chartDataOf(
-                categories = multiLineCategories,
-                *newItems
-                    .map { (name, values) ->
-                        ChartSeries(name = name, values = values.map { it.toDouble() })
-                    }.toTypedArray(),
-            )
+            newItems.toChartData(categories = multiLineCategories)
         return MultiLineSampleData(
             dataSet = dataSet,
             seriesKeys = newItems.map { it.first },
