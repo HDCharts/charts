@@ -1,46 +1,64 @@
 # Stacked Area v3 migration
 
-`StackedAreaChart` now accepts shared `ChartData`. Categories identify shared X positions; each `ChartSeries` is an ordered contribution series with one value per category.
+Use shared `ChartData` with one `ChartSeries` per contribution series. Categories
+identify the shared X positions.
+
+## Before
+
+```kotlin
+@Composable
+private fun ShowStackedArea() {
+    val items = listOf(
+        "Free Plan" to listOf(620f, 650f, 690f, 720f, 760f, 800f),
+        "Standard Plan" to listOf(240f, 260f, 285f, 310f, 340f, 365f),
+        "Premium Plan" to listOf(90f, 95f, 105f, 118f, 130f, 142f),
+    )
+
+    val dataSet = items.toMultiChartDataSet(
+        title = "Monthly Active Subscribers by Plan",
+        categories = listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun"),
+    )
+
+    StackedAreaChart(
+        dataSet = dataSet,
+        selectedPointIndex = 1,
+    )
+}
+```
+
+## After
 
 ```kotlin
 StackedAreaChart(
     data = chartDataOf(
-        categories = listOf("Jan", "Feb", "Mar"),
-        ChartSeries("Free Plan", listOf(620.0, 650.0, 690.0)),
-        ChartSeries("Standard Plan", listOf(240.0, 260.0, 285.0)),
-        ChartSeries("Premium Plan", listOf(90.0, 95.0, 105.0)),
+        categories = listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun"),
+        ChartSeries("Free Plan", listOf(620.0, 650.0, 690.0, 720.0, 760.0, 800.0)),
+        ChartSeries("Standard Plan", listOf(240.0, 260.0, 285.0, 310.0, 340.0, 365.0)),
+        ChartSeries("Premium Plan", listOf(90.0, 95.0, 105.0, 118.0, 130.0, 142.0)),
     ),
     modifier = Modifier.fillMaxWidth(),
     title = "Monthly Active Subscribers by Plan",
-    selection = rememberChartSelection(),
+    selection = rememberChartSelection(initialIndex = 1),
 )
 ```
 
-The old `MultiChartDataSet` and `selectedPointIndex` public inputs are removed. Use `selection = staticChartSelection(index)` for deterministic previews and screenshots. Selection is a source X index shared by every series; replacing data clears selection while resize, scrolling, compact/expanded changes, and external callback replacement preserve a valid source selection.
+The old `MultiChartDataSet` and `selectedPointIndex` inputs are removed. Use
+`selection` instead; it identifies one source X index shared by all series.
 
-## Grouped style
+## Styles and selection
 
-`StackedAreaChartStyle` now groups:
+Move customizations to the grouped `StackedAreaChartStyle` sections such as
+`fill`, `boundary`, `axis`, and `selection`. Series colors correspond to
+contribution series.
 
-- `fill: StackedAreaFillStyle` with fallback color, immutable series colors, and alpha.
-- `boundary: StackedAreaBoundaryStyle` with visibility, fallback color, immutable series colors, `Dp` width, and Bezier flag.
-- `axis: StackedAreaAxisStyle` with X/Y `AxisLabelStyle` blocks.
-- `selection: StackedAreaSelectionStyle` with visibility, color, and `Dp` width.
-- `chartContainerStyle` and `zoomControlsVisible`.
+Use `staticChartSelection(index)` for a preset preview or screenshot. Replacing
+data clears selection; resizing and density changes preserve it.
 
-Explicit colors match the number of contribution series. The internal renderer temporarily receives a flat adapter style; that adapter is not a public compatibility API and can be removed in a later renderer cleanup.
+## Behavior
 
-## Data and behavior
-
-- Require at least one aligned series and at least two X positions.
-- Categories are empty or match every series length.
-- Contributions must be finite and nonnegative. Diverging or signed stacks are not supported in this migration.
-- Stacking remains absolute per X position, not percentage-normalized columns. All-zero totals use a finite fallback domain.
-- Compact rendering may average source points for density, but source selection maps to a bucket-center source X and selected legend values remain raw contributions.
-- Linear and Bezier boundaries share identical geometry. Boundary colors default to the fill palette when not provided.
-- `interactionEnabled = false` disables user gestures and header control changes while programmatic selection and theme/style updates still render.
-- The caller `Modifier` is preserved for both valid and validation-error output.
-
-## Validation
-
-The implementation adds invalid/ragged/negative/nonfinite data coverage, fill/boundary palette cardinality coverage, selection and dense-mode tests, sample migration, screenshot call-site migration, and release notes. Local validation completed for stacked-area JVM tests, shared JVM tests, stacked-area Wasm test-source compilation, affected lint, and sample compilation. Android screenshots, browser, simulator, and API compatibility remain CI gates.
+- Series must be aligned, contain at least two X positions, and use finite,
+  nonnegative values.
+- Categories are optional; when supplied, they must match every series.
+- Stacking shows absolute totals rather than percentages.
+- `interactionEnabled = false` disables user controls while programmatic
+  selection remains visible.

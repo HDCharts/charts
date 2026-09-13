@@ -1,46 +1,71 @@
 # Stacked Bar v3 migration
 
-`StackedBarChart` now accepts shared `ChartData`. Categories are bars; each `ChartSeries` is an ordered segment with one contribution per bar.
+Use shared `ChartData` with one `ChartSeries` per stack segment. Each category
+is one bar, and each series supplies one contribution for every bar.
+
+## Before
+
+```kotlin
+@Composable
+private fun ShowStackedBar() {
+    val items = listOf(
+        "North America" to listOf(320f, 340f, 360f, 390f),
+        "Europe" to listOf(210f, 230f, 245f, 260f),
+        "Asia Pacific" to listOf(180f, 205f, 225f, 250f),
+    )
+
+    val dataSet = items.toMultiChartDataSet(
+        title = "Quarterly Revenue by Region",
+        prefix = "$",
+        categories = listOf("Q1", "Q2", "Q3", "Q4"),
+    )
+
+    StackedBarChart(
+        dataSet = dataSet,
+        selectedBarIndex = 1,
+    )
+}
+```
+
+## After
 
 ```kotlin
 StackedBarChart(
     data = chartDataOf(
-        categories = listOf("North", "Europe", "Asia"),
-        ChartSeries("Q1", listOf(320.0, 260.0, 220.0)),
-        ChartSeries("Q2", listOf(340.0, 280.0, 210.0)),
+        categories = listOf("Q1", "Q2", "Q3", "Q4"),
+        ChartSeries("North America", listOf(320.0, 340.0, 360.0, 390.0)),
+        ChartSeries("Europe", listOf(210.0, 230.0, 245.0, 260.0)),
+        ChartSeries("Asia Pacific", listOf(180.0, 205.0, 225.0, 250.0)),
     ),
     modifier = Modifier.fillMaxWidth(),
-    title = "Quarterly revenue",
-    selection = rememberChartSelection(),
+    title = "Quarterly Revenue by Region",
+    selection = rememberChartSelection(initialIndex = 1),
 )
 ```
 
-The old row-oriented `MultiChartDataSet` and `selectedBarIndex` public inputs are removed. Legacy rows must be transposed explicitly: rows are bars, while each new series is one segment column. Use `selection = staticChartSelection(index)` for deterministic previews and screenshots.
+The old row-oriented `MultiChartDataSet` input is removed. Transpose legacy
+rows when migrating: each row becomes one bar, its label becomes the category
+label, and each new series contains one segment column.
 
-## Grouped style
+## Styles and selection
 
-`StackedBarChartStyle` now groups:
+Move customizations to the grouped `StackedBarChartStyle` sections such as
+`segments`, `layout`, `axis`, and `selection`. Segment colors correspond to
+series, not bars.
 
-- `segments: StackedBarSegmentStyle` with fallback color, immutable segment colors, and alpha.
-- `layout: StackedBarLayoutStyle` with spacing and minimum bar width.
-- `axis: StackedBarAxisStyle` with X/Y `AxisLabelStyle` blocks.
-- `selection: StackedBarSelectionStyle` with visibility, color, and `Dp` width.
-- `chartContainerStyle` and `zoomControlsVisible`.
+Use `selection` instead of `selectedBarIndex`. Selection applies to a whole bar,
+not an individual segment. Use `staticChartSelection(index)` for a preset
+preview or screenshot.
 
-Explicit colors match the number of segment series, not the number of bars. The internal renderer temporarily receives a flat adapter style; that adapter is not a public compatibility API and can be removed in a later renderer cleanup.
+The old dataset `prefix` is not a parameter on the v3 stacked-bar API; selected
+values use the chart's default formatting.
 
-## Data and behavior
+## Behavior
 
-- Require at least one aligned segment series and at least two bars.
-- Categories are empty or match every segment length.
-- Contributions must be finite and nonnegative. Negative/diverging stacks are not supported in this migration.
-- Stacks remain absolute totals, not percentage-normalized columns. All-zero totals use a finite fallback domain.
-- Compact rendering may average source bars for density, but source selection maps to a bucket-center source bar and selected legend values remain raw contributions.
-- Selection is whole-bar and hoisted through `ChartSelection`; it is not segment-level.
-- Replacing data clears selection. Resize, density changes, and scrolling preserve valid source selection.
-- `interactionEnabled = false` disables user controls while programmatic selection remains visible.
-- The caller `Modifier` is preserved for both valid and validation-error output.
-
-## Validation
-
-The implementation adds nonsquare transposition fixtures, invalid/ragged/negative/nonfinite data coverage, segment palette cardinality coverage, selection and dense-mode tests, sample migration, screenshot call-site migration, and release notes. Local validation completed for stacked-bar JVM tests, shared JVM tests, stacked-bar Wasm test-source compilation, affected lint, and sample compilation. Android screenshots, browser, simulator, and API compatibility remain CI gates.
+- Series must be aligned, contain at least two bars, and use finite,
+  nonnegative values.
+- Categories are optional; when supplied, they must match every series.
+- Stacks show absolute totals rather than percentages.
+- Replacing data clears selection. Resizing and density changes preserve it.
+- `interactionEnabled = false` disables user controls while programmatic
+  selection remains visible.
