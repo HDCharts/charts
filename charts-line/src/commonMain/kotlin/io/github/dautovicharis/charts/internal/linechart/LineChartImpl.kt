@@ -32,6 +32,7 @@ private const val LINE_ZOOM_STEP = 1.25f
 @Composable
 internal fun LineChartImpl(
     data: MultiChartData,
+    modifier: Modifier = Modifier,
     style: LineChartInternalStyle,
     interactionEnabled: Boolean = true,
     animateOnStart: Boolean = true,
@@ -111,7 +112,10 @@ internal fun LineChartImpl(
         val showCompactToggle = isDenseMorphData
         val showZoomControlsInHeader = isDenseMorphMode && style.zoomControlsVisible
         val showHeader = title.isNotBlank() || showCompactToggle || showZoomControlsInHeader
-        Chart(chartContainerStyle = style.chartContainerStyle) {
+        Chart(
+            chartContainerStyle = style.chartContainerStyle,
+            modifier = modifier,
+        ) {
             if (showHeader) {
                 LineChartHeader(
                     title = title,
@@ -168,6 +172,10 @@ internal fun LineChartImpl(
             }
         }
     } else {
-        ChartErrors(style = style.chartContainerStyle, errors = errors.toImmutableList())
+        ChartErrors(
+            style = style.chartContainerStyle,
+            errors = errors.toImmutableList(),
+            modifier = modifier,
+        )
     }
 }

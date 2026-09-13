@@ -25,6 +25,7 @@ import io.github.dautovicharis.charts.model.chartDataOf
 import io.github.dautovicharis.charts.model.toChartData
 import kotlin.test.Test
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalTestApi::class)
 class LineChartV3ContractTest {
@@ -121,6 +122,27 @@ class LineChartV3ContractTest {
             onNodeWithTag(TestTags.CHART_ERROR).assertIsDisplayed()
             onAllNodesWithTag(TestTags.LINE_CHART).assertCountEquals(0)
             onNodeWithText("Series 1 is not aligned", substring = true).assertIsDisplayed()
+        }
+
+    @Test
+    fun validDataAppliesModifierToOuterChartContainer() =
+        runComposeUiTest {
+            setContent {
+                LineChart(
+                    data = data(categories = listOf("A", "B", "C")),
+                    modifier = Modifier.testTag("line-container").size(280.dp, 240.dp),
+                    title = "Line",
+                    animateOnStart = false,
+                )
+            }
+
+            val containerBounds = onNodeWithTag("line-container").fetchSemanticsNode().boundsInRoot
+            val titleBounds = onNodeWithTag(TestTags.CHART_TITLE).fetchSemanticsNode().boundsInRoot
+
+            assertTrue(titleBounds.left >= containerBounds.left)
+            assertTrue(titleBounds.top >= containerBounds.top)
+            assertTrue(titleBounds.right <= containerBounds.right)
+            assertTrue(titleBounds.bottom <= containerBounds.bottom)
         }
 
     private fun data(categories: List<String>): ChartData =
