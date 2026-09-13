@@ -28,8 +28,8 @@ PieChart(
     title = "Progress",
     style = PieChartDefaults.style(
         donut = PieChartDefaults.donut(holePercentage = 50f),
-        selection = selection,
     ),
+    selection = selection,
 )
 ```
 
@@ -47,13 +47,12 @@ by the chart.
 
 ## Selection and interaction
 
-Pass a `ChartSelection` through `PieChartDefaults.style` when selection must be
+Pass a `ChartSelection` directly to `PieChart` when selection must be
 controlled by the application:
 
 ```kotlin
 val selection = rememberChartSelection()
-val style = PieChartDefaults.style(selection = selection)
-PieChart(data = slices, style = style)
+PieChart(data = slices, selection = selection)
 ```
 
 Programmatic selection remains visible when `interactionEnabled` is `false`; in

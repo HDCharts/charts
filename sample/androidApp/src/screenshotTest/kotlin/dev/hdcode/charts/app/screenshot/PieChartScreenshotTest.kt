@@ -54,10 +54,7 @@ fun PieChartSelectedSlicePreview() {
     ScreenshotSurface {
         PieChart(
             data = sample.slices,
-            style =
-                PieChartDefaults.style(
-                    selection = staticChartSelection(1),
-                ),
+            selection = staticChartSelection(1),
         )
     }
 }

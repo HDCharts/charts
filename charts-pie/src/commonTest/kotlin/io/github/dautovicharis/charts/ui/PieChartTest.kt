@@ -162,8 +162,8 @@ class PieChartTest {
             setContent {
                 PieChart(
                     pieSlices,
-                    style = PieChartDefaults.style(selection = staticChartSelection(selectedSliceIndex)),
                     title = TITLE,
+                    selection = staticChartSelection(selectedSliceIndex),
                 )
             }
 
@@ -264,7 +264,7 @@ class PieChartTest {
         runComposeUiTest {
             val selection = ChartSelection()
             setContent {
-                PieChart(pieSlices, title = TITLE, style = PieChartDefaults.style(selection = selection))
+                PieChart(pieSlices, title = TITLE, selection = selection)
             }
 
             runOnIdle { selection.select(1) }
@@ -283,7 +283,7 @@ class PieChartTest {
             val notifications = mutableListOf<Int?>()
             val selection = ChartSelection { notifications.add(it) }
             setContent {
-                PieChart(pieSlices, title = TITLE, style = PieChartDefaults.style(selection = selection))
+                PieChart(pieSlices, title = TITLE, selection = selection)
             }
 
             waitForIdle()
@@ -337,7 +337,7 @@ class PieChartTest {
             val newSelection = ChartSelection()
             var selection by mutableStateOf(oldSelection)
             setContent {
-                PieChart(pieSlices, title = TITLE, style = PieChartDefaults.style(selection = selection))
+                PieChart(pieSlices, title = TITLE, selection = selection)
             }
 
             var size = onNodeWithTag(TestTags.PIE_CHART).fetchSemanticsNode().size

@@ -26,7 +26,9 @@ import io.github.dautovicharis.charts.internal.common.palette.generateColorShade
 import io.github.dautovicharis.charts.internal.piechart.PieChart
 import io.github.dautovicharis.charts.internal.piechart.calculatePercentages
 import io.github.dautovicharis.charts.internal.validatePieData
+import io.github.dautovicharis.charts.model.ChartSelection
 import io.github.dautovicharis.charts.model.PieSlice
+import io.github.dautovicharis.charts.model.rememberChartSelection
 import io.github.dautovicharis.charts.style.PieChartDefaults
 import io.github.dautovicharis.charts.style.PieChartStyle
 import kotlinx.collections.immutable.ImmutableList
@@ -51,6 +53,9 @@ internal const val PIE_SELECTION_AUTO_DESELECT_TIMEOUT_MS = 3000L
  * branch when the data fails validation.
  * @param style The style to be applied to the chart. If not provided, the default style will be used.
  * @param title Optional chart title displayed when no slice is selected.
+ * @param selection The hoisted selection state. Use [rememberChartSelection] for interactive
+ *   charts or [io.github.dautovicharis.charts.model.staticChartSelection] for deterministic
+ *   preset selections.
  * @param interactionEnabled When `false`, disables tap-to-select and the auto-deselect timeout.
  * @param animateOnStart When `false`, renders the chart in its final state without the
  *   initial reveal animation.
@@ -61,6 +66,7 @@ fun PieChart(
     modifier: Modifier = Modifier,
     style: PieChartStyle = PieChartDefaults.style(),
     title: String? = null,
+    selection: ChartSelection = rememberChartSelection(),
     interactionEnabled: Boolean = true,
     animateOnStart: Boolean = true,
 ) {
@@ -96,6 +102,7 @@ fun PieChart(
         points = points,
         colors = colors,
         style = style,
+        selection = selection,
         interactionEnabled = interactionEnabled,
         animateOnStart = animateOnStart,
     )
@@ -109,10 +116,10 @@ private fun PieChartContent(
     points: ImmutableList<Double>,
     colors: ImmutableList<Color>,
     style: PieChartStyle,
+    selection: ChartSelection,
     interactionEnabled: Boolean,
     animateOnStart: Boolean,
 ) {
-    val selection = style.selection
     val piePercentages =
         remember(points) {
             calculatePercentages(points)
