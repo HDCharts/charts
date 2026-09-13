@@ -14,13 +14,10 @@ for the target release.
 
 ## Guardrails
 
-- Follow the commit, push, and pull-request policy — including the
-  git-actions questionnaire — in the Guardrails section of
-  [hdc-pr](../hdc-pr/SKILL.md).
-- Preserve migration fragments belonging to other pull requests.
-- Write only when the intended fragment has a clean worktree state.
-- Inspect generated reports for every command result and distinguish reported
-  incompatibilities from infrastructure failures.
+Follow [AGENTS.md](../../AGENTS.md) Guardrails.
+
+Inspect generated reports for every command result and distinguish reported
+incompatibilities from infrastructure failures.
 
 
 ## Workflow
