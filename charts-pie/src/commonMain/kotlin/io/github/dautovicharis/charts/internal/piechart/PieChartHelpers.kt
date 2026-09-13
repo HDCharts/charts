@@ -104,10 +104,17 @@ internal fun createPieSlices(data: ChartData): List<SliceGeometry> = createPieSl
 internal fun createPieSlices(values: List<Double>): List<SliceGeometry> =
     mutableListOf<SliceGeometry>().apply {
         var lastEndDeg = 0.0
-        val maxValue = values.sum()
+        val maxValue = values.maxOrNull() ?: 0.0
+        val scaledTotal =
+            if (maxValue > 0.0) {
+                values.sumOf { it / maxValue }
+            } else {
+                0.0
+            }
         for (slice in values) {
             val startDeg = lastEndDeg
-            val normalized = if (maxValue == 0.0) 0.0 else slice / maxValue
+            val normalized =
+                if (scaledTotal == 0.0) 0.0 else (slice / maxValue) / scaledTotal
             val endDeg = lastEndDeg + (normalized * 360)
             lastEndDeg = endDeg
             add(

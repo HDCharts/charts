@@ -16,8 +16,8 @@ class DataValidationPieTest {
     fun validatePieData_validSlices_noValidationErrors() {
         val slices =
             listOf(
-                PieSlice(label = "A", value = 1f),
-                PieSlice(label = "B", value = 2f),
+                PieSlice(label = "A", value = 1.0),
+                PieSlice(label = "B", value = 2.0),
             )
 
         val validationErrors = validatePieData(slices)
@@ -27,7 +27,7 @@ class DataValidationPieTest {
 
     @Test
     fun validatePieData_tooFewSlices_validationErrorsPresent() {
-        val slices = listOf(PieSlice(label = "A", value = 10f))
+        val slices = listOf(PieSlice(label = "A", value = 10.0))
 
         val validationErrors = validatePieData(slices)
 
@@ -41,9 +41,9 @@ class DataValidationPieTest {
     fun validatePieData_nanValue_validationErrorsPresent() {
         val slices =
             listOf(
-                PieSlice(label = "A", value = 1f),
-                PieSlice(label = "B", value = Float.NaN),
-                PieSlice(label = "C", value = 3f),
+                PieSlice(label = "A", value = 1.0),
+                PieSlice(label = "B", value = Double.NaN),
+                PieSlice(label = "C", value = 3.0),
             )
 
         val validationErrors = validatePieData(slices)
@@ -57,9 +57,9 @@ class DataValidationPieTest {
     fun validatePieData_negativeValue_validationErrorsPresent() {
         val slices =
             listOf(
-                PieSlice(label = "A", value = 1f),
-                PieSlice(label = "B", value = -2f),
-                PieSlice(label = "C", value = 3f),
+                PieSlice(label = "A", value = 1.0),
+                PieSlice(label = "B", value = -2.0),
+                PieSlice(label = "C", value = 3.0),
             )
 
         val validationErrors = validatePieData(slices)

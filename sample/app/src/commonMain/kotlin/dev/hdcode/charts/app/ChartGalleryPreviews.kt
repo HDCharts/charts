@@ -98,7 +98,7 @@ private fun PieChartPreview(values: List<Float>) {
     val data =
         remember(values) {
             values.mapIndexed { index, value ->
-                PieSlice(label = "Segment ${index + 1}", value = value)
+                PieSlice(label = "Segment ${index + 1}", value = value.toDouble())
             }
         }
     PieChart(

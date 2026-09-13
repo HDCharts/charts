@@ -35,12 +35,12 @@ import kotlin.test.assertNull
 class PieChartTest {
     private val pieSlices =
         listOf(
-            PieSlice(label = "A", value = 10f),
-            PieSlice(label = "B", value = 20f),
-            PieSlice(label = "C", value = 30f),
-            PieSlice(label = "D", value = 40f),
+            PieSlice(label = "A", value = 10.0),
+            PieSlice(label = "B", value = 20.0),
+            PieSlice(label = "C", value = 30.0),
+            PieSlice(label = "D", value = 40.0),
         )
-    private val points: List<Double> = pieSlices.map { it.value.toDouble() }
+    private val points: List<Double> = pieSlices.map { it.value }
     private val labels: List<String> = pieSlices.map { it.label }
 
     @OptIn(ExperimentalTestApi::class)
@@ -86,7 +86,7 @@ class PieChartTest {
     @Test
     fun pieChart_withInvalidData_displaysError() =
         runComposeUiTest {
-            val invalidSlices = listOf(PieSlice(label = "A", value = 1f))
+            val invalidSlices = listOf(PieSlice(label = "A", value = 1.0))
             val expectedError = RULE_DATA_POINTS_LESS_THAN_MIN.format(MIN_REQUIRED_PIE)
 
             setContent {

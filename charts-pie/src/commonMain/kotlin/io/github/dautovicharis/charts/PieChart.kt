@@ -73,7 +73,7 @@ fun PieChart(
             )
         }
     val labels = remember(data) { data.map { it.label }.toImmutableList() }
-    val points = remember(data) { data.map { it.value.toDouble() }.toImmutableList() }
+    val points = remember(data) { data.map { it.value }.toImmutableList() }
 
     PieChartContent(
         modifier = modifier,
