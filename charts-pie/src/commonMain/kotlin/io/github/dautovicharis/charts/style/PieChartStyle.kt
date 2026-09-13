@@ -11,8 +11,6 @@ import androidx.compose.ui.graphics.Color
 import io.github.dautovicharis.charts.internal.DONUT_MAX_PERCENTAGE
 import io.github.dautovicharis.charts.internal.DONUT_MIN_PERCENTAGE
 import io.github.dautovicharis.charts.internal.piechart.AdaptivePieSizeModifier
-import io.github.dautovicharis.charts.model.ChartSelection
-import io.github.dautovicharis.charts.model.rememberChartSelection
 
 /**
  * The style for a Pie Chart, grouped into cohesive sub-styles.
@@ -22,9 +20,6 @@ import io.github.dautovicharis.charts.model.rememberChartSelection
  * @property slices The slice configuration of the chart.
  * @property border The border configuration of the chart.
  * @property legend The legend configuration of the chart.
- * @property selection The selection state of the chart. Use [io.github.dautovicharis.charts.model.rememberChartSelection]
- * for interactive charts or [io.github.dautovicharis.charts.model.staticChartSelection] for
- * deterministic preset selections.
  */
 @Stable
 class PieChartStyle(
@@ -34,7 +29,6 @@ class PieChartStyle(
     val slices: PieChartSlicesStyle,
     val border: PieChartBorderStyle,
     val legend: LegendStyle,
-    val selection: ChartSelection,
 )
 
 /**
@@ -86,7 +80,6 @@ object PieChartDefaults {
      * @param slices The slice configuration. Defaults to theme-derived slice colors and alpha.
      * @param border The border configuration. Defaults to a 3f border using the surface color.
      * @param legend The legend configuration. Defaults to a visible legend.
-     * @param selection The selection state of the chart. Defaults to an empty remembered selection.
      */
     @Composable
     fun style(
@@ -95,7 +88,6 @@ object PieChartDefaults {
         slices: PieChartSlicesStyle = slices(),
         border: PieChartBorderStyle = border(),
         legend: LegendStyle = legend(),
-        selection: ChartSelection = rememberChartSelection(),
     ): PieChartStyle {
         val modifier: Modifier =
             AdaptivePieSizeModifier
@@ -108,7 +100,6 @@ object PieChartDefaults {
             slices = slices,
             border = border,
             legend = legend,
-            selection = selection,
         )
     }
 
