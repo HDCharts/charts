@@ -1,0 +1,4 @@
+interface:
+  display_name: "Ship HDCharts PR"
+  short_description: "Create coordinated HDCharts pull requests"
+  default_prompt: "Use $hdc-pr to safely create and coordinate the pull requests for my current HDCharts changes."

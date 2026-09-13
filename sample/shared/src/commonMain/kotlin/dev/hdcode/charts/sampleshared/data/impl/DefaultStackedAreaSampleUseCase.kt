@@ -3,8 +3,7 @@ package dev.hdcode.charts.sampleshared.data.impl
 import dev.hdcode.charts.sampleshared.data.StackedAreaSampleData
 import dev.hdcode.charts.sampleshared.data.StackedAreaSampleUseCase
 import io.github.dautovicharis.charts.model.ChartData
-import io.github.dautovicharis.charts.model.ChartSeries
-import io.github.dautovicharis.charts.model.chartDataOf
+import io.github.dautovicharis.charts.model.toChartData
 
 internal class DefaultStackedAreaSampleUseCase : StackedAreaSampleUseCase {
     companion object {
@@ -68,11 +67,7 @@ internal class DefaultStackedAreaSampleUseCase : StackedAreaSampleUseCase {
     private fun stackedAreaData(
         series: List<Pair<String, List<Double>>>,
         categories: List<String>,
-    ): ChartData =
-        chartDataOf(
-            categories = categories,
-            *series.map { (name, values) -> ChartSeries(name = name, values = values) }.toTypedArray(),
-        )
+    ): ChartData = series.toChartData(categories = categories)
 
     private fun stackedAreaCategoriesFor(points: Int): List<String> {
         if (points <= stackedAreaCategories.size) {

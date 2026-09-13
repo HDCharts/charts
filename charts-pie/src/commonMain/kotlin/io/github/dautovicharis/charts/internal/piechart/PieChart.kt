@@ -61,12 +61,13 @@ internal fun PieChart(
     val isPreview = LocalInspectionMode.current
     var show by rememberShowState(isPreviewMode = isPreview || !animateOnStart)
     val values = chartData.points
+    val interactionSlices = remember(values) { createPieSlices(values) }
     val animatables =
-        remember(values.size, isPreview, animateOnStart) {
-            List(values.size) { index ->
+        remember(interactionSlices, isPreview, animateOnStart) {
+            List(interactionSlices.size) { index ->
                 val initialValue =
                     if (isPreview || !animateOnStart) {
-                        values[index].toFloat()
+                        interactionSlices[index].normalizedValue.toFloat()
                     } else {
                         0f
                     }
@@ -74,13 +75,13 @@ internal fun PieChart(
             }
         }
     val hasInitialized = remember { mutableStateOf(false) }
-    LaunchedEffect(values, isPreview, animateOnStart) {
-        if (values.isEmpty()) return@LaunchedEffect
+    LaunchedEffect(interactionSlices, isPreview, animateOnStart) {
+        if (interactionSlices.isEmpty()) return@LaunchedEffect
         val shouldAnimate = !isPreview && (animateOnStart || hasInitialized.value)
         coroutineScope {
-            values.forEachIndexed { index, value ->
+            interactionSlices.forEachIndexed { index, slice ->
                 launch {
-                    val target = value.toFloat()
+                    val target = slice.normalizedValue.toFloat()
                     if (!shouldAnimate) {
                         animatables[index].snapTo(target)
                     } else {
@@ -95,7 +96,6 @@ internal fun PieChart(
         hasInitialized.value = true
     }
 
-    val interactionSlices = remember(values) { createPieSlices(values) }
     var selectedIndex by remember { mutableIntStateOf(NO_SELECTION) }
     LaunchedEffect(selectedSliceIndex) {
         selectedIndex = selectedSliceIndex

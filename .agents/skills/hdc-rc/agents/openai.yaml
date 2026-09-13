@@ -1,0 +1,4 @@
+interface:
+  display_name: "HDCharts Release Compatibility"
+  short_description: "Generate HDCharts migration fragments"
+  default_prompt: "Use $hdc-rc to check API compatibility and update the current release migration fragment."

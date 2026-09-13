@@ -13,6 +13,6 @@ class DataValidationColorSemanticsTest {
         val dataSet = asymmetricMultiDataSet
         val style = mockLineChartStyle(colorsAsymmetric.take(3))
 
-        assertTrue(validateLineData(dataSet.data, style).isEmpty())
+        assertTrue(validateLineData(dataSet, style).isEmpty())
     }
 }

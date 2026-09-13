@@ -4,7 +4,7 @@ This step finalizes the shared data, formatting, and selection foundation before
 
 ## One value type: Double
 
-The shared v3 API accepts **Double only**, not separate String, Int, Float, or generic Number inputs. `ChartSeries.values` and `ChartValueFormatter.format` now use Double, and `toChartData()` is an extension on `List<Double>` only.
+The shared v3 API accepts **Double only**, not separate String, Int, Float, or generic Number inputs. `ChartSeries.values` and `ChartValueFormatter.format` now use Double. `toChartData()` is available for single `List<Double>` values and named multi-series `List<Pair<String, List<Double>>>` values.
 
 ```kotlin
 // Before: provisional v3 snapshot API

@@ -1,0 +1,4 @@
+interface:
+  display_name: "HDCharts Changeset"
+  short_description: "Create HDCharts release changesets"
+  default_prompt: "Use $hdc-changeset to create or update the release changeset for my current change."

@@ -210,6 +210,14 @@ class PieChartHelpersTest {
     }
 
     @Test
+    fun createPieSlices_normalizesDoubleValuesBeforeGeometryConversion() {
+        val slices = createPieSlices(values = listOf(1e40, 1e40))
+
+        assertEquals(180f, slices[0].sweepAngle)
+        assertEquals(180f, slices[1].sweepAngle)
+    }
+
+    @Test
     fun calculatePercentages_returnsCorrectPercentages() {
         // Arrange
         val testData =

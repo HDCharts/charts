@@ -137,13 +137,9 @@ private fun LineChartPreview(values: List<Float>) {
 private fun MultiLineChartPreview(series: List<Pair<String, List<Float>>>) {
     val data =
         remember(series) {
-            chartDataOf(
-                categories = emptyList(),
-                *series
-                    .map { (name, values) ->
-                        ChartSeries(name = name, values = values.map { it.toDouble() })
-                    }.toTypedArray(),
-            )
+            series
+                .map { (name, values) -> name to values.map { it.toDouble() } }
+                .toChartData()
         }
     LineChart(
         data = data,
@@ -165,13 +161,9 @@ private fun MultiLineChartPreview(series: List<Pair<String, List<Float>>>) {
 private fun StackedAreaChartPreview(series: List<Pair<String, List<Float>>>) {
     val data =
         remember(series) {
-            chartDataOf(
-                categories = emptyList(),
-                *series
-                    .map { (name, values) ->
-                        ChartSeries(name = name, values = values.map { it.toDouble() })
-                    }.toTypedArray(),
-            )
+            series
+                .map { (name, values) -> name to values.map { it.toDouble() } }
+                .toChartData()
         }
     StackedAreaChart(
         data = data,
@@ -306,13 +298,9 @@ private fun RadarChartPreview(series: List<Pair<String, List<Float>>>) {
 
     val data =
         remember(previewSeries) {
-            chartDataOf(
-                categories = categories,
-                *previewSeries
-                    .map { (name, values) ->
-                        ChartSeries(name = name, values = values.map { it.toDouble() })
-                    }.toTypedArray(),
-            )
+            previewSeries
+                .map { (name, values) -> name to values.map { it.toDouble() } }
+                .toChartData(categories = categories)
         }
 
     RadarChart(
