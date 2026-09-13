@@ -20,19 +20,23 @@ import kotlin.math.sqrt
  * @param pointX X coordinate of the point.
  * @param pointY Y coordinate of the point.
  * @param size The size of the circle as [IntSize].
+ * @param overflowInset The amount the drawn radius is shrunk on each side to make room for the
+ *   scale-up animation of the selected slice.
  * @return `true` if the point is inside the circle, `false` otherwise.
  */
 internal fun isPointInCircle(
     pointX: Float,
     pointY: Float,
     size: IntSize,
+    overflowInset: Float = 0f,
 ): Boolean {
     // Calculate the center coordinates of the circle
     val centerX = size.center.x
     val centerY = size.center.y
 
-    // Calculate the radius of the circle as half of the minimum dimension (width or height)
-    val radius = min(size.width, size.height) / 2
+    // Calculate the radius of the circle as half of the minimum dimension (width or height),
+    // shrunk by the overflow inset used for the selected-slice scale-up animation.
+    val radius = min(size.width, size.height) / 2f - overflowInset
 
     // Calculate the distance between the point and the center of the circle using the Pythagorean theorem
     val dx = pointX - centerX
@@ -82,22 +86,38 @@ internal fun degree(
     return degree
 }
 
+/**
+ * Resolves the slice index at the given tap point.
+ *
+ * Uses the drawn pie radius and a half-open `[startDeg, endDeg)` interval so each boundary
+ * resolves to exactly one slice. Zero-sweep slices are skipped because they have no
+ * selectable area. A donut hole radius can be provided to exclude the inner cutout.
+ */
 internal fun getSelectedIndex(
     pointX: Float,
     pointY: Float,
     size: IntSize,
     slices: List<SliceGeometry>,
-): Int =
-    when (isPointInCircle(pointX = pointX, pointY = pointY, size = size)) {
-        true -> {
-            val touchDegree = degree(pointX = pointX, pointY = pointY, size = size)
-            slices
-                .indexOfFirst { it.startDeg < touchDegree && it.endDeg > touchDegree }
-                .takeIf { it != NO_SELECTION } ?: NO_SELECTION
-        }
+    overflowInset: Float = 0f,
+    donutHoleRadius: Float = 0f,
+): Int {
+    if (slices.isEmpty()) return NO_SELECTION
+    if (!isPointInCircle(pointX, pointY, size, overflowInset)) return NO_SELECTION
 
-        else -> NO_SELECTION
-    }
+    val centerX = size.center.x
+    val centerY = size.center.y
+    val distanceFromCenter =
+        sqrt((pointX - centerX) * (pointX - centerX) + (pointY - centerY) * (pointY - centerY))
+    if (donutHoleRadius > 0f && distanceFromCenter <= donutHoleRadius) return NO_SELECTION
+
+    val touchDegree = degree(pointX, pointY, size)
+    return slices
+        .indexOfFirst { slice ->
+            slice.sweepAngle > 0.0 &&
+                touchDegree >= slice.startDeg &&
+                touchDegree < slice.endDeg
+        }.takeIf { it != NO_SELECTION } ?: NO_SELECTION
+}
 
 internal fun createPieSlices(data: ChartData): List<SliceGeometry> = createPieSlices(data.points)
 
@@ -145,7 +165,7 @@ internal fun getCoordinatesForSlice(
     val slice = slices[index]
     val startAngle = slice.startDeg
     val sweepAngle = slice.sweepAngle
-    val radius = size.width / 2
+    val radius = size.width / 2f
 
     // Calculate midpoint angle of the slice
     val midAngle = startAngle + (sweepAngle / 2f)
@@ -163,8 +183,17 @@ internal fun getCoordinatesForSlice(
     return Offset(x, y)
 }
 
+/**
+ * Calculates the percentage string for each value.
+ *
+ * Returns `"0"` for every slice when the total is zero or non-positive so callers never
+ * see `NaN%` for the all-zero case. Already-rounded to two decimals.
+ */
 internal fun calculatePercentages(values: List<Double>): List<String> {
     val total = values.sum()
+    if (total == 0.0 || !total.isFinite()) {
+        return List(values.size) { "0" }
+    }
     return values.map { value ->
         val percentage = (value / total) * 100
         val rounded = round(percentage * 100) / 100

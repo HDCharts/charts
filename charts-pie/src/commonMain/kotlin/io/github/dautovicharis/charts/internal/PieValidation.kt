@@ -9,19 +9,18 @@ fun validatePieData(data: List<PieSlice>): List<String> {
     val pointsSize = data.size
 
     if (pointsSize < MIN_REQUIRED_PIE) {
-        val validationError =
+        validationErrors +=
             ValidationErrors.RULE_DATA_POINTS_LESS_THAN_MIN.format(MIN_REQUIRED_PIE)
-        validationErrors.add(validationError)
         return validationErrors
     }
 
     data.forEachIndexed { index, slice ->
         if (slice.value.isNaN()) {
-            val validationError = ValidationErrors.RULE_DATA_POINT_NOT_NUMBER.format(index)
-            validationErrors.add(validationError)
+            validationErrors += ValidationErrors.RULE_DATA_POINT_NOT_NUMBER.format(index)
+        } else if (!slice.value.isFinite()) {
+            validationErrors += ValidationErrors.RULE_DATA_POINT_NOT_FINITE.format(index)
         } else if (slice.value < 0) {
-            val validationError = ValidationErrors.RULE_DATA_POINT_NEGATIVE.format(index)
-            validationErrors.add(validationError)
+            validationErrors += ValidationErrors.RULE_DATA_POINT_NEGATIVE.format(index)
         }
     }
     return validationErrors
