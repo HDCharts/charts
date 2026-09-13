@@ -38,6 +38,9 @@ fun buildBucketRanges(
 }
 
 @InternalChartsApi
+fun bucketCenterIndex(range: IntRange): Int = range.first + ((range.last - range.first) / 2)
+
+@InternalChartsApi
 fun aggregatePointsByAverage(
     sourcePoints: List<Double>,
     bucketRanges: List<IntRange>,
@@ -72,7 +75,7 @@ fun aggregateLabelsByCenterValue(
 ): List<String> {
     if (bucketRanges.isEmpty()) return emptyList()
     return bucketRanges.mapIndexed { bucketIndex, range ->
-        val centerIndex = range.first + ((range.last - range.first) / 2)
+        val centerIndex = bucketCenterIndex(range)
         sourceLabels.getOrNull(centerIndex)
             ?: sourceLabels.getOrNull(range.last)
             ?: "Bucket ${bucketIndex + 1}"

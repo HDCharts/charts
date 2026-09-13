@@ -24,6 +24,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -112,6 +113,7 @@ internal fun LineChartContent(
     val touchX = remember { mutableFloatStateOf(0f) }
     val dragging = remember { mutableStateOf(false) }
     val valueAnimationSpec = remember { AnimationSpec.lineChart() }
+    val currentOnValueChanged by rememberUpdatedState(onValueChanged)
 
     val lineAnimation by animateFloatAsState(
         targetValue = if (show) ANIMATION_TARGET else 0f,
@@ -175,7 +177,7 @@ internal fun LineChartContent(
             dragging.value = false
             if (reportedSelection.intValue != NO_SELECTION) {
                 reportedSelection.intValue = NO_SELECTION
-                onValueChanged(NO_SELECTION)
+                currentOnValueChanged(NO_SELECTION)
             }
         }
     }
@@ -184,7 +186,7 @@ internal fun LineChartContent(
         if (hasForcedSelection) return@LaunchedEffect
         if (tapInteractionEnabled && reportedSelection.intValue >= pointsCount) {
             reportedSelection.intValue = NO_SELECTION
-            onValueChanged(NO_SELECTION)
+            currentOnValueChanged(NO_SELECTION)
         }
     }
 
@@ -323,7 +325,7 @@ internal fun LineChartContent(
                     )
                 if (reportedSelection.intValue != selectedIndex) {
                     reportedSelection.intValue = selectedIndex
-                    onValueChanged(selectedIndex)
+                    currentOnValueChanged(selectedIndex)
                 }
             },
             onHorizontalDrag = { position ->
@@ -336,21 +338,21 @@ internal fun LineChartContent(
                     )
                 if (reportedSelection.intValue != selectedIndex) {
                     reportedSelection.intValue = selectedIndex
-                    onValueChanged(selectedIndex)
+                    currentOnValueChanged(selectedIndex)
                 }
             },
             onDragEnd = {
                 dragging.value = false
                 if (reportedSelection.intValue != NO_SELECTION) {
                     reportedSelection.intValue = NO_SELECTION
-                    onValueChanged(NO_SELECTION)
+                    currentOnValueChanged(NO_SELECTION)
                 }
             },
             onDragCancel = {
                 dragging.value = false
                 if (reportedSelection.intValue != NO_SELECTION) {
                     reportedSelection.intValue = NO_SELECTION
-                    onValueChanged(NO_SELECTION)
+                    currentOnValueChanged(NO_SELECTION)
                 }
             },
         )
@@ -382,7 +384,7 @@ internal fun LineChartContent(
                         }
                     if (reportedSelection.intValue != toggledSelection) {
                         reportedSelection.intValue = toggledSelection
-                        onValueChanged(toggledSelection)
+                        currentOnValueChanged(toggledSelection)
                     }
                 }
             },

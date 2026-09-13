@@ -23,6 +23,8 @@ import io.github.dautovicharis.charts.internal.common.model.ChartData as Interna
 /**
  * Displays one or more aligned indexed series. A single public entry point handles both
  * single- and multi-line data. Selection always refers to a source X index shared by all series.
+ * In compact mode, user interaction selects the middle source index represented by a bucket;
+ * programmatic source selection highlights the bucket containing that index.
  */
 @Composable
 fun LineChart(

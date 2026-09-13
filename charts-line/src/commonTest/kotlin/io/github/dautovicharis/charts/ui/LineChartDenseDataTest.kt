@@ -7,6 +7,7 @@ import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
@@ -14,12 +15,15 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeLeft
 import androidx.compose.ui.test.v2.runComposeUiTest
 import io.github.dautovicharis.charts.LineChart
+import io.github.dautovicharis.charts.LineChartRenderMode
 import io.github.dautovicharis.charts.internal.TestTags
 import io.github.dautovicharis.charts.model.ChartData
+import io.github.dautovicharis.charts.model.ChartSelection
 import io.github.dautovicharis.charts.model.toChartData
 import io.github.dautovicharis.charts.style.LineChartDefaults
 import kotlin.test.Test
 import kotlin.test.assertNotEquals
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalTestApi::class)
 class LineChartDenseDataTest {
@@ -64,6 +68,63 @@ class LineChartDenseDataTest {
 
             onAllNodesWithTag(TestTags.LINE_CHART_ZOOM_OUT).assertCountEquals(0)
             onAllNodesWithTag(TestTags.LINE_CHART_ZOOM_IN).assertCountEquals(0)
+        }
+
+    @Test
+    fun lineChart_compactMode_programmaticSelectionUsesSourceIndex() =
+        runComposeUiTest {
+            val dataSet = largeDataSet()
+            val sourceIndex = 80
+            setContent {
+                LineChart(
+                    data = dataSet,
+                    selection = ChartSelection(initialIndex = sourceIndex),
+                    animateOnStart = false,
+                )
+            }
+
+            onNodeWithTag(TestTags.CHART_TITLE)
+                .assertTextEquals("${dataSet.categories[sourceIndex]}: ${dataSet.series.single().values[sourceIndex]}")
+                .assertIsDisplayed()
+        }
+
+    @Test
+    fun lineChart_timelineMode_programmaticSelectionUsesSourceIndex() =
+        runComposeUiTest {
+            val dataSet = largeDataSet()
+            val sourceIndex = 80
+            setContent {
+                LineChart(
+                    data = dataSet,
+                    renderMode = LineChartRenderMode.Timeline,
+                    selection = ChartSelection(initialIndex = sourceIndex),
+                    animateOnStart = false,
+                )
+            }
+
+            onNodeWithTag(TestTags.CHART_TITLE)
+                .assertTextEquals("${dataSet.categories[sourceIndex]}: ${dataSet.series.single().values[sourceIndex]}")
+                .assertIsDisplayed()
+        }
+
+    @Test
+    fun lineChart_compactMode_dragReportsSourceIndex() =
+        runComposeUiTest {
+            val reportedSelections = mutableListOf<Int?>()
+            val selection = ChartSelection(onSelectionChanged = reportedSelections::add)
+            setContent {
+                LineChart(
+                    data = largeDataSet(),
+                    selection = selection,
+                    animateOnStart = false,
+                )
+            }
+
+            onNodeWithTag(TestTags.LINE_CHART).performTouchInput { swipeLeft() }
+
+            runOnIdle {
+                assertTrue(reportedSelections.filterNotNull().any { sourceIndex -> sourceIndex >= 50 })
+            }
         }
 
     @Test
