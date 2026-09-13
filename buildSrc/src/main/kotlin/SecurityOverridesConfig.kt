@@ -101,11 +101,17 @@ private data class SecurityOverrideRule(
 fun Project.configureJsSecurityOverrides(versionCatalog: VersionCatalog) {
     val serializeJavascriptSecurityVersion = versionCatalog.requiredVersion("serialize-javascript-security")
     val uuidSecurityVersion = versionCatalog.requiredVersion("uuid-security")
+    val jsYamlSecurityVersion = versionCatalog.requiredVersion("js-yaml-security")
+    val qsSecurityVersion = versionCatalog.requiredVersion("qs-security")
+    val fastUriSecurityVersion = versionCatalog.requiredVersion("fast-uri-security")
     val yarnRootExtension = resolveYarnRootExtension()
 
     // Keep Kotlin/JS transitive dependencies patched in kotlin-js-store/yarn.lock.
     yarnRootExtension.applyResolution("serialize-javascript", serializeJavascriptSecurityVersion)
     yarnRootExtension.applyResolution("uuid", uuidSecurityVersion)
+    yarnRootExtension.applyResolution("js-yaml", jsYamlSecurityVersion)
+    yarnRootExtension.applyResolution("qs", qsSecurityVersion)
+    yarnRootExtension.applyResolution("fast-uri", fastUriSecurityVersion)
 }
 
 private fun Project.resolveYarnRootExtension(): Any {
