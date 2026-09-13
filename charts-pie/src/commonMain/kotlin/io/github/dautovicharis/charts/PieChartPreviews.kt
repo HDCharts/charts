@@ -8,7 +8,7 @@ import io.github.dautovicharis.charts.style.PieChartDefaults
 import io.github.dautovicharis.charts.style.PieChartStyle
 
 private const val PIE_CHART_TITLE = "Pie Chart"
-private val PIE_VALUES = listOf(32f, 21f, 24f, 14f, 9f)
+private val PIE_VALUES = listOf(32.0, 21.0, 24.0, 14.0, 9.0)
 private val PIE_LABELS = listOf("North", "East", "South", "West", "Other")
 private val PIE_SLICES =
     PIE_LABELS.mapIndexed { index, label -> PieSlice(label = label, value = PIE_VALUES[index]) }
@@ -45,7 +45,7 @@ private fun PieChartPreview() {
 private fun PieChartErrorPreview() {
     ChartsPreviewTheme {
         PieChart(
-            data = listOf(PieSlice(label = "Slice 1", value = 42f)),
+            data = listOf(PieSlice(label = "Slice 1", value = 42.0)),
             style = PieChartDefaults.style(),
             title = PIE_CHART_TITLE,
         )
