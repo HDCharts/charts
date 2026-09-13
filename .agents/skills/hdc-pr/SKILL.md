@@ -35,6 +35,10 @@ Run selected tasks and list the exact commands in the PR body. CI owns
 `validateDocsGifBaselines` and instrumented Android tests unless the user asks
 to run them locally.
 
+Run `./gradlew apiCompatibilityCheck` locally for public API or library-module
+changes. If it reports an incompatible API, ask whether the change is
+intentional and whether to create a release-note or migration fragment.
+
 ## Workflow
 
 1. Inspect the diff and determine the affected modules.
