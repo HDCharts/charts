@@ -70,15 +70,7 @@ jobs:
             exit 0
           fi
 
-          filtered="$({
-            while IFS= read -r file; do
-              case "${file}" in
-                release-notes/*) printf '%s\n' "${file}" ;;
-                docs/*|*.md) ;;
-                *) printf '%s\n' "${file}" ;;
-              esac
-            done <<< "${files}"
-          } | sort -u)"
+          filtered="$(printf '%s\n' "${files}" | bash scripts/ci-has-code-changes.sh --filter snapshot | sort -u)"
           if [ -z "${filtered:-}" ]; then
             echo "Only ignored paths changed in the last 24 hours."
             echo "has_changes=false" >> "$GITHUB_OUTPUT"

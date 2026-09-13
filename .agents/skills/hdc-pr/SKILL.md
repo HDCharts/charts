@@ -1,53 +1,45 @@
 ---
 name: hdc-pr
-description: Create or update a pull request only after the user explicitly asks to create, open, publish, or ship a PR.
+description: Prepare or create an HDCharts pull request only after the user explicitly asks to create, open, publish, or ship it.
 ---
+
+# Create Pull Requests
 
 ## Guardrails
 
-Follow [AGENTS.md](../../AGENTS.md) Guardrails.
+Follow [AGENTS.md](../../AGENTS.md). Git actions require explicit approval
+through the git-actions questionnaire.
 
-## Branch and commit naming
+## Branch and Commit Naming
 
-- Create feature branches from `main` with the format
-  `<type>/<short-kebab-summary>`.
-- Use branch types such as `feat`, `fix`, `refactor`, `docs`, `test`, `ci`, and
-  `chore`.
+- Create feature branches from `main` with `<type>/<short-kebab-summary>`.
+- Use `feat`, `fix`, `refactor`, `docs`, `test`, `ci`, or `chore` as branch types.
 - Use commit subjects in the format `<type>(<scope>): <imperative summary>`.
 - Keep the type and scope lowercase and the summary concise.
-- Examples: `feat/pie-v3-numeric-hardening` and
-  `feat(pie): align PieSlice value with v3 Double contract`.
 
-## Validation questionnaire
+Examples:
 
-Before committing, use the `question` tool to confirm which validation to run
-based on the scope of the changes:
+```text
+feat/pie-v3-numeric-hardening
+feat(pie): align PieSlice value with v3 Double contract
+```
 
-- Change confined to one chart module → scoped tests:
-  `./gradlew :charts-<module>:jvmTest`
-- Cross-module or `charts-core` change → full JVM tests:
-  `./gradlew chartsTestJvm`
-- Compose UI / visual change → screenshot baselines:
-  `./gradlew :androidApp:validateDebugScreenshotTest` (update via
-  `./gradlew updateScreenshots`)
-- Public API change → `./gradlew apiCompatibilityCheck`
-- Any change → `./gradlew ktlintCheck`
+Release notes and API migration topics use separate user-invoked workflows.
 
-Run the selected tasks and list the executed commands in the PR body
-Validation section.
+## Validation Questionnaire
 
-Do not run `./gradlew validateDocsGifBaselines` or instrumented Android tests
-locally: they are machine-dependent, slow, and run on CI when required.
+Ask which checks to run using the canonical matrix in
+`docs/workflows/ci-test-matrix.md`.
+
+Run selected tasks and list the exact commands in the PR body. CI owns
+`validateDocsGifBaselines` and instrumented Android tests unless the user asks
+to run them locally.
 
 ## Workflow
 
-1. Determine the changeset status with the user-impact gate in
-   [hdc-changeset](../hdc-changeset/SKILL.md). If a changeset is required,
-   ask the user for confirmation before creating it.
-2. Run the Validation questionnaire and execute the selected checks.
-3. Show the proposed branch + commit + push + PR commands as one batched
-   `question` prompt (per the git-actions questionnaire in
-   [AGENTS.md](../../AGENTS.md)) and wait for an explicit "yes" before
-   executing any of them.
-4. After all actions succeed, report the pull request URL and changeset
-   status.
+1. Inspect the diff and determine the affected modules.
+2. Run the selected checks from the canonical matrix.
+3. Read `.github/PULL_REQUEST_TEMPLATE.md` and use its sections and headings.
+4. Show the proposed branch, commit, push, and PR commands in one batched
+   `question` prompt and wait for an explicit yes before executing them.
+5. Report the PR URL and validation.

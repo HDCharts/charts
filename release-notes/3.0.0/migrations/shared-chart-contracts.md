@@ -30,7 +30,9 @@ val dataFromStrings = stringValues.map { text ->
 
 Choose an appropriate application error policy for invalid strings; the library does not infer parsing, locale, or missing-value behavior. Widening a Float does not recover precision already lost. The immutable models copy supplied lists; changing those original lists does not update a chart. Replace data instead. Models do not enforce chart-specific lengths or value ranges; each chart's validation remains responsible for those rules.
 
-Legacy v2 numeric/string dataset conversions remain while their charts still consume them. They are not new v3 input alternatives. Pie still uses its existing `PieSlice` entity with a Float value in this PR; a separate numeric alignment is planned before v3 stabilization. Do not pass the new `ChartData` to a chart that has not migrated its public signature.
+Chart-specific input contracts are documented in each chart migration. Follow
+`pie-v3.md` for the `PieSlice` value contract and use each chart's migration
+topic for its supported data model.
 
 ## Categories are explicit
 
@@ -61,7 +63,7 @@ The holder is remembered; a new `initialIndex` on recomposition does not reset i
 
 Selection indices refer to source data. Bounds checking and chart-specific reset/gesture policies belong to the chart. `staticChartSelection(index)` creates ordinary mutable state initialized to that index; it does not lock selection or disable animation/interaction.
 
-Pie continues to take selection through `PieChartDefaults.style(selection = selection)`. It now redirects taps to a replacement holder and cancels the previous holder's pending deselection timer. Repeated taps still drive the interaction timeout independently of deduplicated selection notifications. No pie geometry or public parameter redesign is included.
+Pie-specific selection and interaction behavior is documented in `pie-v3.md`, including the selection holder, timeout, and callback contracts. No pie geometry or public parameter redesign is included.
 
 ## Value formatting
 

@@ -10,3 +10,20 @@ Each PR test job checks the same immutable merge revision prepared by the PR wor
 | iOS Tests | `./gradlew ciTestIos` | `iosSimulatorArm64Test` for every chart library module. | GitHub-hosted `macos-15` Apple Silicon runner using the ARM64 iOS Simulator. |
 
 The `ciTest*` tasks are CI entry points. They delegate to the platform-specific `chartsTest*` tasks defined in the root build.
+
+## Local Validation Selection
+
+Use the smallest applicable command:
+
+| Scope | Command |
+| --- | --- |
+| One chart module | `./gradlew :charts-<module>:jvmTest` |
+| Cross-module or `charts-core` | `./gradlew chartsTestJvm` |
+| Kotlin or build logic | `./gradlew ktlintCheck` |
+| Compile gate | `./gradlew ciCompile` |
+| Repository checks | `./gradlew chartsCheck` |
+| Compose or screenshots | `./gradlew :androidApp:validateDebugScreenshotTest` |
+| Intentional screenshot updates | `./gradlew updateScreenshots` |
+
+CI owns `chartsTestAndroid`, `chartsTestWasm`, `chartsTestIos`, and
+`validateDocsGifBaselines` unless explicitly requested locally.

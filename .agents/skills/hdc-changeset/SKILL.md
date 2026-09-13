@@ -1,37 +1,36 @@
 ---
 name: hdc-changeset
-description: Create or update a release changeset for the current repository. Use when the user asks to create or update release notes for a user-facing change.
+description: Create or update a concise HDCharts release note on direct user request.
 ---
 
-# Create release changesets
+# Create Release Notes
 
 ## Guardrails
 
-Follow [AGENTS.md](../../AGENTS.md) Guardrails. Working-tree edits do not
-grant permission to commit, push, or open a PR.
+Follow [AGENTS.md](../../AGENTS.md). This skill edits release-note files.
 
-## User-impact gate
+Only a direct user request loads this skill; other workflows leave release-note
+work unchanged.
 
-The changeset gate covers observable features, fixes, behavior changes, API
-changes, and public documentation changes.
+## Scope
 
-CI configuration, dependency updates with no behavior changes, internal
-refactors, build cleanup, formatting, linting, repository maintenance, and
-release-process documentation that does not affect users use the no-changeset
-result.
-
-For those changes, output exactly:
+Create notes for observable features, fixes, behavior changes, public API
+changes, and public documentation changes. For maintenance-only work, report:
 
 ```text
-No changeset needed.
+No release note needed.
 ```
 
 ## Workflow
 
-1. Resolve the current pull request number, or use the explicit number provided
-   by the user.
-2. Read `.version`, require `<major>.<minor>.<patch>-SNAPSHOT`, and remove the
-   suffix to obtain `release_version`.
+1. Confirm that the user directly requested release-note work.
+2. Resolve `release_version` with the repository helper:
+
+   ```bash
+   bash ./.github/scripts/resolve-release-version.sh
+   ```
+
+   Use the helper output as the version directory name.
 3. Ensure these directories exist:
 
    ```text
@@ -39,13 +38,34 @@ No changeset needed.
    release-notes/<release_version>/migrations/
    ```
 
-4. Create the changeset at:
+4. Create or update a stable release note at:
 
    ```text
-   release-notes/<release_version>/changes/<pr-number>-<short-kebab>.md
+   release-notes/<release_version>/changes/<short-kebab-summary>.md
    ```
 
-   Use [assets/pr-changeset.md](assets/pr-changeset.md) as the template.
-5. Populate and validate the type, published module, pull request URL,
-   release-note word count, and absence of template placeholders.
-6. Report the release version and created or updated path.
+   Use a short, stable topic summary for the filename and release information
+   for the content.
+5. Use direct, concise wording and this template:
+
+   ```markdown
+   # Release Changeset
+
+   - type: `<feature|feat|fix|refactor|docs|chore>`
+   - module: `<published-module>`
+   - release_note: `<plain-language sentence, maximum 20 words>`
+   ```
+
+   Populate the change type, published module, and one concise public outcome.
+6. Validate the fields and word limit.
+7. Report the release version and created or updated path.
+
+## Release-Note Check
+
+Before finalizing a release note, confirm:
+
+- The change is public and user-visible.
+- The note describes one coherent outcome.
+- The wording is direct and positive.
+- The note contains the public outcome and release information only.
+- The note fits the public release highlights.

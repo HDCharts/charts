@@ -1,4 +1,4 @@
-# PR Changeset
+# Release Changeset
 
 - type: `feat`
 - module: `charts-stacked-area`

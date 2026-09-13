@@ -6,7 +6,7 @@
 
 ## Breaking Change
 
-<!-- Describe the breaking change and required migration, or remove this section. -->
+<!-- Describe the breaking change and required migration, or write "None". -->
 
 ## Validation
 
