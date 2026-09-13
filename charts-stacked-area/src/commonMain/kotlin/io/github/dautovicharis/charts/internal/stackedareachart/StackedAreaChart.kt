@@ -22,6 +22,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -131,9 +132,12 @@ internal fun StackedAreaChart(
             }
         }
     val hasInitialized = remember { mutableStateOf(false) }
-    var selectedSourceIndexFromInteraction by remember { mutableIntStateOf(NO_SELECTION) }
     val forcedSelectedSourceIndex =
         selectedPointIndex.takeIf { it in 0 until sourcePointsCount } ?: NO_SELECTION
+    var selectedSourceIndexFromInteraction by
+        remember(forcedSelectedSourceIndex) {
+            mutableIntStateOf(forcedSelectedSourceIndex)
+        }
     val hasForcedSelection = forcedSelectedSourceIndex != NO_SELECTION
     val isScrollable = isDenseData && denseExpanded
     val scrollState = rememberScrollState()
@@ -326,6 +330,11 @@ private fun StackedAreaChartContent(
     val showXAxisLabelsCandidate = style.xAxisLabelsVisible && xAxisLabels.isNotEmpty()
     val dragInteractionEnabled = interactionEnabled && !isScrollable
     val tapInteractionEnabled = interactionEnabled && isScrollable
+    val currentToggleSelection by rememberUpdatedState(onToggleSelection)
+    val currentSelectIndex by rememberUpdatedState(onSelectIndex)
+    val currentClearSelection by rememberUpdatedState(onClearSelection)
+    val currentZoomScale by rememberUpdatedState(zoomScale)
+    val currentZoomChange by rememberUpdatedState(onZoomScaleChange)
 
     BoxWithConstraints(modifier = modifier) {
         val density = LocalDensity.current
@@ -485,7 +494,7 @@ private fun StackedAreaChartContent(
                             width = size.width.toFloat(),
                             pointsCount = pointsCount,
                         )
-                    onSelectIndex(selected)
+                    currentSelectIndex(selected)
                 },
                 onHorizontalDrag = { position ->
                     val selected =
@@ -494,10 +503,10 @@ private fun StackedAreaChartContent(
                             width = size.width.toFloat(),
                             pointsCount = pointsCount,
                         )
-                    onSelectIndex(selected)
+                    currentSelectIndex(selected)
                 },
-                onDragEnd = { onClearSelection() },
-                onDragCancel = { onClearSelection() },
+                onDragEnd = { currentClearSelection() },
+                onDragCancel = { currentClearSelection() },
             )
         val denseTapModifier =
             buildTapGestureModifier(
@@ -518,11 +527,11 @@ private fun StackedAreaChartContent(
                             stepX = stepX,
                         )
                     if (selected != NO_SELECTION) {
-                        onToggleSelection(selected)
+                        currentToggleSelection(selected)
                     }
                 },
                 onDoubleTap = {
-                    onZoomScaleChange((zoomScale * zoomStep).coerceIn(zoomMin, zoomMax))
+                    currentZoomChange((currentZoomScale * zoomStep).coerceIn(zoomMin, zoomMax))
                 },
             )
         val pinchModifier =
@@ -530,8 +539,8 @@ private fun StackedAreaChartContent(
                 enabled = isScrollable,
                 zoomMin = zoomMin,
                 zoomMax = zoomMax,
-                getZoomScale = { zoomScale },
-                setZoomScale = onZoomScaleChange,
+                getZoomScale = { currentZoomScale },
+                setZoomScale = { currentZoomChange(it) },
                 pointsCount,
                 zoomMin,
                 zoomMax,

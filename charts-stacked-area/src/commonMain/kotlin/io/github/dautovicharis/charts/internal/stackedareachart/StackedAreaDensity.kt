@@ -68,11 +68,12 @@ internal fun aggregateForCompactDensity(
             ?.item
             ?.points
             ?.size ?: 0
-    if (targetPoints <= 1 || sourcePointsCount <= targetPoints) {
+    val safeTargetPoints = targetPoints.coerceAtLeast(1)
+    if (sourcePointsCount <= safeTargetPoints) {
         return identityRenderData(data)
     }
 
-    val bucketSize = bucketSizeForTargetCore(totalPoints = sourcePointsCount, targetPoints = targetPoints)
+    val bucketSize = bucketSizeForTargetCore(totalPoints = sourcePointsCount, targetPoints = safeTargetPoints)
     val bucketRanges = buildBucketRangesCore(totalPoints = sourcePointsCount, bucketSize = bucketSize)
     val aggregatedCategories = aggregateLabelsByCenterValueCore(data.categories, bucketRanges)
     val aggregatedItems =

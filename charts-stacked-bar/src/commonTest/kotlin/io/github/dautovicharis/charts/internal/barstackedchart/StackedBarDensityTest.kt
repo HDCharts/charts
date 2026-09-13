@@ -32,6 +32,25 @@ class StackedBarDensityTest {
     }
 
     @Test
+    fun aggregateForCompactDensity_oneBarCapacity_createsOneSourceBucket() {
+        val data =
+            toInternal(
+                chartData(
+                    bars = 10,
+                    segmentNames = listOf("S1", "S2"),
+                ),
+            )
+
+        val render = aggregateForCompactDensity(data = data, targetBars = 1)
+
+        assertEquals(expected = 1, actual = render.data.items.size)
+        assertEquals(expected = listOf(0..9), actual = render.bucketRanges)
+        assertEquals(expected = listOf(4), actual = render.sourceIndexByRenderIndex)
+        assertEquals(expected = 4, actual = render.resolveSourceIndex(0))
+        assertEquals(expected = 0, actual = render.resolveRenderIndex(9))
+    }
+
+    @Test
     fun identityRenderData_returnsDirectIndexMapping() {
         val data =
             toInternal(

@@ -15,9 +15,11 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import io.github.dautovicharis.charts.StackedAreaChart
 import io.github.dautovicharis.charts.internal.TestTags
 import io.github.dautovicharis.charts.model.ChartData
+import io.github.dautovicharis.charts.model.ChartSelection
 import io.github.dautovicharis.charts.model.ChartSeries
 import io.github.dautovicharis.charts.model.chartDataOf
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 
 @OptIn(ExperimentalTestApi::class)
@@ -59,6 +61,26 @@ class StackedAreaChartDenseDataTest {
 
             assertNotEquals(beforeScrollTitle, afterScrollTitle)
             assertNotEquals("Dense Stacked Area", afterScrollTitle)
+        }
+
+    @Test
+    fun stackedAreaChart_clearThenTapSameBucket_selectsItAgain() =
+        runComposeUiTest {
+            val selection = ChartSelection()
+            setContent {
+                StackedAreaChart(data = denseStackedAreaData(), selection = selection, animateOnStart = false)
+            }
+
+            onNodeWithTag(TestTags.STACKED_AREA_CHART_DENSE_EXPAND).performTouchInput { click() }
+            tapChartAt(x = 24f)
+            waitUntil(timeoutMillis = 3_000L) { selection.selectedIndex != null }
+            val selectedIndex = selection.selectedIndex
+
+            runOnIdle { selection.clear() }
+            tapChartAt(x = 24f)
+            waitUntil(timeoutMillis = 3_000L) { selection.selectedIndex != null }
+
+            assertEquals(expected = selectedIndex, actual = selection.selectedIndex)
         }
 
     @Test
