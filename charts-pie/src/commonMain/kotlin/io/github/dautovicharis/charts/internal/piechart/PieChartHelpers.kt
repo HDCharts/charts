@@ -15,17 +15,14 @@ import kotlin.math.sin
 import kotlin.math.sqrt
 
 /**
- * Checks whether the given point (`[pointX]`, `[pointY]`) is inside the drawn circular pie,
- * accounting for the inset applied when a slice is scaled up for selection.
- *
- * Hit-testing uses the actual drawn radius, not the full enclosing canvas rectangle, so taps
- * in the outer gutter never register a selection.
+ * Checks whether the given point (`[pointX]`, `[pointY]`) is inside a circle with the specified [size].
  *
  * @param pointX X coordinate of the point.
  * @param pointY Y coordinate of the point.
- * @param size The size of the canvas as [IntSize].
+ * @param size The size of the circle as [IntSize].
  * @param overflowInset The amount the drawn radius is shrunk on each side to make room for the
  *   scale-up animation of the selected slice.
+ * @return `true` if the point is inside the circle, `false` otherwise.
  */
 internal fun isPointInCircle(
     pointX: Float,
@@ -33,12 +30,20 @@ internal fun isPointInCircle(
     size: IntSize,
     overflowInset: Float = 0f,
 ): Boolean {
+    // Calculate the center coordinates of the circle
     val centerX = size.center.x
     val centerY = size.center.y
+
+    // Calculate the radius of the circle as half of the minimum dimension (width or height),
+    // shrunk by the overflow inset used for the selected-slice scale-up animation.
     val radius = min(size.width, size.height) / 2f - overflowInset
+
+    // Calculate the distance between the point and the center of the circle using the Pythagorean theorem
     val dx = pointX - centerX
     val dy = pointY - centerY
     val distance = sqrt(dx * dx + dy * dy)
+
+    // The point is inside the circle if the distance is less than or equal to the radius
     return distance <= radius
 }
 
@@ -56,13 +61,20 @@ internal fun degree(
     pointY: Float,
     size: IntSize,
 ): Double {
+    // Calculate the differences in x and y coordinates between the point and the center of the circle
     val dx = pointX - size.center.x
     val dy = pointY - size.center.y
+
+    // Calculate the acute angle in degrees
     val acuteDegree = atan(dy / dx) * (180 / PI)
+
+    // Determine the quadrant in which the point lies
     val isInBottomRight = dx >= 0 && dy >= 0
     val isInBottomLeft = dx <= 0 && dy >= 0
     val isInTopLeft = dx <= 0 && dy <= 0
     val isInTopRight = dx >= 0 && dy <= 0
+
+    // Adjust the degree based on the quadrant
     val degree =
         when {
             isInBottomRight -> acuteDegree
@@ -137,6 +149,14 @@ internal fun createPieSlices(values: List<Double>): List<SliceGeometry> =
         }
     }
 
+/**
+ * Calculates the coordinates for the middle of a slice in a pie chart.
+ *
+ * @param index The index of the slice in the list of slices.
+ * @param size The size of the pie chart as [IntSize].
+ * @param slices The list of slices in the pie chart.
+ * @return The [Offset] representing the coordinates of the middle of the slice.
+ */
 internal fun getCoordinatesForSlice(
     index: Int,
     size: IntSize,
@@ -146,11 +166,20 @@ internal fun getCoordinatesForSlice(
     val startAngle = slice.startDeg
     val sweepAngle = slice.sweepAngle
     val radius = size.width / 2f
+
+    // Calculate midpoint angle of the slice
     val midAngle = startAngle + (sweepAngle / 2f)
+
+    // Convert midpoint angle from degrees to radians
     val radian = midAngle * (PI / 180)
+
+    // Calculate the distance from the center to the middle of the slice
     val middleRadius = radius / 2f
+
+    // Calculate x and y coordinates of the middle of the slice
     val x = radius + middleRadius * cos(radian).toFloat()
     val y = radius + middleRadius * sin(radian).toFloat()
+
     return Offset(x, y)
 }
 
