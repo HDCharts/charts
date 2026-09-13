@@ -7,8 +7,7 @@ import dev.hdcode.charts.app.data.LiveLatencyTimelineUseCase
 import dev.hdcode.charts.app.demo.timeline.LiveTimelineControlsState
 import dev.hdcode.charts.app.demo.timeline.LiveTimelineDefaults
 import io.github.dautovicharis.charts.model.ChartData
-import io.github.dautovicharis.charts.model.ChartSeries
-import io.github.dautovicharis.charts.model.chartDataOf
+import io.github.dautovicharis.charts.model.toChartData
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -310,17 +309,10 @@ class MultiLineChartViewModel(
         val p95Values = normalize(baseWindow.p95Values)
         val seriesKeys = liveLatencyTimelineUseCase.multiSeriesKeys
         val multiDataSet =
-            chartDataOf(
-                categories = labels,
-                ChartSeries(
-                    name = seriesKeys.getOrElse(0) { "P50 Latency" },
-                    values = p50Values.map { it.toDouble() },
-                ),
-                ChartSeries(
-                    name = seriesKeys.getOrElse(1) { "P95 Latency" },
-                    values = p95Values.map { it.toDouble() },
-                ),
-            )
+            listOf(
+                seriesKeys.getOrElse(0) { "P50 Latency" } to p50Values.map { it.toDouble() },
+                seriesKeys.getOrElse(1) { "P95 Latency" } to p95Values.map { it.toDouble() },
+            ).toChartData(categories = labels)
 
         return MultiLineChartState(
             dataSet = multiDataSet,

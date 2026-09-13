@@ -106,16 +106,13 @@ dependencies {
 
 ```kotlin
 @Composable
-fun BasicLineChart() {
-    val values = listOf(42f, 38f, 45f, 51f, 47f, 54f, 49f)
+private fun basicLineChart() {
+    val values = listOf(42.0, 38.0, 45.0, 51.0, 47.0, 54.0, 49.0)
     val labels = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
 
-    val dataSet = values.toChartDataSet(
-        title = "Daily Support Tickets",
-        labels = labels,
-    )
+    val data = values.toChartData(categories = labels)
 
-    LineChart(dataSet)
+    LineChart(data = data, title = "Daily Support Tickets")
 }
 ```
 

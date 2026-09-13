@@ -81,6 +81,22 @@ fun List<Double>.toChartData(
     )
 
 /**
+ * Builds multi-series [ChartData] from a list of named series.
+ *
+ * Each pair supplies a series name and its values. For a more explicit
+ * construction, use [chartDataOf] with [ChartSeries] instances.
+ *
+ * @param categories The indexed-dimension labels shared by all series.
+ * Empty by default (no explicit labels); otherwise the count must match
+ * each series' value count.
+ */
+fun List<Pair<String, List<Double>>>.toChartData(categories: List<String> = emptyList()): ChartData =
+    ChartData(
+        categories = categories,
+        series = map { (name, values) -> ChartSeries(name = name, values = values) },
+    )
+
+/**
  * Builds a [ChartData] from shared [categories] and one or more [series].
  */
 fun chartDataOf(

@@ -9,27 +9,19 @@ import dev.hdcode.charts.app.screenshot.shared.ScreenshotPreview
 import dev.hdcode.charts.app.screenshot.shared.ScreenshotSurface
 import dev.hdcode.charts.sampleshared.fixtures.ChartTestStyleFixtures
 import io.github.dautovicharis.charts.LineChart
-import io.github.dautovicharis.charts.model.ChartSeries
 import io.github.dautovicharis.charts.model.ChartValueFormatters
-import io.github.dautovicharis.charts.model.chartDataOf
 import io.github.dautovicharis.charts.model.staticChartSelection
+import io.github.dautovicharis.charts.model.toChartData
 import io.github.dautovicharis.charts.style.ChartContainerDefaults
 
 private const val MULTI_LINE_SELECTION_INDEX = 4
 
 private val MULTI_LINE_SELECTION_DATA =
-    chartDataOf(
+    listOf(
+        "P50 Latency" to listOf(122.5, 149.125, 134.333, 126.75, 101.322397132296, 114.667, 129.75),
+        "P95 Latency" to listOf(167.75, 219.2, 176.85, 161.45, 151.31476088115193, 166.42, 188.95),
+    ).toChartData(
         categories = listOf("14:00:00", "14:00:07", "14:00:14", "14:00:21", "14:00:28", "14:00:35", "14:00:42"),
-        *arrayOf(
-            ChartSeries(
-                name = "P50 Latency",
-                values = listOf(122.5, 149.125, 134.333, 126.75, 101.322397132296, 114.667, 129.75),
-            ),
-            ChartSeries(
-                name = "P95 Latency",
-                values = listOf(167.75, 219.2, 176.85, 161.45, 151.31476088115193, 166.42, 188.95),
-            ),
-        ),
     )
 
 @PreviewTest

@@ -1,16 +1,18 @@
 package io.github.dautovicharis.charts.unit.validation
 
 import io.github.dautovicharis.charts.internal.ValidationErrors
+import io.github.dautovicharis.charts.internal.common.model.ChartDataItem
+import io.github.dautovicharis.charts.internal.common.model.MultiChartData
 import io.github.dautovicharis.charts.internal.format
 import io.github.dautovicharis.charts.internal.validateBarData
 import io.github.dautovicharis.charts.internal.validateLineData
 import io.github.dautovicharis.charts.mock.MockTest
 import io.github.dautovicharis.charts.mock.MockTest.TITLE
 import io.github.dautovicharis.charts.model.toChartData
-import io.github.dautovicharis.charts.model.toMultiChartDataSet
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import io.github.dautovicharis.charts.internal.common.model.toChartData as toInternalChartData
 
 class DataValidationStringDataTest {
     @Test
@@ -35,13 +37,21 @@ class DataValidationStringDataTest {
     fun validateLineData_stringDataWithInvalidValue_validationErrorsPresent() {
         // Arrange
         val dataSet =
-            listOf("Series" to listOf("2.0", "invalid"))
-                .toMultiChartDataSet(title = TITLE)
+            MultiChartData(
+                items =
+                    listOf(
+                        ChartDataItem(
+                            label = "Series",
+                            item = listOf("2.0", "invalid").toInternalChartData(),
+                        ),
+                    ),
+                title = TITLE,
+            )
         val lineChartStyle =
             MockTest.mockLineChartStyle(lineColors = listOf(MockTest.colors.first()))
 
         // Act
-        val validationErrors = validateLineData(dataSet.data, lineChartStyle)
+        val validationErrors = validateLineData(dataSet, lineChartStyle)
 
         // Assert
         val expectedError =
