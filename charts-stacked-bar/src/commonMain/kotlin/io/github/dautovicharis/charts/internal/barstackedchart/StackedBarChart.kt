@@ -22,6 +22,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -145,9 +146,12 @@ internal fun StackedBarChart(
                 }
             }
         val hasInitialized = remember { mutableStateOf(false) }
-        var selectedSourceIndexFromInteraction by remember { mutableIntStateOf(NO_SELECTION) }
         val forcedSelectedSourceIndex =
             selectedBarIndex.takeIf { it in 0 until sourceDataSize } ?: NO_SELECTION
+        var selectedSourceIndexFromInteraction by
+            remember(forcedSelectedSourceIndex) {
+                mutableIntStateOf(forcedSelectedSourceIndex)
+            }
         val hasForcedSelection = forcedSelectedSourceIndex != NO_SELECTION
 
         val isScrollable = isDenseData && denseExpanded
@@ -319,6 +323,11 @@ private fun StackedBarChartContent(
 ) {
     val dataSize = data.items.size
     val labels = remember(data) { data.items.map { item -> item.label } }
+    val currentToggleSelection by rememberUpdatedState(onToggleSelection)
+    val currentSelectIndex by rememberUpdatedState(onSelectIndex)
+    val currentClearSelection by rememberUpdatedState(onClearSelection)
+    val currentZoomScale by rememberUpdatedState(zoomScale)
+    val currentZoomChange by rememberUpdatedState(onZoomScaleChange)
 
     BoxWithConstraints(modifier = modifier) {
         val density = LocalDensity.current
@@ -399,7 +408,7 @@ private fun StackedBarChartContent(
                 spacingPx = spacingPx,
                 viewportWidthPx = viewportWidthPx,
                 chartHeightPx = chartHeightPx,
-                onTapIndex = onToggleSelection,
+                onTapIndex = { currentToggleSelection(it) },
             )
 
         val fitDragModifier =
@@ -411,8 +420,8 @@ private fun StackedBarChartContent(
                 spacingPx = spacingPx,
                 viewportWidthPx = viewportWidthPx,
                 chartHeightPx = chartHeightPx,
-                onDragIndex = onSelectIndex,
-                onDragFinished = onClearSelection,
+                onDragIndex = { currentSelectIndex(it) },
+                onDragFinished = { currentClearSelection() },
             )
 
         val scrollTapModifier =
@@ -422,9 +431,9 @@ private fun StackedBarChartContent(
                 dataSize = dataSize,
                 unitWidthPx = unitWidthPx,
                 scrollState = scrollState,
-                onTapIndex = onToggleSelection,
+                onTapIndex = { currentToggleSelection(it) },
                 onDoubleTap = {
-                    onZoomScaleChange((zoomScale * zoomStep).coerceIn(zoomMin, zoomMax))
+                    currentZoomChange((currentZoomScale * zoomStep).coerceIn(zoomMin, zoomMax))
                 },
             )
 
@@ -434,8 +443,8 @@ private fun StackedBarChartContent(
                 dataSize = dataSize,
                 zoomMin = zoomMin,
                 zoomMax = zoomMax,
-                getZoomScale = { zoomScale },
-                setZoomScale = onZoomScaleChange,
+                getZoomScale = { currentZoomScale },
+                setZoomScale = { currentZoomChange(it) },
             )
 
         val xAxisPlan =

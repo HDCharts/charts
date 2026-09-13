@@ -70,11 +70,12 @@ internal fun aggregateForCompactDensity(
     targetBars: Int,
 ): StackedBarRenderData {
     val sourceSize = data.items.size
-    if (targetBars <= 1 || sourceSize <= targetBars) {
+    val safeTargetBars = targetBars.coerceAtLeast(1)
+    if (sourceSize <= safeTargetBars) {
         return identityRenderData(data)
     }
 
-    val bucketSize = bucketSizeForTargetCore(totalPoints = sourceSize, targetPoints = targetBars)
+    val bucketSize = bucketSizeForTargetCore(totalPoints = sourceSize, targetPoints = safeTargetBars)
     val bucketRanges = buildBucketRangesCore(totalPoints = sourceSize, bucketSize = bucketSize)
     val segmentCount =
         data.items
