@@ -61,7 +61,8 @@ fun LineChart(
         }
     LineChartImpl(
         data = internalData,
-        style = style.toInternal(modifier),
+        modifier = modifier,
+        style = style.toInternal(),
         interactionEnabled = interactionEnabled,
         animateOnStart = animateOnStart,
         renderMode = renderMode,
