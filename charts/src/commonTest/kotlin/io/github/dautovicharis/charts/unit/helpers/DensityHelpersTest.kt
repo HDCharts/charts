@@ -5,6 +5,7 @@ import io.github.dautovicharis.charts.internal.common.composable.zoomOutScale
 import io.github.dautovicharis.charts.internal.common.density.aggregateLabelsByCenterValue
 import io.github.dautovicharis.charts.internal.common.density.aggregateLabelsByLastValue
 import io.github.dautovicharis.charts.internal.common.density.aggregatePointsByAverage
+import io.github.dautovicharis.charts.internal.common.density.bucketCenterIndex
 import io.github.dautovicharis.charts.internal.common.density.bucketSizeForTarget
 import io.github.dautovicharis.charts.internal.common.density.buildBucketRanges
 import io.github.dautovicharis.charts.internal.common.density.shouldUseScrollableDensity
@@ -23,6 +24,12 @@ class DensityHelpersTest {
     fun bucketSizeForTarget_roundsUpToFitTargetCount() {
         val bucketSize = bucketSizeForTarget(totalPoints = 120, targetPoints = 50)
         assertEquals(expected = 3, actual = bucketSize)
+    }
+
+    @Test
+    fun bucketCenterIndex_usesLowerMiddleElement() {
+        assertEquals(expected = 1, actual = bucketCenterIndex(0..2))
+        assertEquals(expected = 0, actual = bucketCenterIndex(0..1))
     }
 
     @Test

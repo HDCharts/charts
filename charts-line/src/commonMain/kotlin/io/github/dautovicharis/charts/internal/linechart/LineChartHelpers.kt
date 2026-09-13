@@ -3,6 +3,7 @@ package io.github.dautovicharis.charts.internal.linechart
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.util.lerp
+import io.github.dautovicharis.charts.internal.NO_SELECTION
 import io.github.dautovicharis.charts.internal.common.bezier.DEFAULT_BEZIER_TENSION
 import io.github.dautovicharis.charts.internal.common.bezier.cubicControlPointsForSegment
 import io.github.dautovicharis.charts.internal.common.model.ChartDataItem
@@ -10,6 +11,7 @@ import io.github.dautovicharis.charts.internal.common.model.MultiChartData
 import io.github.dautovicharis.charts.internal.common.model.toChartData
 import io.github.dautovicharis.charts.internal.common.density.aggregateLabelsByCenterValue as aggregateLabelsByCenterValueCore
 import io.github.dautovicharis.charts.internal.common.density.aggregatePointsByAverage as aggregatePointsByAverageCore
+import io.github.dautovicharis.charts.internal.common.density.bucketCenterIndex as bucketCenterIndexCore
 import io.github.dautovicharis.charts.internal.common.density.bucketSizeForTarget as bucketSizeForTargetCore
 import io.github.dautovicharis.charts.internal.common.density.buildBucketRanges as buildBucketRangesCore
 import io.github.dautovicharis.charts.internal.common.density.shouldUseScrollableDensity as shouldUseScrollableDensityCore
@@ -21,6 +23,29 @@ internal fun shouldUseScrollableDensity(pointsCount: Int): Boolean =
         pointsCount = pointsCount,
         threshold = LINE_DENSE_THRESHOLD,
     )
+
+internal fun compactDensityRanges(
+    sourcePointsCount: Int,
+    targetPoints: Int = LINE_DENSE_THRESHOLD,
+): List<IntRange> {
+    if (sourcePointsCount <= 0) return emptyList()
+    val bucketSize = bucketSizeForTargetCore(sourcePointsCount, targetPoints.coerceAtLeast(1))
+    return buildBucketRangesCore(sourcePointsCount, bucketSize)
+}
+
+internal fun renderIndexForSourceIndex(
+    sourceIndex: Int,
+    sourceRanges: List<IntRange>,
+): Int = sourceRanges.indexOfFirst { sourceIndex in it }
+
+internal fun sourceIndexForRenderIndex(
+    renderIndex: Int,
+    sourceRanges: List<IntRange>,
+): Int =
+    sourceRanges
+        .getOrNull(renderIndex)
+        ?.let(::bucketCenterIndexCore)
+        ?: NO_SELECTION
 
 internal fun aggregateForCompactDensity(
     data: MultiChartData,
@@ -35,8 +60,7 @@ internal fun aggregateForCompactDensity(
             ?.size ?: return data
     if (sourcePointsCount <= targetPoints) return data
 
-    val bucketSize = bucketSizeForTargetCore(totalPoints = sourcePointsCount, targetPoints = targetPoints)
-    val bucketRanges = buildBucketRangesCore(totalPoints = sourcePointsCount, bucketSize = bucketSize)
+    val bucketRanges = compactDensityRanges(sourcePointsCount, targetPoints)
     val aggregatedCategories = aggregateLabelsByCenterValueCore(data.categories, bucketRanges)
     val aggregatedItems =
         data.items.map { item ->

@@ -61,6 +61,14 @@ internal fun LineChartImpl(
             }
         var denseExpanded by rememberDenseExpandedState(isDenseModeAvailable = isDenseMorphData)
         val compactDenseMode = isDenseMorphData && !denseExpanded
+        val sourceRanges =
+            remember(sourcePointsCount, compactDenseMode) {
+                if (compactDenseMode) {
+                    compactDensityRanges(sourcePointsCount)
+                } else {
+                    emptyList()
+                }
+            }
         val renderData =
             remember(data, compactDenseMode) {
                 if (compactDenseMode) {
@@ -69,8 +77,14 @@ internal fun LineChartImpl(
                     data
                 }
             }
-        val renderDataPointsCount = renderData.getFirstPointsSize()
-        val effectiveSelectedIndex = selectedPointIndex.takeIf { it in 0 until renderDataPointsCount } ?: NO_SELECTION
+        val effectiveSelectedIndex =
+            remember(selectedPointIndex, sourceRanges, compactDenseMode, sourcePointsCount) {
+                if (compactDenseMode) {
+                    renderIndexForSourceIndex(selectedPointIndex, sourceRanges)
+                } else {
+                    selectedPointIndex.takeIf { it in 0 until sourcePointsCount } ?: NO_SELECTION
+                }
+            }
         val title =
             if (effectiveSelectedIndex != NO_SELECTION) {
                 selectedTitle ?: renderData.getLabel(effectiveSelectedIndex)
@@ -78,9 +92,9 @@ internal fun LineChartImpl(
                 renderData.title
             }
         val labels =
-            remember(renderData, effectiveSelectedIndex, isTimelineMode) {
-                if (!isTimelineMode && renderData.hasCategories() && effectiveSelectedIndex != NO_SELECTION) {
-                    renderData.items.map { it.item.labels[effectiveSelectedIndex] }.toImmutableList()
+            remember(data, selectedPointIndex, isTimelineMode) {
+                if (!isTimelineMode && data.hasCategories() && selectedPointIndex in 0 until sourcePointsCount) {
+                    data.items.map { it.item.labels[selectedPointIndex] }.toImmutableList()
                 } else {
                     persistentListOf()
                 }
@@ -159,7 +173,15 @@ internal fun LineChartImpl(
                 selectedPointIndex = effectiveSelectedIndex,
                 valueFormatter = valueFormatter,
                 axisValueFormatter = axisValueFormatter,
-                onValueChanged = { selectedIndex -> onValueChanged(selectedIndex) },
+                onValueChanged = { renderIndex ->
+                    onValueChanged(
+                        if (compactDenseMode) {
+                            sourceIndexForRenderIndex(renderIndex, sourceRanges)
+                        } else {
+                            renderIndex
+                        },
+                    )
+                },
             )
 
             if (renderData.hasCategories() || isTimelineMode) {

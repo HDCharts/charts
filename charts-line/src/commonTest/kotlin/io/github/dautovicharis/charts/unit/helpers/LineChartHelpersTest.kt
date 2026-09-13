@@ -9,10 +9,13 @@ import io.github.dautovicharis.charts.internal.common.model.toChartData
 import io.github.dautovicharis.charts.internal.linechart.aggregateForCompactDensity
 import io.github.dautovicharis.charts.internal.linechart.buildLineXAxisTicks
 import io.github.dautovicharis.charts.internal.linechart.buildLineYAxisTicks
+import io.github.dautovicharis.charts.internal.linechart.compactDensityRanges
 import io.github.dautovicharis.charts.internal.linechart.findNearestPoint
+import io.github.dautovicharis.charts.internal.linechart.renderIndexForSourceIndex
 import io.github.dautovicharis.charts.internal.linechart.resolveLineXAxisLabels
 import io.github.dautovicharis.charts.internal.linechart.scaleValues
 import io.github.dautovicharis.charts.internal.linechart.shouldUseScrollableDensity
+import io.github.dautovicharis.charts.internal.linechart.sourceIndexForRenderIndex
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertSame
@@ -75,6 +78,16 @@ class LineChartHelpersTest {
         val aggregated = aggregateForCompactDensity(data)
 
         assertSame(data, aggregated)
+    }
+
+    @Test
+    fun compactDensitySelection_mapsBetweenRenderBucketsAndSourceIndices() {
+        val ranges = compactDensityRanges(sourcePointsCount = 120, targetPoints = 50)
+
+        assertEquals(expected = 26, actual = renderIndexForSourceIndex(sourceIndex = 80, sourceRanges = ranges))
+        assertEquals(expected = 79, actual = sourceIndexForRenderIndex(renderIndex = 26, sourceRanges = ranges))
+        assertEquals(expected = -1, actual = renderIndexForSourceIndex(sourceIndex = 120, sourceRanges = ranges))
+        assertEquals(expected = -1, actual = sourceIndexForRenderIndex(renderIndex = 40, sourceRanges = ranges))
     }
 
     @Test
