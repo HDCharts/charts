@@ -42,10 +42,6 @@ commons-lang3-security = "3.18.0"
 logback-core-security = "1.5.25"
 # https://www.cve.org/CVERecord?id=CVE-2020-13956
 httpclient-security = "4.5.14"
-# https://github.com/advisories/GHSA-qj8w-gfj5-8c6v
-serialize-javascript-security = "7.0.7"
-# https://github.com/advisories/GHSA-w5hq-g745-h8pq
-uuid-security = "11.1.1"
 # https://www.cve.org/CVERecord?id=CVE-2024-29371
 jose4j-security = "0.9.6"
 # https://github.com/advisories/GHSA-72hv-8253-57qq

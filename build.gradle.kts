@@ -54,9 +54,6 @@ buildscript {
     configurations.configureBuildscriptSecurityOverrides(buildscriptVersionCatalog)
 }
 
-// Keep Kotlin/JS transitive dependencies patched in kotlin-js-store/yarn.lock.
-configureJsSecurityOverrides(versionCatalog)
-
 // Root project only needs the ktlint/logback override; commons-lang3 is enforced in subprojects.
 configurations.configureProjectSecurityOverrides(
     versionCatalog = versionCatalog,

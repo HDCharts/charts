@@ -1,4 +1,3 @@
-import org.gradle.api.Project
 import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.artifacts.VersionCatalog
 
@@ -97,60 +96,3 @@ private data class SecurityOverrideRule(
     val version: String,
     val reason: String,
 )
-
-fun Project.configureJsSecurityOverrides(versionCatalog: VersionCatalog) {
-    val serializeJavascriptSecurityVersion = versionCatalog.requiredVersion("serialize-javascript-security")
-    val uuidSecurityVersion = versionCatalog.requiredVersion("uuid-security")
-    val yarnRootExtension = resolveYarnRootExtension()
-
-    // Keep Kotlin/JS transitive dependencies patched in kotlin-js-store/yarn.lock.
-    yarnRootExtension.applyResolution("serialize-javascript", serializeJavascriptSecurityVersion)
-    yarnRootExtension.applyResolution("uuid", uuidSecurityVersion)
-}
-
-private fun Project.resolveYarnRootExtension(): Any {
-    val yarnRootClass =
-        sequenceOf(
-            Thread.currentThread().contextClassLoader,
-            javaClass.classLoader,
-            this::class.java.classLoader,
-        ).filterNotNull()
-            .mapNotNull { classLoader ->
-                runCatching {
-                    Class.forName(
-                        "org.jetbrains.kotlin.gradle.targets.js.yarn.YarnRootExtension",
-                        true,
-                        classLoader,
-                    )
-                }.getOrNull()
-            }.firstOrNull()
-            ?: error("Unable to load YarnRootExtension class from available classloaders")
-    return try {
-        val getMethod = yarnRootClass.getMethod("get", Project::class.java)
-        getMethod.invoke(null, this)
-    } catch (_: NoSuchMethodException) {
-        val companion = yarnRootClass.getDeclaredField("Companion").get(null)
-        val getMethod =
-            companion.javaClass.methods.firstOrNull { method ->
-                method.name == "get" &&
-                    method.parameterTypes.contentEquals(
-                        arrayOf(Project::class.java),
-                    )
-            } ?: error("Unable to locate YarnRootExtension#get(Project) method")
-        getMethod.invoke(companion, this)
-    }
-}
-
-private fun Any.applyResolution(
-    dependencyName: String,
-    version: String,
-) {
-    val resolutionMethod =
-        javaClass.methods.firstOrNull { method ->
-            method.name == "resolution" &&
-                method.parameterTypes.contentEquals(
-                    arrayOf(String::class.java, String::class.java),
-                )
-        } ?: error("Unable to locate YarnRootExtension#resolution(String, String) method")
-    resolutionMethod.invoke(this, dependencyName, version)
-}
