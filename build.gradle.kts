@@ -1,7 +1,5 @@
 import org.gradle.api.Task
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
-import org.jetbrains.kotlin.gradle.plugin.mpp.DisableCacheInKotlinVersion
-import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeCacheApi
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.TestExecutable
 import org.jetbrains.kotlin.gradle.targets.js.testing.karma.KotlinKarma
@@ -86,7 +84,6 @@ val verifySigningKey =
         commandLine("bash", verificationScript.absolutePath, "--required")
     }
 
-@OptIn(KotlinNativeCacheApi::class)
 subprojects {
     version = rootProject.version
 
@@ -112,6 +109,28 @@ subprojects {
         }
     }
 
+    // Compose Multiplatform 1.11.x ships a `ui-uikit` prebuilt Kotlin/Native
+    // cache that hard-references UIViewLayoutRegion (an iOS 17 UIKit symbol).
+    // On the hosted macos-15 cache (Xcode 16 / iOS 18 SDK) the linker only
+    // resolves this symbol when the test binary's iOS deployment target is
+    // >= 17.0; otherwise the KGP auto-disables the native cache and
+    // linkDebugTestIosSimulatorArm64 falls back to a slow uncached link for
+    // every chart module. Bump the test-only minimum (the published library
+    // keeps Kotlin's default 15.0) so the cache stays enabled.
+    plugins.withId("org.jetbrains.kotlin.multiplatform") {
+        if (path !in ChartsModules.library) return@withId
+
+        extensions.configure<KotlinMultiplatformExtension>("kotlin") {
+            targets.withType<KotlinNativeTarget>().configureEach {
+                if (name != "iosSimulatorArm64") return@configureEach
+
+                binaries.withType<TestExecutable>().configureEach {
+                    freeCompilerArgs += "-Xoverride-konan-properties=minVersion.ios=17.0"
+                }
+            }
+        }
+    }
+
     configurations.configureProjectSecurityOverrides(
         versionCatalog = versionCatalog,
         includeCommonsLang = true,
@@ -131,33 +150,6 @@ subprojects {
                     .dir("karma.config.d")
                     .asFile,
             )
-        }
-    }
-
-    // Hosted macOS can supply Kotlin/Native dependency caches built with a newer
-    // iOS Simulator SDK than this project's iOS deployment target. Linking those
-    // caches then fails on symbols unavailable to the deployment target.
-    //
-    // Disable only simulator *test* binary caches; this does not change published
-    // libraries or device targets. Re-enable caching after a Kotlin/Compose update
-    // provides deployment-target-compatible caches (or after an intentional minimum
-    // iOS version increase). The version marker makes that review mandatory on
-    // Kotlin upgrades.
-    plugins.withId("org.jetbrains.kotlin.multiplatform") {
-        if (path !in ChartsModules.library) return@withId
-
-        extensions.configure<KotlinMultiplatformExtension>("kotlin") {
-            targets.withType<KotlinNativeTarget>().configureEach {
-                if (name != "iosSimulatorArm64") return@configureEach
-
-                binaries.withType<TestExecutable>().configureEach {
-                    disableNativeCache(
-                        version = DisableCacheInKotlinVersion.`2_4_10`,
-                        reason =
-                            "Hosted macOS caches can target a newer simulator SDK than the test deployment target.",
-                    )
-                }
-            }
         }
     }
 }
