@@ -39,7 +39,7 @@ object ChartTestStyleFixtures {
             border =
                 PieChartDefaults.border(
                     color = MaterialTheme.colorScheme.surface,
-                    width = 5f,
+                    width = 2.5.dp,
                 ),
             legend = PieChartDefaults.legend(visible = true),
         )

@@ -9,6 +9,7 @@ import io.github.dautovicharis.charts.internal.common.model.MultiChartData
 import io.github.dautovicharis.charts.internal.linechart.LineChartInternalStyle
 import io.github.dautovicharis.charts.model.ChartValueFormatter
 import kotlinx.collections.immutable.ImmutableList
+import kotlin.time.Duration
 
 @Composable
 internal fun LineChart(
@@ -18,7 +19,7 @@ internal fun LineChart(
     interactionEnabled: Boolean,
     animateOnStart: Boolean,
     renderMode: LineChartRenderMode = LineChartRenderMode.Morph,
-    animationDurationMillis: Int = 420,
+    animationDuration: Duration,
     isDenseMorphMode: Boolean = false,
     scrollState: ScrollState,
     zoomScale: Float = 1f,
@@ -34,7 +35,7 @@ internal fun LineChart(
         interactionEnabled = interactionEnabled,
         animateOnStart = animateOnStart,
         renderMode = renderMode,
-        animationDurationMillis = animationDurationMillis,
+        animationDuration = animationDuration,
         isDenseMorphMode = isDenseMorphMode,
         scrollState = scrollState,
         zoomScale = zoomScale,

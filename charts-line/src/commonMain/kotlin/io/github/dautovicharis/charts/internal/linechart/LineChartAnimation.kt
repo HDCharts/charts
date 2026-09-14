@@ -1,6 +1,7 @@
 package io.github.dautovicharis.charts.internal.linechart
 
 import io.github.dautovicharis.charts.LineChartRenderMode
+import kotlin.time.Duration
 
 internal fun hasSameSeriesStructure(
     previous: List<List<Double>>,
@@ -10,13 +11,24 @@ internal fun hasSameSeriesStructure(
     return previous.indices.all { index -> previous[index].size == current[index].size }
 }
 
+/**
+ * Converts this [Duration] to an integer millisecond value safe for Compose animation specs.
+ *
+ * Clamps the result between [MIN_TIMELINE_DURATION_MS] and [Int.MAX_VALUE] to prevent non-positive
+ * timeline shift durations and integer overflow on very large or infinite durations.
+ */
+internal fun Duration.toTimelineDurationMillis(): Int =
+    inWholeMilliseconds
+        .coerceIn(MIN_TIMELINE_DURATION_MS.toLong(), Int.MAX_VALUE.toLong())
+        .toInt()
+
 internal fun decideLineChartUpdate(
     previousRawSeries: List<List<Double>>?,
     currentRawSeries: List<List<Double>>,
     currentMinMax: Pair<Double, Double>,
     previousTimelineRenderMinMax: Pair<Double, Double>?,
     renderMode: LineChartRenderMode,
-    animationDurationMillis: Int,
+    animationDuration: Duration,
 ): LineChartUpdateDecision {
     if (renderMode != LineChartRenderMode.Timeline) {
         return LineChartUpdateDecision(
@@ -47,9 +59,7 @@ internal fun decideLineChartUpdate(
                             currentSeries = currentRawSeries,
                             minMax = stabilizedMinMax,
                         ),
-                    animationDurationMillis =
-                        animationDurationMillis
-                            .coerceAtLeast(MIN_TIMELINE_DURATION_MS),
+                    animationDuration = animationDuration,
                 )
             }
 

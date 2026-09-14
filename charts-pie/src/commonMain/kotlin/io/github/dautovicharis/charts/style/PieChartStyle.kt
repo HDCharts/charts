@@ -8,6 +8,8 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import io.github.dautovicharis.charts.internal.DONUT_MAX_PERCENTAGE
 import io.github.dautovicharis.charts.internal.DONUT_MIN_PERCENTAGE
 import io.github.dautovicharis.charts.internal.piechart.AdaptivePieSizeModifier
@@ -64,7 +66,7 @@ data class PieChartSlicesStyle(
  */
 @Immutable
 data class PieChartBorderStyle(
-    val width: Float,
+    val width: Dp,
     val color: Color,
 )
 
@@ -78,7 +80,7 @@ object PieChartDefaults {
      * @param chartContainerStyle The style to be applied to the chart view. Defaults to the default style of ChartContainerDefaults.
      * @param donut The donut configuration. Defaults to a chart without a donut hole.
      * @param slices The slice configuration. Defaults to theme-derived slice colors and alpha.
-     * @param border The border configuration. Defaults to a 3f border using the surface color.
+     * @param border The border configuration. Defaults to a 1.dp border using the surface color.
      * @param legend The legend configuration. Defaults to a visible legend.
      */
     @Composable
@@ -141,12 +143,12 @@ object PieChartDefaults {
      * Returns a [PieChartBorderStyle] with the provided parameters or their default values.
      *
      * @param color The color of the border around the pie chart. Defaults to the surface color of the MaterialTheme.
-     * @param width The width of the border around the pie chart. Defaults to 3f.
+     * @param width The width of the border around the pie chart. Defaults to 1.dp.
      */
     @Composable
     fun border(
         color: Color = MaterialTheme.colorScheme.surface,
-        width: Float = 3f,
+        width: Dp = 1.dp,
     ): PieChartBorderStyle =
         PieChartBorderStyle(
             width = width,

@@ -60,6 +60,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlin.math.max
 import kotlin.math.roundToInt
+import kotlin.time.Duration
 
 internal const val LINE_STROKE_WIDTH = 5f
 internal const val MARKER_REVEAL_DURATION_MS = 260
@@ -81,7 +82,7 @@ internal sealed interface LineChartTransitionMode {
 
     data class TimelineShift(
         val transitionData: TimelineTransitionData,
-        val animationDurationMillis: Int,
+        val animationDuration: Duration,
     ) : LineChartTransitionMode
 }
 
@@ -99,7 +100,7 @@ internal fun LineChartContent(
     interactionEnabled: Boolean,
     animateOnStart: Boolean,
     renderMode: LineChartRenderMode = LineChartRenderMode.Morph,
-    animationDurationMillis: Int = 420,
+    animationDuration: Duration,
     isDenseMorphMode: Boolean = false,
     scrollState: ScrollState,
     zoomScale: Float = 1f,
@@ -190,7 +191,7 @@ internal fun LineChartContent(
         }
     }
 
-    LaunchedEffect(show, rawSeries, renderMode, animationDurationMillis) {
+    LaunchedEffect(show, rawSeries, renderMode, animationDuration) {
         if (pointsCount <= 0 || seriesCount == 0) return@LaunchedEffect
 
         if (!show && !isPreview) {
@@ -215,7 +216,7 @@ internal fun LineChartContent(
                 currentMinMax = minMax,
                 previousTimelineRenderMinMax = timelineRenderMinMax.value,
                 renderMode = renderMode,
-                animationDurationMillis = animationDurationMillis,
+                animationDuration = animationDuration,
             )
         timelineRenderMinMax.value = updateDecision.nextTimelineRenderMinMax
         val normalizedForCurrent =
@@ -275,7 +276,7 @@ internal fun LineChartContent(
                     targetValue = ANIMATION_TARGET,
                     animationSpec =
                         tween(
-                            durationMillis = mode.animationDurationMillis,
+                            durationMillis = mode.animationDuration.toTimelineDurationMillis(),
                             easing = LinearEasing,
                         ),
                 )

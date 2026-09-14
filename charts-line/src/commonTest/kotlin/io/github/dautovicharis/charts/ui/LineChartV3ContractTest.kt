@@ -125,6 +125,19 @@ class LineChartV3ContractTest {
         }
 
     @Test
+    fun noTitle_noSelection_doesNotBorrowSeriesName() =
+        runComposeUiTest {
+            setContent {
+                LineChart(
+                    data = listOf(10.0, 20.0, 30.0).toChartData(seriesName = "Series"),
+                    animateOnStart = false,
+                )
+            }
+
+            onAllNodesWithTag(TestTags.CHART_TITLE).assertCountEquals(0)
+        }
+
+    @Test
     fun validDataAppliesModifierToOuterChartContainer() =
         runComposeUiTest {
             setContent {

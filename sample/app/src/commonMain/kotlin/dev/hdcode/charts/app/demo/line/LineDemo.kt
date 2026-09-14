@@ -54,6 +54,7 @@ import io.github.dautovicharis.charts.style.LineChartDefaults
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.math.roundToInt
+import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun LineChartDemo(viewModel: LineChartViewModel = koinViewModel()) {
@@ -132,7 +133,7 @@ fun LineChartDemo(viewModel: LineChartViewModel = koinViewModel()) {
                     data = uiState.dataSet,
                     style = LineChartDefaults.style(chartContainerStyle = chartContainerStyle),
                     renderMode = LineChartRenderMode.Timeline,
-                    animationDurationMillis = timelineAnimationDuration,
+                    animationDuration = timelineAnimationDuration.milliseconds,
                 )
             }
 

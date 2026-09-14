@@ -29,8 +29,10 @@ private val MULTI_LINE_SELECTION_DATA =
 @Composable
 fun LineChartDefaultPreview() {
     ScreenshotSurface {
+        val data = SCREENSHOT_LINE_SAMPLE_USE_CASE.initialLineDataSet()
         LineChart(
-            data = SCREENSHOT_LINE_SAMPLE_USE_CASE.initialLineDataSet(),
+            data = data,
+            title = data.series.single().name,
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
         )
     }
@@ -41,8 +43,10 @@ fun LineChartDefaultPreview() {
 @Composable
 fun LineChartCustomPreview() {
     ScreenshotSurface {
+        val data = SCREENSHOT_LINE_SAMPLE_USE_CASE.initialLineDataSet()
         LineChart(
-            data = SCREENSHOT_LINE_SAMPLE_USE_CASE.initialLineDataSet(),
+            data = data,
+            title = data.series.single().name,
             style = ChartTestStyleFixtures.lineCustomStyle(chartContainerStyle = ChartContainerDefaults.style()),
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
         )
