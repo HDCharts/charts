@@ -17,6 +17,8 @@ import io.github.dautovicharis.charts.model.rememberSelectionLifecycle
 import io.github.dautovicharis.charts.style.LineChartDefaults
 import io.github.dautovicharis.charts.style.LineChartStyle
 import kotlinx.collections.immutable.toImmutableList
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 import io.github.dautovicharis.charts.internal.common.model.ChartData as InternalChartData
 
 /**
@@ -24,6 +26,14 @@ import io.github.dautovicharis.charts.internal.common.model.ChartData as Interna
  * single- and multi-line data. Selection always refers to a source X index shared by all series.
  * In compact mode, user interaction selects the middle source index represented by a bucket;
  * programmatic source selection highlights the bucket containing that index.
+ *
+ * - [interactionEnabled] gates gesture-based selection. It has no effect in [LineChartRenderMode.Timeline],
+ *   which is a non-interactive, continuously updating presentation mode.
+ * - [renderMode] controls only the update transition. In [LineChartRenderMode.Timeline] the strip shifts
+ *   horizontally as new points arrive; gestures are not supported regardless of [interactionEnabled].
+ * - [animationDuration] is typed as [Duration] (for example `420.milliseconds`); the value is
+ *   carried as a typed duration through the rendering pipeline and converted to milliseconds
+ *   only at the animation spec boundary.
  */
 @Composable
 fun LineChart(
@@ -35,7 +45,7 @@ fun LineChart(
     interactionEnabled: Boolean = true,
     animateOnStart: Boolean = true,
     renderMode: LineChartRenderMode = LineChartRenderMode.Morph,
-    animationDurationMillis: Int = 420,
+    animationDuration: Duration = 420.milliseconds,
     valueFormatter: ChartValueFormatter = LineChartDefaults.valueFormatter,
     axisValueFormatter: ChartValueFormatter = LineChartDefaults.axisValueFormatter,
 ) {
@@ -66,7 +76,7 @@ fun LineChart(
         interactionEnabled = interactionEnabled,
         animateOnStart = animateOnStart,
         renderMode = renderMode,
-        animationDurationMillis = animationDurationMillis,
+        animationDuration = animationDuration,
         selectedPointIndex = selectedIndex,
         onValueChanged = { index ->
             if (index == NO_SELECTION) selection.clear() else selection.select(index)
@@ -155,10 +165,6 @@ private fun toInternalLineData(
     return MultiChartData(
         items = items,
         categories = categories.takeIf { data.series.size > 1 }.orEmpty(),
-        title =
-            title ?: data.series
-                .firstOrNull()
-                ?.name
-                .orEmpty(),
+        title = title.orEmpty(),
     )
 }

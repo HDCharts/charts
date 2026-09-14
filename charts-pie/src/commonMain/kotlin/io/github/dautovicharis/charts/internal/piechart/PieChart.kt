@@ -24,6 +24,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import io.github.dautovicharis.charts.internal.ANIMATION_DURATION
@@ -59,6 +60,7 @@ internal fun PieChart(
     onSliceTouched: (Int) -> Unit = {},
 ) {
     val isPreview = LocalInspectionMode.current
+    val density = LocalDensity.current
     var show by rememberShowState(isPreviewMode = isPreview || !animateOnStart)
     val values = chartData.points
     val interactionSlices = remember(values) { createPieSlices(values) }
@@ -163,6 +165,7 @@ internal fun PieChart(
                 .onGloballyPositioned { show = true }
                 .then(interactionModifier)
                 .drawWithCache {
+                    val borderWidthPx = with(density) { style.border.width.toPx() }
                     val canvasMinDimension = size.minDimension
                     val overflowInset = canvasMinDimension * (MAX_SCALE - DEFAULT_SCALE) / 2f
                     val pieDiameter = canvasMinDimension - overflowInset * 2f
@@ -176,7 +179,7 @@ internal fun PieChart(
                     val pieCenter = pieBounds.center
                     val pieRadius = pieBounds.width / 2f
                     val layerBounds = Rect(0f, 0f, size.width, size.height)
-                    val borderStroke = Stroke(width = style.border.width)
+                    val borderStroke = Stroke(width = borderWidthPx)
 
                     onDrawBehind {
                         val animatedSlices = createPieSlices(animatables.map { it.value.toDouble() })

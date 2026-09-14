@@ -3,7 +3,6 @@ package io.github.dautovicharis.charts.ui
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
@@ -26,13 +25,6 @@ class LineChartTest {
     @Test
     fun lineChart_withValidData_displaysChart() =
         runComposeUiTest {
-            // Arrange
-            val expectedTitle =
-                dataSet.series
-                    .first()
-                    .name
-                    .orEmpty()
-
             // Act
             setContent {
                 LineChart(data = dataSet)
@@ -40,9 +32,7 @@ class LineChartTest {
 
             // Assert
             onNodeWithTag(TestTags.LINE_CHART).assertIsDisplayed()
-            onNodeWithTag(TestTags.CHART_TITLE)
-                .assertTextEquals(expectedTitle)
-                .assertIsDisplayed()
+            onAllNodesWithTag(TestTags.CHART_TITLE).assertCountEquals(0)
             onAllNodesWithTag(TestTags.LINE_CHART_X_AXIS_LABELS).assertCountEquals(0)
             onNodeWithTag(TestTags.LINE_CHART_Y_AXIS_LABELS).assertIsDisplayed()
         }
@@ -52,11 +42,6 @@ class LineChartTest {
     fun lineChart_withTimelineRenderMode_displaysChart() =
         runComposeUiTest {
             // Arrange
-            val expectedTitle =
-                dataSet.series
-                    .first()
-                    .name
-                    .orEmpty()
             val expectedLegendCurrentValue = "$TITLE - 40.0"
 
             // Act
@@ -69,9 +54,7 @@ class LineChartTest {
 
             // Assert
             onNodeWithTag(TestTags.LINE_CHART).assertIsDisplayed()
-            onNodeWithTag(TestTags.CHART_TITLE)
-                .assertTextEquals(expectedTitle)
-                .assertIsDisplayed()
+            onAllNodesWithTag(TestTags.CHART_TITLE).assertCountEquals(0)
             onAllNodesWithText(expectedLegendCurrentValue).assertCountEquals(0)
             onAllNodesWithTag(TestTags.LINE_CHART_X_AXIS_LABELS).assertCountEquals(0)
             onNodeWithTag(TestTags.LINE_CHART_Y_AXIS_LABELS).assertIsDisplayed()

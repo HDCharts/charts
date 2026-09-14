@@ -16,12 +16,25 @@ import io.github.dautovicharis.charts.internal.linechart.resolveLineXAxisLabels
 import io.github.dautovicharis.charts.internal.linechart.scaleValues
 import io.github.dautovicharis.charts.internal.linechart.shouldUseScrollableDensity
 import io.github.dautovicharis.charts.internal.linechart.sourceIndexForRenderIndex
+import io.github.dautovicharis.charts.internal.linechart.toTimelineDurationMillis
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 
 class LineChartHelpersTest {
+    @Test
+    fun toTimelineDurationMillis_boundsValuesToTweenRange() {
+        assertEquals(expected = 1, actual = (-1).milliseconds.toTimelineDurationMillis())
+        assertEquals(expected = Int.MAX_VALUE, actual = Duration.INFINITE.toTimelineDurationMillis())
+        assertEquals(
+            expected = Int.MAX_VALUE,
+            actual = (Int.MAX_VALUE.toLong() + 1L).milliseconds.toTimelineDurationMillis(),
+        )
+    }
+
     @Test
     fun shouldUseScrollableDensity_resolvesFromThreshold() {
         assertEquals(expected = false, actual = shouldUseScrollableDensity(pointsCount = 49))

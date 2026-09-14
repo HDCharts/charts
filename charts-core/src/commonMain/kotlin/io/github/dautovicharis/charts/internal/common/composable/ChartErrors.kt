@@ -15,7 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import io.github.dautovicharis.charts.internal.TestTags
-import io.github.dautovicharis.charts.internal.common.theme.ChartsDefaultTheme
 import io.github.dautovicharis.charts.style.ChartContainerStyle
 import kotlinx.collections.immutable.ImmutableList
 
@@ -25,24 +24,22 @@ fun ChartErrors(
     errors: ImmutableList<String>,
     modifier: Modifier = Modifier,
 ) {
-    ChartsDefaultTheme(content = {
-        Box(modifier = modifier.then(style.modifierMain)) {
-            Column(modifier = Modifier.padding(15.dp).testTag(TestTags.CHART_ERROR)) {
-                errors.forEach { error ->
-                    Text(
-                        modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .background(
-                                    color = MaterialTheme.colorScheme.errorContainer,
-                                    shape = RoundedCornerShape(5.dp),
-                                ).padding(5.dp),
-                        text = "$error\n",
-                        color = MaterialTheme.colorScheme.onErrorContainer,
-                    )
-                    Spacer(modifier = Modifier.height(5.dp))
-                }
+    Box(modifier = modifier.then(style.modifierMain)) {
+        Column(modifier = Modifier.padding(style.innerPadding).testTag(TestTags.CHART_ERROR)) {
+            errors.forEach { error ->
+                Text(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .background(
+                                color = MaterialTheme.colorScheme.errorContainer,
+                                shape = RoundedCornerShape(5.dp),
+                            ).padding(5.dp),
+                    text = "$error\n",
+                    color = MaterialTheme.colorScheme.onErrorContainer,
+                )
+                Spacer(modifier = Modifier.height(5.dp))
             }
         }
-    })
+    }
 }

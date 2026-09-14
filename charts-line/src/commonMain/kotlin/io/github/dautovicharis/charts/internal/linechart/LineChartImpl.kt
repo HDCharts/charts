@@ -24,6 +24,7 @@ import io.github.dautovicharis.charts.internal.linechart.LineChartInternalStyle
 import io.github.dautovicharis.charts.internal.validateLineData
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlin.time.Duration
 
 private const val LINE_ZOOM_MIN = 1f
 private const val LINE_ZOOM_MAX = 4f
@@ -37,7 +38,7 @@ internal fun LineChartImpl(
     interactionEnabled: Boolean = true,
     animateOnStart: Boolean = true,
     renderMode: LineChartRenderMode = LineChartRenderMode.Morph,
-    animationDurationMillis: Int = 420,
+    animationDuration: Duration,
     selectedPointIndex: Int = NO_SELECTION,
     onValueChanged: (Int) -> Unit = {},
     valueFormatter: io.github.dautovicharis.charts.model.ChartValueFormatter,
@@ -166,7 +167,7 @@ internal fun LineChartImpl(
                 interactionEnabled = interactionEnabled,
                 animateOnStart = animateOnStart,
                 renderMode = renderMode,
-                animationDurationMillis = animationDurationMillis,
+                animationDuration = animationDuration,
                 isDenseMorphMode = isDenseMorphMode,
                 scrollState = scrollState,
                 zoomScale = zoomScale,
