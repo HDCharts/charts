@@ -53,7 +53,7 @@ kotlin {
 
     sourceSets {
         all {
-            languageSettings.optIn("io.github.dautovicharis.charts.internal.InternalChartsApi")
+            languageSettings.optIn("io.github.hdcharts.charts.internal.InternalChartsApi")
         }
 
         commonMain.dependencies {

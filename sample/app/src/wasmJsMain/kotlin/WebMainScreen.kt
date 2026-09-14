@@ -2,34 +2,34 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.unit.dp
-import chartsproject.app.generated.resources.dark_mode_off
-import chartsproject.app.generated.resources.dark_mode_on
-import chartsproject.app.generated.resources.dark_mode_system
-import chartsproject.app.generated.resources.drawer_dark_mode_subtitle
-import chartsproject.app.generated.resources.drawer_dynamic_colors_disable_hint
-import chartsproject.app.generated.resources.drawer_dynamic_colors_subtitle
-import chartsproject.app.generated.resources.drawer_github_subtitle
-import chartsproject.app.generated.resources.drawer_header_subtitle
-import chartsproject.app.generated.resources.drawer_header_title
-import chartsproject.app.generated.resources.drawer_section_appearance
-import chartsproject.app.generated.resources.drawer_section_links
-import chartsproject.app.generated.resources.drawer_section_themes
-import chartsproject.app.generated.resources.drawer_title_dark_mode
-import chartsproject.app.generated.resources.drawer_title_dynamic_colors
-import chartsproject.app.generated.resources.drawer_title_github
-import chartsproject.app.generated.resources.github_url
-import chartsproject.sample_shared.generated.resources.ic_github
-import dev.hdcode.charts.app.ChartDestination
-import dev.hdcode.charts.app.LocalChartGalleryColumns
-import dev.hdcode.charts.app.MainScreen
-import dev.hdcode.charts.app.ui.composable.LocalChartDemoMaxWidth
-import dev.hdcode.charts.sampleshared.startup.ChartsStartupGate
-import dev.hdcode.charts.sampleshared.startup.StartupResources
-import dev.hdcode.charts.sampleshared.startup.rememberStartupResourcesReady
-import dev.hdcode.charts.sampleshared.theme.AppTheme
-import dev.hdcode.charts.sampleshared.theme.docsSlate
-import chartsproject.app.generated.resources.Res as AppRes
-import chartsproject.sample_shared.generated.resources.Res as SharedRes
+import hdcharts.app.generated.resources.dark_mode_off
+import hdcharts.app.generated.resources.dark_mode_on
+import hdcharts.app.generated.resources.dark_mode_system
+import hdcharts.app.generated.resources.drawer_dark_mode_subtitle
+import hdcharts.app.generated.resources.drawer_dynamic_colors_disable_hint
+import hdcharts.app.generated.resources.drawer_dynamic_colors_subtitle
+import hdcharts.app.generated.resources.drawer_github_subtitle
+import hdcharts.app.generated.resources.drawer_header_subtitle
+import hdcharts.app.generated.resources.drawer_header_title
+import hdcharts.app.generated.resources.drawer_section_appearance
+import hdcharts.app.generated.resources.drawer_section_links
+import hdcharts.app.generated.resources.drawer_section_themes
+import hdcharts.app.generated.resources.drawer_title_dark_mode
+import hdcharts.app.generated.resources.drawer_title_dynamic_colors
+import hdcharts.app.generated.resources.drawer_title_github
+import hdcharts.app.generated.resources.github_url
+import hdcharts.sample_shared.generated.resources.ic_github
+import io.github.hdcharts.app.ChartDestination
+import io.github.hdcharts.app.LocalChartGalleryColumns
+import io.github.hdcharts.app.MainScreen
+import io.github.hdcharts.app.ui.composable.LocalChartDemoMaxWidth
+import io.github.hdcharts.sampleshared.startup.ChartsStartupGate
+import io.github.hdcharts.sampleshared.startup.StartupResources
+import io.github.hdcharts.sampleshared.startup.rememberStartupResourcesReady
+import io.github.hdcharts.sampleshared.theme.AppTheme
+import io.github.hdcharts.sampleshared.theme.docsSlate
+import hdcharts.app.generated.resources.Res as AppRes
+import hdcharts.sample_shared.generated.resources.Res as SharedRes
 
 @Composable
 internal fun WebMainScreen() {

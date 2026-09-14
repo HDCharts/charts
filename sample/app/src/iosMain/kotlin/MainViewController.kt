@@ -1,5 +1,5 @@
 import androidx.compose.ui.window.ComposeUIViewController
-import dev.hdcode.charts.app.MainScreen
+import io.github.hdcharts.app.MainScreen
 
 @Suppress("FunctionName")
 fun MainViewController() =

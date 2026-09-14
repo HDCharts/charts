@@ -1,6 +1,6 @@
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.window.ComposeViewport
-import dev.hdcode.charts.app.di.initKoin
+import io.github.hdcharts.app.di.initKoin
 
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {

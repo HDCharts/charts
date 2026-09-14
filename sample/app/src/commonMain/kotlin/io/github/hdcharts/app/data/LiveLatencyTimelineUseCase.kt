@@ -1,0 +1,38 @@
+package io.github.hdcharts.app.data
+
+import io.github.hdcharts.charts.model.ChartData
+
+data class LiveLatencySingleSeriesWindow(
+    val values: List<Float>,
+    val labels: List<String>,
+    val endTick: Int,
+)
+
+data class LiveLatencyMultiSeriesWindow(
+    val p50Values: List<Float>,
+    val p95Values: List<Float>,
+    val labels: List<String>,
+    val endTick: Int,
+)
+
+interface LiveLatencyTimelineUseCase {
+    val multiSeriesKeys: List<String>
+
+    fun createSingleWindow(
+        windowSize: Int,
+        endTick: Int? = null,
+    ): LiveLatencySingleSeriesWindow
+
+    fun advanceSingleWindow(window: LiveLatencySingleSeriesWindow): LiveLatencySingleSeriesWindow
+
+    fun toSingleDataSet(window: LiveLatencySingleSeriesWindow): ChartData
+
+    fun createMultiWindow(
+        windowSize: Int,
+        endTick: Int? = null,
+    ): LiveLatencyMultiSeriesWindow
+
+    fun advanceMultiWindow(window: LiveLatencyMultiSeriesWindow): LiveLatencyMultiSeriesWindow
+
+    fun toMultiDataSet(window: LiveLatencyMultiSeriesWindow): ChartData
+}

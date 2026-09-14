@@ -1,0 +1,165 @@
+package io.github.hdcharts.charts.style
+
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import io.github.hdcharts.charts.internal.DONUT_MAX_PERCENTAGE
+import io.github.hdcharts.charts.internal.DONUT_MIN_PERCENTAGE
+import io.github.hdcharts.charts.internal.piechart.AdaptivePieSizeModifier
+
+/**
+ * The style for a Pie Chart, grouped into cohesive sub-styles.
+ *
+ * @property chartContainerStyle The shared container/layout presentation.
+ * @property donut The donut configuration of the chart.
+ * @property slices The slice configuration of the chart.
+ * @property border The border configuration of the chart.
+ * @property legend The legend configuration of the chart.
+ */
+@Stable
+class PieChartStyle(
+    internal val modifier: Modifier,
+    val chartContainerStyle: ChartContainerStyle,
+    val donut: PieChartDonutStyle,
+    val slices: PieChartSlicesStyle,
+    val border: PieChartBorderStyle,
+    val legend: LegendStyle,
+)
+
+/**
+ * Donut configuration for a [PieChartStyle].
+ *
+ * @property holePercentage The percentage of the chart that is a donut hole.
+ * Must be between [io.github.hdcharts.charts.internal.DONUT_MIN_PERCENTAGE]
+ * and [io.github.hdcharts.charts.internal.DONUT_MAX_PERCENTAGE].
+ */
+@Immutable
+data class PieChartDonutStyle(
+    val holePercentage: Float,
+)
+
+/**
+ * Slice configuration for a [PieChartStyle].
+ *
+ * @property alpha The alpha value applied to rendered pie slices.
+ * @property baseColor The base color used to generate shades for slices that do not
+ * specify their own color via [io.github.hdcharts.charts.model.PieSlice.color].
+ */
+@Immutable
+data class PieChartSlicesStyle(
+    val alpha: Float,
+    val baseColor: Color,
+)
+
+/**
+ * Border configuration for a [PieChartStyle].
+ *
+ * @property width The width of the border around the pie chart.
+ * @property color The color of the border around the pie chart.
+ */
+@Immutable
+data class PieChartBorderStyle(
+    val width: Dp,
+    val color: Color,
+)
+
+/**
+ * An object that provides default styles for a Pie Chart.
+ */
+object PieChartDefaults {
+    /**
+     * Returns a [PieChartStyle] with the provided parameters or their default values.
+     *
+     * @param chartContainerStyle The style to be applied to the chart view. Defaults to the default style of ChartContainerDefaults.
+     * @param donut The donut configuration. Defaults to a chart without a donut hole.
+     * @param slices The slice configuration. Defaults to theme-derived slice colors and alpha.
+     * @param border The border configuration. Defaults to a 1.dp border using the surface color.
+     * @param legend The legend configuration. Defaults to a visible legend.
+     */
+    @Composable
+    fun style(
+        chartContainerStyle: ChartContainerStyle = ChartContainerDefaults.style(),
+        donut: PieChartDonutStyle = donut(),
+        slices: PieChartSlicesStyle = slices(),
+        border: PieChartBorderStyle = border(),
+        legend: LegendStyle = legend(),
+    ): PieChartStyle {
+        val modifier: Modifier =
+            AdaptivePieSizeModifier
+                .padding(chartContainerStyle.innerPadding)
+                .fillMaxSize()
+        return PieChartStyle(
+            modifier = modifier,
+            chartContainerStyle = chartContainerStyle,
+            donut = donut,
+            slices = slices,
+            border = border,
+            legend = legend,
+        )
+    }
+
+    /**
+     * Returns a [PieChartDonutStyle] with the provided parameters or their default values.
+     *
+     * @param holePercentage The percentage of the chart that is a donut hole. Defaults to 0f.
+     */
+    @Composable
+    fun donut(holePercentage: Float = 0f): PieChartDonutStyle =
+        PieChartDonutStyle(
+            holePercentage =
+                holePercentage.coerceIn(
+                    DONUT_MIN_PERCENTAGE,
+                    DONUT_MAX_PERCENTAGE,
+                ),
+        )
+
+    /**
+     * Returns a [PieChartSlicesStyle] with the provided parameters or their default values.
+     *
+     * @param baseColor The base color used to generate shades for slices that do not specify
+     * their own color via [io.github.hdcharts.charts.model.PieSlice.color]. Defaults to
+     * the primary color of the MaterialTheme.
+     * @param alpha The alpha value applied to rendered pie slices. Defaults to 0.4f in light
+     * theme and 0.6f in dark theme.
+     */
+    @Composable
+    fun slices(
+        baseColor: Color = MaterialTheme.colorScheme.primary,
+        alpha: Float = defaultChartAlpha(),
+    ): PieChartSlicesStyle =
+        PieChartSlicesStyle(
+            alpha = alpha.coerceIn(0f, 1f),
+            baseColor = baseColor,
+        )
+
+    /**
+     * Returns a [PieChartBorderStyle] with the provided parameters or their default values.
+     *
+     * @param color The color of the border around the pie chart. Defaults to the surface color of the MaterialTheme.
+     * @param width The width of the border around the pie chart. Defaults to 1.dp.
+     */
+    @Composable
+    fun border(
+        color: Color = MaterialTheme.colorScheme.surface,
+        width: Dp = 1.dp,
+    ): PieChartBorderStyle =
+        PieChartBorderStyle(
+            width = width,
+            color = color,
+        )
+
+    /**
+     * Returns a [LegendStyle] with the provided parameters or their default values.
+     *
+     * @param visible Whether the legend is visible. Defaults to true.
+     */
+    @Composable
+    fun legend(visible: Boolean = true): LegendStyle = LegendDefaults.style(visible = visible)
+}
