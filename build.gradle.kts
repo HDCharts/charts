@@ -110,13 +110,14 @@ subprojects {
     }
 
     // Compose Multiplatform 1.11.x ships a `ui-uikit` prebuilt Kotlin/Native
-    // cache that hard-references UIViewLayoutRegion (an iOS 17 UIKit symbol).
-    // On the hosted macos-15 cache (Xcode 16 / iOS 18 SDK) the linker only
-    // resolves this symbol when the test binary's iOS deployment target is
-    // >= 17.0; otherwise the KGP auto-disables the native cache and
-    // linkDebugTestIosSimulatorArm64 falls back to a slow uncached link for
-    // every chart module. Bump the test-only minimum (the published library
-    // keeps Kotlin's default 15.0) so the cache stays enabled.
+    // cache that hard-references _OBJC_CLASS_$_UIViewLayoutRegion and auto-links
+    // the private UIUtilities framework. The hosted macos-15 cache (Xcode 16 /
+    // iOS 18 SDK) only resolves this symbol through UIUtilities when the test
+    // binary's iOS deployment target is >= 18.0; at 17.0 ld fails with
+    // "Undefined symbols: _OBJC_CLASS_$_UIViewLayoutRegion" and warns
+    // "Could not find or use auto-linked framework 'UIUtilities'". Bump the
+    // test-only minimum (the published library keeps Kotlin's default 15.0) so
+    // the cache stays enabled.
     plugins.withId("org.jetbrains.kotlin.multiplatform") {
         if (path !in ChartsModules.library) return@withId
 
@@ -125,7 +126,8 @@ subprojects {
                 if (name != "iosSimulatorArm64") return@configureEach
 
                 binaries.withType<TestExecutable>().configureEach {
-                    freeCompilerArgs += "-Xoverride-konan-properties=minVersion.ios=17.0"
+                    freeCompilerArgs += "-Xoverride-konan-properties=minVersion.ios=18.0"
+                    linkerOpts += "-mios-simulator-version-min=18.0"
                 }
             }
         }
