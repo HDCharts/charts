@@ -1,7 +1,4 @@
 import org.gradle.api.Task
-import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
-import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
-import org.jetbrains.kotlin.gradle.plugin.mpp.TestExecutable
 import org.jetbrains.kotlin.gradle.targets.js.testing.karma.KotlinKarma
 
 plugins {
@@ -105,29 +102,6 @@ subprojects {
         tasks.configureEach {
             if (isGradleSignTask()) {
                 dependsOn(verifySigningKey)
-            }
-        }
-    }
-
-    // Compose Multiplatform 1.11.x ships a `ui-uikit` prebuilt Kotlin/Native
-    // cache that hard-references _OBJC_CLASS_$_UIViewLayoutRegion and auto-links
-    // the private UIUtilities framework. The hosted macos-15 cache (Xcode 16 /
-    // iOS 18 SDK) only resolves this symbol through UIUtilities when the test
-    // binary's iOS deployment target is >= 18.0; at 17.0 ld fails with
-    // "Undefined symbols: _OBJC_CLASS_$_UIViewLayoutRegion" and warns
-    // "Could not find or use auto-linked framework 'UIUtilities'". Bump the
-    // test-only minimum (the published library keeps Kotlin's default 15.0) so
-    // the cache stays enabled.
-    plugins.withId("org.jetbrains.kotlin.multiplatform") {
-        if (path !in ChartsModules.library) return@withId
-
-        extensions.configure<KotlinMultiplatformExtension>("kotlin") {
-            targets.withType<KotlinNativeTarget>().configureEach {
-                if (name != "iosSimulatorArm64") return@configureEach
-
-                binaries.withType<TestExecutable>().configureEach {
-                    freeCompilerArgs += "-Xoverride-konan-properties=minVersion.ios=18.0"
-                }
             }
         }
     }
