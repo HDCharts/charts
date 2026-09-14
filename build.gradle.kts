@@ -127,7 +127,6 @@ subprojects {
 
                 binaries.withType<TestExecutable>().configureEach {
                     freeCompilerArgs += "-Xoverride-konan-properties=minVersion.ios=18.0"
-                    linkerOpts += "-mios-simulator-version-min=18.0"
                 }
             }
         }
