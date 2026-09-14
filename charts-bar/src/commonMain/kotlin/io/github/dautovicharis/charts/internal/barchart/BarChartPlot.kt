@@ -2,11 +2,7 @@ package io.github.dautovicharis.charts.internal.barchart
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import io.github.dautovicharis.charts.internal.InternalChartsApi
@@ -15,6 +11,7 @@ import io.github.dautovicharis.charts.internal.common.composable.Chart
 import io.github.dautovicharis.charts.model.ChartData
 import io.github.dautovicharis.charts.model.ChartSelection
 import io.github.dautovicharis.charts.model.ChartValueFormatter
+import io.github.dautovicharis.charts.model.rememberSelectionLifecycle
 import io.github.dautovicharis.charts.style.BarChartStyle
 import io.github.dautovicharis.charts.internal.common.model.ChartData as InternalChartData
 
@@ -63,25 +60,27 @@ fun BarChartInternalPlot(
     }
 }
 
-/** Keep the selection lifecycle alive across validation-error and valid plot states. */
+/**
+ * Validates the [ChartSelection] index against [data] and drives the lifecycle
+ * (clear on data identity change or out-of-bounds index) via
+ * [rememberSelectionLifecycle]. Returns the validated index, or
+ * [NO_SELECTION] if none is valid.
+ */
 @InternalChartsApi
 @Composable
 fun rememberBarSelection(
     data: ChartData,
     selection: ChartSelection,
 ): Int {
-    var previousData by remember(selection) { mutableStateOf(data) }
     val count =
         data.series
             .singleOrNull()
             ?.values
             ?.size ?: 0
-    val selectedIndex = selection.selectedIndex?.takeIf { previousData == data && it in 0 until count }
-    LaunchedEffect(data, selection, selection.selectedIndex) {
-        if (previousData != data || selection.selectedIndex?.let { it !in 0 until count } == true) {
-            previousData = data
-            selection.clear()
-        }
-    }
-    return selectedIndex ?: NO_SELECTION
+    rememberSelectionLifecycle(
+        selection = selection,
+        data = data,
+        itemCount = count,
+    )
+    return selection.selectedIndex?.takeIf { it in 0 until count } ?: NO_SELECTION
 }

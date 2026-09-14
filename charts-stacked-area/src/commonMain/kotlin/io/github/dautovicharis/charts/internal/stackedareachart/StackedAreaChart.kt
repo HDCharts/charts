@@ -138,7 +138,9 @@ internal fun StackedAreaChart(
         remember(forcedSelectedSourceIndex) {
             mutableIntStateOf(forcedSelectedSourceIndex)
         }
-    val hasForcedSelection = forcedSelectedSourceIndex != NO_SELECTION
+    LaunchedEffect(selectedPointIndex) {
+        selectedSourceIndexFromInteraction = selectedPointIndex
+    }
     val isScrollable = isDenseData && denseExpanded
     val scrollState = rememberScrollState()
     var zoomScale by
@@ -191,22 +193,6 @@ internal fun StackedAreaChart(
             }
         }
         hasInitialized.value = true
-    }
-
-    LaunchedEffect(sourcePointsCount) {
-        if (hasForcedSelection) return@LaunchedEffect
-        if (selectedSourceIndexFromInteraction !in 0 until sourcePointsCount) {
-            selectedSourceIndexFromInteraction = NO_SELECTION
-            onValueChanged(NO_SELECTION)
-        }
-    }
-
-    LaunchedEffect(renderData) {
-        if (hasForcedSelection) return@LaunchedEffect
-        if (selectedSourceIndexFromInteraction != NO_SELECTION) {
-            selectedSourceIndexFromInteraction = NO_SELECTION
-            onValueChanged(NO_SELECTION)
-        }
     }
 
     val effectiveSelectedSourceIndex =

@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import io.github.dautovicharis.charts.internal.InternalChartsApi
 
 /**
  * Hoisted selection state for charts that support selecting a single data point
@@ -33,6 +34,15 @@ class ChartSelection constructor(
         private set
 
     /**
+     * Monotonic counter bumped on every [select], [clear], and [renew] call,
+     * including no-ops. Lifecycle helpers observe this counter to react to
+     * taps that do not change the selected index (e.g. renewing an
+     * auto-deselect timer without changing which point is selected).
+     */
+    internal var version: Int by mutableStateOf(0)
+        private set
+
+    /**
      * Optional callback invoked after the selection changes. Initialization, repeated
      * selection of the same index, and clearing an already empty selection do not notify.
      */
@@ -45,6 +55,7 @@ class ChartSelection constructor(
         if (selectedIndex == index) return
         selectedIndex = index
         onSelectionChanged?.invoke(index)
+        version++
     }
 
     /**
@@ -54,6 +65,17 @@ class ChartSelection constructor(
         if (selectedIndex == null) return
         selectedIndex = null
         onSelectionChanged?.invoke(null)
+        version++
+    }
+
+    /**
+     * Signals a lifecycle "touch" without changing the selected index. Use to renew
+     * timers (e.g. an auto-deselect countdown) when a user re-taps the same point.
+     * Does not invoke [onSelectionChanged].
+     */
+    @InternalChartsApi
+    fun renew() {
+        version++
     }
 }
 

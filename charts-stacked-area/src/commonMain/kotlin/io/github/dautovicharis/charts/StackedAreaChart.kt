@@ -3,8 +3,6 @@ package io.github.dautovicharis.charts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import io.github.dautovicharis.charts.internal.NO_SELECTION
@@ -20,6 +18,7 @@ import io.github.dautovicharis.charts.model.ChartData
 import io.github.dautovicharis.charts.model.ChartSelection
 import io.github.dautovicharis.charts.model.ChartValueFormatters
 import io.github.dautovicharis.charts.model.rememberChartSelection
+import io.github.dautovicharis.charts.model.rememberSelectionLifecycle
 import io.github.dautovicharis.charts.style.StackedAreaChartDefaults
 import io.github.dautovicharis.charts.style.StackedAreaChartStyle
 import kotlinx.collections.immutable.persistentListOf
@@ -44,12 +43,11 @@ fun StackedAreaChart(
             ?.values
             ?.size ?: 0
     val selectedIndex = selection.selectedIndex?.takeIf { it in 0 until pointCount } ?: NO_SELECTION
-    val previousData = remember(selection) { mutableStateOf<ChartData?>(null) }
-    LaunchedEffect(data) {
-        val oldData = previousData.value
-        if (oldData != null && oldData != data) selection.clear()
-        previousData.value = data
-    }
+    rememberSelectionLifecycle(
+        selection = selection,
+        data = data,
+        itemCount = pointCount,
+    )
 
     if (errors.isNotEmpty()) {
         ChartErrors(style.chartContainerStyle, errors.toImmutableList(), modifier)
