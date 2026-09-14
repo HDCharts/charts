@@ -278,6 +278,47 @@ class PieChartTest {
 
     @OptIn(ExperimentalTestApi::class)
     @Test
+    fun pieChart_externalSelection_doesNotAutoDeselect() =
+        runComposeUiTest {
+            val selection = ChartSelection()
+            setContent {
+                PieChart(pieSlices, title = TITLE, selection = selection)
+            }
+
+            mainClock.autoAdvance = false
+            runOnIdle { selection.select(1) }
+            mainClock.advanceTimeBy(
+                PIE_SELECTION_AUTO_DESELECT_TIMEOUT_MS + 500L,
+                ignoreFrameDuration = true,
+            )
+            runOnIdle {
+                assertEquals(expected = 1, actual = selection.selectedIndex)
+            }
+            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(labels[1])
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun pieChart_invalidReplacementData_clearsSelection() =
+        runComposeUiTest {
+            val selection = ChartSelection(initialIndex = 2)
+            var data by mutableStateOf(pieSlices)
+            setContent {
+                PieChart(data, title = TITLE, selection = selection)
+            }
+
+            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(labels[2])
+            runOnIdle {
+                data = listOf(PieSlice(label = "Only", value = 1.0))
+            }
+            onNodeWithTag(TestTags.CHART_ERROR).assertIsDisplayed()
+            runOnIdle {
+                assertNull(actual = selection.selectedIndex)
+            }
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
     fun pieChart_repeatedTap_renewsTimeoutWithoutDuplicateNotification() =
         runComposeUiTest {
             val notifications = mutableListOf<Int?>()

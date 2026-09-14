@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,13 +27,14 @@ import io.github.dautovicharis.charts.internal.piechart.calculatePercentages
 import io.github.dautovicharis.charts.internal.validatePieData
 import io.github.dautovicharis.charts.model.ChartSelection
 import io.github.dautovicharis.charts.model.PieSlice
+import io.github.dautovicharis.charts.model.SelectionLifetime
 import io.github.dautovicharis.charts.model.rememberChartSelection
+import io.github.dautovicharis.charts.model.rememberSelectionLifecycle
 import io.github.dautovicharis.charts.style.PieChartDefaults
 import io.github.dautovicharis.charts.style.PieChartStyle
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.coroutines.delay
 
 private const val SELECTED_TITLE_PERCENTAGE_SIZE_FACTOR = 0.72f
 internal const val PIE_SELECTION_AUTO_DESELECT_TIMEOUT_MS = 3000L
@@ -70,6 +70,20 @@ fun PieChart(
     interactionEnabled: Boolean = true,
     animateOnStart: Boolean = true,
 ) {
+    var interactionNonce by remember(data, selection) { mutableStateOf<Long?>(null) }
+    rememberSelectionLifecycle(
+        selection = selection,
+        data = data,
+        itemCount = data.size,
+        lifetime =
+            if (interactionEnabled) {
+                SelectionLifetime.AutoDeselect(PIE_SELECTION_AUTO_DESELECT_TIMEOUT_MS)
+            } else {
+                SelectionLifetime.Persistent
+            },
+        autoDeselectTrigger = interactionNonce,
+    )
+
     val validationErrors =
         remember(data) {
             validatePieData(data)
@@ -105,6 +119,9 @@ fun PieChart(
         selection = selection,
         interactionEnabled = interactionEnabled,
         animateOnStart = animateOnStart,
+        onSelectionInteraction = {
+            interactionNonce = (interactionNonce ?: 0L) + 1L
+        },
     )
 }
 
@@ -119,6 +136,7 @@ private fun PieChartContent(
     selection: ChartSelection,
     interactionEnabled: Boolean,
     animateOnStart: Boolean,
+    onSelectionInteraction: () -> Unit,
 ) {
     val piePercentages =
         remember(points) {
@@ -127,17 +145,6 @@ private fun PieChartContent(
     val forcedSelectedIndex =
         selection.selectedIndex?.takeIf { it in points.indices } ?: NO_SELECTION
     val hasSelection = forcedSelectedIndex != NO_SELECTION
-    var interactionSelection by remember(points, selection) { mutableStateOf<Int?>(null) }
-    var interactionNonce by remember(points, selection) { mutableStateOf(0L) }
-
-    LaunchedEffect(points, selection, interactionNonce) {
-        val pending = interactionSelection ?: return@LaunchedEffect
-        delay(PIE_SELECTION_AUTO_DESELECT_TIMEOUT_MS)
-        if (selection.selectedIndex == pending) {
-            selection.clear()
-        }
-        interactionSelection = null
-    }
 
     Chart(
         chartContainerStyle = style.chartContainerStyle,
@@ -192,11 +199,9 @@ private fun PieChartContent(
         ) { index ->
             if (index != NO_SELECTION) {
                 selection.select(index)
-                interactionSelection = index
-                interactionNonce++
+                onSelectionInteraction()
             } else {
                 selection.clear()
-                interactionSelection = null
             }
         }
 

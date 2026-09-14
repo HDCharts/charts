@@ -152,7 +152,9 @@ internal fun StackedBarChart(
             remember(forcedSelectedSourceIndex) {
                 mutableIntStateOf(forcedSelectedSourceIndex)
             }
-        val hasForcedSelection = forcedSelectedSourceIndex != NO_SELECTION
+        LaunchedEffect(selectedBarIndex) {
+            selectedSourceIndexFromInteraction = selectedBarIndex
+        }
 
         val isScrollable = isDenseData && denseExpanded
         val scrollState = rememberScrollState()
@@ -186,22 +188,6 @@ internal fun StackedBarChart(
                 }
             }
             hasInitialized.value = true
-        }
-
-        LaunchedEffect(sourceDataSize) {
-            if (hasForcedSelection) return@LaunchedEffect
-            if (selectedSourceIndexFromInteraction !in 0 until sourceDataSize) {
-                selectedSourceIndexFromInteraction = NO_SELECTION
-                onValueChanged(NO_SELECTION)
-            }
-        }
-
-        LaunchedEffect(renderData) {
-            if (hasForcedSelection) return@LaunchedEffect
-            if (selectedSourceIndexFromInteraction != NO_SELECTION) {
-                selectedSourceIndexFromInteraction = NO_SELECTION
-                onValueChanged(NO_SELECTION)
-            }
         }
 
         val effectiveSelectedSourceIndex =

@@ -136,6 +136,29 @@ class ChartSelectionTest {
         assertNull(selection.selectedIndex)
     }
 
+    @Test
+    fun renew_doesNotChangeIndexOrNotify() {
+        val notifications = mutableListOf<Int?>()
+        val selection = ChartSelection { notifications.add(it) }
+        selection.select(1)
+
+        selection.renew()
+
+        assertEquals(expected = 1, actual = selection.selectedIndex)
+        assertEquals(expected = listOf<Int?>(1), actual = notifications)
+    }
+
+    @Test
+    fun renew_whenEmpty_doesNotChangeIndexOrNotify() {
+        val notifications = mutableListOf<Int?>()
+        val selection = ChartSelection { notifications.add(it) }
+
+        selection.renew()
+
+        assertNull(selection.selectedIndex)
+        assertEquals(expected = emptyList(), actual = notifications)
+    }
+
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun rememberedSelection_keepsIdentityAndUsesLatestCallback() =

@@ -2,8 +2,6 @@ package io.github.dautovicharis.charts
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -23,6 +21,7 @@ import io.github.dautovicharis.charts.model.ChartData
 import io.github.dautovicharis.charts.model.ChartSelection
 import io.github.dautovicharis.charts.model.ChartValueFormatters
 import io.github.dautovicharis.charts.model.rememberChartSelection
+import io.github.dautovicharis.charts.model.rememberSelectionLifecycle
 import io.github.dautovicharis.charts.style.RadarChartDefaults
 import io.github.dautovicharis.charts.style.RadarChartStyle
 import kotlinx.collections.immutable.ImmutableList
@@ -47,12 +46,11 @@ fun RadarChart(
             ?.values
             ?.size ?: 0
     val selectedIndex = selection.selectedIndex?.takeIf { it in 0 until axisCount } ?: NO_SELECTION
-    val previousData = remember(selection) { mutableStateOf<ChartData?>(null) }
-    LaunchedEffect(data) {
-        val oldData = previousData.value
-        if (oldData != null && oldData != data) selection.clear()
-        previousData.value = data
-    }
+    rememberSelectionLifecycle(
+        selection = selection,
+        data = data,
+        itemCount = axisCount,
+    )
 
     val internalData = remember(data, title) { toInternalRadarData(data, title) }
     val internalStyle = style.toInternal()
