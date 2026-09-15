@@ -7,17 +7,12 @@ compatibility use separate concurrency groups. Each workflow uses the immutable
 
 ## Labels
 
-- `breaking-change` marks an intentional public API incompatibility. The API
-  compatibility job fetches current labels from the GitHub API on every attempt,
-  including failed-job reruns. Adding or removing it does not trigger a separate
-  API run.
 - `run-gif-validation` opts a pull request into GIF baseline validation. The
   validation runs for normal pull-request events while this label is present.
   Adding or removing the label does not trigger a separate validation run. It
   is informational and is not a required status check.
 
-After changing `breaking-change`, rerun the failed API jobs or all jobs. After
-changing `run-gif-validation`, use **Re-run all jobs** in the GIF workflow so its
+After changing `run-gif-validation`, use **Re-run all jobs** in the GIF workflow so its
 label-check job fetches the current labels before deciding whether to validate.
 Failed-job-only reruns reuse the output of a previously successful label check.
 
@@ -61,7 +56,7 @@ cancel validation.
 | `Lint` | Runs Kotlin and build-logic lint when the PR contains code/build changes. |
 | `Test` | Runs `ciTestJvm`, `ciTestAndroid`, `ciTestWeb`, and `ciTestIos` when needed; uploads Gradle's native HTML and XML reports. |
 | `PR API Compatibility` | Runs the API compatibility check for every normal pull-request event and reports the required result. |
-| `API compatibility` | Runs `./gradlew apiCompatibilityCheck`; a detected public API incompatibility requires the `breaking-change` label. |
+| `API compatibility` | Runs `./gradlew apiCompatibilityCheck`; a detected public API incompatibility fails the PR with a workflow-run annotation that instructs the developer to run `./gradlew apiCompatibilityUpdateBaseline` and commit the updated baseline in the same PR. |
 | `GIF validation` | Runs the opt-in GIF baseline workflow while the `run-gif-validation` label is present. |
 
 Gradle's `chartsTest*` tasks are platform-specific commands for local use. The
@@ -73,7 +68,7 @@ The core reusable workflows receive `source-sha` from `Prepare PR`. API and
 GIF validation receive the triggering event's `github.sha`, so each check uses
 the immutable merge result for that event. Core checks retain their
 code-change optimization; API compatibility always runs for normal
-pull-request events and uses the `breaking-change` label only as policy input.
+pull-request events and detects breaking changes directly without using labels.
 
 ## Merge protection
 
@@ -137,6 +132,8 @@ requested.
   `protect main` ruleset. Reusable workflows can expose check names differently
   after the first rollout, so use the exact names shown on the PR checks page.
 - **Tests fail:** inspect the relevant `PR Test` job logs (JVM, Android, Wasm, or iOS) and download its test-report artifact for Gradle's HTML and XML reports.
-- **API compatibility fails:** add the `breaking-change` label only when a
-  detected public API incompatibility is intentional; unrelated Gradle or
-  compatibility errors are not bypassed by this label.
+- **API compatibility fails:** when a detected public API incompatibility is
+  intentional, run `./gradlew apiCompatibilityUpdateBaseline` locally, commit
+  the updated `API-COMPATIBILITY-BASELINE.txt` in the same pull
+  request, and push. Unrelated Gradle or compatibility errors are not bypassed
+  by updating the baseline.

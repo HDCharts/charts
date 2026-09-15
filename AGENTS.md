@@ -36,6 +36,12 @@ Read the relevant documentation before substantial changes:
   questionnaire. Loading `hdc-pr` does not grant permission to act.
 - **Never use history-rewriting commands.** Do not force-push, amend commits,
   rebase published history, or use an equivalent destructive operation.
+- **Never touch the git index on your own.** Do not run `git add`, `git rm`,
+  `git restore --staged`, `git reset`, or any command that modifies the staged
+  set without an explicit user instruction. The user reviews and approves what
+  is staged; silently staging follow-up edits hides new changes from their
+  review. If you think a follow-up edit should be staged, ask first using the
+  `question` tool and list the exact files you intend to stage.
 - **Keep release skills user-invoked.** Invoke `hdc-changeset` or `hdc-rc` only
   when the user directly requests release-note or API-compatibility work. Other
   skills must not load or invoke them implicitly.
@@ -60,6 +66,9 @@ Read the relevant documentation before substantial changes:
 Before each of these actions, use the `question` tool with the proposed command
 and wait for an explicit yes:
 
+- **Stage or unstage files**: `git add <paths>`, `git add -p`, `git rm <paths>`,
+  `git restore --staged <paths>`, `git reset <paths>`. List the exact paths you
+  intend to stage or unstage so the user can approve precisely.
 - **Create branch**: `git checkout -b <branch> from <base>`.
 - **Commit**: show the staged diff summary and proposed commit subject.
 - **Push**: show the branch name and remote.

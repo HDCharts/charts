@@ -15,7 +15,7 @@ is_ignored_path() {
     docs/*|.agents/*|.kilo/*|.claude/*|.gitignore|*.md)
       return 0
       ;;
-    gif-baselines/*|scripts/*|.github/api-compatibility-baseline.txt|.github/CODEOWNERS|.github/FUNDING.yml|.editorconfig|LICENSE|LICENSE.*|readme-assets/*)
+    gif-baselines/*|scripts/*|API-COMPATIBILITY-BASELINE.txt|.github/CODEOWNERS|.github/FUNDING.yml|.editorconfig|LICENSE|LICENSE.*|readme-assets/*)
       if [[ "$profile" == "core" ]]; then
         return 0
       fi
@@ -122,7 +122,7 @@ run_self_test() {
     failures=$((failures + 1))
   fi
 
-  result="$(is_code_change $'README.md\n.github/api-compatibility-baseline.txt')"
+  result="$(is_code_change $'README.md\nAPI-COMPATIBILITY-BASELINE.txt')"
   if ! assert_equal "false" "$result" "api compatibility baseline change"; then
     failures=$((failures + 1))
   fi
