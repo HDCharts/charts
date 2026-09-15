@@ -29,12 +29,9 @@ import hdcharts.app.generated.resources.bar_data_points
 import hdcharts.app.generated.resources.bar_data_points_range
 import hdcharts.app.generated.resources.cd_pause_live_updates
 import hdcharts.app.generated.resources.cd_play_live_updates
-import io.github.hdcharts.app.ui.composable.ChartAspectRatioPreset
-import io.github.hdcharts.app.ui.composable.ChartAspectRatioToggle
 import io.github.hdcharts.app.ui.composable.ChartDemo
 import io.github.hdcharts.app.ui.composable.ChartPreset
 import io.github.hdcharts.app.ui.composable.ChartPresetToggle
-import io.github.hdcharts.app.ui.composable.toChartModifier
 import io.github.hdcharts.charts.BarChart
 import io.github.hdcharts.charts.style.BarChartDefaults
 import io.github.hdcharts.charts.style.ChartContainerDefaults
@@ -49,8 +46,6 @@ fun BarChartDemo(viewModel: BarChartViewModel = koinViewModel()) {
     val isPlaying by viewModel.isPlaying.collectAsStateWithLifecycle()
     val controlsState by viewModel.controlsState.collectAsStateWithLifecycle()
     var preset by remember { mutableStateOf(ChartPreset.Default) }
-    var aspectRatioPreset by remember { mutableStateOf(ChartAspectRatioPreset.Square) }
-    val chartModifier = aspectRatioPreset.toChartModifier()
     val chartContainerStyle = ChartContainerDefaults.style()
     val refresh: () -> Unit = viewModel::refresh
 
@@ -64,10 +59,6 @@ fun BarChartDemo(viewModel: BarChartViewModel = koinViewModel()) {
                 ChartPresetToggle(
                     selectedPreset = preset,
                     onPresetSelected = { preset = it },
-                )
-                ChartAspectRatioToggle(
-                    selectedPreset = aspectRatioPreset,
-                    onPresetSelected = { aspectRatioPreset = it },
                 )
             }
         },
@@ -95,12 +86,12 @@ fun BarChartDemo(viewModel: BarChartViewModel = koinViewModel()) {
             )
         },
     ) {
-        key(controlsState.points, controlsState.minValue, controlsState.maxValue, preset, aspectRatioPreset) {
+        key(controlsState.points, controlsState.minValue, controlsState.maxValue, preset) {
             when (preset) {
                 ChartPreset.Default -> {
                     BarChart(
                         data = dataSet,
-                        modifier = chartModifier,
+                        modifier = Modifier.fillMaxWidth(),
                         title = dataSet.series.single().name,
                         style = BarChartDefaults.style(chartContainerStyle = chartContainerStyle),
                     )
@@ -109,7 +100,7 @@ fun BarChartDemo(viewModel: BarChartViewModel = koinViewModel()) {
                 ChartPreset.Custom -> {
                     BarChart(
                         data = dataSet,
-                        modifier = chartModifier,
+                        modifier = Modifier.fillMaxWidth(),
                         title = dataSet.series.single().name,
                         style =
                             ChartTestStyleFixtures.barCustomStyle(

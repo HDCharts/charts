@@ -29,12 +29,9 @@ import hdcharts.app.generated.resources.cd_pause_live_updates
 import hdcharts.app.generated.resources.cd_play_live_updates
 import hdcharts.app.generated.resources.histogram_data_points
 import hdcharts.app.generated.resources.histogram_data_points_range
-import io.github.hdcharts.app.ui.composable.ChartAspectRatioPreset
-import io.github.hdcharts.app.ui.composable.ChartAspectRatioToggle
 import io.github.hdcharts.app.ui.composable.ChartDemo
 import io.github.hdcharts.app.ui.composable.ChartPreset
 import io.github.hdcharts.app.ui.composable.ChartPresetToggle
-import io.github.hdcharts.app.ui.composable.toChartModifier
 import io.github.hdcharts.charts.HistogramChart
 import io.github.hdcharts.charts.style.ChartContainerDefaults
 import io.github.hdcharts.charts.style.HistogramChartDefaults
@@ -49,8 +46,6 @@ fun HistogramChartDemo(viewModel: HistogramChartViewModel = koinViewModel()) {
     val isPlaying by viewModel.isPlaying.collectAsStateWithLifecycle()
     val controlsState by viewModel.controlsState.collectAsStateWithLifecycle()
     var preset by remember { mutableStateOf(ChartPreset.Default) }
-    var aspectRatioPreset by remember { mutableStateOf(ChartAspectRatioPreset.Square) }
-    val chartModifier = aspectRatioPreset.toChartModifier()
     val chartContainerStyle = ChartContainerDefaults.style()
     val refresh: () -> Unit = viewModel::refresh
 
@@ -64,10 +59,6 @@ fun HistogramChartDemo(viewModel: HistogramChartViewModel = koinViewModel()) {
                 ChartPresetToggle(
                     selectedPreset = preset,
                     onPresetSelected = { preset = it },
-                )
-                ChartAspectRatioToggle(
-                    selectedPreset = aspectRatioPreset,
-                    onPresetSelected = { aspectRatioPreset = it },
                 )
             }
         },
@@ -95,12 +86,12 @@ fun HistogramChartDemo(viewModel: HistogramChartViewModel = koinViewModel()) {
             )
         },
     ) {
-        key(controlsState.points, controlsState.minValue, controlsState.maxValue, preset, aspectRatioPreset) {
+        key(controlsState.points, controlsState.minValue, controlsState.maxValue, preset) {
             when (preset) {
                 ChartPreset.Default -> {
                     HistogramChart(
                         data = dataSet,
-                        modifier = chartModifier,
+                        modifier = Modifier.fillMaxWidth(),
                         title = dataSet.series.single().name,
                         style = HistogramChartDefaults.style(chartContainerStyle = chartContainerStyle),
                     )
@@ -109,7 +100,7 @@ fun HistogramChartDemo(viewModel: HistogramChartViewModel = koinViewModel()) {
                 ChartPreset.Custom -> {
                     HistogramChart(
                         data = dataSet,
-                        modifier = chartModifier,
+                        modifier = Modifier.fillMaxWidth(),
                         title = dataSet.series.single().name,
                         style =
                             ChartTestStyleFixtures.histogramCustomStyle(
