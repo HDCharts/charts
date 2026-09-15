@@ -15,16 +15,42 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  prepare:
+    name: Prepare PR
+    runs-on: ubuntu-latest
+    outputs:
+      source_sha: ${{ github.sha }}
+      should_run: ${{ steps.changes.outputs.should_run }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Detect code changes
+        id: changes
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          should_run="$(bash scripts/ci-has-code-changes.sh "$BASE_SHA" "$HEAD_SHA")"
+          echo "should_run=$should_run" >> "$GITHUB_OUTPUT"
+          bash .github/scripts/sync-gif-baselines.sh --self-test
+          bash .github/scripts/validate-snapshot-provenance.sh --self-test
+
   api-compatibility:
     name: Internal API Compatibility
+    needs: prepare
     uses: ./.github/workflows/api-compatibility.yml
     with:
-      source-sha: ${{ github.sha }}
+      source-sha: ${{ needs.prepare.outputs.source_sha }}
+      should-run: ${{ needs.prepare.outputs.should_run == 'true' }}
 
   api-result:
     name: PR API Compatibility
-    if: ${{ always() }}
-    needs: api-compatibility
+    needs:
+      - prepare
+      - api-compatibility
+    if: ${{ always() && needs.prepare.outputs.should_run == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Verify API compatibility
