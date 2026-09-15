@@ -262,7 +262,7 @@ jobs:
 
             const message = [
               `📚 [Documentation](https://charts.hdcode.dev/)`,
-              `📦 [Maven Central](https://central.sonatype.com/repository/maven-snapshots/io/github/dautovicharis/charts/maven-metadata.xml)`,
+              `📦 [Maven Central](https://central.sonatype.com/repository/maven-snapshots/io/github/hdcharts/charts/maven-metadata.xml)`,
             ].join('\n');
 
             await github.rest.repos.createCommitComment({

@@ -329,7 +329,7 @@ jobs:
 
             const message = [
               `📚 [Documentation](https://charts.hdcode.dev/)`,
-              `📦 [Maven Central](https://central.sonatype.com/artifact/io.github.dautovicharis/charts/${version})`,
+              `📦 [Maven Central](https://central.sonatype.com/artifact/io.github.hdcharts/charts/${version})`,
             ].join('\n');
 
             await github.rest.repos.createCommitComment({

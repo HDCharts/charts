@@ -38,9 +38,9 @@ if (( ${#changes[@]} )); then
   done < <(sorted "${changes[@]}")
   echo
   if [[ "${migration_base}" == "snapshot" ]]; then
-    echo "📦 Maven Central: https://central.sonatype.com/repository/maven-snapshots/io/github/dautovicharis/charts/maven-metadata.xml"
+    echo "📦 Maven Central: https://central.sonatype.com/repository/maven-snapshots/io/github/hdcharts/charts/maven-metadata.xml"
   else
-    echo "📦 Maven Central: https://central.sonatype.com/artifact/io.github.dautovicharis/charts/${version}"
+    echo "📦 Maven Central: https://central.sonatype.com/artifact/io.github.hdcharts/charts/${version}"
   fi
   echo "📚 Documentation: https://charts.hdcode.dev/"
   echo

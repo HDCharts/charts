@@ -1,4 +1,4 @@
-rootProject.name = "ChartsProject"
+rootProject.name = "hdcharts"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 val chartsDependencyMode =
@@ -64,7 +64,7 @@ dependencyResolutionManagement {
                     }
                 }
                 filter {
-                    includeGroup("io.github.dautovicharis")
+                    includeGroup("io.github.hdcharts")
                 }
             }
         }
@@ -84,6 +84,7 @@ include(":charts-radar")
 include(":charts-stacked-bar")
 include(":charts-stacked-area")
 include(":charts-bom")
+include(":charts-relocation")
 include(":smoke-line")
 
 // Demo app modules live under sample/.

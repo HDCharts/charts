@@ -1,6 +1,6 @@
 import org.gradle.api.Project
 
-private const val CHARTS_GROUP_ID = "io.github.dautovicharis"
+private const val CHARTS_GROUP_ID = "io.github.hdcharts"
 private const val CHARTS_DEPENDENCY_MODE_PROPERTY = "chartsDependencyMode"
 private const val CHARTS_PUBLISHED_VERSION_PROPERTY = "chartsPublishedVersion"
 

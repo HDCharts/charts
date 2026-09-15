@@ -22,7 +22,6 @@ object ChartsPublishing {
             developer {
                 id.set(Config.DEVELOPER_ID)
                 name.set(Config.DEVELOPER_NAME)
-                email.set(Config.DEVELOPER_EMAIL)
             }
         }
         pom.issueManagement {
