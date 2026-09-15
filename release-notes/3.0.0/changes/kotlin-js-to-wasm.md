@@ -2,4 +2,4 @@
 
 - type: `chore`
 - module: `charts`
-- release_note: `Web support runs on Kotlin/Wasm (wasmJs) across published modules.`
+- release_note: `Web targets now ship on Kotlin/Wasm across all modules.`

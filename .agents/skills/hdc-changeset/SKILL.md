@@ -1,71 +1,55 @@
 ---
 name: hdc-changeset
-description: Create or update a concise HDCharts release note on direct user request.
+description: Create or update an HDCharts release note.
 ---
 
 # Create Release Notes
 
-## Guardrails
-
-Follow [AGENTS.md](../../AGENTS.md). This skill edits release-note files.
-
-Only a direct user request loads this skill; other workflows leave release-note
-work unchanged.
-
-## Scope
-
-Create notes for observable features, fixes, behavior changes, public API
-changes, and public documentation changes. For maintenance-only work, report:
-
-```text
-No release note needed.
-```
-
 ## Workflow
 
-1. Confirm that the user directly requested release-note work.
-2. Resolve `release_version` with the repository helper:
+1. Resolve `release_version` with the helper:
 
    ```bash
    bash ./.github/scripts/resolve-release-version.sh
    ```
 
-   Use the helper output as the version directory name.
-3. Ensure these directories exist:
+   Use that output as the directory name.
+2. Ensure these directories exist:
 
    ```text
    release-notes/<release_version>/changes/
    release-notes/<release_version>/migrations/
    ```
-
-4. Create or update a stable release note at:
+3. Create or update a release note at:
 
    ```text
    release-notes/<release_version>/changes/<short-kebab-summary>.md
    ```
 
-   Use a short, stable topic summary for the filename and release information
-   for the content.
-5. Use direct, concise wording and this template:
+   Pick a short, stable topic summary for the filename.
+4. Use this template:
 
    ```markdown
    # Release Changeset
 
    - type: `<feature|feat|fix|refactor|docs|chore>`
    - module: `<published-module>`
-   - release_note: `<plain-language sentence, maximum 20 words>`
+   - release_note: `<plain-language sentence, maximum 12 words>`
    ```
+5. Validate the word limit and report the release version and the path you
+   created or updated.
 
-   Populate the change type, published module, and one concise public outcome.
-6. Validate the fields and word limit.
-7. Report the release version and created or updated path.
+## Wording
 
-## Release-Note Check
+The release note is the headline shown in "What's New" on the GitHub release
+page and the docs site. Write for a developer evaluating whether to upgrade.
+Lead with the user-visible outcome in one sentence of 12 words or fewer.
+Keep API identifiers, exceptions, and fallback paths in the matching
+`migrations/` file. Plain, direct, positive — no emojis, no marketing
+language, no hedging.
 
-Before finalizing a release note, confirm:
+## Check
 
-- The change is public and user-visible.
-- The note describes one coherent outcome.
-- The wording is direct and positive.
-- The note contains the public outcome and release information only.
-- The note fits the public release highlights.
+Confirm the release_note is one sentence, 12 words or fewer, fits the public
+release highlights, and routes rename/removal detail to a matching
+`migrations/` file.
