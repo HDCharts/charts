@@ -8,25 +8,30 @@ Workflows:
 
 ```mermaid
  flowchart TD
-   A["PR opened, synchronized, or reopened"] --> B["Pull Request API Compatibility"]
-   B --> C["Run API Compatibility"]
-   C --> D{"Breaking API change detected?"}
-   D -- No --> E["Pass: API remains compatible"]
-   D -- Yes --> F["Fail: API compatibility gate fails with workflow-run annotation and instructions"]
-   F --> G["Developer runs ./gradlew apiCompatibilityUpdateBaseline locally"]
-   G --> H["Developer commits the updated API-COMPATIBILITY-BASELINE.txt in the same PR"]
-   H --> B
+   A["PR opened, synchronized, or reopened"] --> B["Prepare PR detects code changes"]
+   B --> C{"Code or build changes?"}
+   C -- No --> D["Docs-only no-op: PR API Compatibility skipped"]
+   C -- Yes --> E["Run API Compatibility"]
+   E --> F{"Breaking API change detected?"}
+   F -- No --> G["Pass: API remains compatible"]
+   F -- Yes --> H["Fail: API compatibility gate fails with workflow-run annotation and instructions"]
+   H --> I["Developer runs ./gradlew apiCompatibilityUpdateBaseline locally"]
+   I --> J["Developer commits the updated API-COMPATIBILITY-BASELINE.txt in the same PR"]
+   J --> B
 ```
 
 The `Pull Request API Compatibility` workflow runs for the `opened`,
-`synchronize`, and `reopened` pull-request actions, including documentation-only
-changes. When the compatibility check detects a binary or source-incompatible
-public API change, the workflow fails the API gate and posts a workflow-run
-annotation that points the developer at `./gradlew apiCompatibilityUpdateBaseline`.
-The developer runs that task locally, commits the regenerated
-`API-COMPATIBILITY-BASELINE.txt` in the same pull request, and pushes
-again. The next run compares the new commit against the updated baseline and
-passes.
+`synchronize`, and `reopened` pull-request actions. Its `Prepare PR` job runs
+the same code-change detector used by the core workflow and gates the
+compatibility check on it. Documentation-only pull requests use the reusable
+workflow's `Docs-only no-op` path and report `PR API Compatibility` as
+skipped rather than running the Gradle compatibility check. When the
+compatibility check does detect a binary or source-incompatible public API
+change, it fails the API gate and posts a workflow-run annotation that points
+the developer at `./gradlew apiCompatibilityUpdateBaseline`. The developer
+runs that task locally, commits the regenerated
+`API-COMPATIBILITY-BASELINE.txt` in the same pull request, and pushes again.
+The next run compares the new commit against the updated baseline and passes.
 
 ## Release Audit Flow
 
