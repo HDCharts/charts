@@ -37,12 +37,18 @@ flowchart TD
 
 The core workflow runs only for the `opened`, `synchronize`, and `reopened`
 pull-request actions. Its `PR Core Checks` gate fails if preparation or any
-dependent core check fails or is cancelled. Documentation-only changes still
-use the reusable workflows' successful no-op path.
+dependent core check fails or is cancelled. The API workflow uses the same
+actions and its `PR API Compatibility` gate fails if preparation or the
+compatibility check fails or is cancelled. Documentation-only changes use
+each reusable workflow's `Docs-only no-op` job instead of its real validation
+job.
 
 The API workflow listens for the same three pull-request actions as the core
-workflow and always runs the compatibility check. Its `PR API Compatibility`
-gate reports the reusable workflow result as the required status check.
+workflow. Its `Prepare PR` job runs the same code-change detector and skips
+the compatibility check on documentation-only pull requests. Its
+`PR API Compatibility` gate reports the reusable workflow result as the
+required status check; on docs-only pull requests the gate is skipped rather
+than reported as success.
 
 The GIF workflow is optional. Its label-check job runs on the three normal
 pull-request actions and fetches current labels from the GitHub API; the
@@ -55,12 +61,12 @@ cancel validation.
 
 | Workflow or job | Responsibility |
 | --- | --- |
-| `Prepare PR` | Checks out the repository, detects code changes, and records the merge revision for core checks. |
+| `Prepare PR` | Checks out the repository, detects code changes, and records the merge revision for core and API checks. |
 | `Assemble` | Runs `./gradlew ciAssemble`. |
 | `Compile` | Runs `./gradlew ciCompile`. |
 | `Lint` | Runs Kotlin and build-logic lint when the PR contains code/build changes. |
 | `Test` | Runs `ciTestJvm`, `ciTestAndroid`, `ciTestWeb`, and `ciTestIos` when needed; uploads Gradle's native HTML and XML reports. |
-| `PR API Compatibility` | Runs the API compatibility check for every normal pull-request event and reports the required result. |
+| `PR API Compatibility` | Runs the API compatibility check on code/build-changing pull-request events and reports the required result; docs-only pull requests skip the check and report as skipped. |
 | `API compatibility` | Runs `./gradlew apiCompatibilityCheck`; a detected public API incompatibility requires the `breaking-change` label. |
 | `GIF validation` | Runs the opt-in GIF baseline workflow while the `run-gif-validation` label is present. |
 
@@ -69,11 +75,13 @@ Gradle's `chartsTest*` tasks are platform-specific commands for local use. The
 the exact scope invoked by the reusable workflows. The `smoke-line` consumer
 compile belongs only to `ciCompile`, not to a test task.
 
-The core reusable workflows receive `source-sha` from `Prepare PR`. API and
-GIF validation receive the triggering event's `github.sha`, so each check uses
-the immutable merge result for that event. Core checks retain their
-code-change optimization; API compatibility always runs for normal
-pull-request events and uses the `breaking-change` label only as policy input.
+The core reusable workflows receive `source-sha` from `Prepare PR`. The API
+workflow's `Prepare PR` job records the same merge revision and passes it to
+the reusable workflow; the GIF validation workflow receives the triggering
+event's `github.sha` directly, so each check uses the immutable merge result
+for that event. Core checks and API compatibility retain their code-change
+optimization; API compatibility uses the `breaking-change` label only as
+policy input when it does run.
 
 ## Merge protection
 
@@ -88,6 +96,12 @@ Do not require `Prepare PR`, individual implementation jobs, or `PR GIF Baseline
 Validation`; GIF validation is optional. Rulesets match status-check contexts
 literally, so keep the required names exactly as shown above.
 
+A documentation-only pull request skips `PR Core Checks`' real validation jobs
+and skips `PR API Compatibility` entirely; the required status check reports
+as skipped on the PR checks page. Configure the ruleset to treat skipped
+required checks as non-blocking, or rely on GitHub's default behavior, so
+docs-only pull requests can still merge.
+
 ## Fork PR security boundary
 
 All three pull-request workflows run on `pull_request` with read-only
@@ -100,9 +114,11 @@ access and must not execute untrusted PR code.
 ## Non-code changes
 
 `scripts/ci-has-code-changes.sh` treats documentation, release-note, agent
-guidance, and repository-metadata-only changes as non-code changes for the core
-workflow. The API compatibility workflow still runs for those changes because
-it always checks the current public API against the baseline.
+guidance, and repository-metadata-only changes as non-code changes. Both the
+core workflow and the API workflow skip their real validation jobs for
+documentation-only pull requests and use the `Docs-only no-op` job instead.
+The `breaking-change` label is not consulted on docs-only pull requests because
+the compatibility check does not run.
 
 The snapshot release workflow uses the same script with the `snapshot` profile.
 Release notes, GIF baselines, scripts, and other release-relevant changes remain
@@ -110,10 +126,10 @@ snapshot triggers.
 
 ## Reusable workflow status display
 
-The reusable core workflows define two mutually exclusive paths for some
-checks:
+The reusable core and API workflows define two mutually exclusive paths for
+their validation jobs:
 
-- the real validation job, such as `Assemble`;
+- the real validation job, such as `Assemble` or `Compare Public API Against Release`;
 - an explicit docs-only no-op job named `Docs-only no-op`.
 
 GitHub displays both job definitions in the run, even though only one path is
@@ -123,9 +139,10 @@ passing. That skipped row is the inactive alternative; it does not mean that
 the pull request had no code changes and is not an additional required check.
 
 For a docs-only pull request, the no-op job succeeds and the real validation
-job is skipped for the core workflow, while API compatibility still runs. The
-aggregate `PR Core Checks` job verifies the core no-op path, and
-`PR API Compatibility` verifies the API result.
+job is skipped for both the core workflow and the API compatibility workflow.
+The aggregate `PR Core Checks` job verifies the core no-op path, and
+`PR API Compatibility` is skipped because the reusable workflow selected its
+`Docs-only no-op` path.
 
 The optional `PR GIF Baseline Validation` job is different: when it is skipped,
 the `run-gif-validation` label was not present and GIF validation was not
