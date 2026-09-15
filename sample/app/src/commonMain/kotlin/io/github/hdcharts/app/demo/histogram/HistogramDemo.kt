@@ -15,14 +15,12 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import hdcharts.app.generated.resources.Res
 import hdcharts.app.generated.resources.cd_pause_live_updates
@@ -33,90 +31,87 @@ import io.github.hdcharts.app.ui.composable.ChartDemo
 import io.github.hdcharts.app.ui.composable.ChartPreset
 import io.github.hdcharts.app.ui.composable.ChartPresetToggle
 import io.github.hdcharts.charts.HistogramChart
+import io.github.hdcharts.charts.style.BarChartDefaults
 import io.github.hdcharts.charts.style.ChartContainerDefaults
 import io.github.hdcharts.charts.style.HistogramChartDefaults
 import io.github.hdcharts.sampleshared.fixtures.ChartTestStyleFixtures
+import io.github.hdcharts.sampleshared.theme.Dimens
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.math.roundToInt
 
 @Composable
 fun HistogramChartDemo(viewModel: HistogramChartViewModel = koinViewModel()) {
-    val dataSet by viewModel.dataSet.collectAsStateWithLifecycle()
-    val isPlaying by viewModel.isPlaying.collectAsStateWithLifecycle()
-    val controlsState by viewModel.controlsState.collectAsStateWithLifecycle()
-    var preset by remember { mutableStateOf(ChartPreset.Default) }
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val chartContainerStyle = ChartContainerDefaults.style()
-    val refresh: () -> Unit = viewModel::refresh
 
     ChartDemo(
-        onRefresh = refresh,
+        onRefresh = viewModel::refresh,
         presetContent = {
             Column(
-                verticalArrangement = Arrangement.spacedBy(10.dp),
+                verticalArrangement = Arrangement.spacedBy(Dimens.controlSpacing),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 ChartPresetToggle(
-                    selectedPreset = preset,
-                    onPresetSelected = { preset = it },
+                    selectedPreset = uiState.preset,
+                    onPresetSelected = viewModel::onPresetSelected,
                 )
             }
         },
         extraButtons = {
-            IconButton(
-                onClick = viewModel::togglePlaying,
-            ) {
+            IconButton(onClick = viewModel::togglePlaying) {
                 Icon(
-                    imageVector = if (isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
+                    imageVector = if (uiState.isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
                     tint = MaterialTheme.colorScheme.onSurface,
                     contentDescription =
                         stringResource(
-                            if (isPlaying) Res.string.cd_pause_live_updates else Res.string.cd_play_live_updates,
+                            if (uiState.isPlaying) {
+                                Res.string.cd_pause_live_updates
+                            } else {
+                                Res.string.cd_play_live_updates
+                            },
                         ),
                 )
             }
         },
         controlsContent = {
             HistogramDataPointsControls(
-                points = controlsState.points,
-                minValue = controlsState.minValue,
-                maxValue = controlsState.maxValue,
+                points = uiState.controlsState.points,
+                minValue = uiState.controlsState.minValue,
+                maxValue = uiState.controlsState.maxValue,
                 onPointsChange = viewModel::updateDataPoints,
                 onRangeChange = viewModel::updateDataRange,
             )
         },
     ) {
-        key(controlsState.points, controlsState.minValue, controlsState.maxValue, preset) {
-            when (preset) {
-                ChartPreset.Default -> {
-                    HistogramChart(
-                        data = dataSet,
-                        modifier = Modifier.fillMaxWidth(),
-                        title = dataSet.series.single().name,
-                        style = HistogramChartDefaults.style(chartContainerStyle = chartContainerStyle),
+        val style =
+            when (uiState.preset) {
+                ChartPreset.Default ->
+                    HistogramChartDefaults.style(
+                        range = BarChartDefaults.range(min = 0.0),
+                        chartContainerStyle = chartContainerStyle,
                     )
-                }
-
-                ChartPreset.Custom -> {
-                    HistogramChart(
-                        data = dataSet,
-                        modifier = Modifier.fillMaxWidth(),
-                        title = dataSet.series.single().name,
-                        style =
-                            ChartTestStyleFixtures.histogramCustomStyle(
-                                chartContainerStyle = chartContainerStyle,
-                                barCount =
-                                    dataSet.series
-                                        .single()
-                                        .values.size,
-                                useBarColors = true,
-                                minValue = controlsState.minValue.toDouble(),
-                                maxValue = controlsState.maxValue.toDouble(),
-                            ),
+                ChartPreset.Custom ->
+                    ChartTestStyleFixtures.histogramCustomStyle(
+                        chartContainerStyle = chartContainerStyle,
+                        barCount =
+                            uiState.dataSet.series
+                                .single()
+                                .values.size,
+                        useBarColors = true,
+                        minValue = uiState.controlsState.minValue.toDouble(),
+                        maxValue = uiState.controlsState.maxValue.toDouble(),
                     )
-                }
             }
-        }
+        HistogramChart(
+            data = uiState.dataSet,
+            modifier = Modifier.fillMaxWidth(),
+            title =
+                uiState.dataSet.series
+                    .single()
+                    .name,
+            style = style,
+        )
     }
 }
 
@@ -139,8 +134,8 @@ private fun HistogramDataPointsControls(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .padding(top = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
+                .padding(top = Dimens.sm),
+        verticalArrangement = Arrangement.spacedBy(Dimens.xs),
     ) {
         Text(
             text = stringResource(Res.string.histogram_data_points, draftPoints.roundToInt()),

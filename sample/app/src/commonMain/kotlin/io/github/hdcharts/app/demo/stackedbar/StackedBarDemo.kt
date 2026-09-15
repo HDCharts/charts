@@ -15,14 +15,12 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import hdcharts.app.generated.resources.Res
 import hdcharts.app.generated.resources.cd_pause_live_updates
@@ -36,6 +34,7 @@ import io.github.hdcharts.charts.StackedBarChart
 import io.github.hdcharts.charts.style.ChartContainerDefaults
 import io.github.hdcharts.charts.style.StackedBarChartDefaults
 import io.github.hdcharts.sampleshared.fixtures.ChartTestStyleFixtures
+import io.github.hdcharts.sampleshared.theme.Dimens
 import io.github.hdcharts.sampleshared.theme.LocalChartColors
 import io.github.hdcharts.sampleshared.theme.seriesColors
 import org.jetbrains.compose.resources.stringResource
@@ -44,81 +43,65 @@ import kotlin.math.roundToInt
 
 @Composable
 fun StackedBarChartDemo(viewModel: StackedBarChartViewModel = koinViewModel()) {
-    val dataSet by viewModel.dataSet.collectAsStateWithLifecycle()
-    val isPlaying by viewModel.isPlaying.collectAsStateWithLifecycle()
-    val controlsState by viewModel.controlsState.collectAsStateWithLifecycle()
-    val chartColors = LocalChartColors.current
-    var preset by remember { mutableStateOf(ChartPreset.Default) }
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val chartContainerStyle = ChartContainerDefaults.style()
     val segmentColors =
-        remember(dataSet.segmentKeys, chartColors) {
-            chartColors.seriesColors(dataSet.segmentKeys.size)
-        }
-
-    val refresh: () -> Unit = viewModel::refresh
+        LocalChartColors.current.seriesColors(uiState.chart.segmentKeys.size)
 
     ChartDemo(
-        onRefresh = refresh,
+        onRefresh = viewModel::refresh,
         presetContent = {
             Column(
-                verticalArrangement = Arrangement.spacedBy(10.dp),
+                verticalArrangement = Arrangement.spacedBy(Dimens.controlSpacing),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 ChartPresetToggle(
-                    selectedPreset = preset,
-                    onPresetSelected = { preset = it },
+                    selectedPreset = uiState.preset,
+                    onPresetSelected = viewModel::onPresetSelected,
                 )
             }
         },
         extraButtons = {
-            IconButton(
-                onClick = viewModel::togglePlaying,
-            ) {
+            IconButton(onClick = viewModel::togglePlaying) {
                 Icon(
-                    imageVector = if (isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
+                    imageVector = if (uiState.isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
                     tint = MaterialTheme.colorScheme.onSurface,
                     contentDescription =
                         stringResource(
-                            if (isPlaying) Res.string.cd_pause_live_updates else Res.string.cd_play_live_updates,
+                            if (uiState.isPlaying) {
+                                Res.string.cd_pause_live_updates
+                            } else {
+                                Res.string.cd_play_live_updates
+                            },
                         ),
                 )
             }
         },
         controlsContent = {
             StackedBarDataPointsControls(
-                points = controlsState.points,
-                minValue = controlsState.minValue,
-                maxValue = controlsState.maxValue,
+                points = uiState.controlsState.points,
+                minValue = uiState.controlsState.minValue,
+                maxValue = uiState.controlsState.maxValue,
                 onPointsChange = viewModel::updateDataPoints,
                 onRangeChange = viewModel::updateDataRange,
             )
         },
     ) {
-        key(controlsState.points, controlsState.minValue, controlsState.maxValue, preset) {
-            when (preset) {
-                ChartPreset.Default -> {
-                    StackedBarChart(
-                        data = dataSet.dataSet,
-                        modifier = Modifier.fillMaxWidth(),
-                        title = dataSet.title,
-                        style = StackedBarChartDefaults.style(chartContainerStyle = chartContainerStyle),
+        val style =
+            when (uiState.preset) {
+                ChartPreset.Default -> StackedBarChartDefaults.style(chartContainerStyle = chartContainerStyle)
+                ChartPreset.Custom ->
+                    ChartTestStyleFixtures.stackedBarCustomStyle(
+                        chartContainerStyle = chartContainerStyle,
+                        segmentCount = segmentColors.size,
                     )
-                }
-
-                ChartPreset.Custom -> {
-                    StackedBarChart(
-                        data = dataSet.dataSet,
-                        modifier = Modifier.fillMaxWidth(),
-                        title = dataSet.title,
-                        style =
-                            ChartTestStyleFixtures.stackedBarCustomStyle(
-                                chartContainerStyle = chartContainerStyle,
-                                segmentCount = segmentColors.size,
-                            ),
-                    )
-                }
             }
-        }
+        StackedBarChart(
+            data = uiState.chart.dataSet,
+            modifier = Modifier.fillMaxWidth(),
+            title = uiState.chart.title,
+            style = style,
+        )
     }
 }
 
@@ -141,8 +124,8 @@ private fun StackedBarDataPointsControls(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .padding(top = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
+                .padding(top = Dimens.sm),
+        verticalArrangement = Arrangement.spacedBy(Dimens.xs),
     ) {
         Text(
             text = stringResource(Res.string.stacked_bar_data_points, draftPoints.roundToInt()),

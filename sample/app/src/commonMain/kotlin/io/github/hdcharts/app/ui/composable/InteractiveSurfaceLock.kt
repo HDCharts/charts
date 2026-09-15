@@ -25,16 +25,8 @@ val LocalInteractiveSurfaceCallbacks =
 @Composable
 fun DrawerGestureLockContainer(
     modifier: Modifier = Modifier,
-    enabled: Boolean = true,
     content: @Composable () -> Unit,
 ) {
-    if (!enabled) {
-        Box(modifier = modifier) {
-            content()
-        }
-        return
-    }
-
     val callbacks = LocalInteractiveSurfaceCallbacks.current
     var isInteracting by remember { mutableStateOf(false) }
 

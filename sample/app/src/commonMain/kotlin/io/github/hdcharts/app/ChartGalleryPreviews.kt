@@ -24,9 +24,7 @@ import io.github.hdcharts.charts.PieChart
 import io.github.hdcharts.charts.RadarChart
 import io.github.hdcharts.charts.StackedAreaChart
 import io.github.hdcharts.charts.StackedBarChart
-import io.github.hdcharts.charts.model.ChartSeries
 import io.github.hdcharts.charts.model.PieSlice
-import io.github.hdcharts.charts.model.chartDataOf
 import io.github.hdcharts.charts.model.toChartData
 import io.github.hdcharts.charts.style.BarChartDefaults
 import io.github.hdcharts.charts.style.ChartContainerDefaults
@@ -37,6 +35,8 @@ import io.github.hdcharts.charts.style.PieChartDefaults
 import io.github.hdcharts.charts.style.RadarChartDefaults
 import io.github.hdcharts.charts.style.StackedAreaChartDefaults
 import io.github.hdcharts.charts.style.StackedBarChartDefaults
+import io.github.hdcharts.sampleshared.data.ChartGalleryPreview
+import io.github.hdcharts.sampleshared.theme.Dimens
 
 private val PreviewShape = RoundedCornerShape(18.dp)
 private val PreviewChartSize = 140.dp
@@ -68,7 +68,7 @@ internal fun ChartPreviewFrame(
                 .then(clickModifier)
                 .background(frameBrush)
                 .border(1.dp, accent.copy(alpha = 0.18f), PreviewShape)
-                .padding(6.dp),
+                .padding(Dimens.xs),
         contentAlignment = Alignment.Center,
     ) {
         content()
@@ -78,7 +78,7 @@ internal fun ChartPreviewFrame(
 @Composable
 internal fun ChartPreview(
     destination: ChartDestination,
-    previews: ChartGalleryPreviewState,
+    previews: ChartGalleryPreview,
 ) {
     when (destination) {
         is ChartDestination.PieChartScreen -> PieChartPreview(previews.pieValues)
@@ -95,11 +95,11 @@ internal fun ChartPreview(
 }
 
 @Composable
-private fun PieChartPreview(values: List<Float>) {
+private fun PieChartPreview(values: List<Double>) {
     val data =
         remember(values) {
             values.mapIndexed { index, value ->
-                PieSlice(label = "Segment ${index + 1}", value = value.toDouble())
+                PieSlice(label = "Segment ${index + 1}", value = value)
             }
         }
     PieChart(
@@ -116,10 +116,10 @@ private fun PieChartPreview(values: List<Float>) {
 }
 
 @Composable
-private fun LineChartPreview(values: List<Float>) {
+private fun LineChartPreview(values: List<Double>) {
     val data =
         remember(values) {
-            values.map { it.toDouble() }.toChartData(seriesName = "")
+            values.toChartData()
         }
     LineChart(
         data = data,
@@ -139,17 +139,14 @@ private fun LineChartPreview(values: List<Float>) {
 }
 
 @Composable
-private fun MultiLineChartPreview(series: List<Pair<String, List<Float>>>) {
+private fun MultiLineChartPreview(series: List<Pair<String, List<Double>>>) {
     val data =
         remember(series) {
-            series
-                .map { (name, values) -> name to values.map { it.toDouble() } }
-                .toChartData()
+            series.toChartData()
         }
     LineChart(
         data = data,
         modifier = Modifier.size(PreviewChartSize),
-        title = "",
         style =
             LineChartDefaults.style(
                 chartContainerStyle = previewChartContainerStyle(),
@@ -165,17 +162,14 @@ private fun MultiLineChartPreview(series: List<Pair<String, List<Float>>>) {
 }
 
 @Composable
-private fun StackedAreaChartPreview(series: List<Pair<String, List<Float>>>) {
+private fun StackedAreaChartPreview(series: List<Pair<String, List<Double>>>) {
     val data =
         remember(series) {
-            series
-                .map { (name, values) -> name to values.map { it.toDouble() } }
-                .toChartData()
+            series.toChartData()
         }
     StackedAreaChart(
         data = data,
         modifier = Modifier.size(PreviewChartSize),
-        title = "",
         style =
             StackedAreaChartDefaults.style(
                 chartContainerStyle = previewChartContainerStyle(),
@@ -191,15 +185,14 @@ private fun StackedAreaChartPreview(series: List<Pair<String, List<Float>>>) {
 }
 
 @Composable
-private fun BarChartPreview(values: List<Float>) {
+private fun BarChartPreview(values: List<Double>) {
     val data =
         remember(values) {
-            values.map { it.toDouble() }.toChartData(seriesName = "")
+            values.toChartData()
         }
     BarChart(
         data = data,
         modifier = Modifier.size(PreviewChartSize),
-        title = "",
         style =
             BarChartDefaults.style(
                 range =
@@ -220,22 +213,14 @@ private fun BarChartPreview(values: List<Float>) {
 }
 
 @Composable
-private fun HistogramChartPreview(values: List<Float>) {
-    val labels =
-        remember(values) {
-            List(values.size) { index -> "B${index + 1}" }
-        }
+private fun HistogramChartPreview(values: List<Double>) {
     val data =
-        remember(values, labels) {
-            values.map { it.toDouble() }.toChartData(
-                categories = labels,
-                seriesName = "",
-            )
+        remember(values) {
+            values.toChartData()
         }
     HistogramChart(
         data = data,
         modifier = Modifier.size(PreviewChartSize),
-        title = "",
         style =
             HistogramChartDefaults.style(
                 range = BarChartDefaults.range(min = 0.0),
@@ -252,23 +237,14 @@ private fun HistogramChartPreview(values: List<Float>) {
 }
 
 @Composable
-private fun StackedBarChartPreview(series: List<Pair<String, List<Float>>>) {
-    val dataSet =
+private fun StackedBarChartPreview(series: List<Pair<String, List<Double>>>) {
+    val data =
         remember(series) {
-            chartDataOf(
-                categories = series.map { (barLabel, _) -> barLabel },
-                *List(series.maxOfOrNull { (_, values) -> values.size } ?: 0) { segmentIndex ->
-                    ChartSeries(
-                        name = "Segment ${segmentIndex + 1}",
-                        values = series.map { (_, values) -> values.getOrNull(segmentIndex)?.toDouble() ?: 0.0 },
-                    )
-                }.toTypedArray(),
-            )
+            series.toChartData()
         }
     StackedBarChart(
-        data = dataSet,
+        data = data,
         modifier = Modifier.size(PreviewChartSize),
-        title = "",
         style =
             StackedBarChartDefaults.style(
                 chartContainerStyle = previewChartContainerStyle(),
@@ -284,45 +260,16 @@ private fun StackedBarChartPreview(series: List<Pair<String, List<Float>>>) {
 }
 
 @Composable
-private fun RadarChartPreview(series: List<Pair<String, List<Float>>>) {
-    val categories =
-        remember {
-            listOf(
-                "Performance",
-                "Reliability",
-                "Usability",
-                "Security",
-                "Scalability",
-                "Observability",
-            )
-        }
-
-    val previewSeries =
-        remember(series) {
-            if (series.isNotEmpty()) {
-                series
-            } else {
-                listOf(
-                    "Release 2.3" to listOf(86f, 82f, 78f, 89f, 84f, 77f),
-                )
-            }
-        }
-
+private fun RadarChartPreview(series: List<Pair<String, List<Double>>>) {
     val data =
-        remember(previewSeries) {
-            previewSeries
-                .map { (name, values) -> name to values.map { it.toDouble() } }
-                .toChartData(categories = categories)
-        }
+        remember(series) { series.toChartData() }
 
     RadarChart(
         data = data,
         modifier = Modifier.size(PreviewChartSize),
-        title = "",
         style =
             RadarChartDefaults.style(
                 chartContainerStyle = previewChartContainerStyle(),
-                categories = RadarChartDefaults.categories(legendVisible = false),
             ),
         interactionEnabled = false,
         animateOnStart = false,
@@ -330,4 +277,4 @@ private fun RadarChartPreview(series: List<Pair<String, List<Float>>>) {
 }
 
 @Composable
-private fun previewChartContainerStyle(): ChartContainerStyle = ChartContainerDefaults.style(contentPadding = 4.dp)
+private fun previewChartContainerStyle(): ChartContainerStyle = ChartContainerDefaults.style(contentPadding = Dimens.xs)

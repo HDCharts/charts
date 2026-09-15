@@ -2,6 +2,7 @@ package io.github.hdcharts.app.demo.stackedbar
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import io.github.hdcharts.app.ui.composable.ChartPreset
 import io.github.hdcharts.charts.model.ChartData
 import io.github.hdcharts.sampleshared.data.StackedBarSampleUseCase
 import kotlinx.coroutines.Job
@@ -9,6 +10,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
@@ -24,6 +26,13 @@ data class StackedBarChartState(
     val dataSet: ChartData,
     val segmentKeys: List<String> = emptyList(),
     val title: String = "",
+)
+
+data class StackedBarChartUiState(
+    val chart: StackedBarChartState,
+    val controlsState: StackedBarChartControlsState,
+    val preset: ChartPreset = ChartPreset.Default,
+    val isPlaying: Boolean = false,
 )
 
 class StackedBarChartViewModel(
@@ -51,34 +60,95 @@ class StackedBarChartViewModel(
             safeStart..safeEnd
         }
 
-    private val _dataSet =
-        MutableStateFlow(
-            initialSample.let { sample ->
-                StackedBarChartState(
-                    dataSet = sample.dataSet,
-                    segmentKeys = sample.segmentKeys,
-                    title = sample.title,
-                )
-            },
+    private val initialControlsState =
+        StackedBarChartControlsState(
+            points = defaultPoints,
+            minValue = defaultRange.first,
+            maxValue = defaultRange.last,
         )
 
-    val dataSet: StateFlow<StackedBarChartState> = _dataSet.asStateFlow()
-    private val _controlsState =
+    private val _uiState =
         MutableStateFlow(
-            StackedBarChartControlsState(
-                points = defaultPoints,
-                minValue = defaultRange.first,
-                maxValue = defaultRange.last,
+            StackedBarChartUiState(
+                chart =
+                    StackedBarChartState(
+                        dataSet = initialSample.dataSet,
+                        segmentKeys = initialSample.segmentKeys,
+                        title = initialSample.title,
+                    ),
+                controlsState = initialControlsState,
             ),
         )
-    val controlsState: StateFlow<StackedBarChartControlsState> = _controlsState.asStateFlow()
-    private val _isPlaying = MutableStateFlow(false)
-    val isPlaying: StateFlow<Boolean> = _isPlaying.asStateFlow()
+
+    val uiState: StateFlow<StackedBarChartUiState> = _uiState.asStateFlow()
     private var liveUpdatesJob: Job? = null
 
-    fun regenerateDataSet(
-        points: Int = _controlsState.value.points,
-        range: IntRange = _controlsState.value.minValue.._controlsState.value.maxValue,
+    fun onPresetSelected(preset: ChartPreset) {
+        if (preset == _uiState.value.preset) return
+        _uiState.update { it.copy(preset = preset) }
+    }
+
+    fun togglePlaying() {
+        setPlaying(!_uiState.value.isPlaying)
+    }
+
+    fun refresh() {
+        regenerateDataSet()
+    }
+
+    fun updateDataPoints(points: Int) {
+        val controls = _uiState.value.controlsState
+        val safePoints = points.coerceIn(MIN_SUPPORTED_POINTS, MAX_SUPPORTED_POINTS)
+        if (safePoints == controls.points) return
+
+        val updatedControls = controls.copy(points = safePoints)
+        regenerateDataSet(
+            points = updatedControls.points,
+            range = updatedControls.minValue..updatedControls.maxValue,
+            onRegenerated = { chart ->
+                _uiState.update { state ->
+                    state.copy(controlsState = updatedControls, chart = chart)
+                }
+            },
+        )
+    }
+
+    fun updateDataRange(
+        minValue: Int,
+        maxValue: Int,
+    ) {
+        val safeMin = minValue.coerceIn(MIN_SUPPORTED_VALUE, MAX_SUPPORTED_VALUE)
+        val safeMax = maxValue.coerceIn(safeMin, MAX_SUPPORTED_VALUE)
+        val controls = _uiState.value.controlsState
+
+        if (
+            controls.minValue == safeMin &&
+            controls.maxValue == safeMax
+        ) {
+            return
+        }
+
+        val updatedControls = controls.copy(minValue = safeMin, maxValue = safeMax)
+        regenerateDataSet(
+            points = updatedControls.points,
+            range = safeMin..safeMax,
+            onRegenerated = { chart ->
+                _uiState.update { state ->
+                    state.copy(controlsState = updatedControls, chart = chart)
+                }
+            },
+        )
+    }
+
+    override fun onCleared() {
+        stopLiveUpdates()
+        super.onCleared()
+    }
+
+    private fun regenerateDataSet(
+        points: Int = _uiState.value.controlsState.points,
+        range: IntRange = _uiState.value.controlsState.minValue.._uiState.value.controlsState.maxValue,
+        onRegenerated: ((StackedBarChartState) -> Unit)? = null,
     ) {
         val safePoints =
             points.coerceIn(
@@ -92,69 +162,27 @@ class StackedBarChartViewModel(
                 points = safePoints,
                 range = safeRangeStart..safeRangeEnd,
             )
-        _dataSet.value =
+        val chart =
             StackedBarChartState(
                 dataSet = sample.dataSet,
                 segmentKeys = sample.segmentKeys,
                 title = sample.title,
             )
-    }
-
-    fun refresh() {
-        regenerateDataSet()
-    }
-
-    fun updateDataPoints(points: Int) {
-        val controls = _controlsState.value
-        val safePoints = points.coerceIn(MIN_SUPPORTED_POINTS, MAX_SUPPORTED_POINTS)
-        if (safePoints == controls.points) return
-
-        _controlsState.value = controls.copy(points = safePoints)
-        regenerateDataSet(
-            points = safePoints,
-            range = controls.minValue..controls.maxValue,
-        )
-    }
-
-    fun updateDataRange(
-        minValue: Int,
-        maxValue: Int,
-    ) {
-        val safeMin = minValue.coerceIn(MIN_SUPPORTED_VALUE, MAX_SUPPORTED_VALUE)
-        val safeMax = maxValue.coerceIn(safeMin, MAX_SUPPORTED_VALUE)
-        val controls = _controlsState.value
-
-        if (
-            controls.minValue == safeMin &&
-            controls.maxValue == safeMax
-        ) {
-            return
+        if (onRegenerated != null) {
+            onRegenerated(chart)
+        } else {
+            _uiState.update { it.copy(chart = chart) }
         }
-
-        _controlsState.value =
-            controls.copy(
-                minValue = safeMin,
-                maxValue = safeMax,
-            )
-        regenerateDataSet(
-            points = controls.points,
-            range = safeMin..safeMax,
-        )
     }
 
-    fun togglePlaying() {
-        val shouldPlay = !_isPlaying.value
-        _isPlaying.value = shouldPlay
-        if (shouldPlay) {
+    private fun setPlaying(playing: Boolean) {
+        if (_uiState.value.isPlaying == playing) return
+        _uiState.update { it.copy(isPlaying = playing) }
+        if (playing) {
             startLiveUpdates()
         } else {
             stopLiveUpdates()
         }
-    }
-
-    override fun onCleared() {
-        stopLiveUpdates()
-        super.onCleared()
     }
 
     private fun startLiveUpdates() {

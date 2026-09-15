@@ -61,6 +61,7 @@ import hdcharts.app.generated.resources.drawer_title_github
 import hdcharts.app.generated.resources.github_url
 import hdcharts.app.generated.resources.github_url_content_description
 import hdcharts.sample_shared.generated.resources.ic_github
+import io.github.hdcharts.sampleshared.theme.Dimens
 import io.github.hdcharts.sampleshared.theme.LocalHasDynamicColorFeature
 import io.github.hdcharts.sampleshared.theme.Theme
 import org.jetbrains.compose.resources.painterResource
@@ -130,7 +131,7 @@ fun SettingsDrawerContent(
                 text = stringResource(Res.string.drawer_dynamic_colors_disable_hint),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp),
+                modifier = Modifier.padding(horizontal = Dimens.drawerPadding, vertical = Dimens.xs),
             )
         } else {
             ThemeSwatches(
@@ -152,7 +153,7 @@ fun SettingsDrawerContent(
             },
             onClick = { uriHandler.openUri(githubUrl) },
         )
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(Dimens.drawerPadding))
     }
 }
 
@@ -173,7 +174,7 @@ private fun DrawerHeader(
             Modifier
                 .fillMaxWidth()
                 .background(headerBrush)
-                .padding(18.dp),
+                .padding(Dimens.galleryPadding),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -213,7 +214,7 @@ private fun DrawerSectionTitle(text: String) {
         text = text,
         style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f),
-        modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp),
+        modifier = Modifier.padding(horizontal = Dimens.drawerPadding, vertical = Dimens.controlSpacing),
     )
 }
 
@@ -231,14 +232,14 @@ private fun DrawerSettingCard(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 6.dp)
+                .padding(horizontal = Dimens.cardPadding, vertical = Dimens.xs)
                 .clickable(onClick = onClick),
     ) {
         Row(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 14.dp, vertical = 12.dp),
+                    .padding(horizontal = 14.dp, vertical = Dimens.md),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Box(
@@ -251,7 +252,7 @@ private fun DrawerSettingCard(
             ) {
                 leading()
             }
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(Dimens.md))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = title,
@@ -282,13 +283,13 @@ private fun DrawerToggleCard(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 6.dp),
+                .padding(horizontal = Dimens.cardPadding, vertical = Dimens.xs),
     ) {
         Row(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 14.dp, vertical = 12.dp),
+                    .padding(horizontal = 14.dp, vertical = Dimens.md),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Box(
@@ -305,7 +306,7 @@ private fun DrawerToggleCard(
                     tint = MaterialTheme.colorScheme.secondary,
                 )
             }
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(Dimens.md))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = title,
@@ -333,9 +334,9 @@ private fun ThemeSwatches(
 ) {
     LazyRow(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(Dimens.md),
     ) {
-        item { Spacer(modifier = Modifier.width(16.dp)) }
+        item { Spacer(modifier = Modifier.width(Dimens.cardPadding)) }
         itemsIndexed(items = themeState.themes) { index, theme ->
             val themeContentDescription = stringResource(Res.string.cd_select_theme, index + 1)
             val isSelectedTheme = themeState.selectedTheme == theme
@@ -372,7 +373,7 @@ private fun ThemeSwatches(
                 )
             }
         }
-        item { Spacer(modifier = Modifier.width(16.dp)) }
+        item { Spacer(modifier = Modifier.width(Dimens.cardPadding)) }
     }
 }
 
@@ -386,7 +387,7 @@ private fun SettingBadge(text: String) {
             text = text,
             style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
             color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+            modifier = Modifier.padding(horizontal = Dimens.controlSpacing, vertical = Dimens.xs),
         )
     }
 }

@@ -1,16 +1,16 @@
-package io.github.hdcharts.app.data
+package io.github.hdcharts.sampleshared.data
 
 import io.github.hdcharts.charts.model.ChartData
 
 data class LiveLatencySingleSeriesWindow(
-    val values: List<Float>,
+    val values: List<Double>,
     val labels: List<String>,
     val endTick: Int,
 )
 
 data class LiveLatencyMultiSeriesWindow(
-    val p50Values: List<Float>,
-    val p95Values: List<Float>,
+    val p50Values: List<Double>,
+    val p95Values: List<Double>,
     val labels: List<String>,
     val endTick: Int,
 )

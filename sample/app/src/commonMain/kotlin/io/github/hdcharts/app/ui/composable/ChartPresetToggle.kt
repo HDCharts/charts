@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import hdcharts.app.generated.resources.Res
 import hdcharts.app.generated.resources.chart_custom
 import hdcharts.app.generated.resources.chart_default
+import io.github.hdcharts.sampleshared.theme.Dimens
 import org.jetbrains.compose.resources.stringResource
 
 enum class ChartPreset {
@@ -34,7 +35,7 @@ fun ChartPresetToggle(
 ) {
     Row(
         modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(Dimens.sm),
     ) {
         PresetItem(
             label = stringResource(Res.string.chart_default),
@@ -55,7 +56,7 @@ private fun PresetItem(
     selected: Boolean,
     onClick: () -> Unit,
 ) {
-    val shape = RoundedCornerShape(12.dp)
+    val shape = RoundedCornerShape(Dimens.md)
     val backgroundColor =
         if (selected) {
             MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
@@ -80,6 +81,6 @@ private fun PresetItem(
                 .background(backgroundColor, shape)
                 .clickable(onClick = onClick)
                 .semantics { role = Role.Button }
-                .padding(horizontal = 14.dp, vertical = 8.dp),
+                .padding(horizontal = 14.dp, vertical = Dimens.sm),
     )
 }

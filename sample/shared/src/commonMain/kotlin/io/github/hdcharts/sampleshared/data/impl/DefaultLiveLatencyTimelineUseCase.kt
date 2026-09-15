@@ -1,10 +1,10 @@
-package io.github.hdcharts.app.data.impl
+package io.github.hdcharts.sampleshared.data.impl
 
-import io.github.hdcharts.app.data.LiveLatencyMultiSeriesWindow
-import io.github.hdcharts.app.data.LiveLatencySingleSeriesWindow
-import io.github.hdcharts.app.data.LiveLatencyTimelineUseCase
 import io.github.hdcharts.charts.model.ChartData
 import io.github.hdcharts.charts.model.toChartData
+import io.github.hdcharts.sampleshared.data.LiveLatencyMultiSeriesWindow
+import io.github.hdcharts.sampleshared.data.LiveLatencySingleSeriesWindow
+import io.github.hdcharts.sampleshared.data.LiveLatencyTimelineUseCase
 import kotlin.math.sin
 import kotlin.random.Random
 
@@ -42,6 +42,9 @@ private class LiveLatencyTimelineGenerator {
         private const val SINGLE_TITLE = "API Gateway P95 Latency"
         private const val P50_SERIES_LABEL = "P50 Latency"
         private const val P95_SERIES_LABEL = "P95 Latency"
+        private const val P50_MIN = 70.0
+        private const val P50_MAX = 190.0
+        private const val P95_MAX = 320.0
     }
 
     val multiSeriesKeys: List<String> = listOf(P50_SERIES_LABEL, P95_SERIES_LABEL)
@@ -78,9 +81,7 @@ private class LiveLatencyTimelineGenerator {
     }
 
     fun toSingleDataSet(window: LiveLatencySingleSeriesWindow): ChartData =
-        window.values
-            .map { it.toDouble() }
-            .toChartData(categories = window.labels, seriesName = SINGLE_TITLE)
+        window.values.toChartData(categories = window.labels, seriesName = SINGLE_TITLE)
 
     fun createMultiWindow(
         windowSize: Int,
@@ -90,8 +91,8 @@ private class LiveLatencyTimelineGenerator {
         val resolvedEndTick = resolveEndTick(windowSize = safeWindowSize, endTick = endTick)
         val ticks = (resolvedEndTick - safeWindowSize + 1)..resolvedEndTick
 
-        val p50Values = mutableListOf<Float>()
-        val p95Values = mutableListOf<Float>()
+        val p50Values = mutableListOf<Double>()
+        val p95Values = mutableListOf<Double>()
         ticks.forEach { tick ->
             val p50 = sampleP50Latency(tick)
             val p95 = sampleP95Latency(tick, p50)
@@ -121,8 +122,8 @@ private class LiveLatencyTimelineGenerator {
 
     fun toMultiDataSet(window: LiveLatencyMultiSeriesWindow): ChartData =
         listOf(
-            P50_SERIES_LABEL to window.p50Values.map { it.toDouble() },
-            P95_SERIES_LABEL to window.p95Values.map { it.toDouble() },
+            P50_SERIES_LABEL to window.p50Values,
+            P95_SERIES_LABEL to window.p95Values,
         ).toChartData(categories = window.labels)
 
     private fun resolveEndTick(
@@ -130,18 +131,18 @@ private class LiveLatencyTimelineGenerator {
         endTick: Int?,
     ): Int = (endTick ?: windowSize - 1).coerceAtLeast(windowSize - 1)
 
-    private fun sampleP50Latency(tick: Int): Float {
+    private fun sampleP50Latency(tick: Int): Double {
         val trend = 112.0 + (18.0 * sin(tick / 7.0)) + (8.0 * sin(tick / 2.8))
         val jitter = Random.nextDouble(from = -5.0, until = 5.0)
-        return (trend + jitter).toFloat().coerceIn(70f, 190f)
+        return (trend + jitter).coerceIn(P50_MIN, P50_MAX)
     }
 
     private fun sampleP95Latency(
         tick: Int,
-        p50Latency: Float,
-    ): Float {
+        p50Latency: Double,
+    ): Double {
         val spread = 32.0 + (14.0 * sin(tick / 5.0)) + Random.nextDouble(from = 0.0, until = 15.0)
-        return (p50Latency + spread.toFloat()).coerceIn(p50Latency + 8f, 320f)
+        return (p50Latency + spread).coerceIn(p50Latency + 8.0, P95_MAX)
     }
 
     private fun formatTickLabel(tick: Int): String {

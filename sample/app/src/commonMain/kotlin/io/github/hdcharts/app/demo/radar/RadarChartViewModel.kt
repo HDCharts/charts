@@ -21,7 +21,12 @@ data class RadarChartState(
     val customData: ChartData,
     val seriesKeys: List<String> = emptyList(),
     val title: String,
+)
+
+data class RadarChartUiState(
+    val chart: RadarChartState,
     val preset: ChartPreset = ChartPreset.Default,
+    val isPlaying: Boolean = false,
 )
 
 class RadarChartViewModel(
@@ -32,83 +37,98 @@ class RadarChartViewModel(
     private val refreshRange = radarSampleUseCase.radarRefreshRange()
     private var liveUpdatesJob: Job? = null
 
-    private val _dataSet =
+    private val _uiState =
         MutableStateFlow(
-            RadarChartState(
-                basicData = initialDefaultData,
-                customData = initialSample.customData,
-                seriesKeys = initialSample.seriesKeys,
-                title = initialSample.title,
+            RadarChartUiState(
+                chart =
+                    RadarChartState(
+                        basicData = initialDefaultData,
+                        customData = initialSample.customData,
+                        seriesKeys = initialSample.seriesKeys,
+                        title = initialSample.title,
+                    ),
                 preset = ChartPreset.Default,
             ),
         )
 
-    val dataSet: StateFlow<RadarChartState> = _dataSet.asStateFlow()
-    private val _isPlaying = MutableStateFlow(false)
-    val isPlaying: StateFlow<Boolean> = _isPlaying.asStateFlow()
+    val uiState: StateFlow<RadarChartUiState> = _uiState.asStateFlow()
 
     fun onPresetSelected(preset: ChartPreset) {
-        if (preset == _dataSet.value.preset) return
-        _dataSet.update { it.copy(preset = preset) }
+        if (preset == _uiState.value.preset) return
         applyInitialPresetData(preset)
+        _uiState.update { it.copy(preset = preset) }
     }
 
-    fun regenerateBasicData(range: IntRange = refreshRange) {
-        val data = radarSampleUseCase.radarDefaultData(range = range)
-        _dataSet.update {
-            it.copy(basicData = data)
-        }
-    }
-
-    fun regenerateCustomData(range: IntRange = refreshRange) {
-        val sample = radarSampleUseCase.radarCustomSample(range = range)
-        _dataSet.update {
-            it.copy(
-                customData = sample.data,
-                seriesKeys = sample.seriesKeys,
-            )
-        }
+    fun togglePlaying() {
+        setPlaying(!_uiState.value.isPlaying)
     }
 
     fun refresh() {
-        when (_dataSet.value.preset) {
+        refreshCurrentPreset()
+    }
+
+    override fun onCleared() {
+        stopLiveUpdates()
+        super.onCleared()
+    }
+
+    private fun refreshCurrentPreset() {
+        when (_uiState.value.preset) {
             ChartPreset.Default -> regenerateBasicData()
             ChartPreset.Custom -> regenerateCustomData()
+        }
+    }
+
+    private fun regenerateBasicData(range: IntRange = refreshRange) {
+        val data = radarSampleUseCase.radarDefaultData(range = range)
+        _uiState.update { state ->
+            state.copy(chart = state.chart.copy(basicData = data))
+        }
+    }
+
+    private fun regenerateCustomData(range: IntRange = refreshRange) {
+        val sample = radarSampleUseCase.radarCustomSample(range = range)
+        _uiState.update { state ->
+            state.copy(
+                chart =
+                    state.chart.copy(
+                        customData = sample.data,
+                        seriesKeys = sample.seriesKeys,
+                    ),
+            )
         }
     }
 
     private fun applyInitialPresetData(preset: ChartPreset) {
         when (preset) {
             ChartPreset.Default -> {
-                _dataSet.update {
-                    it.copy(basicData = initialDefaultData)
+                _uiState.update { state ->
+                    state.copy(chart = state.chart.copy(basicData = initialDefaultData))
                 }
             }
 
             ChartPreset.Custom -> {
-                _dataSet.update {
-                    it.copy(
-                        customData = initialSample.customData,
-                        seriesKeys = initialSample.seriesKeys,
+                _uiState.update { state ->
+                    state.copy(
+                        chart =
+                            state.chart.copy(
+                                customData = initialSample.customData,
+                                seriesKeys = initialSample.seriesKeys,
+                            ),
                     )
                 }
             }
         }
     }
 
-    fun togglePlaying() {
-        val shouldPlay = !_isPlaying.value
-        _isPlaying.value = shouldPlay
-        if (shouldPlay) {
+    private fun setPlaying(playing: Boolean) {
+        if (_uiState.value.isPlaying == playing) return
+        _uiState.update { it.copy(isPlaying = playing) }
+        if (playing) {
             startLiveUpdates()
         } else {
             stopLiveUpdates()
         }
-    }
-
-    override fun onCleared() {
-        stopLiveUpdates()
-        super.onCleared()
     }
 
     private fun startLiveUpdates() {
