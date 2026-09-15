@@ -11,7 +11,7 @@ plugins {
 
 val apiCompatibilityBaselineJarsDirProperty = "apiCompatibilityBaselineJarsDir"
 val apiCompatibilityBaselineRefProperty = "apiCompatibilityBaselineRef"
-val apiCompatibilityBaselineFilePath = ".github/api-compatibility-baseline.txt"
+val apiCompatibilityBaselineFilePath = "API-COMPATIBILITY-BASELINE.txt"
 val apiCompatibilityDefaultBaselineJarsDir = "api-compatibility/baseline-jars"
 // japicmp --exclude expects wildcard expressions, not regex.
 val apiCompatibilityInternalExcludePattern = "*.internal.*"
@@ -85,7 +85,7 @@ fun String.toTaskSuffix(): String =
 tasks.register("prepareApiCompatibilityBaselineJars") {
     group = "verification"
     description =
-        "Builds baseline jars for API compatibility checks. Default source is .github/api-compatibility-baseline.txt."
+        "Builds baseline jars for API compatibility checks. Default source is API-COMPATIBILITY-BASELINE.txt."
 
     doLast {
         val baselineJarsDir = project.baselineJarsDir()
@@ -214,6 +214,35 @@ val apiCompatibilityTasks =
 tasks.register("apiCompatibilityCheck") {
     group = "verification"
     description =
-        "Checks published JVM artifacts for breaking API changes using baseline ref from .github/api-compatibility-baseline.txt (or -P$apiCompatibilityBaselineRefProperty / -P$apiCompatibilityBaselineJarsDirProperty override)."
+        "Checks published JVM artifacts for breaking API changes using baseline ref from API-COMPATIBILITY-BASELINE.txt (or -P$apiCompatibilityBaselineRefProperty / -P$apiCompatibilityBaselineJarsDirProperty override)."
     dependsOn(apiCompatibilityTasks)
+}
+
+tasks.register("apiCompatibilityUpdateBaseline") {
+    group = "verification"
+    description =
+        "Writes the current HEAD commit SHA to API-COMPATIBILITY-BASELINE.txt so that intentional breaking changes can be acknowledged by updating the baseline in the same pull request. After running this task, commit the regenerated baseline file alongside the breaking change."
+    val baselineFile = rootProject.file(apiCompatibilityBaselineFilePath)
+    doLast {
+        val currentSha =
+            project.execAndGetStdout(
+                listOf("git", "rev-parse", "-q", "--verify", "HEAD^{commit}"),
+            )
+        if (currentSha.isBlank()) {
+            throw GradleException(
+                "Unable to resolve the current HEAD commit SHA; ensure the working tree is a git checkout.",
+            )
+        }
+        val source = "manual:head:${currentSha.take(12)}"
+        baselineFile.parentFile.mkdirs()
+        baselineFile.writeText(
+            buildString {
+                appendLine("# Baseline commit used by API compatibility workflow.")
+                appendLine("# Updated via the apiCompatibilityUpdateBaseline Gradle task.")
+                appendLine("# source: $source")
+                appendLine(currentSha)
+            },
+        )
+        logger.lifecycle("Updated baseline to $currentSha ($source).")
+    }
 }

@@ -42,7 +42,7 @@ Write direct migration prose with the supported API and required user action.
 3. Resolve the baseline ref:
    - release audits: use the previous release tag provided by the user or
      inferred from release history;
-   - standard checks: read `.github/api-compatibility-baseline.txt`.
+   - standard checks: read `API-COMPATIBILITY-BASELINE.txt`.
 4. Remove the generated `build/reports/api-compatibility/` directory.
 5. Run from the repository root:
 

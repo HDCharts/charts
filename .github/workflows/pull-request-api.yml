@@ -9,7 +9,6 @@ on:
 permissions:
   actions: read
   contents: read
-  pull-requests: read
 
 concurrency:
   group: pr-api-${{ github.event.pull_request.number }}

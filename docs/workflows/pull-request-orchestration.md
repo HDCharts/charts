@@ -7,17 +7,12 @@ compatibility use separate concurrency groups. Each workflow uses the immutable
 
 ## Labels
 
-- `breaking-change` marks an intentional public API incompatibility. The API
-  compatibility job fetches current labels from the GitHub API on every attempt,
-  including failed-job reruns. Adding or removing it does not trigger a separate
-  API run.
 - `run-gif-validation` opts a pull request into GIF baseline validation. The
   validation runs for normal pull-request events while this label is present.
   Adding or removing the label does not trigger a separate validation run. It
   is informational and is not a required status check.
 
-After changing `breaking-change`, rerun the failed API jobs or all jobs. After
-changing `run-gif-validation`, use **Re-run all jobs** in the GIF workflow so its
+After changing `run-gif-validation`, use **Re-run all jobs** in the GIF workflow so its
 label-check job fetches the current labels before deciding whether to validate.
 Failed-job-only reruns reuse the output of a previously successful label check.
 
@@ -67,7 +62,7 @@ cancel validation.
 | `Lint` | Runs Kotlin and build-logic lint when the PR contains code/build changes. |
 | `Test` | Runs `ciTestJvm`, `ciTestAndroid`, `ciTestWeb`, and `ciTestIos` when needed; uploads Gradle's native HTML and XML reports. |
 | `PR API Compatibility` | Runs the API compatibility check on code/build-changing pull-request events and reports the required result; docs-only pull requests skip the check and report as skipped. |
-| `API compatibility` | Runs `./gradlew apiCompatibilityCheck`; a detected public API incompatibility requires the `breaking-change` label. |
+| `API compatibility` | Runs `./gradlew apiCompatibilityCheck`; a detected public API incompatibility fails the PR with a workflow-run annotation that instructs the developer to run `./gradlew apiCompatibilityUpdateBaseline` and commit the updated baseline in the same PR. |
 | `GIF validation` | Runs the opt-in GIF baseline workflow while the `run-gif-validation` label is present. |
 
 Gradle's `chartsTest*` tasks are platform-specific commands for local use. The
@@ -80,8 +75,8 @@ workflow's `Prepare PR` job records the same merge revision and passes it to
 the reusable workflow; the GIF validation workflow receives the triggering
 event's `github.sha` directly, so each check uses the immutable merge result
 for that event. Core checks and API compatibility retain their code-change
-optimization; API compatibility uses the `breaking-change` label only as
-policy input when it does run.
+optimization; API compatibility detects breaking changes directly without
+using labels.
 
 ## Merge protection
 
@@ -117,8 +112,6 @@ access and must not execute untrusted PR code.
 guidance, and repository-metadata-only changes as non-code changes. Both the
 core workflow and the API workflow skip their real validation jobs for
 documentation-only pull requests and use the `Docs-only no-op` job instead.
-The `breaking-change` label is not consulted on docs-only pull requests because
-the compatibility check does not run.
 
 The snapshot release workflow uses the same script with the `snapshot` profile.
 Release notes, GIF baselines, scripts, and other release-relevant changes remain
@@ -129,7 +122,7 @@ snapshot triggers.
 The reusable core and API workflows define two mutually exclusive paths for
 their validation jobs:
 
-- the real validation job, such as `Assemble` or `Compare Public API Against Release`;
+- the real validation job, such as `Assemble` or `Compare Public API Against Baseline`;
 - an explicit docs-only no-op job named `Docs-only no-op`.
 
 GitHub displays both job definitions in the run, even though only one path is
@@ -154,6 +147,8 @@ requested.
   `protect main` ruleset. Reusable workflows can expose check names differently
   after the first rollout, so use the exact names shown on the PR checks page.
 - **Tests fail:** inspect the relevant `PR Test` job logs (JVM, Android, Wasm, or iOS) and download its test-report artifact for Gradle's HTML and XML reports.
-- **API compatibility fails:** add the `breaking-change` label only when a
-  detected public API incompatibility is intentional; unrelated Gradle or
-  compatibility errors are not bypassed by this label.
+- **API compatibility fails:** when a detected public API incompatibility is
+  intentional, run `./gradlew apiCompatibilityUpdateBaseline` locally, commit
+  the updated `API-COMPATIBILITY-BASELINE.txt` in the same pull
+  request, and push. Unrelated Gradle or compatibility errors are not bypassed
+  by updating the baseline.

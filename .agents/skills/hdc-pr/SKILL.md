@@ -37,7 +37,10 @@ to run them locally.
 
 Run `./gradlew apiCompatibilityCheck` locally for public API or library-module
 changes. If it reports an incompatible API, ask whether the change is
-intentional and whether to create a release-note or migration fragment.
+intentional. If it is intentional, run `./gradlew apiCompatibilityUpdateBaseline`
+locally and include the regenerated `API-COMPATIBILITY-BASELINE.txt`
+in the same pull request. Then ask whether to create a release-note or
+migration fragment.
 
 ## Workflow
 

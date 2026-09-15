@@ -15,7 +15,6 @@ on:
 
 permissions:
   contents: read
-  pull-requests: read
 
 jobs:
   skipped:
@@ -27,23 +26,10 @@ jobs:
         run: echo 'No code changes require the API compatibility check.'
 
   api-compatibility:
-    name: Compare Public API Against Release
+    name: Compare Public API Against Baseline
     if: ${{ inputs.should-run }}
     runs-on: ubuntu-latest
     steps:
-      - name: Fetch current PR labels
-        id: labels
-        shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-        run: |
-          set -euo pipefail
-          has_breaking_label="$(gh api --paginate \
-            "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/labels?per_page=100" |
-            jq -s 'any(.[][]; .name == "breaking-change")')"
-          echo "has_breaking_label=${has_breaking_label}" >> "$GITHUB_OUTPUT"
-
       - name: Checkout code
         uses: actions/checkout@v7
         with:
@@ -71,53 +57,63 @@ jobs:
           echo "exit_code=${exit_code}" >> "$GITHUB_OUTPUT"
 
       - name: API compatibility summary
+        id: summary
         if: always()
         shell: bash
         env:
           EXIT_CODE: ${{ steps.compatibility.outputs.exit_code }}
-          HAS_BREAKING_LABEL: ${{ steps.labels.outputs.has_breaking_label }}
         run: |
           set -euo pipefail
 
           result="compatible"
-          binary_change_detected="false"
-          source_change_detected="false"
           any_change_detected="false"
+          instruction=""
 
-          if [[ -f api-compatibility.log ]] && grep -q "Detected binary changes\." api-compatibility.log; then
-            binary_change_detected="true"
-          fi
-
-          if [[ -f api-compatibility.log ]] && grep -q "Detected source incompatible changes\." api-compatibility.log; then
-            source_change_detected="true"
-          fi
-
-          if [[ "${binary_change_detected}" == "true" || "${source_change_detected}" == "true" ]]; then
+          if [[ -f api-compatibility.log ]] && grep -Eq "Detected binary changes\.|Detected source incompatible changes\." api-compatibility.log; then
             any_change_detected="true"
           fi
 
           if [[ -z "${EXIT_CODE}" ]]; then
             result="check did not run (missing exit code)"
           elif [[ "${EXIT_CODE}" != "0" ]]; then
-            if [[ "${HAS_BREAKING_LABEL}" == "true" && "${any_change_detected}" == "true" ]]; then
-              result="incompatible (breaking-change label present, allowed)"
-            elif [[ "${HAS_BREAKING_LABEL}" == "true" ]]; then
-              result="failed (breaking-change label present, but no API break detected)"
+            if [[ "${any_change_detected}" == "true" ]]; then
+              result="incompatible (breaking API change detected)"
+              instruction="Run ./gradlew apiCompatibilityUpdateBaseline and commit the updated API-COMPATIBILITY-BASELINE.txt in this pull request."
             else
-              result="incompatible (breaking-change label missing)"
+              result="failed (compatibility check errored without detecting a break)"
             fi
           fi
 
-          echo "result=${result}" >> "$GITHUB_OUTPUT"
-          echo "binary_change_detected=${binary_change_detected}" >> "$GITHUB_OUTPUT"
-          echo "source_change_detected=${source_change_detected}" >> "$GITHUB_OUTPUT"
+          {
+            echo "## API compatibility"
+            echo "- Result: ${result}"
+            if [[ -n "${instruction}" ]]; then
+              echo ""
+              echo "${instruction}"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          echo "any_change_detected=${any_change_detected}" >> "$GITHUB_OUTPUT"
+          echo "instruction=${instruction}" >> "$GITHUB_OUTPUT"
+
+      - name: Annotate breaking API change on the workflow run
+        if: always()
+        shell: bash
+        env:
+          ANY_CHANGE_DETECTED: ${{ steps.summary.outputs.any_change_detected }}
+          INSTRUCTION: ${{ steps.summary.outputs.instruction }}
+        run: |
+          set -euo pipefail
+          if [[ "${ANY_CHANGE_DETECTED}" != "true" ]]; then
+            exit 0
+          fi
+          echo "::error title=Breaking API change detected::${INSTRUCTION}"
 
       - name: Enforce API compatibility policy
         if: always()
         shell: bash
         env:
           EXIT_CODE: ${{ steps.compatibility.outputs.exit_code }}
-          HAS_BREAKING_LABEL: ${{ steps.labels.outputs.has_breaking_label }}
         run: |
           set -euo pipefail
           if [[ -z "${EXIT_CODE}" ]]; then
@@ -129,13 +125,5 @@ jobs:
             exit 0
           fi
 
-          if [[ "${HAS_BREAKING_LABEL}" == "true" ]]; then
-            if [[ -f api-compatibility.log ]] && grep -Eq "Detected binary changes\.|Detected source incompatible changes\." api-compatibility.log; then
-              exit 0
-            fi
-            echo "API compatibility task failed for a non-compatibility reason even though breaking-change label is present."
-            exit 1
-          fi
-
-          echo "API compatibility check failed without breaking-change label."
+          echo "API compatibility check failed; update the baseline in this pull request to acknowledge intentional breaking changes."
           exit 1
