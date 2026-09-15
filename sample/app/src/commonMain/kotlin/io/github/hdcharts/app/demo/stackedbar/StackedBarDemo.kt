@@ -29,12 +29,9 @@ import hdcharts.app.generated.resources.cd_pause_live_updates
 import hdcharts.app.generated.resources.cd_play_live_updates
 import hdcharts.app.generated.resources.stacked_bar_data_points
 import hdcharts.app.generated.resources.stacked_bar_data_points_range
-import io.github.hdcharts.app.ui.composable.ChartAspectRatioPreset
-import io.github.hdcharts.app.ui.composable.ChartAspectRatioToggle
 import io.github.hdcharts.app.ui.composable.ChartDemo
 import io.github.hdcharts.app.ui.composable.ChartPreset
 import io.github.hdcharts.app.ui.composable.ChartPresetToggle
-import io.github.hdcharts.app.ui.composable.toChartModifier
 import io.github.hdcharts.charts.StackedBarChart
 import io.github.hdcharts.charts.style.ChartContainerDefaults
 import io.github.hdcharts.charts.style.StackedBarChartDefaults
@@ -52,8 +49,6 @@ fun StackedBarChartDemo(viewModel: StackedBarChartViewModel = koinViewModel()) {
     val controlsState by viewModel.controlsState.collectAsStateWithLifecycle()
     val chartColors = LocalChartColors.current
     var preset by remember { mutableStateOf(ChartPreset.Default) }
-    var aspectRatioPreset by remember { mutableStateOf(ChartAspectRatioPreset.Square) }
-    val chartModifier = aspectRatioPreset.toChartModifier()
     val chartContainerStyle = ChartContainerDefaults.style()
     val segmentColors =
         remember(dataSet.segmentKeys, chartColors) {
@@ -72,10 +67,6 @@ fun StackedBarChartDemo(viewModel: StackedBarChartViewModel = koinViewModel()) {
                 ChartPresetToggle(
                     selectedPreset = preset,
                     onPresetSelected = { preset = it },
-                )
-                ChartAspectRatioToggle(
-                    selectedPreset = aspectRatioPreset,
-                    onPresetSelected = { aspectRatioPreset = it },
                 )
             }
         },
@@ -103,12 +94,12 @@ fun StackedBarChartDemo(viewModel: StackedBarChartViewModel = koinViewModel()) {
             )
         },
     ) {
-        key(controlsState.points, controlsState.minValue, controlsState.maxValue, preset, aspectRatioPreset) {
+        key(controlsState.points, controlsState.minValue, controlsState.maxValue, preset) {
             when (preset) {
                 ChartPreset.Default -> {
                     StackedBarChart(
                         data = dataSet.dataSet,
-                        modifier = chartModifier,
+                        modifier = Modifier.fillMaxWidth(),
                         title = dataSet.title,
                         style = StackedBarChartDefaults.style(chartContainerStyle = chartContainerStyle),
                     )
@@ -117,7 +108,7 @@ fun StackedBarChartDemo(viewModel: StackedBarChartViewModel = koinViewModel()) {
                 ChartPreset.Custom -> {
                     StackedBarChart(
                         data = dataSet.dataSet,
-                        modifier = chartModifier,
+                        modifier = Modifier.fillMaxWidth(),
                         title = dataSet.title,
                         style =
                             ChartTestStyleFixtures.stackedBarCustomStyle(

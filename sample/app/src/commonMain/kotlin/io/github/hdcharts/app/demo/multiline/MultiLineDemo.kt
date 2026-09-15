@@ -42,10 +42,7 @@ import hdcharts.app.generated.resources.line_data_points
 import hdcharts.app.generated.resources.line_data_points_range
 import io.github.hdcharts.app.demo.timeline.LiveTimelineControls
 import io.github.hdcharts.app.demo.timeline.timelineAnimationDurationMillis
-import io.github.hdcharts.app.ui.composable.ChartAspectRatioPreset
-import io.github.hdcharts.app.ui.composable.ChartAspectRatioToggle
 import io.github.hdcharts.app.ui.composable.ChartDemo
-import io.github.hdcharts.app.ui.composable.toChartModifier
 import io.github.hdcharts.charts.LineChart
 import io.github.hdcharts.charts.LineChartRenderMode
 import io.github.hdcharts.charts.model.ChartValueFormatters
@@ -65,8 +62,6 @@ fun MultiLineChartDemo(viewModel: MultiLineChartViewModel = koinViewModel()) {
     val chartColors = LocalChartColors.current
     val lineColors = chartColors.seriesColors(uiState.dataSet.seriesKeys.size)
     val timelineAnimationDuration = timelineAnimationDurationMillis(uiState.controlsState.updateIntervalMs)
-    var aspectRatioPreset by remember { mutableStateOf(ChartAspectRatioPreset.Square) }
-    val chartModifier = aspectRatioPreset.toChartModifier()
     val chartContainerStyle = ChartContainerDefaults.style()
 
     ChartDemo(
@@ -80,10 +75,6 @@ fun MultiLineChartDemo(viewModel: MultiLineChartViewModel = koinViewModel()) {
                 MultiLineDemoPresetToggle(
                     selectedPreset = uiState.preset,
                     onPresetSelected = viewModel::onPresetSelected,
-                )
-                ChartAspectRatioToggle(
-                    selectedPreset = aspectRatioPreset,
-                    onPresetSelected = { aspectRatioPreset = it },
                 )
             }
         },
@@ -129,7 +120,7 @@ fun MultiLineChartDemo(viewModel: MultiLineChartViewModel = koinViewModel()) {
             MultiLineDemoPreset.Default -> {
                 LineChart(
                     data = uiState.dataSet.dataSet,
-                    modifier = chartModifier,
+                    modifier = Modifier.fillMaxWidth(),
                     title = uiState.dataSet.title,
                     valueFormatter = ChartValueFormatters.suffix(" ms"),
                     style = LineChartDefaults.style(chartContainerStyle = chartContainerStyle),
@@ -139,7 +130,7 @@ fun MultiLineChartDemo(viewModel: MultiLineChartViewModel = koinViewModel()) {
             MultiLineDemoPreset.Timeline -> {
                 LineChart(
                     data = uiState.dataSet.dataSet,
-                    modifier = chartModifier,
+                    modifier = Modifier.fillMaxWidth(),
                     title = uiState.dataSet.title,
                     valueFormatter = ChartValueFormatters.suffix(" ms"),
                     style = LineChartDefaults.style(chartContainerStyle = chartContainerStyle),
@@ -156,7 +147,7 @@ fun MultiLineChartDemo(viewModel: MultiLineChartViewModel = koinViewModel()) {
                     )
                 LineChart(
                     data = uiState.dataSet.dataSet,
-                    modifier = chartModifier,
+                    modifier = Modifier.fillMaxWidth(),
                     title = uiState.dataSet.title,
                     valueFormatter = ChartValueFormatters.suffix(" ms"),
                     style = customStyle,

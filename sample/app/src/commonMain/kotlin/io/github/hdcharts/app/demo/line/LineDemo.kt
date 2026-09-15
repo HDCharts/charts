@@ -42,10 +42,7 @@ import hdcharts.app.generated.resources.line_data_points
 import hdcharts.app.generated.resources.line_data_points_range
 import io.github.hdcharts.app.demo.timeline.LiveTimelineControls
 import io.github.hdcharts.app.demo.timeline.timelineAnimationDurationMillis
-import io.github.hdcharts.app.ui.composable.ChartAspectRatioPreset
-import io.github.hdcharts.app.ui.composable.ChartAspectRatioToggle
 import io.github.hdcharts.app.ui.composable.ChartDemo
-import io.github.hdcharts.app.ui.composable.toChartModifier
 import io.github.hdcharts.charts.LineChart
 import io.github.hdcharts.charts.LineChartRenderMode
 import io.github.hdcharts.charts.style.ChartContainerDefaults
@@ -60,8 +57,6 @@ import kotlin.time.Duration.Companion.milliseconds
 fun LineChartDemo(viewModel: LineChartViewModel = koinViewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val timelineAnimationDuration = timelineAnimationDurationMillis(uiState.timelineControlsState.updateIntervalMs)
-    var aspectRatioPreset by remember { mutableStateOf(ChartAspectRatioPreset.Square) }
-    val chartModifier = aspectRatioPreset.toChartModifier()
     val chartContainerStyle = ChartContainerDefaults.style()
 
     ChartDemo(
@@ -75,10 +70,6 @@ fun LineChartDemo(viewModel: LineChartViewModel = koinViewModel()) {
                 LineDemoPresetToggle(
                     selectedPreset = uiState.preset,
                     onPresetSelected = viewModel::onPresetSelected,
-                )
-                ChartAspectRatioToggle(
-                    selectedPreset = aspectRatioPreset,
-                    onPresetSelected = { aspectRatioPreset = it },
                 )
             }
         },
@@ -124,7 +115,7 @@ fun LineChartDemo(viewModel: LineChartViewModel = koinViewModel()) {
             LineDemoPreset.Default -> {
                 LineChart(
                     data = uiState.dataSet,
-                    modifier = chartModifier,
+                    modifier = Modifier.fillMaxWidth(),
                     style = LineChartDefaults.style(chartContainerStyle = chartContainerStyle),
                 )
             }
@@ -132,7 +123,7 @@ fun LineChartDemo(viewModel: LineChartViewModel = koinViewModel()) {
             LineDemoPreset.Timeline -> {
                 LineChart(
                     data = uiState.dataSet,
-                    modifier = chartModifier,
+                    modifier = Modifier.fillMaxWidth(),
                     style = LineChartDefaults.style(chartContainerStyle = chartContainerStyle),
                     renderMode = LineChartRenderMode.Timeline,
                     animationDuration = timelineAnimationDuration.milliseconds,
@@ -142,7 +133,7 @@ fun LineChartDemo(viewModel: LineChartViewModel = koinViewModel()) {
             LineDemoPreset.Custom -> {
                 LineChart(
                     data = uiState.dataSet,
-                    modifier = chartModifier,
+                    modifier = Modifier.fillMaxWidth(),
                     style = ChartTestStyleFixtures.lineCustomStyle(chartContainerStyle = chartContainerStyle),
                 )
             }
