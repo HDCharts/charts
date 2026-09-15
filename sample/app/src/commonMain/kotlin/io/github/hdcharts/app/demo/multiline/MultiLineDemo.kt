@@ -66,8 +66,8 @@ fun MultiLineChartDemo(viewModel: MultiLineChartViewModel = koinViewModel()) {
     val lineColors = chartColors.seriesColors(uiState.dataSet.seriesKeys.size)
     val timelineAnimationDuration = timelineAnimationDurationMillis(uiState.controlsState.updateIntervalMs)
     var aspectRatioPreset by remember { mutableStateOf(ChartAspectRatioPreset.Square) }
-    val chartContainerStyle =
-        ChartContainerDefaults.style(modifierChart = aspectRatioPreset.toChartModifier())
+    val chartModifier = aspectRatioPreset.toChartModifier()
+    val chartContainerStyle = ChartContainerDefaults.style()
 
     ChartDemo(
         onRefresh = viewModel::refreshForSelectedPreset,
@@ -129,6 +129,7 @@ fun MultiLineChartDemo(viewModel: MultiLineChartViewModel = koinViewModel()) {
             MultiLineDemoPreset.Default -> {
                 LineChart(
                     data = uiState.dataSet.dataSet,
+                    modifier = chartModifier,
                     title = uiState.dataSet.title,
                     valueFormatter = ChartValueFormatters.suffix(" ms"),
                     style = LineChartDefaults.style(chartContainerStyle = chartContainerStyle),
@@ -138,6 +139,7 @@ fun MultiLineChartDemo(viewModel: MultiLineChartViewModel = koinViewModel()) {
             MultiLineDemoPreset.Timeline -> {
                 LineChart(
                     data = uiState.dataSet.dataSet,
+                    modifier = chartModifier,
                     title = uiState.dataSet.title,
                     valueFormatter = ChartValueFormatters.suffix(" ms"),
                     style = LineChartDefaults.style(chartContainerStyle = chartContainerStyle),
@@ -154,6 +156,7 @@ fun MultiLineChartDemo(viewModel: MultiLineChartViewModel = koinViewModel()) {
                     )
                 LineChart(
                     data = uiState.dataSet.dataSet,
+                    modifier = chartModifier,
                     title = uiState.dataSet.title,
                     valueFormatter = ChartValueFormatters.suffix(" ms"),
                     style = customStyle,

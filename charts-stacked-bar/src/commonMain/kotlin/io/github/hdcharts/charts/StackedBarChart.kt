@@ -1,13 +1,14 @@
 package io.github.hdcharts.charts
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
 import io.github.hdcharts.charts.internal.NO_SELECTION
 import io.github.hdcharts.charts.internal.barstackedchart.toInternal
-import io.github.hdcharts.charts.internal.common.composable.Chart
 import io.github.hdcharts.charts.internal.common.composable.ChartErrors
 import io.github.hdcharts.charts.internal.common.composable.Legend
 import io.github.hdcharts.charts.internal.common.model.ChartDataItem
@@ -77,20 +78,24 @@ fun StackedBarChart(
                 .map { ChartValueFormatters.Default.format(it.values[selectedIndex]) }
                 .toImmutableList()
         }
-    Chart(style.chartContainerStyle, modifier) {
-        Column(modifier = Modifier.wrapContentSize()) {
-            StackedBarChartInternal(
-                data = internalData,
-                title = effectiveTitle,
-                style = internalStyle,
-                colors = colors,
-                interactionEnabled = interactionEnabled,
-                animateOnStart = animateOnStart,
-                selectedBarIndex = selectedIndex,
-                onValueChanged = { index ->
-                    if (index == NO_SELECTION) selection.clear() else selection.select(index)
-                },
-            )
+    BoxWithConstraints(modifier = modifier) {
+        val boundedHeight = maxHeight != Dp.Infinity
+        Column {
+            val plotModifier = if (boundedHeight) Modifier.weight(1f) else Modifier
+            Box(modifier = plotModifier) {
+                StackedBarChartInternal(
+                    data = internalData,
+                    title = effectiveTitle,
+                    style = internalStyle,
+                    colors = colors,
+                    interactionEnabled = interactionEnabled,
+                    animateOnStart = animateOnStart,
+                    selectedBarIndex = selectedIndex,
+                    onValueChanged = { index ->
+                        if (index == NO_SELECTION) selection.clear() else selection.select(index)
+                    },
+                )
+            }
             if (data.categories.isNotEmpty() && segmentNames.any { it.isNotBlank() }) {
                 Legend(
                     chartContainerStyle = style.chartContainerStyle,

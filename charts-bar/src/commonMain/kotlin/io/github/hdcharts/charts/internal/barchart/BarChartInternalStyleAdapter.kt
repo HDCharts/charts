@@ -3,6 +3,7 @@ package io.github.hdcharts.charts.internal.barchart
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalDensity
 import io.github.hdcharts.charts.internal.InternalChartsApi
+import io.github.hdcharts.charts.internal.common.layout.fillMaxSizeChartModifier
 import io.github.hdcharts.charts.style.BarChartStyle
 
 /**
@@ -16,7 +17,7 @@ import io.github.hdcharts.charts.style.BarChartStyle
 fun BarChartStyle.toInternal(): BarChartInternalStyle {
     val density = LocalDensity.current
     return BarChartInternalStyle(
-        modifier = chartContainerStyle.fillMaxSizeChartModifier(),
+        modifier = fillMaxSizeChartModifier(chartContainerStyle),
         chartContainerStyle = chartContainerStyle,
         barColor = bars.color,
         barColors = bars.colors,

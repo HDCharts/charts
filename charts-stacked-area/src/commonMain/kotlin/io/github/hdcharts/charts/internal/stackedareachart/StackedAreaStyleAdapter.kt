@@ -2,13 +2,14 @@ package io.github.hdcharts.charts.internal.stackedareachart
 
 import androidx.compose.runtime.Composable
 import io.github.hdcharts.charts.internal.InternalChartsApi
+import io.github.hdcharts.charts.internal.common.layout.fillMaxSizeChartModifier
 import io.github.hdcharts.charts.style.StackedAreaChartStyle
 
 @InternalChartsApi
 @Composable
 fun StackedAreaChartStyle.toInternal(showXAxisLabels: Boolean = true): StackedAreaInternalStyle =
     StackedAreaInternalStyle(
-        modifier = chartContainerStyle.fillMaxSizeChartModifier(),
+        modifier = fillMaxSizeChartModifier(chartContainerStyle),
         chartContainerStyle = chartContainerStyle,
         areaColor = fill.color,
         areaColors = fill.colors.toList(),

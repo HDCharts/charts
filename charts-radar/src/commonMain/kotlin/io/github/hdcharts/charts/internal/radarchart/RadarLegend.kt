@@ -11,11 +11,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import io.github.hdcharts.charts.internal.InternalChartsApi
 import io.github.hdcharts.charts.internal.common.composable.LegendItems
+import io.github.hdcharts.charts.internal.common.layout.modifierLegend
 import io.github.hdcharts.charts.style.ChartContainerStyle
 import kotlinx.collections.immutable.ImmutableList
 
 @Composable
+@OptIn(InternalChartsApi::class)
 internal fun RadarLegend(
     chartContainerStyle: ChartContainerStyle,
     series: ImmutableList<String>,
@@ -36,12 +39,12 @@ internal fun RadarLegend(
     ) {
         if (series.isNotEmpty()) {
             LegendTitle("Series")
-            Spacer(modifier = Modifier.height(chartContainerStyle.innerPadding / 2f))
+            Spacer(modifier = Modifier.height(chartContainerStyle.contentPadding / 2f))
             LegendItems(
                 items = series,
                 colors = seriesColors,
                 fallbackColor = MaterialTheme.colorScheme.primary,
-                itemPadding = chartContainerStyle.innerPadding,
+                itemPadding = chartContainerStyle.contentPadding,
                 label = { index, seriesName ->
                     seriesLegendLabel(
                         seriesName = seriesName,
@@ -54,16 +57,16 @@ internal fun RadarLegend(
 
         if (categories.isNotEmpty()) {
             if (series.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(chartContainerStyle.innerPadding / 2f))
+                Spacer(modifier = Modifier.height(chartContainerStyle.contentPadding / 2f))
             }
             LegendTitle("Categories")
-            Spacer(modifier = Modifier.height(chartContainerStyle.innerPadding / 2f))
+            Spacer(modifier = Modifier.height(chartContainerStyle.contentPadding / 2f))
             val neutral = MaterialTheme.colorScheme.onSurfaceVariant
             LegendItems(
                 items = categories,
                 colors = categoryColors,
                 fallbackColor = neutral,
-                itemPadding = chartContainerStyle.innerPadding,
+                itemPadding = chartContainerStyle.contentPadding,
             )
         }
     }

@@ -50,8 +50,8 @@ fun BarChartDemo(viewModel: BarChartViewModel = koinViewModel()) {
     val controlsState by viewModel.controlsState.collectAsStateWithLifecycle()
     var preset by remember { mutableStateOf(ChartPreset.Default) }
     var aspectRatioPreset by remember { mutableStateOf(ChartAspectRatioPreset.Square) }
-    val chartContainerStyle =
-        ChartContainerDefaults.style(modifierChart = aspectRatioPreset.toChartModifier())
+    val chartModifier = aspectRatioPreset.toChartModifier()
+    val chartContainerStyle = ChartContainerDefaults.style()
     val refresh: () -> Unit = viewModel::refresh
 
     ChartDemo(
@@ -100,6 +100,7 @@ fun BarChartDemo(viewModel: BarChartViewModel = koinViewModel()) {
                 ChartPreset.Default -> {
                     BarChart(
                         data = dataSet,
+                        modifier = chartModifier,
                         title = dataSet.series.single().name,
                         style = BarChartDefaults.style(chartContainerStyle = chartContainerStyle),
                     )
@@ -108,6 +109,7 @@ fun BarChartDemo(viewModel: BarChartViewModel = koinViewModel()) {
                 ChartPreset.Custom -> {
                     BarChart(
                         data = dataSet,
+                        modifier = chartModifier,
                         title = dataSet.series.single().name,
                         style =
                             ChartTestStyleFixtures.barCustomStyle(

@@ -1,12 +1,13 @@
 package io.github.hdcharts.charts
 
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.github.hdcharts.charts.StackedAreaChart
 import io.github.hdcharts.charts.model.ChartSeries
 import io.github.hdcharts.charts.model.chartDataOf
-import io.github.hdcharts.charts.style.ChartContainerDefaults
 import io.github.hdcharts.charts.style.StackedAreaChartDefaults
 
 private const val STACKED_AREA_CHART_TITLE = "Stacked Area Chart"
@@ -41,10 +42,10 @@ private fun StackedAreaChartPreviewContent() {
         StackedAreaChartDefaults.style(
             fill = StackedAreaChartDefaults.fill(colors = colors, alpha = 0.32f),
             boundary = StackedAreaChartDefaults.boundary(colors = colors, bezier = false),
-            chartContainerStyle = ChartContainerDefaults.style(width = 300.dp),
         )
     StackedAreaChart(
         data = chartDataOf(categories = CATEGORIES, *STACKED_AREA_VALUES.toTypedArray()),
+        modifier = Modifier.width(300.dp),
         title = STACKED_AREA_CHART_TITLE,
         style = style,
     )

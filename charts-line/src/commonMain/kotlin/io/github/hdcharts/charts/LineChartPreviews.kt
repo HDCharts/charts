@@ -1,13 +1,14 @@
 package io.github.hdcharts.charts
 
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import io.github.hdcharts.charts.model.ChartSeries
 import io.github.hdcharts.charts.model.chartDataOf
 import io.github.hdcharts.charts.model.toChartData
-import io.github.hdcharts.charts.style.ChartContainerDefaults
 import io.github.hdcharts.charts.style.LineChartDefaults
 import io.github.hdcharts.charts.style.LineChartStyle
 
@@ -40,13 +41,13 @@ private fun lineStyle(lineColors: List<Color>): LineChartStyle =
         line = LineChartDefaults.line(colors = lineColors, bezier = true),
         points = LineChartDefaults.points(size = 9.dp, visible = true),
         selection = LineChartDefaults.selection(size = 5.dp),
-        chartContainerStyle = ChartContainerDefaults.style(width = 300.dp),
     )
 
 @Composable
 private fun LineChartPreviewContent() {
     LineChart(
         data = SIMPLE_LINE_VALUES.map(Float::toDouble).toChartData(seriesName = LINE_CHART_TITLE),
+        modifier = Modifier.width(300.dp),
         style = lineStyle(lineColors = listOf(MaterialTheme.colorScheme.primary)),
     )
 }
@@ -69,6 +70,7 @@ private fun MultiLineChartPreviewContent() {
                         ChartSeries(name, values.map(Float::toDouble))
                     }.toTypedArray(),
             ),
+        modifier = Modifier.width(300.dp),
         style = lineStyle(lineColors = colors),
     )
 }

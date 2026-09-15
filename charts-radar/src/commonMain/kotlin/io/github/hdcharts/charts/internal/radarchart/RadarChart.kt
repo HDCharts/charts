@@ -33,6 +33,7 @@ import io.github.hdcharts.charts.internal.AnimationSpec
 import io.github.hdcharts.charts.internal.NO_SELECTION
 import io.github.hdcharts.charts.internal.TestTags
 import io.github.hdcharts.charts.internal.common.composable.rememberShowState
+import io.github.hdcharts.charts.internal.common.layout.fillMaxSizeChartModifier
 import io.github.hdcharts.charts.internal.common.model.MultiChartData
 import io.github.hdcharts.charts.internal.common.model.minMax
 import io.github.hdcharts.charts.internal.common.model.normalizeByMinMax
@@ -79,7 +80,7 @@ internal fun RadarChart(
         selectedIndex.intValue = forcedSelectedIndex
     }
 
-    BoxWithConstraints(modifier = style.chartContainerStyle.fillMaxSizeChartModifier()) {
+    BoxWithConstraints(modifier = fillMaxSizeChartModifier(style.chartContainerStyle)) {
         val density = LocalDensity.current
         val widthPx = with(density) { maxWidth.toPx() }
         val heightPx = with(density) { maxHeight.toPx() }

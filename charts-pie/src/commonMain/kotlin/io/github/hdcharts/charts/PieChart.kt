@@ -1,7 +1,11 @@
 package io.github.hdcharts.charts
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -16,11 +20,13 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
+import io.github.hdcharts.charts.internal.InternalChartsApi
 import io.github.hdcharts.charts.internal.NO_SELECTION
 import io.github.hdcharts.charts.internal.TestTags
-import io.github.hdcharts.charts.internal.common.composable.Chart
 import io.github.hdcharts.charts.internal.common.composable.ChartErrors
 import io.github.hdcharts.charts.internal.common.composable.Legend
+import io.github.hdcharts.charts.internal.common.layout.modifierTopTitle
 import io.github.hdcharts.charts.internal.common.palette.generateColorShades
 import io.github.hdcharts.charts.internal.piechart.PieChart
 import io.github.hdcharts.charts.internal.piechart.calculatePercentages
@@ -60,6 +66,7 @@ internal const val PIE_SELECTION_AUTO_DESELECT_TIMEOUT_MS = 3000L
  * @param animateOnStart When `false`, renders the chart in its final state without the
  *   initial reveal animation.
  */
+@OptIn(InternalChartsApi::class)
 @Composable
 fun PieChart(
     data: List<PieSlice>,
@@ -146,71 +153,75 @@ private fun PieChartContent(
         selection.selectedIndex?.takeIf { it in points.indices } ?: NO_SELECTION
     val hasSelection = forcedSelectedIndex != NO_SELECTION
 
-    Chart(
-        chartContainerStyle = style.chartContainerStyle,
-        modifier = modifier,
-    ) {
-        val displayedTitle = if (hasSelection) labels[forcedSelectedIndex] else title.orEmpty()
-        if (displayedTitle.isNotBlank()) {
-            if (hasSelection) {
-                Row(
-                    modifier =
-                        style.chartContainerStyle.modifierTopTitle
-                            .padding(end = style.chartContainerStyle.innerPadding),
-                    horizontalArrangement =
-                        Arrangement.spacedBy(style.chartContainerStyle.innerPadding),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
+    BoxWithConstraints(modifier = modifier) {
+        val boundedHeight = maxHeight != Dp.Infinity
+        Column {
+            val displayedTitle = if (hasSelection) labels[forcedSelectedIndex] else title.orEmpty()
+            if (displayedTitle.isNotBlank()) {
+                if (hasSelection) {
+                    Row(
+                        modifier =
+                            style.chartContainerStyle.modifierTopTitle
+                                .padding(end = style.chartContainerStyle.contentPadding),
+                        horizontalArrangement =
+                            Arrangement.spacedBy(style.chartContainerStyle.contentPadding),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            modifier = Modifier.testTag(TestTags.CHART_TITLE),
+                            text = displayedTitle,
+                            style = style.chartContainerStyle.styleTitle,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                        Text(
+                            text = "${piePercentages[forcedSelectedIndex]}%",
+                            style = selectedPercentageStyle(style.chartContainerStyle.styleTitle),
+                            maxLines = 1,
+                        )
+                    }
+                } else {
                     Text(
-                        modifier = Modifier.testTag(TestTags.CHART_TITLE),
+                        modifier =
+                            style.chartContainerStyle.modifierTopTitle
+                                .testTag(TestTags.CHART_TITLE),
                         text = displayedTitle,
                         style = style.chartContainerStyle.styleTitle,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                    Text(
-                        text = "${piePercentages[forcedSelectedIndex]}%",
-                        style = selectedPercentageStyle(style.chartContainerStyle.styleTitle),
-                        maxLines = 1,
                     )
                 }
-            } else {
-                Text(
-                    modifier =
-                        style.chartContainerStyle.modifierTopTitle
-                            .testTag(TestTags.CHART_TITLE),
-                    text = displayedTitle,
-                    style = style.chartContainerStyle.styleTitle,
+            }
+
+            val chartData =
+                remember(labels, points) {
+                    toInternalChartData(labels = labels, points = points)
+                }
+            val plotModifier =
+                if (boundedHeight) Modifier.weight(1f, fill = false) else Modifier
+            Box(modifier = plotModifier.aspectRatio(1f)) {
+                PieChart(
+                    chartData = chartData,
+                    colors = colors,
+                    style = style,
+                    interactionEnabled = interactionEnabled,
+                    animateOnStart = animateOnStart,
+                    selectedSliceIndex = forcedSelectedIndex,
+                ) { index ->
+                    if (index != NO_SELECTION) {
+                        selection.select(index)
+                        onSelectionInteraction()
+                    } else {
+                        selection.clear()
+                    }
+                }
+            }
+
+            if (style.legend.visible) {
+                Legend(
+                    chartContainerStyle = style.chartContainerStyle,
+                    legend = labels,
+                    colors = colors,
                 )
             }
-        }
-
-        val chartData =
-            remember(labels, points) {
-                toInternalChartData(labels = labels, points = points)
-            }
-        PieChart(
-            chartData = chartData,
-            colors = colors,
-            style = style,
-            interactionEnabled = interactionEnabled,
-            animateOnStart = animateOnStart,
-            selectedSliceIndex = forcedSelectedIndex,
-        ) { index ->
-            if (index != NO_SELECTION) {
-                selection.select(index)
-                onSelectionInteraction()
-            } else {
-                selection.clear()
-            }
-        }
-
-        if (style.legend.visible) {
-            Legend(
-                chartContainerStyle = style.chartContainerStyle,
-                legend = labels,
-                colors = colors,
-            )
         }
     }
 }

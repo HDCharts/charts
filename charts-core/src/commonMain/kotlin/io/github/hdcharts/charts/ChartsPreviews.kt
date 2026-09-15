@@ -1,13 +1,14 @@
 package io.github.hdcharts.charts
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.AndroidUiModes.UI_MODE_NIGHT_NO
 import androidx.compose.ui.tooling.preview.AndroidUiModes.UI_MODE_NIGHT_YES
 import androidx.compose.ui.tooling.preview.AndroidUiModes.UI_MODE_TYPE_NORMAL
 import androidx.compose.ui.tooling.preview.Preview
-import io.github.hdcharts.charts.internal.common.composable.Chart
 import io.github.hdcharts.charts.internal.common.composable.ChartErrors
 import io.github.hdcharts.charts.internal.common.theme.ChartsDefaultTheme
 import io.github.hdcharts.charts.style.ChartContainerDefaults
@@ -40,7 +41,7 @@ fun ChartsPreviewTheme(content: @Composable () -> Unit) {
 @Composable
 private fun ChartsCoreContainerPreview() {
     ChartsPreviewTheme {
-        Chart(chartContainerStyle = ChartContainerDefaults.style()) {
+        Box(modifier = Modifier) {
             Text("HDCharts Core Container")
         }
     }

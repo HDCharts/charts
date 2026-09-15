@@ -24,8 +24,8 @@ fun ChartErrors(
     errors: ImmutableList<String>,
     modifier: Modifier = Modifier,
 ) {
-    Box(modifier = modifier.then(style.modifierMain)) {
-        Column(modifier = Modifier.padding(style.innerPadding).testTag(TestTags.CHART_ERROR)) {
+    Box(modifier = modifier) {
+        Column(modifier = Modifier.padding(style.contentPadding).testTag(TestTags.CHART_ERROR)) {
             errors.forEach { error ->
                 Text(
                     modifier =

@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import io.github.hdcharts.charts.internal.common.layout.modifierLegend
 import io.github.hdcharts.charts.style.ChartContainerStyle
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -34,7 +35,7 @@ fun Legend(
         items = legend,
         colors = colors,
         fallbackColor = MaterialTheme.colorScheme.primary,
-        itemPadding = chartContainerStyle.innerPadding,
+        itemPadding = chartContainerStyle.contentPadding,
         modifier =
             chartContainerStyle.modifierLegend.animateContentSize(
                 animationSpec =

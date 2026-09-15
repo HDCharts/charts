@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -103,6 +104,7 @@ private fun PieChartPreview(values: List<Float>) {
         }
     PieChart(
         data = data,
+        modifier = Modifier.size(PreviewChartSize),
         style =
             PieChartDefaults.style(
                 chartContainerStyle = previewChartContainerStyle(),
@@ -121,6 +123,7 @@ private fun LineChartPreview(values: List<Float>) {
         }
     LineChart(
         data = data,
+        modifier = Modifier.size(PreviewChartSize),
         style =
             LineChartDefaults.style(
                 chartContainerStyle = previewChartContainerStyle(),
@@ -145,6 +148,7 @@ private fun MultiLineChartPreview(series: List<Pair<String, List<Float>>>) {
         }
     LineChart(
         data = data,
+        modifier = Modifier.size(PreviewChartSize),
         title = "",
         style =
             LineChartDefaults.style(
@@ -170,6 +174,7 @@ private fun StackedAreaChartPreview(series: List<Pair<String, List<Float>>>) {
         }
     StackedAreaChart(
         data = data,
+        modifier = Modifier.size(PreviewChartSize),
         title = "",
         style =
             StackedAreaChartDefaults.style(
@@ -193,6 +198,7 @@ private fun BarChartPreview(values: List<Float>) {
         }
     BarChart(
         data = data,
+        modifier = Modifier.size(PreviewChartSize),
         title = "",
         style =
             BarChartDefaults.style(
@@ -228,6 +234,7 @@ private fun HistogramChartPreview(values: List<Float>) {
         }
     HistogramChart(
         data = data,
+        modifier = Modifier.size(PreviewChartSize),
         title = "",
         style =
             HistogramChartDefaults.style(
@@ -260,6 +267,7 @@ private fun StackedBarChartPreview(series: List<Pair<String, List<Float>>>) {
         }
     StackedBarChart(
         data = dataSet,
+        modifier = Modifier.size(PreviewChartSize),
         title = "",
         style =
             StackedBarChartDefaults.style(
@@ -309,6 +317,7 @@ private fun RadarChartPreview(series: List<Pair<String, List<Float>>>) {
 
     RadarChart(
         data = data,
+        modifier = Modifier.size(PreviewChartSize),
         title = "",
         style =
             RadarChartDefaults.style(
@@ -321,12 +330,4 @@ private fun RadarChartPreview(series: List<Pair<String, List<Float>>>) {
 }
 
 @Composable
-private fun previewChartContainerStyle(): ChartContainerStyle =
-    ChartContainerDefaults.style(
-        width = PreviewChartSize,
-        outerPadding = 0.dp,
-        innerPadding = 4.dp,
-        cornerRadius = 14.dp,
-        shadow = 0.dp,
-        backgroundColor = Color.Transparent,
-    )
+private fun previewChartContainerStyle(): ChartContainerStyle = ChartContainerDefaults.style(contentPadding = 4.dp)

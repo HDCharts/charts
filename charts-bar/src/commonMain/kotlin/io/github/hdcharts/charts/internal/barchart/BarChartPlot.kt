@@ -7,7 +7,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import io.github.hdcharts.charts.internal.InternalChartsApi
 import io.github.hdcharts.charts.internal.NO_SELECTION
-import io.github.hdcharts.charts.internal.common.composable.Chart
 import io.github.hdcharts.charts.model.ChartData
 import io.github.hdcharts.charts.model.ChartSelection
 import io.github.hdcharts.charts.model.ChartValueFormatter
@@ -40,7 +39,7 @@ fun BarChartInternalPlot(
                 },
             )
         }
-    Chart(style.chartContainerStyle, modifier) {
+    Box(modifier = modifier) {
         Box(modifier = if (chartTag == null) Modifier else Modifier.testTag(chartTag)) {
             BarChart(
                 chartData = chartData,

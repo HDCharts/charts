@@ -133,6 +133,7 @@ class BarChartDenseDataTest {
             setContent {
                 BarChart(
                     data = largeDataSet(points = 40),
+                    modifier = Modifier.size(320.dp),
                     title = DEFAULT_TITLE,
                 )
             }
@@ -337,11 +338,7 @@ class BarChartDenseDataTest {
                     animateOnStart = false,
                     style =
                         BarChartDefaults.style(
-                            chartContainerStyle =
-                                ChartContainerDefaults.style(
-                                    outerPadding = 0.dp,
-                                    innerPadding = 0.dp,
-                                ),
+                            chartContainerStyle = ChartContainerDefaults.style(contentPadding = 0.dp),
                             bars = BarChartDefaults.bars(space = 0.dp, minBarWidth = 100.dp),
                             axis = BarChartDefaults.axis(yLabels = BarChartDefaults.yLabels(visible = false)),
                         ),
@@ -396,11 +393,7 @@ class BarChartDenseDataTest {
                     animateOnStart = false,
                     style =
                         BarChartDefaults.style(
-                            chartContainerStyle =
-                                ChartContainerDefaults.style(
-                                    outerPadding = 0.dp,
-                                    innerPadding = 0.dp,
-                                ),
+                            chartContainerStyle = ChartContainerDefaults.style(contentPadding = 0.dp),
                             bars =
                                 BarChartDefaults.bars(
                                     color = Color.Blue,

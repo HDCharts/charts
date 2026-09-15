@@ -1,6 +1,5 @@
 package io.github.hdcharts.charts.mock
 
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -310,11 +309,7 @@ internal object MockTest {
 
     private fun mockChartContainerStyle(): ChartContainerStyle =
         ChartContainerStyle(
-            modifierMain = Modifier.fillMaxSize(),
             styleTitle = TextStyle.Default,
-            modifierLegend = Modifier.fillMaxSize(),
-            modifierTopTitle = Modifier.fillMaxSize(),
-            innerPadding = Dp(10f),
-            modifierChart = Modifier.aspectRatio(1f),
+            contentPadding = Dp(10f),
         )
 }

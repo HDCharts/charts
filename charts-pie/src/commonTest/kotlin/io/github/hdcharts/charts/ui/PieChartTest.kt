@@ -1,5 +1,10 @@
 package io.github.hdcharts.charts.ui
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -15,6 +20,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.dp
 import io.github.hdcharts.charts.PIE_SELECTION_AUTO_DESELECT_TIMEOUT_MS
 import io.github.hdcharts.charts.PieChart
 import io.github.hdcharts.charts.internal.TestTags
@@ -35,6 +41,7 @@ import kotlin.math.sin
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class PieChartTest {
     private val pieSlices =
@@ -57,6 +64,53 @@ class PieChartTest {
 
             onNodeWithTag(TestTags.PIE_CHART).assertIsDisplayed()
             onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(TITLE)
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun pieChart_withBoundedSize_keepsLegendInsideContainer() =
+        runComposeUiTest {
+            setContent {
+                PieChart(
+                    data = pieSlices,
+                    modifier = Modifier.size(width = 280.dp, height = 240.dp).testTag("pie-container"),
+                    title = TITLE,
+                    animateOnStart = false,
+                )
+            }
+
+            val containerBounds = onNodeWithTag("pie-container").fetchSemanticsNode().boundsInRoot
+            labels.forEach { label ->
+                val legend = onNodeWithText(label).assertIsDisplayed().fetchSemanticsNode().boundsInRoot
+                assertTrue(legend.bottom <= containerBounds.bottom)
+            }
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun pieChart_insideVerticalScroll_displaysChart() =
+        runComposeUiTest {
+            setContent {
+                Column(
+                    modifier =
+                        Modifier
+                            .width(240.dp)
+                            .verticalScroll(rememberScrollState()),
+                ) {
+                    PieChart(
+                        data = pieSlices,
+                        title = TITLE,
+                        animateOnStart = false,
+                    )
+                }
+            }
+
+            val chartBounds = onNodeWithTag(TestTags.PIE_CHART).assertIsDisplayed().fetchSemanticsNode().boundsInRoot
+            val legendBounds = onNodeWithText(labels.first()).fetchSemanticsNode().boundsInRoot
+            assertTrue(
+                chartBounds.bottom <= legendBounds.top,
+                "Chart bounds $chartBounds overlap legend bounds $legendBounds",
+            )
         }
 
     @OptIn(ExperimentalTestApi::class)
