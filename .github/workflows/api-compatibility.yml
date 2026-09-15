@@ -4,6 +4,10 @@ name: API Compatibility
 on:
   workflow_call:
     inputs:
+      should-run:
+        description: Whether the pull request contains code or build changes.
+        required: true
+        type: boolean
       source-sha:
         description: Immutable merge revision being checked.
         required: true
@@ -14,8 +18,17 @@ permissions:
   pull-requests: read
 
 jobs:
+  skipped:
+    name: Docs-only no-op
+    if: ${{ !inputs.should-run }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Report docs-only no-op
+        run: echo 'No code changes require the API compatibility check.'
+
   api-compatibility:
     name: Compare Public API Against Release
+    if: ${{ inputs.should-run }}
     runs-on: ubuntu-latest
     steps:
       - name: Fetch current PR labels

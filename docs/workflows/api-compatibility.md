@@ -9,22 +9,28 @@ Workflows:
 
 ```mermaid
 flowchart TD
-  A["PR opened, synchronized, or reopened"] --> B["Pull Request API Compatibility"]
-  B --> C["Run API Compatibility"]
-  C --> D{"Breaking API change detected?"}
-  D -- No --> E["Pass: API remains compatible"]
-  D -- Yes --> F{"PR has breaking-change label?"}
-  F -- No --> G["Fail: add breaking-change label or restore compatibility"]
-  F -- Yes --> H["Pass: breaking change is explicitly acknowledged"]
+  A["PR opened, synchronized, or reopened"] --> B["Prepare PR detects code changes"]
+  B --> C{"Code or build changes?"}
+  C -- No --> D["Docs-only no-op: PR API Compatibility skipped"]
+  C -- Yes --> E["Run API Compatibility"]
+  E --> F{"Breaking API change detected?"}
+  F -- No --> G["Pass: API remains compatible"]
+  F -- Yes --> H{"PR has breaking-change label?"}
+  H -- No --> I["Fail: add breaking-change label or restore compatibility"]
+  H -- Yes --> J["Pass: breaking change is explicitly acknowledged"]
 
-  G --> B
+  I --> B
 ```
 
 The `Pull Request API Compatibility` workflow runs for the `opened`,
-`synchronize`, and `reopened` pull-request actions. It runs the Gradle
-compatibility check for every such event, including documentation-only changes.
-The `breaking-change` label is evaluated as policy input: it allows an
-intentional API break but does not trigger a separate workflow run.
+`synchronize`, and `reopened` pull-request actions. Its `Prepare PR` job runs
+the same code-change detector used by the core workflow and gates the
+compatibility check on it. Documentation-only pull requests use the reusable
+workflow's `Docs-only no-op` path and report `PR API Compatibility` as
+skipped rather than running the Gradle compatibility check. The
+`breaking-change` label is evaluated as policy input on pull requests that do
+run the check; it allows an intentional API break but does not trigger a
+separate workflow run.
 
 The compatibility job fetches current PR labels from the GitHub API on each
 attempt rather than using the original event's label snapshot. After adding
