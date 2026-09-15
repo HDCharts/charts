@@ -74,13 +74,13 @@ Use independent modules when you want only specific chart types and smaller depe
 
 ```kotlin
 commonMain.dependencies {
-    implementation("io.github.hdcharts:charts-line:<version>")
-    implementation("io.github.hdcharts:charts-pie:<version>")
-    implementation("io.github.hdcharts:charts-bar:<version>")
-    implementation("io.github.hdcharts:charts-histogram:<version>")
-    implementation("io.github.hdcharts:charts-stacked-bar:<version>")
-    implementation("io.github.hdcharts:charts-stacked-area:<version>")
-    implementation("io.github.hdcharts:charts-radar:<version>")
+    implementation("io.github.hdcharts:line:<version>")
+    implementation("io.github.hdcharts:pie:<version>")
+    implementation("io.github.hdcharts:bar:<version>")
+    implementation("io.github.hdcharts:histogram:<version>")
+    implementation("io.github.hdcharts:stacked-bar:<version>")
+    implementation("io.github.hdcharts:stacked-area:<version>")
+    implementation("io.github.hdcharts:radar:<version>")
 }
 ```
 
@@ -91,14 +91,14 @@ For KMP `commonMain`, keep explicit versions as shown above.
 
 ```kotlin
 dependencies {
-    implementation(platform("io.github.hdcharts:charts-bom:<version>"))
-    implementation("io.github.hdcharts:charts-line")
-    implementation("io.github.hdcharts:charts-pie")
-    implementation("io.github.hdcharts:charts-bar")
-    implementation("io.github.hdcharts:charts-histogram")
-    implementation("io.github.hdcharts:charts-stacked-bar")
-    implementation("io.github.hdcharts:charts-stacked-area")
-    implementation("io.github.hdcharts:charts-radar")
+    implementation(platform("io.github.hdcharts:bom:<version>"))
+    implementation("io.github.hdcharts:line")
+    implementation("io.github.hdcharts:pie")
+    implementation("io.github.hdcharts:bar")
+    implementation("io.github.hdcharts:histogram")
+    implementation("io.github.hdcharts:stacked-bar")
+    implementation("io.github.hdcharts:stacked-area")
+    implementation("io.github.hdcharts:radar")
 }
 ```
 

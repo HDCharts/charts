@@ -9,8 +9,8 @@ longer receives new artifacts.
 | | Before (2.x) | After (3.0.0) |
 |---|---|---|
 | Umbrella | `io.github.dautovicharis:charts` | `io.github.hdcharts:charts` |
-| Modules | `io.github.dautovicharis:charts-line` | `io.github.hdcharts:charts-line` |
-| BOM | `io.github.dautovicharis:charts-bom` | `io.github.hdcharts:charts-bom` |
+| Modules | `io.github.dautovicharis:charts-line` | `io.github.hdcharts:line` |
+| BOM | `io.github.dautovicharis:charts-bom` | `io.github.hdcharts:bom` |
 
 The Kotlin package also moves with the group:
 
@@ -37,7 +37,7 @@ import io.github.hdcharts.charts.LineChart
 import io.github.hdcharts.charts.model.toChartData
 
 commonMain.dependencies {
-    implementation("io.github.hdcharts:charts-line:3.0.0")
+    implementation("io.github.hdcharts:line:3.0.0")
 }
 ```
 
@@ -47,7 +47,7 @@ Consumers staying on `io.github.dautovicharis:charts-line:2.x` do not need to
 change anything until they upgrade to `3.0.0`. When a consumer that pins
 `io.github.dautovicharis:charts-line:3.0.0` resolves the new version, Maven
 Central follows the relocation published under the old group and downloads the
-artifact from `io.github.hdcharts:charts-line:3.0.0` automatically. No manual
+artifact from `io.github.hdcharts:line:3.0.0` automatically. No manual
 intervention is required during the upgrade.
 
 The relocation applies once at the `3.0.0` release. From `3.0.1` onward, the
