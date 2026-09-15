@@ -2,13 +2,14 @@ package io.github.hdcharts.charts.internal.barstackedchart
 
 import androidx.compose.runtime.Composable
 import io.github.hdcharts.charts.internal.InternalChartsApi
+import io.github.hdcharts.charts.internal.common.layout.fillMaxSizeChartModifier
 import io.github.hdcharts.charts.style.StackedBarChartStyle
 
 @InternalChartsApi
 @Composable
 fun StackedBarChartStyle.toInternal(showXAxisLabels: Boolean = true): StackedBarInternalStyle =
     StackedBarInternalStyle(
-        modifier = chartContainerStyle.fillMaxSizeChartModifier(),
+        modifier = fillMaxSizeChartModifier(chartContainerStyle),
         chartContainerStyle = chartContainerStyle,
         barColor = segments.color,
         barAlpha = segments.alpha,

@@ -1,9 +1,14 @@
 package io.github.hdcharts.charts.ui
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.onNodeWithTag
@@ -22,6 +27,7 @@ import io.github.hdcharts.charts.model.staticChartSelection
 import io.github.hdcharts.charts.style.RadarChartDefaults
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class RadarChartTest {
     @OptIn(ExperimentalTestApi::class)
@@ -39,6 +45,33 @@ class RadarChartTest {
             onNodeWithTag(TestTags.CHART_TITLE)
                 .assertTextEquals(TITLE)
                 .isDisplayed()
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun radarChart_insideVerticalScroll_displaysChart() =
+        runComposeUiTest {
+            setContent {
+                Column(
+                    modifier =
+                        Modifier
+                            .width(240.dp)
+                            .verticalScroll(rememberScrollState()),
+                ) {
+                    RadarChart(
+                        data = data,
+                        title = TITLE,
+                        animateOnStart = false,
+                    )
+                }
+            }
+
+            val chartBounds = onNodeWithTag(TestTags.RADAR_CHART).assertIsDisplayed().fetchSemanticsNode().boundsInRoot
+            val legendBounds = onNodeWithText("Categories").fetchSemanticsNode().boundsInRoot
+            assertTrue(
+                chartBounds.bottom <= legendBounds.top,
+                "Chart bounds $chartBounds overlap legend bounds $legendBounds",
+            )
         }
 
     @OptIn(ExperimentalTestApi::class)

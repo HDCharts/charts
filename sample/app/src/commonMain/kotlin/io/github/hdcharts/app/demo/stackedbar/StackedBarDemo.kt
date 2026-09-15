@@ -53,8 +53,8 @@ fun StackedBarChartDemo(viewModel: StackedBarChartViewModel = koinViewModel()) {
     val chartColors = LocalChartColors.current
     var preset by remember { mutableStateOf(ChartPreset.Default) }
     var aspectRatioPreset by remember { mutableStateOf(ChartAspectRatioPreset.Square) }
-    val chartContainerStyle =
-        ChartContainerDefaults.style(modifierChart = aspectRatioPreset.toChartModifier())
+    val chartModifier = aspectRatioPreset.toChartModifier()
+    val chartContainerStyle = ChartContainerDefaults.style()
     val segmentColors =
         remember(dataSet.segmentKeys, chartColors) {
             chartColors.seriesColors(dataSet.segmentKeys.size)
@@ -108,6 +108,7 @@ fun StackedBarChartDemo(viewModel: StackedBarChartViewModel = koinViewModel()) {
                 ChartPreset.Default -> {
                     StackedBarChart(
                         data = dataSet.dataSet,
+                        modifier = chartModifier,
                         title = dataSet.title,
                         style = StackedBarChartDefaults.style(chartContainerStyle = chartContainerStyle),
                     )
@@ -116,6 +117,7 @@ fun StackedBarChartDemo(viewModel: StackedBarChartViewModel = koinViewModel()) {
                 ChartPreset.Custom -> {
                     StackedBarChart(
                         data = dataSet.dataSet,
+                        modifier = chartModifier,
                         title = dataSet.title,
                         style =
                             ChartTestStyleFixtures.stackedBarCustomStyle(

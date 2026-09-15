@@ -1,5 +1,10 @@
 package io.github.hdcharts.charts.ui
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
@@ -10,6 +15,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.v2.runComposeUiTest
+import androidx.compose.ui.unit.dp
 import io.github.hdcharts.charts.StackedBarChart
 import io.github.hdcharts.charts.internal.TestTags
 import io.github.hdcharts.charts.mock.MockTest.colors
@@ -50,6 +56,31 @@ class StackedBarChartTest {
                 .assertIsDisplayed()
             onNodeWithTag(TestTags.STACKED_BAR_CHART_X_AXIS_LABELS).assertIsDisplayed()
             onNodeWithTag(TestTags.STACKED_BAR_CHART_Y_AXIS_LABELS).assertIsDisplayed()
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun stackedBarChart_insideVerticalScroll_hasNonZeroPlotHeight() =
+        runComposeUiTest {
+            setContent {
+                Column(
+                    modifier =
+                        Modifier
+                            .width(240.dp)
+                            .verticalScroll(rememberScrollState()),
+                ) {
+                    StackedBarChart(
+                        data = validData(),
+                        animateOnStart = false,
+                    )
+                }
+            }
+
+            val chartBounds =
+                onNodeWithTag(TestTags.STACKED_BAR_CHART)
+                    .fetchSemanticsNode()
+                    .boundsInRoot
+            assertTrue(chartBounds.height > 0f, "Chart bounds must have positive height: $chartBounds")
         }
 
     @OptIn(ExperimentalTestApi::class)

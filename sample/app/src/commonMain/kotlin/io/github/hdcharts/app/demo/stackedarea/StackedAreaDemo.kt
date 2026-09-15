@@ -53,8 +53,8 @@ fun StackedAreaChartDemo(viewModel: StackedAreaChartViewModel = koinViewModel())
     val chartColors = LocalChartColors.current
     var preset by remember { mutableStateOf(ChartPreset.Default) }
     var aspectRatioPreset by remember { mutableStateOf(ChartAspectRatioPreset.Square) }
-    val chartContainerStyle =
-        ChartContainerDefaults.style(modifierChart = aspectRatioPreset.toChartModifier())
+    val chartModifier = aspectRatioPreset.toChartModifier()
+    val chartContainerStyle = ChartContainerDefaults.style()
     val areaColors =
         remember(dataSet.seriesKeys, chartColors) {
             chartColors.seriesColors(dataSet.seriesKeys.size)
@@ -108,6 +108,7 @@ fun StackedAreaChartDemo(viewModel: StackedAreaChartViewModel = koinViewModel())
                 ChartPreset.Default -> {
                     StackedAreaChart(
                         data = dataSet.data,
+                        modifier = chartModifier,
                         title = dataSet.title,
                         style = StackedAreaChartDefaults.style(chartContainerStyle = chartContainerStyle),
                     )
@@ -116,6 +117,7 @@ fun StackedAreaChartDemo(viewModel: StackedAreaChartViewModel = koinViewModel())
                 ChartPreset.Custom -> {
                     StackedAreaChart(
                         data = dataSet.data,
+                        modifier = chartModifier,
                         title = dataSet.title,
                         style =
                             ChartTestStyleFixtures.stackedAreaCustomStyle(

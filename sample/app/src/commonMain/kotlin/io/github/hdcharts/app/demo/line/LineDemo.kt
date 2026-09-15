@@ -61,8 +61,8 @@ fun LineChartDemo(viewModel: LineChartViewModel = koinViewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val timelineAnimationDuration = timelineAnimationDurationMillis(uiState.timelineControlsState.updateIntervalMs)
     var aspectRatioPreset by remember { mutableStateOf(ChartAspectRatioPreset.Square) }
-    val chartContainerStyle =
-        ChartContainerDefaults.style(modifierChart = aspectRatioPreset.toChartModifier())
+    val chartModifier = aspectRatioPreset.toChartModifier()
+    val chartContainerStyle = ChartContainerDefaults.style()
 
     ChartDemo(
         onRefresh = viewModel::refreshForSelectedPreset,
@@ -124,6 +124,7 @@ fun LineChartDemo(viewModel: LineChartViewModel = koinViewModel()) {
             LineDemoPreset.Default -> {
                 LineChart(
                     data = uiState.dataSet,
+                    modifier = chartModifier,
                     style = LineChartDefaults.style(chartContainerStyle = chartContainerStyle),
                 )
             }
@@ -131,6 +132,7 @@ fun LineChartDemo(viewModel: LineChartViewModel = koinViewModel()) {
             LineDemoPreset.Timeline -> {
                 LineChart(
                     data = uiState.dataSet,
+                    modifier = chartModifier,
                     style = LineChartDefaults.style(chartContainerStyle = chartContainerStyle),
                     renderMode = LineChartRenderMode.Timeline,
                     animationDuration = timelineAnimationDuration.milliseconds,
@@ -140,6 +142,7 @@ fun LineChartDemo(viewModel: LineChartViewModel = koinViewModel()) {
             LineDemoPreset.Custom -> {
                 LineChart(
                     data = uiState.dataSet,
+                    modifier = chartModifier,
                     style = ChartTestStyleFixtures.lineCustomStyle(chartContainerStyle = chartContainerStyle),
                 )
             }

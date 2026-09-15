@@ -1,20 +1,8 @@
 package io.github.hdcharts.charts.style
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -22,38 +10,25 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+private const val DEFAULT_CHART_CONTENT_PADDING_DP = 15
+
+private fun defaultChartContentPadding(): Dp = DEFAULT_CHART_CONTENT_PADDING_DP.dp
+
 /**
- * A class that defines the style for the chart container.
+ * Presentation-only container style shared by every chart.
  *
- * @property modifierMain The main modifier to be applied to the chart container, including its
- * background and (depending on the configured width) its wrapping or fixed width behavior.
- * @property styleTitle The style to be applied to the title of the chart container.
- * @property modifierTopTitle The modifier to be applied to the top title of the chart container.
- * @property modifierLegend The modifier to be applied to the legend of the chart container.
- * @property innerPadding The inner padding of the chart container.
- * @property modifierChart The modifier applied to chart drawing content.
+ * The caller controls the surrounding chrome (background, shadow, shape, and outer padding) and
+ * the chart's size through the chart `modifier`. The style supplies the chart-internal content
+ * spacing and the title text style.
+ *
+ * @property styleTitle The text style applied to chart titles.
+ * @property contentPadding The internal spacing used for axes, title, legend, and plot content.
  */
 @Immutable
 class ChartContainerStyle(
-    val modifierMain: Modifier,
     val styleTitle: TextStyle,
-    val modifierTopTitle: Modifier,
-    val modifierLegend: Modifier,
-    val innerPadding: Dp,
-    val modifierChart: Modifier,
-) {
-    fun wrapContentChartModifier(contentPadding: Dp = innerPadding): Modifier =
-        Modifier
-            .wrapContentSize()
-            .padding(contentPadding)
-            .then(modifierChart)
-
-    fun fillMaxSizeChartModifier(contentPadding: Dp = innerPadding): Modifier =
-        Modifier
-            .padding(contentPadding)
-            .then(modifierChart)
-            .fillMaxSize()
-}
+    val contentPadding: Dp,
+)
 
 /**
  * An object that provides default styles for a chart container.
@@ -62,48 +37,14 @@ object ChartContainerDefaults {
     /**
      * Returns a [ChartContainerStyle] with the provided parameters or their default values.
      *
-     * @param width The width of the chart container. Defaults to Dp.Infinity.
-     * @param outerPadding The outer padding of the chart container. Defaults to 20.dp.
-     * @param innerPadding The inner padding of the chart container. Defaults to 15.dp.
-     * @param cornerRadius The corner radius of the chart container. Defaults to 20.dp.
-     * @param shadow The shadow of the chart container. Defaults to 1.dp.
-     * @param backgroundColor The background color of the chart container. Defaults to a subtle blend of surface and primaryContainer that adapts to dark mode.
-     * @param modifierChart The modifier applied to chart drawing content. Defaults to a square aspect ratio.
+     * The container applies only chart content spacing. Use the chart composable's
+     * `modifier` for width, height, placement, and surrounding padding. Wrap the chart in a
+     * `Surface`, `Card`, or `Modifier.background()` to add chrome when desired.
+     *
+     * @param contentPadding The spacing reserved inside the chart for axes and supporting content.
      */
     @Composable
-    fun style(
-        width: Dp = Dp.Infinity,
-        outerPadding: Dp = 20.dp,
-        innerPadding: Dp = 15.dp,
-        cornerRadius: Dp = 20.dp,
-        shadow: Dp = 1.dp,
-        backgroundColor: Color = defaultChartBackgroundColor(),
-        modifierChart: Modifier = Modifier.aspectRatio(1f),
-    ): ChartContainerStyle {
-        val modifierTitle: Modifier = Modifier.padding(top = innerPadding, start = innerPadding)
-        val modifierLegend: Modifier =
-            Modifier
-                .wrapContentSize()
-                .padding(start = innerPadding, end = innerPadding, bottom = innerPadding)
-
-        val modifierMain: Modifier =
-            Modifier
-                .wrapContentHeight()
-                .padding(outerPadding)
-                .shadow(elevation = shadow, shape = RoundedCornerShape(cornerRadius))
-                .background(
-                    color = backgroundColor,
-                    shape = RoundedCornerShape(cornerRadius),
-                )
-
-        // Dp.Infinity (the default) means the chart wraps its content width; an explicit
-        // finite width constrains the chart to that width.
-        val updatedModifierMain =
-            when (width) {
-                Dp.Infinity -> modifierMain.wrapContentWidth()
-                else -> modifierMain.width(width)
-            }
-
+    fun style(contentPadding: Dp = defaultChartContentPadding()): ChartContainerStyle {
         val titleStyle =
             TextStyle(
                 fontSize = 20.sp,
@@ -111,14 +52,9 @@ object ChartContainerDefaults {
                 textAlign = TextAlign.Start,
                 fontWeight = FontWeight.ExtraBold,
             )
-
         return ChartContainerStyle(
-            modifierMain = updatedModifierMain,
             styleTitle = titleStyle,
-            modifierTopTitle = modifierTitle,
-            modifierLegend = modifierLegend,
-            innerPadding = innerPadding,
-            modifierChart = modifierChart,
+            contentPadding = contentPadding,
         )
     }
 }

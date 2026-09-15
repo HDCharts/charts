@@ -1,7 +1,6 @@
 package io.github.hdcharts.charts
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.unit.dp
 import io.github.hdcharts.charts.model.PieSlice
 import io.github.hdcharts.charts.style.ChartContainerDefaults
 import io.github.hdcharts.charts.style.PieChartDefaults
@@ -17,13 +16,7 @@ private val PIE_SLICES =
 private fun PieChartPreviewContent() {
     val style: PieChartStyle =
         PieChartDefaults.style(
-            chartContainerStyle =
-                ChartContainerDefaults.style(
-                    backgroundColor = androidx.compose.material3.MaterialTheme.colorScheme.surface,
-                    cornerRadius = 20.dp,
-                    shadow = 15.dp,
-                    innerPadding = 15.dp,
-                ),
+            chartContainerStyle = ChartContainerDefaults.style(),
         )
     PieChart(
         data = PIE_SLICES,

@@ -2,13 +2,14 @@ package io.github.hdcharts.charts.internal.linechart
 
 import androidx.compose.runtime.Composable
 import io.github.hdcharts.charts.internal.InternalChartsApi
+import io.github.hdcharts.charts.internal.common.layout.wrapContentChartModifier
 import io.github.hdcharts.charts.style.LineChartStyle
 
 @InternalChartsApi
 @Composable
 fun LineChartStyle.toInternal(): LineChartInternalStyle =
     LineChartInternalStyle(
-        modifier = chartContainerStyle.wrapContentChartModifier(),
+        modifier = wrapContentChartModifier(chartContainerStyle),
         chartContainerStyle = chartContainerStyle,
         dragPointColorSameAsLine = false,
         pointColorSameAsLine = false,

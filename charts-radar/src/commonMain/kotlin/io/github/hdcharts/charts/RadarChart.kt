@@ -1,14 +1,19 @@
 package io.github.hdcharts.charts
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.unit.Dp
 import io.github.hdcharts.charts.internal.NO_SELECTION
 import io.github.hdcharts.charts.internal.TestTags
-import io.github.hdcharts.charts.internal.common.composable.Chart
 import io.github.hdcharts.charts.internal.common.composable.ChartErrors
+import io.github.hdcharts.charts.internal.common.layout.modifierTopTitle
 import io.github.hdcharts.charts.internal.common.model.ChartDataItem
 import io.github.hdcharts.charts.internal.common.model.MultiChartData
 import io.github.hdcharts.charts.internal.common.palette.generateColorShades
@@ -97,41 +102,48 @@ fun RadarChart(
                 .map { ChartValueFormatters.Default.format(it.values[selectedIndex]) }
                 .toImmutableList()
         }
-    Chart(chartContainerStyle = style.chartContainerStyle, modifier = modifier) {
-        if (effectiveTitle.isNotBlank()) {
-            Text(
-                modifier =
-                    style.chartContainerStyle.modifierTopTitle
-                        .testTag(TestTags.CHART_TITLE),
-                text = effectiveTitle,
-                style = style.chartContainerStyle.styleTitle,
-            )
-        }
-        RadarChart(
-            data = internalData,
-            style = internalStyle,
-            colors = lineColors,
-            categoryColors = categoryColorsList,
-            axisLabels = categories,
-            interactionEnabled = interactionEnabled,
-            animateOnStart = animateOnStart,
-            selectedAxisIndex = selectedIndex,
-            onValueChanged = { index ->
-                if (index == NO_SELECTION) selection.clear() else selection.select(index)
-            },
-        )
-        if (
-            data.categories.isNotEmpty() &&
-            (style.categories.legendVisible || selectedIndex != NO_SELECTION)
-        ) {
-            RadarLegend(
-                chartContainerStyle = style.chartContainerStyle,
-                series = if (hasMultipleSeries) seriesNames else persistentListOf(),
-                seriesColors = lineColors,
-                seriesLabels = if (hasMultipleSeries) selectedLabels else persistentListOf(),
-                categories = categories,
-                categoryColors = categoryColorsList,
-            )
+    BoxWithConstraints(modifier = modifier) {
+        val boundedHeight = maxHeight != Dp.Infinity
+        Column {
+            if (effectiveTitle.isNotBlank()) {
+                Text(
+                    modifier =
+                        style.chartContainerStyle.modifierTopTitle
+                            .testTag(TestTags.CHART_TITLE),
+                    text = effectiveTitle,
+                    style = style.chartContainerStyle.styleTitle,
+                )
+            }
+            val plotModifier =
+                if (boundedHeight) Modifier.weight(1f, fill = false) else Modifier
+            Box(modifier = plotModifier.aspectRatio(1f)) {
+                RadarChart(
+                    data = internalData,
+                    style = internalStyle,
+                    colors = lineColors,
+                    categoryColors = categoryColorsList,
+                    axisLabels = categories,
+                    interactionEnabled = interactionEnabled,
+                    animateOnStart = animateOnStart,
+                    selectedAxisIndex = selectedIndex,
+                    onValueChanged = { index ->
+                        if (index == NO_SELECTION) selection.clear() else selection.select(index)
+                    },
+                )
+            }
+            if (
+                data.categories.isNotEmpty() &&
+                (style.categories.legendVisible || selectedIndex != NO_SELECTION)
+            ) {
+                RadarLegend(
+                    chartContainerStyle = style.chartContainerStyle,
+                    series = if (hasMultipleSeries) seriesNames else persistentListOf(),
+                    seriesColors = lineColors,
+                    seriesLabels = if (hasMultipleSeries) selectedLabels else persistentListOf(),
+                    categories = categories,
+                    categoryColors = categoryColorsList,
+                )
+            }
         }
     }
 }

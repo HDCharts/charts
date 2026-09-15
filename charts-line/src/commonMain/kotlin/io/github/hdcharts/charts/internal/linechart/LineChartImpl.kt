@@ -1,5 +1,8 @@
 package io.github.hdcharts.charts.internal.linechart
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -8,10 +11,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.hdcharts.charts.LineChartRenderMode
 import io.github.hdcharts.charts.internal.NO_SELECTION
-import io.github.hdcharts.charts.internal.common.composable.Chart
 import io.github.hdcharts.charts.internal.common.composable.ChartErrors
 import io.github.hdcharts.charts.internal.common.composable.Legend
 import io.github.hdcharts.charts.internal.common.composable.rememberDenseExpandedState
@@ -127,71 +130,79 @@ internal fun LineChartImpl(
         val showCompactToggle = isDenseMorphData
         val showZoomControlsInHeader = isDenseMorphMode && style.zoomControlsVisible
         val showHeader = title.isNotBlank() || showCompactToggle || showZoomControlsInHeader
-        Chart(
-            chartContainerStyle = style.chartContainerStyle,
-            modifier = modifier,
-        ) {
-            if (showHeader) {
-                LineChartHeader(
-                    title = title,
-                    style = style,
-                    showDensityToggle = showCompactToggle,
-                    denseExpanded = denseExpanded,
-                    onToggleDensity = { denseExpanded = !denseExpanded },
-                    showZoomControls = showZoomControlsInHeader,
-                    zoomScale = zoomScale,
-                    minZoom = LINE_ZOOM_MIN,
-                    maxZoom = LINE_ZOOM_MAX,
-                    onZoomOut = {
-                        zoomScale = zoomOutScale(zoomScale, LINE_ZOOM_STEP, LINE_ZOOM_MIN, LINE_ZOOM_MAX)
-                    },
-                    onZoomIn = {
-                        zoomScale = zoomInScale(zoomScale, LINE_ZOOM_STEP, LINE_ZOOM_MIN, LINE_ZOOM_MAX)
-                    },
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(
-                                top = style.chartContainerStyle.innerPadding,
-                                start = style.chartContainerStyle.innerPadding,
-                                end = style.chartContainerStyle.innerPadding,
-                                bottom = if (showZoomControlsInHeader) style.chartContainerStyle.innerPadding else 0.dp,
-                            ),
-                )
-            }
+        BoxWithConstraints(modifier = modifier) {
+            val boundedHeight = maxHeight != Dp.Infinity
+            Column {
+                if (showHeader) {
+                    LineChartHeader(
+                        title = title,
+                        style = style,
+                        showDensityToggle = showCompactToggle,
+                        denseExpanded = denseExpanded,
+                        onToggleDensity = { denseExpanded = !denseExpanded },
+                        showZoomControls = showZoomControlsInHeader,
+                        zoomScale = zoomScale,
+                        minZoom = LINE_ZOOM_MIN,
+                        maxZoom = LINE_ZOOM_MAX,
+                        onZoomOut = {
+                            zoomScale = zoomOutScale(zoomScale, LINE_ZOOM_STEP, LINE_ZOOM_MIN, LINE_ZOOM_MAX)
+                        },
+                        onZoomIn = {
+                            zoomScale = zoomInScale(zoomScale, LINE_ZOOM_STEP, LINE_ZOOM_MIN, LINE_ZOOM_MAX)
+                        },
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(
+                                    top = style.chartContainerStyle.contentPadding,
+                                    start = style.chartContainerStyle.contentPadding,
+                                    end = style.chartContainerStyle.contentPadding,
+                                    bottom =
+                                        if (showZoomControlsInHeader) {
+                                            style.chartContainerStyle.contentPadding
+                                        } else {
+                                            0.dp
+                                        },
+                                ),
+                    )
+                }
 
-            LineChart(
-                data = renderData,
-                style = style,
-                colors = lineColors,
-                interactionEnabled = interactionEnabled,
-                animateOnStart = animateOnStart,
-                renderMode = renderMode,
-                animationDuration = animationDuration,
-                isDenseMorphMode = isDenseMorphMode,
-                scrollState = scrollState,
-                zoomScale = zoomScale,
-                selectedPointIndex = effectiveSelectedIndex,
-                valueFormatter = valueFormatter,
-                axisValueFormatter = axisValueFormatter,
-                onValueChanged = { renderIndex ->
-                    onValueChanged(
-                        if (compactDenseMode) {
-                            sourceIndexForRenderIndex(renderIndex, sourceRanges)
-                        } else {
-                            renderIndex
+                val plotModifier = if (boundedHeight) Modifier.weight(1f) else Modifier
+                Box(modifier = plotModifier) {
+                    LineChart(
+                        data = renderData,
+                        style = style,
+                        colors = lineColors,
+                        interactionEnabled = interactionEnabled,
+                        animateOnStart = animateOnStart,
+                        renderMode = renderMode,
+                        animationDuration = animationDuration,
+                        isDenseMorphMode = isDenseMorphMode,
+                        scrollState = scrollState,
+                        zoomScale = zoomScale,
+                        selectedPointIndex = effectiveSelectedIndex,
+                        valueFormatter = valueFormatter,
+                        axisValueFormatter = axisValueFormatter,
+                        onValueChanged = { renderIndex ->
+                            onValueChanged(
+                                if (compactDenseMode) {
+                                    sourceIndexForRenderIndex(renderIndex, sourceRanges)
+                                } else {
+                                    renderIndex
+                                },
+                            )
                         },
                     )
-                },
-            )
+                }
 
-            if (renderData.hasCategories() || isTimelineMode) {
-                Legend(
-                    chartContainerStyle = style.chartContainerStyle,
-                    legend = renderData.items.map { it.label }.toImmutableList(),
-                    colors = lineColors,
-                    labels = labels,
-                )
+                if (renderData.hasCategories() || isTimelineMode) {
+                    Legend(
+                        chartContainerStyle = style.chartContainerStyle,
+                        legend = renderData.items.map { it.label }.toImmutableList(),
+                        colors = lineColors,
+                        labels = labels,
+                    )
+                }
             }
         }
     } else {

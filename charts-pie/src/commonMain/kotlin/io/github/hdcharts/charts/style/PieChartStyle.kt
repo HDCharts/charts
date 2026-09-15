@@ -1,7 +1,5 @@
 package io.github.hdcharts.charts.style
 
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
@@ -12,7 +10,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.hdcharts.charts.internal.DONUT_MAX_PERCENTAGE
 import io.github.hdcharts.charts.internal.DONUT_MIN_PERCENTAGE
-import io.github.hdcharts.charts.internal.piechart.AdaptivePieSizeModifier
+import io.github.hdcharts.charts.internal.InternalChartsApi
+import io.github.hdcharts.charts.internal.common.layout.fillMaxSizeChartModifier
 
 /**
  * The style for a Pie Chart, grouped into cohesive sub-styles.
@@ -84,6 +83,7 @@ object PieChartDefaults {
      * @param legend The legend configuration. Defaults to a visible legend.
      */
     @Composable
+    @OptIn(InternalChartsApi::class)
     fun style(
         chartContainerStyle: ChartContainerStyle = ChartContainerDefaults.style(),
         donut: PieChartDonutStyle = donut(),
@@ -91,10 +91,7 @@ object PieChartDefaults {
         border: PieChartBorderStyle = border(),
         legend: LegendStyle = legend(),
     ): PieChartStyle {
-        val modifier: Modifier =
-            AdaptivePieSizeModifier
-                .padding(chartContainerStyle.innerPadding)
-                .fillMaxSize()
+        val modifier: Modifier = fillMaxSizeChartModifier(chartContainerStyle)
         return PieChartStyle(
             modifier = modifier,
             chartContainerStyle = chartContainerStyle,

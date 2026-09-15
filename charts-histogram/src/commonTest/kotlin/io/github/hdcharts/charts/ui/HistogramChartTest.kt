@@ -324,11 +324,7 @@ class HistogramChartTest {
                     animateOnStart = false,
                     style =
                         HistogramChartDefaults.style(
-                            chartContainerStyle =
-                                ChartContainerDefaults.style(
-                                    outerPadding = 0.dp,
-                                    innerPadding = 0.dp,
-                                ),
+                            chartContainerStyle = ChartContainerDefaults.style(contentPadding = 0.dp),
                             bars = HistogramChartDefaults.bars(colors = colors, alpha = 1f),
                             range = BarChartDefaults.range(min = 0.0, max = 1.0),
                             grid = BarChartDefaults.grid(visible = false),

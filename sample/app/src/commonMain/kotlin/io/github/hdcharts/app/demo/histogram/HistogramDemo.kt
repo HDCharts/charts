@@ -50,8 +50,8 @@ fun HistogramChartDemo(viewModel: HistogramChartViewModel = koinViewModel()) {
     val controlsState by viewModel.controlsState.collectAsStateWithLifecycle()
     var preset by remember { mutableStateOf(ChartPreset.Default) }
     var aspectRatioPreset by remember { mutableStateOf(ChartAspectRatioPreset.Square) }
-    val chartContainerStyle =
-        ChartContainerDefaults.style(modifierChart = aspectRatioPreset.toChartModifier())
+    val chartModifier = aspectRatioPreset.toChartModifier()
+    val chartContainerStyle = ChartContainerDefaults.style()
     val refresh: () -> Unit = viewModel::refresh
 
     ChartDemo(
@@ -100,6 +100,7 @@ fun HistogramChartDemo(viewModel: HistogramChartViewModel = koinViewModel()) {
                 ChartPreset.Default -> {
                     HistogramChart(
                         data = dataSet,
+                        modifier = chartModifier,
                         title = dataSet.series.single().name,
                         style = HistogramChartDefaults.style(chartContainerStyle = chartContainerStyle),
                     )
@@ -108,6 +109,7 @@ fun HistogramChartDemo(viewModel: HistogramChartViewModel = koinViewModel()) {
                 ChartPreset.Custom -> {
                     HistogramChart(
                         data = dataSet,
+                        modifier = chartModifier,
                         title = dataSet.series.single().name,
                         style =
                             ChartTestStyleFixtures.histogramCustomStyle(
