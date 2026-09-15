@@ -49,6 +49,7 @@ import io.github.hdcharts.app.library.BuildConfig
 import io.github.hdcharts.app.ui.composable.InteractiveSurfaceCallbacks
 import io.github.hdcharts.app.ui.composable.LocalInteractiveSurfaceCallbacks
 import io.github.hdcharts.sampleshared.theme.AppTheme
+import io.github.hdcharts.sampleshared.theme.Dimens
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -56,7 +57,7 @@ import org.koin.compose.viewmodel.koinViewModel
 
 private val WideLayoutBreakpoint = 980.dp
 private val SettingsRailWidth = 320.dp
-private val SettingsEdgeOpenZoneWidth = 20.dp
+private val SettingsEdgeOpenZoneWidth = Dimens.drawerPadding
 private val SettingsEdgeOpenDragThreshold = 28.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -327,7 +328,7 @@ fun MainScreenContent(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 12.dp),
+                    .padding(bottom = Dimens.md),
         )
     }
 }

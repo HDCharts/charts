@@ -2,12 +2,12 @@ package io.github.hdcharts.app.demo.line
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import io.github.hdcharts.app.data.LiveLatencySingleSeriesWindow
-import io.github.hdcharts.app.data.LiveLatencyTimelineUseCase
 import io.github.hdcharts.app.demo.timeline.LiveTimelineControlsState
 import io.github.hdcharts.app.demo.timeline.LiveTimelineDefaults
 import io.github.hdcharts.charts.model.ChartData
 import io.github.hdcharts.charts.model.toChartData
+import io.github.hdcharts.sampleshared.data.LiveLatencySingleSeriesWindow
+import io.github.hdcharts.sampleshared.data.LiveLatencyTimelineUseCase
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow

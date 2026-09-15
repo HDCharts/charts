@@ -13,10 +13,10 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import hdcharts.app.generated.resources.Res
 import hdcharts.app.generated.resources.timeline_update_interval
 import hdcharts.app.generated.resources.timeline_window_size
+import io.github.hdcharts.sampleshared.theme.Dimens
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToInt
 
@@ -55,8 +55,8 @@ fun LiveTimelineControls(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .padding(top = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
+                .padding(top = Dimens.sm),
+        verticalArrangement = Arrangement.spacedBy(Dimens.xs),
     ) {
         Text(
             text = stringResource(Res.string.timeline_update_interval, draftIntervalMs.roundToInt()),

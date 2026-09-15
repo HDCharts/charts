@@ -30,6 +30,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.github.hdcharts.sampleshared.theme.Dimens
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -64,8 +65,8 @@ fun ChartGallery(
             modifier
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 18.dp, vertical = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+                .padding(horizontal = Dimens.galleryPadding, vertical = Dimens.cardPadding),
+        verticalArrangement = Arrangement.spacedBy(Dimens.cardPadding),
     ) {
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
             val preferredColumns = LocalChartGalleryColumns.current.coerceIn(1, 3)
@@ -76,13 +77,13 @@ fun ChartGallery(
                     else -> 1
                 }
 
-            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(Dimens.cardPadding)) {
                 items.chunked(columns).forEach { rowItems ->
                     val hasUnevenLastItem = columns > 1 && rowItems.size == 1
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(Dimens.cardPadding),
                     ) {
                         rowItems.forEach { item ->
                             val accent = MaterialTheme.colorScheme.primary
@@ -116,7 +117,7 @@ fun ChartGallery(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .padding(top = 4.dp, bottom = 12.dp),
+                    .padding(top = Dimens.xs, bottom = Dimens.md),
             contentAlignment = Alignment.Center,
         ) {
             Text(
@@ -144,7 +145,7 @@ private fun ChartGalleryCard(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
+                    .padding(Dimens.cardPadding),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -164,7 +165,7 @@ private fun ChartGalleryCard(
                         tint = accent,
                     )
                 }
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(Dimens.md))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = stringResource(item.destination.title),
@@ -179,11 +180,11 @@ private fun ChartGalleryCard(
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(Dimens.md))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                horizontalArrangement = Arrangement.spacedBy(Dimens.controlSpacing),
             ) {
                 Column(
                     modifier = Modifier.fillMaxWidth(),

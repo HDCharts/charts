@@ -49,6 +49,7 @@ import io.github.hdcharts.charts.model.ChartValueFormatters
 import io.github.hdcharts.charts.style.ChartContainerDefaults
 import io.github.hdcharts.charts.style.LineChartDefaults
 import io.github.hdcharts.sampleshared.fixtures.ChartTestStyleFixtures
+import io.github.hdcharts.sampleshared.theme.Dimens
 import io.github.hdcharts.sampleshared.theme.LocalChartColors
 import io.github.hdcharts.sampleshared.theme.seriesColors
 import org.jetbrains.compose.resources.stringResource
@@ -69,7 +70,7 @@ fun MultiLineChartDemo(viewModel: MultiLineChartViewModel = koinViewModel()) {
         refreshVisible = uiState.preset != MultiLineDemoPreset.Timeline,
         presetContent = {
             Column(
-                verticalArrangement = Arrangement.spacedBy(10.dp),
+                verticalArrangement = Arrangement.spacedBy(Dimens.controlSpacing),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 MultiLineDemoPresetToggle(
@@ -176,8 +177,8 @@ private fun MultiLineDataPointsControls(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .padding(top = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
+                .padding(top = Dimens.sm),
+        verticalArrangement = Arrangement.spacedBy(Dimens.xs),
     ) {
         Text(
             text = stringResource(Res.string.line_data_points, draftPoints.roundToInt()),
@@ -220,7 +221,7 @@ private fun MultiLineDemoPresetToggle(
 ) {
     Row(
         modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(Dimens.sm),
     ) {
         MultiLineDemoPresetItem(
             label = stringResource(Res.string.chart_default),
@@ -246,7 +247,7 @@ private fun MultiLineDemoPresetItem(
     selected: Boolean,
     onClick: () -> Unit,
 ) {
-    val shape = RoundedCornerShape(12.dp)
+    val shape = RoundedCornerShape(Dimens.md)
     val backgroundColor =
         if (selected) {
             MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
@@ -271,6 +272,6 @@ private fun MultiLineDemoPresetItem(
                 .background(backgroundColor, shape)
                 .clickable(onClick = onClick)
                 .semantics { role = Role.Button }
-                .padding(horizontal = 14.dp, vertical = 8.dp),
+                .padding(horizontal = 14.dp, vertical = Dimens.sm),
     )
 }

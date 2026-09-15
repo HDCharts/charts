@@ -37,3 +37,14 @@ data class RadarCustomSampleData(
     val data: ChartData,
     val seriesKeys: List<String>,
 )
+
+data class ChartGalleryPreview(
+    val pieValues: List<Double>,
+    val lineValues: List<Double>,
+    val multiLineSeries: List<Pair<String, List<Double>>>,
+    val stackedAreaSeries: List<Pair<String, List<Double>>>,
+    val barValues: List<Double>,
+    val histogramValues: List<Double>,
+    val stackedSeries: List<Pair<String, List<Double>>>,
+    val radarSeries: List<Pair<String, List<Double>>>,
+)

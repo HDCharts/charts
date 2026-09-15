@@ -1,7 +1,8 @@
 package io.github.hdcharts.app
 
 import androidx.lifecycle.ViewModel
-import io.github.hdcharts.app.data.ChartPreviewUseCase
+import io.github.hdcharts.sampleshared.data.ChartGalleryPreview
+import io.github.hdcharts.sampleshared.data.ChartPreviewUseCase
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,20 +17,9 @@ data class ChartGalleryItemUiState(
     val subtitle: String,
 )
 
-data class ChartGalleryPreviewState(
-    val pieValues: List<Float>,
-    val lineValues: List<Float>,
-    val multiLineSeries: List<Pair<String, List<Float>>>,
-    val stackedAreaSeries: List<Pair<String, List<Float>>>,
-    val barValues: List<Float>,
-    val histogramValues: List<Float>,
-    val stackedSeries: List<Pair<String, List<Float>>>,
-    val radarSeries: List<Pair<String, List<Float>>>,
-)
-
 data class ChartGalleryState(
     val items: List<ChartGalleryItemUiState>,
-    val previews: ChartGalleryPreviewState,
+    val previews: ChartGalleryPreview,
 )
 
 class ChartGalleryViewModel(
@@ -130,7 +120,7 @@ class ChartGalleryViewModel(
     private suspend fun previewLoop(
         baseIntervalMs: Long,
         jitterMs: Long,
-        update: (ChartGalleryPreviewState) -> ChartGalleryPreviewState,
+        update: (ChartGalleryPreview) -> ChartGalleryPreview,
     ) {
         while (true) {
             delay(randomizedInterval(baseIntervalMs, jitterMs))

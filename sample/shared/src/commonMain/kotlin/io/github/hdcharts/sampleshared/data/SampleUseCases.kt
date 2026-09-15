@@ -1,8 +1,10 @@
 package io.github.hdcharts.sampleshared.data
 
 import io.github.hdcharts.sampleshared.data.impl.DefaultBarSampleUseCase
+import io.github.hdcharts.sampleshared.data.impl.DefaultChartPreviewUseCase
 import io.github.hdcharts.sampleshared.data.impl.DefaultHistogramSampleUseCase
 import io.github.hdcharts.sampleshared.data.impl.DefaultLineSampleUseCase
+import io.github.hdcharts.sampleshared.data.impl.DefaultLiveLatencyTimelineUseCase
 import io.github.hdcharts.sampleshared.data.impl.DefaultMultiLineSampleUseCase
 import io.github.hdcharts.sampleshared.data.impl.DefaultPieSampleUseCase
 import io.github.hdcharts.sampleshared.data.impl.DefaultRadarSampleUseCase
@@ -24,3 +26,7 @@ fun stackedBarSampleUseCase(): StackedBarSampleUseCase = DefaultStackedBarSample
 fun stackedAreaSampleUseCase(): StackedAreaSampleUseCase = DefaultStackedAreaSampleUseCase()
 
 fun radarSampleUseCase(): RadarSampleUseCase = DefaultRadarSampleUseCase()
+
+fun liveLatencyTimelineUseCase(): LiveLatencyTimelineUseCase = DefaultLiveLatencyTimelineUseCase()
+
+fun chartPreviewUseCase(): ChartPreviewUseCase = DefaultChartPreviewUseCase()

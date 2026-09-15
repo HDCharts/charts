@@ -2,12 +2,12 @@ package io.github.hdcharts.app.demo.multiline
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import io.github.hdcharts.app.data.LiveLatencyMultiSeriesWindow
-import io.github.hdcharts.app.data.LiveLatencyTimelineUseCase
 import io.github.hdcharts.app.demo.timeline.LiveTimelineControlsState
 import io.github.hdcharts.app.demo.timeline.LiveTimelineDefaults
 import io.github.hdcharts.charts.model.ChartData
 import io.github.hdcharts.charts.model.toChartData
+import io.github.hdcharts.sampleshared.data.LiveLatencyMultiSeriesWindow
+import io.github.hdcharts.sampleshared.data.LiveLatencyTimelineUseCase
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -291,17 +291,17 @@ class MultiLineChartViewModel(
         val safeMin = controls.minValue.toDouble()
         val safeMax = controls.maxValue.toDouble().coerceAtLeast(safeMin + 1.0)
         val sourceValues = baseWindow.p50Values + baseWindow.p95Values
-        val sourceMin = sourceValues.minOrNull()?.toDouble() ?: 0.0
-        val sourceMax = sourceValues.maxOrNull()?.toDouble() ?: sourceMin
+        val sourceMin = sourceValues.minOrNull() ?: 0.0
+        val sourceMax = sourceValues.maxOrNull() ?: sourceMin
         val sourceRange = sourceMax - sourceMin
 
-        fun normalize(values: List<Float>): List<Float> =
+        fun normalize(values: List<Double>): List<Double> =
             if (sourceRange == 0.0) {
-                List(values.size) { safeMin.toFloat() }
+                List(values.size) { safeMin }
             } else {
                 values.map { value ->
                     val normalized = ((value - sourceMin) / sourceRange).coerceIn(0.0, 1.0)
-                    (safeMin + normalized * (safeMax - safeMin)).toFloat()
+                    safeMin + normalized * (safeMax - safeMin)
                 }
             }
 
@@ -310,8 +310,8 @@ class MultiLineChartViewModel(
         val seriesKeys = liveLatencyTimelineUseCase.multiSeriesKeys
         val multiDataSet =
             listOf(
-                seriesKeys.getOrElse(0) { "P50 Latency" } to p50Values.map { it.toDouble() },
-                seriesKeys.getOrElse(1) { "P95 Latency" } to p95Values.map { it.toDouble() },
+                seriesKeys.getOrElse(0) { "P50 Latency" } to p50Values,
+                seriesKeys.getOrElse(1) { "P95 Latency" } to p95Values,
             ).toChartData(categories = labels)
 
         return MultiLineChartState(

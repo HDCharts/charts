@@ -16,10 +16,11 @@ import kotlinx.coroutines.launch
 
 private const val LIVE_UPDATE_INTERVAL_MS = 2000L
 
-data class PieChartState(
+data class PieChartUiState(
     val slices: List<PieSlice>,
     val title: String,
     val preset: ChartPreset = ChartPreset.Default,
+    val isPlaying: Boolean = false,
 )
 
 class PieChartViewModel(
@@ -31,68 +32,34 @@ class PieChartViewModel(
     private val defaultSegmentCount = initialDefaultSample.slices.size
     private var liveUpdatesJob: Job? = null
 
-    private val _dataSet =
+    private val _uiState =
         MutableStateFlow(
-            initialDefaultSample.let { sample ->
-                PieChartState(
-                    slices = sample.slices,
-                    title = sample.title,
-                    preset = ChartPreset.Default,
-                )
-            },
+            PieChartUiState(
+                slices = initialDefaultSample.slices,
+                title = initialDefaultSample.title,
+                preset = ChartPreset.Default,
+            ),
         )
 
-    val dataSet: StateFlow<PieChartState> = _dataSet.asStateFlow()
-    private val _isPlaying = MutableStateFlow(false)
-    val isPlaying: StateFlow<Boolean> = _isPlaying.asStateFlow()
+    val uiState: StateFlow<PieChartUiState> = _uiState.asStateFlow()
 
     fun onPresetSelected(preset: ChartPreset) {
-        if (preset == _dataSet.value.preset) return
-        _dataSet.update { it.copy(preset = preset) }
+        if (preset == _uiState.value.preset) return
         applyInitialPresetData(preset)
-    }
-
-    fun regenerateDefaultDataSet() {
-        val sample =
-            pieSampleUseCase.pieSample(
-                range = refreshRange,
-                numOfPoints = defaultSegmentCount..defaultSegmentCount,
-            )
-        _dataSet.update {
-            it.copy(
-                slices = sample.slices,
-                title = sample.title,
-            )
-        }
-    }
-
-    fun regenerateCustomDataSet(range: IntRange = refreshRange) {
-        val sample =
-            pieSampleUseCase.pieCustomSample(range)
-        _dataSet.update {
-            it.copy(
-                slices = sample.slices,
-                title = sample.title,
-            )
-        }
+        _uiState.update { it.copy(preset = preset) }
     }
 
     fun togglePlaying() {
-        val shouldPlay = !_isPlaying.value
-        _isPlaying.value = shouldPlay
-        if (shouldPlay) {
-            startLiveUpdates()
-        } else {
-            stopLiveUpdates()
-        }
+        setPlaying(!_uiState.value.isPlaying)
     }
 
     fun refresh() {
         refreshCurrentPreset()
     }
 
-    fun refreshCurrentPresetLive() {
-        refreshCurrentPreset()
+    override fun onCleared() {
+        stopLiveUpdates()
+        super.onCleared()
     }
 
     private fun applyInitialPresetData(preset: ChartPreset) {
@@ -101,7 +68,7 @@ class PieChartViewModel(
                 ChartPreset.Default -> initialDefaultSample
                 ChartPreset.Custom -> initialCustomSample
             }
-        _dataSet.update {
+        _uiState.update {
             it.copy(
                 slices = sample.slices,
                 title = sample.title,
@@ -110,9 +77,44 @@ class PieChartViewModel(
     }
 
     private fun refreshCurrentPreset() {
-        when (_dataSet.value.preset) {
+        when (_uiState.value.preset) {
             ChartPreset.Default -> regenerateDefaultDataSet()
             ChartPreset.Custom -> regenerateCustomDataSet()
+        }
+    }
+
+    private fun regenerateDefaultDataSet() {
+        val sample =
+            pieSampleUseCase.pieSample(
+                range = refreshRange,
+                numOfPoints = defaultSegmentCount..defaultSegmentCount,
+            )
+        _uiState.update {
+            it.copy(
+                slices = sample.slices,
+                title = sample.title,
+            )
+        }
+    }
+
+    private fun regenerateCustomDataSet(range: IntRange = refreshRange) {
+        val sample =
+            pieSampleUseCase.pieCustomSample(range)
+        _uiState.update {
+            it.copy(
+                slices = sample.slices,
+                title = sample.title,
+            )
+        }
+    }
+
+    private fun setPlaying(playing: Boolean) {
+        if (_uiState.value.isPlaying == playing) return
+        _uiState.update { it.copy(isPlaying = playing) }
+        if (playing) {
+            startLiveUpdates()
+        } else {
+            stopLiveUpdates()
         }
     }
 
@@ -120,10 +122,10 @@ class PieChartViewModel(
         liveUpdatesJob?.cancel()
         liveUpdatesJob =
             viewModelScope.launch {
-                refreshCurrentPresetLive()
+                refreshCurrentPreset()
                 while (isActive) {
                     delay(LIVE_UPDATE_INTERVAL_MS)
-                    refreshCurrentPresetLive()
+                    refreshCurrentPreset()
                 }
             }
     }
@@ -131,10 +133,5 @@ class PieChartViewModel(
     private fun stopLiveUpdates() {
         liveUpdatesJob?.cancel()
         liveUpdatesJob = null
-    }
-
-    override fun onCleared() {
-        stopLiveUpdates()
-        super.onCleared()
     }
 }
