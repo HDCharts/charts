@@ -54,10 +54,6 @@ cancel validation. When the label is present, the resulting
 `PR GIF Baseline Validation` status check is required by the
 `protect main` ruleset, so merges wait for it to pass.
 
-Docs GIFs record in landscape. `validate-gifs.yml` rotates the emulator with
-`adb shell settings put system user_rotation 1` before running
-`validateDocsGifBaselines`.
-
 ## Workflow responsibilities
 
 | Workflow or job | Responsibility |
