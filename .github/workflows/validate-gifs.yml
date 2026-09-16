@@ -65,14 +65,17 @@ jobs:
           api-level: 35
           target: google_apis
           arch: x86_64
-          profile: Nexus 6
+          # Tablet profile: produces a 2560x1600 landscape surface (16:10) by
+          # default, closer to the docs reference preview (1194x834 dp at
+          # 264 dpi) than a phone profile would.
+          profile: Pixel Tablet
           emulator-options: -no-window -no-audio -gpu swiftshader_indirect -no-snapshot
           script: |
-            # Force 16:9 landscape display so the recorder activity reports a
-            # landscape window. The recorder captures the activity root, so
+            # Force 1.43:1 landscape display so the recorder activity reports
+            # a landscape window. The recorder captures the activity root, so
             # landscape here means landscape input frames which fit the
-            # 1080x608 (16:9) gifWidth/gifHeight canvas without downscaling.
-            adb shell wm size 1920x1080
+            # 1080x755 (1.43:1) gifWidth/gifHeight canvas without downscaling.
+            adb shell wm size 1920x1344
             ./gradlew validateDocsGifBaselines -PgifOutputDir="$GIF_OUTPUT_DIR" --no-daemon --stacktrace
 
       - name: Report GIF baseline mismatches

@@ -2,13 +2,13 @@ package io.github.hdcharts.app.gif
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import io.github.hdcharts.app.gif.DocsGifScenariosData.STACKED_AREA_TITLE
+import io.github.hdcharts.app.gif.DocsGifScenariosData.STACKED_BAR_TITLE
 import io.github.hdcharts.charts.BarChart
 import io.github.hdcharts.charts.HistogramChart
 import io.github.hdcharts.charts.LineChart
@@ -17,14 +17,9 @@ import io.github.hdcharts.charts.RadarChart
 import io.github.hdcharts.charts.StackedAreaChart
 import io.github.hdcharts.charts.StackedBarChart
 import io.github.hdcharts.charts.model.ChartValueFormatters
-import io.github.hdcharts.sampleshared.data.barSampleUseCase
-import io.github.hdcharts.sampleshared.data.histogramSampleUseCase
-import io.github.hdcharts.sampleshared.data.lineSampleUseCase
-import io.github.hdcharts.sampleshared.data.multiLineSampleUseCase
+import io.github.hdcharts.charts.model.toChartData
 import io.github.hdcharts.sampleshared.data.pieSampleUseCase
 import io.github.hdcharts.sampleshared.data.radarSampleUseCase
-import io.github.hdcharts.sampleshared.data.stackedAreaSampleUseCase
-import io.github.hdcharts.sampleshared.data.stackedBarSampleUseCase
 import io.github.hdcharts.sampleshared.theme.AppTheme
 import io.github.hdcharts.sampleshared.theme.docsSlate
 import io.github.hdcodedev.composegif.annotations.GifFractionPoint
@@ -73,7 +68,15 @@ fun PieDefaultGifScenario() {
 @Composable
 fun LineDefaultGifScenario() {
     DocsGifScene {
-        LineChart(data = lineSampleUseCase().initialLineDataSet())
+        val scenario = DocsGifScenariosData.line()
+        LineChart(
+            data =
+                DocsGifScenariosData.buildSingleSeries(
+                    scenario,
+                    DocsGifScenariosData.LINE_TITLE,
+                ),
+            title = DocsGifScenariosData.LINE_TITLE,
+        )
     }
 }
 
@@ -95,8 +98,12 @@ fun LineDefaultGifScenario() {
 @Composable
 fun MultiLineDefaultGifScenario() {
     DocsGifScene {
-        val sample = multiLineSampleUseCase().initialMultiLineSample()
-        LineChart(data = sample.dataSet, title = sample.title, valueFormatter = ChartValueFormatters.prefix("$"))
+        val scenario = DocsGifScenariosData.multiLine()
+        LineChart(
+            data = scenario.items.toChartData(categories = scenario.categories),
+            title = DocsGifScenariosData.MULTI_LINE_TITLE,
+            valueFormatter = ChartValueFormatters.prefix("$"),
+        )
     }
 }
 
@@ -112,10 +119,14 @@ fun MultiLineDefaultGifScenario() {
 @Composable
 fun BarDefaultGifScenario() {
     DocsGifScene {
-        val data = barSampleUseCase().initialBarDataSet()
+        val scenario = DocsGifScenariosData.bar()
         BarChart(
-            data = data,
-            title = data.series.single().name,
+            data =
+                DocsGifScenariosData.buildSingleSeries(
+                    scenario,
+                    DocsGifScenariosData.BAR_TITLE,
+                ),
+            title = DocsGifScenariosData.BAR_TITLE,
         )
     }
 }
@@ -132,10 +143,14 @@ fun BarDefaultGifScenario() {
 @Composable
 fun HistogramDefaultGifScenario() {
     DocsGifScene {
-        val data = histogramSampleUseCase().initialHistogramDataSet()
+        val scenario = DocsGifScenariosData.histogram()
         HistogramChart(
-            data = data,
-            title = data.series.single().name,
+            data =
+                DocsGifScenariosData.buildSingleSeries(
+                    scenario,
+                    DocsGifScenariosData.HISTOGRAM_TITLE,
+                ),
+            title = DocsGifScenariosData.HISTOGRAM_TITLE,
         )
     }
 }
@@ -155,8 +170,11 @@ fun HistogramDefaultGifScenario() {
 @Composable
 fun StackedBarDefaultGifScenario() {
     DocsGifScene {
-        val sample = stackedBarSampleUseCase().initialStackedBarSample()
-        StackedBarChart(data = sample.dataSet, title = sample.title)
+        val scenario = DocsGifScenariosData.stackedBar()
+        StackedBarChart(
+            data = scenario.items.toChartData(categories = scenario.categories),
+            title = STACKED_BAR_TITLE,
+        )
     }
 }
 
@@ -178,8 +196,11 @@ fun StackedBarDefaultGifScenario() {
 @Composable
 fun StackedAreaDefaultGifScenario() {
     DocsGifScene {
-        val sample = stackedAreaSampleUseCase().initialStackedAreaSample()
-        StackedAreaChart(data = sample.data, title = sample.title)
+        val scenario = DocsGifScenariosData.stackedArea()
+        StackedAreaChart(
+            data = scenario.items.toChartData(categories = scenario.categories),
+            title = STACKED_AREA_TITLE,
+        )
     }
 }
 
@@ -219,8 +240,7 @@ private fun DocsGifScene(chartContent: @Composable () -> Unit) {
         Box(
             modifier =
                 Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(16f / 9f)
+                    .fillMaxSize()
                     .background(MaterialTheme.colorScheme.background),
             contentAlignment = Alignment.Center,
         ) {

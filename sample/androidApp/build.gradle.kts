@@ -190,11 +190,12 @@ gifRecorder {
     baselineDir.set(rootProject.layout.projectDirectory.dir("gif-baselines"))
     // Matches the Material 3 colorScheme.background used by DocsGifScene.
     canvasBackgroundColor.set("0xFCFCFD")
-    // Force 16:9 landscape output at 1080x608. The recorder ffmpeg filter
-    // pads input frames to this canvas and fills unused pixels with
-    // canvasBackgroundColor.
+    // Force 1.43:1 landscape output at 1080x755, matching the tablet landscape
+    // preview (1194x834 dp) and the capture region set by `adb shell wm size`
+    // in validate-gifs.yml. The recorder ffmpeg filter pads input frames to
+    // this canvas and fills unused pixels with canvasBackgroundColor.
     gifWidth.set(1080)
-    gifHeight.set(608)
+    gifHeight.set(755)
 }
 
 dependencies {
