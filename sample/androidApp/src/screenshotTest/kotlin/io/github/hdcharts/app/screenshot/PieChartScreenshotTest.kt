@@ -2,6 +2,8 @@ package io.github.hdcharts.app.screenshot
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.ui.Alignment
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -67,7 +69,11 @@ fun PieChartRectangularPlotAreaPreview() {
     ScreenshotSurface {
         PieChart(
             data = sample.slices,
-            modifier = Modifier.fillMaxWidth().height(350.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(350.dp)
+                    .wrapContentSize(Alignment.Center),
             style =
                 PieChartDefaults.style(
                     legend = PieChartDefaults.legend(visible = false),
