@@ -65,9 +65,20 @@ jobs:
           api-level: 35
           target: google_apis
           arch: x86_64
-          profile: Nexus 6
+          # Nexus 10 is the standard tablet AVD profile that ships with the
+          # Android SDK (2560x1600 xhdpi xlarge). "Pixel Tablet" / "Pixel
+          # C" / "Pixel Slate" are NOT in the SDK's device list. The
+          # recorder receives a 1.43:1 landscape window after we override
+          # wm size below.
+          profile: Nexus 10
           emulator-options: -no-window -no-audio -gpu swiftshader_indirect -no-snapshot
-          script: ./gradlew validateDocsGifBaselines -PgifOutputDir="$GIF_OUTPUT_DIR" --no-daemon --stacktrace
+          script: |
+            # Force 1.43:1 landscape display so the recorder activity reports
+            # a landscape window. The recorder captures the activity root, so
+            # landscape here means landscape input frames which fit the
+            # 1080x755 (1.43:1) gifWidth/gifHeight canvas without downscaling.
+            adb shell wm size 1920x1344
+            ./gradlew validateDocsGifBaselines -PgifOutputDir="$GIF_OUTPUT_DIR" --no-daemon --stacktrace
 
       - name: Report GIF baseline mismatches
         if: always()

@@ -28,3 +28,15 @@ internal const val PREVIEW_DEVICE_TABLET_LANDSCAPE: String = "spec:width=1194dp,
     device = PREVIEW_DEVICE_TABLET_LANDSCAPE,
 )
 internal annotation class ScreenshotPreview
+
+/**
+ * Landscape-only annotation. Use for tests that mirror docs GIF scenarios,
+ * where the canonical landscape view is the tablet landscape preview and
+ * portrait or dark variants add no signal.
+ */
+@Preview(
+    name = "Light Tablet Landscape",
+    uiMode = Configuration.UI_MODE_NIGHT_NO,
+    device = PREVIEW_DEVICE_TABLET_LANDSCAPE,
+)
+internal annotation class DocsGifLandscapePreview
