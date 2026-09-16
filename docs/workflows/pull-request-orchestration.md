@@ -54,6 +54,11 @@ cancel validation. When the label is present, the resulting
 `PR GIF Baseline Validation` status check is required by the
 `protect main` ruleset, so merges wait for it to pass.
 
+Docs GIFs record at 1080×608 (16:9 landscape) via three layers: `validate-gifs.yml`
+forces the emulator to `wm size 1920x1080`; `DocsGifScene` matches that ratio with
+`Modifier.fillMaxWidth().aspectRatio(16f / 9f)`; the recorder pads ffmpeg output via
+`gifWidth.set(1080)` and `gifHeight.set(608)` in `sample/androidApp/build.gradle.kts`.
+
 ## Workflow responsibilities
 
 | Workflow or job | Responsibility |

@@ -2,6 +2,7 @@ package io.github.hdcharts.app.gif
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.MaterialTheme
@@ -219,7 +220,7 @@ private fun DocsGifScene(chartContent: @Composable () -> Unit) {
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .wrapContentHeight()
+                    .aspectRatio(16f / 9f)
                     .background(MaterialTheme.colorScheme.background),
             contentAlignment = Alignment.Center,
         ) {
