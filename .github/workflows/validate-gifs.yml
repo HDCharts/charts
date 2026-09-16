@@ -67,7 +67,11 @@ jobs:
           arch: x86_64
           profile: Nexus 6
           emulator-options: -no-window -no-audio -gpu swiftshader_indirect -no-snapshot
-          script: ./gradlew validateDocsGifBaselines -PgifOutputDir="$GIF_OUTPUT_DIR" --no-daemon --stacktrace
+          script: |
+            # Record docs GIFs in landscape.
+            adb shell settings put system accelerometer_rotation 0
+            adb shell settings put system user_rotation 1
+            ./gradlew validateDocsGifBaselines -PgifOutputDir="$GIF_OUTPUT_DIR" --no-daemon --stacktrace
 
       - name: Report GIF baseline mismatches
         if: always()

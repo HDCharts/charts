@@ -36,7 +36,7 @@ jobs:
           echo "should_run=${should_run}" >> "$GITHUB_OUTPUT"
 
   gif-validation:
-    # Optional: keep this out of the required-status-check ruleset.
+    # Required status check "PR GIF Baseline Validation" in protect main.
     name: PR GIF Baseline Validation
     needs: check-label
     if: ${{ needs.check-label.outputs.should_run == 'true' }}

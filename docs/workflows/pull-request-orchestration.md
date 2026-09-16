@@ -45,12 +45,18 @@ the compatibility check on documentation-only pull requests. Its
 required status check; on docs-only pull requests the gate is skipped rather
 than reported as success.
 
-The GIF workflow is optional. Its label-check job runs on the three normal
+The GIF workflow is opt-in. Its label-check job runs on the three normal
 pull-request actions and fetches current labels from the GitHub API; the
 validation job runs only when `run-gif-validation` is present. Its
 `pr-gif-<PR number>` concurrency group cancels an active validation when a new
 commit supersedes it. Adding or removing the label alone does not start or
-cancel validation.
+cancel validation. When the label is present, the resulting
+`PR GIF Baseline Validation` status check is required by the
+`protect main` ruleset, so merges wait for it to pass.
+
+Docs GIFs record in landscape. `validate-gifs.yml` rotates the emulator with
+`adb shell settings put system user_rotation 1` before running
+`validateDocsGifBaselines`.
 
 ## Workflow responsibilities
 
@@ -80,16 +86,20 @@ using labels.
 
 ## Merge protection
 
-The `protect main` branch ruleset requires only these stable final gates:
+The `protect main` branch ruleset requires these stable final gates:
 
 ```text
 PR Core Checks
 PR API Compatibility
+PR GIF Baseline Validation
 ```
 
-Do not require `Prepare PR`, individual implementation jobs, or `PR GIF Baseline
-Validation`; GIF validation is optional. Rulesets match status-check contexts
-literally, so keep the required names exactly as shown above.
+`PR Core Checks` and `PR API Compatibility` are required on every pull
+request. `PR GIF Baseline Validation` is required but is only posted by the
+`Pull Request GIF Validation` workflow when the `run-gif-validation` label
+is present; with `strict_required_status_checks_policy: false`, a missing
+required check does not block the merge, so unlabeled pull requests skip the
+GIF run while labeled pull requests are blocked until validation passes.
 
 A documentation-only pull request skips `PR Core Checks`' real validation jobs
 and skips `PR API Compatibility` entirely; the required status check reports
@@ -137,9 +147,10 @@ The aggregate `PR Core Checks` job verifies the core no-op path, and
 `PR API Compatibility` is skipped because the reusable workflow selected its
 `Docs-only no-op` path.
 
-The optional `PR GIF Baseline Validation` job is different: when it is skipped,
+The opt-in `PR GIF Baseline Validation` job is different: when it is skipped,
 the `run-gif-validation` label was not present and GIF validation was not
-requested.
+requested. A missing required check does not block merges under the
+non-strict ruleset policy used by `protect main`.
 
 ## Troubleshooting
 
