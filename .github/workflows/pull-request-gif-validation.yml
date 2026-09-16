@@ -4,7 +4,7 @@ name: Pull Request GIF Validation
 on:
   pull_request:
     branches: [main]
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize, reopened, labeled, unlabeled]
 
 permissions:
   actions: read
@@ -36,10 +36,33 @@ jobs:
           echo "should_run=${should_run}" >> "$GITHUB_OUTPUT"
 
   gif-validation:
-    # Required status check "PR GIF Baseline Validation" in protect main.
-    name: PR GIF Baseline Validation
+    name: GIF Baseline Validation
     needs: check-label
     if: ${{ needs.check-label.outputs.should_run == 'true' }}
     uses: ./.github/workflows/validate-gifs.yml
     with:
       source-sha: ${{ github.sha }}
+
+  gif-result:
+    name: PR GIF Baseline Validation
+    if: ${{ always() }}
+    needs:
+      - check-label
+      - gif-validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify GIF baseline validation
+        env:
+          CHECK_LABEL_RESULT: ${{ needs.check-label.result }}
+          SHOULD_RUN: ${{ needs.check-label.outputs.should_run }}
+          GIF_RESULT: ${{ needs.gif-validation.result }}
+        run: |
+          if [ "$CHECK_LABEL_RESULT" != "success" ]; then
+            echo "GIF validation label check did not succeed: $CHECK_LABEL_RESULT"
+            exit 1
+          fi
+
+          if [ "$SHOULD_RUN" = "true" ] && [ "$GIF_RESULT" != "success" ]; then
+            echo "GIF baseline validation did not succeed: $GIF_RESULT"
+            exit 1
+          fi
