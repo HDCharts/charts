@@ -65,11 +65,12 @@ jobs:
           api-level: 35
           target: google_apis
           arch: x86_64
-          # Pixel C is a 2560x1800 landscape tablet AVD profile the Android
-          # SDK ships; "Pixel Tablet" is not a packaged avdmanager device
-          # name. The recorder receives a 1.43:1 landscape window after we
-          # override wm size below.
-          profile: Pixel C
+          # Nexus 10 is the standard tablet AVD profile that ships with the
+          # Android SDK (2560x1600 xhdpi xlarge). "Pixel Tablet" / "Pixel
+          # C" / "Pixel Slate" are NOT in the SDK's device list. The
+          # recorder receives a 1.43:1 landscape window after we override
+          # wm size below.
+          profile: Nexus 10
           emulator-options: -no-window -no-audio -gpu swiftshader_indirect -no-snapshot
           script: |
             # Force 1.43:1 landscape display so the recorder activity reports
