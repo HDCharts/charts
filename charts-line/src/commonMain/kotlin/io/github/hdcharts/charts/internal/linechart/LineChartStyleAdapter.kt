@@ -36,5 +36,6 @@ fun LineChartStyle.toInternal(): LineChartInternalStyle =
         xAxisLabelColor = axis.xLabels.color,
         xAxisLabelSize = axis.xLabels.size,
         xAxisLabelMaxCount = axis.xLabels.count,
+        legendVisible = legend.visible,
         zoomControlsVisible = zoomControlsVisible,
     )

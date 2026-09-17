@@ -150,6 +150,7 @@ private fun MultiLineChartPreview(series: List<Pair<String, List<Double>>>) {
         style =
             LineChartDefaults.style(
                 chartContainerStyle = previewChartContainerStyle(),
+                legend = LineChartDefaults.legend(visible = false),
                 axis =
                     LineChartDefaults.axis(
                         xLabels = LineChartDefaults.xLabels(visible = false),

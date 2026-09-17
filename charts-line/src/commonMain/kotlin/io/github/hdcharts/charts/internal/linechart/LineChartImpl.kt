@@ -195,7 +195,7 @@ internal fun LineChartImpl(
                     )
                 }
 
-                if (renderData.hasCategories() || isTimelineMode) {
+                if (style.legendVisible && renderData.items.size > 1) {
                     Legend(
                         chartContainerStyle = style.chartContainerStyle,
                         legend = renderData.items.map { it.label }.toImmutableList(),
