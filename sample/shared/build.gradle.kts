@@ -52,7 +52,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             api(chartsDependencies.module(projects.charts, "charts"))
-            api(chartsDependencies.module(projects.chartsCore, "charts-core"))
+            api(chartsDependencies.module(projects.chartsCore, "core"))
             api(libs.compose.mpp.runtime)
             api(libs.compose.mpp.foundation)
             api(libs.compose.mpp.material3)
