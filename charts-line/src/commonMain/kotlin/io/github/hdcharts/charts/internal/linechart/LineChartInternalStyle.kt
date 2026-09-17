@@ -38,5 +38,6 @@ class LineChartInternalStyle(
     val xAxisLabelColor: Color,
     val xAxisLabelSize: TextUnit,
     val xAxisLabelMaxCount: Int,
+    val legendVisible: Boolean,
     val zoomControlsVisible: Boolean,
 )

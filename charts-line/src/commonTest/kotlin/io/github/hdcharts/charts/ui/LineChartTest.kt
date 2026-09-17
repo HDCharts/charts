@@ -19,6 +19,7 @@ import io.github.hdcharts.charts.LineChartRenderMode
 import io.github.hdcharts.charts.internal.TestTags
 import io.github.hdcharts.charts.mock.MockTest.TITLE
 import io.github.hdcharts.charts.mock.MockTest.dataSet
+import io.github.hdcharts.charts.mock.MockTest.multiDataSet
 import io.github.hdcharts.charts.model.ChartData
 import io.github.hdcharts.charts.model.ChartSeries
 import io.github.hdcharts.charts.model.toChartData
@@ -91,6 +92,33 @@ class LineChartTest {
             onNodeWithTag(TestTags.LINE_CHART_Y_AXIS_LABELS).assertIsDisplayed()
             onAllNodesWithTag(TestTags.LINE_CHART_ZOOM_OUT).assertCountEquals(0)
             onAllNodesWithTag(TestTags.LINE_CHART_ZOOM_IN).assertCountEquals(0)
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun lineChart_multiSeriesWithHiddenLegend_doesNotRenderLegend() =
+        runComposeUiTest {
+            setContent {
+                LineChart(
+                    data = multiDataSet,
+                    style = LineChartDefaults.style(legend = LineChartDefaults.legend(visible = false)),
+                )
+            }
+
+            onNodeWithTag(TestTags.LINE_CHART).assertIsDisplayed()
+            onAllNodesWithText("Item 1").assertCountEquals(0)
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun lineChart_multiSeriesWithDefaultLegend_rendersLegend() =
+        runComposeUiTest {
+            setContent {
+                LineChart(data = multiDataSet)
+            }
+
+            onNodeWithTag(TestTags.LINE_CHART).assertIsDisplayed()
+            onNodeWithText("Item 1").assertIsDisplayed()
         }
 
     @OptIn(ExperimentalTestApi::class)

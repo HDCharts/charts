@@ -62,6 +62,7 @@ class LineChartStyle(
     val points: LinePointStyle,
     val selection: LineSelectionStyle,
     val axis: LineAxisStyle,
+    val legend: LegendStyle,
     val zoomControlsVisible: Boolean,
 )
 
@@ -73,8 +74,9 @@ object LineChartDefaults {
         points: LinePointStyle = points(),
         selection: LineSelectionStyle = selection(),
         axis: LineAxisStyle = axis(),
+        legend: LegendStyle = legend(),
         zoomControlsVisible: Boolean = true,
-    ): LineChartStyle = LineChartStyle(chartContainerStyle, line, points, selection, axis, zoomControlsVisible)
+    ): LineChartStyle = LineChartStyle(chartContainerStyle, line, points, selection, axis, legend, zoomControlsVisible)
 
     @Composable
     fun line(
@@ -124,6 +126,18 @@ object LineChartDefaults {
         size: TextUnit = 11.sp,
         count: Int = 5,
     ): AxisLabelStyle = AxisLabelStyle(visible, color, size, count)
+
+    /**
+     * Returns a [LegendStyle] with the provided visibility.
+     *
+     * The chart renders the legend only when the data has more than one series
+     * and [visible] is true. Pass `visible = false` to suppress the legend for
+     * multi-series data.
+     *
+     * @param visible Whether the legend is visible. Defaults to true.
+     */
+    @Composable
+    fun legend(visible: Boolean = true): LegendStyle = LegendDefaults.style(visible = visible)
 
     val valueFormatter: ChartValueFormatter = ChartValueFormatters.Default
     val axisValueFormatter: ChartValueFormatter =

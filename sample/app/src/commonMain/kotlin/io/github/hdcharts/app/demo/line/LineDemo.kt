@@ -112,11 +112,17 @@ fun LineChartDemo(viewModel: LineChartViewModel = koinViewModel()) {
             }
         },
     ) {
+        val chartTitle =
+            uiState.dataSet.series
+                .firstOrNull()
+                ?.name
+                .orEmpty()
         when (uiState.preset) {
             LineDemoPreset.Default -> {
                 LineChart(
                     data = uiState.dataSet,
                     modifier = Modifier.fillMaxWidth(),
+                    title = chartTitle,
                     style = LineChartDefaults.style(chartContainerStyle = chartContainerStyle),
                 )
             }
@@ -125,6 +131,7 @@ fun LineChartDemo(viewModel: LineChartViewModel = koinViewModel()) {
                 LineChart(
                     data = uiState.dataSet,
                     modifier = Modifier.fillMaxWidth(),
+                    title = chartTitle,
                     style = LineChartDefaults.style(chartContainerStyle = chartContainerStyle),
                     renderMode = LineChartRenderMode.Timeline,
                     animationDuration = timelineAnimationDuration.milliseconds,
@@ -135,6 +142,7 @@ fun LineChartDemo(viewModel: LineChartViewModel = koinViewModel()) {
                 LineChart(
                     data = uiState.dataSet,
                     modifier = Modifier.fillMaxWidth(),
+                    title = chartTitle,
                     style = ChartTestStyleFixtures.lineCustomStyle(chartContainerStyle = chartContainerStyle),
                 )
             }

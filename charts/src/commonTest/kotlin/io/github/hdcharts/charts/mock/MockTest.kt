@@ -198,6 +198,7 @@ internal object MockTest {
             xAxisLabelColor = Color.Gray,
             xAxisLabelSize = 11.sp,
             xAxisLabelMaxCount = 6,
+            legendVisible = true,
             zoomControlsVisible = true,
         )
 
