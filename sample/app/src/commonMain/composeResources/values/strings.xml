@@ -27,6 +27,8 @@
     <string name="stacked_area_data_points_range">Value range: %1$d - %2$d</string>
     <string name="timeline_update_interval">Update interval: %1$d ms</string>
     <string name="timeline_window_size">Window size: %1$d points</string>
+    <string name="timeline_scale_switch">Scale switch: every %1$d points</string>
+    <string name="timeline_scale_switch_hint">Runs in the millions, drops below 100, and climbs back. Use at least the window size to see the chart rescale completely.</string>
 
     <!-- Drawer -->
     <string name="drawer_header_title">Settings</string>
@@ -60,6 +62,7 @@
     <string name="chart_basic">Basic</string>
     <string name="chart_default">Default</string>
     <string name="chart_timeline">Timeline</string>
+    <string name="chart_scale_drop">Scale drop</string>
     <string name="chart_custom">Custom</string>
 
     <string translatable="false" name="github_url">https://github.com/HDCharts/charts</string>

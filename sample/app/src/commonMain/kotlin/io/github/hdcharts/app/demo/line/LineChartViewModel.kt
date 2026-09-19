@@ -4,18 +4,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.hdcharts.app.demo.timeline.LiveTimelineControlsState
 import io.github.hdcharts.app.demo.timeline.LiveTimelineDefaults
+import io.github.hdcharts.app.demo.timeline.LiveTimelineStreamer
 import io.github.hdcharts.charts.model.ChartData
 import io.github.hdcharts.charts.model.toChartData
 import io.github.hdcharts.sampleshared.data.LiveLatencySingleSeriesWindow
 import io.github.hdcharts.sampleshared.data.LiveLatencyTimelineUseCase
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 
 data class LineChartDataControlsState(
     val points: Int,
@@ -26,6 +23,7 @@ data class LineChartDataControlsState(
 enum class LineDemoPreset {
     Default,
     Timeline,
+    ScaleDrop,
     Custom,
 }
 
@@ -72,11 +70,21 @@ class LineChartViewModel(
         )
     val uiState: StateFlow<LineChartUiState> = _uiState.asStateFlow()
 
-    private var liveUpdatesJob: Job? = null
+    private val liveUpdates =
+        LiveTimelineStreamer(
+            scope = viewModelScope,
+            intervalMillis = {
+                _uiState.value.timelineControlsState.updateIntervalMs
+                    .toLong()
+            },
+            onTick = ::appendLiveTick,
+        )
 
     fun refreshForSelectedPreset() {
         when (_uiState.value.preset) {
             LineDemoPreset.Timeline -> refreshTimeline()
+            // Unreachable: LineScaleDropDemo renders the preset and hides the refresh button.
+            LineDemoPreset.ScaleDrop -> Unit
             LineDemoPreset.Default,
             LineDemoPreset.Custom,
             -> refreshGeneratedData()
@@ -109,7 +117,7 @@ class LineChartViewModel(
                 timelineControlsState = state.timelineControlsState.copy(updateIntervalMs = safeInterval),
             )
         }
-        restartLiveUpdatesIfNeeded()
+        liveUpdates.restartIfRunning()
     }
 
     fun updateWindowSize(windowSize: Int) {
@@ -187,6 +195,8 @@ class LineChartViewModel(
 
         when (selectedPreset) {
             LineDemoPreset.Timeline -> setPlaying(true)
+            // The scale drop preset streams its own data, so this view model only stops its updates.
+            LineDemoPreset.ScaleDrop -> setPlaying(false)
             LineDemoPreset.Default,
             LineDemoPreset.Custom,
             -> {
@@ -199,7 +209,7 @@ class LineChartViewModel(
     }
 
     override fun onCleared() {
-        stopLiveUpdates()
+        liveUpdates.stop()
         super.onCleared()
     }
 
@@ -231,35 +241,10 @@ class LineChartViewModel(
             state.copy(isPlaying = playing)
         }
         if (playing) {
-            startLiveUpdates()
+            liveUpdates.start()
         } else {
-            stopLiveUpdates()
+            liveUpdates.stop()
         }
-    }
-
-    private fun startLiveUpdates() {
-        liveUpdatesJob?.cancel()
-        liveUpdatesJob =
-            viewModelScope.launch {
-                while (isActive) {
-                    val intervalMs =
-                        _uiState.value.timelineControlsState.updateIntervalMs
-                            .toLong()
-                    delay(intervalMs)
-                    appendLiveTick()
-                }
-            }
-    }
-
-    private fun restartLiveUpdatesIfNeeded() {
-        if (_uiState.value.isPlaying) {
-            startLiveUpdates()
-        }
-    }
-
-    private fun stopLiveUpdates() {
-        liveUpdatesJob?.cancel()
-        liveUpdatesJob = null
     }
 
     private fun buildGeneratedDataSet(controls: LineChartDataControlsState): ChartData {

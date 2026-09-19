@@ -131,8 +131,8 @@ subprojects {
 
 tasks.register("chartsTestJvm") {
     group = "verification"
-    description = "Runs JVM tests for all chart modules"
-    dependsOn(ChartsModules.library.map { "$it:jvmTest" })
+    description = "Runs JVM tests for all chart modules and the sample modules"
+    dependsOn((ChartsModules.library + ChartsModules.sampleTested).map { "$it:jvmTest" })
 }
 
 tasks.register("chartsTestIos") {

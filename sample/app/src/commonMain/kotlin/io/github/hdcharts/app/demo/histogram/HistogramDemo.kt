@@ -10,15 +10,9 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RangeSlider
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -30,6 +24,8 @@ import hdcharts.app.generated.resources.histogram_data_points_range
 import io.github.hdcharts.app.ui.composable.ChartDemo
 import io.github.hdcharts.app.ui.composable.ChartPreset
 import io.github.hdcharts.app.ui.composable.ChartPresetToggle
+import io.github.hdcharts.app.ui.composable.DemoRangeSlider
+import io.github.hdcharts.app.ui.composable.DemoSlider
 import io.github.hdcharts.charts.HistogramChart
 import io.github.hdcharts.charts.style.BarChartDefaults
 import io.github.hdcharts.charts.style.ChartContainerDefaults
@@ -38,7 +34,6 @@ import io.github.hdcharts.sampleshared.fixtures.ChartTestStyleFixtures
 import io.github.hdcharts.sampleshared.theme.Dimens
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
-import kotlin.math.roundToInt
 
 @Composable
 fun HistogramChartDemo(viewModel: HistogramChartViewModel = koinViewModel()) {
@@ -123,13 +118,6 @@ private fun HistogramDataPointsControls(
     onPointsChange: (Int) -> Unit,
     onRangeChange: (Int, Int) -> Unit,
 ) {
-    val minPointsSupported = HistogramChartViewModel.MIN_SUPPORTED_POINTS.toFloat()
-    val maxPointsSupported = HistogramChartViewModel.MAX_SUPPORTED_POINTS.toFloat()
-    val minValueSupported = HistogramChartViewModel.MIN_SUPPORTED_VALUE.toFloat()
-    val maxValueSupported = HistogramChartViewModel.MAX_SUPPORTED_VALUE.toFloat()
-    var draftPoints by remember(points) { mutableFloatStateOf(points.toFloat()) }
-    var draftRange by remember(minValue, maxValue) { mutableStateOf(minValue.toFloat()..maxValue.toFloat()) }
-
     Column(
         modifier =
             Modifier
@@ -137,35 +125,26 @@ private fun HistogramDataPointsControls(
                 .padding(top = Dimens.sm),
         verticalArrangement = Arrangement.spacedBy(Dimens.xs),
     ) {
-        Text(
-            text = stringResource(Res.string.histogram_data_points, draftPoints.roundToInt()),
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-        Slider(
-            value = draftPoints,
-            valueRange = minPointsSupported..maxPointsSupported,
-            onValueChange = { draftPoints = it },
-            onValueChangeFinished = { onPointsChange(draftPoints.roundToInt()) },
-        )
-        Text(
-            text =
-                stringResource(
-                    Res.string.histogram_data_points_range,
-                    draftRange.start.roundToInt(),
-                    draftRange.endInclusive.roundToInt(),
-                ),
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-        RangeSlider(
-            value = draftRange,
-            valueRange = minValueSupported..maxValueSupported,
-            onValueChange = { draftRange = it },
-            onValueChangeFinished = {
-                onRangeChange(
-                    draftRange.start.roundToInt(),
-                    draftRange.endInclusive.roundToInt(),
-                )
-            },
-        )
+        DemoSlider(
+            value = points,
+            range = HistogramChartViewModel.MIN_SUPPORTED_POINTS..HistogramChartViewModel.MAX_SUPPORTED_POINTS,
+            onValueSelected = onPointsChange,
+        ) { draftPoints ->
+            Text(
+                text = stringResource(Res.string.histogram_data_points, draftPoints),
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+        }
+        DemoRangeSlider(
+            start = minValue,
+            end = maxValue,
+            range = HistogramChartViewModel.MIN_SUPPORTED_VALUE..HistogramChartViewModel.MAX_SUPPORTED_VALUE,
+            onRangeSelected = onRangeChange,
+        ) { draftMinValue, draftMaxValue ->
+            Text(
+                text = stringResource(Res.string.histogram_data_points_range, draftMinValue, draftMaxValue),
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+        }
     }
 }

@@ -10,15 +10,9 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RangeSlider
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -30,6 +24,8 @@ import hdcharts.app.generated.resources.stacked_bar_data_points_range
 import io.github.hdcharts.app.ui.composable.ChartDemo
 import io.github.hdcharts.app.ui.composable.ChartPreset
 import io.github.hdcharts.app.ui.composable.ChartPresetToggle
+import io.github.hdcharts.app.ui.composable.DemoRangeSlider
+import io.github.hdcharts.app.ui.composable.DemoSlider
 import io.github.hdcharts.charts.StackedBarChart
 import io.github.hdcharts.charts.style.ChartContainerDefaults
 import io.github.hdcharts.charts.style.StackedBarChartDefaults
@@ -39,7 +35,6 @@ import io.github.hdcharts.sampleshared.theme.LocalChartColors
 import io.github.hdcharts.sampleshared.theme.seriesColors
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
-import kotlin.math.roundToInt
 
 @Composable
 fun StackedBarChartDemo(viewModel: StackedBarChartViewModel = koinViewModel()) {
@@ -113,13 +108,6 @@ private fun StackedBarDataPointsControls(
     onPointsChange: (Int) -> Unit,
     onRangeChange: (Int, Int) -> Unit,
 ) {
-    val minPointsSupported = StackedBarChartViewModel.MIN_SUPPORTED_POINTS.toFloat()
-    val maxPointsSupported = StackedBarChartViewModel.MAX_SUPPORTED_POINTS.toFloat()
-    val minValueSupported = StackedBarChartViewModel.MIN_SUPPORTED_VALUE.toFloat()
-    val maxValueSupported = StackedBarChartViewModel.MAX_SUPPORTED_VALUE.toFloat()
-    var draftPoints by remember(points) { mutableFloatStateOf(points.toFloat()) }
-    var draftRange by remember(minValue, maxValue) { mutableStateOf(minValue.toFloat()..maxValue.toFloat()) }
-
     Column(
         modifier =
             Modifier
@@ -127,35 +115,26 @@ private fun StackedBarDataPointsControls(
                 .padding(top = Dimens.sm),
         verticalArrangement = Arrangement.spacedBy(Dimens.xs),
     ) {
-        Text(
-            text = stringResource(Res.string.stacked_bar_data_points, draftPoints.roundToInt()),
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-        Slider(
-            value = draftPoints,
-            valueRange = minPointsSupported..maxPointsSupported,
-            onValueChange = { draftPoints = it },
-            onValueChangeFinished = { onPointsChange(draftPoints.roundToInt()) },
-        )
-        Text(
-            text =
-                stringResource(
-                    Res.string.stacked_bar_data_points_range,
-                    draftRange.start.roundToInt(),
-                    draftRange.endInclusive.roundToInt(),
-                ),
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-        RangeSlider(
-            value = draftRange,
-            valueRange = minValueSupported..maxValueSupported,
-            onValueChange = { draftRange = it },
-            onValueChangeFinished = {
-                onRangeChange(
-                    draftRange.start.roundToInt(),
-                    draftRange.endInclusive.roundToInt(),
-                )
-            },
-        )
+        DemoSlider(
+            value = points,
+            range = StackedBarChartViewModel.MIN_SUPPORTED_POINTS..StackedBarChartViewModel.MAX_SUPPORTED_POINTS,
+            onValueSelected = onPointsChange,
+        ) { draftPoints ->
+            Text(
+                text = stringResource(Res.string.stacked_bar_data_points, draftPoints),
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+        }
+        DemoRangeSlider(
+            start = minValue,
+            end = maxValue,
+            range = StackedBarChartViewModel.MIN_SUPPORTED_VALUE..StackedBarChartViewModel.MAX_SUPPORTED_VALUE,
+            onRangeSelected = onRangeChange,
+        ) { draftMinValue, draftMaxValue ->
+            Text(
+                text = stringResource(Res.string.stacked_bar_data_points_range, draftMinValue, draftMaxValue),
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+        }
     }
 }

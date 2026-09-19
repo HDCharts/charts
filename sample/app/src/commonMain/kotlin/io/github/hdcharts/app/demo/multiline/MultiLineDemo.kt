@@ -14,15 +14,9 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RangeSlider
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,6 +37,8 @@ import hdcharts.app.generated.resources.line_data_points_range
 import io.github.hdcharts.app.demo.timeline.LiveTimelineControls
 import io.github.hdcharts.app.demo.timeline.timelineAnimationDurationMillis
 import io.github.hdcharts.app.ui.composable.ChartDemo
+import io.github.hdcharts.app.ui.composable.DemoRangeSlider
+import io.github.hdcharts.app.ui.composable.DemoSlider
 import io.github.hdcharts.charts.LineChart
 import io.github.hdcharts.charts.LineChartRenderMode
 import io.github.hdcharts.charts.model.ChartValueFormatters
@@ -54,7 +50,6 @@ import io.github.hdcharts.sampleshared.theme.LocalChartColors
 import io.github.hdcharts.sampleshared.theme.seriesColors
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
-import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
@@ -166,13 +161,6 @@ private fun MultiLineDataPointsControls(
     onPointsChange: (Int) -> Unit,
     onRangeChange: (Int, Int) -> Unit,
 ) {
-    val minPointsSupported = MultiLineChartViewModel.MIN_SUPPORTED_POINTS.toFloat()
-    val maxPointsSupported = MultiLineChartViewModel.MAX_SUPPORTED_POINTS.toFloat()
-    val minValueSupported = MultiLineChartViewModel.MIN_SUPPORTED_VALUE.toFloat()
-    val maxValueSupported = MultiLineChartViewModel.MAX_SUPPORTED_VALUE.toFloat()
-    var draftPoints by remember(points) { mutableFloatStateOf(points.toFloat()) }
-    var draftRange by remember(minValue, maxValue) { mutableStateOf(minValue.toFloat()..maxValue.toFloat()) }
-
     Column(
         modifier =
             Modifier
@@ -180,36 +168,27 @@ private fun MultiLineDataPointsControls(
                 .padding(top = Dimens.sm),
         verticalArrangement = Arrangement.spacedBy(Dimens.xs),
     ) {
-        Text(
-            text = stringResource(Res.string.line_data_points, draftPoints.roundToInt()),
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-        Slider(
-            value = draftPoints,
-            valueRange = minPointsSupported..maxPointsSupported,
-            onValueChange = { draftPoints = it },
-            onValueChangeFinished = { onPointsChange(draftPoints.roundToInt()) },
-        )
-        Text(
-            text =
-                stringResource(
-                    Res.string.line_data_points_range,
-                    draftRange.start.roundToInt(),
-                    draftRange.endInclusive.roundToInt(),
-                ),
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-        RangeSlider(
-            value = draftRange,
-            valueRange = minValueSupported..maxValueSupported,
-            onValueChange = { draftRange = it },
-            onValueChangeFinished = {
-                onRangeChange(
-                    draftRange.start.roundToInt(),
-                    draftRange.endInclusive.roundToInt(),
-                )
-            },
-        )
+        DemoSlider(
+            value = points,
+            range = MultiLineChartViewModel.MIN_SUPPORTED_POINTS..MultiLineChartViewModel.MAX_SUPPORTED_POINTS,
+            onValueSelected = onPointsChange,
+        ) { draftPoints ->
+            Text(
+                text = stringResource(Res.string.line_data_points, draftPoints),
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+        }
+        DemoRangeSlider(
+            start = minValue,
+            end = maxValue,
+            range = MultiLineChartViewModel.MIN_SUPPORTED_VALUE..MultiLineChartViewModel.MAX_SUPPORTED_VALUE,
+            onRangeSelected = onRangeChange,
+        ) { draftMinValue, draftMaxValue ->
+            Text(
+                text = stringResource(Res.string.line_data_points_range, draftMinValue, draftMaxValue),
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+        }
     }
 }
 

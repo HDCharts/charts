@@ -2,23 +2,32 @@ package io.github.hdcharts.charts.unit.helpers
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import io.github.hdcharts.charts.LineChartRenderMode
+import io.github.hdcharts.charts.internal.ANIMATION_DURATION_LINE_CHART
 import io.github.hdcharts.charts.internal.common.bezier.cubicControlPointsForSegment
 import io.github.hdcharts.charts.internal.common.model.ChartDataItem
 import io.github.hdcharts.charts.internal.common.model.MultiChartData
 import io.github.hdcharts.charts.internal.common.model.toChartData
+import io.github.hdcharts.charts.internal.linechart.LineChartTransitionMode
+import io.github.hdcharts.charts.internal.linechart.MIN_TIMELINE_DURATION_MS
 import io.github.hdcharts.charts.internal.linechart.aggregateForCompactDensity
 import io.github.hdcharts.charts.internal.linechart.buildLineXAxisTicks
 import io.github.hdcharts.charts.internal.linechart.buildLineYAxisTicks
 import io.github.hdcharts.charts.internal.linechart.compactDensityRanges
+import io.github.hdcharts.charts.internal.linechart.decideLineChartUpdate
 import io.github.hdcharts.charts.internal.linechart.findNearestPoint
+import io.github.hdcharts.charts.internal.linechart.lineChartValueAnimationSpec
+import io.github.hdcharts.charts.internal.linechart.normalizeSeriesByMinMax
 import io.github.hdcharts.charts.internal.linechart.renderIndexForSourceIndex
 import io.github.hdcharts.charts.internal.linechart.resolveLineXAxisLabels
 import io.github.hdcharts.charts.internal.linechart.scaleValues
 import io.github.hdcharts.charts.internal.linechart.shouldUseScrollableDensity
 import io.github.hdcharts.charts.internal.linechart.sourceIndexForRenderIndex
+import io.github.hdcharts.charts.internal.linechart.timelineShiftValues
 import io.github.hdcharts.charts.internal.linechart.toTimelineDurationMillis
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 import kotlin.time.Duration
@@ -352,5 +361,158 @@ class LineChartHelpersTest {
         assertEquals(expected = "0", actual = ticks.last().label)
         assertEquals(expected = 10f, actual = ticks.first().centerY)
         assertEquals(expected = 190f, actual = ticks.last().centerY)
+    }
+
+    @Test
+    fun decideLineChartUpdate_inMorphMode_keepsMorphTransition() {
+        val mode =
+            decideLineChartUpdate(
+                previousRawSeries = listOf(listOf(1.0, 2.0)),
+                currentRawSeries = listOf(listOf(2.0, 3.0)),
+                currentMinMax = 2.0 to 3.0,
+                renderMode = LineChartRenderMode.Morph,
+                animationDuration = 500.milliseconds,
+            )
+
+        assertEquals(expected = LineChartTransitionMode.Morph, actual = mode)
+    }
+
+    @Test
+    fun decideLineChartUpdate_withoutPreviousSeries_keepsMorphTransition() {
+        val mode =
+            decideLineChartUpdate(
+                previousRawSeries = null,
+                currentRawSeries = listOf(listOf(2.0, 3.0)),
+                currentMinMax = 2.0 to 3.0,
+                renderMode = LineChartRenderMode.Timeline,
+                animationDuration = 500.milliseconds,
+            )
+
+        assertEquals(expected = LineChartTransitionMode.Morph, actual = mode)
+    }
+
+    @Test
+    fun decideLineChartUpdate_whenTimelineRangeShrinks_usesCurrentRange() {
+        val previousSeries = listOf(listOf(1_500_000.0, 20.0, 40.0))
+        val currentSeries = listOf(listOf(20.0, 40.0, 60.0))
+
+        val mode =
+            decideLineChartUpdate(
+                previousRawSeries = previousSeries,
+                currentRawSeries = currentSeries,
+                currentMinMax = 20.0 to 60.0,
+                renderMode = LineChartRenderMode.Timeline,
+                animationDuration = 500.milliseconds,
+            )
+
+        val shift = assertIs<LineChartTransitionMode.TimelineShift>(mode)
+        assertEquals(expected = 20.0 to 60.0, actual = shift.transitionData.minMax)
+        assertEquals(expected = previousSeries, actual = shift.transitionData.previousSeries)
+        assertEquals(expected = currentSeries, actual = shift.transitionData.currentSeries)
+        assertEquals(expected = 500.milliseconds, actual = shift.animationDuration)
+    }
+
+    @Test
+    fun normalizeSeriesByMinMax_spreadsSmallValuesOverFullRange() {
+        val normalized =
+            normalizeSeriesByMinMax(
+                series = listOf(listOf(20.0, 40.0, 60.0)),
+                minMax = 20.0 to 60.0,
+            )
+
+        assertEquals(expected = listOf(listOf(0f, 0.5f, 1f)), actual = normalized)
+    }
+
+    @Test
+    fun decideLineChartUpdate_whenWindowIsRebuiltInPlace_keepsMorphTransition() {
+        val mode =
+            decideLineChartUpdate(
+                previousRawSeries = listOf(listOf(10.0, 20.0, 30.0)),
+                currentRawSeries = listOf(listOf(90.0, 80.0, 70.0)),
+                currentMinMax = 70.0 to 90.0,
+                renderMode = LineChartRenderMode.Timeline,
+                animationDuration = 500.milliseconds,
+            )
+
+        assertEquals(expected = LineChartTransitionMode.Morph, actual = mode)
+    }
+
+    @Test
+    fun decideLineChartUpdate_whenOneSeriesIsNotAdvanced_keepsMorphTransition() {
+        val mode =
+            decideLineChartUpdate(
+                previousRawSeries = listOf(listOf(10.0, 20.0, 30.0), listOf(1.0, 2.0, 3.0)),
+                currentRawSeries = listOf(listOf(20.0, 30.0, 40.0), listOf(7.0, 8.0, 9.0)),
+                currentMinMax = 1.0 to 40.0,
+                renderMode = LineChartRenderMode.Timeline,
+                animationDuration = 500.milliseconds,
+            )
+
+        assertEquals(expected = LineChartTransitionMode.Morph, actual = mode)
+    }
+
+    @Test
+    fun decideLineChartUpdate_whenWindowAdvancesByOnePoint_shiftsTimeline() {
+        val mode =
+            decideLineChartUpdate(
+                previousRawSeries = listOf(listOf(10.0, 20.0, 30.0)),
+                currentRawSeries = listOf(listOf(20.0, 30.0, 40.0)),
+                currentMinMax = 20.0 to 40.0,
+                renderMode = LineChartRenderMode.Timeline,
+                animationDuration = 500.milliseconds,
+            )
+
+        assertIs<LineChartTransitionMode.TimelineShift>(mode)
+    }
+
+    @Test
+    fun timelineShiftValues_drawsPreviousWindowFollowedByNewestPoint() {
+        val values =
+            timelineShiftValues(
+                previousSeries = listOf(listOf(20.0, 40.0, 60.0)),
+                currentSeries = listOf(listOf(40.0, 60.0, 80.0)),
+                minMax = 20.0 to 80.0,
+            )
+
+        assertEquals(expected = listOf(listOf(0f, 1f / 3f, 2f / 3f, 1f)), actual = values)
+    }
+
+    @Test
+    fun lineChartValueAnimationSpec_inTimelineMode_usesTheRequestedDuration() {
+        val spec =
+            lineChartValueAnimationSpec(
+                renderMode = LineChartRenderMode.Timeline,
+                animationDuration = 160.milliseconds,
+            )
+
+        assertEquals(
+            expected = 160,
+            actual = spec.durationMillis,
+            message =
+                "A timeline update that cannot be shifted still has to settle within the update " +
+                    "interval the caller asked for, or the next update cancels it half finished.",
+        )
+    }
+
+    @Test
+    fun lineChartValueAnimationSpec_inTimelineMode_clampsANonPositiveDuration() {
+        val spec =
+            lineChartValueAnimationSpec(
+                renderMode = LineChartRenderMode.Timeline,
+                animationDuration = Duration.ZERO,
+            )
+
+        assertEquals(expected = MIN_TIMELINE_DURATION_MS, actual = spec.durationMillis)
+    }
+
+    @Test
+    fun lineChartValueAnimationSpec_inMorphMode_keepsTheDefaultDuration() {
+        val spec =
+            lineChartValueAnimationSpec(
+                renderMode = LineChartRenderMode.Morph,
+                animationDuration = 160.milliseconds,
+            )
+
+        assertEquals(expected = ANIMATION_DURATION_LINE_CHART, actual = spec.durationMillis)
     }
 }

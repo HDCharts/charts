@@ -5,6 +5,7 @@ import io.github.hdcharts.app.MainViewModel
 import io.github.hdcharts.app.demo.bar.BarChartViewModel
 import io.github.hdcharts.app.demo.histogram.HistogramChartViewModel
 import io.github.hdcharts.app.demo.line.LineChartViewModel
+import io.github.hdcharts.app.demo.line.LineScaleDropViewModel
 import io.github.hdcharts.app.demo.multiline.MultiLineChartViewModel
 import io.github.hdcharts.app.demo.pie.PieChartViewModel
 import io.github.hdcharts.app.demo.radar.RadarChartViewModel
@@ -49,6 +50,7 @@ val appModule =
         viewModel { ChartGalleryViewModel(get()) }
         viewModel { MainViewModel() }
         viewModel { LineChartViewModel(get()) }
+        viewModel { LineScaleDropViewModel(get()) }
         viewModel { MultiLineChartViewModel(get()) }
         viewModel { BarChartViewModel(get()) }
         viewModel { HistogramChartViewModel(get()) }
