@@ -14,6 +14,11 @@ if [[ ! "${charts_sha}" =~ ^[0-9a-fA-F]{40}$ ]]; then
   exit 1
 fi
 
+# Sync wiki docs from this exact release source before any promotion, so a
+# release freezes docs from the code being released rather than whatever the
+# last snapshot happened to contain.
+bash .github/scripts/sync-wiki-docs.sh "${docs_dir}"
+
 # Release content is immutable once present, so an existing registry entry may
 # only be reused when the committed manifest proves it came from this charts SHA.
 if jq -e --arg version "${release_version}" \
