@@ -142,7 +142,9 @@ class LineChartTest {
             val plotBounds = onNodeWithTag(TestTags.LINE_CHART_PLOT).fetchSemanticsNode().boundsInRoot
             val captureBounds = onNodeWithTag("line-capture").fetchSemanticsNode().boundsInRoot
             val sampleX = (plotBounds.left - captureBounds.left + 2f).toInt()
-            val sampleY = (plotBounds.top - captureBounds.top + plotBounds.height * 0.95f).toInt()
+            // The line's vertical inset is a small fixed pixel margin, not density-scaled, so a
+            // value at the bottom of the range hugs within a few px of the true bottom edge.
+            val sampleY = (plotBounds.top - captureBounds.top + plotBounds.height - 3f).toInt()
 
             // The first value normalizes to the bottom of the plot under the default, data-derived range.
             val beforePixels = capturePixels()
