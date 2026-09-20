@@ -54,6 +54,22 @@ data class LineAxisStyle(
     val yLabels: AxisLabelStyle,
 )
 
+/**
+ * Optional fixed Y-axis range for line charts.
+ *
+ * `null` for either bound means the chart derives that bound from data, so [min] and [max]
+ * can be set independently. Explicit bounds must be finite. If the resolved range is equal
+ * or reversed, both bounds fall back to the data-derived domain.
+ *
+ * @property min Optional minimum value.
+ * @property max Optional maximum value.
+ */
+@Immutable
+data class LineRangeStyle(
+    val min: Double?,
+    val max: Double?,
+)
+
 /** Grouped, Compose-friendly v3 style for single- and multi-line charts. */
 @Immutable
 class LineChartStyle(
@@ -62,6 +78,7 @@ class LineChartStyle(
     val points: LinePointStyle,
     val selection: LineSelectionStyle,
     val axis: LineAxisStyle,
+    val range: LineRangeStyle,
     val legend: LegendStyle,
     val zoomControlsVisible: Boolean,
 )
@@ -74,9 +91,11 @@ object LineChartDefaults {
         points: LinePointStyle = points(),
         selection: LineSelectionStyle = selection(),
         axis: LineAxisStyle = axis(),
+        range: LineRangeStyle = range(),
         legend: LegendStyle = legend(),
         zoomControlsVisible: Boolean = true,
-    ): LineChartStyle = LineChartStyle(chartContainerStyle, line, points, selection, axis, legend, zoomControlsVisible)
+    ): LineChartStyle =
+        LineChartStyle(chartContainerStyle, line, points, selection, axis, range, legend, zoomControlsVisible)
 
     @Composable
     fun line(
@@ -110,6 +129,14 @@ object LineChartDefaults {
         xLabels: AxisLabelStyle = xLabels(),
         yLabels: AxisLabelStyle = yLabels(),
     ): LineAxisStyle = LineAxisStyle(visible, color, lineWidth, xLabels, yLabels)
+
+    /**
+     * Returns a [LineRangeStyle] for the optional fixed Y-axis range.
+     */
+    fun range(
+        min: Double? = null,
+        max: Double? = null,
+    ): LineRangeStyle = LineRangeStyle(min = min, max = max)
 
     @Composable
     fun xLabels(

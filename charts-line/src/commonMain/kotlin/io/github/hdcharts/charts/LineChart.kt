@@ -123,6 +123,9 @@ private fun validateLineInput(
         if (series.values.any { !it.isFinite() }) errors += "Series $index contains a non-finite value."
     }
     if (!style.line.alpha.isFinite() || style.line.alpha !in 0f..1f) errors += "Line alpha must be in 0..1."
+    if (style.range.min?.isFinite() == false || style.range.max?.isFinite() == false) {
+        errors += "Range bounds must be finite."
+    }
     if (!style.line.strokeWidth.value
             .isFinite() ||
         style.line.strokeWidth.value < 0f

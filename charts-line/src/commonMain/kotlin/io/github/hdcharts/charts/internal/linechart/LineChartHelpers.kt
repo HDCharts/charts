@@ -8,6 +8,8 @@ import io.github.hdcharts.charts.internal.common.bezier.DEFAULT_BEZIER_TENSION
 import io.github.hdcharts.charts.internal.common.bezier.cubicControlPointsForSegment
 import io.github.hdcharts.charts.internal.common.model.ChartDataItem
 import io.github.hdcharts.charts.internal.common.model.MultiChartData
+import io.github.hdcharts.charts.internal.common.model.minMax
+import io.github.hdcharts.charts.internal.common.model.resolveOptionalRange
 import io.github.hdcharts.charts.internal.common.model.toChartData
 import io.github.hdcharts.charts.internal.common.density.aggregateLabelsByCenterValue as aggregateLabelsByCenterValueCore
 import io.github.hdcharts.charts.internal.common.density.aggregatePointsByAverage as aggregatePointsByAverageCore
@@ -77,6 +79,21 @@ internal fun aggregateForCompactDensity(
         categories = if (data.hasCategories()) aggregatedCategories else emptyList(),
         title = data.title,
     )
+}
+
+/**
+ * Resolves the Y-axis domain, applying [minValue] and [maxValue] independently over the
+ * data-derived range. If either override is null, that bound falls back to the data range. If
+ * both bounds are explicit overrides and conflict, both fall back to the data range. If only one
+ * bound is overridden and the data-derived opposite bound crosses it, the override still wins and
+ * the opposite bound is clamped to it. See [resolveOptionalRange].
+ */
+internal fun MultiChartData.resolveLineRange(
+    minValue: Double?,
+    maxValue: Double?,
+): Pair<Double, Double> {
+    val (dataMin, dataMax) = minMax()
+    return resolveOptionalRange(dataMin, dataMax, minValue, maxValue)
 }
 
 internal fun findNearestPoint(

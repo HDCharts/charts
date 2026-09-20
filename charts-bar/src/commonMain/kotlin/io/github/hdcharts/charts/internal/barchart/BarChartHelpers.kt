@@ -7,6 +7,7 @@ import io.github.hdcharts.charts.internal.common.axis.AxisLabelFootprintPx
 import io.github.hdcharts.charts.internal.common.axis.AxisXPlanRequest
 import io.github.hdcharts.charts.internal.common.axis.AxisXPlanResult
 import io.github.hdcharts.charts.internal.common.model.ChartData
+import io.github.hdcharts.charts.internal.common.model.resolveOptionalRange
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.roundToInt
@@ -176,9 +177,7 @@ internal fun ChartData.resolveBarRange(
     val autoMin = minOf(0.0, points.min())
     val autoMax = maxOf(0.0, points.max())
     val fallback = if (autoMin == autoMax) 0.0 to 1.0 else autoMin to autoMax
-    val min = minValue ?: fallback.first
-    val max = maxValue ?: fallback.second
-    return if (max <= min) fallback else min to max
+    return resolveOptionalRange(fallback.first, fallback.second, minValue, maxValue)
 }
 
 /** Overflow-safe mapping; Float conversion happens only at the drawing boundary. */
