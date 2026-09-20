@@ -137,6 +137,8 @@ class LineChartTest {
                 return checkNotNull(capturedPixels.value)
             }
 
+            onNodeWithTag(TestTags.LINE_CHART).assertIsDisplayed()
+
             val plotBounds = onNodeWithTag(TestTags.LINE_CHART_PLOT).fetchSemanticsNode().boundsInRoot
             val captureBounds = onNodeWithTag("line-capture").fetchSemanticsNode().boundsInRoot
             val sampleX = (plotBounds.left - captureBounds.left + 2f).toInt()
