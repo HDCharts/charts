@@ -5,20 +5,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import hdcharts.app.generated.resources.Res
 import hdcharts.app.generated.resources.timeline_update_interval
 import hdcharts.app.generated.resources.timeline_window_size
+import io.github.hdcharts.app.ui.composable.DemoSlider
 import io.github.hdcharts.sampleshared.theme.Dimens
 import org.jetbrains.compose.resources.stringResource
-import kotlin.math.roundToInt
 
 data class LiveTimelineControlsState(
     val updateIntervalMs: Int = LiveTimelineDefaults.DEFAULT_UPDATE_INTERVAL_MS,
@@ -26,12 +21,12 @@ data class LiveTimelineControlsState(
 )
 
 object LiveTimelineDefaults {
-    const val DEFAULT_UPDATE_INTERVAL_MS = 500
+    const val DEFAULT_UPDATE_INTERVAL_MS = 200
     const val MIN_UPDATE_INTERVAL_MS = 200
     const val MAX_UPDATE_INTERVAL_MS = 2000
-    const val DEFAULT_WINDOW_SIZE = 100
     const val MIN_WINDOW_SIZE = 10
     const val MAX_WINDOW_SIZE = 120
+    const val DEFAULT_WINDOW_SIZE = MAX_WINDOW_SIZE
 }
 
 @Composable
@@ -40,17 +35,6 @@ fun LiveTimelineControls(
     onUpdateIntervalChange: (Int) -> Unit,
     onWindowSizeChange: (Int) -> Unit,
 ) {
-    var draftIntervalMs by remember(controlsState.updateIntervalMs) {
-        mutableFloatStateOf(controlsState.updateIntervalMs.toFloat())
-    }
-    var draftWindowSize by remember(controlsState.windowSize) {
-        mutableFloatStateOf(controlsState.windowSize.toFloat())
-    }
-    val minUpdateInterval = LiveTimelineDefaults.MIN_UPDATE_INTERVAL_MS.toFloat()
-    val maxUpdateInterval = LiveTimelineDefaults.MAX_UPDATE_INTERVAL_MS.toFloat()
-    val minWindowSize = LiveTimelineDefaults.MIN_WINDOW_SIZE.toFloat()
-    val maxWindowSize = LiveTimelineDefaults.MAX_WINDOW_SIZE.toFloat()
-
     Column(
         modifier =
             Modifier
@@ -58,27 +42,26 @@ fun LiveTimelineControls(
                 .padding(top = Dimens.sm),
         verticalArrangement = Arrangement.spacedBy(Dimens.xs),
     ) {
-        Text(
-            text = stringResource(Res.string.timeline_update_interval, draftIntervalMs.roundToInt()),
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-        Slider(
-            value = draftIntervalMs,
-            valueRange = minUpdateInterval..maxUpdateInterval,
-            onValueChange = { value -> draftIntervalMs = value },
-            onValueChangeFinished = { onUpdateIntervalChange(draftIntervalMs.roundToInt()) },
-        )
-
-        Text(
-            text = stringResource(Res.string.timeline_window_size, draftWindowSize.roundToInt()),
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-        Slider(
-            value = draftWindowSize,
-            valueRange = minWindowSize..maxWindowSize,
-            onValueChange = { value -> draftWindowSize = value },
-            onValueChangeFinished = { onWindowSizeChange(draftWindowSize.roundToInt()) },
-        )
+        DemoSlider(
+            value = controlsState.updateIntervalMs,
+            range = LiveTimelineDefaults.MIN_UPDATE_INTERVAL_MS..LiveTimelineDefaults.MAX_UPDATE_INTERVAL_MS,
+            onValueSelected = onUpdateIntervalChange,
+        ) { draftIntervalMs ->
+            Text(
+                text = stringResource(Res.string.timeline_update_interval, draftIntervalMs),
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+        }
+        DemoSlider(
+            value = controlsState.windowSize,
+            range = LiveTimelineDefaults.MIN_WINDOW_SIZE..LiveTimelineDefaults.MAX_WINDOW_SIZE,
+            onValueSelected = onWindowSizeChange,
+        ) { draftWindowSize ->
+            Text(
+                text = stringResource(Res.string.timeline_window_size, draftWindowSize),
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+        }
     }
 }
 

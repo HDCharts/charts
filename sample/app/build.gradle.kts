@@ -81,6 +81,13 @@ kotlin {
             implementation(libs.kotlinx.collections.immutable)
         }
 
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+            implementation(kotlin("test-common"))
+            implementation(kotlin("test-annotations-common"))
+            implementation(libs.kotlinx.coroutines.test)
+        }
+
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)

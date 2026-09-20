@@ -4,18 +4,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.hdcharts.app.demo.timeline.LiveTimelineControlsState
 import io.github.hdcharts.app.demo.timeline.LiveTimelineDefaults
+import io.github.hdcharts.app.demo.timeline.LiveTimelineStreamer
 import io.github.hdcharts.charts.model.ChartData
 import io.github.hdcharts.charts.model.toChartData
 import io.github.hdcharts.sampleshared.data.LiveLatencyMultiSeriesWindow
 import io.github.hdcharts.sampleshared.data.LiveLatencyTimelineUseCase
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 
 data class MultiLineChartState(
     val dataSet: ChartData,
@@ -79,7 +76,15 @@ class MultiLineChartViewModel(
         )
     val uiState: StateFlow<MultiLineChartUiState> = _uiState.asStateFlow()
 
-    private var liveUpdatesJob: Job? = null
+    private val liveUpdates =
+        LiveTimelineStreamer(
+            scope = viewModelScope,
+            intervalMillis = {
+                _uiState.value.controlsState.updateIntervalMs
+                    .toLong()
+            },
+            onTick = ::appendLiveTick,
+        )
 
     fun refresh() {
         refreshForSelectedPreset()
@@ -120,7 +125,7 @@ class MultiLineChartViewModel(
                 controlsState = state.controlsState.copy(updateIntervalMs = safeInterval),
             )
         }
-        restartLiveUpdatesIfNeeded()
+        liveUpdates.restartIfRunning()
     }
 
     fun updateWindowSize(windowSize: Int) {
@@ -210,7 +215,7 @@ class MultiLineChartViewModel(
     }
 
     override fun onCleared() {
-        stopLiveUpdates()
+        liveUpdates.stop()
         super.onCleared()
     }
 
@@ -250,35 +255,10 @@ class MultiLineChartViewModel(
             state.copy(isPlaying = playing)
         }
         if (playing) {
-            startLiveUpdates()
+            liveUpdates.start()
         } else {
-            stopLiveUpdates()
+            liveUpdates.stop()
         }
-    }
-
-    private fun startLiveUpdates() {
-        liveUpdatesJob?.cancel()
-        liveUpdatesJob =
-            viewModelScope.launch {
-                while (isActive) {
-                    val intervalMs =
-                        _uiState.value.controlsState.updateIntervalMs
-                            .toLong()
-                    delay(intervalMs)
-                    appendLiveTick()
-                }
-            }
-    }
-
-    private fun restartLiveUpdatesIfNeeded() {
-        if (_uiState.value.isPlaying) {
-            startLiveUpdates()
-        }
-    }
-
-    private fun stopLiveUpdates() {
-        liveUpdatesJob?.cancel()
-        liveUpdatesJob = null
     }
 
     private fun buildGeneratedDataSet(controls: MultiLineChartDataControlsState): MultiLineChartState {

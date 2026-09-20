@@ -5,6 +5,8 @@ import io.github.hdcharts.charts.model.toChartData
 import io.github.hdcharts.sampleshared.data.LiveLatencyMultiSeriesWindow
 import io.github.hdcharts.sampleshared.data.LiveLatencySingleSeriesWindow
 import io.github.hdcharts.sampleshared.data.LiveLatencyTimelineUseCase
+import io.github.hdcharts.sampleshared.data.LiveTimelineProfile
+import io.github.hdcharts.sampleshared.data.MIN_SCALE_SWITCH_POINTS
 import kotlin.math.sin
 import kotlin.random.Random
 
@@ -16,7 +18,15 @@ class DefaultLiveLatencyTimelineUseCase : LiveLatencyTimelineUseCase {
     override fun createSingleWindow(
         windowSize: Int,
         endTick: Int?,
-    ): LiveLatencySingleSeriesWindow = generator.createSingleWindow(windowSize = windowSize, endTick = endTick)
+        profile: LiveTimelineProfile,
+        scaleSwitchPoints: Int,
+    ): LiveLatencySingleSeriesWindow =
+        generator.createSingleWindow(
+            windowSize = windowSize,
+            endTick = endTick,
+            profile = profile,
+            scaleSwitchPoints = scaleSwitchPoints,
+        )
 
     override fun advanceSingleWindow(window: LiveLatencySingleSeriesWindow): LiveLatencySingleSeriesWindow =
         generator.advanceSingleWindow(window)
@@ -40,6 +50,10 @@ private class LiveLatencyTimelineGenerator {
         private const val SECONDS_PER_DAY = 24 * 60 * 60
         private const val BASE_SECOND_OF_DAY = 14 * 60 * 60
         private const val SINGLE_TITLE = "API Gateway P95 Latency"
+        private const val SCALE_DROP_TITLE = "Queue Backlog Drain"
+        private const val SCALE_DROP_MIN = 1_000_000.0
+        private const val SCALE_DROP_MAX = 2_000_000.0
+        private const val SCALE_DROP_TAIL_MAX = 100.0
         private const val P50_SERIES_LABEL = "P50 Latency"
         private const val P95_SERIES_LABEL = "P95 Latency"
         private const val P50_MIN = 70.0
@@ -52,36 +66,51 @@ private class LiveLatencyTimelineGenerator {
     fun createSingleWindow(
         windowSize: Int,
         endTick: Int? = null,
+        profile: LiveTimelineProfile = LiveTimelineProfile.Latency,
+        scaleSwitchPoints: Int = windowSize,
     ): LiveLatencySingleSeriesWindow {
         val safeWindowSize = windowSize.coerceAtLeast(MIN_WINDOW_SIZE)
+        val safeScaleSwitchPoints = scaleSwitchPoints.coerceAtLeast(MIN_SCALE_SWITCH_POINTS)
         val resolvedEndTick = resolveEndTick(windowSize = safeWindowSize, endTick = endTick)
         val ticks = (resolvedEndTick - safeWindowSize + 1)..resolvedEndTick
         val values =
             ticks.map { tick ->
-                val p50 = sampleP50Latency(tick)
-                sampleP95Latency(tick, p50)
+                sampleValue(tick = tick, profile = profile, scaleSwitchPoints = safeScaleSwitchPoints)
             }
         val labels = ticks.map(::formatTickLabel)
         return LiveLatencySingleSeriesWindow(
             values = values,
             labels = labels,
             endTick = resolvedEndTick,
+            profile = profile,
+            scaleSwitchPoints = safeScaleSwitchPoints,
         )
     }
 
     fun advanceSingleWindow(window: LiveLatencySingleSeriesWindow): LiveLatencySingleSeriesWindow {
         val nextTick = window.endTick + 1
-        val p50 = sampleP50Latency(nextTick)
-        val nextP95 = sampleP95Latency(nextTick, p50)
+        val nextValue =
+            sampleValue(
+                tick = nextTick,
+                profile = window.profile,
+                scaleSwitchPoints = window.scaleSwitchPoints.coerceAtLeast(MIN_SCALE_SWITCH_POINTS),
+            )
         return window.copy(
-            values = window.values.drop(1) + nextP95,
+            values = window.values.drop(1) + nextValue,
             labels = window.labels.drop(1) + formatTickLabel(nextTick),
             endTick = nextTick,
         )
     }
 
     fun toSingleDataSet(window: LiveLatencySingleSeriesWindow): ChartData =
-        window.values.toChartData(categories = window.labels, seriesName = SINGLE_TITLE)
+        window.values.toChartData(
+            categories = window.labels,
+            seriesName =
+                when (window.profile) {
+                    LiveTimelineProfile.Latency -> SINGLE_TITLE
+                    LiveTimelineProfile.ScaleDrop -> SCALE_DROP_TITLE
+                },
+        )
 
     fun createMultiWindow(
         windowSize: Int,
@@ -130,6 +159,25 @@ private class LiveLatencyTimelineGenerator {
         windowSize: Int,
         endTick: Int?,
     ): Int = (endTick ?: windowSize - 1).coerceAtLeast(windowSize - 1)
+
+    private fun sampleValue(
+        tick: Int,
+        profile: LiveTimelineProfile,
+        scaleSwitchPoints: Int,
+    ): Double =
+        when (profile) {
+            LiveTimelineProfile.Latency -> sampleP95Latency(tick, sampleP50Latency(tick))
+            LiveTimelineProfile.ScaleDrop -> sampleScaleDropValue(tick = tick, scaleSwitchPoints = scaleSwitchPoints)
+        }
+
+    private fun sampleScaleDropValue(
+        tick: Int,
+        scaleSwitchPoints: Int,
+    ): Double =
+        when ((tick / scaleSwitchPoints) % 2) {
+            0 -> Random.nextDouble(from = SCALE_DROP_MIN, until = SCALE_DROP_MAX)
+            else -> Random.nextDouble(from = 0.0, until = SCALE_DROP_TAIL_MAX)
+        }
 
     private fun sampleP50Latency(tick: Int): Double {
         val trend = 112.0 + (18.0 * sin(tick / 7.0)) + (8.0 * sin(tick / 2.8))

@@ -75,7 +75,20 @@ internal data class TimelineTransitionData(
     val previousSeries: List<List<Double>>,
     val currentSeries: List<List<Double>>,
     val minMax: Pair<Double, Double>,
-)
+) {
+    /**
+     * Normalized values drawn for each series while the shift animates.
+     *
+     * The transition data is rebuilt once per update, so the values are normalized here instead of
+     * on every animation frame.
+     */
+    val drawValues: List<List<Float>> =
+        timelineShiftValues(
+            previousSeries = previousSeries,
+            currentSeries = currentSeries,
+            minMax = minMax,
+        )
+}
 
 internal sealed interface LineChartTransitionMode {
     data object Morph : LineChartTransitionMode
@@ -85,12 +98,6 @@ internal sealed interface LineChartTransitionMode {
         val animationDuration: Duration,
     ) : LineChartTransitionMode
 }
-
-internal data class LineChartUpdateDecision(
-    val normalizationMinMax: Pair<Double, Double>?,
-    val nextTimelineRenderMinMax: Pair<Double, Double>?,
-    val mode: LineChartTransitionMode,
-)
 
 @Composable
 internal fun LineChartContent(
@@ -113,7 +120,10 @@ internal fun LineChartContent(
     var show by rememberShowState(isPreviewMode = isPreview || !animateOnStart)
     val touchX = remember { mutableFloatStateOf(0f) }
     val dragging = remember { mutableStateOf(false) }
-    val valueAnimationSpec = remember { AnimationSpec.lineChart() }
+    val valueAnimationSpec =
+        remember(renderMode, animationDuration) {
+            lineChartValueAnimationSpec(renderMode = renderMode, animationDuration = animationDuration)
+        }
     val currentOnValueChanged by rememberUpdatedState(onValueChanged)
 
     val lineAnimation by animateFloatAsState(
@@ -165,7 +175,6 @@ internal fun LineChartContent(
     val previousRawSeries = remember { mutableStateOf<List<List<Double>>?>(null) }
     val timelineTransitionData = remember { mutableStateOf<TimelineTransitionData?>(null) }
     val timelineProgress = remember { Animatable(ANIMATION_TARGET) }
-    val timelineRenderMinMax = remember { mutableStateOf<Pair<Double, Double>?>(null) }
     val isTimelineMode = renderMode == LineChartRenderMode.Timeline
     val denseMorphEnabled = isDenseMorphMode && !isTimelineMode
     val dragInteractionEnabled = interactionEnabled && !isTimelineMode && !denseMorphEnabled
@@ -202,28 +211,20 @@ internal fun LineChartContent(
             previousRawSeries.value = null
             timelineTransitionData.value = null
             timelineProgress.snapTo(ANIMATION_TARGET)
-            timelineRenderMinMax.value = null
             return@LaunchedEffect
         }
 
         val previousRawSnapshot = previousRawSeries.value
         previousRawSeries.value = rawSeries
 
-        val updateDecision =
+        val transitionMode =
             decideLineChartUpdate(
                 previousRawSeries = previousRawSnapshot,
                 currentRawSeries = rawSeries,
                 currentMinMax = minMax,
-                previousTimelineRenderMinMax = timelineRenderMinMax.value,
                 renderMode = renderMode,
                 animationDuration = animationDuration,
             )
-        timelineRenderMinMax.value = updateDecision.nextTimelineRenderMinMax
-        val normalizedForCurrent =
-            when (val normalizationMinMax = updateDecision.normalizationMinMax) {
-                null -> targetNormalized
-                else -> normalizeSeriesByMinMax(series = rawSeries, minMax = normalizationMinMax)
-            }
         val hasStructureChanged =
             previousRawSnapshot != null &&
                 !hasSameSeriesStructure(
@@ -233,7 +234,7 @@ internal fun LineChartContent(
 
         if (hasStructureChanged) {
             animatedValues.forEachIndexed { seriesIndex, series ->
-                val targetSeries = normalizedForCurrent.getOrNull(seriesIndex) ?: emptyList()
+                val targetSeries = targetNormalized.getOrNull(seriesIndex) ?: emptyList()
                 series.forEachIndexed { pointIndex, animatable ->
                     val target = targetSeries.getOrNull(pointIndex) ?: 0f
                     animatable.snapTo(target)
@@ -247,7 +248,7 @@ internal fun LineChartContent(
 
         if (isPreview || !hasInitialized.value) {
             animatedValues.forEachIndexed { seriesIndex, series ->
-                val targetSeries = normalizedForCurrent.getOrNull(seriesIndex) ?: emptyList()
+                val targetSeries = targetNormalized.getOrNull(seriesIndex) ?: emptyList()
                 series.forEachIndexed { pointIndex, animatable ->
                     val target = targetSeries.getOrNull(pointIndex) ?: 0f
                     animatable.snapTo(target)
@@ -259,10 +260,10 @@ internal fun LineChartContent(
             return@LaunchedEffect
         }
 
-        when (val mode = updateDecision.mode) {
+        when (val mode = transitionMode) {
             is LineChartTransitionMode.TimelineShift -> {
                 animatedValues.forEachIndexed { seriesIndex, series ->
-                    val targetSeries = normalizedForCurrent.getOrNull(seriesIndex) ?: emptyList()
+                    val targetSeries = targetNormalized.getOrNull(seriesIndex) ?: emptyList()
                     series.forEachIndexed { pointIndex, animatable ->
                         val target = targetSeries.getOrNull(pointIndex) ?: 0f
                         animatable.snapTo(target)
@@ -292,7 +293,7 @@ internal fun LineChartContent(
 
         coroutineScope {
             animatedValues.forEachIndexed { seriesIndex, series ->
-                val targetSeries = normalizedForCurrent.getOrNull(seriesIndex) ?: emptyList()
+                val targetSeries = targetNormalized.getOrNull(seriesIndex) ?: emptyList()
                 series.forEachIndexed { pointIndex, animatable ->
                     val target = targetSeries.getOrNull(pointIndex) ?: 0f
                     launch {
@@ -634,24 +635,12 @@ internal fun LineChartContent(
                                     progress < ANIMATION_TARGET
 
                             if (useTimeline) {
-                                val normalizedPrevious =
-                                    normalizeSeriesByMinMax(
-                                        series = transitionData.previousSeries,
-                                        minMax = transitionData.minMax,
-                                    )
-                                val normalizedCurrent =
-                                    normalizeSeriesByMinMax(
-                                        series = transitionData.currentSeries,
-                                        minMax = transitionData.minMax,
-                                    )
                                 val shiftPx = -(progress * timelineStep(size.width, pointsCount))
 
                                 data.items.forEachIndexed { index, _ ->
-                                    val previousValues = normalizedPrevious.getOrNull(index).orEmpty()
-                                    val currentValues = normalizedCurrent.getOrNull(index).orEmpty()
-                                    if (previousValues.isEmpty() || currentValues.isEmpty()) return@forEachIndexed
+                                    val timelineValues = transitionData.drawValues.getOrNull(index).orEmpty()
+                                    if (timelineValues.isEmpty()) return@forEachIndexed
 
-                                    val timelineValues = previousValues + currentValues.last()
                                     val scaledValues = timelineValues.map { value -> value * size.height }
 
                                     drawChartPath(

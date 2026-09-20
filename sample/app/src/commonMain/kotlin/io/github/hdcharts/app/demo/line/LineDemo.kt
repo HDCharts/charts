@@ -4,7 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -14,15 +14,9 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RangeSlider
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,12 +31,15 @@ import hdcharts.app.generated.resources.cd_pause_live_updates
 import hdcharts.app.generated.resources.cd_play_live_updates
 import hdcharts.app.generated.resources.chart_custom
 import hdcharts.app.generated.resources.chart_default
+import hdcharts.app.generated.resources.chart_scale_drop
 import hdcharts.app.generated.resources.chart_timeline
 import hdcharts.app.generated.resources.line_data_points
 import hdcharts.app.generated.resources.line_data_points_range
 import io.github.hdcharts.app.demo.timeline.LiveTimelineControls
 import io.github.hdcharts.app.demo.timeline.timelineAnimationDurationMillis
 import io.github.hdcharts.app.ui.composable.ChartDemo
+import io.github.hdcharts.app.ui.composable.DemoRangeSlider
+import io.github.hdcharts.app.ui.composable.DemoSlider
 import io.github.hdcharts.charts.LineChart
 import io.github.hdcharts.charts.LineChartRenderMode
 import io.github.hdcharts.charts.style.ChartContainerDefaults
@@ -51,7 +48,6 @@ import io.github.hdcharts.sampleshared.fixtures.ChartTestStyleFixtures
 import io.github.hdcharts.sampleshared.theme.Dimens
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
-import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
@@ -59,21 +55,27 @@ fun LineChartDemo(viewModel: LineChartViewModel = koinViewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val timelineAnimationDuration = timelineAnimationDurationMillis(uiState.timelineControlsState.updateIntervalMs)
     val chartContainerStyle = ChartContainerDefaults.style()
+    val presetContent: @Composable () -> Unit = {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(Dimens.controlSpacing),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            LineDemoPresetToggle(
+                selectedPreset = uiState.preset,
+                onPresetSelected = viewModel::onPresetSelected,
+            )
+        }
+    }
+
+    if (uiState.preset == LineDemoPreset.ScaleDrop) {
+        LineScaleDropDemo(presetContent = presetContent)
+        return
+    }
 
     ChartDemo(
         onRefresh = viewModel::refreshForSelectedPreset,
         refreshVisible = uiState.preset != LineDemoPreset.Timeline,
-        presetContent = {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(Dimens.controlSpacing),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                LineDemoPresetToggle(
-                    selectedPreset = uiState.preset,
-                    onPresetSelected = viewModel::onPresetSelected,
-                )
-            }
-        },
+        presetContent = presetContent,
         extraButtons = {
             if (uiState.preset == LineDemoPreset.Timeline) {
                 IconButton(
@@ -146,6 +148,8 @@ fun LineChartDemo(viewModel: LineChartViewModel = koinViewModel()) {
                     style = ChartTestStyleFixtures.lineCustomStyle(chartContainerStyle = chartContainerStyle),
                 )
             }
+
+            LineDemoPreset.ScaleDrop -> Unit
         }
     }
 }
@@ -156,9 +160,10 @@ private fun LineDemoPresetToggle(
     onPresetSelected: (LineDemoPreset) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Row(
+    FlowRow(
         modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(Dimens.sm),
+        horizontalArrangement = Arrangement.spacedBy(Dimens.sm, Alignment.CenterHorizontally),
+        verticalArrangement = Arrangement.spacedBy(Dimens.xs),
     ) {
         LineDemoPresetItem(
             label = stringResource(Res.string.chart_default),
@@ -169,6 +174,11 @@ private fun LineDemoPresetToggle(
             label = stringResource(Res.string.chart_timeline),
             selected = selectedPreset == LineDemoPreset.Timeline,
             onClick = { onPresetSelected(LineDemoPreset.Timeline) },
+        )
+        LineDemoPresetItem(
+            label = stringResource(Res.string.chart_scale_drop),
+            selected = selectedPreset == LineDemoPreset.ScaleDrop,
+            onClick = { onPresetSelected(LineDemoPreset.ScaleDrop) },
         )
         LineDemoPresetItem(
             label = stringResource(Res.string.chart_custom),
@@ -186,13 +196,6 @@ private fun LineDataPointsControls(
     onPointsChange: (Int) -> Unit,
     onRangeChange: (Int, Int) -> Unit,
 ) {
-    val minPointsSupported = LineChartViewModel.MIN_SUPPORTED_POINTS.toFloat()
-    val maxPointsSupported = LineChartViewModel.MAX_SUPPORTED_POINTS.toFloat()
-    val minValueSupported = LineChartViewModel.MIN_SUPPORTED_VALUE.toFloat()
-    val maxValueSupported = LineChartViewModel.MAX_SUPPORTED_VALUE.toFloat()
-    var draftPoints by remember(points) { mutableFloatStateOf(points.toFloat()) }
-    var draftRange by remember(minValue, maxValue) { mutableStateOf(minValue.toFloat()..maxValue.toFloat()) }
-
     Column(
         modifier =
             Modifier
@@ -200,36 +203,27 @@ private fun LineDataPointsControls(
                 .padding(top = Dimens.sm),
         verticalArrangement = Arrangement.spacedBy(Dimens.xs),
     ) {
-        Text(
-            text = stringResource(Res.string.line_data_points, draftPoints.roundToInt()),
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-        Slider(
-            value = draftPoints,
-            valueRange = minPointsSupported..maxPointsSupported,
-            onValueChange = { draftPoints = it },
-            onValueChangeFinished = { onPointsChange(draftPoints.roundToInt()) },
-        )
-        Text(
-            text =
-                stringResource(
-                    Res.string.line_data_points_range,
-                    draftRange.start.roundToInt(),
-                    draftRange.endInclusive.roundToInt(),
-                ),
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-        RangeSlider(
-            value = draftRange,
-            valueRange = minValueSupported..maxValueSupported,
-            onValueChange = { draftRange = it },
-            onValueChangeFinished = {
-                onRangeChange(
-                    draftRange.start.roundToInt(),
-                    draftRange.endInclusive.roundToInt(),
-                )
-            },
-        )
+        DemoSlider(
+            value = points,
+            range = LineChartViewModel.MIN_SUPPORTED_POINTS..LineChartViewModel.MAX_SUPPORTED_POINTS,
+            onValueSelected = onPointsChange,
+        ) { draftPoints ->
+            Text(
+                text = stringResource(Res.string.line_data_points, draftPoints),
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+        }
+        DemoRangeSlider(
+            start = minValue,
+            end = maxValue,
+            range = LineChartViewModel.MIN_SUPPORTED_VALUE..LineChartViewModel.MAX_SUPPORTED_VALUE,
+            onRangeSelected = onRangeChange,
+        ) { draftMinValue, draftMaxValue ->
+            Text(
+                text = stringResource(Res.string.line_data_points_range, draftMinValue, draftMaxValue),
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+        }
     }
 }
 

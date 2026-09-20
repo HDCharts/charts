@@ -14,6 +14,7 @@ object ChartsModules {
             ":charts",
         )
 
+    val sampleTested = listOf(SAMPLE_SHARED, ":app")
     val publishable = library + listOf(":charts-bom", ":charts-relocation")
     val ciKmpCompile = library + listOf(SAMPLE_SHARED, ":app")
     val ciAndroidCompile = library + listOf(SAMPLE_SHARED, ":app")
