@@ -116,10 +116,12 @@ private fun isTimelineAdvance(
  * The drawn window is the previous window followed by the newest point, so the line slides one step
  * to the left and ends on the current window.
  *
- * Only the oldest point can fall outside [minMax]: every other drawn value belongs to the current
- * window. That point is drawn flat against the plot edge for the length of the shift, because the
- * renderer keeps every value inside the plot. The artifact covers one horizontal step and only
- * appears when the leaving value is outside the current range.
+ * When [minMax] is fully data-derived, only the oldest point can fall outside it: every other
+ * drawn value belongs to the current window, and that point is drawn flat against the plot edge
+ * for the length of the shift because the renderer keeps every value inside the plot. That
+ * artifact covers one horizontal step and only appears when the leaving value is outside the
+ * current range. If [minMax] instead comes from a fixed range narrower than the live data, more
+ * than one drawn point can sit outside it for as long as the data keeps exceeding those bounds.
  */
 internal fun timelineShiftValues(
     previousSeries: List<List<Double>>,

@@ -1,4 +1,4 @@
 # Baseline commit used by API compatibility workflow.
 # Updated via the apiCompatibilityUpdateBaseline Gradle task.
-# source: manual:main:2d0049a7fbf3
-2d0049a7fbf33c18c5bd2f70b3158c5608780ac0
+# source: manual:head:8392ba35ce9a
+8392ba35ce9a5bcea3ede05d839a684a0e606c2e

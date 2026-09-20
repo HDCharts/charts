@@ -56,16 +56,30 @@ fun ChartData.normalizeBarValues(
 fun ChartData.resolveBarRange(
     minValue: Float?,
     maxValue: Float?,
-): Pair<Double, Double> {
-    val dataMin = points.min()
-    val dataMax = points.max()
-    val resolvedMin = minValue?.toDouble() ?: dataMin
-    val resolvedMax = maxValue?.toDouble() ?: dataMax
+): Pair<Double, Double> = resolveOptionalRange(points.min(), points.max(), minValue?.toDouble(), maxValue?.toDouble())
 
-    return if (resolvedMax <= resolvedMin) {
-        dataMin to dataMax
-    } else {
-        resolvedMin to resolvedMax
+/**
+ * Applies optional [minValue]/[maxValue] overrides to a data-derived domain, independently. A
+ * null override falls back to the corresponding data bound. If both bounds are explicit
+ * overrides and they are equal or reversed, both bounds fall back to the data-derived domain
+ * (the caller supplied a self-contradictory range). If only one bound is overridden and the
+ * data-derived opposite bound crosses it, the override still wins and the opposite bound is
+ * clamped to it, rather than discarding the override entirely. Shared by chart types whose fixed
+ * range differs only in how the data-derived fallback domain ([dataMin], [dataMax]) is computed.
+ */
+fun resolveOptionalRange(
+    dataMin: Double,
+    dataMax: Double,
+    minValue: Double?,
+    maxValue: Double?,
+): Pair<Double, Double> {
+    val resolvedMin = minValue ?: dataMin
+    val resolvedMax = maxValue ?: dataMax
+    if (resolvedMax > resolvedMin) return resolvedMin to resolvedMax
+    return when {
+        minValue != null && maxValue != null -> dataMin to dataMax
+        minValue != null -> resolvedMin to resolvedMin
+        else -> resolvedMax to resolvedMax
     }
 }
 

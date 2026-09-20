@@ -30,6 +30,8 @@ class LineChartInternalStyle(
     val axisVisible: Boolean,
     val axisColor: Color,
     val axisLineWidth: Float,
+    val minValue: Double?,
+    val maxValue: Double?,
     val yAxisLabelsVisible: Boolean,
     val yAxisLabelColor: Color,
     val yAxisLabelSize: TextUnit,

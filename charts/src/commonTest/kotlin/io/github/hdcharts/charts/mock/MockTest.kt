@@ -190,6 +190,8 @@ internal object MockTest {
             axisVisible = true,
             axisColor = Color.Gray,
             axisLineWidth = 1f,
+            minValue = null,
+            maxValue = null,
             yAxisLabelsVisible = true,
             yAxisLabelColor = Color.Gray,
             yAxisLabelSize = 11.sp,

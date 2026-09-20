@@ -19,6 +19,7 @@ import io.github.hdcharts.charts.internal.linechart.findNearestPoint
 import io.github.hdcharts.charts.internal.linechart.lineChartValueAnimationSpec
 import io.github.hdcharts.charts.internal.linechart.normalizeSeriesByMinMax
 import io.github.hdcharts.charts.internal.linechart.renderIndexForSourceIndex
+import io.github.hdcharts.charts.internal.linechart.resolveLineRange
 import io.github.hdcharts.charts.internal.linechart.resolveLineXAxisLabels
 import io.github.hdcharts.charts.internal.linechart.scaleValues
 import io.github.hdcharts.charts.internal.linechart.shouldUseScrollableDensity
@@ -240,6 +241,82 @@ class LineChartHelpersTest {
             // Assert
             assertTrue { scaledValues == entry.value }
         }
+    }
+
+    @Test
+    fun resolveLineRange_noOverrides_returnsDataMinMax() {
+        val data = singleSeriesData(listOf(10.0, 20.0, 30.0))
+
+        assertEquals(10.0 to 30.0, data.resolveLineRange(null, null))
+    }
+
+    @Test
+    fun resolveLineRange_independentOverrides_applyEachBoundSeparately() {
+        val data = singleSeriesData(listOf(10.0, 20.0, 30.0))
+
+        assertEquals(0.0 to 30.0, data.resolveLineRange(minValue = 0.0, maxValue = null))
+        assertEquals(10.0 to 100.0, data.resolveLineRange(minValue = null, maxValue = 100.0))
+        assertEquals(0.0 to 100.0, data.resolveLineRange(minValue = 0.0, maxValue = 100.0))
+    }
+
+    @Test
+    fun resolveLineRange_invalidOverride_fallsBackToDataMinMax() {
+        val data = singleSeriesData(listOf(10.0, 20.0, 30.0))
+
+        assertEquals(10.0 to 30.0, data.resolveLineRange(minValue = 50.0, maxValue = 20.0))
+        assertEquals(10.0 to 30.0, data.resolveLineRange(minValue = 20.0, maxValue = 20.0))
+    }
+
+    @Test
+    fun resolveLineRange_singleSidedOverride_crossingDataBound_keepsOverrideInstead_ofFallingBackToDataRange() {
+        val data = singleSeriesData(listOf(-30.0, -20.0, -10.0))
+
+        assertEquals(0.0 to 0.0, data.resolveLineRange(minValue = 0.0, maxValue = null))
+
+        val positiveData = singleSeriesData(listOf(10.0, 20.0, 30.0))
+        assertEquals(0.0 to 0.0, positiveData.resolveLineRange(minValue = null, maxValue = 0.0))
+    }
+
+    @Test
+    fun resolveLineRange_timelineFixedMin_staysPinnedAcrossLiveTicksEvenWhenDataDipsBelowIt() {
+        // LineChartContent recomputes minMax via remember(data, style.minValue, style.maxValue) on every tick.
+        val tickBeforeDip = singleSeriesData(listOf(5.0, 8.0, 12.0))
+        val tickDuringDip = singleSeriesData(listOf(8.0, 12.0, -3.0))
+        val tickAfterDip = singleSeriesData(listOf(12.0, -3.0, 6.0))
+
+        val minMaxBeforeDip = tickBeforeDip.resolveLineRange(minValue = 0.0, maxValue = null)
+        val minMaxDuringDip = tickDuringDip.resolveLineRange(minValue = 0.0, maxValue = null)
+        val minMaxAfterDip = tickAfterDip.resolveLineRange(minValue = 0.0, maxValue = null)
+
+        assertEquals(0.0, minMaxBeforeDip.first)
+        assertEquals(0.0, minMaxDuringDip.first)
+        assertEquals(0.0, minMaxAfterDip.first)
+        assertEquals(0.0 to 12.0, minMaxBeforeDip)
+        assertEquals(0.0 to 12.0, minMaxDuringDip)
+        assertEquals(0.0 to 12.0, minMaxAfterDip)
+    }
+
+    @Test
+    fun resolveLineRange_timelineFixedMin_wholeWindowBelowIt_clampsInsteadOfShowingNegativeRange() {
+        val allBelowFloor = singleSeriesData(listOf(-8.0, -5.0, -2.0))
+
+        val minMax = allBelowFloor.resolveLineRange(minValue = 0.0, maxValue = null)
+
+        assertEquals(0.0 to 0.0, minMax)
+        val normalized = normalizeSeriesByMinMax(series = listOf(allBelowFloor.items[0].item.points), minMax = minMax)
+        assertEquals(listOf(listOf(0f, 0f, 0f)), normalized)
+    }
+
+    @Test
+    fun timelineShiftValues_fixedRangeNarrowerThanLiveWindow_pinsMoreThanTheOldestPointFlat() {
+        val previousSeries = listOf(listOf(120.0, 130.0, 140.0))
+        val currentSeries = listOf(listOf(130.0, 140.0, 150.0))
+        val fixedMinMax = 0.0 to 100.0
+
+        val drawValues =
+            timelineShiftValues(previousSeries = previousSeries, currentSeries = currentSeries, minMax = fixedMinMax)
+
+        assertEquals(listOf(listOf(1f, 1f, 1f, 1f)), drawValues)
     }
 
     @Test
@@ -515,4 +592,10 @@ class LineChartHelpersTest {
 
         assertEquals(expected = ANIMATION_DURATION_LINE_CHART, actual = spec.durationMillis)
     }
+
+    private fun singleSeriesData(points: List<Double>): MultiChartData =
+        MultiChartData(
+            items = listOf(ChartDataItem(label = "Series", item = points.toChartData())),
+            title = "Single",
+        )
 }

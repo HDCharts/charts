@@ -221,6 +221,25 @@ LineChart(
 )
 ```
 
+### Fixed Y-axis range
+
+By default the Y-axis is derived from the data, which can make small fluctuations look
+exaggerated when the axis doesn't start at zero. Set `range` on `*Defaults.style()` to pin
+`min`, `max`, or both, independently of one another; whichever bound you leave `null` keeps
+deriving from the data.
+
+```kotlin
+LineChart(
+    data = dataSet,
+    modifier = Modifier.fillMaxWidth().height(260.dp),
+    style = LineChartDefaults.style(
+        range = LineChartDefaults.range(min = 0.0, max = 100.0),
+    ),
+)
+```
+
+`BarChart` exposes the same `range` block on `BarChartDefaults.style()`.
+
 ### Selection
 
 Use `rememberChartSelection()` to hoist selection. The chart calls back into it; you read

@@ -51,7 +51,6 @@ import io.github.hdcharts.charts.internal.common.composable.rememberShowState
 import io.github.hdcharts.charts.internal.common.interaction.buildHorizontalDragGestureModifier
 import io.github.hdcharts.charts.internal.common.interaction.buildTapGestureModifier
 import io.github.hdcharts.charts.internal.common.model.MultiChartData
-import io.github.hdcharts.charts.internal.common.model.minMax
 import io.github.hdcharts.charts.internal.common.model.normalizeByMinMax
 import io.github.hdcharts.charts.internal.linechart.LineChartInternalStyle
 import io.github.hdcharts.charts.model.ChartValueFormatter
@@ -148,7 +147,10 @@ internal fun LineChartContent(
 
     val rawSeries = remember(data) { data.items.map { item -> item.item.points.toList() } }
     val xAxisLabels = remember(data) { resolveLineXAxisLabels(data) }
-    val minMax = remember(data) { data.minMax() }
+    val minMax =
+        remember(data, style.minValue, style.maxValue) {
+            data.resolveLineRange(style.minValue, style.maxValue)
+        }
     val targetNormalized = remember(rawSeries, minMax) { data.normalizeByMinMax(minMax, 0f) }
     val pointsCount = rawSeries.firstOrNull()?.size ?: 0
     val forcedSelectionIndex = selectedPointIndex.takeIf { it in 0 until pointsCount } ?: NO_SELECTION
@@ -200,7 +202,7 @@ internal fun LineChartContent(
         }
     }
 
-    LaunchedEffect(show, rawSeries, renderMode, animationDuration) {
+    LaunchedEffect(show, rawSeries, minMax, renderMode, animationDuration) {
         if (pointsCount <= 0 || seriesCount == 0) return@LaunchedEffect
 
         if (!show && !isPreview) {
