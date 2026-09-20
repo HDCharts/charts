@@ -35,6 +35,7 @@ jobs:
           should_run="$(bash scripts/ci-has-code-changes.sh "$BASE_SHA" "$HEAD_SHA")"
           echo "should_run=$should_run" >> "$GITHUB_OUTPUT"
           bash .github/scripts/sync-gif-baselines.sh --self-test
+          bash .github/scripts/sync-wiki-docs.sh --self-test
           bash .github/scripts/validate-snapshot-provenance.sh --self-test
 
   assemble:
