@@ -1,0 +1,102 @@
+# Reusable sync of snapshot release notes, wiki docs, and GIF baselines into charts-docs
+# main. Runs under the Snapshot environment only. Shared by the snapshot release pipeline
+# and the manual Snapshot Docs workflow.
+name: Sync Snapshot Docs
+
+on:
+  workflow_call:
+    inputs:
+      source-ref:
+        description: HDCharts ref to sync docs from.
+        required: true
+        type: string
+      release-notes-version:
+        description: Release-note version directory to mirror (e.g. 1.2.3).
+        required: true
+        type: string
+      write-provenance-manifest:
+        description: >-
+          Also stamp docs-app/public/snapshot-manifest.json with charts-version and the
+          resolved source SHA. Only the snapshot release pipeline should set this: release.yml
+          gates a real release on this manifest proving a full snapshot (Maven + Android) was
+          published for the exact commit.
+        required: false
+        type: boolean
+        default: false
+      charts-version:
+        description: Version recorded in the provenance manifest. Required when write-provenance-manifest is true.
+        required: false
+        type: string
+        default: ''
+    secrets:
+      CHARTS_WORKFLOW_TOKEN:
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: charts-docs-main-sync
+  cancel-in-progress: false
+
+jobs:
+  sync-docs:
+    name: Sync release notes, wiki docs, and GIF baselines
+    runs-on: ubuntu-latest
+    environment: Snapshot
+    steps:
+      - name: Checkout snapshot source
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
+          ref: ${{ inputs.source-ref }}
+      - name: Checkout charts-docs main
+        uses: actions/checkout@v7
+        with:
+          repository: HDCharts/charts-docs
+          ref: main
+          path: charts-docs-repo
+          fetch-depth: 0
+          token: ${{ secrets.CHARTS_WORKFLOW_TOKEN }}
+      - name: Mirror snapshot release notes
+        env:
+          ALLOW_MISSING_RELEASE_NOTES: "true"
+        run: bash .github/scripts/sync-release-notes.sh charts-docs-repo "${{ inputs.release-notes-version }}"
+      - name: Sync snapshot wiki docs
+        run: bash .github/scripts/sync-wiki-docs.sh charts-docs-repo
+      - name: Sync snapshot GIF baselines
+        run: bash .github/scripts/sync-gif-baselines.sh charts-docs-repo
+      - name: Write snapshot provenance
+        if: ${{ inputs.write-provenance-manifest }}
+        env:
+          SNAPSHOT_VERSION: ${{ inputs.charts-version }}
+          SOURCE_SHA: ${{ inputs.source-ref }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p charts-docs-repo/docs-app/public
+          printf '{"source_sha":"%s","charts_version":"%s"}\n' \
+            "$SOURCE_SHA" "$SNAPSHOT_VERSION" \
+            > charts-docs-repo/docs-app/public/snapshot-manifest.json
+      - name: Commit and push charts-docs main
+        working-directory: charts-docs-repo
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "charts-release-bot"
+          git config user.email "charts-release-bot@users.noreply.github.com"
+          if [ "${{ inputs.write-provenance-manifest }}" = "true" ]; then
+            git add release-notes content/snapshot/wiki docs-app/public/snapshot-manifest.json
+            message="docs(snapshot): sync release notes, wiki docs, GIF baselines, and provenance"
+            already_current_message="Snapshot release notes, wiki docs, GIF baselines, and provenance are already current."
+          else
+            git add release-notes content/snapshot/wiki
+            message="docs(snapshot): sync release notes, wiki docs, and GIF baselines"
+            already_current_message="Release notes, wiki docs, and GIF baselines are already current."
+          fi
+          if git diff --cached --quiet; then
+            echo "$already_current_message"
+          else
+            git commit -m "$message"
+            git push origin HEAD:main
+          fi
