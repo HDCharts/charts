@@ -59,7 +59,8 @@ internal fun parseJapicmpXmlFindings(
     xmlFile: File,
 ): List<ApiFinding> {
     val document =
-        DocumentBuilderFactory.newInstance()
+        DocumentBuilderFactory
+            .newInstance()
             .apply { isNamespaceAware = false }
             .newDocumentBuilder()
             .parse(xmlFile)
