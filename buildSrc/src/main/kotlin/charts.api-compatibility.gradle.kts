@@ -15,6 +15,10 @@ private val apiCompatibilityBaselineRefProperty = "apiCompatibilityBaselineRef"
 private val apiCompatibilityFallbackBaselineRef = "origin/main"
 private val apiCompatibilityAcknowledgedBreaksFilePath = "API-COMPATIBILITY-BREAKS.txt"
 private val apiCompatibilitySemVerPattern = Regex("^[0-9]+\\.[0-9]+\\.[0-9]+$")
+
+// Axion appends a sanitized branch name to the version on any non-release branch, so the pending
+// release heading can only match a leading X.Y.Z prefix, not the whole resolved version string.
+private val apiCompatibilitySemVerPrefixPattern = Regex("^[0-9]+\\.[0-9]+\\.[0-9]+")
 private val apiCompatibilityDefaultBaselineJarsDir = "api-compatibility/baseline-jars"
 // japicmp --exclude expects wildcard expressions, not regex.
 private val apiCompatibilityInternalExcludePattern = "*.internal.*"
@@ -61,10 +65,9 @@ private fun Project.requireGateBaseline() {
 // Axion's resolved version, which advances only when a tag lands, so it is stable across a cycle.
 private fun Project.resolvePendingReleaseHeading(): String {
     val rawVersion = rootProject.version.toString()
-    val strippedVersion = rawVersion.removeSuffix("-SNAPSHOT")
-    return strippedVersion.takeIf { apiCompatibilitySemVerPattern.matches(it) }
+    return apiCompatibilitySemVerPrefixPattern.find(rawVersion)?.value
         ?: throw GradleException(
-            "Resolved project version '$rawVersion' is not a SemVer -SNAPSHOT version; cannot derive an " +
+            "Resolved project version '$rawVersion' does not start with a SemVer X.Y.Z; cannot derive an " +
                 "$apiCompatibilityAcknowledgedBreaksFilePath section heading from it.",
         )
 }
