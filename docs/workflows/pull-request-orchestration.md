@@ -69,7 +69,7 @@ forces the emulator to `wm size 1920x1080`; `DocsGifScene` matches that ratio wi
 | `Lint` | Runs Kotlin and build-logic lint when the PR contains code/build changes. |
 | `Test` | Runs `ciTestJvm`, `ciTestAndroid`, `ciTestWeb`, and `ciTestIos` when needed; uploads Gradle's native HTML and XML reports. |
 | `PR API Compatibility` | Runs the API compatibility check on code/build-changing pull-request events and reports the required result; docs-only pull requests skip the check and report as skipped. |
-| `API compatibility` | Runs `./gradlew apiCompatibilityCheck`; a detected public API incompatibility fails the PR with a workflow-run annotation that instructs the developer to run `./gradlew apiCompatibilityUpdateBaseline` and commit the updated baseline in the same PR. |
+| `API compatibility` | Runs `./gradlew apiCompatibilityCheck` against the latest release tag; an unacknowledged public API incompatibility fails the PR with a workflow-run annotation that instructs the developer to run `./gradlew apiCompatibilityAcknowledgeBreaks` and commit the updated `API-COMPATIBILITY-BREAKS.txt` in the same PR. |
 | `GIF validation` | Runs the opt-in GIF baseline workflow while the `run-gif-validation` label is present. |
 
 Gradle's `chartsTest*` tasks are platform-specific commands for local use. The
@@ -160,7 +160,8 @@ non-strict ruleset policy used by `protect main`.
   after the first rollout, so use the exact names shown on the PR checks page.
 - **Tests fail:** inspect the relevant `PR Test` job logs (JVM, Android, Wasm, or iOS) and download its test-report artifact for Gradle's HTML and XML reports.
 - **API compatibility fails:** when a detected public API incompatibility is
-  intentional, run `./gradlew apiCompatibilityUpdateBaseline` locally, commit
-  the updated `API-COMPATIBILITY-BASELINE.txt` in the same pull
-  request, and push. Unrelated Gradle or compatibility errors are not bypassed
-  by updating the baseline.
+  intentional, run `./gradlew apiCompatibilityAcknowledgeBreaks`
+  locally, review and commit the updated `API-COMPATIBILITY-BREAKS.txt` in the
+  same pull request, and push. Unrelated Gradle or compatibility errors are
+  not bypassed by acknowledging a break — see
+  [`docs/workflows/api-compatibility.md`](api-compatibility.md).

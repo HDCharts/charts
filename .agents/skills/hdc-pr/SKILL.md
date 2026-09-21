@@ -36,11 +36,12 @@ Run selected tasks and list the exact commands in the PR body. CI owns
 to run them locally.
 
 Run `./gradlew apiCompatibilityCheck` locally for public API or library-module
-changes. If it reports an incompatible API, ask whether the change is
-intentional. If it is intentional, run `./gradlew apiCompatibilityUpdateBaseline`
-locally and include the regenerated `API-COMPATIBILITY-BASELINE.txt`
-in the same pull request. Then ask whether to create a release-note or
-migration fragment.
+changes. If it reports an unacknowledged incompatible API change, ask whether
+the change is intentional. If it is intentional, run
+`./gradlew apiCompatibilityAcknowledgeBreaks` locally, review
+`git diff API-COMPATIBILITY-BREAKS.txt`, and include the regenerated file in
+the same pull request. Then ask whether to create a release-note or migration
+fragment.
 
 ## Workflow
 

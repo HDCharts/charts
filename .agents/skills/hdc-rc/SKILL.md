@@ -36,32 +36,21 @@ Write direct migration prose with the supported API and required user action.
    Use the helper output as the version directory name:
    `release-notes/<release_version>/migrations/`.
 
-2. Inspect existing migration files and map the reported symbols to stable
-   migration topics. Reuse the canonical topic file when it exists. Merge
-   overlapping fragments before adding a new topic.
-3. Resolve the baseline ref:
-   - release audits: use the previous release tag provided by the user or
-     inferred from release history;
-   - standard checks: read `API-COMPATIBILITY-BASELINE.txt`.
-4. Remove the generated `build/reports/api-compatibility/` directory.
-5. Run from the repository root:
+2. Run from the repository root, which compares against the latest release
+   tag:
 
    ```bash
    ./gradlew apiCompatibilityCheck --no-daemon --continue
    ```
 
-   For release audits, pass the previous release tag:
-
-   ```bash
-   ./gradlew apiCompatibilityCheck --no-daemon --continue -PapiCompatibilityBaselineRef=<previous-release-tag>
-   ```
-
-6. Capture the command status and classify API incompatibilities separately
-   from infrastructure failures.
-7. Verify that every configured module produced a current Markdown report.
-8. For each breaking module, determine the affected call sites, user-visible
+   Only if the user explicitly names an older release to investigate, run
+   `apiCompatibilityCompare -PapiCompatibilityBaselineRef=<the ref the user
+   named>` instead. Never choose a ref on your own.
+3. Capture the command status.
+4. Verify that every configured module produced a current Markdown report.
+5. For each breaking module, determine the affected call sites, user-visible
    API change, supported replacement, and minimal migration example.
-9. For breaking modules, update the canonical topic file using this structure:
+6. For breaking modules, update the canonical topic file using this structure:
 
    ```markdown
    # <Topic> migration
@@ -81,8 +70,8 @@ Write direct migration prose with the supported API and required user action.
    <Focused tests and remaining platform or CI gates.>
    ```
 
-10. Validate examples against the reports and check for placeholders or
-    overlapping topics. Leave migration files unchanged when no breaking module
-    is reported.
-11. Report the release version, baseline ref, command result, breaking modules,
-    canonical topic paths, and any duplicate files removed.
+7. Validate examples against the reports and check for placeholders or
+   overlapping topics. Leave migration files unchanged when the reports name
+   no breaking module.
+8. Report the release version, baseline ref, command result, breaking modules,
+   canonical topic paths, and any duplicate files removed.

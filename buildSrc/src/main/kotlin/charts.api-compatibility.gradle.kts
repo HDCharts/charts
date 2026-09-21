@@ -9,16 +9,23 @@ plugins {
     id("me.champeau.gradle.japicmp")
 }
 
-val apiCompatibilityBaselineJarsDirProperty = "apiCompatibilityBaselineJarsDir"
-val apiCompatibilityBaselineRefProperty = "apiCompatibilityBaselineRef"
-val apiCompatibilityBaselineFilePath = "API-COMPATIBILITY-BASELINE.txt"
-val apiCompatibilityDefaultBaselineJarsDir = "api-compatibility/baseline-jars"
-// japicmp --exclude expects wildcard expressions, not regex.
-val apiCompatibilityInternalExcludePattern = "*.internal.*"
-// Compose compiler implementation detail whose generated members can change between Kotlin versions.
-val apiCompatibilityComposeSingletonsExcludePattern = "*.ComposableSingletons\$*"
+private val apiCompatibilityBaselineJarsDirProperty = "apiCompatibilityBaselineJarsDir"
+private val apiCompatibilityBaselineRefProperty = "apiCompatibilityBaselineRef"
+// Fallback for a repository that has no release tag yet; squash-safe, unlike a pinned pre-merge SHA.
+private val apiCompatibilityFallbackBaselineRef = "origin/main"
+private val apiCompatibilityAcknowledgedBreaksFilePath = "API-COMPATIBILITY-BREAKS.txt"
+private val apiCompatibilitySemVerPattern = Regex("^[0-9]+\\.[0-9]+\\.[0-9]+$")
 
-fun Project.baselineJarsDir(): File =
+// Axion appends a sanitized branch name to the version on any non-release branch, so the pending
+// release heading can only match a leading X.Y.Z prefix, not the whole resolved version string.
+private val apiCompatibilitySemVerPrefixPattern = Regex("^[0-9]+\\.[0-9]+\\.[0-9]+")
+private val apiCompatibilityDefaultBaselineJarsDir = "api-compatibility/baseline-jars"
+// japicmp --exclude expects wildcard expressions, not regex.
+private val apiCompatibilityInternalExcludePattern = "*.internal.*"
+// Compose compiler implementation detail whose generated members can change between Kotlin versions.
+private val apiCompatibilityComposeSingletonsExcludePattern = "*.ComposableSingletons\$*"
+
+private fun Project.baselineJarsDir(): File =
     providers
         .gradleProperty(apiCompatibilityBaselineJarsDirProperty)
         .orNull
@@ -30,30 +37,42 @@ fun Project.baselineJarsDir(): File =
             .get()
             .asFile
 
-fun Project.resolveBaselineRef(): String {
+private fun Project.adHocBaselineRef(): String? =
     providers
         .gradleProperty(apiCompatibilityBaselineRefProperty)
         .orNull
         ?.takeIf { it.isNotBlank() }
-        ?.let { return it }
 
-    val baselineFile = rootProject.file(apiCompatibilityBaselineFilePath)
-    if (!baselineFile.isFile) {
-        throw GradleException(
-            "Missing baseline file at ${baselineFile.absolutePath}.",
-        )
-    }
-
-    return baselineFile
-        .readLines()
+private fun Project.latestReleaseTag(): String? =
+    execAndGetStdout(listOf("git", "tag", "--list", "--sort=-version:refname"), ignoreExitCode = true)
+        .lineSequence()
         .map { it.trim() }
-        .firstOrNull { it.isNotBlank() && !it.startsWith("#") }
+        .firstOrNull { apiCompatibilitySemVerPattern.matches(it) }
+
+// The gate always spans the current release cycle: the latest release tag up to the working tree.
+private fun Project.resolveBaselineRef(): String =
+    adHocBaselineRef() ?: latestReleaseTag() ?: apiCompatibilityFallbackBaselineRef
+
+// apiCompatibilityCheck and apiCompatibilityAcknowledgeBreaks must agree on the span they describe.
+private fun Project.requireGateBaseline() {
+    val adHocRef = adHocBaselineRef() ?: return
+    throw GradleException(
+        "This task always compares against the current release cycle, so -P$apiCompatibilityBaselineRefProperty " +
+            "($adHocRef) does not apply. Use 'apiCompatibilityCompare' to diff against an arbitrary ref.",
+    )
+}
+
+// Axion's resolved version, which advances only when a tag lands, so it is stable across a cycle.
+private fun Project.resolvePendingReleaseHeading(): String {
+    val rawVersion = rootProject.version.toString()
+    return apiCompatibilitySemVerPrefixPattern.find(rawVersion)?.value
         ?: throw GradleException(
-            "No baseline ref found in ${baselineFile.absolutePath}.",
+            "Resolved project version '$rawVersion' does not start with a SemVer X.Y.Z; cannot derive an " +
+                "$apiCompatibilityAcknowledgedBreaksFilePath section heading from it.",
         )
 }
 
-fun Project.execAndGetStdout(
+private fun Project.execAndGetStdout(
     args: List<String>,
     workingDir: File = rootProject.rootDir,
     ignoreExitCode: Boolean = false,
@@ -73,27 +92,44 @@ fun Project.execAndGetStdout(
     return output.trim()
 }
 
-fun String.toArtifactId(): String = removePrefix(":")
+private fun String.toArtifactId(): String = removePrefix(":")
 
-fun String.toTaskSuffix(): String =
+private fun String.toTaskSuffix(): String =
     split('-', '.')
         .filter { it.isNotBlank() }
         .joinToString("") { token ->
             token.replaceFirstChar { firstChar -> firstChar.uppercase() }
         }
 
+private fun Project.apiCompatibilityXmlReportFile(artifactId: String): File =
+    layout.buildDirectory
+        .file("reports/api-compatibility/$artifactId.xml")
+        .get()
+        .asFile
+
+private fun Project.currentApiCompatibilityFindings(): List<ApiFinding> =
+    ChartsModules.library.flatMap { projectPath ->
+        val artifactId = projectPath.toArtifactId()
+        val xmlFile = apiCompatibilityXmlReportFile(artifactId)
+        if (xmlFile.isFile) parseJapicmpXmlFindings(artifactId, xmlFile) else emptyList()
+    }
+
 tasks.register("prepareApiCompatibilityBaselineJars") {
     group = "verification"
     description =
-        "Builds baseline jars for API compatibility checks. Default source is API-COMPATIBILITY-BASELINE.txt."
+        "Builds baseline jars for API compatibility checks from the latest release tag."
 
     doLast {
+        // A skipped JapicmpTask leaves its old report behind, which would read as a current finding.
+        project.delete(layout.buildDirectory.dir("reports/api-compatibility"))
+
         val baselineJarsDir = project.baselineJarsDir()
 
         project.delete(baselineJarsDir)
         baselineJarsDir.mkdirs()
 
         val baselineRef = project.resolveBaselineRef()
+        logger.lifecycle("Building API compatibility baseline jars from $baselineRef")
         val baselineSha =
             project.execAndGetStdout(
                 listOf("git", "rev-parse", "-q", "--verify", "$baselineRef^{commit}"),
@@ -164,7 +200,7 @@ tasks.register("prepareApiCompatibilityBaselineJars") {
     }
 }
 
-val apiCompatibilityTasks =
+private val apiCompatibilityTasks =
     ChartsModules.library.map { projectPath ->
         val artifactId = projectPath.toArtifactId()
         tasks.register<JapicmpTask>("apiCompatibility${artifactId.toTaskSuffix()}") {
@@ -176,12 +212,14 @@ val apiCompatibilityTasks =
             accessModifier = "public"
             ignoreMissingClasses = true
             onlyModified = true
-            failOnModification = true
+            // apiCompatibilityCheck decides pass/fail from this task's XML report instead.
+            failOnModification = false
             onlyBinaryIncompatibleModified = true
-            failOnSourceIncompatibility = true
+            failOnSourceIncompatibility = false
             packageExcludes = listOf(apiCompatibilityInternalExcludePattern)
             classExcludes = listOf(apiCompatibilityComposeSingletonsExcludePattern)
             mdOutputFile.set(layout.buildDirectory.file("reports/api-compatibility/$artifactId.md"))
+            xmlOutputFile.set(project.apiCompatibilityXmlReportFile(artifactId))
 
             val baselineJarsDirProvider = providers.provider { project.baselineJarsDir().absoluteFile }
             val oldJarProvider =
@@ -214,35 +252,105 @@ val apiCompatibilityTasks =
 tasks.register("apiCompatibilityCheck") {
     group = "verification"
     description =
-        "Checks published JVM artifacts for breaking API changes using baseline ref from API-COMPATIBILITY-BASELINE.txt (or -P$apiCompatibilityBaselineRefProperty / -P$apiCompatibilityBaselineJarsDirProperty override)."
+        "Checks published JVM artifacts for breaking API changes made since the latest release tag, " +
+        "failing only on findings not acknowledged in $apiCompatibilityAcknowledgedBreaksFilePath."
     dependsOn(apiCompatibilityTasks)
-}
+    doFirst { project.requireGateBaseline() }
 
-tasks.register("apiCompatibilityUpdateBaseline") {
-    group = "verification"
-    description =
-        "Writes the current HEAD commit SHA to API-COMPATIBILITY-BASELINE.txt so that intentional breaking changes can be acknowledged by updating the baseline in the same pull request. After running this task, commit the regenerated baseline file alongside the breaking change."
-    val baselineFile = rootProject.file(apiCompatibilityBaselineFilePath)
     doLast {
-        val currentSha =
-            project.execAndGetStdout(
-                listOf("git", "rev-parse", "-q", "--verify", "HEAD^{commit}"),
-            )
-        if (currentSha.isBlank()) {
+        val findings = project.currentApiCompatibilityFindings()
+        if (findings.isEmpty()) return@doLast
+
+        val acknowledgedBreaksFile = rootProject.file(apiCompatibilityAcknowledgedBreaksFilePath)
+        val acknowledged =
+            if (acknowledgedBreaksFile.isFile) {
+                parseAcknowledgedBreaksSection(
+                    acknowledgedBreaksFile.readText(),
+                    project.resolvePendingReleaseHeading(),
+                ).toSet()
+            } else {
+                emptySet()
+            }
+        val unacknowledged = findings.filterNot { it in acknowledged }
+
+        if (unacknowledged.isNotEmpty()) {
             throw GradleException(
-                "Unable to resolve the current HEAD commit SHA; ensure the working tree is a git checkout.",
+                buildString {
+                    appendLine("Unacknowledged breaking API change(s) detected (${unacknowledged.size}):")
+                    unacknowledged.forEach { finding ->
+                        appendLine(
+                            "  - ${finding.module} | ${finding.className} | ${finding.member} | ${finding.changeKind}",
+                        )
+                    }
+                    appendLine()
+                    append(
+                        "If intentional, run './gradlew apiCompatibilityAcknowledgeBreaks' and commit the " +
+                            "updated $apiCompatibilityAcknowledgedBreaksFilePath in this pull request.",
+                    )
+                },
             )
         }
-        val source = "manual:head:${currentSha.take(12)}"
-        baselineFile.parentFile.mkdirs()
-        baselineFile.writeText(
+    }
+}
+
+tasks.register("apiCompatibilityAcknowledgeBreaks") {
+    group = "verification"
+    description =
+        "Appends the API changes detected for the current release cycle to " +
+        "$apiCompatibilityAcknowledgedBreaksFilePath, under a heading for the pending release version " +
+        "resolved from Axion. Commit the regenerated file alongside the breaking change."
+    dependsOn(apiCompatibilityTasks)
+    doFirst { project.requireGateBaseline() }
+
+    doLast {
+        val acknowledgedBreaksFile = rootProject.file(apiCompatibilityAcknowledgedBreaksFilePath)
+        val sectionHeading = project.resolvePendingReleaseHeading()
+        val acknowledged =
+            if (acknowledgedBreaksFile.isFile) {
+                parseAcknowledgedBreaksSection(acknowledgedBreaksFile.readText(), sectionHeading).toSet()
+            } else {
+                emptySet()
+            }
+        val newFindings = project.currentApiCompatibilityFindings().filterNot { it in acknowledged }
+
+        if (newFindings.isEmpty()) {
+            logger.lifecycle(
+                "No new API compatibility findings; $apiCompatibilityAcknowledgedBreaksFilePath left unchanged.",
+            )
+            return@doLast
+        }
+
+        val addedCount = appendAcknowledgedBreaks(acknowledgedBreaksFile, newFindings, sectionHeading)
+        logger.lifecycle(
+            "Appended $addedCount acknowledged finding(s) to $apiCompatibilityAcknowledgedBreaksFilePath " +
+                "under \"## $sectionHeading\".",
+        )
+    }
+}
+
+tasks.register("apiCompatibilityCompare") {
+    group = "verification"
+    description =
+        "Reports the public API diff against -P$apiCompatibilityBaselineRefProperty=<ref> for investigation, " +
+        "leaving $apiCompatibilityAcknowledgedBreaksFilePath and the compatibility gate untouched."
+    dependsOn(apiCompatibilityTasks)
+
+    doLast {
+        val baselineRef =
+            project.adHocBaselineRef()
+                ?: throw GradleException(
+                    "Pass -P$apiCompatibilityBaselineRefProperty=<ref> naming the ref to compare against.",
+                )
+        val findings = project.currentApiCompatibilityFindings()
+        logger.lifecycle(
             buildString {
-                appendLine("# Baseline commit used by API compatibility workflow.")
-                appendLine("# Updated via the apiCompatibilityUpdateBaseline Gradle task.")
-                appendLine("# source: $source")
-                appendLine(currentSha)
+                appendLine("Public API diff against $baselineRef (${findings.size} finding(s)):")
+                findings.forEach { finding ->
+                    appendLine(
+                        "  - ${finding.module} | ${finding.className} | ${finding.member} | ${finding.changeKind}",
+                    )
+                }
             },
         )
-        logger.lifecycle("Updated baseline to $currentSha ($source).")
     }
 }

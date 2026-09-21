@@ -64,35 +64,23 @@ jobs:
         run: |
           set -euo pipefail
 
-          previous_release="$(git tag --list --sort=-version:refname | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1 || true)"
-          if [[ -z "${previous_release}" ]]; then
-            echo "No previous SemVer release tag found; skipping release API audit."
-            echo "## Release API Audit" >> "$GITHUB_STEP_SUMMARY"
-            echo "- Result: skipped (no previous SemVer release tag)" >> "$GITHUB_STEP_SUMMARY"
-            exit 0
-          fi
-
           set +e
           set -o pipefail
           ./gradlew apiCompatibilityCheck --no-daemon --continue \
-            "-PapiCompatibilityBaselineRef=${previous_release}" \
             2>&1 | tee release-api-compatibility.log
           exit_code=${PIPESTATUS[0]}
           set -e
 
-          {
-            echo "## Release API Audit"
-            echo "- Baseline: \`${previous_release}\`"
-          } >> "$GITHUB_STEP_SUMMARY"
+          echo "## Release API Audit" >> "$GITHUB_STEP_SUMMARY"
 
           if [[ "${exit_code}" == "0" ]]; then
             echo "- Result: compatible" >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
 
-          if grep -Eq "Detected binary changes\.|Detected source incompatible changes\." release-api-compatibility.log; then
-            echo "- Result: acknowledged API changes detected; see the job log" >> "$GITHUB_STEP_SUMMARY"
-            echo "::warning::Release contains API changes relative to ${previous_release}."
+          if grep -Eq "Unacknowledged breaking API change\(s\) detected" release-api-compatibility.log; then
+            echo "- Result: unacknowledged API changes detected; see the job log" >> "$GITHUB_STEP_SUMMARY"
+            echo "::warning::Release contains unacknowledged API changes; see the job log."
             exit 0
           fi
 
