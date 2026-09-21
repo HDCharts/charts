@@ -69,7 +69,7 @@ jobs:
           any_change_detected="false"
           instruction=""
 
-          if [[ -f api-compatibility.log ]] && grep -Eq "Detected binary changes\.|Detected source incompatible changes\." api-compatibility.log; then
+          if [[ -f api-compatibility.log ]] && grep -Eq "Unacknowledged breaking API change\(s\) detected" api-compatibility.log; then
             any_change_detected="true"
           fi
 
@@ -78,7 +78,7 @@ jobs:
           elif [[ "${EXIT_CODE}" != "0" ]]; then
             if [[ "${any_change_detected}" == "true" ]]; then
               result="incompatible (breaking API change detected)"
-              instruction="Run ./gradlew apiCompatibilityUpdateBaseline and commit the updated API-COMPATIBILITY-BASELINE.txt in this pull request."
+              instruction="Run ./gradlew apiCompatibilityAcknowledgeBreaks and commit the updated API-COMPATIBILITY-BREAKS.txt in this pull request."
             else
               result="failed (compatibility check errored without detecting a break)"
             fi
@@ -125,5 +125,5 @@ jobs:
             exit 0
           fi
 
-          echo "API compatibility check failed; update the baseline in this pull request to acknowledge intentional breaking changes."
+          echo "API compatibility check failed; run apiCompatibilityAcknowledgeBreaks in this pull request to acknowledge intentional breaking changes."
           exit 1

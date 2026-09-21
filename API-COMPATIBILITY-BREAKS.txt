@@ -1,0 +1,388 @@
+# Acknowledged breaking API changes, grouped by release.
+# Format per entry: <module> | <class> | <member> | <change-kind>
+#
+# Each section heading is the pending release version, resolved from Axion when an entry
+# is acknowledged via ./gradlew apiCompatibilityAcknowledgeBreaks. Once that version is
+# tagged, the next acknowledgment resolves the next version and opens its own section above.
+# Run 'git blame' on a line to see the pull request that accepted that break.
+
+## 3.0.0
+charts-core | chartsproject.charts_core.generated.resources.ActualResourceCollectorsKt |  | CLASS_REMOVED
+charts-core | chartsproject.charts_core.generated.resources.ActualResourceCollectorsKt | getAllDrawableResources(chartsproject.charts_core.generated.resources.Res) | METHOD_REMOVED
+charts-core | chartsproject.charts_core.generated.resources.ActualResourceCollectorsKt | getAllFontResources(chartsproject.charts_core.generated.resources.Res) | METHOD_REMOVED
+charts-core | chartsproject.charts_core.generated.resources.ActualResourceCollectorsKt | getAllPluralStringResources(chartsproject.charts_core.generated.resources.Res) | METHOD_REMOVED
+charts-core | chartsproject.charts_core.generated.resources.ActualResourceCollectorsKt | getAllStringArrayResources(chartsproject.charts_core.generated.resources.Res) | METHOD_REMOVED
+charts-core | chartsproject.charts_core.generated.resources.ActualResourceCollectorsKt | getAllStringResources(chartsproject.charts_core.generated.resources.Res) | METHOD_REMOVED
+charts-core | chartsproject.charts_core.generated.resources.Res |  | CLASS_REMOVED
+charts-core | chartsproject.charts_core.generated.resources.Res | getUri(java.lang.String) | METHOD_REMOVED
+charts-core | chartsproject.charts_core.generated.resources.Res | readBytes(java.lang.String, kotlin.coroutines.Continuation) | METHOD_REMOVED
+charts-core | chartsproject.charts_core.generated.resources.Res | $stable | FIELD_REMOVED
+charts-core | chartsproject.charts_core.generated.resources.Res | INSTANCE | FIELD_REMOVED
+charts-core | chartsproject.charts_core.generated.resources.Res$array |  | CLASS_REMOVED
+charts-core | chartsproject.charts_core.generated.resources.Res$array | $stable | FIELD_REMOVED
+charts-core | chartsproject.charts_core.generated.resources.Res$array | INSTANCE | FIELD_REMOVED
+charts-core | chartsproject.charts_core.generated.resources.Res$drawable |  | CLASS_REMOVED
+charts-core | chartsproject.charts_core.generated.resources.Res$drawable | $stable | FIELD_REMOVED
+charts-core | chartsproject.charts_core.generated.resources.Res$drawable | INSTANCE | FIELD_REMOVED
+charts-core | chartsproject.charts_core.generated.resources.Res$font |  | CLASS_REMOVED
+charts-core | chartsproject.charts_core.generated.resources.Res$font | $stable | FIELD_REMOVED
+charts-core | chartsproject.charts_core.generated.resources.Res$font | INSTANCE | FIELD_REMOVED
+charts-core | chartsproject.charts_core.generated.resources.Res$plurals |  | CLASS_REMOVED
+charts-core | chartsproject.charts_core.generated.resources.Res$plurals | $stable | FIELD_REMOVED
+charts-core | chartsproject.charts_core.generated.resources.Res$plurals | INSTANCE | FIELD_REMOVED
+charts-core | chartsproject.charts_core.generated.resources.Res$string |  | CLASS_REMOVED
+charts-core | chartsproject.charts_core.generated.resources.Res$string | $stable | FIELD_REMOVED
+charts-core | chartsproject.charts_core.generated.resources.Res$string | INSTANCE | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.ChartsPreviewLightDark |  | CLASS_REMOVED
+charts-core | io.github.dautovicharis.charts.ChartsPreviewsKt |  | CLASS_REMOVED
+charts-core | io.github.dautovicharis.charts.ChartsPreviewsKt | ChartsPreviewTheme(kotlin.jvm.functions.Function2, androidx.compose.runtime.Composer, int) | METHOD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.AnimationSpec |  | CLASS_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.AnimationSpec | barChartCascaded(int) | METHOD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.AnimationSpec | barChartSmooth() | METHOD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.AnimationSpec | lineChart() | METHOD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.AnimationSpec | pieChart(int) | METHOD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.AnimationSpec | pieChartDonut() | METHOD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.AnimationSpec | pieChartValue() | METHOD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.AnimationSpec | radarChart() | METHOD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.AnimationSpec | stackedBar(int) | METHOD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.AnimationSpec | $stable | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.AnimationSpec | INSTANCE | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.ConstantsKt |  | CLASS_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.ConstantsKt | getAXIS_LABEL_CHART_GAP() | METHOD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.ConstantsKt | ANIMATION_TARGET | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.ConstantsKt | ANIMATION_DURATION_BAR | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.ConstantsKt | ANIMATION_DURATION | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.ConstantsKt | DEFAULT_SCALE | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.ConstantsKt | ANIMATION_DURATION_LINE_CHART | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.ConstantsKt | DONUT_MAX_PERCENTAGE | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.ConstantsKt | ANIMATION_OFFSET | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.ConstantsKt | DONUT_MIN_PERCENTAGE | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.ConstantsKt | ANIMATION_DURATION_LINE | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.ConstantsKt | NO_SELECTION | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.ConstantsKt | MAX_SCALE | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.DataValidationKt |  | CLASS_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.DataValidationKt | format(java.lang.String, java.lang.Object[]) | METHOD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.DataValidationKt | validateMultiSeriesChartData(io.github.dautovicharis.charts.internal.common.model.MultiChartData, int, int, int, int) | METHOD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.InternalChartsApi |  | CLASS_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.TestTags |  | CLASS_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.TestTags | BAR_CHART_ZOOM_IN | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.TestTags | LINE_CHART_PLOT | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.TestTags | STACKED_BAR_CHART_ZOOM_OUT | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.TestTags | BAR_CHART_DENSE_EXPAND | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.TestTags | RADAR_CHART | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.TestTags | BAR_CHART | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.TestTags | STACKED_BAR_CHART | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.TestTags | STACKED_AREA_CHART_DENSE_COLLAPSE | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.TestTags | LINE_CHART_ZOOM_OUT | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.TestTags | STACKED_BAR_CHART_ZOOM_IN | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.TestTags | LINE_CHART_DENSE_COLLAPSE | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.TestTags | BAR_CHART_X_AXIS_LABELS | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.TestTags | BAR_CHART_Y_AXIS_LABELS | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.TestTags | STACKED_AREA_CHART_X_AXIS_LABELS | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.TestTags | STACKED_AREA_CHART_Y_AXIS_LABELS | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.TestTags | CHART_TITLE | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.TestTags | LINE_CHART_DENSE_EXPAND | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.TestTags | LINE_CHART | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.TestTags | STACKED_BAR_CHART_DENSE_COLLAPSE | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.TestTags | BAR_CHART_PLOT | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.TestTags | BAR_CHART_DENSE_COLLAPSE | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.TestTags | LINE_CHART_Y_AXIS_LABELS | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.TestTags | LINE_CHART_X_AXIS_LABELS | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.TestTags | STACKED_AREA_CHART_ZOOM_IN | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.TestTags | INSTANCE | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.TestTags | STACKED_AREA_CHART_ZOOM_OUT | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.TestTags | HISTOGRAM_CHART | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.TestTags | STACKED_BAR_CHART_DENSE_EXPAND | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.TestTags | $stable | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.TestTags | STACKED_AREA_CHART_DENSE_EXPAND | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.TestTags | STACKED_AREA_CHART_PLOT | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.TestTags | STACKED_BAR_CHART_PLOT | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.TestTags | LINE_CHART_ZOOM_IN | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.TestTags | CHART_ERROR | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.TestTags | STACKED_AREA_CHART | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.TestTags | STACKED_BAR_CHART_X_AXIS_LABELS | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.TestTags | STACKED_BAR_CHART_Y_AXIS_LABELS | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.TestTags | BAR_CHART_ZOOM_OUT | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.TestTags | PIE_CHART | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.ValidationErrors |  | CLASS_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.ValidationErrors | MIN_REQUIRED_BAR | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.ValidationErrors | RULE_DATA_POINTS_LESS_THAN_MIN | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.ValidationErrors | RULE_DATA_POINT_NEGATIVE | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.ValidationErrors | RULE_CATEGORIES_SIZE_MISMATCH | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.ValidationErrors | MIN_REQUIRED_STACKED_AREA | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.ValidationErrors | RULE_ITEM_POINT_NOT_NUMBER | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.ValidationErrors | INSTANCE | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.ValidationErrors | MIN_REQUIRED_LINE | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.ValidationErrors | MIN_REQUIRED_RADAR | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.ValidationErrors | RULE_ITEM_POINT_NEGATIVE | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.ValidationErrors | $stable | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.ValidationErrors | RULE_COLORS_SIZE_MISMATCH | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.ValidationErrors | MIN_REQUIRED_STACKED_BAR | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.ValidationErrors | RULE_ITEM_POINTS_SIZE | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.ValidationErrors | MIN_REQUIRED_PIE | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.ValidationErrors | MIN_REQUIRED_HISTOGRAM | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.internal.ValidationErrors | RULE_DATA_POINT_NOT_NUMBER | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.model.ChartDataSet |  | CLASS_REMOVED
+charts-core | io.github.dautovicharis.charts.model.ChartDataSet | ChartDataSet(io.github.dautovicharis.charts.internal.common.model.ChartDataType, java.lang.String, java.util.List) | CONSTRUCTOR_REMOVED
+charts-core | io.github.dautovicharis.charts.model.ChartDataSet | ChartDataSet(io.github.dautovicharis.charts.internal.common.model.ChartDataType, java.lang.String, java.lang.String, java.lang.String, java.util.List) | CONSTRUCTOR_REMOVED
+charts-core | io.github.dautovicharis.charts.model.ChartDataSet | getData() | METHOD_REMOVED
+charts-core | io.github.dautovicharis.charts.model.ChartDataSet | $stable | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.model.ChartDataSetKt |  | CLASS_REMOVED
+charts-core | io.github.dautovicharis.charts.model.ChartDataSetKt | toDoubleChartDataSet(java.util.List, java.lang.String, java.lang.String, java.lang.String, java.util.List) | METHOD_REMOVED
+charts-core | io.github.dautovicharis.charts.model.ChartDataSetKt | toFloatChartDataSet(java.util.List, java.lang.String, java.lang.String, java.lang.String, java.util.List) | METHOD_REMOVED
+charts-core | io.github.dautovicharis.charts.model.ChartDataSetKt | toIntChartDataSet(java.util.List, java.lang.String, java.lang.String, java.lang.String, java.util.List) | METHOD_REMOVED
+charts-core | io.github.dautovicharis.charts.model.ChartDataSetKt | toStringChartDataSet(java.util.List, java.lang.String, java.lang.String, java.lang.String, java.util.List) | METHOD_REMOVED
+charts-core | io.github.dautovicharis.charts.model.MultiChartDataSet |  | CLASS_REMOVED
+charts-core | io.github.dautovicharis.charts.model.MultiChartDataSet | MultiChartDataSet(java.util.List, java.util.List, java.lang.String, java.lang.String, java.lang.String) | CONSTRUCTOR_REMOVED
+charts-core | io.github.dautovicharis.charts.model.MultiChartDataSet | getData() | METHOD_REMOVED
+charts-core | io.github.dautovicharis.charts.model.MultiChartDataSet | $stable | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.model.MultiChartDataSetKt |  | CLASS_REMOVED
+charts-core | io.github.dautovicharis.charts.model.MultiChartDataSetKt | toDoubleMultiChartDataSet(java.util.List, java.lang.String, java.util.List, java.lang.String, java.lang.String) | METHOD_REMOVED
+charts-core | io.github.dautovicharis.charts.model.MultiChartDataSetKt | toFloatMultiChartDataSet(java.util.List, java.lang.String, java.util.List, java.lang.String, java.lang.String) | METHOD_REMOVED
+charts-core | io.github.dautovicharis.charts.model.MultiChartDataSetKt | toIntMultiChartDataSet(java.util.List, java.lang.String, java.util.List, java.lang.String, java.lang.String) | METHOD_REMOVED
+charts-core | io.github.dautovicharis.charts.model.MultiChartDataSetKt | toStringMultiChartDataSet(java.util.List, java.lang.String, java.util.List, java.lang.String, java.lang.String) | METHOD_REMOVED
+charts-core | io.github.dautovicharis.charts.style.AlphaDefaultsKt |  | CLASS_REMOVED
+charts-core | io.github.dautovicharis.charts.style.AlphaDefaultsKt | defaultChartAlpha(float, float, androidx.compose.runtime.Composer, int, int) | METHOD_REMOVED
+charts-core | io.github.dautovicharis.charts.style.BackgroundDefaultsKt |  | CLASS_REMOVED
+charts-core | io.github.dautovicharis.charts.style.BackgroundDefaultsKt | defaultChartBackgroundColor(float, float, androidx.compose.runtime.Composer, int, int) | METHOD_REMOVED
+charts-core | io.github.dautovicharis.charts.style.ChartViewDefaults |  | CLASS_REMOVED
+charts-core | io.github.dautovicharis.charts.style.ChartViewDefaults | style-RtVkMj4(float, float, float, float, float, long, androidx.compose.ui.Modifier, androidx.compose.runtime.Composer, int, int) | METHOD_REMOVED
+charts-core | io.github.dautovicharis.charts.style.ChartViewDefaults | $stable | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.style.ChartViewDefaults | INSTANCE | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.style.ChartViewStyle |  | CLASS_REMOVED
+charts-core | io.github.dautovicharis.charts.style.ChartViewStyle | fillMaxSizeChartModifier-0680j_4(float) | METHOD_REMOVED
+charts-core | io.github.dautovicharis.charts.style.ChartViewStyle | getBackgroundColor-0d7_KjU() | METHOD_REMOVED
+charts-core | io.github.dautovicharis.charts.style.ChartViewStyle | getInnerPadding-D9Ej5fM() | METHOD_REMOVED
+charts-core | io.github.dautovicharis.charts.style.ChartViewStyle | getModifierChart() | METHOD_REMOVED
+charts-core | io.github.dautovicharis.charts.style.ChartViewStyle | getModifierLegend() | METHOD_REMOVED
+charts-core | io.github.dautovicharis.charts.style.ChartViewStyle | getModifierMain() | METHOD_REMOVED
+charts-core | io.github.dautovicharis.charts.style.ChartViewStyle | getModifierTopTitle() | METHOD_REMOVED
+charts-core | io.github.dautovicharis.charts.style.ChartViewStyle | getStyleTitle() | METHOD_REMOVED
+charts-core | io.github.dautovicharis.charts.style.ChartViewStyle | getWidth-D9Ej5fM() | METHOD_REMOVED
+charts-core | io.github.dautovicharis.charts.style.ChartViewStyle | wrapContentChartModifier-0680j_4(float) | METHOD_REMOVED
+charts-core | io.github.dautovicharis.charts.style.ChartViewStyle | $stable | FIELD_REMOVED
+charts-core | io.github.dautovicharis.charts.style.Style |  | CLASS_REMOVED
+charts-core | io.github.dautovicharis.charts.style.Style | getProperties() | METHOD_REMOVED
+charts-line | io.github.dautovicharis.charts.internal.LineValidationKt |  | CLASS_REMOVED
+charts-line | io.github.dautovicharis.charts.internal.LineValidationKt | validateLineData(io.github.dautovicharis.charts.internal.common.model.MultiChartData, io.github.dautovicharis.charts.style.LineChartStyle) | METHOD_REMOVED
+charts-line | io.github.dautovicharis.charts.LineChartKt |  | CLASS_REMOVED
+charts-line | io.github.dautovicharis.charts.LineChartKt | LineChart(io.github.dautovicharis.charts.model.ChartDataSet, io.github.dautovicharis.charts.style.LineChartStyle, boolean, boolean, io.github.dautovicharis.charts.LineChartRenderMode, int, int, androidx.compose.runtime.Composer, int, int) | METHOD_REMOVED
+charts-line | io.github.dautovicharis.charts.LineChartKt | LineChart(io.github.dautovicharis.charts.model.MultiChartDataSet, io.github.dautovicharis.charts.style.LineChartStyle, boolean, boolean, io.github.dautovicharis.charts.LineChartRenderMode, int, int, androidx.compose.runtime.Composer, int, int) | METHOD_REMOVED
+charts-line | io.github.dautovicharis.charts.LineChartPreviewsKt |  | CLASS_REMOVED
+charts-line | io.github.dautovicharis.charts.LineChartRenderMode |  | CLASS_REMOVED
+charts-line | io.github.dautovicharis.charts.LineChartRenderMode | getEntries() | METHOD_REMOVED
+charts-line | io.github.dautovicharis.charts.LineChartRenderMode | valueOf(java.lang.String) | METHOD_REMOVED
+charts-line | io.github.dautovicharis.charts.LineChartRenderMode | values() | METHOD_REMOVED
+charts-line | io.github.dautovicharis.charts.LineChartRenderMode | Timeline | FIELD_REMOVED
+charts-line | io.github.dautovicharis.charts.LineChartRenderMode | Morph | FIELD_REMOVED
+charts-line | io.github.dautovicharis.charts.style.LineChartDefaults |  | CLASS_REMOVED
+charts-line | io.github.dautovicharis.charts.style.LineChartDefaults | style-JaXcJH4(long, float, boolean, long, float, java.util.List, boolean, float, boolean, float, long, boolean, long, float, boolean, long, long, int, boolean, long, long, int, boolean, io.github.dautovicharis.charts.style.ChartViewStyle, androidx.compose.runtime.Composer, int, int, int, int) | METHOD_REMOVED
+charts-line | io.github.dautovicharis.charts.style.LineChartDefaults | $stable | FIELD_REMOVED
+charts-line | io.github.dautovicharis.charts.style.LineChartDefaults | INSTANCE | FIELD_REMOVED
+charts-line | io.github.dautovicharis.charts.style.LineChartStyle |  | CLASS_REMOVED
+charts-line | io.github.dautovicharis.charts.style.LineChartStyle | getAxisColor-0d7_KjU() | METHOD_REMOVED
+charts-line | io.github.dautovicharis.charts.style.LineChartStyle | getAxisLineWidth() | METHOD_REMOVED
+charts-line | io.github.dautovicharis.charts.style.LineChartStyle | getAxisVisible() | METHOD_REMOVED
+charts-line | io.github.dautovicharis.charts.style.LineChartStyle | getBezier() | METHOD_REMOVED
+charts-line | io.github.dautovicharis.charts.style.LineChartStyle | getChartViewStyle() | METHOD_REMOVED
+charts-line | io.github.dautovicharis.charts.style.LineChartStyle | getDragActivePointSize() | METHOD_REMOVED
+charts-line | io.github.dautovicharis.charts.style.LineChartStyle | getDragPointColor-0d7_KjU() | METHOD_REMOVED
+charts-line | io.github.dautovicharis.charts.style.LineChartStyle | getDragPointColorSameAsLine() | METHOD_REMOVED
+charts-line | io.github.dautovicharis.charts.style.LineChartStyle | getDragPointSize() | METHOD_REMOVED
+charts-line | io.github.dautovicharis.charts.style.LineChartStyle | getDragPointVisible() | METHOD_REMOVED
+charts-line | io.github.dautovicharis.charts.style.LineChartStyle | getLineAlpha() | METHOD_REMOVED
+charts-line | io.github.dautovicharis.charts.style.LineChartStyle | getLineColor-0d7_KjU() | METHOD_REMOVED
+charts-line | io.github.dautovicharis.charts.style.LineChartStyle | getLineColors() | METHOD_REMOVED
+charts-line | io.github.dautovicharis.charts.style.LineChartStyle | getModifier() | METHOD_REMOVED
+charts-line | io.github.dautovicharis.charts.style.LineChartStyle | getPointColor-0d7_KjU() | METHOD_REMOVED
+charts-line | io.github.dautovicharis.charts.style.LineChartStyle | getPointColorSameAsLine() | METHOD_REMOVED
+charts-line | io.github.dautovicharis.charts.style.LineChartStyle | getPointSize() | METHOD_REMOVED
+charts-line | io.github.dautovicharis.charts.style.LineChartStyle | getPointVisible() | METHOD_REMOVED
+charts-line | io.github.dautovicharis.charts.style.LineChartStyle | getProperties() | METHOD_REMOVED
+charts-line | io.github.dautovicharis.charts.style.LineChartStyle | getXAxisLabelColor-0d7_KjU() | METHOD_REMOVED
+charts-line | io.github.dautovicharis.charts.style.LineChartStyle | getXAxisLabelMaxCount() | METHOD_REMOVED
+charts-line | io.github.dautovicharis.charts.style.LineChartStyle | getXAxisLabelSize-XSAIIZE() | METHOD_REMOVED
+charts-line | io.github.dautovicharis.charts.style.LineChartStyle | getXAxisLabelsVisible() | METHOD_REMOVED
+charts-line | io.github.dautovicharis.charts.style.LineChartStyle | getYAxisLabelColor-0d7_KjU() | METHOD_REMOVED
+charts-line | io.github.dautovicharis.charts.style.LineChartStyle | getYAxisLabelCount() | METHOD_REMOVED
+charts-line | io.github.dautovicharis.charts.style.LineChartStyle | getYAxisLabelSize-XSAIIZE() | METHOD_REMOVED
+charts-line | io.github.dautovicharis.charts.style.LineChartStyle | getYAxisLabelsVisible() | METHOD_REMOVED
+charts-line | io.github.dautovicharis.charts.style.LineChartStyle | getZoomControlsVisible() | METHOD_REMOVED
+charts-line | io.github.dautovicharis.charts.style.LineChartStyle | $stable | FIELD_REMOVED
+charts-pie | io.github.dautovicharis.charts.internal.PieValidationKt |  | CLASS_REMOVED
+charts-pie | io.github.dautovicharis.charts.internal.PieValidationKt | validatePieData(io.github.dautovicharis.charts.model.ChartDataSet, io.github.dautovicharis.charts.style.PieChartStyle) | METHOD_REMOVED
+charts-pie | io.github.dautovicharis.charts.PieChartKt |  | CLASS_REMOVED
+charts-pie | io.github.dautovicharis.charts.PieChartKt | PieChart(io.github.dautovicharis.charts.model.ChartDataSet, io.github.dautovicharis.charts.style.PieChartStyle, boolean, boolean, int, androidx.compose.runtime.Composer, int, int) | METHOD_REMOVED
+charts-pie | io.github.dautovicharis.charts.PieChartKt | PIE_SELECTION_AUTO_DESELECT_TIMEOUT_MS | FIELD_REMOVED
+charts-pie | io.github.dautovicharis.charts.PieChartPreviewsKt |  | CLASS_REMOVED
+charts-pie | io.github.dautovicharis.charts.style.PieChartDefaults |  | CLASS_REMOVED
+charts-pie | io.github.dautovicharis.charts.style.PieChartDefaults | style-QIcBpto(long, java.util.List, float, long, float, float, boolean, io.github.dautovicharis.charts.style.ChartViewStyle, androidx.compose.runtime.Composer, int, int) | METHOD_REMOVED
+charts-pie | io.github.dautovicharis.charts.style.PieChartDefaults | $stable | FIELD_REMOVED
+charts-pie | io.github.dautovicharis.charts.style.PieChartDefaults | INSTANCE | FIELD_REMOVED
+charts-pie | io.github.dautovicharis.charts.style.PieChartStyle |  | CLASS_REMOVED
+charts-pie | io.github.dautovicharis.charts.style.PieChartStyle | getBorderColor-0d7_KjU() | METHOD_REMOVED
+charts-pie | io.github.dautovicharis.charts.style.PieChartStyle | getBorderWidth() | METHOD_REMOVED
+charts-pie | io.github.dautovicharis.charts.style.PieChartStyle | getChartViewStyle() | METHOD_REMOVED
+charts-pie | io.github.dautovicharis.charts.style.PieChartStyle | getDonutPercentage() | METHOD_REMOVED
+charts-pie | io.github.dautovicharis.charts.style.PieChartStyle | getLegendVisible() | METHOD_REMOVED
+charts-pie | io.github.dautovicharis.charts.style.PieChartStyle | getModifier() | METHOD_REMOVED
+charts-pie | io.github.dautovicharis.charts.style.PieChartStyle | getPieAlpha() | METHOD_REMOVED
+charts-pie | io.github.dautovicharis.charts.style.PieChartStyle | getPieColor-0d7_KjU() | METHOD_REMOVED
+charts-pie | io.github.dautovicharis.charts.style.PieChartStyle | getPieColors() | METHOD_REMOVED
+charts-pie | io.github.dautovicharis.charts.style.PieChartStyle | getProperties() | METHOD_REMOVED
+charts-pie | io.github.dautovicharis.charts.style.PieChartStyle | setPieColors(java.util.List) | METHOD_REMOVED
+charts-pie | io.github.dautovicharis.charts.style.PieChartStyle | $stable | FIELD_REMOVED
+charts-bar | io.github.dautovicharis.charts.BarChartKt |  | CLASS_REMOVED
+charts-bar | io.github.dautovicharis.charts.BarChartKt | BarChart(io.github.dautovicharis.charts.model.ChartDataSet, io.github.dautovicharis.charts.style.BarChartStyle, boolean, boolean, int, androidx.compose.runtime.Composer, int, int) | METHOD_REMOVED
+charts-bar | io.github.dautovicharis.charts.BarChartPreviewsKt |  | CLASS_REMOVED
+charts-bar | io.github.dautovicharis.charts.internal.BarValidationKt |  | CLASS_REMOVED
+charts-bar | io.github.dautovicharis.charts.internal.BarValidationKt | validateBarData(io.github.dautovicharis.charts.internal.common.model.ChartData, int) | METHOD_REMOVED
+charts-bar | io.github.dautovicharis.charts.style.BarChartDefaults |  | CLASS_REMOVED
+charts-bar | io.github.dautovicharis.charts.style.BarChartDefaults | style-qaGFc8c(long, java.util.List, float, float, java.lang.Float, java.lang.Float, float, boolean, boolean, int, long, float, boolean, long, float, boolean, long, long, int, boolean, long, float, io.github.dautovicharis.charts.style.ChartViewStyle, boolean, long, long, int, androidx.compose.runtime.Composer, int, int, int, int) | METHOD_REMOVED
+charts-bar | io.github.dautovicharis.charts.style.BarChartDefaults | $stable | FIELD_REMOVED
+charts-bar | io.github.dautovicharis.charts.style.BarChartDefaults | INSTANCE | FIELD_REMOVED
+charts-bar | io.github.dautovicharis.charts.style.BarChartStyle |  | CLASS_REMOVED
+charts-bar | io.github.dautovicharis.charts.style.BarChartStyle | getAxisColor-0d7_KjU() | METHOD_REMOVED
+charts-bar | io.github.dautovicharis.charts.style.BarChartStyle | getAxisLineWidth() | METHOD_REMOVED
+charts-bar | io.github.dautovicharis.charts.style.BarChartStyle | getAxisVisible() | METHOD_REMOVED
+charts-bar | io.github.dautovicharis.charts.style.BarChartStyle | getBarAlpha() | METHOD_REMOVED
+charts-bar | io.github.dautovicharis.charts.style.BarChartStyle | getBarColor-0d7_KjU() | METHOD_REMOVED
+charts-bar | io.github.dautovicharis.charts.style.BarChartStyle | getBarColors() | METHOD_REMOVED
+charts-bar | io.github.dautovicharis.charts.style.BarChartStyle | getChartViewStyle() | METHOD_REMOVED
+charts-bar | io.github.dautovicharis.charts.style.BarChartStyle | getGridColor-0d7_KjU() | METHOD_REMOVED
+charts-bar | io.github.dautovicharis.charts.style.BarChartStyle | getGridLineWidth() | METHOD_REMOVED
+charts-bar | io.github.dautovicharis.charts.style.BarChartStyle | getGridSteps() | METHOD_REMOVED
+charts-bar | io.github.dautovicharis.charts.style.BarChartStyle | getGridVisible() | METHOD_REMOVED
+charts-bar | io.github.dautovicharis.charts.style.BarChartStyle | getMaxValue() | METHOD_REMOVED
+charts-bar | io.github.dautovicharis.charts.style.BarChartStyle | getMinBarWidth-D9Ej5fM() | METHOD_REMOVED
+charts-bar | io.github.dautovicharis.charts.style.BarChartStyle | getMinValue() | METHOD_REMOVED
+charts-bar | io.github.dautovicharis.charts.style.BarChartStyle | getModifier() | METHOD_REMOVED
+charts-bar | io.github.dautovicharis.charts.style.BarChartStyle | getProperties() | METHOD_REMOVED
+charts-bar | io.github.dautovicharis.charts.style.BarChartStyle | getSelectionLineColor-0d7_KjU() | METHOD_REMOVED
+charts-bar | io.github.dautovicharis.charts.style.BarChartStyle | getSelectionLineVisible() | METHOD_REMOVED
+charts-bar | io.github.dautovicharis.charts.style.BarChartStyle | getSelectionLineWidth() | METHOD_REMOVED
+charts-bar | io.github.dautovicharis.charts.style.BarChartStyle | getSpace-D9Ej5fM() | METHOD_REMOVED
+charts-bar | io.github.dautovicharis.charts.style.BarChartStyle | getXAxisLabelColor-0d7_KjU() | METHOD_REMOVED
+charts-bar | io.github.dautovicharis.charts.style.BarChartStyle | getXAxisLabelMaxCount() | METHOD_REMOVED
+charts-bar | io.github.dautovicharis.charts.style.BarChartStyle | getXAxisLabelSize-XSAIIZE() | METHOD_REMOVED
+charts-bar | io.github.dautovicharis.charts.style.BarChartStyle | getXAxisLabelsVisible() | METHOD_REMOVED
+charts-bar | io.github.dautovicharis.charts.style.BarChartStyle | getYAxisLabelColor-0d7_KjU() | METHOD_REMOVED
+charts-bar | io.github.dautovicharis.charts.style.BarChartStyle | getYAxisLabelCount() | METHOD_REMOVED
+charts-bar | io.github.dautovicharis.charts.style.BarChartStyle | getYAxisLabelSize-XSAIIZE() | METHOD_REMOVED
+charts-bar | io.github.dautovicharis.charts.style.BarChartStyle | getYAxisLabelsVisible() | METHOD_REMOVED
+charts-bar | io.github.dautovicharis.charts.style.BarChartStyle | getZoomControlsVisible() | METHOD_REMOVED
+charts-bar | io.github.dautovicharis.charts.style.BarChartStyle | $stable | FIELD_REMOVED
+charts-histogram | io.github.dautovicharis.charts.HistogramChartKt |  | CLASS_REMOVED
+charts-histogram | io.github.dautovicharis.charts.HistogramChartKt | HistogramChart(io.github.dautovicharis.charts.model.ChartDataSet, io.github.dautovicharis.charts.style.BarChartStyle, boolean, boolean, int, androidx.compose.runtime.Composer, int, int) | METHOD_REMOVED
+charts-histogram | io.github.dautovicharis.charts.HistogramChartPreviewsKt |  | CLASS_REMOVED
+charts-histogram | io.github.dautovicharis.charts.internal.HistogramValidationKt |  | CLASS_REMOVED
+charts-histogram | io.github.dautovicharis.charts.internal.HistogramValidationKt | validateHistogramData(io.github.dautovicharis.charts.internal.common.model.ChartData, int) | METHOD_REMOVED
+charts-histogram | io.github.dautovicharis.charts.style.HistogramChartDefaults |  | CLASS_REMOVED
+charts-histogram | io.github.dautovicharis.charts.style.HistogramChartDefaults | style-qaGFc8c(long, java.util.List, float, float, java.lang.Float, java.lang.Float, float, boolean, boolean, int, long, float, boolean, long, float, boolean, long, long, int, boolean, long, float, io.github.dautovicharis.charts.style.ChartViewStyle, boolean, long, long, int, androidx.compose.runtime.Composer, int, int, int, int) | METHOD_REMOVED
+charts-histogram | io.github.dautovicharis.charts.style.HistogramChartDefaults | $stable | FIELD_REMOVED
+charts-histogram | io.github.dautovicharis.charts.style.HistogramChartDefaults | INSTANCE | FIELD_REMOVED
+charts-histogram | io.github.dautovicharis.charts.style.HistogramChartStyleKt |  | CLASS_REMOVED
+charts-stacked-bar | io.github.dautovicharis.charts.internal.StackedBarValidationKt |  | CLASS_REMOVED
+charts-stacked-bar | io.github.dautovicharis.charts.internal.StackedBarValidationKt | validateBarData(io.github.dautovicharis.charts.internal.common.model.MultiChartData, io.github.dautovicharis.charts.style.StackedBarChartStyle) | METHOD_REMOVED
+charts-stacked-bar | io.github.dautovicharis.charts.StackedBarChartKt |  | CLASS_REMOVED
+charts-stacked-bar | io.github.dautovicharis.charts.StackedBarChartKt | StackedBarChart(io.github.dautovicharis.charts.model.MultiChartDataSet, io.github.dautovicharis.charts.style.StackedBarChartStyle, boolean, boolean, int, androidx.compose.runtime.Composer, int, int) | METHOD_REMOVED
+charts-stacked-bar | io.github.dautovicharis.charts.StackedBarChartPreviewsKt |  | CLASS_REMOVED
+charts-stacked-bar | io.github.dautovicharis.charts.style.StackedBarChartDefaults |  | CLASS_REMOVED
+charts-stacked-bar | io.github.dautovicharis.charts.style.StackedBarChartDefaults | style-C-Bhz8Q(long, float, float, java.util.List, io.github.dautovicharis.charts.style.ChartViewStyle, float, boolean, boolean, long, long, int, boolean, long, long, int, boolean, long, float, androidx.compose.runtime.Composer, int, int, int) | METHOD_REMOVED
+charts-stacked-bar | io.github.dautovicharis.charts.style.StackedBarChartDefaults | $stable | FIELD_REMOVED
+charts-stacked-bar | io.github.dautovicharis.charts.style.StackedBarChartDefaults | INSTANCE | FIELD_REMOVED
+charts-stacked-bar | io.github.dautovicharis.charts.style.StackedBarChartStyle |  | CLASS_REMOVED
+charts-stacked-bar | io.github.dautovicharis.charts.style.StackedBarChartStyle | getBarAlpha() | METHOD_REMOVED
+charts-stacked-bar | io.github.dautovicharis.charts.style.StackedBarChartStyle | getBarColor-0d7_KjU() | METHOD_REMOVED
+charts-stacked-bar | io.github.dautovicharis.charts.style.StackedBarChartStyle | getBarColors() | METHOD_REMOVED
+charts-stacked-bar | io.github.dautovicharis.charts.style.StackedBarChartStyle | getChartViewStyle() | METHOD_REMOVED
+charts-stacked-bar | io.github.dautovicharis.charts.style.StackedBarChartStyle | getMinBarWidth-D9Ej5fM() | METHOD_REMOVED
+charts-stacked-bar | io.github.dautovicharis.charts.style.StackedBarChartStyle | getModifier() | METHOD_REMOVED
+charts-stacked-bar | io.github.dautovicharis.charts.style.StackedBarChartStyle | getProperties() | METHOD_REMOVED
+charts-stacked-bar | io.github.dautovicharis.charts.style.StackedBarChartStyle | getSelectionLineColor-0d7_KjU() | METHOD_REMOVED
+charts-stacked-bar | io.github.dautovicharis.charts.style.StackedBarChartStyle | getSelectionLineVisible() | METHOD_REMOVED
+charts-stacked-bar | io.github.dautovicharis.charts.style.StackedBarChartStyle | getSelectionLineWidth() | METHOD_REMOVED
+charts-stacked-bar | io.github.dautovicharis.charts.style.StackedBarChartStyle | getSpace-D9Ej5fM() | METHOD_REMOVED
+charts-stacked-bar | io.github.dautovicharis.charts.style.StackedBarChartStyle | getXAxisLabelColor-0d7_KjU() | METHOD_REMOVED
+charts-stacked-bar | io.github.dautovicharis.charts.style.StackedBarChartStyle | getXAxisLabelMaxCount() | METHOD_REMOVED
+charts-stacked-bar | io.github.dautovicharis.charts.style.StackedBarChartStyle | getXAxisLabelSize-XSAIIZE() | METHOD_REMOVED
+charts-stacked-bar | io.github.dautovicharis.charts.style.StackedBarChartStyle | getXAxisLabelsVisible() | METHOD_REMOVED
+charts-stacked-bar | io.github.dautovicharis.charts.style.StackedBarChartStyle | getYAxisLabelColor-0d7_KjU() | METHOD_REMOVED
+charts-stacked-bar | io.github.dautovicharis.charts.style.StackedBarChartStyle | getYAxisLabelCount() | METHOD_REMOVED
+charts-stacked-bar | io.github.dautovicharis.charts.style.StackedBarChartStyle | getYAxisLabelSize-XSAIIZE() | METHOD_REMOVED
+charts-stacked-bar | io.github.dautovicharis.charts.style.StackedBarChartStyle | getYAxisLabelsVisible() | METHOD_REMOVED
+charts-stacked-bar | io.github.dautovicharis.charts.style.StackedBarChartStyle | getZoomControlsVisible() | METHOD_REMOVED
+charts-stacked-bar | io.github.dautovicharis.charts.style.StackedBarChartStyle | $stable | FIELD_REMOVED
+charts-stacked-area | io.github.dautovicharis.charts.internal.StackedAreaValidationKt |  | CLASS_REMOVED
+charts-stacked-area | io.github.dautovicharis.charts.internal.StackedAreaValidationKt | validateStackedAreaData(io.github.dautovicharis.charts.internal.common.model.MultiChartData, io.github.dautovicharis.charts.style.StackedAreaChartStyle) | METHOD_REMOVED
+charts-stacked-area | io.github.dautovicharis.charts.StackedAreaChartKt |  | CLASS_REMOVED
+charts-stacked-area | io.github.dautovicharis.charts.StackedAreaChartKt | StackedAreaChart(io.github.dautovicharis.charts.model.MultiChartDataSet, io.github.dautovicharis.charts.style.StackedAreaChartStyle, boolean, boolean, int, androidx.compose.runtime.Composer, int, int) | METHOD_REMOVED
+charts-stacked-area | io.github.dautovicharis.charts.StackedAreaChartPreviewsKt |  | CLASS_REMOVED
+charts-stacked-area | io.github.dautovicharis.charts.style.StackedAreaChartDefaults |  | CLASS_REMOVED
+charts-stacked-area | io.github.dautovicharis.charts.style.StackedAreaChartDefaults | style-T-GZ5OA(long, java.util.List, float, boolean, long, java.util.List, float, boolean, io.github.dautovicharis.charts.style.ChartViewStyle, boolean, boolean, long, long, int, boolean, long, long, int, androidx.compose.runtime.Composer, int, int, int) | METHOD_REMOVED
+charts-stacked-area | io.github.dautovicharis.charts.style.StackedAreaChartDefaults | $stable | FIELD_REMOVED
+charts-stacked-area | io.github.dautovicharis.charts.style.StackedAreaChartDefaults | INSTANCE | FIELD_REMOVED
+charts-stacked-area | io.github.dautovicharis.charts.style.StackedAreaChartStyle |  | CLASS_REMOVED
+charts-stacked-area | io.github.dautovicharis.charts.style.StackedAreaChartStyle | getAreaColor-0d7_KjU() | METHOD_REMOVED
+charts-stacked-area | io.github.dautovicharis.charts.style.StackedAreaChartStyle | getAreaColors() | METHOD_REMOVED
+charts-stacked-area | io.github.dautovicharis.charts.style.StackedAreaChartStyle | getBezier() | METHOD_REMOVED
+charts-stacked-area | io.github.dautovicharis.charts.style.StackedAreaChartStyle | getChartViewStyle() | METHOD_REMOVED
+charts-stacked-area | io.github.dautovicharis.charts.style.StackedAreaChartStyle | getFillAlpha() | METHOD_REMOVED
+charts-stacked-area | io.github.dautovicharis.charts.style.StackedAreaChartStyle | getLineColor-0d7_KjU() | METHOD_REMOVED
+charts-stacked-area | io.github.dautovicharis.charts.style.StackedAreaChartStyle | getLineColors() | METHOD_REMOVED
+charts-stacked-area | io.github.dautovicharis.charts.style.StackedAreaChartStyle | getLineVisible() | METHOD_REMOVED
+charts-stacked-area | io.github.dautovicharis.charts.style.StackedAreaChartStyle | getLineWidth() | METHOD_REMOVED
+charts-stacked-area | io.github.dautovicharis.charts.style.StackedAreaChartStyle | getModifier() | METHOD_REMOVED
+charts-stacked-area | io.github.dautovicharis.charts.style.StackedAreaChartStyle | getProperties() | METHOD_REMOVED
+charts-stacked-area | io.github.dautovicharis.charts.style.StackedAreaChartStyle | getXAxisLabelColor-0d7_KjU() | METHOD_REMOVED
+charts-stacked-area | io.github.dautovicharis.charts.style.StackedAreaChartStyle | getXAxisLabelMaxCount() | METHOD_REMOVED
+charts-stacked-area | io.github.dautovicharis.charts.style.StackedAreaChartStyle | getXAxisLabelSize-XSAIIZE() | METHOD_REMOVED
+charts-stacked-area | io.github.dautovicharis.charts.style.StackedAreaChartStyle | getXAxisLabelsVisible() | METHOD_REMOVED
+charts-stacked-area | io.github.dautovicharis.charts.style.StackedAreaChartStyle | getYAxisLabelColor-0d7_KjU() | METHOD_REMOVED
+charts-stacked-area | io.github.dautovicharis.charts.style.StackedAreaChartStyle | getYAxisLabelCount() | METHOD_REMOVED
+charts-stacked-area | io.github.dautovicharis.charts.style.StackedAreaChartStyle | getYAxisLabelSize-XSAIIZE() | METHOD_REMOVED
+charts-stacked-area | io.github.dautovicharis.charts.style.StackedAreaChartStyle | getYAxisLabelsVisible() | METHOD_REMOVED
+charts-stacked-area | io.github.dautovicharis.charts.style.StackedAreaChartStyle | getZoomControlsVisible() | METHOD_REMOVED
+charts-stacked-area | io.github.dautovicharis.charts.style.StackedAreaChartStyle | $stable | FIELD_REMOVED
+charts-radar | io.github.dautovicharis.charts.internal.RadarValidationKt |  | CLASS_REMOVED
+charts-radar | io.github.dautovicharis.charts.internal.RadarValidationKt | validateRadarData(io.github.dautovicharis.charts.internal.common.model.MultiChartData, io.github.dautovicharis.charts.style.RadarChartStyle) | METHOD_REMOVED
+charts-radar | io.github.dautovicharis.charts.RadarChartKt |  | CLASS_REMOVED
+charts-radar | io.github.dautovicharis.charts.RadarChartKt | RadarChart(io.github.dautovicharis.charts.model.ChartDataSet, io.github.dautovicharis.charts.style.RadarChartStyle, boolean, boolean, int, androidx.compose.runtime.Composer, int, int) | METHOD_REMOVED
+charts-radar | io.github.dautovicharis.charts.RadarChartKt | RadarChart(io.github.dautovicharis.charts.model.MultiChartDataSet, io.github.dautovicharis.charts.style.RadarChartStyle, boolean, boolean, int, androidx.compose.runtime.Composer, int, int) | METHOD_REMOVED
+charts-radar | io.github.dautovicharis.charts.RadarChartPreviewsKt |  | CLASS_REMOVED
+charts-radar | io.github.dautovicharis.charts.style.RadarChartDefaults |  | CLASS_REMOVED
+charts-radar | io.github.dautovicharis.charts.style.RadarChartDefaults | style-7ASAkxg(long, float, int, boolean, long, float, boolean, long, long, float, boolean, boolean, java.util.List, float, boolean, long, float, boolean, long, java.util.List, float, float, boolean, io.github.dautovicharis.charts.style.ChartViewStyle, androidx.compose.runtime.Composer, int, int, int, int) | METHOD_REMOVED
+charts-radar | io.github.dautovicharis.charts.style.RadarChartDefaults | $stable | FIELD_REMOVED
+charts-radar | io.github.dautovicharis.charts.style.RadarChartDefaults | INSTANCE | FIELD_REMOVED
+charts-radar | io.github.dautovicharis.charts.style.RadarChartStyle |  | CLASS_REMOVED
+charts-radar | io.github.dautovicharis.charts.style.RadarChartStyle | getAxisLabelColor-0d7_KjU() | METHOD_REMOVED
+charts-radar | io.github.dautovicharis.charts.style.RadarChartStyle | getAxisLabelPadding-D9Ej5fM() | METHOD_REMOVED
+charts-radar | io.github.dautovicharis.charts.style.RadarChartStyle | getAxisLabelSize-XSAIIZE() | METHOD_REMOVED
+charts-radar | io.github.dautovicharis.charts.style.RadarChartStyle | getAxisLabelVisible() | METHOD_REMOVED
+charts-radar | io.github.dautovicharis.charts.style.RadarChartStyle | getAxisLineColor-0d7_KjU() | METHOD_REMOVED
+charts-radar | io.github.dautovicharis.charts.style.RadarChartStyle | getAxisLineWidth() | METHOD_REMOVED
+charts-radar | io.github.dautovicharis.charts.style.RadarChartStyle | getAxisVisible() | METHOD_REMOVED
+charts-radar | io.github.dautovicharis.charts.style.RadarChartStyle | getCategoryColors() | METHOD_REMOVED
+charts-radar | io.github.dautovicharis.charts.style.RadarChartStyle | getCategoryLegendVisible() | METHOD_REMOVED
+charts-radar | io.github.dautovicharis.charts.style.RadarChartStyle | getCategoryPinSize() | METHOD_REMOVED
+charts-radar | io.github.dautovicharis.charts.style.RadarChartStyle | getCategoryPinsVisible() | METHOD_REMOVED
+charts-radar | io.github.dautovicharis.charts.style.RadarChartStyle | getChartViewStyle() | METHOD_REMOVED
+charts-radar | io.github.dautovicharis.charts.style.RadarChartStyle | getFillAlpha() | METHOD_REMOVED
+charts-radar | io.github.dautovicharis.charts.style.RadarChartStyle | getFillVisible() | METHOD_REMOVED
+charts-radar | io.github.dautovicharis.charts.style.RadarChartStyle | getGridColor-0d7_KjU() | METHOD_REMOVED
+charts-radar | io.github.dautovicharis.charts.style.RadarChartStyle | getGridLineWidth() | METHOD_REMOVED
+charts-radar | io.github.dautovicharis.charts.style.RadarChartStyle | getGridSteps() | METHOD_REMOVED
+charts-radar | io.github.dautovicharis.charts.style.RadarChartStyle | getGridVisible() | METHOD_REMOVED
+charts-radar | io.github.dautovicharis.charts.style.RadarChartStyle | getLineColor-0d7_KjU() | METHOD_REMOVED
+charts-radar | io.github.dautovicharis.charts.style.RadarChartStyle | getLineColors() | METHOD_REMOVED
+charts-radar | io.github.dautovicharis.charts.style.RadarChartStyle | getLineWidth() | METHOD_REMOVED
+charts-radar | io.github.dautovicharis.charts.style.RadarChartStyle | getModifier() | METHOD_REMOVED
+charts-radar | io.github.dautovicharis.charts.style.RadarChartStyle | getPointColor-0d7_KjU() | METHOD_REMOVED
+charts-radar | io.github.dautovicharis.charts.style.RadarChartStyle | getPointColorSameAsLine() | METHOD_REMOVED
+charts-radar | io.github.dautovicharis.charts.style.RadarChartStyle | getPointSize() | METHOD_REMOVED
+charts-radar | io.github.dautovicharis.charts.style.RadarChartStyle | getPointVisible() | METHOD_REMOVED
+charts-radar | io.github.dautovicharis.charts.style.RadarChartStyle | getProperties() | METHOD_REMOVED
+charts-radar | io.github.dautovicharis.charts.style.RadarChartStyle | $stable | FIELD_REMOVED
+charts | io.github.dautovicharis.charts.ChartsUmbrella |  | CLASS_REMOVED
+charts | io.github.dautovicharis.charts.ChartsUmbrella | $stable | FIELD_REMOVED
+charts | io.github.dautovicharis.charts.ChartsUmbrella | INSTANCE | FIELD_REMOVED
