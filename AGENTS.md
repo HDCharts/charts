@@ -96,6 +96,7 @@ Project skills use the `hdc-` prefix. The canonical source is
 | `hdc-plan` | The user chooses local planning for a complex or multi-step feature. | `.agents/skills/hdc-plan/SKILL.md` |
 | `hdc-changeset` | The user directly requests creating or updating a release note. | `.agents/skills/hdc-changeset/SKILL.md` |
 | `hdc-rc` | The user directly requests API compatibility or migration work. | `.agents/skills/hdc-rc/SKILL.md` |
+| `hdc-gif` | Recording or updating docs GIF scenarios locally against a running emulator. | `.agents/skills/hdc-gif/SKILL.md` |
 
 ## Validation
 

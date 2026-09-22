@@ -2,7 +2,12 @@ package io.github.hdcharts.app.screenshot
 
 import androidx.compose.runtime.Composable
 import com.android.tools.screenshot.PreviewTest
-import io.github.hdcharts.app.gif.DocsGifScenariosData
+import io.github.hdcharts.app.gif.docs.BarViewModel
+import io.github.hdcharts.app.gif.docs.HistogramViewModel
+import io.github.hdcharts.app.gif.docs.LineViewModel
+import io.github.hdcharts.app.gif.docs.MultiLineViewModel
+import io.github.hdcharts.app.gif.docs.StackedAreaViewModel
+import io.github.hdcharts.app.gif.docs.StackedBarViewModel
 import io.github.hdcharts.app.screenshot.shared.DocsGifLandscapePreview
 import io.github.hdcharts.app.screenshot.shared.SCREENSHOT_PIE_SAMPLE_USE_CASE
 import io.github.hdcharts.app.screenshot.shared.SCREENSHOT_RADAR_SAMPLE_USE_CASE
@@ -15,14 +20,14 @@ import io.github.hdcharts.charts.RadarChart
 import io.github.hdcharts.charts.StackedAreaChart
 import io.github.hdcharts.charts.StackedBarChart
 import io.github.hdcharts.charts.model.ChartValueFormatters
-import io.github.hdcharts.charts.model.toChartData
 
 /**
  * Landscape screenshot tests that mirror the docs GIF scenarios. Pie and
  * radar still pull from the existing sample use cases (their data is
- * sensible at any aspect ratio). All other charts use the shared
- * `DocsGifScenariosData` so the same fixtures drive the recorder and the
- * screenshot baselines.
+ * sensible at any aspect ratio). All other charts read the ChartData
+ * straight off the same ViewModel that produces the GIF, under
+ * `io.github.hdcharts.app.gif.docs`, so the screenshot and the recorded
+ * GIF can never drift apart.
  */
 
 @PreviewTest
@@ -40,15 +45,8 @@ fun PieDocsGifScenarioPreview() {
 @Composable
 fun LineDocsGifScenarioPreview() {
     ScreenshotSurface {
-        val scenario = DocsGifScenariosData.line()
-        LineChart(
-            data =
-                DocsGifScenariosData.buildSingleSeries(
-                    scenario,
-                    DocsGifScenariosData.LINE_TITLE,
-                ),
-            title = DocsGifScenariosData.LINE_TITLE,
-        )
+        val data = LineViewModel().chartData.value
+        LineChart(data = data, title = data.series.single().name)
     }
 }
 
@@ -57,10 +55,10 @@ fun LineDocsGifScenarioPreview() {
 @Composable
 fun MultiLineDocsGifScenarioPreview() {
     ScreenshotSurface {
-        val scenario = DocsGifScenariosData.multiLine()
+        val data = MultiLineViewModel().chartData.value
         LineChart(
-            data = scenario.items.toChartData(categories = scenario.categories),
-            title = DocsGifScenariosData.MULTI_LINE_TITLE,
+            data = data,
+            title = "Weekly Revenue by Channel",
             valueFormatter = ChartValueFormatters.prefix("$"),
         )
     }
@@ -71,15 +69,8 @@ fun MultiLineDocsGifScenarioPreview() {
 @Composable
 fun BarDocsGifScenarioPreview() {
     ScreenshotSurface {
-        val scenario = DocsGifScenariosData.bar()
-        BarChart(
-            data =
-                DocsGifScenariosData.buildSingleSeries(
-                    scenario,
-                    DocsGifScenariosData.BAR_TITLE,
-                ),
-            title = DocsGifScenariosData.BAR_TITLE,
-        )
+        val data = BarViewModel().chartData.value
+        BarChart(data = data, title = data.series.single().name)
     }
 }
 
@@ -88,15 +79,8 @@ fun BarDocsGifScenarioPreview() {
 @Composable
 fun HistogramDocsGifScenarioPreview() {
     ScreenshotSurface {
-        val scenario = DocsGifScenariosData.histogram()
-        HistogramChart(
-            data =
-                DocsGifScenariosData.buildSingleSeries(
-                    scenario,
-                    DocsGifScenariosData.HISTOGRAM_TITLE,
-                ),
-            title = DocsGifScenariosData.HISTOGRAM_TITLE,
-        )
+        val data = HistogramViewModel().chartData.value
+        HistogramChart(data = data, title = data.series.single().name)
     }
 }
 
@@ -105,11 +89,8 @@ fun HistogramDocsGifScenarioPreview() {
 @Composable
 fun StackedBarDocsGifScenarioPreview() {
     ScreenshotSurface {
-        val scenario = DocsGifScenariosData.stackedBar()
-        StackedBarChart(
-            data = scenario.items.toChartData(categories = scenario.categories),
-            title = DocsGifScenariosData.STACKED_BAR_TITLE,
-        )
+        val data = StackedBarViewModel().chartData.value
+        StackedBarChart(data = data, title = "Quarterly Revenue by Channel")
     }
 }
 
@@ -118,11 +99,8 @@ fun StackedBarDocsGifScenarioPreview() {
 @Composable
 fun StackedAreaDocsGifScenarioPreview() {
     ScreenshotSurface {
-        val scenario = DocsGifScenariosData.stackedArea()
-        StackedAreaChart(
-            data = scenario.items.toChartData(categories = scenario.categories),
-            title = DocsGifScenariosData.STACKED_AREA_TITLE,
-        )
+        val data = StackedAreaViewModel().chartData.value
+        StackedAreaChart(data = data, title = "Monthly Active Subscribers by Plan")
     }
 }
 

@@ -48,16 +48,7 @@ val hasReleaseSigningConfig =
     ).all { !it.isNullOrBlank() }
 
 val gifDocsVersion = providers.gradleProperty("gifDocsVersion").orElse("snapshot")
-val gifContentRoot =
-    providers.gradleProperty("gifContentRoot").orElse(
-        providers.provider {
-            val migratedDocsContent =
-                rootProject.layout.projectDirectory
-                    .dir("../charts-docs/content")
-                    .asFile
-            if (migratedDocsContent.exists()) "../charts-docs/content" else "docs/content"
-        },
-    )
+val gifContentRoot = providers.gradleProperty("gifContentRoot")
 val gifOutputDir = providers.gradleProperty("gifOutputDir")
 val compileSdkVersion =
     libs.versions.compile.sdk
@@ -185,7 +176,7 @@ gifRecorder {
                 gifContentRoot.zip(gifDocsVersion) { contentRoot, docsVersion ->
                     rootProject.layout.projectDirectory.dir("$contentRoot/$docsVersion/wiki/assets")
                 },
-            ),
+            ).orElse(rootProject.layout.projectDirectory.dir("gif-baselines")),
     )
     baselineDir.set(rootProject.layout.projectDirectory.dir("gif-baselines"))
     // Matches the Material 3 colorScheme.background used by DocsGifScene.
@@ -196,6 +187,10 @@ gifRecorder {
     // this canvas and fills unused pixels with canvasBackgroundColor.
     gifWidth.set(1080)
     gifHeight.set(755)
+    // "none" compresses busy/moving scenarios (e.g. line_timeline) far better than the ordered
+    // "bayer" default, which defeats GIF's run-length coding; see charts-gif-recorder PR #32.
+    gifDither.set("none")
+    gifsicleLossy.set(90)
 }
 
 dependencies {
@@ -204,6 +199,8 @@ dependencies {
     implementation(project(":sample-shared"))
     implementation(libs.androidx.activity.compose)
     implementation(libs.compose.ui.tooling.preview)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.koin.android)
     debugImplementation(libs.compose.ui.tooling)
     debugImplementation(libs.compose.ui.test.manifest)

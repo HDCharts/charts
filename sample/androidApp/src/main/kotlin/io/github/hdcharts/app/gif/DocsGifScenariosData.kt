@@ -1,15 +1,13 @@
 package io.github.hdcharts.app.gif
 
-import io.github.hdcharts.charts.model.ChartData
-import io.github.hdcharts.charts.model.toChartData
 import kotlin.math.PI
 import kotlin.math.roundToInt
 import kotlin.math.sin
 
 /**
- * Shared data definitions for the docs GIF scenarios and the matching
- * landscape screenshot tests. Values are designed so the chart's y-axis
- * max equals `yAxisLabelCount * step` with `step` an integer.
+ * Shared, generic value/label generators for the docs GIF scenario fixtures. Scenario-specific
+ * data (which parameters, which title) lives with each scenario's own composable in
+ * `io.github.hdcharts.app.gif.docs`; only the reusable math lives here.
  *
  * Each scenario uses 21 data points so the default `xLabels.count = 6`
  * produces a stride of exactly 4 between visible labels
@@ -17,24 +15,7 @@ import kotlin.math.sin
  * (17 / 5 ≈ 3.4) that causes uneven spacing.
  */
 internal object DocsGifScenariosData {
-    internal const val BAR_TITLE = "Daily Net Cash Flow"
-    internal const val LINE_TITLE = "Daily Support Tickets"
-    internal const val MULTI_LINE_TITLE = "Weekly Revenue by Channel"
-    internal const val HISTOGRAM_TITLE = "Request Duration Distribution"
-    internal const val STACKED_BAR_TITLE = "Quarterly Revenue by Channel"
-    internal const val STACKED_AREA_TITLE = "Monthly Active Subscribers by Plan"
-
-    private const val POINTS = 21
-
-    internal data class SingleSeriesScenario(
-        val categories: List<String>,
-        val values: List<Double>,
-    )
-
-    internal data class MultiSeriesScenario(
-        val categories: List<String>,
-        val items: List<Pair<String, List<Double>>>,
-    )
+    internal const val POINTS = 21
 
     private val monthNames =
         listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
@@ -43,24 +24,24 @@ internal object DocsGifScenariosData {
      * Repeats month abbreviations cyclically until [count] entries are
      * produced.
      */
-    private fun monthLabels(count: Int): List<String> = List(count) { monthNames[it % monthNames.size] }
+    fun monthLabels(count: Int): List<String> = List(count) { monthNames[it % monthNames.size] }
 
     /**
      * Returns [count] week-shaped labels of the form `W<index + 1>`
      * (W1, W2, ...).
      */
-    private fun weekLabels(count: Int): List<String> = List(count) { "W${it + 1}" }
+    fun weekLabels(count: Int): List<String> = List(count) { "W${it + 1}" }
 
     /**
      * Returns [count] quarter-shaped labels of the form `Q<index + 1>`.
      */
-    private fun quarterLabels(count: Int): List<String> = List(count) { "Q${it + 1}" }
+    fun quarterLabels(count: Int): List<String> = List(count) { "Q${it + 1}" }
 
     /**
      * Builds histogram bucket labels of the form `0-25ms`, `25-50ms`,
      * ... `<(count-1)*stepMs>ms+` for the catch-all tail.
      */
-    private fun msBuckets(
+    fun msBuckets(
         count: Int,
         stepMs: Int,
     ): List<String> {
@@ -74,7 +55,7 @@ internal object DocsGifScenariosData {
      * are scaled by `dip`. Pure: same inputs always produce the same
      * integer list.
      */
-    private fun ramped(
+    fun ramped(
         count: Int,
         start: Double,
         end: Double,
@@ -94,7 +75,7 @@ internal object DocsGifScenariosData {
      * then recover to [lastEnd]. Indices `[0, [dipStart])` rise; `[dipStart..dipEnd)`
      * dip; `[dipEnd..count)` recover. Returns an integer list of length [count].
      */
-    private fun bent(
+    fun bent(
         count: Int,
         firstStart: Double,
         firstEnd: Double,
@@ -116,7 +97,7 @@ internal object DocsGifScenariosData {
      * produce the same output (no [Math.random], no clock). Output is
      * rounded to integer; values stay non-negative.
      */
-    private fun jitter(
+    fun jitter(
         values: List<Double>,
         amplitude: Double,
         seed: Int,
@@ -143,7 +124,7 @@ internal object DocsGifScenariosData {
      * y-axis ticks can be placed at integer steps of `(targetMax /
      * (labelCount - 1))`.
      */
-    private fun normalizeMax(
+    fun normalizeMax(
         values: List<Double>,
         targetMax: Double,
     ): List<Double> {
@@ -159,7 +140,7 @@ internal object DocsGifScenariosData {
      * so the per-point y-axis max lands on the chosen tick-friendly
      * integer.
      */
-    private fun normalizeStacked(
+    fun normalizeStacked(
         series: List<List<Double>>,
         targetMax: Double,
     ): List<List<Double>> {
@@ -169,123 +150,58 @@ internal object DocsGifScenariosData {
         return series.map { col -> col.map { (it * scale).roundToInt().toDouble() } }
     }
 
-    fun bar(): SingleSeriesScenario =
-        SingleSeriesScenario(
-            categories = monthLabels(POINTS),
-            values =
-                normalizeMax(
-                    jitter(ramped(POINTS, start = 80.0, end = 280.0), amplitude = 18.0, seed = 7),
-                    targetMax = 280.0,
-                ),
-        )
+    /** [ramped] jittered and normalized in one call, for a single independently-scaled series. */
+    fun rampedSeries(
+        count: Int,
+        start: Double,
+        end: Double,
+        amplitude: Double,
+        seed: Int,
+        targetMax: Double,
+        dip: Double? = null,
+        dipStart: Int = 0,
+        dipEnd: Int = count,
+    ): List<Double> = normalizeMax(jitter(ramped(count, start, end, dip, dipStart, dipEnd), amplitude, seed), targetMax)
 
-    fun line(): SingleSeriesScenario =
-        SingleSeriesScenario(
-            categories = weekLabels(POINTS),
-            values =
-                normalizeMax(
-                    jitter(ramped(POINTS, start = 30.0, end = 360.0), amplitude = 45.0, seed = 19),
-                    targetMax = 360.0,
-                ),
-        )
-
-    fun multiLine(): MultiSeriesScenario =
-        MultiSeriesScenario(
-            categories = weekLabels(POINTS),
-            items =
-                listOf(
-                    "Web Store" to
-                        normalizeMax(
-                            jitter(ramped(POINTS, 180.0, 720.0, dip = 0.85, dipStart = 7, dipEnd = 8), 25.0, 13),
-                            targetMax = 720.0,
-                        ),
-                    "Mobile App" to
-                        normalizeMax(
-                            jitter(ramped(POINTS, 120.0, 580.0, dip = 0.92, dipStart = 6, dipEnd = 7), 20.0, 17),
-                            targetMax = 580.0,
-                        ),
-                    "Partner Sales" to
-                        normalizeMax(
-                            jitter(ramped(POINTS, 60.0, 340.0, dip = 1.0, dipStart = 9, dipEnd = 12), 12.0, 23),
-                            targetMax = 340.0,
-                        ),
-                ),
-        )
-
-    fun histogram(): SingleSeriesScenario =
-        SingleSeriesScenario(
-            categories = msBuckets(POINTS, 25),
-            values =
-                normalizeMax(
-                    jitter(
-                        bent(
-                            count = POINTS,
-                            firstStart = 4.0,
-                            firstEnd = 80.0,
-                            dip = 0.75,
-                            dipStart = 10,
-                            dipEnd = 18,
-                            lastEnd = 36.0,
-                        ),
-                        amplitude = 4.0,
-                        seed = 31,
-                    ),
-                    targetMax = 80.0,
-                ),
-        )
-
-    fun stackedBar(): MultiSeriesScenario {
-        val (online, retail, wholesale) =
-            normalizeStacked(
-                listOf(
-                    jitter(ramped(POINTS, 280.0, 1080.0), 18.0, 41),
-                    jitter(ramped(POINTS, 480.0, 1400.0), 25.0, 53),
-                    jitter(
-                        bent(POINTS, 360.0, 760.0, dip = 0.55, dipStart = 9, dipEnd = 12, lastEnd = 720.0),
-                        30.0,
-                        67,
-                    ),
-                ),
-                targetMax = 3200.0,
-            )
-        return MultiSeriesScenario(
-            categories = quarterLabels(POINTS),
-            items =
-                listOf(
-                    "Online" to online,
-                    "Retail" to retail,
-                    "Wholesale" to wholesale,
-                ),
-        )
+    /** [bent] jittered and normalized in one call, for a single independently-scaled series. */
+    fun bentSeries(
+        count: Int,
+        firstStart: Double,
+        firstEnd: Double,
+        amplitude: Double,
+        seed: Int,
+        targetMax: Double,
+        dip: Double = 0.5,
+        dipStart: Int = count / 3,
+        dipEnd: Int = 2 * count / 3,
+        lastEnd: Double = firstEnd,
+    ): List<Double> {
+        val jittered = jitter(bent(count, firstStart, firstEnd, dip, dipStart, dipEnd, lastEnd), amplitude, seed)
+        return normalizeMax(jittered, targetMax)
     }
 
-    fun stackedArea(): MultiSeriesScenario {
-        val (freePlan, standardPlan, premiumPlan) =
-            normalizeStacked(
-                listOf(
-                    jitter(ramped(POINTS, 240.0, 880.0), 25.0, 71),
-                    jitter(ramped(POINTS, 100.0, 700.0), 30.0, 83),
-                    jitter(bent(POINTS, 60.0, 660.0, dip = 0.7, dipStart = 9, dipEnd = 12, lastEnd = 360.0), 25.0, 89),
-                ),
-                targetMax = 1600.0,
-            )
-        return MultiSeriesScenario(
-            categories = monthLabels(POINTS),
-            items =
-                listOf(
-                    "Free Plan" to freePlan,
-                    "Standard Plan" to standardPlan,
-                    "Premium Plan" to premiumPlan,
-                ),
-        )
-    }
+    /** [ramped] jittered but left unnormalized, for a series later combined via [normalizeStacked]. */
+    fun jitteredRamped(
+        count: Int,
+        start: Double,
+        end: Double,
+        amplitude: Double,
+        seed: Int,
+        dip: Double? = null,
+        dipStart: Int = 0,
+        dipEnd: Int = count,
+    ): List<Double> = jitter(ramped(count, start, end, dip, dipStart, dipEnd), amplitude, seed)
 
-    fun buildSingleSeries(
-        scenario: SingleSeriesScenario,
-        seriesName: String,
-    ): ChartData =
-        scenario.values.toChartData(
-            categories = scenario.categories,
-            seriesName = seriesName,
-        )
+    /** [bent] jittered but left unnormalized, for a series later combined via [normalizeStacked]. */
+    fun jitteredBent(
+        count: Int,
+        firstStart: Double,
+        firstEnd: Double,
+        amplitude: Double,
+        seed: Int,
+        dip: Double = 0.5,
+        dipStart: Int = count / 3,
+        dipEnd: Int = 2 * count / 3,
+        lastEnd: Double = firstEnd,
+    ): List<Double> = jitter(bent(count, firstStart, firstEnd, dip, dipStart, dipEnd, lastEnd), amplitude, seed)
 }
