@@ -253,14 +253,16 @@ tasks.register("listDocsGifScenarios") {
 tasks.register("recordDocsGif") {
     group = "HDCharts"
     description =
-        "Records one docs GIF scenario to <gifContentRoot>/<gifDocsVersion>/wiki/assets (set -PgifScenario=<name>, defaults to first)"
+        "Records one docs GIF scenario to gif-baselines/ (set -PgifScenario=<name>, defaults to first; " +
+        "override with -PgifOutputDir or -PgifContentRoot/-PgifDocsVersion)"
     dependsOn(":androidApp:recordGifDebug")
 }
 
 tasks.register("recordDocsGifs") {
     group = "HDCharts"
     description =
-        "Records all docs GIF scenarios to <gifContentRoot>/<gifDocsVersion>/wiki/assets (default version: snapshot)"
+        "Records all docs GIF scenarios to gif-baselines/ " +
+        "(override with -PgifOutputDir or -PgifContentRoot/-PgifDocsVersion)"
     dependsOn(":androidApp:recordGifsDebug")
 }
 

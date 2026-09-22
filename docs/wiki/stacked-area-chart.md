@@ -8,16 +8,20 @@ title: Stacked Area
 
 ![Stacked Area Demo](/content/{{version}}/wiki/assets/stacked_area_default.gif)
 
+The example below is minimal and runs as written. The GIF above uses a longer generated
+series per plan; its full source is in
+[`StackedAreaExample.kt`](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/StackedAreaExample.kt).
+
 ```kotlin
 @Composable
-private fun ShowStackedArea() {
-    val items = listOf(
-        "Free Plan" to listOf(620.0, 650.0, 690.0, 720.0, 760.0, 800.0),
-        "Standard Plan" to listOf(240.0, 260.0, 285.0, 310.0, 340.0, 365.0),
-        "Premium Plan" to listOf(90.0, 95.0, 105.0, 118.0, 130.0, 142.0),
+fun ShowStackedArea() {
+    val data = listOf(
+        "Free Plan" to listOf(240.0, 380.0, 520.0, 610.0, 740.0, 880.0),
+        "Standard Plan" to listOf(100.0, 210.0, 330.0, 450.0, 580.0, 700.0),
+        "Premium Plan" to listOf(60.0, 140.0, 260.0, 380.0, 520.0, 660.0),
+    ).toChartData(
+        categories = listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun"),
     )
-
-    val data = items.toChartData(categories = listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun"))
 
     StackedAreaChart(data = data, title = "Monthly Active Subscribers by Plan")
 }

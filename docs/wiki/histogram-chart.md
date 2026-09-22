@@ -8,27 +8,22 @@ title: Histogram
 
 ![Histogram Demo](/content/{{version}}/wiki/assets/histogram_default.gif)
 
+The example below is minimal and runs as written. The GIF above uses a longer generated
+distribution; its full source is in
+[`HistogramExample.kt`](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/HistogramExample.kt).
+
 ```kotlin
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
-import io.github.hdcharts.charts.HistogramChart
-import io.github.hdcharts.charts.model.toChartData
-import io.github.hdcharts.charts.style.HistogramChartDefaults
-
 @Composable
-private fun ShowHistogram() {
-    val data = listOf(3.0, 6.0, 11.0, 16.0, 14.0, 9.0, 5.0).toChartData(
-        categories = listOf("0-50ms", "50-100ms", "100-150ms", "150-200ms", "200-250ms", "250-300ms", "300ms+"),
-        seriesName = "Requests",
+fun ShowHistogram() {
+    val data = listOf(4.0, 18.0, 47.0, 72.0, 58.0, 31.0, 14.0, 6.0).toChartData(
+        categories = listOf(
+            "0-25ms", "25-50ms", "50-75ms", "75-100ms",
+            "100-125ms", "125-150ms", "150-175ms", "175ms+",
+        ),
+        seriesName = "Request Duration Distribution",
     )
 
-    HistogramChart(
-        data = data,
-        title = "Request Duration Distribution",
-        style = HistogramChartDefaults.style(
-            bars = HistogramChartDefaults.bars(color = Color(0xFF0F766E)),
-        ),
-    )
+    HistogramChart(data = data, title = "Request Duration Distribution")
 }
 ```
 

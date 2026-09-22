@@ -5,21 +5,23 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import io.github.hdcharts.app.gif.DocsGifScenariosData.STACKED_AREA_TITLE
-import io.github.hdcharts.app.gif.DocsGifScenariosData.STACKED_BAR_TITLE
-import io.github.hdcharts.charts.BarChart
-import io.github.hdcharts.charts.HistogramChart
-import io.github.hdcharts.charts.LineChart
-import io.github.hdcharts.charts.PieChart
-import io.github.hdcharts.charts.RadarChart
-import io.github.hdcharts.charts.StackedAreaChart
-import io.github.hdcharts.charts.StackedBarChart
-import io.github.hdcharts.charts.model.ChartValueFormatters
-import io.github.hdcharts.charts.model.toChartData
-import io.github.hdcharts.sampleshared.data.pieSampleUseCase
-import io.github.hdcharts.sampleshared.data.radarSampleUseCase
+import io.github.hdcharts.app.gif.docs.LiveSensorReadingViewModel
+import io.github.hdcharts.app.gif.docs.MorphingLineViewModel
+import io.github.hdcharts.app.gif.docs.ShowBar
+import io.github.hdcharts.app.gif.docs.ShowHistogram
+import io.github.hdcharts.app.gif.docs.ShowLine
+import io.github.hdcharts.app.gif.docs.ShowLineWithRange
+import io.github.hdcharts.app.gif.docs.ShowLiveLine
+import io.github.hdcharts.app.gif.docs.ShowMorphingLine
+import io.github.hdcharts.app.gif.docs.ShowMultiLine
+import io.github.hdcharts.app.gif.docs.ShowPie
+import io.github.hdcharts.app.gif.docs.ShowRadar
+import io.github.hdcharts.app.gif.docs.ShowStackedArea
+import io.github.hdcharts.app.gif.docs.ShowStackedBar
 import io.github.hdcharts.sampleshared.theme.AppTheme
 import io.github.hdcharts.sampleshared.theme.docsSlate
 import io.github.hdcodedev.composegif.annotations.GifFractionPoint
@@ -44,13 +46,7 @@ import io.github.hdcodedev.composegif.annotations.RecordGif
 )
 @Composable
 fun PieDefaultGifScenario() {
-    val sample = pieSampleUseCase().initialPieSample()
-    DocsGifScene {
-        PieChart(
-            data = sample.slices,
-            title = sample.title,
-        )
-    }
+    DocsGifScene { ShowPie() }
 }
 
 @RecordGif(
@@ -67,17 +63,7 @@ fun PieDefaultGifScenario() {
 )
 @Composable
 fun LineDefaultGifScenario() {
-    DocsGifScene {
-        val scenario = DocsGifScenariosData.line()
-        LineChart(
-            data =
-                DocsGifScenariosData.buildSingleSeries(
-                    scenario,
-                    DocsGifScenariosData.LINE_TITLE,
-                ),
-            title = DocsGifScenariosData.LINE_TITLE,
-        )
-    }
+    DocsGifScene { ShowLine() }
 }
 
 @RecordGif(
@@ -97,13 +83,49 @@ fun LineDefaultGifScenario() {
 )
 @Composable
 fun MultiLineDefaultGifScenario() {
+    DocsGifScene { ShowMultiLine() }
+}
+
+@RecordGif(
+    name = "line_range",
+    interactionNodeTag = "LineChartPlot",
+    interactions = [
+        GifInteraction(type = GifInteractionType.TAP, target = GifInteractionTarget.LEFT, framesAfter = 14),
+        GifInteraction(type = GifInteractionType.TAP, target = GifInteractionTarget.CENTER, framesAfter = 14),
+        GifInteraction(type = GifInteractionType.TAP, target = GifInteractionTarget.RIGHT, framesAfter = 14),
+    ],
+)
+@Composable
+fun LineRangeGifScenario() {
+    DocsGifScene { ShowLineWithRange() }
+}
+
+@RecordGif(
+    name = "line_morph",
+    fps = 25,
+)
+@Composable
+fun LineMorphGifScenario() {
     DocsGifScene {
-        val scenario = DocsGifScenariosData.multiLine()
-        LineChart(
-            data = scenario.items.toChartData(categories = scenario.categories),
-            title = DocsGifScenariosData.MULTI_LINE_TITLE,
-            valueFormatter = ChartValueFormatters.prefix("$"),
-        )
+        // Injects a composition-bound scope so the ticker respects the recorder's virtual frame clock.
+        val scope = rememberCoroutineScope()
+        val viewModel = remember { MorphingLineViewModel(tickerScope = scope) }
+        ShowMorphingLine(viewModel = viewModel)
+    }
+}
+
+@RecordGif(
+    name = "line_timeline",
+    durationMs = 1500,
+    fps = 25,
+)
+@Composable
+fun LineTimelineGifScenario() {
+    DocsGifScene {
+        // Injects a composition-bound scope so the ticker respects the recorder's virtual frame clock.
+        val scope = rememberCoroutineScope()
+        val viewModel = remember { LiveSensorReadingViewModel(tickerScope = scope) }
+        ShowLiveLine(viewModel = viewModel)
     }
 }
 
@@ -118,17 +140,7 @@ fun MultiLineDefaultGifScenario() {
 )
 @Composable
 fun BarDefaultGifScenario() {
-    DocsGifScene {
-        val scenario = DocsGifScenariosData.bar()
-        BarChart(
-            data =
-                DocsGifScenariosData.buildSingleSeries(
-                    scenario,
-                    DocsGifScenariosData.BAR_TITLE,
-                ),
-            title = DocsGifScenariosData.BAR_TITLE,
-        )
-    }
+    DocsGifScene { ShowBar() }
 }
 
 @RecordGif(
@@ -142,17 +154,7 @@ fun BarDefaultGifScenario() {
 )
 @Composable
 fun HistogramDefaultGifScenario() {
-    DocsGifScene {
-        val scenario = DocsGifScenariosData.histogram()
-        HistogramChart(
-            data =
-                DocsGifScenariosData.buildSingleSeries(
-                    scenario,
-                    DocsGifScenariosData.HISTOGRAM_TITLE,
-                ),
-            title = DocsGifScenariosData.HISTOGRAM_TITLE,
-        )
-    }
+    DocsGifScene { ShowHistogram() }
 }
 
 @RecordGif(
@@ -169,13 +171,7 @@ fun HistogramDefaultGifScenario() {
 )
 @Composable
 fun StackedBarDefaultGifScenario() {
-    DocsGifScene {
-        val scenario = DocsGifScenariosData.stackedBar()
-        StackedBarChart(
-            data = scenario.items.toChartData(categories = scenario.categories),
-            title = STACKED_BAR_TITLE,
-        )
-    }
+    DocsGifScene { ShowStackedBar() }
 }
 
 @RecordGif(
@@ -195,13 +191,7 @@ fun StackedBarDefaultGifScenario() {
 )
 @Composable
 fun StackedAreaDefaultGifScenario() {
-    DocsGifScene {
-        val scenario = DocsGifScenariosData.stackedArea()
-        StackedAreaChart(
-            data = scenario.items.toChartData(categories = scenario.categories),
-            title = STACKED_AREA_TITLE,
-        )
-    }
+    DocsGifScene { ShowStackedArea() }
 }
 
 @RecordGif(
@@ -225,13 +215,7 @@ fun StackedAreaDefaultGifScenario() {
 )
 @Composable
 fun RadarDefaultGifScenario() {
-    DocsGifScene {
-        val data = radarSampleUseCase().initialRadarDefaultData()
-        RadarChart(
-            data = data,
-            title = data.series.single().name,
-        )
-    }
+    DocsGifScene { ShowRadar() }
 }
 
 @Composable
