@@ -31,3 +31,4 @@ finding.
 - Explain the failure condition and user or release impact.
 - Suggest the smallest safe fix and a focused missing test when relevant.
 - Report high-confidence, behavior-related findings only.
+- Leave long-term maintenance cost to `hdc-maintainability`.
