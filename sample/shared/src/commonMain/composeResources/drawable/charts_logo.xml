@@ -1,0 +1,49 @@
+<!-- HDCharts logo; matches the Android sample launcher icon (sample/androidApp ic_launcher_foreground.xml). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="36dp"
+    android:height="36dp"
+    android:viewportWidth="512"
+    android:viewportHeight="512">
+  <path
+      android:pathData="M96,0h320a96,96 0,0 1,96,96v320a96,96 0,0 1,-96,96h-320a96,96 0,0 1,-96,-96v-320a96,96 0,0 1,96,-96z"
+      android:fillColor="#39777A"/>
+  <path
+      android:pathData="M108.8,208L108.8,144c0,-30.08 24.32,-54.4 54.4,-54.4l144,0"
+      android:strokeWidth="28.8"
+      android:fillColor="#00000000"
+      android:strokeColor="#FFFFFF"
+      android:strokeLineCap="round"/>
+  <path
+      android:pathData="M403.2,313.6l0,54.4c0,30.08 -24.32,54.4 -54.4,54.4L294.4,422.4"
+      android:strokeWidth="28.8"
+      android:fillColor="#00000000"
+      android:strokeColor="#FFFFFF"
+      android:strokeLineCap="round"/>
+  <path
+      android:pathData="M92.8,336c41.6,-25.6 70.4,-86.4 112,-76.8 38.4,9.6 54.4,44.8 92.8,25.6 41.6,-19.2 76.8,-86.4 121.6,-137.6"
+      android:strokeLineJoin="round"
+      android:strokeWidth="28.8"
+      android:fillColor="#00000000"
+      android:strokeColor="#FFFFFF"
+      android:strokeLineCap="round"/>
+  <path
+      android:pathData="M92.8,336m-14.4,0a14.4,14.4 0,1 1,28.8 0a14.4,14.4 0,1 1,-28.8 0"
+      android:strokeAlpha="0.86"
+      android:fillColor="#C7892F"
+      android:fillAlpha="0.86"/>
+  <path
+      android:pathData="M204.8,259.2m-14.4,0a14.4,14.4 0,1 1,28.8 0a14.4,14.4 0,1 1,-28.8 0"
+      android:strokeAlpha="0.86"
+      android:fillColor="#C7892F"
+      android:fillAlpha="0.86"/>
+  <path
+      android:pathData="M297.6,284.8m-14.4,0a14.4,14.4 0,1 1,28.8 0a14.4,14.4 0,1 1,-28.8 0"
+      android:strokeAlpha="0.86"
+      android:fillColor="#C7892F"
+      android:fillAlpha="0.86"/>
+  <path
+      android:pathData="M419.2,147.2m-14.4,0a14.4,14.4 0,1 1,28.8 0a14.4,14.4 0,1 1,-28.8 0"
+      android:strokeAlpha="0.86"
+      android:fillColor="#C7892F"
+      android:fillAlpha="0.86"/>
+</vector>

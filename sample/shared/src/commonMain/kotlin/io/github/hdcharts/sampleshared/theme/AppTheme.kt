@@ -45,6 +45,18 @@ fun AppTheme(
                 surfaceVariant = uiColors.surfaceVariant,
                 error = uiColors.error,
                 onError = uiColors.onError,
+                onPrimaryContainer = uiColors.onPrimaryContainer ?: baseScheme.onPrimaryContainer,
+                secondaryContainer = uiColors.secondaryContainer ?: baseScheme.secondaryContainer,
+                onSecondaryContainer = uiColors.onSecondaryContainer ?: baseScheme.onSecondaryContainer,
+                onSurfaceVariant = uiColors.onSurfaceVariant ?: baseScheme.onSurfaceVariant,
+                errorContainer = uiColors.errorContainer ?: baseScheme.errorContainer,
+                outline = uiColors.outline ?: baseScheme.outline,
+                outlineVariant = uiColors.outlineVariant ?: baseScheme.outlineVariant,
+                surfaceTint = uiColors.surfaceTint ?: baseScheme.surfaceTint,
+                surfaceContainerLow = uiColors.surfaceContainerLow ?: baseScheme.surfaceContainerLow,
+                surfaceContainer = uiColors.surfaceContainer ?: baseScheme.surfaceContainer,
+                surfaceContainerHigh = uiColors.surfaceContainerHigh ?: baseScheme.surfaceContainerHigh,
+                surfaceContainerHighest = uiColors.surfaceContainerHighest ?: baseScheme.surfaceContainerHighest,
             )
         }
     val chartColors = if (darkTheme) DarkChartColors else LightChartColors
