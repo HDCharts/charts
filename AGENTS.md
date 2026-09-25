@@ -85,6 +85,7 @@ Project skills use the `hdc-` prefix. The canonical source is
 | Skill | Use when | Location |
 |---|---|---|
 | `hdc-review` | Reviewing a diff, commit, branch, pull request, or implementation for bugs, regressions, API risks, and missing tests. | `.agents/skills/hdc-review/SKILL.md` |
+| `hdc-maintainability` | Reviewing a diff, branch, pull request, or plan for long-term maintenance cost, API surface growth, and cross-repo fan-out. | `.agents/skills/hdc-maintainability/SKILL.md` |
 | `hdc-architecture` | Module boundaries, public chart API layering, validation, rendering, and sample integration. | `.agents/skills/hdc-architecture/SKILL.md` |
 | `hdc-kotlin` | Kotlin and Kotlin Multiplatform source sets, models, APIs, visibility, dependencies, and formatting. | `.agents/skills/hdc-kotlin/SKILL.md` |
 | `hdc-compose` | Compose Multiplatform chart composables, drawing, interaction, previews, and screenshots. | `.agents/skills/hdc-compose/SKILL.md` |
