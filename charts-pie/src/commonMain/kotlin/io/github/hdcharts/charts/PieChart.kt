@@ -27,7 +27,6 @@ import io.github.hdcharts.charts.internal.TestTags
 import io.github.hdcharts.charts.internal.common.composable.ChartErrors
 import io.github.hdcharts.charts.internal.common.composable.Legend
 import io.github.hdcharts.charts.internal.common.layout.modifierTopTitle
-import io.github.hdcharts.charts.internal.common.palette.generateColorShades
 import io.github.hdcharts.charts.internal.piechart.PieChart
 import io.github.hdcharts.charts.internal.piechart.calculatePercentages
 import io.github.hdcharts.charts.internal.validatePieData
@@ -37,9 +36,9 @@ import io.github.hdcharts.charts.model.SelectionLifetime
 import io.github.hdcharts.charts.model.rememberChartSelection
 import io.github.hdcharts.charts.model.rememberSelectionLifecycle
 import io.github.hdcharts.charts.style.PieChartDefaults
+import io.github.hdcharts.charts.style.PieChartSlicesStyle
 import io.github.hdcharts.charts.style.PieChartStyle
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 
 private const val SELECTED_TITLE_PERCENTAGE_SIZE_FACTOR = 0.72f
@@ -106,12 +105,8 @@ fun PieChart(
     }
 
     val colors =
-        remember(data, style.slices.alpha, style.slices.baseColor) {
-            resolveSliceColors(
-                slices = data,
-                baseColor = style.slices.baseColor,
-                alpha = style.slices.alpha,
-            )
+        remember(data, style.slices) {
+            resolveSliceColors(slices = data, style = style.slices)
         }
     val labels = remember(data) { data.map { it.label }.toImmutableList() }
     val points = remember(data) { data.map { it.value }.toImmutableList() }
@@ -228,18 +223,12 @@ private fun PieChartContent(
 
 private fun resolveSliceColors(
     slices: List<PieSlice>,
-    baseColor: Color,
-    alpha: Float,
+    style: PieChartSlicesStyle,
 ): ImmutableList<Color> {
-    if (slices.isEmpty()) return persistentListOf()
-    val defaultPalette =
-        generateColorShades(
-            baseColor = baseColor,
-            numberOfShades = slices.size,
-        )
+    val defaultPalette = style.resolveColors(slices.size)
     return slices
         .mapIndexed { index, slice ->
-            (slice.color ?: defaultPalette[index % defaultPalette.size]).copy(alpha = alpha)
+            (slice.color ?: defaultPalette[index]).copy(alpha = style.alpha)
         }.toImmutableList()
 }
 

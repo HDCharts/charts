@@ -8,6 +8,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.hdcharts.charts.internal.common.palette.resolvePaletteColors
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 
@@ -18,6 +19,20 @@ data class StackedAreaFillStyle(
     val alpha: Float,
 ) {
     constructor(color: Color, colors: List<Color>, alpha: Float) : this(color, colors.toImmutableList(), alpha)
+
+    /**
+     * Returns the fill colors the chart draws for [seriesCount] series, before [alpha] is applied.
+     *
+     * A single series uses [color]. Multiple series use [colors] when set, or generated
+     * shades of [color] when [colors] is empty.
+     */
+    fun resolveColors(seriesCount: Int): ImmutableList<Color> =
+        resolvePaletteColors(
+            baseColor = color,
+            colors = colors,
+            count = seriesCount,
+            singleItemUsesBase = true,
+        )
 }
 
 @Immutable
@@ -35,6 +50,20 @@ data class StackedAreaBoundaryStyle(
         width: Dp,
         bezier: Boolean,
     ) : this(visible, color, colors.toImmutableList(), width, bezier)
+
+    /**
+     * Returns the boundary line colors the chart draws for [seriesCount] series.
+     *
+     * A single series uses [color]. Multiple series use [colors] when set, or generated
+     * shades of [color] when [colors] is empty.
+     */
+    fun resolveColors(seriesCount: Int): ImmutableList<Color> =
+        resolvePaletteColors(
+            baseColor = color,
+            colors = colors,
+            count = seriesCount,
+            singleItemUsesBase = true,
+        )
 }
 
 @Immutable

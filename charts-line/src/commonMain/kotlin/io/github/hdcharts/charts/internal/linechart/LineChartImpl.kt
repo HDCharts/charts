@@ -22,7 +22,7 @@ import io.github.hdcharts.charts.internal.common.composable.rememberZoomScaleSta
 import io.github.hdcharts.charts.internal.common.composable.zoomInScale
 import io.github.hdcharts.charts.internal.common.composable.zoomOutScale
 import io.github.hdcharts.charts.internal.common.model.MultiChartData
-import io.github.hdcharts.charts.internal.common.palette.generateColorShades
+import io.github.hdcharts.charts.internal.common.palette.resolvePaletteColors
 import io.github.hdcharts.charts.internal.linechart.LineChartInternalStyle
 import io.github.hdcharts.charts.internal.validateLineData
 import kotlinx.collections.immutable.persistentListOf
@@ -114,18 +114,13 @@ internal fun LineChartImpl(
             )
         val lineColors =
             remember(renderData, style.lineColors, style.lineColor, style.lineAlpha) {
-                if (renderData.hasSingleItem()) {
-                    persistentListOf(style.lineColor.copy(alpha = style.lineAlpha))
-                } else if (style.lineColors.isEmpty()) {
-                    generateColorShades(
-                        baseColor = style.lineColor.copy(alpha = style.lineAlpha),
-                        numberOfShades = renderData.items.size,
-                    )
-                } else {
-                    style.lineColors
-                        .map { color -> color.copy(alpha = style.lineAlpha) }
-                        .toImmutableList()
-                }
+                resolvePaletteColors(
+                    baseColor = style.lineColor,
+                    colors = style.lineColors,
+                    count = renderData.items.size,
+                    singleItemUsesBase = true,
+                ).map { color -> color.copy(alpha = style.lineAlpha) }
+                    .toImmutableList()
             }
         val showCompactToggle = isDenseMorphData
         val showZoomControlsInHeader = isDenseMorphMode && style.zoomControlsVisible

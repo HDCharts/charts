@@ -8,6 +8,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.hdcharts.charts.internal.common.palette.resolvePaletteColors
 import io.github.hdcharts.charts.model.ChartValueFormatter
 import io.github.hdcharts.charts.model.ChartValueFormatters
 import kotlinx.collections.immutable.ImmutableList
@@ -28,6 +29,20 @@ data class LineVisualStyle(
         strokeWidth: Dp,
         bezier: Boolean,
     ) : this(color, alpha, colors.toImmutableList(), strokeWidth, bezier)
+
+    /**
+     * Returns the line colors the chart draws for [seriesCount] series, before [alpha] is applied.
+     *
+     * A single series uses [color]. Multiple series use [colors] when set, or generated
+     * shades of [color] when [colors] is empty.
+     */
+    fun resolveColors(seriesCount: Int): ImmutableList<Color> =
+        resolvePaletteColors(
+            baseColor = color,
+            colors = colors,
+            count = seriesCount,
+            singleItemUsesBase = true,
+        )
 }
 
 @Immutable
