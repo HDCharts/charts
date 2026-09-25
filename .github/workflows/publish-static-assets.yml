@@ -137,71 +137,13 @@ jobs:
   publish-playground:
     name: Publish playground
     if: ${{ inputs.mode == 'snapshot' }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    environment: Snapshot
-    steps:
-      - name: Checkout charts source
-        uses: actions/checkout@v7
-        with:
-          fetch-depth: 1
-          ref: ${{ inputs.source-ref }}
-      - name: Checkout charts-playground
-        uses: actions/checkout@v7
-        with:
-          repository: HDCharts/charts-playground
-          ref: main
-          path: playground-repo
-          fetch-depth: 1
-      - uses: actions/setup-java@v6.0.0
-        with:
-          java-version: 17
-          distribution: zulu
-          cache: gradle
-      - name: Build playground static assets
-        working-directory: playground-repo
-        shell: bash
-        env:
-          SOURCE_SHA: ${{ inputs.source-sha }}
-        run: |
-          set -euo pipefail
-          PUBLISHED_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-          PLAYGROUND_SHA="$(git rev-parse HEAD)"
-          ./gradlew -DchartsLocalPath=.. :playground:wasmJsBrowserDistribution \
-            -PchartsDisplayVersion="${{ inputs.charts-version }}" \
-            -PsnapshotMetadataChartsSha="${SOURCE_SHA}" \
-            -PsnapshotMetadataPlaygroundSha="${PLAYGROUND_SHA}" \
-            -PsnapshotMetadataPublishedAt="${PUBLISHED_AT}" \
-            --no-daemon --stacktrace --build-cache
-      - name: Validate playground static assets
-        working-directory: playground-repo
-        shell: bash
-        run: |
-          set -euo pipefail
-          required_files=(
-            playground/build/dist/wasmJs/productionExecutable/index.html
-            playground/build/dist/wasmJs/productionExecutable/Playground.js
-          )
-          for file in "${required_files[@]}"; do
-            if [[ ! -f "${file}" ]]; then
-              echo "Missing required playground file: ${file}" >&2
-              exit 1
-            fi
-          done
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v6
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          aws-region: ${{ vars.AWS_REGION }}
-      - name: Publish playground snapshot
-        working-directory: playground-repo
-        env:
-          CHARTS_VERSION: ${{ inputs.charts-version }}
-          SOURCE_SHA: ${{ inputs.source-sha }}
-          DOCS_STATIC_BUCKET: ${{ vars.DOCS_STATIC_BUCKET }}
-          PLAYGROUND_DIST_DIR: playground/build/dist/wasmJs/productionExecutable
-        shell: bash
-        run: bash ../.github/scripts/publish-docs-to-s3.sh snapshot playground
+    uses: ./.github/workflows/publish-playground.yml
+    with:
+      charts-version: ${{ inputs.charts-version }}
+      source-sha: ${{ inputs.source-sha }}
+      source-ref: ${{ inputs.source-ref }}
+    secrets:
+      AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
 
   publish-shared-static-assets:
     name: Publish shared static assets

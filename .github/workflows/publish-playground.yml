@@ -1,0 +1,147 @@
+# Publishes the snapshot playground built from charts-playground against this charts
+# checkout. Called by Publish Static Assets during snapshot releases, and dispatched on
+# its own (by charts-playground on pushes to main, or manually) when only the playground
+# changed, so a playground update does not require a full snapshot release.
+name: Publish Playground
+
+on:
+  workflow_call:
+    inputs:
+      charts-version:
+        description: Charts version displayed in the playground.
+        required: true
+        type: string
+      source-sha:
+        description: HDCharts commit the playground is built against.
+        required: true
+        type: string
+      source-ref:
+        description: Git ref to build against.
+        required: true
+        type: string
+    secrets:
+      AWS_ROLE_ARN:
+        required: true
+  workflow_dispatch:
+    inputs:
+      playground-ref:
+        description: charts-playground ref to build.
+        required: false
+        type: string
+        default: main
+      reason:
+        description: Optional note for the manual playground publish.
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish-playground:
+    name: Publish playground
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: Snapshot
+    # Serializes standalone publishes only. A shared group would let a queued standalone
+    # run cancel a pending snapshot-release call and fail the snapshot publication.
+    concurrency:
+      group: ${{ inputs.charts-version == '' && 'playground-snapshot-standalone' || format('playground-snapshot-{0}', github.run_id) }}
+      cancel-in-progress: false
+    env:
+      # Standalone runs receive no charts inputs and resolve them from this checkout.
+      STANDALONE: ${{ inputs.charts-version == '' }}
+    steps:
+      - name: Checkout charts source
+        uses: actions/checkout@v7
+        with:
+          # Axion needs tags to resolve the version in standalone runs.
+          fetch-depth: ${{ inputs.charts-version == '' && '0' || '1' }}
+          ref: ${{ inputs.source-ref }}
+      - name: Checkout charts-playground
+        uses: actions/checkout@v7
+        with:
+          repository: HDCharts/charts-playground
+          ref: ${{ inputs.playground-ref || 'main' }}
+          path: playground-repo
+          fetch-depth: 1
+      - uses: actions/setup-java@v6.0.0
+        with:
+          java-version: 17
+          distribution: zulu
+          cache: gradle
+      - name: Resolve charts version and source
+        id: charts
+        shell: bash
+        env:
+          INPUT_CHARTS_VERSION: ${{ inputs.charts-version }}
+          INPUT_SOURCE_SHA: ${{ inputs.source-sha }}
+        run: |
+          set -euo pipefail
+          if [[ "${STANDALONE}" != "true" ]]; then
+            echo "charts_version=${INPUT_CHARTS_VERSION}" >> "$GITHUB_OUTPUT"
+            echo "source_sha=${INPUT_SOURCE_SHA}" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          CHARTS_VERSION=$(./gradlew -q currentVersion \
+            | awk 'NF {v=$NF} END {gsub(/\r/, "", v); print v}')
+          if [[ -z "${CHARTS_VERSION:-}" ]]; then
+            echo "Failed to resolve version from Axion currentVersion task." >&2
+            exit 1
+          fi
+          echo "charts_version=${CHARTS_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "source_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - name: Build playground static assets
+        working-directory: playground-repo
+        shell: bash
+        env:
+          CHARTS_VERSION: ${{ steps.charts.outputs.charts_version }}
+          SOURCE_SHA: ${{ steps.charts.outputs.source_sha }}
+        run: |
+          set -euo pipefail
+          PUBLISHED_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          PLAYGROUND_SHA="$(git rev-parse HEAD)"
+          ./gradlew -DchartsLocalPath=.. :playground:wasmJsBrowserDistribution \
+            -PchartsDisplayVersion="${CHARTS_VERSION}" \
+            -PsnapshotMetadataChartsSha="${SOURCE_SHA}" \
+            -PsnapshotMetadataPlaygroundSha="${PLAYGROUND_SHA}" \
+            -PsnapshotMetadataPublishedAt="${PUBLISHED_AT}" \
+            --no-daemon --stacktrace --build-cache
+      - name: Validate playground static assets
+        working-directory: playground-repo
+        shell: bash
+        run: |
+          set -euo pipefail
+          required_files=(
+            playground/build/dist/wasmJs/productionExecutable/index.html
+            playground/build/dist/wasmJs/productionExecutable/Playground.js
+          )
+          for file in "${required_files[@]}"; do
+            if [[ ! -f "${file}" ]]; then
+              echo "Missing required playground file: ${file}" >&2
+              exit 1
+            fi
+          done
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+      - name: Publish playground snapshot
+        working-directory: playground-repo
+        env:
+          CHARTS_VERSION: ${{ steps.charts.outputs.charts_version }}
+          SOURCE_SHA: ${{ steps.charts.outputs.source_sha }}
+          DOCS_STATIC_BUCKET: ${{ vars.DOCS_STATIC_BUCKET }}
+          PLAYGROUND_DIST_DIR: playground/build/dist/wasmJs/productionExecutable
+        shell: bash
+        run: bash ../.github/scripts/publish-docs-to-s3.sh snapshot playground
+      # Snapshot releases invalidate every snapshot path when finalizing the publication.
+      - name: Invalidate playground CloudFront cache
+        if: ${{ env.STANDALONE == 'true' }}
+        env:
+          CLOUDFRONT_DISTRIBUTION_ID: ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}
+        shell: bash
+        run: bash .github/scripts/invalidate-docs-cloudfront.sh playground
