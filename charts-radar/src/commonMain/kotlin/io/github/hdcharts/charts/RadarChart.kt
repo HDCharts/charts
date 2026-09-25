@@ -16,7 +16,6 @@ import io.github.hdcharts.charts.internal.common.composable.ChartErrors
 import io.github.hdcharts.charts.internal.common.layout.modifierTopTitle
 import io.github.hdcharts.charts.internal.common.model.ChartDataItem
 import io.github.hdcharts.charts.internal.common.model.MultiChartData
-import io.github.hdcharts.charts.internal.common.palette.generateColorShades
 import io.github.hdcharts.charts.internal.radarchart.RadarChart
 import io.github.hdcharts.charts.internal.radarchart.RadarLegend
 import io.github.hdcharts.charts.internal.radarchart.categoryColors
@@ -76,14 +75,8 @@ fun RadarChart(
     }
 
     val lineColors =
-        remember(style.polygon, data.series.size, hasSingleSeries) {
-            if (hasSingleSeries) {
-                persistentListOf(style.polygon.lineColor)
-            } else if (style.polygon.lineColors.isEmpty()) {
-                generateColorShades(style.polygon.lineColor, data.series.size)
-            } else {
-                style.polygon.lineColors
-            }.toImmutableList()
+        remember(style.polygon, data.series.size) {
+            style.polygon.resolveLineColors(data.series.size)
         }
     val categories: ImmutableList<String> = data.categories.toImmutableList()
     val categoryColorsList =

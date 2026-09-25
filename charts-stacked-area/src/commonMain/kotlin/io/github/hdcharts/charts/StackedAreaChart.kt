@@ -12,7 +12,6 @@ import io.github.hdcharts.charts.internal.common.composable.ChartErrors
 import io.github.hdcharts.charts.internal.common.composable.Legend
 import io.github.hdcharts.charts.internal.common.model.ChartDataItem
 import io.github.hdcharts.charts.internal.common.model.MultiChartData
-import io.github.hdcharts.charts.internal.common.palette.generateColorShades
 import io.github.hdcharts.charts.internal.stackedareachart.StackedAreaChart
 import io.github.hdcharts.charts.internal.stackedareachart.toInternal
 import io.github.hdcharts.charts.model.ChartData
@@ -57,28 +56,16 @@ fun StackedAreaChart(
 
     val internalData = remember(data, title) { toInternalStackedAreaData(data, title) }
     val internalStyle = style.toInternal(showXAxisLabels = data.categories.isNotEmpty())
-    val hasSingleSeries = data.series.size == 1
     val colors =
-        remember(style.fill, data.series.size, hasSingleSeries) {
-            val palette =
-                if (hasSingleSeries) {
-                    persistentListOf(style.fill.color)
-                } else if (style.fill.colors.isEmpty()) {
-                    generateColorShades(style.fill.color, data.series.size)
-                } else {
-                    style.fill.colors
-                }
-            palette.map { it.copy(alpha = style.fill.alpha) }.toImmutableList()
+        remember(style.fill, data.series.size) {
+            style.fill
+                .resolveColors(data.series.size)
+                .map { it.copy(alpha = style.fill.alpha) }
+                .toImmutableList()
         }
     val lineColors =
-        remember(style.boundary, data.series.size, hasSingleSeries) {
-            if (hasSingleSeries) {
-                persistentListOf(style.boundary.color)
-            } else if (style.boundary.colors.isEmpty()) {
-                generateColorShades(style.boundary.color, data.series.size)
-            } else {
-                style.boundary.colors
-            }.toImmutableList()
+        remember(style.boundary, data.series.size) {
+            style.boundary.resolveColors(data.series.size)
         }
     val seriesNames = data.series.map { it.name.orEmpty() }.toImmutableList()
     val selectedTitle = data.categories.getOrNull(selectedIndex)

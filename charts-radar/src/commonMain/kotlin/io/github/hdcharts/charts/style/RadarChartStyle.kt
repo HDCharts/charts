@@ -6,6 +6,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
+import io.github.hdcharts.charts.internal.common.palette.resolvePaletteColors
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 
@@ -49,6 +50,20 @@ data class RadarPolygonStyle(
         lineColors = lineColors.toImmutableList(),
         lineWidth = lineWidth,
     )
+
+    /**
+     * Returns the polygon line colors the chart draws for [seriesCount] series.
+     *
+     * A single series uses [lineColor]. Multiple series use [lineColors] when set, or
+     * generated shades of [lineColor] when [lineColors] is empty.
+     */
+    fun resolveLineColors(seriesCount: Int): ImmutableList<Color> =
+        resolvePaletteColors(
+            baseColor = lineColor,
+            colors = lineColors,
+            count = seriesCount,
+            singleItemUsesBase = true,
+        )
 }
 
 @Immutable

@@ -12,6 +12,8 @@ import io.github.hdcharts.charts.internal.DONUT_MAX_PERCENTAGE
 import io.github.hdcharts.charts.internal.DONUT_MIN_PERCENTAGE
 import io.github.hdcharts.charts.internal.InternalChartsApi
 import io.github.hdcharts.charts.internal.common.layout.fillMaxSizeChartModifier
+import io.github.hdcharts.charts.internal.common.palette.resolvePaletteColors
+import kotlinx.collections.immutable.ImmutableList
 
 /**
  * The style for a Pie Chart, grouped into cohesive sub-styles.
@@ -55,7 +57,20 @@ data class PieChartDonutStyle(
 data class PieChartSlicesStyle(
     val alpha: Float,
     val baseColor: Color,
-)
+) {
+    /**
+     * Returns the default colors for [sliceCount] slices, before [alpha] is applied:
+     * generated shades of [baseColor]. A slice with its own
+     * [io.github.hdcharts.charts.model.PieSlice.color] uses that color instead.
+     */
+    fun resolveColors(sliceCount: Int): ImmutableList<Color> =
+        resolvePaletteColors(
+            baseColor = baseColor,
+            colors = emptyList(),
+            count = sliceCount,
+            singleItemUsesBase = false,
+        )
+}
 
 /**
  * Border configuration for a [PieChartStyle].

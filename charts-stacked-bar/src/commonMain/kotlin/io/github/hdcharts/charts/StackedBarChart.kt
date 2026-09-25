@@ -13,7 +13,6 @@ import io.github.hdcharts.charts.internal.common.composable.ChartErrors
 import io.github.hdcharts.charts.internal.common.composable.Legend
 import io.github.hdcharts.charts.internal.common.model.ChartDataItem
 import io.github.hdcharts.charts.internal.common.model.MultiChartData
-import io.github.hdcharts.charts.internal.common.palette.generateColorShades
 import io.github.hdcharts.charts.model.ChartData
 import io.github.hdcharts.charts.model.ChartSelection
 import io.github.hdcharts.charts.model.ChartValueFormatters
@@ -59,13 +58,10 @@ fun StackedBarChart(
     val internalStyle = style.toInternal(showXAxisLabels = data.categories.isNotEmpty())
     val colors =
         remember(style.segments, data.series.size) {
-            if (style.segments.colors.isEmpty()) {
-                generateColorShades(style.segments.color.copy(alpha = style.segments.alpha), data.series.size)
-            } else {
-                style.segments.colors
-                    .map { it.copy(alpha = style.segments.alpha) }
-                    .toImmutableList()
-            }
+            style.segments
+                .resolveColors(data.series.size)
+                .map { it.copy(alpha = style.segments.alpha) }
+                .toImmutableList()
         }
     val segmentNames = data.series.map { it.name.orEmpty() }.toImmutableList()
     val selectedTitle = data.categories.getOrNull(selectedIndex)

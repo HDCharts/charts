@@ -5,6 +5,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 
 /**
@@ -27,7 +28,7 @@ data class AxisLabelStyle(
  * Bar visual configuration shared by vertical bar and histogram charts.
  *
  * @property color The fallback bar color when [colors] is empty.
- * @property colors Optional explicit per-bar colors. Empty means use [color] / generated shades;
+ * @property colors Optional explicit per-bar colors. Empty means every bar uses [color];
  * non-empty must match the source bar count.
  * @property alpha The alpha value applied to rendered bars. Replaces the source color alpha.
  * @property space The spacing between bars.
@@ -57,6 +58,17 @@ data class BarBarsStyle(
         space = space,
         minBarWidth = minBarWidth,
     )
+
+    /**
+     * Returns the bar colors the chart draws for [barCount] bars, before [alpha] is applied:
+     * [colors] when set, or [color] for every bar when [colors] is empty.
+     */
+    fun resolveColors(barCount: Int): ImmutableList<Color> =
+        when {
+            barCount <= 0 -> persistentListOf()
+            colors.isEmpty() -> List(barCount) { color }.toImmutableList()
+            else -> colors
+        }
 }
 
 /**

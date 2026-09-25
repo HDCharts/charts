@@ -215,3 +215,23 @@ private fun Float.normalizeHue(): Float {
     val normalized = this % HUE_MAX_DEGREES
     return if (normalized < 0f) normalized + HUE_MAX_DEGREES else normalized
 }
+
+/**
+ * Resolves the colors a chart draws for [count] items, before alpha is applied.
+ *
+ * Explicit [colors] win; an empty list falls back to generated shades of [baseColor].
+ * With [singleItemUsesBase], a single item always uses [baseColor].
+ */
+@InternalChartsApi
+fun resolvePaletteColors(
+    baseColor: Color,
+    colors: List<Color>,
+    count: Int,
+    singleItemUsesBase: Boolean,
+): ImmutableList<Color> =
+    when {
+        count <= 0 -> persistentListOf()
+        singleItemUsesBase && count == 1 -> persistentListOf(baseColor)
+        colors.isEmpty() -> generateColorShades(baseColor, count)
+        else -> colors.toImmutableList()
+    }
