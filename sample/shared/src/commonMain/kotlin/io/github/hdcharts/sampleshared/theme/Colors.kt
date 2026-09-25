@@ -21,6 +21,19 @@ data class UiColors(
     val surfaceVariant: Color,
     val error: Color,
     val onError: Color,
+    // Optional roles; when null, the Material baseline value is kept.
+    val onPrimaryContainer: Color? = null,
+    val secondaryContainer: Color? = null,
+    val onSecondaryContainer: Color? = null,
+    val onSurfaceVariant: Color? = null,
+    val errorContainer: Color? = null,
+    val outline: Color? = null,
+    val outlineVariant: Color? = null,
+    val surfaceTint: Color? = null,
+    val surfaceContainerLow: Color? = null,
+    val surfaceContainer: Color? = null,
+    val surfaceContainerHigh: Color? = null,
+    val surfaceContainerHighest: Color? = null,
 )
 
 private object UiNeutrals {
@@ -227,5 +240,70 @@ val docsSlate =
                 surfaceVariant = UiNeutrals.darkSurfaceVariant,
                 error = UiNeutrals.darkError,
                 onError = UiNeutrals.darkOnError,
+            ),
+    )
+
+/**
+ * Theme mirroring the charts-docs site tokens (docs-app/app/globals.css).
+ * The docs site is light-only; the dark variant is derived from the same teal and sage-gray scale.
+ */
+val docsTheme =
+    Theme(
+        name = "Docs",
+        light =
+            UiColors(
+                primary = Color(0xFF39777A),
+                onPrimary = Color(0xFFFFFFFF),
+                primaryContainer = Color(0xFFDCE9E8),
+                onPrimaryContainer = Color(0xFF23585C),
+                secondary = Color(0xFF786FAE),
+                onSecondary = Color(0xFFFFFFFF),
+                secondaryContainer = Color(0xFFE7EFEF),
+                onSecondaryContainer = Color(0xFF23585C),
+                tertiary = Color(0xFF8A601C),
+                background = Color(0xFFF7F9F8),
+                onBackground = Color(0xFF1F2933),
+                surface = Color(0xFFFFFFFF),
+                onSurface = Color(0xFF1F2933),
+                surfaceVariant = Color(0xFFEEF3F1),
+                onSurfaceVariant = Color(0xFF5F6D73),
+                surfaceTint = Color(0xFF39777A),
+                error = Color(0xFFB65C57),
+                onError = Color(0xFFFFFFFF),
+                errorContainer = Color(0xFFF6E3E1),
+                outline = Color(0xFF94A39D),
+                outlineVariant = Color(0xFFDDE5E2),
+                surfaceContainerLow = Color(0xFFF8FAF9),
+                surfaceContainer = Color(0xFFF1F5F3),
+                surfaceContainerHigh = Color(0xFFE7EEEB),
+                surfaceContainerHighest = Color(0xFFDDE5E2),
+            ),
+        dark =
+            UiColors(
+                primary = Color(0xFF7FC3C5),
+                onPrimary = Color(0xFF00373A),
+                primaryContainer = Color(0xFF1F5457),
+                onPrimaryContainer = Color(0xFFBFE6E6),
+                secondary = Color(0xFFBDB6E6),
+                onSecondary = Color(0xFF2E275C),
+                secondaryContainer = Color(0xFF2A3D3A),
+                onSecondaryContainer = Color(0xFFBFE6E6),
+                tertiary = Color(0xFFE3B872),
+                background = Color(0xFF121A18),
+                onBackground = Color(0xFFE7EEEB),
+                surface = Color(0xFF172120),
+                onSurface = Color(0xFFE7EEEB),
+                surfaceVariant = Color(0xFF2B3A36),
+                onSurfaceVariant = Color(0xFFB6C4BF),
+                surfaceTint = Color(0xFF7FC3C5),
+                error = Color(0xFFE8A09B),
+                onError = Color(0xFF5C1814),
+                errorContainer = Color(0xFF7A2F2B),
+                outline = Color(0xFF74827D),
+                outlineVariant = Color(0xFF40514B),
+                surfaceContainerLow = Color(0xFF172120),
+                surfaceContainer = Color(0xFF1F2B28),
+                surfaceContainerHigh = Color(0xFF25332F),
+                surfaceContainerHighest = Color(0xFF2F3E3A),
             ),
     )
