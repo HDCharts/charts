@@ -64,6 +64,8 @@ jobs:
         run: bash .github/scripts/sync-release-notes.sh charts-docs-repo "${{ inputs.release-notes-version }}"
       - name: Sync snapshot wiki docs
         run: bash .github/scripts/sync-wiki-docs.sh charts-docs-repo
+      - name: Sync dev docs
+        run: bash .github/scripts/sync-dev-docs.sh charts-docs-repo
       - name: Sync snapshot GIF baselines
         run: bash .github/scripts/sync-gif-baselines.sh charts-docs-repo
       - name: Write snapshot provenance
@@ -86,11 +88,11 @@ jobs:
           git config user.name "charts-release-bot"
           git config user.email "charts-release-bot@users.noreply.github.com"
           if [ "${{ inputs.write-provenance-manifest }}" = "true" ]; then
-            git add release-notes content/snapshot/wiki docs-app/public/snapshot-manifest.json
+            git add release-notes content/snapshot content/dev docs-app/public/snapshot-manifest.json
             message="docs(snapshot): sync release notes, wiki docs, GIF baselines, and provenance"
             already_current_message="Snapshot release notes, wiki docs, GIF baselines, and provenance are already current."
           else
-            git add release-notes content/snapshot/wiki
+            git add release-notes content/snapshot content/dev
             message="docs(snapshot): sync release notes, wiki docs, and GIF baselines"
             already_current_message="Release notes, wiki docs, and GIF baselines are already current."
           fi
