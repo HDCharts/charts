@@ -1,8 +1,13 @@
+---
+title: API Compatibility
+order: 3
+---
+
 # API Compatibility
 
 Workflows:
-- `Pull Request API Compatibility` — `charts/.github/workflows/pull-request-api.yml` (pull-request orchestration)
-- `API Compatibility` — `charts/.github/workflows/api-compatibility.yml` (reusable compatibility check)
+- `Pull Request API Compatibility` — [`pull-request-api.yml`](https://github.com/HDCharts/charts/blob/main/.github/workflows/pull-request-api.yml) (pull-request orchestration)
+- `API Compatibility` — [`api-compatibility.yml`](https://github.com/HDCharts/charts/blob/main/.github/workflows/api-compatibility.yml) (reusable compatibility check)
 
 ## Baseline resolution
 
@@ -59,17 +64,27 @@ its own section on top. Released sections stay as a permanent, append-only
 history of every accepted break.
 
 ```mermaid
-flowchart TD
-  A["PR opened, synchronized, or reopened"] --> B["Prepare PR detects code changes"]
-  B --> C{"Code or build changes?"}
-  C -- No --> D["Docs-only no-op: PR API Compatibility skipped"]
-  C -- Yes --> E["Run apiCompatibilityCheck against the latest release tag"]
-  E --> F{"Unacknowledged breaking change?"}
-  F -- No --> G["Pass: every finding is either absent or already acknowledged"]
-  F -- Yes --> H["Fail: gate fails with workflow-run annotation and instructions"]
-  H --> I["Developer runs ./gradlew apiCompatibilityAcknowledgeBreaks"]
-  I --> J["Developer commits the updated API-COMPATIBILITY-BREAKS.txt in the same PR"]
-  J --> B
+sequenceDiagram
+  actor Dev as Developer
+  participant PR as Pull request
+  participant CI as API compatibility
+  Dev->>PR: Push a change
+  PR->>CI: Start the API workflow
+  alt Docs-only change
+    CI-->>PR: PR API Compatibility skipped
+  else Code or build change
+    CI->>CI: apiCompatibilityCheck against the latest release tag
+    alt Every finding is acknowledged
+      CI-->>PR: Pass
+    else Unacknowledged break
+      CI-->>PR: Fail with an annotation and instructions
+      Dev->>Dev: Run ./gradlew apiCompatibilityAcknowledgeBreaks
+      Dev->>Dev: Review the API-COMPATIBILITY-BREAKS.txt diff
+      Dev->>PR: Commit the updated file and push
+      PR->>CI: Run the check again
+      CI-->>PR: Pass
+    end
+  end
 ```
 
 1. Push the breaking change. `apiCompatibilityCheck` fails the PR and posts a

@@ -13,7 +13,7 @@ sync_wiki_docs() {
     echo "Missing charts wiki source directory: ${source_dir}" >&2
     return 1
   fi
-  if find "${source_dir}" -maxdepth 1 -type l -print -quit | grep -q .; then
+  if find "${source_dir}" -type l -print -quit | grep -q .; then
     echo "Wiki doc sources must not contain symbolic links." >&2
     return 1
   fi
@@ -21,9 +21,11 @@ sync_wiki_docs() {
   mkdir -p "${target_dir}"
   # README.md documents the source directory itself and is not a wiki page.
   # assets/ is owned by sync-gif-baselines.sh and must survive this sync untouched.
+  # dev/ holds unversioned developer docs, synced by sync-dev-docs.sh and never frozen into a release.
   rsync --archive --delete \
     --exclude='README.md' \
     --exclude='assets/' \
+    --exclude='/dev/' \
     "${source_dir}/" "${target_dir}/"
 }
 
@@ -41,6 +43,7 @@ run_self_test() {
   [[ ! -e "${temp_dir}/content/snapshot/wiki/stale.md" ]]
   [[ ! -e "${temp_dir}/content/snapshot/wiki/README.md" ]]
   [[ -f "${temp_dir}/content/snapshot/wiki/assets/keep.gif" ]]
+  [[ ! -e "${temp_dir}/content/snapshot/wiki/dev" ]]
 
   local source_file
   for source_file in "${source_dir}"/*.md; do

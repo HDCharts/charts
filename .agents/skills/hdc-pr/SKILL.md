@@ -29,7 +29,7 @@ Release notes and API migration topics use separate user-invoked workflows.
 ## Validation Questionnaire
 
 Ask which checks to run using the canonical matrix in
-`docs/workflows/ci-test-matrix.md`.
+`docs/wiki/dev/releases/ci-test-matrix.md`.
 
 Run selected tasks and list the exact commands in the PR body. CI owns
 `validateDocsGifBaselines` and instrumented Android tests unless the user asks
