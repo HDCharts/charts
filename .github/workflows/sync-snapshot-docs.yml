@@ -42,7 +42,7 @@ concurrency:
 jobs:
   sync-docs:
     name: Sync release notes, wiki docs, and GIF baselines
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     environment: Snapshot
     steps:
       - name: Checkout snapshot source

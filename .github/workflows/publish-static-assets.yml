@@ -42,7 +42,7 @@ concurrency:
 jobs:
   publish-api-reference:
     name: Publish API reference
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 30
     environment: ${{ inputs.mode == 'release' && 'Production' || 'Snapshot' }}
     steps:
@@ -89,7 +89,7 @@ jobs:
 
   publish-demo:
     name: Publish demo
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 30
     environment: ${{ inputs.mode == 'release' && 'Production' || 'Snapshot' }}
     steps:
@@ -147,7 +147,7 @@ jobs:
 
   publish-shared-static-assets:
     name: Publish shared static assets
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     needs: [publish-api-reference, publish-demo, publish-playground]
     if: >-
       ${{
@@ -175,7 +175,7 @@ jobs:
 
   finalize-publication:
     name: Finalize static publication
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     needs: publish-shared-static-assets
     if: >-
       ${{
