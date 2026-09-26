@@ -29,5 +29,5 @@ class StackedBarInternalStyle(
     val xAxisLabelMaxCount: Int,
     val selectionLineVisible: Boolean,
     val selectionLineColor: Color,
-    val selectionLineWidth: Float,
+    val selectionLineWidth: Dp,
 )

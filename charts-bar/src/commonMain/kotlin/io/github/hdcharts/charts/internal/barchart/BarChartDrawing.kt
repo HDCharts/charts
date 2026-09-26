@@ -42,7 +42,7 @@ internal fun DrawScope.drawBars(
                 color = style.gridColor,
                 start = Offset(0f, y),
                 end = Offset(size.width, y),
-                strokeWidth = style.gridLineWidth,
+                strokeWidth = style.gridLineWidth.toPx(),
             )
         }
     }
@@ -52,13 +52,13 @@ internal fun DrawScope.drawBars(
             color = style.axisColor,
             start = Offset(0f, 0f),
             end = Offset(0f, size.height),
-            strokeWidth = style.axisLineWidth,
+            strokeWidth = style.axisLineWidth.toPx(),
         )
         drawLine(
             color = style.axisColor,
             start = Offset(0f, clampedBaselineY),
             end = Offset(size.width, clampedBaselineY),
-            strokeWidth = style.axisLineWidth,
+            strokeWidth = style.axisLineWidth.toPx(),
         )
     }
 
@@ -89,13 +89,13 @@ internal fun DrawScope.drawBars(
             color = style.selectionLineColor,
             start = Offset(selectedCenterX, 0f),
             end = Offset(selectedCenterX, size.height),
-            strokeWidth = style.selectionLineWidth,
+            strokeWidth = style.selectionLineWidth.toPx(),
         )
         drawCircle(
             color = style.selectionLineColor,
             radius = 3.dp.toPx(),
             center = Offset(selectedCenterX, clampedBaselineY),
-            style = Stroke(width = style.selectionLineWidth),
+            style = Stroke(width = style.selectionLineWidth.toPx()),
         )
     }
 }

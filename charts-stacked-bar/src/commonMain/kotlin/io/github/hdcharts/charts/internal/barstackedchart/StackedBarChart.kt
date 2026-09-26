@@ -613,13 +613,13 @@ private fun DrawScope.drawStackedBars(
             color = style.selectionLineColor,
             start = Offset(selectedCenterX, 0f),
             end = Offset(selectedCenterX, size.height),
-            strokeWidth = style.selectionLineWidth,
+            strokeWidth = style.selectionLineWidth.toPx(),
         )
         drawCircle(
             color = style.selectionLineColor,
             radius = 3.dp.toPx(),
             center = Offset(selectedCenterX, size.height),
-            style = Stroke(width = style.selectionLineWidth),
+            style = Stroke(width = style.selectionLineWidth.toPx()),
         )
     }
 }

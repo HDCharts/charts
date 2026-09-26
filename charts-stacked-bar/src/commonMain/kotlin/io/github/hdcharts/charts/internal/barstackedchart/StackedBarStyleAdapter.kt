@@ -27,5 +27,5 @@ fun StackedBarChartStyle.toInternal(showXAxisLabels: Boolean = true): StackedBar
         xAxisLabelMaxCount = axis.xLabels.count,
         selectionLineVisible = selection.visible,
         selectionLineColor = selection.color,
-        selectionLineWidth = selection.width.value,
+        selectionLineWidth = selection.width,
     )

@@ -24,6 +24,7 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.v2.runComposeUiTest
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.hdcharts.charts.LineChart
 import io.github.hdcharts.charts.LineChartRenderMode
@@ -91,6 +92,22 @@ class LineChartTest {
 
             onNodeWithTag(TestTags.CHART_ERROR).assertIsDisplayed()
             onNodeWithText("Range bounds must be finite.", substring = true).assertIsDisplayed()
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun lineChart_withUnspecifiedPointSize_displaysValidationError() =
+        runComposeUiTest {
+            setContent {
+                LineChart(
+                    data = listOf(10.0, 20.0, 30.0).toChartData(),
+                    style = LineChartDefaults.style(points = LineChartDefaults.points(size = Dp.Unspecified)),
+                    animateOnStart = false,
+                )
+            }
+
+            onNodeWithTag(TestTags.CHART_ERROR).assertIsDisplayed()
+            onNodeWithText("Point size must resolve to 0..16384 pixels.", substring = true).assertIsDisplayed()
         }
 
     @OptIn(ExperimentalTestApi::class)

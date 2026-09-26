@@ -52,6 +52,11 @@ removed. Use the `title` and `selection` parameters instead. Use
 Move customizations to the grouped `RadarChartStyle` sections such as `grid`,
 `axes`, `polygon`, `points`, and `categories`.
 
+Sizes are `Dp` and scale with screen density. The 2.x `Float` sizes were
+pixels, so divide them by the screen density when migrating. Point and pin
+sizes are radii. The defaults are `1.dp` grid and axis lines, `3.dp` label
+padding, a `2.dp` polygon line, `4.dp` points, and `2.dp` category pins.
+
 ## Behavior
 
 - Use at least one series and three aligned axes. Values must be finite.

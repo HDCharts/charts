@@ -94,6 +94,22 @@ class RadarChartTest {
 
     @OptIn(ExperimentalTestApi::class)
     @Test
+    fun radarChart_withNegativePointSize_displaysValidationError() =
+        runComposeUiTest {
+            setContent {
+                RadarChart(
+                    data = data,
+                    title = TITLE,
+                    style = RadarChartDefaults.style(points = RadarChartDefaults.points(size = (-1).dp)),
+                )
+            }
+
+            onNodeWithTag(TestTags.CHART_ERROR).assertIsDisplayed()
+            onNodeWithText("Point size must resolve to 0..16384 pixels.", substring = true).assertIsDisplayed()
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
     fun radarChart_withSelectedAxisIndex_displaysSelectedAxisDetails() =
         runComposeUiTest {
             val selectedAxisIndex = 1

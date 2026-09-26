@@ -8,6 +8,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Dp
 import io.github.hdcharts.charts.internal.NO_SELECTION
@@ -21,6 +22,7 @@ import io.github.hdcharts.charts.internal.radarchart.RadarLegend
 import io.github.hdcharts.charts.internal.radarchart.categoryColors
 import io.github.hdcharts.charts.internal.radarchart.toInternal
 import io.github.hdcharts.charts.internal.validateRadarData
+import io.github.hdcharts.charts.internal.validateSizes
 import io.github.hdcharts.charts.model.ChartData
 import io.github.hdcharts.charts.model.ChartSelection
 import io.github.hdcharts.charts.model.ChartValueFormatters
@@ -59,14 +61,23 @@ fun RadarChart(
     val internalData = remember(data, title) { toInternalRadarData(data, title) }
     val internalStyle = style.toInternal()
     val hasSingleSeries = data.series.size == 1
+    val density = LocalDensity.current
     val errors =
-        remember(data, style) {
+        remember(data, style, density) {
             validateRadarData(
                 data = data,
                 paletteSize = if (hasSingleSeries) 0 else style.polygon.lineColors.size,
                 categoryPaletteSize = style.categories.colors.size,
                 categoryCount = if (data.categories.isEmpty()) 0 else data.categories.size,
-            )
+            ) +
+                validateSizes(
+                    density,
+                    "Grid line width" to style.grid.lineWidth,
+                    "Axis line width" to style.axes.lineWidth,
+                    "Polygon line width" to style.polygon.lineWidth,
+                    "Point size" to style.points.size,
+                    "Category pin size" to style.categories.pinSize,
+                )
         }
 
     if (errors.isNotEmpty()) {

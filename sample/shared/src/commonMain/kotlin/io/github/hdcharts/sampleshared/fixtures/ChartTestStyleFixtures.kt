@@ -67,14 +67,14 @@ object ChartTestStyleFixtures {
             points =
                 LineChartDefaults.points(
                     color = chartColors.seriesColor(1).copy(alpha = chartDefaultAlpha()),
-                    size = 9.dp,
+                    size = 4.dp,
                     visible = true,
                 ),
             selection =
                 LineChartDefaults.selection(
                     color = chartColors.selection,
-                    size = 8.dp,
-                    activeSize = 10.dp,
+                    size = 3.dp,
+                    activeSize = 4.dp,
                     visible = true,
                 ),
         )
@@ -239,25 +239,25 @@ object ChartTestStyleFixtures {
             chartContainerStyle = chartContainerStyle,
             grid =
                 RadarChartDefaults.grid(
-                    lineWidth = 1.4f,
+                    lineWidth = 1.dp,
                     steps = 6,
                 ),
             axes =
                 RadarChartDefaults.axes(
-                    lineWidth = 1.2f,
+                    lineWidth = 1.dp,
                     labelColor = chartColors.axisLabel,
                     lineColor = chartColors.axisLine,
                 ),
             polygon =
                 RadarChartDefaults.polygon(
                     lineColors = chartColors.seriesColors(seriesKeys),
-                    lineWidth = 3.5f,
+                    lineWidth = 1.dp,
                     fillAlpha = 0.2f,
                 ),
             points =
                 RadarChartDefaults.points(
                     color = chartColors.highlight,
-                    size = 5f,
+                    size = 2.dp,
                 ),
             categories = RadarChartDefaults.categories(legendVisible = false),
         )

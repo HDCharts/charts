@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import io.github.hdcharts.charts.internal.NO_SELECTION
 import io.github.hdcharts.charts.internal.barstackedchart.toInternal
@@ -13,6 +15,7 @@ import io.github.hdcharts.charts.internal.common.composable.ChartErrors
 import io.github.hdcharts.charts.internal.common.composable.Legend
 import io.github.hdcharts.charts.internal.common.model.ChartDataItem
 import io.github.hdcharts.charts.internal.common.model.MultiChartData
+import io.github.hdcharts.charts.internal.validateSizes
 import io.github.hdcharts.charts.model.ChartData
 import io.github.hdcharts.charts.model.ChartSelection
 import io.github.hdcharts.charts.model.ChartValueFormatters
@@ -36,7 +39,8 @@ fun StackedBarChart(
     interactionEnabled: Boolean = true,
     animateOnStart: Boolean = true,
 ) {
-    val errors = remember(data, style) { validateStackedBarInput(data, style) }
+    val density = LocalDensity.current
+    val errors = remember(data, style, density) { validateStackedBarInput(data, style, density) }
     val pointCount =
         data.series
             .firstOrNull()
@@ -107,6 +111,7 @@ fun StackedBarChart(
 private fun validateStackedBarInput(
     data: ChartData,
     style: StackedBarChartStyle,
+    density: Density,
 ): List<String> {
     val errors = mutableListOf<String>()
     if (data.series.isEmpty()) return listOf("At least one stacked segment is required.")
@@ -133,6 +138,13 @@ private fun validateStackedBarInput(
     if (style.axis.xLabels.count < 2 || style.axis.yLabels.count < 2) {
         errors += "Axis label counts must be at least two."
     }
+    errors +=
+        validateSizes(
+            density,
+            "Bar spacing" to style.layout.space,
+            "Minimum bar width" to style.layout.minBarWidth,
+            "Selection line width" to style.selection.width,
+        )
     return errors
 }
 

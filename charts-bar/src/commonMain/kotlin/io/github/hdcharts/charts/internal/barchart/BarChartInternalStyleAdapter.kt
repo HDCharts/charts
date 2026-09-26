@@ -1,7 +1,6 @@
 package io.github.hdcharts.charts.internal.barchart
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalDensity
 import io.github.hdcharts.charts.internal.InternalChartsApi
 import io.github.hdcharts.charts.internal.common.layout.fillMaxSizeChartModifier
 import io.github.hdcharts.charts.style.BarChartStyle
@@ -14,9 +13,8 @@ import io.github.hdcharts.charts.style.BarChartStyle
  */
 @InternalChartsApi
 @Composable
-fun BarChartStyle.toInternal(): BarChartInternalStyle {
-    val density = LocalDensity.current
-    return BarChartInternalStyle(
+fun BarChartStyle.toInternal(): BarChartInternalStyle =
+    BarChartInternalStyle(
         modifier = fillMaxSizeChartModifier(chartContainerStyle),
         chartContainerStyle = chartContainerStyle,
         barColor = bars.color,
@@ -30,10 +28,10 @@ fun BarChartStyle.toInternal(): BarChartInternalStyle {
         gridVisible = grid.visible,
         gridSteps = grid.steps,
         gridColor = grid.color,
-        gridLineWidth = with(density) { grid.lineWidth.toPx() },
+        gridLineWidth = grid.lineWidth,
         axisVisible = axis.visible,
         axisColor = axis.color,
-        axisLineWidth = with(density) { axis.lineWidth.toPx() },
+        axisLineWidth = axis.lineWidth,
         yAxisLabelsVisible = axis.yLabels.visible,
         yAxisLabelColor = axis.yLabels.color,
         yAxisLabelSize = axis.yLabels.size,
@@ -44,6 +42,5 @@ fun BarChartStyle.toInternal(): BarChartInternalStyle {
         xAxisLabelMaxCount = axis.xLabels.count,
         selectionLineVisible = selectionLine.visible,
         selectionLineColor = selectionLine.color,
-        selectionLineWidth = with(density) { selectionLine.width.toPx() },
+        selectionLineWidth = selectionLine.width,
     )
-}

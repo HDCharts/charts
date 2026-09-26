@@ -144,8 +144,8 @@ internal fun RadarChart(
             }
 
         val labelRadius =
-            remember(radius, style.axisLabelPadding) {
-                radius + style.axisLabelPadding
+            remember(radius, style.axisLabelPadding, density) {
+                radius + with(density) { style.axisLabelPadding.toPx() }
             }
 
         val labelPositions =
@@ -248,7 +248,7 @@ private fun DrawScope.drawRadar(
             startAngle = startAngle,
             angleStep = angleStep,
             color = style.gridColor,
-            strokeWidth = style.gridLineWidth,
+            strokeWidth = style.gridLineWidth.toPx(),
         )
     }
 
@@ -260,7 +260,7 @@ private fun DrawScope.drawRadar(
             startAngle = startAngle,
             angleStep = angleStep,
             color = style.axisLineColor,
-            strokeWidth = style.axisLineWidth,
+            strokeWidth = style.axisLineWidth.toPx(),
         )
     }
 
@@ -292,11 +292,11 @@ private fun DrawScope.drawRadar(
             )
         }
 
-        if (style.lineWidth > 0f) {
+        if (style.lineWidth > 0.dp) {
             drawPath(
                 path = path,
                 color = lineColor,
-                style = Stroke(width = style.lineWidth),
+                style = Stroke(width = style.lineWidth.toPx()),
             )
         }
     }
@@ -308,7 +308,7 @@ private fun DrawScope.drawRadar(
                 center = center,
                 startAngle = startAngle,
                 angleStep = angleStep,
-                pointSize = style.pointSize,
+                pointSize = style.pointSize.toPx(),
                 pointColor =
                     when (style.pointColorSameAsLine) {
                         true -> lineColor
@@ -328,7 +328,7 @@ private fun DrawScope.drawRadar(
             startAngle = startAngle,
             angleStep = angleStep,
             colors = categoryColors,
-            pinSize = style.categoryPinSize,
+            pinSize = style.categoryPinSize.toPx(),
             dragging = dragging,
             selectedIndex = selectedIndex,
         )

@@ -57,6 +57,12 @@ Move customizations to the grouped `LineChartStyle` sections such as `line`,
 `selectedPointIndex`; it identifies one source X index shared by all series.
 Use `staticChartSelection(index)` for a preset preview or screenshot.
 
+Sizes are `Dp` and scale with screen density. The 2.x `Float` sizes were
+pixels, so divide them by the screen density when migrating. For example,
+`pointSize = 9f` looked like `points(size = 3.dp)` on a 3x screen. Point and
+selection sizes are radii. The defaults are a `2.dp` line, `4.dp` points,
+`3.dp` and `5.dp` selection markers, and a `1.dp` axis.
+
 Categories are explicit labels. An empty list hides X-axis labels, and supplied
 categories must match every series. `valueFormatter` and `axisValueFormatter`
 are independent and both receive `Double` values.

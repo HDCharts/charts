@@ -4,7 +4,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.hdcharts.charts.internal.common.palette.resolvePaletteColors
 import kotlinx.collections.immutable.ImmutableList
@@ -14,7 +16,7 @@ import kotlinx.collections.immutable.toImmutableList
 data class RadarGridStyle(
     val visible: Boolean,
     val color: Color,
-    val lineWidth: Float,
+    val lineWidth: Dp,
     val steps: Int,
 )
 
@@ -22,10 +24,10 @@ data class RadarGridStyle(
 data class RadarAxesStyle(
     val visible: Boolean,
     val lineColor: Color,
-    val lineWidth: Float,
+    val lineWidth: Dp,
     val labelColor: Color,
     val labelSize: TextUnit,
-    val labelPadding: Float,
+    val labelPadding: Dp,
     val labelVisible: Boolean,
 )
 
@@ -35,14 +37,14 @@ data class RadarPolygonStyle(
     val fillAlpha: Float,
     val lineColor: Color,
     val lineColors: ImmutableList<Color>,
-    val lineWidth: Float,
+    val lineWidth: Dp,
 ) {
     constructor(
         fillVisible: Boolean,
         fillAlpha: Float,
         lineColor: Color,
         lineColors: List<Color>,
-        lineWidth: Float,
+        lineWidth: Dp,
     ) : this(
         fillVisible = fillVisible,
         fillAlpha = fillAlpha.coerceIn(0f, 1f),
@@ -71,7 +73,7 @@ data class RadarPointStyle(
     val visible: Boolean,
     val color: Color,
     val colorSameAsLine: Boolean,
-    val size: Float,
+    val size: Dp,
 )
 
 @Immutable
@@ -79,7 +81,7 @@ data class RadarCategoryStyle(
     val legendVisible: Boolean,
     val pinsVisible: Boolean,
     val colors: ImmutableList<Color>,
-    val pinSize: Float,
+    val pinSize: Dp,
 )
 
 @Immutable
@@ -115,7 +117,7 @@ object RadarChartDefaults {
     fun grid(
         visible: Boolean = true,
         color: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.22f),
-        lineWidth: Float = 1f,
+        lineWidth: Dp = 1.dp,
         steps: Int = 5,
     ): RadarGridStyle = RadarGridStyle(visible, color, lineWidth, steps)
 
@@ -123,10 +125,10 @@ object RadarChartDefaults {
     fun axes(
         visible: Boolean = true,
         lineColor: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
-        lineWidth: Float = 1f,
+        lineWidth: Dp = 1.dp,
         labelColor: Color = MaterialTheme.colorScheme.onSurface,
         labelSize: TextUnit = 12.sp,
-        labelPadding: Float = 8f,
+        labelPadding: Dp = 3.dp,
         labelVisible: Boolean = false,
     ): RadarAxesStyle =
         RadarAxesStyle(
@@ -145,7 +147,7 @@ object RadarChartDefaults {
         fillAlpha: Float = defaultChartAlpha(light = 0.25f, dark = 0.2f),
         lineColor: Color = MaterialTheme.colorScheme.primary,
         lineColors: List<Color> = emptyList(),
-        lineWidth: Float = 3f,
+        lineWidth: Dp = 2.dp,
     ): RadarPolygonStyle = RadarPolygonStyle(fillVisible, fillAlpha, lineColor, lineColors, lineWidth)
 
     @Composable
@@ -153,7 +155,7 @@ object RadarChartDefaults {
         visible: Boolean = true,
         color: Color = MaterialTheme.colorScheme.tertiary,
         colorSameAsLine: Boolean = true,
-        size: Float = 9f,
+        size: Dp = 4.dp,
     ): RadarPointStyle = RadarPointStyle(visible, color, colorSameAsLine, size)
 
     @Composable
@@ -161,6 +163,6 @@ object RadarChartDefaults {
         legendVisible: Boolean = true,
         pinsVisible: Boolean = true,
         colors: List<Color> = emptyList(),
-        pinSize: Float = 6.3f,
+        pinSize: Dp = 2.dp,
     ): RadarCategoryStyle = RadarCategoryStyle(legendVisible, pinsVisible, colors.toImmutableList(), pinSize)
 }

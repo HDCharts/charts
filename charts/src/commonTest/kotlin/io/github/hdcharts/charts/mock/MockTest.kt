@@ -5,6 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.hdcharts.charts.internal.common.model.ChartDataItem
 import io.github.hdcharts.charts.internal.common.model.MultiChartData
@@ -177,19 +178,19 @@ internal object MockTest {
             pointColorSameAsLine = true,
             pointColor = Color.Red,
             pointVisible = true,
-            pointSize = 10f,
+            pointSize = 10.dp,
             lineColor = Color.Green,
             lineAlpha = 1f,
             lineColors = lineColors,
             bezier = true,
-            lineStrokeWidth = 1f,
-            dragPointSize = 7f,
+            lineStrokeWidth = 1.dp,
+            dragPointSize = 7.dp,
             dragPointVisible = true,
-            dragActivePointSize = 12f,
+            dragActivePointSize = 12.dp,
             dragPointColor = Color.Red,
             axisVisible = true,
             axisColor = Color.Gray,
-            axisLineWidth = 1f,
+            axisLineWidth = 1.dp,
             minValue = null,
             maxValue = null,
             yAxisLabelsVisible = true,
@@ -273,17 +274,17 @@ internal object MockTest {
                 RadarGridStyle(
                     visible = true,
                     color = Color.Gray,
-                    lineWidth = 1f,
+                    lineWidth = 1.dp,
                     steps = 4,
                 ),
             axes =
                 RadarAxesStyle(
                     visible = true,
                     lineColor = Color.Gray,
-                    lineWidth = 1f,
+                    lineWidth = 1.dp,
                     labelColor = Color.Gray,
                     labelSize = 11.sp,
-                    labelPadding = 4f,
+                    labelPadding = 4.dp,
                     labelVisible = true,
                 ),
             polygon =
@@ -292,21 +293,21 @@ internal object MockTest {
                     fillAlpha = 0.3f,
                     lineColor = Color.Green,
                     lineColors = lineColors,
-                    lineWidth = 2f,
+                    lineWidth = 2.dp,
                 ),
             points =
                 RadarPointStyle(
                     visible = true,
                     color = Color.Red,
                     colorSameAsLine = true,
-                    size = 8f,
+                    size = 8.dp,
                 ),
             categories =
                 RadarCategoryStyle(
                     legendVisible = true,
                     pinsVisible = true,
                     colors = colors.toImmutableList(),
-                    pinSize = 4f,
+                    pinSize = 4.dp,
                 ),
         )
 

@@ -3,12 +3,15 @@ package io.github.hdcharts.charts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
 import io.github.hdcharts.charts.internal.NO_SELECTION
 import io.github.hdcharts.charts.internal.common.composable.ChartErrors
 import io.github.hdcharts.charts.internal.common.model.ChartDataItem
 import io.github.hdcharts.charts.internal.common.model.MultiChartData
 import io.github.hdcharts.charts.internal.linechart.LineChartImpl
 import io.github.hdcharts.charts.internal.linechart.toInternal
+import io.github.hdcharts.charts.internal.validateSizes
 import io.github.hdcharts.charts.model.ChartData
 import io.github.hdcharts.charts.model.ChartSelection
 import io.github.hdcharts.charts.model.ChartValueFormatter
@@ -49,7 +52,8 @@ fun LineChart(
     valueFormatter: ChartValueFormatter = LineChartDefaults.valueFormatter,
     axisValueFormatter: ChartValueFormatter = LineChartDefaults.axisValueFormatter,
 ) {
-    val errors = remember(data, style) { validateLineInput(data, style) }
+    val density = LocalDensity.current
+    val errors = remember(data, style, density) { validateLineInput(data, style, density) }
     val pointCount =
         data.series
             .firstOrNull()
@@ -98,6 +102,7 @@ fun LineChart(
 private fun validateLineInput(
     data: ChartData,
     style: LineChartStyle,
+    density: Density,
 ): List<String> {
     val errors = mutableListOf<String>()
     if (data.series.isEmpty()) return listOf("At least one line series is required.")
@@ -126,12 +131,15 @@ private fun validateLineInput(
     if (style.range.min?.isFinite() == false || style.range.max?.isFinite() == false) {
         errors += "Range bounds must be finite."
     }
-    if (!style.line.strokeWidth.value
-            .isFinite() ||
-        style.line.strokeWidth.value < 0f
-    ) {
-        errors += "Line stroke width must be finite and nonnegative."
-    }
+    errors +=
+        validateSizes(
+            density,
+            "Line stroke width" to style.line.strokeWidth,
+            "Point size" to style.points.size,
+            "Selection size" to style.selection.size,
+            "Active selection size" to style.selection.activeSize,
+            "Axis line width" to style.axis.lineWidth,
+        )
     if (style.axis.xLabels.count < 2 ||
         style.axis.yLabels.count < 2
     ) {

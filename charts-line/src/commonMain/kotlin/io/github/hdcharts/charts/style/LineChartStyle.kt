@@ -117,22 +117,22 @@ object LineChartDefaults {
         color: Color = MaterialTheme.colorScheme.primary,
         alpha: Float = defaultChartAlpha(),
         colors: List<Color> = emptyList(),
-        strokeWidth: Dp = 5.dp,
+        strokeWidth: Dp = 2.dp,
         bezier: Boolean = true,
     ): LineVisualStyle = LineVisualStyle(color, alpha.coerceIn(0f, 1f), colors, strokeWidth, bezier)
 
     @Composable
     fun points(
         color: Color = MaterialTheme.colorScheme.tertiary,
-        size: Dp = 9.dp,
+        size: Dp = 4.dp,
         visible: Boolean = false,
     ): LinePointStyle = LinePointStyle(color, size, visible)
 
     @Composable
     fun selection(
         color: Color = MaterialTheme.colorScheme.tertiary,
-        size: Dp = 7.dp,
-        activeSize: Dp = 12.dp,
+        size: Dp = 3.dp,
+        activeSize: Dp = 5.dp,
         visible: Boolean = true,
     ): LineSelectionStyle = LineSelectionStyle(color, size, activeSize, visible)
 

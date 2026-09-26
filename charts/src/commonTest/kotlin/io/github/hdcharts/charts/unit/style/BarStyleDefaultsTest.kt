@@ -167,7 +167,7 @@ class BarStyleDefaultsTest {
     }
 
     @Test
-    fun strokes_preserveDefaultPixelsAndResolveExplicitDpAtControlledDensity() =
+    fun strokes_passDefaultAndExplicitDpToInternalStyle() =
         runComposeUiTest {
             lateinit var defaultStyle: BarChartStyle
             lateinit var defaultInternalStyle: BarChartInternalStyle
@@ -198,15 +198,15 @@ class BarStyleDefaultsTest {
             }
 
             runOnIdle {
-                assertEquals(expected = 0.5.dp, actual = defaultStyle.grid.lineWidth)
-                assertEquals(expected = 0.5.dp, actual = defaultStyle.axis.lineWidth)
-                assertEquals(expected = 0.5.dp, actual = defaultStyle.selectionLine.width)
-                assertEquals(expected = 1f, actual = defaultInternalStyle.gridLineWidth)
-                assertEquals(expected = 1f, actual = defaultInternalStyle.axisLineWidth)
-                assertEquals(expected = 1f, actual = defaultInternalStyle.selectionLineWidth)
-                assertEquals(expected = 4f, actual = customInternalStyle.gridLineWidth)
-                assertEquals(expected = 4f, actual = customInternalStyle.axisLineWidth)
-                assertEquals(expected = 4f, actual = customInternalStyle.selectionLineWidth)
+                assertEquals(expected = 1.dp, actual = defaultStyle.grid.lineWidth)
+                assertEquals(expected = 1.dp, actual = defaultStyle.axis.lineWidth)
+                assertEquals(expected = 1.dp, actual = defaultStyle.selectionLine.width)
+                assertEquals(expected = 1.dp, actual = defaultInternalStyle.gridLineWidth)
+                assertEquals(expected = 1.dp, actual = defaultInternalStyle.axisLineWidth)
+                assertEquals(expected = 1.dp, actual = defaultInternalStyle.selectionLineWidth)
+                assertEquals(expected = 2.dp, actual = customInternalStyle.gridLineWidth)
+                assertEquals(expected = 2.dp, actual = customInternalStyle.axisLineWidth)
+                assertEquals(expected = 2.dp, actual = customInternalStyle.selectionLineWidth)
                 assertEquals(expected = min, actual = customInternalStyle.minValue)
                 assertEquals(expected = max, actual = customInternalStyle.maxValue)
             }

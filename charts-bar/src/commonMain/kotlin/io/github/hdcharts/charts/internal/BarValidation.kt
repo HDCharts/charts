@@ -49,18 +49,15 @@ fun validateBarStyle(
     density: Density = Density(1f),
 ): List<String> {
     val errors = mutableListOf<String>()
-    val dimensions =
-        listOf(
-            "bar spacing" to style.bars.space.value,
-            "minimum bar width" to style.bars.minBarWidth.value,
-            "grid width" to style.grid.lineWidth.value,
-            "axis width" to style.axis.lineWidth.value,
-            "selection width" to style.selectionLine.width.value,
+    errors +=
+        validateSizes(
+            density,
+            "Bar spacing" to style.bars.space,
+            "Minimum bar width" to style.bars.minBarWidth,
+            "Grid line width" to style.grid.lineWidth,
+            "Axis line width" to style.axis.lineWidth,
+            "Selection line width" to style.selectionLine.width,
         )
-    dimensions.forEach { (name, value) ->
-        val pixels = value * density.density
-        if (!pixels.isFinite() || pixels !in 0f..16_384f) errors.add("$name must resolve to 0..16384 pixels.")
-    }
     if (!style.bars.alpha.isFinite() || style.bars.alpha !in 0f..1f) errors.add("Bar alpha must be in 0..1.")
     if (style.range.min?.isFinite() == false || style.range.max?.isFinite() == false) {
         errors.add("Range bounds must be finite.")
@@ -69,8 +66,8 @@ fun validateBarStyle(
     listOf(style.axis.xLabels, style.axis.yLabels).forEach { labels ->
         if (labels.size.type != TextUnitType.Sp || !labels.size.value.isFinite() || labels.size.value <= 0f) {
             errors.add("Axis label size must be finite, positive sp.")
-        } else if (with(density) { labels.size.toPx() }.let { !it.isFinite() || it > 16_384f }) {
-            errors.add("Axis label size must resolve to at most 16384 pixels.")
+        } else if (with(density) { labels.size.toPx() }.let { !it.isFinite() || it > MAX_SIZE_PX }) {
+            errors.add("Axis label size must resolve to at most ${MAX_SIZE_PX.toInt()} pixels.")
         }
         if (labels.count !in 2..1000) errors.add("Axis label count must be in 2..1000.")
     }
