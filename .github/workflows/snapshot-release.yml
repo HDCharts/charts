@@ -44,7 +44,7 @@ concurrency:
 jobs:
   changes:
     name: Check for Changes
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     outputs:
       has_changes: ${{ steps.changes.outputs.has_changes }}
     steps:
@@ -82,7 +82,7 @@ jobs:
 
   prepare-snapshot:
     name: Prepare Snapshot Release
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     needs: changes
     if: ${{ needs.changes.outputs.has_changes == 'true' }}
     environment: Snapshot
@@ -174,7 +174,7 @@ jobs:
     name: Publish Snapshot to Maven Central
     needs: [prepare-snapshot, publish-static-assets]
     if: ${{ needs.prepare-snapshot.outputs.is_snapshot == 'true' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     environment: Snapshot
     steps:
       - name: Checkout snapshot source
@@ -202,7 +202,7 @@ jobs:
     name: Announce Snapshot Release
     needs: [prepare-snapshot, publish-static-assets, publish-maven]
     if: ${{ needs.prepare-snapshot.outputs.is_snapshot == 'true' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@v7
         with:

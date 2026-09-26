@@ -17,7 +17,7 @@ concurrency:
 jobs:
   prepare:
     name: Prepare PR
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     outputs:
       source_sha: ${{ github.sha }}
       should_run: ${{ steps.changes.outputs.should_run }}
@@ -53,7 +53,7 @@ jobs:
       - prepare
       - api-compatibility
     if: ${{ always() && needs.prepare.outputs.should_run == 'true' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - name: Verify API compatibility
         env:

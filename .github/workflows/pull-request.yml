@@ -17,7 +17,7 @@ concurrency:
 jobs:
   prepare:
     name: Prepare PR
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     outputs:
       source_sha: ${{ github.sha }}
       should_run: ${{ steps.changes.outputs.should_run }}
@@ -80,7 +80,7 @@ jobs:
       - compile
       - lint
       - test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - name: Verify core checks
         env:

@@ -18,7 +18,7 @@ concurrency:
 jobs:
   check-label:
     name: Check GIF Validation Label
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     outputs:
       should_run: ${{ steps.labels.outputs.should_run }}
     steps:
@@ -49,7 +49,7 @@ jobs:
     needs:
       - check-label
       - gif-validation
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - name: Verify GIF baseline validation
         env:

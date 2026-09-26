@@ -23,7 +23,7 @@ concurrency:
 jobs:
   prepare-release:
     name: Validate release
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     if: ${{ github.ref == 'refs/heads/main' }}
     outputs:
       release_version: ${{ steps.version.outputs.release_version }}
@@ -125,7 +125,7 @@ jobs:
   approve-release:
     name: Approve Release
     needs: prepare-release
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     environment: Release Approval
     steps:
       - name: Record approval
@@ -150,7 +150,7 @@ jobs:
   publish-maven:
     name: Publish Maven release
     needs: [prepare-release, publish-static-assets]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     environment: Production
     steps:
       - uses: actions/checkout@v7
@@ -213,7 +213,7 @@ jobs:
   promote-docs:
     name: Sync notes and promote docs on main
     needs: [prepare-release, publish-maven, build-android]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     environment: Production
     outputs:
       docs_sha: ${{ steps.push.outputs.docs_sha }}
@@ -262,7 +262,7 @@ jobs:
   verify-docs-deployment:
     name: Verify public docs deployment
     needs: [prepare-release, promote-docs]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - name: Wait for the deployment manifest and public routes
         env:
@@ -294,7 +294,7 @@ jobs:
   announce-release:
     name: Announce release
     needs: [prepare-release, publish-maven, promote-docs, verify-docs-deployment]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@v7
         with:

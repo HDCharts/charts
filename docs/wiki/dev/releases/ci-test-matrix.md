@@ -11,10 +11,10 @@ only when the pull request changes code or build files. Workflow:
 
 | CI job | Gradle entry task | Tests included | Runs on |
 | --- | --- | --- | --- |
-| JVM Tests | `./gradlew ciTestJvm` | `jvmTest` for every chart library module. | `ubuntu-latest`, Zulu JDK 17. |
-| Android Tests | `./gradlew ciTestAndroid` | Android screenshot validation, plus `connectedAndroidTest` for every chart library module except `charts-core`. | `ubuntu-latest`; API 35 `google_apis` x86_64 Nexus 6 emulator with KVM. |
-| Wasm Tests | `./gradlew ciTestWeb` | `wasmJsTest` for every chart library module. | `ubuntu-latest`, Kotlin/Wasm browser tests. |
-| iOS Tests | `./gradlew ciTestIos` | `iosSimulatorArm64Test` for every chart library module. | `macos-26`, ARM64 iOS Simulator. |
+| JVM Tests | `./gradlew ciTestJvm` | `jvmTest` for every chart library module. | Ubuntu, Zulu JDK 17. |
+| Android Tests | `./gradlew ciTestAndroid` | Android screenshot validation, plus `connectedAndroidTest` for every chart library module except `charts-core`. | Ubuntu; API 35 `google_apis` x86_64 Nexus 6 emulator with KVM. |
+| Wasm Tests | `./gradlew ciTestWeb` | `wasmJsTest` for every chart library module. | Ubuntu, Kotlin/Wasm browser tests. |
+| iOS Tests | `./gradlew ciTestIos` | `iosSimulatorArm64Test` for every chart library module. | macOS, ARM64 iOS Simulator. |
 
 The `ciTest*` tasks are CI entry points. They delegate to the platform-specific `chartsTest*`
 tasks in the root build.
