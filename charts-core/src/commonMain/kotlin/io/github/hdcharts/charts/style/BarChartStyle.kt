@@ -4,7 +4,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -106,7 +105,6 @@ object BarChartDefaults {
 
     /**
      * Returns a [BarGridStyle] for horizontal grid configuration.
-     * The default stroke width preserves one physical pixel at the current density.
      */
     @Composable
     fun grid(
@@ -115,7 +113,7 @@ object BarChartDefaults {
         color: Color =
             androidx.compose.material3.MaterialTheme.colorScheme.onSurface
                 .copy(alpha = 0.15f),
-        lineWidth: Dp = with(LocalDensity.current) { 1f.toDp() },
+        lineWidth: Dp = 1.dp,
     ): BarGridStyle =
         BarGridStyle(
             visible = visible,
@@ -126,7 +124,6 @@ object BarChartDefaults {
 
     /**
      * Returns a [BarAxisStyle] for axis and label configuration.
-     * The default stroke width preserves one physical pixel at the current density.
      */
     @Composable
     fun axis(
@@ -134,7 +131,7 @@ object BarChartDefaults {
         color: Color =
             androidx.compose.material3.MaterialTheme.colorScheme.onSurface
                 .copy(alpha = 0.3f),
-        lineWidth: Dp = with(LocalDensity.current) { 1f.toDp() },
+        lineWidth: Dp = 1.dp,
         xLabels: AxisLabelStyle = xLabels(),
         yLabels: AxisLabelStyle = yLabels(),
     ): BarAxisStyle =
@@ -186,7 +183,6 @@ object BarChartDefaults {
 
     /**
      * Returns a [BarSelectionLineStyle] for the selection indicator.
-     * The default stroke width preserves one physical pixel at the current density.
      */
     @Composable
     fun selectionLine(
@@ -194,7 +190,7 @@ object BarChartDefaults {
         color: Color =
             androidx.compose.material3.MaterialTheme.colorScheme.primary
                 .copy(alpha = 0.6f),
-        width: Dp = with(LocalDensity.current) { 1f.toDp() },
+        width: Dp = 1.dp,
     ): BarSelectionLineStyle =
         BarSelectionLineStyle(
             visible = visible,

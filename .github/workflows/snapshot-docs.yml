@@ -1,4 +1,4 @@
-# Manually sync release notes, wiki docs, and GIF baselines into charts-docs main
+# Manually sync release notes, wiki docs, GIF baselines, and the hero chart image into charts-docs main
 # without running the full Snapshot Release pipeline (Maven publish, API reference
 # build, Android build). Use this when only docs content changed.
 name: Snapshot Docs

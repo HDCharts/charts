@@ -3,6 +3,7 @@ package io.github.hdcharts.charts.internal.linechart
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import io.github.hdcharts.charts.internal.InternalChartsApi
 import io.github.hdcharts.charts.style.ChartContainerStyle
@@ -17,19 +18,19 @@ class LineChartInternalStyle(
     val pointColorSameAsLine: Boolean,
     val pointColor: Color,
     val pointVisible: Boolean,
-    val pointSize: Float,
+    val pointSize: Dp,
     val lineColor: Color,
     val lineAlpha: Float,
     val lineColors: List<Color>,
     val bezier: Boolean,
-    val lineStrokeWidth: Float,
-    val dragPointSize: Float,
+    val lineStrokeWidth: Dp,
+    val dragPointSize: Dp,
     val dragPointVisible: Boolean,
-    val dragActivePointSize: Float,
+    val dragActivePointSize: Dp,
     val dragPointColor: Color,
     val axisVisible: Boolean,
     val axisColor: Color,
-    val axisLineWidth: Float,
+    val axisLineWidth: Dp,
     val minValue: Double?,
     val maxValue: Double?,
     val yAxisLabelsVisible: Boolean,

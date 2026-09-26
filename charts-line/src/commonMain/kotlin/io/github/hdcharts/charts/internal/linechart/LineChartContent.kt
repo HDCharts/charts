@@ -34,6 +34,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import io.github.hdcharts.charts.LineChartRenderMode
 import io.github.hdcharts.charts.internal.ANIMATION_TARGET
@@ -61,14 +62,24 @@ import kotlin.math.max
 import kotlin.math.roundToInt
 import kotlin.time.Duration
 
-internal const val LINE_STROKE_WIDTH = 5f
 internal const val MARKER_REVEAL_DURATION_MS = 260
 internal const val MARKER_REVEAL_THRESHOLD = 0.999f
 internal const val MARKER_REVEAL_START_SCALE = 0.7f
 internal const val MIN_TIMELINE_DURATION_MS = 1
-internal const val LINE_VERTICAL_SAFE_INSET = (LINE_STROKE_WIDTH / 2f) + 1f
 internal const val LINE_DENSE_MIN_STEP_PX = 12f
 internal const val FIXED_X_AXIS_LABEL_TILT_DEGREES = 34f
+
+/** Space kept above and below the plot so the line, points, and selection markers fit at the min and max values. */
+internal fun Density.lineVerticalSafeInset(style: LineChartInternalStyle): Float {
+    val pointRadius = if (style.pointVisible) style.pointSize.toPx() else 0f
+    val markerRadius =
+        if (style.pointVisible || style.dragPointVisible) {
+            max(style.dragPointSize.toPx(), style.dragActivePointSize.toPx())
+        } else {
+            0f
+        }
+    return max(style.lineStrokeWidth.toPx() / 2f, max(pointRadius, markerRadius)) + 1f
+}
 
 internal data class TimelineTransitionData(
     val previousSeries: List<List<Double>>,
@@ -429,7 +440,7 @@ internal fun LineChartContent(
             }
         val chartHeight = (maxHeight - xAxisHeight).coerceAtLeast(0.dp)
         val chartHeightPx = with(density) { chartHeight.toPx() }.coerceAtLeast(1f)
-        val lineVerticalInsetPx = LINE_VERTICAL_SAFE_INSET.coerceAtMost(chartHeightPx / 2f)
+        val lineVerticalInsetPx = with(density) { lineVerticalSafeInset(style) }.coerceAtMost(chartHeightPx / 2f)
         val yAxisTicks =
             remember(
                 minMax,
@@ -605,10 +616,9 @@ internal fun LineChartContent(
                             if (!show) return@Canvas
 
                             if (showAxisLines) {
-                                val verticalInset = LINE_VERTICAL_SAFE_INSET.coerceAtMost(size.height / 2f)
-                                val drawableHeight = (size.height - (verticalInset * 2f)).coerceAtLeast(0f)
+                                val drawableHeight = (size.height - (lineVerticalInsetPx * 2f)).coerceAtLeast(0f)
                                 val baselineY =
-                                    verticalInset +
+                                    lineVerticalInsetPx +
                                         baselineYForRange(
                                             minValue = minMax.first,
                                             maxValue = minMax.second,
@@ -619,13 +629,13 @@ internal fun LineChartContent(
                                     color = style.axisColor,
                                     start = Offset(0f, 0f),
                                     end = Offset(0f, size.height),
-                                    strokeWidth = style.axisLineWidth,
+                                    strokeWidth = style.axisLineWidth.toPx(),
                                 )
                                 drawLine(
                                     color = style.axisColor,
                                     start = Offset(0f, baselineY),
                                     end = Offset(size.width, baselineY),
-                                    strokeWidth = style.axisLineWidth,
+                                    strokeWidth = style.axisLineWidth.toPx(),
                                 )
                             }
 
@@ -654,6 +664,7 @@ internal fun LineChartContent(
                                         lineColor = colors[index],
                                         timelineWindowPoints = pointsCount,
                                         horizontalOffsetPx = shiftPx,
+                                        verticalInset = lineVerticalInsetPx,
                                     )
                                 }
                                 return@Canvas
@@ -670,6 +681,7 @@ internal fun LineChartContent(
                                     bezierTension = bezierTension,
                                     lineColor = colors[index],
                                     stepXOverride = if (denseMorphEnabled) denseStepX else null,
+                                    verticalInset = lineVerticalInsetPx,
                                 )
                             }
 
@@ -680,7 +692,7 @@ internal fun LineChartContent(
                                 if (stepX > 0f) {
                                     val selectedX = safeSelectedIndex * stepX
                                     val selectionLineColor = resolveSelectionLineColor(style = style, colors = colors)
-                                    val selectionStrokeWidth = max(style.axisLineWidth, 1f)
+                                    val selectionStrokeWidth = max(style.axisLineWidth.toPx(), 1f)
                                     drawLine(
                                         color = selectionLineColor,
                                         start = Offset(selectedX, 0f),
@@ -689,8 +701,7 @@ internal fun LineChartContent(
                                     )
 
                                     if (!dragging.value && (style.dragPointVisible || style.pointVisible)) {
-                                        val verticalInset = LINE_VERTICAL_SAFE_INSET.coerceAtMost(size.height / 2f)
-                                        val markerRadius = style.dragActivePointSize.coerceAtLeast(1f)
+                                        val markerRadius = style.dragActivePointSize.toPx().coerceAtLeast(1f)
                                         data.items.forEachIndexed { seriesIndex, _ ->
                                             val normalized =
                                                 animatedValues
@@ -702,7 +713,7 @@ internal fun LineChartContent(
                                                 mapScaledValueToCanvasY(
                                                     scaledValue = normalized * size.height,
                                                     canvasHeight = size.height,
-                                                    verticalInset = verticalInset,
+                                                    verticalInset = lineVerticalInsetPx,
                                                 )
                                             val markerColor =
                                                 when (style.dragPointColorSameAsLine) {
@@ -738,6 +749,7 @@ internal fun LineChartContent(
                                         style = style,
                                         lineColor = colors[index],
                                         bezierTension = bezierTension,
+                                        verticalInset = lineVerticalInsetPx,
                                     )
                                 }
                             },

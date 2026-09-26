@@ -205,10 +205,10 @@ LineChart(
             color = Color(0xFF1E88E5),
             alpha = 1f,
             colors = emptyList(),
-            strokeWidth = 3.dp,
+            strokeWidth = 2.dp,
             bezier = true,
         ),
-        points = LinePointStyle(color = Color(0xFF1E88E5), size = 6.dp, visible = true),
+        points = LinePointStyle(color = Color(0xFF1E88E5), size = 4.dp, visible = true),
         axis = LineAxisStyle(
             visible = true,
             color = Color.Gray,

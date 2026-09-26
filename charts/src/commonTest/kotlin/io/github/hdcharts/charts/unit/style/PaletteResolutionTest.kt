@@ -97,7 +97,7 @@ class PaletteResolutionTest {
                 fillAlpha = 0.25f,
                 lineColor = base,
                 lineColors = emptyList(),
-                lineWidth = 3f,
+                lineWidth = 3.dp,
             )
 
         assertEquals(generateColorShades(base, 3), polygon.resolveLineColors(3))

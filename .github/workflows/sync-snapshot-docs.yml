@@ -1,4 +1,4 @@
-# Reusable sync of snapshot release notes, wiki docs, and GIF baselines into charts-docs
+# Reusable sync of snapshot release notes, wiki docs, GIF baselines, and the hero chart image into charts-docs
 # main. Runs under the Snapshot environment only. Shared by the snapshot release pipeline
 # and the manual Snapshot Docs workflow.
 name: Sync Snapshot Docs
@@ -41,7 +41,7 @@ concurrency:
 
 jobs:
   sync-docs:
-    name: Sync release notes, wiki docs, and GIF baselines
+    name: Sync release notes, wiki docs, GIF baselines, and hero image
     runs-on: ubuntu-26.04
     environment: Snapshot
     steps:
@@ -68,6 +68,8 @@ jobs:
         run: bash .github/scripts/sync-dev-docs.sh charts-docs-repo
       - name: Sync snapshot GIF baselines
         run: bash .github/scripts/sync-gif-baselines.sh charts-docs-repo
+      - name: Sync hero chart image
+        run: bash .github/scripts/sync-hero-image.sh charts-docs-repo
       - name: Write snapshot provenance
         if: ${{ inputs.write-provenance-manifest }}
         env:
@@ -88,13 +90,13 @@ jobs:
           git config user.name "charts-release-bot"
           git config user.email "charts-release-bot@users.noreply.github.com"
           if [ "${{ inputs.write-provenance-manifest }}" = "true" ]; then
-            git add release-notes content/snapshot content/dev docs-app/public/snapshot-manifest.json
-            message="docs(snapshot): sync release notes, wiki docs, GIF baselines, and provenance"
-            already_current_message="Snapshot release notes, wiki docs, GIF baselines, and provenance are already current."
+            git add release-notes content/snapshot content/dev docs-app/public/charts-hero-chart.png docs-app/public/snapshot-manifest.json
+            message="docs(snapshot): sync release notes, wiki docs, GIF baselines, hero image, and provenance"
+            already_current_message="Snapshot release notes, wiki docs, GIF baselines, hero image, and provenance are already current."
           else
-            git add release-notes content/snapshot content/dev
-            message="docs(snapshot): sync release notes, wiki docs, and GIF baselines"
-            already_current_message="Release notes, wiki docs, and GIF baselines are already current."
+            git add release-notes content/snapshot content/dev docs-app/public/charts-hero-chart.png
+            message="docs(snapshot): sync release notes, wiki docs, GIF baselines, and hero image"
+            already_current_message="Release notes, wiki docs, GIF baselines, and hero image are already current."
           fi
           if git diff --cached --quiet; then
             echo "$already_current_message"

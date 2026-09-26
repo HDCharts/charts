@@ -2,6 +2,7 @@ package io.github.hdcharts.charts.internal.radarchart
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import io.github.hdcharts.charts.internal.InternalChartsApi
 import io.github.hdcharts.charts.style.ChartContainerStyle
@@ -11,27 +12,27 @@ import io.github.hdcharts.charts.style.ChartContainerStyle
 class RadarInternalStyle(
     val chartContainerStyle: ChartContainerStyle,
     val gridColor: Color,
-    val gridLineWidth: Float,
+    val gridLineWidth: Dp,
     val gridSteps: Int,
     val gridVisible: Boolean,
     val axisLineColor: Color,
-    val axisLineWidth: Float,
+    val axisLineWidth: Dp,
     val axisVisible: Boolean,
     val axisLabelColor: Color,
     val axisLabelSize: TextUnit,
-    val axisLabelPadding: Float,
+    val axisLabelPadding: Dp,
     val axisLabelVisible: Boolean,
     val categoryLegendVisible: Boolean,
     val categoryColors: List<Color>,
-    val categoryPinSize: Float,
+    val categoryPinSize: Dp,
     val categoryPinsVisible: Boolean,
     val pointColorSameAsLine: Boolean,
     val pointColor: Color,
-    val pointSize: Float,
+    val pointSize: Dp,
     val pointVisible: Boolean,
     val lineColor: Color,
     val lineColors: List<Color>,
-    val lineWidth: Float,
+    val lineWidth: Dp,
     val fillAlpha: Float,
     val fillVisible: Boolean,
 )

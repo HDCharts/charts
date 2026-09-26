@@ -15,6 +15,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.v2.runComposeUiTest
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.hdcharts.charts.StackedBarChart
 import io.github.hdcharts.charts.internal.TestTags
@@ -155,6 +156,34 @@ class StackedBarChartTest {
 
             onNodeWithTag(TestTags.CHART_ERROR).assertIsDisplayed()
             onNodeWithText("Segment 0 contains a negative or non-finite contribution.\n").assertIsDisplayed()
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun stackedBarChart_withUnspecifiedSelectionWidth_displaysError() =
+        runComposeUiTest {
+            val data =
+                chartDataOf(
+                    categories = listOf("Bar 1", "Bar 2"),
+                    ChartSeries(name = "S1", values = listOf(10.0, 2.0)),
+                    ChartSeries(name = "S2", values = listOf(5.0, 8.0)),
+                )
+
+            setContent {
+                StackedBarChart(
+                    data = data,
+                    style =
+                        StackedBarChartDefaults.style(
+                            selection = StackedBarChartDefaults.selection(width = Dp.Unspecified),
+                        ),
+                )
+            }
+
+            onNodeWithTag(TestTags.CHART_ERROR).assertIsDisplayed()
+            onNodeWithText(
+                "Selection line width must resolve to 0..16384 pixels.",
+                substring = true,
+            ).assertIsDisplayed()
         }
 
     @OptIn(ExperimentalTestApi::class)

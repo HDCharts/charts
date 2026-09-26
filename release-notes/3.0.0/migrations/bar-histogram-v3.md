@@ -62,6 +62,9 @@ Styles are grouped. Migrate customizations to the corresponding blocks on
 `axis`, and `selectionLine`. Create them with `BarChartDefaults` or
 `HistogramChartDefaults` rather than the removed flat style parameters.
 
+Grid, axis, and selection line widths default to `1.dp`. In 2.x they were one
+pixel, so they now look heavier on high-density screens.
+
 ## Behavior
 
 - `title` is separate from `seriesName` and category labels.

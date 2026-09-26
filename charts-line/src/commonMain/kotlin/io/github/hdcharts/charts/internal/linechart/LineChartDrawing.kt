@@ -24,13 +24,13 @@ internal fun DrawScope.drawChartPath(
     timelineWindowPoints: Int? = null,
     horizontalOffsetPx: Float = 0f,
     stepXOverride: Float? = null,
+    verticalInset: Float,
 ) {
     if (values.size <= 1) return
 
     val valuesSize = values.size
     val canvasWidth = size.width
     val canvasHeight = size.height
-    val verticalInset = LINE_VERTICAL_SAFE_INSET.coerceAtMost(canvasHeight / 2f)
     val valuesLastIndex = valuesSize - 1
     val stepX =
         when {
@@ -105,7 +105,7 @@ internal fun DrawScope.drawChartPath(
 
     val lineStroke =
         Stroke(
-            width = style.lineStrokeWidth.coerceAtLeast(0.5f),
+            width = style.lineStrokeWidth.toPx().coerceAtLeast(0.5f),
             cap = StrokeCap.Round,
             join = StrokeJoin.Round,
         )
@@ -120,7 +120,7 @@ internal fun DrawScope.drawChartPath(
         } else {
             val revealX = (canvasWidth * lineAnimationProgress).coerceIn(0f, canvasWidth)
             // Reveal from left to right to keep perceived speed steady across steep curves.
-            clipRect(left = 0f, top = 0f, right = revealX + LINE_STROKE_WIDTH, bottom = canvasHeight) {
+            clipRect(left = 0f, top = 0f, right = revealX + style.lineStrokeWidth.toPx(), bottom = canvasHeight) {
                 drawPath(
                     path = path,
                     color = lineColor,
@@ -167,7 +167,8 @@ private fun DrawScope.tryDrawPathPoints(
         }
     val progress = markerRevealProgress.coerceIn(0f, 1f)
     val animatedColor = pointColor.copy(alpha = pointColor.alpha * progress)
-    val animatedRadius = style.pointSize * (MARKER_REVEAL_START_SCALE + (1f - MARKER_REVEAL_START_SCALE) * progress)
+    val animatedRadius =
+        style.pointSize.toPx() * (MARKER_REVEAL_START_SCALE + (1f - MARKER_REVEAL_START_SCALE) * progress)
 
     for (i in values.indices) {
         val x = horizontalOffsetPx + (i * stepX)
@@ -191,6 +192,7 @@ internal fun DrawScope.drawDragMarker(
     style: LineChartInternalStyle,
     lineColor: Color,
     bezierTension: Float,
+    verticalInset: Float,
 ) {
     if ((!style.dragPointVisible && !style.pointVisible) || values.size <= 1 || size.width <= 0f) return
 
@@ -207,7 +209,6 @@ internal fun DrawScope.drawDragMarker(
             true -> lineColor
             else -> style.dragPointColor
         }
-    val verticalInset = LINE_VERTICAL_SAFE_INSET.coerceAtMost(size.height / 2f)
     val maxDragY = (size.height - verticalInset).coerceAtLeast(verticalInset)
 
     if (style.pointVisible) {
@@ -221,7 +222,7 @@ internal fun DrawScope.drawDragMarker(
             )
         drawCircle(
             center = Offset(selectedX, selectedY),
-            radius = style.dragActivePointSize,
+            radius = style.dragActivePointSize.toPx(),
             color = dragPointColor,
         )
     }
@@ -245,7 +246,7 @@ internal fun DrawScope.drawDragMarker(
 
         drawCircle(
             center = draggingCircleOffset,
-            radius = style.dragPointSize,
+            radius = style.dragPointSize.toPx(),
             color = dragPointColor,
         )
     }

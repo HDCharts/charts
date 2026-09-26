@@ -57,6 +57,9 @@ Use `selection` instead of `selectedBarIndex`. Selection applies to a whole bar,
 not an individual segment. Use `staticChartSelection(index)` for a preset
 preview or screenshot.
 
+The selection line width is `Dp` and scales with screen density. The default is
+`1.dp`; in 2.x widths were pixels.
+
 The old dataset `prefix` is not a parameter on the v3 stacked-bar API; selected
 values use the chart's default formatting.
 

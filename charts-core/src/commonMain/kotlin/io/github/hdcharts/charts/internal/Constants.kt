@@ -11,6 +11,9 @@ const val MAX_SCALE = 1.05f
 
 val AXIS_LABEL_CHART_GAP: Dp = 10.dp
 
+// Largest style size, in pixels, that validation accepts
+const val MAX_SIZE_PX = 16_384f
+
 // Animation duration
 const val ANIMATION_DURATION = 200
 const val ANIMATION_DURATION_BAR = 500
