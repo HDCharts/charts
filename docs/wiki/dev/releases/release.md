@@ -1,6 +1,6 @@
 ---
 title: Release
-order: 5
+order: 6
 ---
 
 # Release
@@ -32,7 +32,7 @@ sequenceDiagram
 ```
 
 Before running this workflow, complete the
-[Release Checklist](https://github.com/HDCharts/charts/blob/main/docs/release/release-checklist.md).
+[Release Checklist](release-checklist.md).
 
 Every job builds from the source SHA pinned in the first step, so all published artifacts come
 from the same commit.
