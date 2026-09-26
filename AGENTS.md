@@ -26,7 +26,7 @@ Read the relevant documentation before substantial changes:
 
 - `CONTRIBUTING.md` for repository layout and test types.
 - `docs/wiki/dev/releases/pull-requests.md` for PR CI and required checks.
-- `docs/release/release-checklist.md` for release readiness.
+- `docs/wiki/dev/releases/release-checklist.md` for release readiness.
 - `release-notes/README.md` for release-note structure and synchronization.
 
 ## Always-Follow Rules
