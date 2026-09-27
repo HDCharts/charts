@@ -6,8 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
-import io.github.hdcharts.charts.LineChart
-import io.github.hdcharts.charts.LineChartRenderMode
+import io.github.hdcharts.charts.LiveLineChart
 import io.github.hdcharts.charts.model.ChartData
 import io.github.hdcharts.charts.model.toChartData
 import kotlinx.coroutines.CoroutineScope
@@ -78,11 +77,10 @@ class LiveSensorReadingViewModel(
 fun ShowLiveLine(viewModel: LiveSensorReadingViewModel = viewModel()) {
     val chartData by viewModel.chartData.collectAsStateWithLifecycle()
 
-    LineChart(
+    LiveLineChart(
         data = chartData,
         title = TITLE,
+        shiftDuration = 120.milliseconds,
         animateOnStart = false,
-        renderMode = LineChartRenderMode.Timeline,
-        animationDuration = 120.milliseconds,
     )
 }

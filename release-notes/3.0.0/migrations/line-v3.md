@@ -50,6 +50,26 @@ The old `ChartDataSet` and `MultiChartDataSet` entry points are removed. There
 is no separate multi-line composable. Use `chartDataOf` when explicit
 `ChartSeries` construction is more convenient.
 
+## Live line charts
+
+Use `LiveLineChart` for timeline updates. It replaces `renderMode =
+LineChartRenderMode.Timeline`. `shiftDuration: Duration` replaces
+`animationDurationMillis: Int`, so pass `120.milliseconds` instead of `120`.
+
+```kotlin
+LiveLineChart(
+    data = readings.toChartData(seriesName = "Sensor"),
+    title = "Sensor",
+    shiftDuration = 120.milliseconds,
+)
+```
+
+`LiveLineChart` has no selection or gestures, so drop `interactionEnabled` and
+`selectedPointIndex` from calls you move to it. It shows no value readout, so
+format the Y axis with `axisValueFormatter`. `LineChart` always morphs, so
+drop `renderMode = LineChartRenderMode.Morph` and `animationDurationMillis`
+from its calls.
+
 ## Styles and selection
 
 Move customizations to the grouped `LineChartStyle` sections such as `line`,
@@ -62,6 +82,10 @@ pixels, so divide them by the screen density when migrating. For example,
 `pointSize = 9f` looked like `points(size = 3.dp)` on a 3x screen. Point and
 selection sizes are radii. The defaults are a `2.dp` line, `4.dp` points,
 `3.dp` and `5.dp` selection markers, and a `1.dp` axis.
+
+`interactionEnabled = false` disables user controls, including fit/expand,
+zoom, and scrolling of dense data, while programmatic selection remains
+visible. Dense data shows the fit view.
 
 Categories are explicit labels. An empty list hides X-axis labels, and supplied
 categories must match every series. `valueFormatter` and `axisValueFormatter`

@@ -4,8 +4,8 @@ title: Line
 
 # Line Chart
 
-`LineChart` renders single or multi-series line data. It has one composable with two
-render modes, selected via `renderMode`.
+`LineChart` renders single or multi-series line data and morphs to new values when the
+data changes. `LiveLineChart` renders a live window that slides as new points arrive.
 
 ![Line Demo](/content/{{version}}/wiki/assets/line_default.gif)
 
@@ -85,22 +85,17 @@ fun ShowLineWithRange() {
 }
 ```
 
-## Render Modes
+## Morphing Updates
 
-`LineChart` has one composable with two render modes, selected via `renderMode`.
-
-### Morph
-
-The default mode. When `data` changes, the line animates smoothly from its old shape to
-the new one. This is the right choice for most charts, including ones with large point
-counts that support zoom and scroll.
+When `data` changes, `LineChart` animates the line from its old shape to the new one.
+This is the right choice for most charts, including ones with large point counts that
+support zoom and scroll.
 
 ![Line Morph Demo](/content/{{version}}/wiki/assets/line_morph.gif)
 
-Hand `LineChart` new `data` and it animates from the previous shape. The example below
-cycles three weeks of the same metric on a timer, with the range pinned so the axis
-doesn't jump between weeks — see [Fixed Y-Axis Range](#fixed-y-axis-range) above. Full
-source behind the GIF:
+The example below cycles three weeks of the same metric on a timer, with the range
+pinned so the axis doesn't jump between weeks — see
+[Fixed Y-Axis Range](#fixed-y-axis-range) above. Full source behind the GIF:
 [`MorphingLineExample.kt`](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/MorphingLineExample.kt).
 
 ```kotlin
@@ -130,20 +125,19 @@ fun ShowMorphingLine() {
             range = LineChartDefaults.range(min = 0.0, max = 80.0),
         ),
         animateOnStart = false,
-        renderMode = LineChartRenderMode.Morph,
     )
 }
 ```
 
-### Timeline
+## Live Line Chart
 
-Built for live, continuously updating data. Instead of morphing, new points slide the whole
+`LiveLineChart` is built for live, continuously updating data. New points slide the whole
 chart horizontally like a rolling window, and the Y-axis rescales automatically as old
-values leave the window. Interaction (selection, gestures) is disabled in this mode.
-`animationDuration` sets the update speed — how long each new point takes to slide into
-place — and should match how often `data` actually changes.
+values leave the window. The chart is display-only, so it has no selection.
+`shiftDuration` sets how long each new point takes to slide into place. Match it to how
+often `data` changes.
 
-![Line Timeline Demo](/content/{{version}}/wiki/assets/line_timeline.gif)
+![Live Line Demo](/content/{{version}}/wiki/assets/line_timeline.gif)
 
 Keep a fixed-size window of values and replace it on every tick. Full source behind the
 GIF, including its heartbeat-shaped reading generator, is in
@@ -161,12 +155,11 @@ fun ShowLiveLine() {
         }
     }
 
-    LineChart(
+    LiveLineChart(
         data = values.toChartData(seriesName = "Live Sensor Reading"),
         title = "Live Sensor Reading",
+        shiftDuration = 120.milliseconds,
         animateOnStart = false,
-        renderMode = LineChartRenderMode.Timeline,
-        animationDuration = 120.milliseconds,
     )
 }
 ```

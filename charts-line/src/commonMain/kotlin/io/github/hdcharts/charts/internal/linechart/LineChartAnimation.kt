@@ -2,9 +2,45 @@ package io.github.hdcharts.charts.internal.linechart
 
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.TweenSpec
-import io.github.hdcharts.charts.LineChartRenderMode
 import io.github.hdcharts.charts.internal.AnimationSpec
 import kotlin.time.Duration
+
+internal const val MIN_TIMELINE_DURATION_MS = 1
+
+internal sealed interface LineChartRenderMode {
+    data object Morph : LineChartRenderMode
+
+    data class Timeline(
+        val shiftDuration: Duration,
+    ) : LineChartRenderMode
+}
+
+internal data class TimelineTransitionData(
+    val previousSeries: List<List<Double>>,
+    val currentSeries: List<List<Double>>,
+    val minMax: Pair<Double, Double>,
+) {
+    /**
+     * Normalized values drawn for each series while the shift animates.
+     *
+     * The transition data is rebuilt once per update, so the values are normalized here instead of
+     * on every animation frame.
+     */
+    val drawValues: List<List<Float>> =
+        timelineShiftValues(
+            previousSeries = previousSeries,
+            currentSeries = currentSeries,
+            minMax = minMax,
+        )
+}
+
+internal sealed interface LineChartTransitionMode {
+    data object Morph : LineChartTransitionMode
+
+    data class TimelineShift(
+        val transitionData: TimelineTransitionData,
+    ) : LineChartTransitionMode
+}
 
 internal fun hasSameSeriesStructure(
     previous: List<List<Double>>,
@@ -41,9 +77,8 @@ internal fun decideLineChartUpdate(
     currentRawSeries: List<List<Double>>,
     currentMinMax: Pair<Double, Double>,
     renderMode: LineChartRenderMode,
-    animationDuration: Duration,
 ): LineChartTransitionMode {
-    if (renderMode != LineChartRenderMode.Timeline || previousRawSeries == null) {
+    if (renderMode !is LineChartRenderMode.Timeline || previousRawSeries == null) {
         return LineChartTransitionMode.Morph
     }
 
@@ -58,30 +93,20 @@ internal fun decideLineChartUpdate(
                 currentSeries = currentRawSeries,
                 minMax = currentMinMax,
             ),
-        animationDuration = animationDuration,
     )
 }
 
-/**
- * Animation spec the line chart moves each point with when an update is not a timeline shift.
- *
- * A timeline update arrives once per update interval, so it settles within [animationDuration] like
- * a shift does. The longer default spec would be cancelled by the next update before it arrives,
- * leaving the line trailing the data it is supposed to be showing.
- */
-internal fun lineChartValueAnimationSpec(
-    renderMode: LineChartRenderMode,
-    animationDuration: Duration,
-): TweenSpec<Float> =
+/** Spec for both timeline shifts and point morphs; Timeline uses shiftDuration for both. */
+internal fun lineChartValueAnimationSpec(renderMode: LineChartRenderMode): TweenSpec<Float> =
     when (renderMode) {
-        LineChartRenderMode.Timeline ->
+        is LineChartRenderMode.Timeline ->
             TweenSpec(
-                durationMillis = animationDuration.toTimelineDurationMillis(),
+                durationMillis = renderMode.shiftDuration.toTimelineDurationMillis(),
                 delay = 0,
                 easing = LinearEasing,
             )
 
-        else -> AnimationSpec.lineChart()
+        LineChartRenderMode.Morph -> AnimationSpec.lineChart()
     }
 
 /**

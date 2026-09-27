@@ -40,7 +40,7 @@ import io.github.hdcharts.app.ui.composable.ChartDemo
 import io.github.hdcharts.app.ui.composable.DemoRangeSlider
 import io.github.hdcharts.app.ui.composable.DemoSlider
 import io.github.hdcharts.charts.LineChart
-import io.github.hdcharts.charts.LineChartRenderMode
+import io.github.hdcharts.charts.LiveLineChart
 import io.github.hdcharts.charts.model.ChartValueFormatters
 import io.github.hdcharts.charts.style.ChartContainerDefaults
 import io.github.hdcharts.charts.style.LineChartDefaults
@@ -124,14 +124,12 @@ fun MultiLineChartDemo(viewModel: MultiLineChartViewModel = koinViewModel()) {
             }
 
             MultiLineDemoPreset.Timeline -> {
-                LineChart(
+                LiveLineChart(
                     data = uiState.dataSet.dataSet,
                     modifier = Modifier.fillMaxWidth(),
                     title = uiState.dataSet.title,
-                    valueFormatter = ChartValueFormatters.suffix(" ms"),
                     style = LineChartDefaults.style(chartContainerStyle = chartContainerStyle),
-                    renderMode = LineChartRenderMode.Timeline,
-                    animationDuration = timelineAnimationDuration.milliseconds,
+                    shiftDuration = timelineAnimationDuration.milliseconds,
                 )
             }
 

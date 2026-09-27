@@ -31,7 +31,7 @@ data class LineScaleDropUiState(
  *
  * The streamed window stays in the millions for
  * [LineScaleDropControlsState.scaleSwitchPoints] points, drops below one hundred for the same
- * number of points, and climbs back, which shows how the timeline render mode rescales while it
+ * number of points, and climbs back, which shows how `LiveLineChart` rescales while it
  * runs. A phase at least as long as the window makes the window hold a single magnitude, so the
  * chart rescales completely. It owns its own window and playback, so the steady timeline demo stays
  * unchanged.

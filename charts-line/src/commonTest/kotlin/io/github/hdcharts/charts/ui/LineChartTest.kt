@@ -6,15 +6,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PixelMap
-import androidx.compose.ui.graphics.layer.GraphicsLayer
-import androidx.compose.ui.graphics.layer.drawLayer
-import androidx.compose.ui.graphics.rememberGraphicsLayer
-import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertCountEquals
@@ -27,7 +20,7 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.hdcharts.charts.LineChart
-import io.github.hdcharts.charts.LineChartRenderMode
+import io.github.hdcharts.charts.LiveLineChart
 import io.github.hdcharts.charts.internal.TestTags
 import io.github.hdcharts.charts.mock.MockTest.TITLE
 import io.github.hdcharts.charts.mock.MockTest.dataSet
@@ -37,8 +30,6 @@ import io.github.hdcharts.charts.model.ChartSeries
 import io.github.hdcharts.charts.model.toChartData
 import io.github.hdcharts.charts.style.ChartContainerDefaults
 import io.github.hdcharts.charts.style.LineChartDefaults
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
@@ -115,44 +106,29 @@ class LineChartTest {
     fun lineChart_rangeOnlyStyleChange_movesLineWithoutDataChange() =
         runComposeUiTest {
             val rangeMin = mutableStateOf<Double?>(null)
-            lateinit var captureLayer: GraphicsLayer
-            lateinit var captureScope: CoroutineScope
-            val capturedPixels = mutableStateOf<PixelMap?>(null)
-            setContent {
-                captureLayer = rememberGraphicsLayer()
-                captureScope = rememberCoroutineScope()
-                LineChart(
-                    data = listOf(25.0, 75.0).toChartData(),
-                    modifier =
-                        Modifier
-                            .testTag("line-capture")
-                            .size(width = 200.dp, height = 300.dp)
-                            .drawWithContent {
-                                captureLayer.record { this@drawWithContent.drawContent() }
-                                drawLayer(captureLayer)
-                            },
-                    animateOnStart = false,
-                    style =
-                        LineChartDefaults.style(
-                            chartContainerStyle = ChartContainerDefaults.style(contentPadding = 0.dp),
-                            line =
-                                LineChartDefaults.line(
-                                    color = Color.Blue,
-                                    alpha = 1f,
-                                    strokeWidth = 10.dp,
-                                    bezier = false,
-                                ),
-                            range = LineChartDefaults.range(min = rangeMin.value),
-                        ),
-                )
-            }
-
-            fun capturePixels(): PixelMap {
-                capturedPixels.value = null
-                runOnIdle { captureScope.launch { capturedPixels.value = captureLayer.toImageBitmap().toPixelMap() } }
-                waitUntil(timeoutMillis = 3_000L) { capturedPixels.value != null }
-                return checkNotNull(capturedPixels.value)
-            }
+            val capturePixels =
+                setCapturedContent { captureModifier ->
+                    LineChart(
+                        data = listOf(25.0, 75.0).toChartData(),
+                        modifier =
+                            captureModifier
+                                .testTag("line-capture")
+                                .size(width = 200.dp, height = 300.dp),
+                        animateOnStart = false,
+                        style =
+                            LineChartDefaults.style(
+                                chartContainerStyle = ChartContainerDefaults.style(contentPadding = 0.dp),
+                                line =
+                                    LineChartDefaults.line(
+                                        color = Color.Blue,
+                                        alpha = 1f,
+                                        strokeWidth = 10.dp,
+                                        bezier = false,
+                                    ),
+                                range = LineChartDefaults.range(min = rangeMin.value),
+                            ),
+                    )
+                }
 
             onNodeWithTag(TestTags.LINE_CHART).assertIsDisplayed()
 
@@ -204,17 +180,14 @@ class LineChartTest {
 
     @OptIn(ExperimentalTestApi::class)
     @Test
-    fun lineChart_withTimelineRenderMode_displaysChart() =
+    fun liveLineChart_displaysChart() =
         runComposeUiTest {
             // Arrange
             val expectedLegendCurrentValue = "$TITLE - 40.0"
 
             // Act
             setContent {
-                LineChart(
-                    data = dataSet,
-                    renderMode = LineChartRenderMode.Timeline,
-                )
+                LiveLineChart(data = dataSet)
             }
 
             // Assert
@@ -256,13 +229,10 @@ class LineChartTest {
 
     @OptIn(ExperimentalTestApi::class)
     @Test
-    fun lineChart_withLargeDatasetInTimelineMode_hidesZoomControls() =
+    fun liveLineChart_withLargeDataset_hidesZoomControls() =
         runComposeUiTest {
             setContent {
-                LineChart(
-                    data = largeDataSet(),
-                    renderMode = LineChartRenderMode.Timeline,
-                )
+                LiveLineChart(data = largeDataSet())
             }
 
             onNodeWithTag(TestTags.LINE_CHART).assertIsDisplayed()

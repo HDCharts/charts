@@ -2,11 +2,9 @@ package io.github.hdcharts.charts.internal.linechart
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -17,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -36,7 +35,6 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
-import io.github.hdcharts.charts.LineChartRenderMode
 import io.github.hdcharts.charts.internal.ANIMATION_TARGET
 import io.github.hdcharts.charts.internal.AXIS_LABEL_CHART_GAP
 import io.github.hdcharts.charts.internal.AnimationSpec
@@ -60,12 +58,10 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlin.math.max
 import kotlin.math.roundToInt
-import kotlin.time.Duration
 
 internal const val MARKER_REVEAL_DURATION_MS = 260
 internal const val MARKER_REVEAL_THRESHOLD = 0.999f
 internal const val MARKER_REVEAL_START_SCALE = 0.7f
-internal const val MIN_TIMELINE_DURATION_MS = 1
 internal const val LINE_DENSE_MIN_STEP_PX = 12f
 internal const val FIXED_X_AXIS_LABEL_TILT_DEGREES = 34f
 
@@ -78,35 +74,7 @@ internal fun Density.lineVerticalSafeInset(style: LineChartInternalStyle): Float
         } else {
             0f
         }
-    return max(style.lineStrokeWidth.toPx() / 2f, max(pointRadius, markerRadius)) + 1f
-}
-
-internal data class TimelineTransitionData(
-    val previousSeries: List<List<Double>>,
-    val currentSeries: List<List<Double>>,
-    val minMax: Pair<Double, Double>,
-) {
-    /**
-     * Normalized values drawn for each series while the shift animates.
-     *
-     * The transition data is rebuilt once per update, so the values are normalized here instead of
-     * on every animation frame.
-     */
-    val drawValues: List<List<Float>> =
-        timelineShiftValues(
-            previousSeries = previousSeries,
-            currentSeries = currentSeries,
-            minMax = minMax,
-        )
-}
-
-internal sealed interface LineChartTransitionMode {
-    data object Morph : LineChartTransitionMode
-
-    data class TimelineShift(
-        val transitionData: TimelineTransitionData,
-        val animationDuration: Duration,
-    ) : LineChartTransitionMode
+    return max(style.line.strokeWidth.toPx() / 2f, max(pointRadius, markerRadius)) + 1f
 }
 
 @Composable
@@ -116,23 +84,21 @@ internal fun LineChartContent(
     colors: ImmutableList<Color>,
     interactionEnabled: Boolean,
     animateOnStart: Boolean,
-    renderMode: LineChartRenderMode = LineChartRenderMode.Morph,
-    animationDuration: Duration,
-    isDenseMorphMode: Boolean = false,
-    scrollState: ScrollState,
+    renderMode: LineChartRenderMode,
+    isDenseMode: Boolean = false,
     zoomScale: Float = 1f,
     selectedPointIndex: Int = NO_SELECTION,
     onValueChanged: (Int) -> Unit = {},
-    valueFormatter: ChartValueFormatter,
     axisValueFormatter: ChartValueFormatter,
 ) {
     val isPreview = LocalInspectionMode.current
     var show by rememberShowState(isPreviewMode = isPreview || !animateOnStart)
     val touchX = remember { mutableFloatStateOf(0f) }
     val dragging = remember { mutableStateOf(false) }
+    val scrollState = rememberScrollState()
     val valueAnimationSpec =
-        remember(renderMode, animationDuration) {
-            lineChartValueAnimationSpec(renderMode = renderMode, animationDuration = animationDuration)
+        remember(renderMode) {
+            lineChartValueAnimationSpec(renderMode = renderMode)
         }
     val currentOnValueChanged by rememberUpdatedState(onValueChanged)
 
@@ -156,7 +122,7 @@ internal fun LineChartContent(
         label = "lineMarkerReveal",
     )
 
-    val rawSeries = remember(data) { data.items.map { item -> item.item.points.toList() } }
+    val rawSeries = remember(data) { data.items.map { item -> item.item.points } }
     val xAxisLabels = remember(data) { resolveLineXAxisLabels(data) }
     val minMax =
         remember(data, style.minValue, style.maxValue) {
@@ -188,16 +154,13 @@ internal fun LineChartContent(
     val previousRawSeries = remember { mutableStateOf<List<List<Double>>?>(null) }
     val timelineTransitionData = remember { mutableStateOf<TimelineTransitionData?>(null) }
     val timelineProgress = remember { Animatable(ANIMATION_TARGET) }
-    val isTimelineMode = renderMode == LineChartRenderMode.Timeline
-    val denseMorphEnabled = isDenseMorphMode && !isTimelineMode
-    val dragInteractionEnabled = interactionEnabled && !isTimelineMode && !denseMorphEnabled
-    val tapInteractionEnabled = interactionEnabled && denseMorphEnabled
+    val dragInteractionEnabled = interactionEnabled && !isDenseMode
+    val tapInteractionEnabled = interactionEnabled && isDenseMode
 
     LaunchedEffect(dragInteractionEnabled, tapInteractionEnabled, hasForcedSelection) {
         dragging.value = false
         if (hasForcedSelection) return@LaunchedEffect
         if (!tapInteractionEnabled) {
-            dragging.value = false
             if (reportedSelection.intValue != NO_SELECTION) {
                 reportedSelection.intValue = NO_SELECTION
                 currentOnValueChanged(NO_SELECTION)
@@ -213,7 +176,7 @@ internal fun LineChartContent(
         }
     }
 
-    LaunchedEffect(show, rawSeries, minMax, renderMode, animationDuration) {
+    LaunchedEffect(show, rawSeries, minMax, renderMode) {
         if (pointsCount <= 0 || seriesCount == 0) return@LaunchedEffect
 
         if (!show && !isPreview) {
@@ -236,7 +199,6 @@ internal fun LineChartContent(
                 currentRawSeries = rawSeries,
                 currentMinMax = minMax,
                 renderMode = renderMode,
-                animationDuration = animationDuration,
             )
         val hasStructureChanged =
             previousRawSnapshot != null &&
@@ -245,28 +207,17 @@ internal fun LineChartContent(
                     current = rawSeries,
                 )
 
-        if (hasStructureChanged) {
+        suspend fun snapToTargets() {
             animatedValues.forEachIndexed { seriesIndex, series ->
                 val targetSeries = targetNormalized.getOrNull(seriesIndex) ?: emptyList()
                 series.forEachIndexed { pointIndex, animatable ->
-                    val target = targetSeries.getOrNull(pointIndex) ?: 0f
-                    animatable.snapTo(target)
+                    animatable.snapTo(targetSeries.getOrNull(pointIndex) ?: 0f)
                 }
             }
-            hasInitialized.value = true
-            timelineTransitionData.value = null
-            timelineProgress.snapTo(ANIMATION_TARGET)
-            return@LaunchedEffect
         }
 
-        if (isPreview || !hasInitialized.value) {
-            animatedValues.forEachIndexed { seriesIndex, series ->
-                val targetSeries = targetNormalized.getOrNull(seriesIndex) ?: emptyList()
-                series.forEachIndexed { pointIndex, animatable ->
-                    val target = targetSeries.getOrNull(pointIndex) ?: 0f
-                    animatable.snapTo(target)
-                }
-            }
+        if (hasStructureChanged || isPreview || !hasInitialized.value) {
+            snapToTargets()
             hasInitialized.value = true
             timelineTransitionData.value = null
             timelineProgress.snapTo(ANIMATION_TARGET)
@@ -275,24 +226,14 @@ internal fun LineChartContent(
 
         when (val mode = transitionMode) {
             is LineChartTransitionMode.TimelineShift -> {
-                animatedValues.forEachIndexed { seriesIndex, series ->
-                    val targetSeries = targetNormalized.getOrNull(seriesIndex) ?: emptyList()
-                    series.forEachIndexed { pointIndex, animatable ->
-                        val target = targetSeries.getOrNull(pointIndex) ?: 0f
-                        animatable.snapTo(target)
-                    }
-                }
+                snapToTargets()
 
                 timelineTransitionData.value = mode.transitionData
 
                 timelineProgress.snapTo(0f)
                 timelineProgress.animateTo(
                     targetValue = ANIMATION_TARGET,
-                    animationSpec =
-                        tween(
-                            durationMillis = mode.animationDuration.toTimelineDurationMillis(),
-                            easing = LinearEasing,
-                        ),
+                    animationSpec = valueAnimationSpec,
                 )
                 timelineTransitionData.value = null
                 return@LaunchedEffect
@@ -310,15 +251,10 @@ internal fun LineChartContent(
                 series.forEachIndexed { pointIndex, animatable ->
                     val target = targetSeries.getOrNull(pointIndex) ?: 0f
                     launch {
-                        val shouldAnimate = !isPreview && (animateOnStart || hasInitialized.value)
-                        if (!shouldAnimate) {
-                            animatable.snapTo(target)
-                        } else {
-                            animatable.animateTo(
-                                targetValue = target,
-                                animationSpec = valueAnimationSpec,
-                            )
-                        }
+                        animatable.animateTo(
+                            targetValue = target,
+                            animationSpec = valueAnimationSpec,
+                        )
                     }
                 }
             }
@@ -490,16 +426,16 @@ internal fun LineChartContent(
                 zoomScale = zoomScale,
             )
         val plotContentWidthPx =
-            if (denseMorphEnabled && pointsCount > 1) {
+            if (isDenseMode && pointsCount > 1) {
                 max(plotViewportWidthPx, denseStepX * (pointsCount - 1))
             } else {
                 plotViewportWidthPx
             }
         val plotContentWidth = with(density) { plotContentWidthPx.toDp() }
-        val scrollOffsetPx = if (denseMorphEnabled) scrollState.value.toFloat() else 0f
-        LaunchedEffect(plotContentWidthPx, plotViewportWidthPx, denseMorphEnabled) {
+        val scrollOffsetPx = if (isDenseMode) scrollState.value.toFloat() else 0f
+        LaunchedEffect(plotContentWidthPx, plotViewportWidthPx, isDenseMode) {
             val maxScroll = (plotContentWidthPx - plotViewportWidthPx).roundToInt().coerceAtLeast(0)
-            if (!denseMorphEnabled && scrollState.value != 0) {
+            if (!isDenseMode && scrollState.value != 0) {
                 scrollState.scrollTo(0)
             } else if (scrollState.value > maxScroll) {
                 scrollState.scrollTo(maxScroll)
@@ -510,7 +446,7 @@ internal fun LineChartContent(
             remember(
                 pointsCount,
                 style.xAxisLabelMaxCount,
-                denseMorphEnabled,
+                isDenseMode,
                 fitStepX,
                 denseStepX,
                 plotViewportWidthPx,
@@ -522,9 +458,9 @@ internal fun LineChartContent(
                         AxisXPlanRequest(
                             dataSize = pointsCount,
                             requestedMaxLabelCount = style.xAxisLabelMaxCount,
-                            isScrollable = denseMorphEnabled,
+                            isScrollable = isDenseMode,
                             unitWidthPx =
-                                if (denseMorphEnabled) {
+                                if (isDenseMode) {
                                     denseStepX.coerceAtLeast(1f)
                                 } else {
                                     fitStepX.coerceAtLeast(1f)
@@ -550,7 +486,7 @@ internal fun LineChartContent(
                 pointsCount,
                 fitStepX,
                 denseStepX,
-                denseMorphEnabled,
+                isDenseMode,
                 scrollOffsetPx,
                 showXAxisLabels,
             ) {
@@ -561,7 +497,7 @@ internal fun LineChartContent(
                         labels = xAxisLabels,
                         labelIndices = xAxisLabelIndices,
                         pointsCount = pointsCount,
-                        stepX = if (denseMorphEnabled) denseStepX else fitStepX,
+                        stepX = if (isDenseMode) denseStepX else fitStepX,
                         scrollOffsetPx = scrollOffsetPx,
                     )
                 }
@@ -600,8 +536,8 @@ internal fun LineChartContent(
                             .testTag(TestTags.LINE_CHART_PLOT)
                             .then(denseTapInteractionModifier)
                             .then(
-                                if (denseMorphEnabled) {
-                                    Modifier.horizontalScroll(state = scrollState, enabled = true)
+                                if (isDenseMode) {
+                                    Modifier.horizontalScroll(state = scrollState, enabled = interactionEnabled)
                                 } else {
                                     Modifier
                                 },
@@ -643,7 +579,6 @@ internal fun LineChartContent(
                             val progress = timelineProgress.value.coerceIn(0f, ANIMATION_TARGET)
                             val useTimeline =
                                 transitionData != null &&
-                                    renderMode == LineChartRenderMode.Timeline &&
                                     progress < ANIMATION_TARGET
 
                             if (useTimeline) {
@@ -680,21 +615,20 @@ internal fun LineChartContent(
                                     markerRevealProgress = markerRevealProgress,
                                     bezierTension = bezierTension,
                                     lineColor = colors[index],
-                                    stepXOverride = if (denseMorphEnabled) denseStepX else null,
+                                    stepXOverride = if (isDenseMode) denseStepX else null,
                                     verticalInset = lineVerticalInsetPx,
                                 )
                             }
 
                             val selectedIndex = reportedSelection.intValue
-                            if (!isTimelineMode && selectedIndex != NO_SELECTION && pointsCount > 1) {
+                            if (selectedIndex != NO_SELECTION && pointsCount > 1) {
                                 val safeSelectedIndex = selectedIndex.coerceIn(0, pointsCount - 1)
-                                val stepX = if (denseMorphEnabled) denseStepX else fitStepX
+                                val stepX = if (isDenseMode) denseStepX else fitStepX
                                 if (stepX > 0f) {
                                     val selectedX = safeSelectedIndex * stepX
-                                    val selectionLineColor = resolveSelectionLineColor(style = style, colors = colors)
                                     val selectionStrokeWidth = max(style.axisLineWidth.toPx(), 1f)
                                     drawLine(
-                                        color = selectionLineColor,
+                                        color = style.dragPointColor,
                                         start = Offset(selectedX, 0f),
                                         end = Offset(selectedX, size.height),
                                         strokeWidth = selectionStrokeWidth,
@@ -715,13 +649,8 @@ internal fun LineChartContent(
                                                     canvasHeight = size.height,
                                                     verticalInset = lineVerticalInsetPx,
                                                 )
-                                            val markerColor =
-                                                when (style.dragPointColorSameAsLine) {
-                                                    true -> colors.getOrNull(seriesIndex) ?: selectionLineColor
-                                                    else -> style.dragPointColor
-                                                }
                                             drawCircle(
-                                                color = markerColor,
+                                                color = style.dragPointColor,
                                                 radius = markerRadius,
                                                 center = Offset(selectedX, y),
                                             )
@@ -747,7 +676,6 @@ internal fun LineChartContent(
                                         touchX = touchX.floatValue,
                                         values = scaledValues,
                                         style = style,
-                                        lineColor = colors[index],
                                         bezierTension = bezierTension,
                                         verticalInset = lineVerticalInsetPx,
                                     )
