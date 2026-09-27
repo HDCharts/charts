@@ -26,9 +26,8 @@ import io.github.hdcharts.sampleshared.theme.seriesColors
 import io.github.hdcharts.charts.style.defaultChartAlpha as chartDefaultAlpha
 
 /**
- * Shared custom style fixtures used by:
- * - `sample/app/src/commonMain/kotlin/io/github/hdcharts/app/demo/...`
- * - `sample/androidApp/src/screenshotTest/kotlin/.../ChartScreenshotTest.kt`
+ * Custom style fixtures for the demo app presets in
+ * `sample/app/src/commonMain/kotlin/io/github/hdcharts/app/demo/...`.
  */
 object ChartTestStyleFixtures {
     @Composable

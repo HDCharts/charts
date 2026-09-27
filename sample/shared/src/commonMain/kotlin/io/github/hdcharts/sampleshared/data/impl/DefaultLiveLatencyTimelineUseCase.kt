@@ -10,10 +10,14 @@ import io.github.hdcharts.sampleshared.data.MIN_SCALE_SWITCH_POINTS
 import kotlin.math.sin
 import kotlin.random.Random
 
-class DefaultLiveLatencyTimelineUseCase : LiveLatencyTimelineUseCase {
-    private val generator = LiveLatencyTimelineGenerator()
+class DefaultLiveLatencyTimelineUseCase(
+    random: Random = Random.Default,
+) : LiveLatencyTimelineUseCase {
+    private val generator = LiveLatencyTimelineGenerator(random)
 
     override val multiSeriesKeys: List<String> = generator.multiSeriesKeys
+
+    override val multiSeriesTitle: String = generator.multiSeriesTitle
 
     override fun createSingleWindow(
         windowSize: Int,
@@ -44,12 +48,14 @@ class DefaultLiveLatencyTimelineUseCase : LiveLatencyTimelineUseCase {
     override fun toMultiDataSet(window: LiveLatencyMultiSeriesWindow): ChartData = generator.toMultiDataSet(window)
 }
 
-private class LiveLatencyTimelineGenerator {
+private class LiveLatencyTimelineGenerator(
+    private val random: Random,
+) {
     companion object {
         private const val MIN_WINDOW_SIZE = 2
         private const val SECONDS_PER_DAY = 24 * 60 * 60
         private const val BASE_SECOND_OF_DAY = 14 * 60 * 60
-        private const val SINGLE_TITLE = "API Gateway P95 Latency"
+        private const val LATENCY_TITLE = "API Latency"
         private const val SCALE_DROP_TITLE = "Queue Backlog Drain"
         private const val SCALE_DROP_MIN = 1_000_000.0
         private const val SCALE_DROP_MAX = 2_000_000.0
@@ -62,6 +68,7 @@ private class LiveLatencyTimelineGenerator {
     }
 
     val multiSeriesKeys: List<String> = listOf(P50_SERIES_LABEL, P95_SERIES_LABEL)
+    val multiSeriesTitle: String = LATENCY_TITLE
 
     fun createSingleWindow(
         windowSize: Int,
@@ -107,7 +114,7 @@ private class LiveLatencyTimelineGenerator {
             categories = window.labels,
             seriesName =
                 when (window.profile) {
-                    LiveTimelineProfile.Latency -> SINGLE_TITLE
+                    LiveTimelineProfile.Latency -> LATENCY_TITLE
                     LiveTimelineProfile.ScaleDrop -> SCALE_DROP_TITLE
                 },
         )
@@ -175,13 +182,13 @@ private class LiveLatencyTimelineGenerator {
         scaleSwitchPoints: Int,
     ): Double =
         when ((tick / scaleSwitchPoints) % 2) {
-            0 -> Random.nextDouble(from = SCALE_DROP_MIN, until = SCALE_DROP_MAX)
-            else -> Random.nextDouble(from = 0.0, until = SCALE_DROP_TAIL_MAX)
+            0 -> random.nextDouble(from = SCALE_DROP_MIN, until = SCALE_DROP_MAX)
+            else -> random.nextDouble(from = 0.0, until = SCALE_DROP_TAIL_MAX)
         }
 
     private fun sampleP50Latency(tick: Int): Double {
         val trend = 112.0 + (18.0 * sin(tick / 7.0)) + (8.0 * sin(tick / 2.8))
-        val jitter = Random.nextDouble(from = -5.0, until = 5.0)
+        val jitter = random.nextDouble(from = -5.0, until = 5.0)
         return (trend + jitter).coerceIn(P50_MIN, P50_MAX)
     }
 
@@ -189,7 +196,7 @@ private class LiveLatencyTimelineGenerator {
         tick: Int,
         p50Latency: Double,
     ): Double {
-        val spread = 32.0 + (14.0 * sin(tick / 5.0)) + Random.nextDouble(from = 0.0, until = 15.0)
+        val spread = 32.0 + (14.0 * sin(tick / 5.0)) + random.nextDouble(from = 0.0, until = 15.0)
         return (p50Latency + spread).coerceIn(p50Latency + 8.0, P95_MAX)
     }
 

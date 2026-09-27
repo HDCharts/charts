@@ -17,6 +17,8 @@ import kotlinx.coroutines.flow.asStateFlow
 private const val TITLE = "Quarterly Revenue by Channel"
 
 class StackedBarViewModel : ViewModel() {
+    val title: String = TITLE
+
     val chartData: StateFlow<ChartData> = MutableStateFlow(buildChartData()).asStateFlow()
 
     private fun buildChartData(): ChartData {

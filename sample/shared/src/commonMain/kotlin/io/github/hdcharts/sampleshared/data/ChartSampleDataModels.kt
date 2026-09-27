@@ -27,15 +27,9 @@ data class StackedAreaSampleData(
 )
 
 data class RadarSampleData(
-    val basicData: ChartData,
-    val customData: ChartData,
-    val seriesKeys: List<String>,
-    val title: String,
-)
-
-data class RadarCustomSampleData(
     val data: ChartData,
     val seriesKeys: List<String>,
+    val title: String,
 )
 
 data class ChartGalleryPreview(

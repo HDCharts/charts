@@ -4,6 +4,12 @@ import io.github.hdcharts.sampleshared.data.ChartGalleryPreview
 import io.github.hdcharts.sampleshared.data.ChartPreviewUseCase
 import kotlin.random.Random
 
+/**
+ * Data for the small animated chart thumbnails on the demo app home screen, drawn by
+ * `ChartGalleryPreviews.kt` and refreshed by `ChartGalleryViewModel` in `sample/app`.
+ * It is kept apart from the other sample use cases on purpose: thumbnails need a few points
+ * with small, fixed jitter bounds.
+ */
 class DefaultChartPreviewUseCase : ChartPreviewUseCase {
     private val previewPieValues = listOf(32.0, 21.0, 24.0, 14.0, 9.0)
     private val previewLineValues = listOf(42.0, 38.0, 45.0, 51.0, 47.0)

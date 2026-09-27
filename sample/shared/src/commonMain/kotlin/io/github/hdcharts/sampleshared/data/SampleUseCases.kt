@@ -10,6 +10,7 @@ import io.github.hdcharts.sampleshared.data.impl.DefaultPieSampleUseCase
 import io.github.hdcharts.sampleshared.data.impl.DefaultRadarSampleUseCase
 import io.github.hdcharts.sampleshared.data.impl.DefaultStackedAreaSampleUseCase
 import io.github.hdcharts.sampleshared.data.impl.DefaultStackedBarSampleUseCase
+import kotlin.random.Random
 
 fun pieSampleUseCase(): PieSampleUseCase = DefaultPieSampleUseCase()
 
@@ -27,6 +28,8 @@ fun stackedAreaSampleUseCase(): StackedAreaSampleUseCase = DefaultStackedAreaSam
 
 fun radarSampleUseCase(): RadarSampleUseCase = DefaultRadarSampleUseCase()
 
-fun liveLatencyTimelineUseCase(): LiveLatencyTimelineUseCase = DefaultLiveLatencyTimelineUseCase()
+/** Pass a seeded [random] for a repeatable window, such as a screenshot fixture. */
+fun liveLatencyTimelineUseCase(random: Random = Random.Default): LiveLatencyTimelineUseCase =
+    DefaultLiveLatencyTimelineUseCase(random)
 
 fun chartPreviewUseCase(): ChartPreviewUseCase = DefaultChartPreviewUseCase()

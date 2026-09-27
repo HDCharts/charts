@@ -4,31 +4,27 @@ import androidx.compose.runtime.Composable
 import com.android.tools.screenshot.PreviewTest
 import io.github.hdcharts.app.screenshot.shared.SCREENSHOT_ANIMATE_ON_START
 import io.github.hdcharts.app.screenshot.shared.SCREENSHOT_LINE_SAMPLE_USE_CASE
-import io.github.hdcharts.app.screenshot.shared.SCREENSHOT_MULTI_LINE_SAMPLE_USE_CASE
+import io.github.hdcharts.app.screenshot.shared.ScreenshotChartSurface
 import io.github.hdcharts.app.screenshot.shared.ScreenshotPreview
-import io.github.hdcharts.app.screenshot.shared.ScreenshotSurface
+import io.github.hdcharts.app.screenshot.shared.categoryIndex
 import io.github.hdcharts.charts.LineChart
-import io.github.hdcharts.charts.model.ChartValueFormatters
 import io.github.hdcharts.charts.model.staticChartSelection
-import io.github.hdcharts.charts.model.toChartData
-import io.github.hdcharts.charts.style.ChartContainerDefaults
-import io.github.hdcharts.sampleshared.fixtures.ChartTestStyleFixtures
+import io.github.hdcharts.charts.style.LineChartDefaults
 
-private const val MULTI_LINE_SELECTION_INDEX = 4
+private const val LINE_SELECTION_LABEL = "Jun 18"
 
-private val MULTI_LINE_SELECTION_DATA =
-    listOf(
-        "P50 Latency" to listOf(122.5, 149.125, 134.333, 126.75, 101.322397132296, 114.667, 129.75),
-        "P95 Latency" to listOf(167.75, 219.2, 176.85, 161.45, 151.31476088115193, 166.42, 188.95),
-    ).toChartData(
-        categories = listOf("14:00:00", "14:00:07", "14:00:14", "14:00:21", "14:00:28", "14:00:35", "14:00:42"),
-    )
+// Near the seasonal peak.
+private const val DENSE_SELECTION_LABEL = "Dec 16"
+
+// Wider than the data (about 10,600 to 19,300) on both sides.
+private const val FIXED_RANGE_MIN = 5_000.0
+private const val FIXED_RANGE_MAX = 25_000.0
 
 @PreviewTest
 @ScreenshotPreview
 @Composable
 fun LineChartDefaultPreview() {
-    ScreenshotSurface {
+    ScreenshotChartSurface {
         val data = SCREENSHOT_LINE_SAMPLE_USE_CASE.initialLineDataSet()
         LineChart(
             data = data,
@@ -41,68 +37,134 @@ fun LineChartDefaultPreview() {
 @PreviewTest
 @ScreenshotPreview
 @Composable
-fun LineChartCustomPreview() {
-    ScreenshotSurface {
+fun LineChartSelectedPointPreview() {
+    ScreenshotChartSurface {
         val data = SCREENSHOT_LINE_SAMPLE_USE_CASE.initialLineDataSet()
         LineChart(
             data = data,
             title = data.series.single().name,
-            style = ChartTestStyleFixtures.lineCustomStyle(chartContainerStyle = ChartContainerDefaults.style()),
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
-        )
-    }
-}
-
-@PreviewTest
-@ScreenshotPreview
-@Composable
-fun MultiLineChartDefaultPreview() {
-    ScreenshotSurface {
-        LineChart(
-            data = SCREENSHOT_MULTI_LINE_SAMPLE_USE_CASE.initialMultiLineSample().dataSet,
-            title = SCREENSHOT_MULTI_LINE_SAMPLE_USE_CASE.initialMultiLineSample().title,
-            valueFormatter = ChartValueFormatters.prefix("$"),
-            animateOnStart = SCREENSHOT_ANIMATE_ON_START,
-        )
-    }
-}
-
-@PreviewTest
-@ScreenshotPreview
-@Composable
-fun MultiLineChartCustomPreview() {
-    ScreenshotSurface {
-        LineChart(
-            data = SCREENSHOT_MULTI_LINE_SAMPLE_USE_CASE.initialMultiLineSample().dataSet,
-            title = SCREENSHOT_MULTI_LINE_SAMPLE_USE_CASE.initialMultiLineSample().title,
-            valueFormatter = ChartValueFormatters.prefix("$"),
-            style =
-                ChartTestStyleFixtures.multiLineCustomStyle(
-                    chartContainerStyle = ChartContainerDefaults.style(),
-                    seriesCount = 3,
-                ),
-            animateOnStart = SCREENSHOT_ANIMATE_ON_START,
-        )
-    }
-}
-
-@PreviewTest
-@ScreenshotPreview
-@Composable
-fun MultiLineChartSelectionLegendPreview() {
-    ScreenshotSurface {
-        LineChart(
-            data = MULTI_LINE_SELECTION_DATA,
-            title = "14:00:28",
-            valueFormatter = ChartValueFormatters.suffix(" ms"),
-            style =
-                ChartTestStyleFixtures.multiLineCustomStyle(
-                    chartContainerStyle = ChartContainerDefaults.style(),
-                    seriesCount = MULTI_LINE_SELECTION_DATA.series.size,
-                ),
             interactionEnabled = false,
+            selection = staticChartSelection(data.categoryIndex(LINE_SELECTION_LABEL)),
+        )
+    }
+}
+
+@PreviewTest
+@ScreenshotPreview
+@Composable
+fun LineChartDensePreview() {
+    ScreenshotChartSurface {
+        val data = SCREENSHOT_LINE_SAMPLE_USE_CASE.initialDenseLineDataSet()
+        LineChart(
+            data = data,
+            title = data.series.single().name,
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
-            selection = staticChartSelection(MULTI_LINE_SELECTION_INDEX),
+        )
+    }
+}
+
+/**
+ * In dense data, selecting a point highlights the bucket that contains it. Interaction stays on
+ * so the expand toggle shows next to the selection.
+ */
+@PreviewTest
+@ScreenshotPreview
+@Composable
+fun LineChartDenseSelectedPointPreview() {
+    ScreenshotChartSurface {
+        val data = SCREENSHOT_LINE_SAMPLE_USE_CASE.initialDenseLineDataSet()
+        LineChart(
+            data = data,
+            title = data.series.single().name,
+            animateOnStart = SCREENSHOT_ANIMATE_ON_START,
+            selection = staticChartSelection(data.categoryIndex(DENSE_SELECTION_LABEL)),
+        )
+    }
+}
+
+@PreviewTest
+@ScreenshotPreview
+@Composable
+fun LineChartNegativeValuesPreview() {
+    ScreenshotChartSurface {
+        val data = SCREENSHOT_LINE_SAMPLE_USE_CASE.initialSignedLineDataSet()
+        LineChart(
+            data = data,
+            title = data.series.single().name,
+            animateOnStart = SCREENSHOT_ANIMATE_ON_START,
+        )
+    }
+}
+
+@PreviewTest
+@ScreenshotPreview
+@Composable
+fun LineChartFixedRangePreview() {
+    ScreenshotChartSurface {
+        val data = SCREENSHOT_LINE_SAMPLE_USE_CASE.initialLineDataSet()
+        LineChart(
+            data = data,
+            title = data.series.single().name,
+            style =
+                LineChartDefaults.style(
+                    range = LineChartDefaults.range(min = FIXED_RANGE_MIN, max = FIXED_RANGE_MAX),
+                ),
+            animateOnStart = SCREENSHOT_ANIMATE_ON_START,
+        )
+    }
+}
+
+@PreviewTest
+@ScreenshotPreview
+@Composable
+fun LineChartPointsPreview() {
+    ScreenshotChartSurface {
+        val data = SCREENSHOT_LINE_SAMPLE_USE_CASE.initialLineDataSet()
+        LineChart(
+            data = data,
+            title = data.series.single().name,
+            style = LineChartDefaults.style(points = LineChartDefaults.points(visible = true)),
+            animateOnStart = SCREENSHOT_ANIMATE_ON_START,
+        )
+    }
+}
+
+@PreviewTest
+@ScreenshotPreview
+@Composable
+fun LineChartStraightLinesPreview() {
+    ScreenshotChartSurface {
+        val data = SCREENSHOT_LINE_SAMPLE_USE_CASE.initialLineDataSet()
+        LineChart(
+            data = data,
+            title = data.series.single().name,
+            style = LineChartDefaults.style(line = LineChartDefaults.line(bezier = false)),
+            animateOnStart = SCREENSHOT_ANIMATE_ON_START,
+        )
+    }
+}
+
+/** With the axis lines and labels hidden, the chart works as a sparkline. */
+@PreviewTest
+@ScreenshotPreview
+@Composable
+fun LineChartHiddenAxisPreview() {
+    ScreenshotChartSurface {
+        val data = SCREENSHOT_LINE_SAMPLE_USE_CASE.initialLineDataSet()
+        LineChart(
+            data = data,
+            title = data.series.single().name,
+            style =
+                LineChartDefaults.style(
+                    axis =
+                        LineChartDefaults.axis(
+                            visible = false,
+                            xLabels = LineChartDefaults.xLabels(visible = false),
+                            yLabels = LineChartDefaults.yLabels(visible = false),
+                        ),
+                ),
+            animateOnStart = SCREENSHOT_ANIMATE_ON_START,
         )
     }
 }

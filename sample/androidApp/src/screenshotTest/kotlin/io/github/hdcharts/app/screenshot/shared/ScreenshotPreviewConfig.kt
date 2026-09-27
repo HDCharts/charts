@@ -7,14 +7,13 @@ internal const val PREVIEW_DEVICE: String = "spec:width=411dp,height=891dp,dpi=4
 internal const val PREVIEW_DEVICE_TABLET: String = "spec:width=834dp,height=1194dp,dpi=264"
 internal const val PREVIEW_DEVICE_TABLET_LANDSCAPE: String = "spec:width=1194dp,height=834dp,dpi=264"
 
+/**
+ * Phone, portrait tablet, and landscape tablet cover narrow, tall, and wide layouts. Dark mode only
+ * changes colors, so it runs at the landscape tablet size, which the docs screenshots page shows best.
+ */
 @Preview(
     name = "Light",
     uiMode = Configuration.UI_MODE_NIGHT_NO,
-    device = PREVIEW_DEVICE,
-)
-@Preview(
-    name = "Dark",
-    uiMode = Configuration.UI_MODE_NIGHT_YES,
     device = PREVIEW_DEVICE,
 )
 @Preview(
@@ -25,6 +24,11 @@ internal const val PREVIEW_DEVICE_TABLET_LANDSCAPE: String = "spec:width=1194dp,
 @Preview(
     name = "Light Tablet Landscape",
     uiMode = Configuration.UI_MODE_NIGHT_NO,
+    device = PREVIEW_DEVICE_TABLET_LANDSCAPE,
+)
+@Preview(
+    name = "Dark Tablet Landscape",
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
     device = PREVIEW_DEVICE_TABLET_LANDSCAPE,
 )
 internal annotation class ScreenshotPreview

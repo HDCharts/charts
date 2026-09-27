@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.hdcharts.app.ui.composable.ChartPreset
 import io.github.hdcharts.charts.model.ChartData
+import io.github.hdcharts.sampleshared.data.RadarSampleData
 import io.github.hdcharts.sampleshared.data.RadarSampleUseCase
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -17,8 +18,7 @@ import kotlinx.coroutines.launch
 private const val LIVE_UPDATE_INTERVAL_MS = 2000L
 
 data class RadarChartState(
-    val basicData: ChartData,
-    val customData: ChartData,
+    val data: ChartData,
     val seriesKeys: List<String> = emptyList(),
     val title: String,
 )
@@ -33,20 +33,13 @@ class RadarChartViewModel(
     private val radarSampleUseCase: RadarSampleUseCase,
 ) : ViewModel() {
     private val initialSample = radarSampleUseCase.initialRadarSample()
-    private val initialDefaultData = radarSampleUseCase.initialRadarDefaultData()
     private val refreshRange = radarSampleUseCase.radarRefreshRange()
     private var liveUpdatesJob: Job? = null
 
     private val _uiState =
         MutableStateFlow(
             RadarChartUiState(
-                chart =
-                    RadarChartState(
-                        basicData = initialDefaultData,
-                        customData = initialSample.customData,
-                        seriesKeys = initialSample.seriesKeys,
-                        title = initialSample.title,
-                    ),
+                chart = initialSample.toChartState(),
                 preset = ChartPreset.Default,
             ),
         )
@@ -55,8 +48,7 @@ class RadarChartViewModel(
 
     fun onPresetSelected(preset: ChartPreset) {
         if (preset == _uiState.value.preset) return
-        applyInitialPresetData(preset)
-        _uiState.update { it.copy(preset = preset) }
+        _uiState.update { it.copy(chart = initialSample.toChartState(), preset = preset) }
     }
 
     fun togglePlaying() {
@@ -64,61 +56,13 @@ class RadarChartViewModel(
     }
 
     fun refresh() {
-        refreshCurrentPreset()
+        val sample = radarSampleUseCase.radarSample(range = refreshRange)
+        _uiState.update { it.copy(chart = sample.toChartState()) }
     }
 
     override fun onCleared() {
         stopLiveUpdates()
         super.onCleared()
-    }
-
-    private fun refreshCurrentPreset() {
-        when (_uiState.value.preset) {
-            ChartPreset.Default -> regenerateBasicData()
-            ChartPreset.Custom -> regenerateCustomData()
-        }
-    }
-
-    private fun regenerateBasicData(range: IntRange = refreshRange) {
-        val data = radarSampleUseCase.radarDefaultData(range = range)
-        _uiState.update { state ->
-            state.copy(chart = state.chart.copy(basicData = data))
-        }
-    }
-
-    private fun regenerateCustomData(range: IntRange = refreshRange) {
-        val sample = radarSampleUseCase.radarCustomSample(range = range)
-        _uiState.update { state ->
-            state.copy(
-                chart =
-                    state.chart.copy(
-                        customData = sample.data,
-                        seriesKeys = sample.seriesKeys,
-                    ),
-            )
-        }
-    }
-
-    private fun applyInitialPresetData(preset: ChartPreset) {
-        when (preset) {
-            ChartPreset.Default -> {
-                _uiState.update { state ->
-                    state.copy(chart = state.chart.copy(basicData = initialDefaultData))
-                }
-            }
-
-            ChartPreset.Custom -> {
-                _uiState.update { state ->
-                    state.copy(
-                        chart =
-                            state.chart.copy(
-                                customData = initialSample.customData,
-                                seriesKeys = initialSample.seriesKeys,
-                            ),
-                    )
-                }
-            }
-        }
     }
 
     private fun setPlaying(playing: Boolean) {
@@ -147,4 +91,11 @@ class RadarChartViewModel(
         liveUpdatesJob?.cancel()
         liveUpdatesJob = null
     }
+
+    private fun RadarSampleData.toChartState(): RadarChartState =
+        RadarChartState(
+            data = data,
+            seriesKeys = seriesKeys,
+            title = title,
+        )
 }

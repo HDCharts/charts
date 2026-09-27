@@ -27,6 +27,8 @@ data class LiveLatencyMultiSeriesWindow(
 interface LiveLatencyTimelineUseCase {
     val multiSeriesKeys: List<String>
 
+    val multiSeriesTitle: String
+
     fun createSingleWindow(
         windowSize: Int,
         endTick: Int? = null,

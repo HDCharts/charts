@@ -14,6 +14,8 @@ import kotlinx.coroutines.flow.asStateFlow
 private const val TITLE = "Household Energy"
 
 class PieViewModel : ViewModel() {
+    val title: String = TITLE
+
     val slices: StateFlow<List<PieSlice>> = MutableStateFlow(buildSlices()).asStateFlow()
 
     private fun buildSlices(): List<PieSlice> =
