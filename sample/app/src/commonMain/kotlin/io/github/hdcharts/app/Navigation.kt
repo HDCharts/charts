@@ -22,6 +22,7 @@ import hdcharts.sample_shared.generated.resources.ic_pie_chart
 import hdcharts.sample_shared.generated.resources.ic_radar_chart
 import hdcharts.sample_shared.generated.resources.ic_stacked_bar_chart
 import io.github.hdcharts.app.demo.bar.BarChartDemo
+import io.github.hdcharts.app.demo.debug.DebugChartsScreen
 import io.github.hdcharts.app.demo.histogram.HistogramChartDemo
 import io.github.hdcharts.app.demo.line.LineChartDemo
 import io.github.hdcharts.app.demo.multiline.MultiLineChartDemo
@@ -40,6 +41,10 @@ sealed class ChartDestination(
 ) {
     object MainScreen {
         const val ROUTE = "main"
+    }
+
+    object DebugChartsScreen {
+        const val ROUTE = "debugCharts"
     }
 
     data object PieChartScreen :
@@ -147,6 +152,10 @@ fun Navigation(
 
         composable(ChartDestination.RadarChartScreen.route) {
             RadarChartDemo()
+        }
+
+        composable(ChartDestination.DebugChartsScreen.ROUTE) {
+            DebugChartsScreen()
         }
     }
 }

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -150,7 +151,8 @@ private fun PieChartContent(
 
     BoxWithConstraints(modifier = modifier) {
         val boundedHeight = maxHeight != Dp.Infinity
-        Column {
+        // Match the width the caller asks for, so the plot centers in a wide chart.
+        Column(modifier = Modifier.widthIn(min = minWidth)) {
             val displayedTitle = if (hasSelection) labels[forcedSelectedIndex] else title.orEmpty()
             if (displayedTitle.isNotBlank()) {
                 if (hasSelection) {
@@ -192,7 +194,12 @@ private fun PieChartContent(
                 }
             val plotModifier =
                 if (boundedHeight) Modifier.weight(1f, fill = false) else Modifier
-            Box(modifier = plotModifier.aspectRatio(1f)) {
+            Box(
+                modifier =
+                    plotModifier
+                        .aspectRatio(1f)
+                        .align(Alignment.CenterHorizontally),
+            ) {
                 PieChart(
                     chartData = chartData,
                     colors = colors,

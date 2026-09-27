@@ -125,6 +125,9 @@ fun MainScreen(viewModel: MainViewModel = koinViewModel()) {
                                     onDarkModeToggle = viewModel::toggleDarkMode,
                                     onDynamicToggle = viewModel::toggleDynamicColor,
                                     onClose = {},
+                                    onDebugChartsClick = {
+                                        navController.navigate(ChartDestination.DebugChartsScreen.ROUTE)
+                                    },
                                     showCloseButton = false,
                                 )
                             }
@@ -168,6 +171,10 @@ fun MainScreen(viewModel: MainViewModel = koinViewModel()) {
                                     onDarkModeToggle = viewModel::toggleDarkMode,
                                     onDynamicToggle = viewModel::toggleDynamicColor,
                                     onClose = { scope.launch { drawerState.close() } },
+                                    onDebugChartsClick = {
+                                        navController.navigate(ChartDestination.DebugChartsScreen.ROUTE)
+                                        scope.launch { drawerState.close() }
+                                    },
                                 )
                             },
                         ) {

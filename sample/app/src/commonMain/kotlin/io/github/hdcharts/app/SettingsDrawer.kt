@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Tune
@@ -75,6 +76,7 @@ fun SettingsDrawerContent(
     onDarkModeToggle: () -> Unit,
     onDynamicToggle: () -> Unit,
     onClose: () -> Unit,
+    onDebugChartsClick: () -> Unit,
     showCloseButton: Boolean = true,
 ) {
     val hasDynamicColors = LocalHasDynamicColorFeature.current
@@ -152,6 +154,18 @@ fun SettingsDrawerContent(
                 )
             },
             onClick = { uriHandler.openUri(githubUrl) },
+        )
+        DrawerSettingCard(
+            title = "Debug charts",
+            subtitle = "Chart edge cases for manual checks",
+            leading = {
+                Icon(
+                    imageVector = Icons.Filled.BugReport,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                )
+            },
+            onClick = onDebugChartsClick,
         )
         Spacer(modifier = Modifier.height(Dimens.drawerPadding))
     }
