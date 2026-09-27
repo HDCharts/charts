@@ -56,11 +56,11 @@ fun LineChart(
         modifier = modifier,
         style = style,
         title = title,
-    ) { internalData, internalStyle ->
+    ) { internalData ->
         LineChartImpl(
             data = internalData,
             modifier = modifier,
-            style = internalStyle,
+            style = style,
             interactionEnabled = interactionEnabled,
             animateOnStart = animateOnStart,
             selectedPointIndex = selectedIndex,

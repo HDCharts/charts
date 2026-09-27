@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import io.github.hdcharts.charts.StackedBarChart
 import io.github.hdcharts.charts.internal.TestTags
 import io.github.hdcharts.charts.mock.MockTest.colors
+import io.github.hdcharts.charts.model.ChartData
 import io.github.hdcharts.charts.model.ChartSeries
 import io.github.hdcharts.charts.model.chartDataOf
 import io.github.hdcharts.charts.model.staticChartSelection
@@ -241,6 +242,28 @@ class StackedBarChartTest {
 
             onAllNodesWithTag(TestTags.STACKED_BAR_CHART_X_AXIS_LABELS).assertCountEquals(0)
             onNodeWithTag(TestTags.STACKED_BAR_CHART_Y_AXIS_LABELS).assertIsDisplayed()
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun stackedBarChart_withoutCategories_doesNotRenderXAxisLayer() =
+        runComposeUiTest {
+            setContent {
+                StackedBarChart(data = ChartData(categories = emptyList(), series = validData().series))
+            }
+
+            onAllNodesWithTag(TestTags.STACKED_BAR_CHART_X_AXIS_LABELS).assertCountEquals(0)
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun stackedBarChart_withBlankCategoryLabels_doesNotRenderXAxisLayer() =
+        runComposeUiTest {
+            setContent {
+                StackedBarChart(data = ChartData(categories = listOf("", " ", ""), series = validData().series))
+            }
+
+            onAllNodesWithTag(TestTags.STACKED_BAR_CHART_X_AXIS_LABELS).assertCountEquals(0)
         }
 
     @OptIn(ExperimentalTestApi::class)

@@ -13,6 +13,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.hdcharts.charts.internal.common.composable.Legend
 import io.github.hdcharts.charts.internal.common.model.MultiChartData
+import io.github.hdcharts.charts.style.LineChartStyle
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -21,7 +22,7 @@ import kotlinx.collections.immutable.toImmutableList
 @Composable
 internal fun LineChartFrame(
     data: MultiChartData,
-    style: LineChartInternalStyle,
+    style: LineChartStyle,
     colors: ImmutableList<Color>,
     modifier: Modifier,
     legendLabels: ImmutableList<String> = persistentListOf(),
@@ -38,7 +39,7 @@ internal fun LineChartFrame(
                 plot()
             }
 
-            if (style.legendVisible && data.items.size > 1) {
+            if (style.legend.visible && data.items.size > 1) {
                 Legend(
                     chartContainerStyle = style.chartContainerStyle,
                     legend = data.items.map { it.label }.toImmutableList(),
@@ -52,7 +53,7 @@ internal fun LineChartFrame(
 
 @Composable
 internal fun rememberLineColors(
-    style: LineChartInternalStyle,
+    style: LineChartStyle,
     count: Int,
 ): ImmutableList<Color> =
     remember(count, style.line) {
@@ -64,14 +65,14 @@ internal fun rememberLineColors(
 
 /** Header padding shared by both line charts, so their titles line up. */
 internal fun lineHeaderModifier(
-    style: LineChartInternalStyle,
+    contentPadding: Dp,
     bottom: Dp = 0.dp,
 ): Modifier =
     Modifier
         .fillMaxWidth()
         .padding(
-            top = style.chartContainerStyle.contentPadding,
-            start = style.chartContainerStyle.contentPadding,
-            end = style.chartContainerStyle.contentPadding,
+            top = contentPadding,
+            start = contentPadding,
+            end = contentPadding,
             bottom = bottom,
         )

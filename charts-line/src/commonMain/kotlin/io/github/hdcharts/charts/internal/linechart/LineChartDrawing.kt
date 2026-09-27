@@ -11,11 +11,11 @@ import androidx.compose.ui.graphics.drawscope.clipRect
 import io.github.hdcharts.charts.internal.ANIMATION_TARGET
 import io.github.hdcharts.charts.internal.NO_SELECTION
 import io.github.hdcharts.charts.internal.common.bezier.cubicControlPointsForSegment
-import io.github.hdcharts.charts.internal.linechart.LineChartInternalStyle
+import io.github.hdcharts.charts.style.LineChartStyle
 
 internal fun DrawScope.drawChartPath(
     values: List<Float>,
-    style: LineChartInternalStyle,
+    style: LineChartStyle,
     lineAnimationProgress: Float,
     markerRevealProgress: Float,
     bezierTension: Float,
@@ -152,18 +152,18 @@ internal fun DrawScope.drawChartPath(
 
 private fun DrawScope.tryDrawPathPoints(
     values: List<Float>,
-    style: LineChartInternalStyle,
+    style: LineChartStyle,
     markerRevealProgress: Float,
     stepX: Float,
     horizontalOffsetPx: Float,
     verticalInset: Float,
 ) {
-    if (!style.pointVisible || values.size <= 1 || size.width <= 0f || markerRevealProgress <= 0f) return
+    if (!style.points.visible || values.size <= 1 || size.width <= 0f || markerRevealProgress <= 0f) return
 
     val progress = markerRevealProgress.coerceIn(0f, 1f)
-    val animatedColor = style.pointColor.copy(alpha = style.pointColor.alpha * progress)
+    val animatedColor = style.points.color.copy(alpha = style.points.color.alpha * progress)
     val animatedRadius =
-        style.pointSize.toPx() * (MARKER_REVEAL_START_SCALE + (1f - MARKER_REVEAL_START_SCALE) * progress)
+        style.points.size.toPx() * (MARKER_REVEAL_START_SCALE + (1f - MARKER_REVEAL_START_SCALE) * progress)
 
     for (i in values.indices) {
         val x = horizontalOffsetPx + (i * stepX)
@@ -184,11 +184,11 @@ private fun DrawScope.tryDrawPathPoints(
 internal fun DrawScope.drawDragMarker(
     touchX: Float,
     values: List<Float>,
-    style: LineChartInternalStyle,
+    style: LineChartStyle,
     bezierTension: Float,
     verticalInset: Float,
 ) {
-    if ((!style.dragPointVisible && !style.pointVisible) || values.size <= 1 || size.width <= 0f) return
+    if ((!style.selection.visible && !style.points.visible) || values.size <= 1 || size.width <= 0f) return
 
     val selectedIndex =
         selectedIndexForTouch(
@@ -200,7 +200,7 @@ internal fun DrawScope.drawDragMarker(
 
     val maxDragY = (size.height - verticalInset).coerceAtLeast(verticalInset)
 
-    if (style.pointVisible) {
+    if (style.points.visible) {
         val stepX = size.width / (values.size - 1)
         val selectedX = selectedIndex * stepX
         val selectedY =
@@ -211,12 +211,12 @@ internal fun DrawScope.drawDragMarker(
             )
         drawCircle(
             center = Offset(selectedX, selectedY),
-            radius = style.dragActivePointSize.toPx(),
-            color = style.dragPointColor,
+            radius = style.selection.activeSize.toPx(),
+            color = style.selection.color,
         )
     }
 
-    if (style.dragPointVisible) {
+    if (style.selection.visible) {
         val nearestPoint =
             findNearestPoint(
                 touchX = touchX,
@@ -235,8 +235,8 @@ internal fun DrawScope.drawDragMarker(
 
         drawCircle(
             center = draggingCircleOffset,
-            radius = style.dragPointSize.toPx(),
-            color = style.dragPointColor,
+            radius = style.selection.size.toPx(),
+            color = style.selection.color,
         )
     }
 }

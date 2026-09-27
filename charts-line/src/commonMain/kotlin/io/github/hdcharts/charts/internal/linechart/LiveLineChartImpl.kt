@@ -6,6 +6,7 @@ import androidx.compose.ui.Modifier
 import io.github.hdcharts.charts.internal.common.composable.ChartHeaderLayout
 import io.github.hdcharts.charts.internal.common.model.MultiChartData
 import io.github.hdcharts.charts.model.ChartValueFormatter
+import io.github.hdcharts.charts.style.LineChartStyle
 import kotlin.time.Duration
 
 /** Display-only line chart: no dense mode, zoom, scrolling or selection. */
@@ -13,7 +14,7 @@ import kotlin.time.Duration
 internal fun LiveLineChartImpl(
     data: MultiChartData,
     modifier: Modifier,
-    style: LineChartInternalStyle,
+    style: LineChartStyle,
     shiftDuration: Duration,
     animateOnStart: Boolean,
     axisValueFormatter: ChartValueFormatter,
@@ -31,7 +32,7 @@ internal fun LiveLineChartImpl(
                     title = data.title,
                     titleTextStyle = style.chartContainerStyle.styleTitle,
                     showControls = false,
-                    modifier = lineHeaderModifier(style = style),
+                    modifier = lineHeaderModifier(contentPadding = style.chartContainerStyle.contentPadding),
                 )
             }
         },

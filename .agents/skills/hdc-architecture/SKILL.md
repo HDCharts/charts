@@ -24,14 +24,16 @@ and sample integration.
 ```text
 Public chart models and styles
         -> chart validation
-        -> internal render models and adapters
+        -> internal render models for data
         -> Compose layout, interaction, and drawing
         -> public selection callbacks and visible readouts
 ```
 
 - Validate at the public chart boundary before conversion.
-- Keep public models, styles, formatters, and selections separate from internal
+- Keep public models, formatters, and selections separate from internal
   renderer data.
+- Renderers read the public grouped chart style directly. Pass values the
+  style cannot express, such as data-derived flags, as prepared parameters.
 - Preserve source indices through dense or compact rendering.
 - Keep formatting and fallback policies at the owning boundary; renderers use
   prepared values and geometry.

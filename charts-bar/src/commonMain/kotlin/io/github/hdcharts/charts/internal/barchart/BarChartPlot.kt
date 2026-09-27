@@ -44,7 +44,7 @@ fun BarChartInternalPlot(
             BarChart(
                 chartData = chartData,
                 title = title.orEmpty(),
-                style = style.toInternal(),
+                style = style,
                 interactionEnabled = interactionEnabled,
                 animateOnStart = animateOnStart,
                 selectedBarIndex = selectedIndex,

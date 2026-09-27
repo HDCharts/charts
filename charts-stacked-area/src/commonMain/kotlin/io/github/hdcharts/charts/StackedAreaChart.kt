@@ -13,7 +13,6 @@ import io.github.hdcharts.charts.internal.common.composable.Legend
 import io.github.hdcharts.charts.internal.common.model.ChartDataItem
 import io.github.hdcharts.charts.internal.common.model.MultiChartData
 import io.github.hdcharts.charts.internal.stackedareachart.StackedAreaChart
-import io.github.hdcharts.charts.internal.stackedareachart.toInternal
 import io.github.hdcharts.charts.model.ChartData
 import io.github.hdcharts.charts.model.ChartSelection
 import io.github.hdcharts.charts.model.ChartValueFormatters
@@ -55,7 +54,6 @@ fun StackedAreaChart(
     }
 
     val internalData = remember(data, title) { toInternalStackedAreaData(data, title) }
-    val internalStyle = style.toInternal(showXAxisLabels = data.categories.isNotEmpty())
     val colors =
         remember(style.fill, data.series.size) {
             style.fill
@@ -86,7 +84,7 @@ fun StackedAreaChart(
                 StackedAreaChart(
                     data = internalData,
                     title = effectiveTitle,
-                    style = internalStyle,
+                    style = style,
                     areaColors = colors,
                     lineColors = lineColors,
                     interactionEnabled = interactionEnabled,

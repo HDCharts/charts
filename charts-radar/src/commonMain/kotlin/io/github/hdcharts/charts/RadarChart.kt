@@ -20,7 +20,6 @@ import io.github.hdcharts.charts.internal.common.model.MultiChartData
 import io.github.hdcharts.charts.internal.radarchart.RadarChart
 import io.github.hdcharts.charts.internal.radarchart.RadarLegend
 import io.github.hdcharts.charts.internal.radarchart.categoryColors
-import io.github.hdcharts.charts.internal.radarchart.toInternal
 import io.github.hdcharts.charts.internal.validateRadarData
 import io.github.hdcharts.charts.internal.validateSizes
 import io.github.hdcharts.charts.model.ChartData
@@ -59,7 +58,6 @@ fun RadarChart(
     )
 
     val internalData = remember(data, title) { toInternalRadarData(data, title) }
-    val internalStyle = style.toInternal()
     val hasSingleSeries = data.series.size == 1
     val density = LocalDensity.current
     val errors =
@@ -91,8 +89,8 @@ fun RadarChart(
         }
     val categories: ImmutableList<String> = data.categories.toImmutableList()
     val categoryColorsList =
-        remember(internalStyle, categories.size) {
-            categoryColors(internalStyle, categories.size)
+        remember(style.categories, categories.size) {
+            categoryColors(style = style.categories, count = categories.size)
         }
     val seriesNames = data.series.map { it.name.orEmpty() }.toImmutableList()
     val hasMultipleSeries = data.series.size > 1
@@ -123,7 +121,7 @@ fun RadarChart(
             Box(modifier = plotModifier.aspectRatio(1f)) {
                 RadarChart(
                     data = internalData,
-                    style = internalStyle,
+                    style = style,
                     colors = lineColors,
                     categoryColors = categoryColorsList,
                     axisLabels = categories,
