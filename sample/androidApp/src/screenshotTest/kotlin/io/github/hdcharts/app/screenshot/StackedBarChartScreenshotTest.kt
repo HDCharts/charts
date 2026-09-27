@@ -4,52 +4,26 @@ import androidx.compose.runtime.Composable
 import com.android.tools.screenshot.PreviewTest
 import io.github.hdcharts.app.screenshot.shared.SCREENSHOT_ANIMATE_ON_START
 import io.github.hdcharts.app.screenshot.shared.SCREENSHOT_STACKED_BAR_SAMPLE_USE_CASE
+import io.github.hdcharts.app.screenshot.shared.ScreenshotChartSurface
 import io.github.hdcharts.app.screenshot.shared.ScreenshotPreview
-import io.github.hdcharts.app.screenshot.shared.ScreenshotSurface
+import io.github.hdcharts.app.screenshot.shared.categoryIndex
 import io.github.hdcharts.charts.StackedBarChart
 import io.github.hdcharts.charts.model.staticChartSelection
-import io.github.hdcharts.charts.style.ChartContainerDefaults
-import io.github.hdcharts.sampleshared.fixtures.ChartTestStyleFixtures
+import io.github.hdcharts.charts.style.StackedBarChartDefaults
+import io.github.hdcharts.sampleshared.theme.LocalChartColors
+import io.github.hdcharts.sampleshared.theme.seriesColors
+
+// The holiday quarter.
+private const val STACKED_BAR_SELECTION_LABEL = "Q4 '25"
+
+private const val DENSE_SELECTION_LABEL = "Q4 '24"
 
 @PreviewTest
 @ScreenshotPreview
 @Composable
 fun StackedBarChartDefaultPreview() {
-    ScreenshotSurface {
+    ScreenshotChartSurface {
         val sample = SCREENSHOT_STACKED_BAR_SAMPLE_USE_CASE.initialStackedBarSample()
-        StackedBarChart(
-            data = sample.dataSet,
-            title = sample.title,
-            animateOnStart = SCREENSHOT_ANIMATE_ON_START,
-        )
-    }
-}
-
-@PreviewTest
-@ScreenshotPreview
-@Composable
-fun StackedBarChartCustomPreview() {
-    ScreenshotSurface {
-        val sample = SCREENSHOT_STACKED_BAR_SAMPLE_USE_CASE.initialStackedBarSample()
-        StackedBarChart(
-            data = sample.dataSet,
-            title = sample.title,
-            style =
-                ChartTestStyleFixtures.stackedBarCustomStyle(
-                    chartContainerStyle = ChartContainerDefaults.style(),
-                    segmentCount = 4,
-                ),
-            animateOnStart = SCREENSHOT_ANIMATE_ON_START,
-        )
-    }
-}
-
-@PreviewTest
-@ScreenshotPreview
-@Composable
-fun StackedBarChartNoCategoriesPreview() {
-    ScreenshotSurface {
-        val sample = SCREENSHOT_STACKED_BAR_SAMPLE_USE_CASE.initialStackedBarNoCategoriesDataSet()
         StackedBarChart(
             data = sample.dataSet,
             title = sample.title,
@@ -62,14 +36,82 @@ fun StackedBarChartNoCategoriesPreview() {
 @ScreenshotPreview
 @Composable
 fun StackedBarChartSelectedBarPreview() {
-    ScreenshotSurface {
+    ScreenshotChartSurface {
         val sample = SCREENSHOT_STACKED_BAR_SAMPLE_USE_CASE.initialStackedBarSample()
         StackedBarChart(
             data = sample.dataSet,
-            title = sample.dataSet.categories[1],
+            title = STACKED_BAR_SELECTION_LABEL,
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
             interactionEnabled = false,
-            selection = staticChartSelection(1),
+            selection = staticChartSelection(sample.dataSet.categoryIndex(STACKED_BAR_SELECTION_LABEL)),
+        )
+    }
+}
+
+@PreviewTest
+@ScreenshotPreview
+@Composable
+fun StackedBarChartNoCategoriesPreview() {
+    ScreenshotChartSurface {
+        val sample = SCREENSHOT_STACKED_BAR_SAMPLE_USE_CASE.initialStackedBarNoCategoriesDataSet()
+        StackedBarChart(
+            data = sample.dataSet,
+            title = sample.title,
+            animateOnStart = SCREENSHOT_ANIMATE_ON_START,
+        )
+    }
+}
+
+@PreviewTest
+@ScreenshotPreview
+@Composable
+fun StackedBarChartDensePreview() {
+    ScreenshotChartSurface {
+        val sample = SCREENSHOT_STACKED_BAR_SAMPLE_USE_CASE.initialDenseStackedBarSample()
+        StackedBarChart(
+            data = sample.dataSet,
+            title = sample.title,
+            animateOnStart = SCREENSHOT_ANIMATE_ON_START,
+        )
+    }
+}
+
+/**
+ * In dense data, selecting a bar highlights the bucket that contains it.
+ * Interaction stays on so the expand toggle shows next to the selection.
+ */
+@PreviewTest
+@ScreenshotPreview
+@Composable
+fun StackedBarChartDenseSelectedBarPreview() {
+    ScreenshotChartSurface {
+        val sample = SCREENSHOT_STACKED_BAR_SAMPLE_USE_CASE.initialDenseStackedBarSample()
+        StackedBarChart(
+            data = sample.dataSet,
+            title = DENSE_SELECTION_LABEL,
+            animateOnStart = SCREENSHOT_ANIMATE_ON_START,
+            selection = staticChartSelection(sample.dataSet.categoryIndex(DENSE_SELECTION_LABEL)),
+        )
+    }
+}
+
+@PreviewTest
+@ScreenshotPreview
+@Composable
+fun StackedBarChartSegmentColorsPreview() {
+    ScreenshotChartSurface {
+        val sample = SCREENSHOT_STACKED_BAR_SAMPLE_USE_CASE.initialStackedBarSample()
+        StackedBarChart(
+            data = sample.dataSet,
+            title = sample.title,
+            style =
+                StackedBarChartDefaults.style(
+                    segments =
+                        StackedBarChartDefaults.segments(
+                            colors = LocalChartColors.current.seriesColors(sample.segmentKeys.size),
+                        ),
+                ),
+            animateOnStart = SCREENSHOT_ANIMATE_ON_START,
         )
     }
 }

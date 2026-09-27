@@ -3,42 +3,79 @@ package io.github.hdcharts.sampleshared.data.impl
 import io.github.hdcharts.charts.model.ChartData
 import io.github.hdcharts.charts.model.toChartData
 import io.github.hdcharts.sampleshared.data.LineSampleUseCase
+import kotlin.random.Random
 
 internal class DefaultLineSampleUseCase : LineSampleUseCase {
     companion object {
-        private const val DEFAULT_TITLE = "Daily Support Tickets"
-        private val REFRESH_RANGE = 10..100
+        private const val TITLE = "Net Revenue (\$K)"
+        private const val DEFAULT_DAYS = 30
+        private const val DENSE_DAYS = 365
+        private const val SIGNED_MONTHS = 24
+        private const val JUNE = 5
+
+        // June 1 is a Monday; weekends dip.
+        private val weekdayFactors = listOf(1.0, 1.03, 1.05, 1.04, 0.97, 0.8, 0.76)
     }
 
-    private val defaultValues = listOf(42f, 38f, 45f, 51f, 47f, 54f, 49f)
-    private val defaultLabels = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
-
-    override fun initialLineDataSet(): ChartData =
-        defaultValues
-            .map { it.toDouble() }
-            .toChartData(categories = defaultLabels, seriesName = DEFAULT_TITLE)
-
-    override fun lineRefreshRange(): IntRange = REFRESH_RANGE
-
-    override fun lineRefreshPointsCount(): Int = defaultValues.size
-
-    override fun lineDataSet(
-        range: IntRange,
-        numOfPoints: IntRange,
-    ): ChartData {
-        val points = numOfPoints.random()
-        val values = List(points) { range.random() }
-        return values
-            .map { it.toDouble() }
-            .toChartData(categories = labelsForPoints(points), seriesName = DEFAULT_TITLE)
+    override fun initialLineDataSet(): ChartData {
+        val baseline =
+            SampleSignals.trend(
+                count = DEFAULT_DAYS,
+                start = 12_400.0,
+                end = 18_600.0,
+                random = Random(11),
+                noise = 380.0,
+            )
+        val values = baseline.mapIndexed { day, value -> value * weekdayFactors[day % weekdayFactors.size] }
+        return SampleSignals
+            .rounded(values)
+            .toChartData(categories = SampleLabels.days(DEFAULT_DAYS, startMonth = JUNE), seriesName = TITLE)
     }
 
-    private fun labelsForPoints(points: Int): List<String> {
-        if (points <= defaultLabels.size) {
-            return defaultLabels.take(points)
-        }
-        val extrasCount = points - defaultLabels.size
-        val extras = List(extrasCount) { index -> "Day ${defaultLabels.size + index + 1}" }
-        return defaultLabels + extras
+    override fun initialDenseLineDataSet(): ChartData {
+        val random = Random(23)
+        val weekly =
+            SampleSignals.trend(
+                count = DENSE_DAYS,
+                start = 0.0,
+                end = 0.0,
+                random = random,
+                cycleAmplitude = 70.0,
+            )
+        val values =
+            SampleSignals
+                .trend(
+                    count = DENSE_DAYS,
+                    start = 820.0,
+                    end = 1_340.0,
+                    random = random,
+                    cycleAmplitude = 150.0,
+                    cyclePeriod = DENSE_DAYS.toDouble(),
+                    // Peaks in mid-December, lowest in mid-June.
+                    cyclePhase = DENSE_DAYS * 0.3,
+                    noise = 55.0,
+                ).zip(weekly) { trend, cycle -> trend + cycle }
+        return SampleSignals
+            .rounded(values)
+            .toChartData(categories = SampleLabels.days(DENSE_DAYS), seriesName = TITLE)
+    }
+
+    override fun initialSignedLineDataSet(): ChartData {
+        val values =
+            SampleSignals.trend(
+                count = SIGNED_MONTHS,
+                start = -9.5,
+                end = 13.8,
+                random = Random(5),
+                cycleAmplitude = 3.6,
+                cyclePeriod = 6.0,
+                noise = 1.8,
+            )
+        return SampleSignals
+            .rounded(values, decimals = 1)
+            .toChartData(
+                categories = SampleLabels.monthsWithYear(SIGNED_MONTHS, startYear = 2024),
+                seriesName = TITLE,
+            )
     }
 }

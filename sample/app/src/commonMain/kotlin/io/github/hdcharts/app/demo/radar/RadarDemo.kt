@@ -53,12 +53,12 @@ fun RadarChartDemo(viewModel: RadarChartViewModel = koinViewModel()) {
         when (uiState.preset) {
             ChartPreset.Default ->
                 RadarChart(
-                    data = uiState.chart.basicData,
+                    data = uiState.chart.data,
                     title = uiState.chart.title,
                 )
             ChartPreset.Custom ->
                 RadarChart(
-                    data = uiState.chart.customData,
+                    data = uiState.chart.data,
                     title = uiState.chart.title,
                     style =
                         ChartTestStyleFixtures.radarCustomStyle(

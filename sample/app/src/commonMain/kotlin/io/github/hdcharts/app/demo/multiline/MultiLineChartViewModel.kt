@@ -50,7 +50,6 @@ class MultiLineChartViewModel(
         const val MAX_SUPPORTED_VALUE = 400
         private const val DEFAULT_MIN_VALUE = 90
         private const val DEFAULT_MAX_VALUE = 220
-        private const val CHART_TITLE = "API Latency (P50 vs P95)"
     }
 
     private val initialControlsState = LiveTimelineControlsState()
@@ -245,7 +244,7 @@ class MultiLineChartViewModel(
         MultiLineChartState(
             dataSet = liveLatencyTimelineUseCase.toMultiDataSet(window),
             seriesKeys = liveLatencyTimelineUseCase.multiSeriesKeys,
-            title = CHART_TITLE,
+            title = liveLatencyTimelineUseCase.multiSeriesTitle,
         )
 
     private fun setPlaying(playing: Boolean) {
@@ -297,7 +296,7 @@ class MultiLineChartViewModel(
         return MultiLineChartState(
             dataSet = multiDataSet,
             seriesKeys = seriesKeys,
-            title = CHART_TITLE,
+            title = liveLatencyTimelineUseCase.multiSeriesTitle,
         )
     }
 }

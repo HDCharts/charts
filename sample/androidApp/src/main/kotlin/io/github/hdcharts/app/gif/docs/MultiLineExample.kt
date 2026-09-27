@@ -18,6 +18,8 @@ import kotlinx.coroutines.flow.asStateFlow
 private const val TITLE = "Weekly Revenue by Channel"
 
 class MultiLineViewModel : ViewModel() {
+    val title: String = TITLE
+
     val chartData: StateFlow<ChartData> = MutableStateFlow(buildChartData()).asStateFlow()
 
     private fun buildChartData(): ChartData {

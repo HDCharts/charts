@@ -4,13 +4,12 @@ import io.github.hdcharts.charts.model.ChartData
 import io.github.hdcharts.charts.model.ChartSeries
 import io.github.hdcharts.charts.model.chartDataOf
 import io.github.hdcharts.charts.model.toChartData
-import io.github.hdcharts.sampleshared.data.RadarCustomSampleData
 import io.github.hdcharts.sampleshared.data.RadarSampleData
 import io.github.hdcharts.sampleshared.data.RadarSampleUseCase
 
 internal class DefaultRadarSampleUseCase : RadarSampleUseCase {
     companion object {
-        private const val DEFAULT_TITLE = "Platform Readiness Score"
+        private const val TITLE = "Platform Readiness Score"
         private val REFRESH_RANGE = 30..100
     }
 
@@ -23,79 +22,42 @@ internal class DefaultRadarSampleUseCase : RadarSampleUseCase {
             "Scalability",
             "Observability",
         )
-    private val radarDefaultValues = listOf(84.0, 79.0, 76.0, 88.0, 82.0, 74.0)
-    private val radarBasicItems =
-        listOf(
-            "Release 2.2" to listOf(80.0, 75.0, 72.0, 85.0, 79.0, 70.0),
-            "Release 2.3" to listOf(86.0, 82.0, 78.0, 89.0, 84.0, 77.0),
-        )
-    private val radarInitialItems =
-        listOf(
-            "Android App" to listOf(88.0, 81.0, 79.0, 90.0, 83.0, 76.0),
-            "iOS App" to listOf(84.0, 86.0, 82.0, 88.0, 80.0, 79.0),
-            "Web App" to listOf(78.0, 74.0, 85.0, 83.0, 88.0, 84.0),
-        )
-    private val radarEdgeValues = listOf(40.0, 55.0, 100.0, 45.0, 70.0, 60.0)
 
-    override fun initialRadarSample(): RadarSampleData =
-        RadarSampleData(
-            basicData =
-                radarBasicItems.toChartData(categories = radarCategories),
-            customData =
-                radarInitialItems.toChartData(categories = radarCategories),
-            seriesKeys = radarInitialItems.map { it.first },
-            title = DEFAULT_TITLE,
+    // Scores out of 100. The radar scales from the lowest to the highest value in the data,
+    // so the scores spread wide enough for low and high to read at a glance.
+    private val radarSingleSeriesValues = listOf(92.0, 64.0, 78.0, 97.0, 48.0, 71.0)
+    private val radarItems =
+        listOf(
+            "Android App" to listOf(91.0, 72.0, 68.0, 85.0, 88.0, 54.0),
+            "iOS App" to listOf(84.0, 93.0, 90.0, 94.0, 61.0, 48.0),
+            "Web App" to listOf(62.0, 70.0, 86.0, 73.0, 95.0, 90.0),
         )
 
-    override fun initialRadarDefaultData(): ChartData =
+    override fun initialRadarSample(): RadarSampleData = radarSample(radarItems, radarCategories)
+
+    override fun initialRadarNoCategoriesSample(): RadarSampleData = radarSample(radarItems, emptyList())
+
+    override fun initialSingleSeriesRadarData(): ChartData =
         chartDataOf(
             categories = radarCategories,
-            ChartSeries(name = "Current", values = radarDefaultValues),
+            ChartSeries(name = TITLE, values = radarSingleSeriesValues),
         )
-
-    override fun initialRadarEdgeData(): ChartData =
-        chartDataOf(
-            categories = radarCategories,
-            ChartSeries(name = "Edge", values = radarEdgeValues),
-        )
-
-    override fun initialRadarMultiNoCategoriesData(): ChartData = radarInitialItems.toChartData()
 
     override fun radarRefreshRange(): IntRange = REFRESH_RANGE
 
-    override fun radarDefaultData(range: IntRange): ChartData {
-        val min = range.first.toDouble()
-        val max = range.last.toDouble()
-        val newValues =
-            radarDefaultValues.map { base ->
-                (base + (-10..10).random()).coerceIn(min, max)
-            }
-        return chartDataOf(
+    override fun radarSample(range: IntRange): RadarSampleData =
+        radarSample(
+            items = radarItems.map { (name, values) -> name to values.map { range.random().toDouble() } },
             categories = radarCategories,
-            ChartSeries(name = "Current", values = newValues),
         )
-    }
 
-    override fun radarBasicData(range: IntRange): ChartData {
-        val min = range.first.toDouble()
-        val max = range.last.toDouble()
-        val newItems =
-            radarBasicItems.map { (name, values) ->
-                name to values.map { base -> (base + (-10..10).random()).coerceIn(min, max) }
-            }
-        return newItems.toChartData(categories = radarCategories)
-    }
-
-    override fun radarCustomSample(range: IntRange): RadarCustomSampleData {
-        val newItems =
-            radarInitialItems.map { (name, values) ->
-                name to values.map { range.random().toDouble() }
-            }
-        val data =
-            newItems.toChartData(categories = radarCategories)
-        return RadarCustomSampleData(
-            data = data,
-            seriesKeys = newItems.map { it.first },
+    private fun radarSample(
+        items: List<Pair<String, List<Double>>>,
+        categories: List<String>,
+    ): RadarSampleData =
+        RadarSampleData(
+            data = items.toChartData(categories = categories),
+            seriesKeys = items.map { it.first },
+            title = TITLE,
         )
-    }
 }

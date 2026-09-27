@@ -26,17 +26,16 @@ data class PieChartUiState(
 class PieChartViewModel(
     private val pieSampleUseCase: PieSampleUseCase,
 ) : ViewModel() {
-    private val initialDefaultSample = pieSampleUseCase.initialPieSample()
-    private val initialCustomSample = pieSampleUseCase.initialPieCustomSample()
+    private val initialSample = pieSampleUseCase.initialPieSample()
     private val refreshRange = pieSampleUseCase.pieRefreshRange()
-    private val defaultSegmentCount = initialDefaultSample.slices.size
+    private val segmentCount = initialSample.slices.size
     private var liveUpdatesJob: Job? = null
 
     private val _uiState =
         MutableStateFlow(
             PieChartUiState(
-                slices = initialDefaultSample.slices,
-                title = initialDefaultSample.title,
+                slices = initialSample.slices,
+                title = initialSample.title,
                 preset = ChartPreset.Default,
             ),
         )
@@ -45,8 +44,13 @@ class PieChartViewModel(
 
     fun onPresetSelected(preset: ChartPreset) {
         if (preset == _uiState.value.preset) return
-        applyInitialPresetData(preset)
-        _uiState.update { it.copy(preset = preset) }
+        _uiState.update {
+            it.copy(
+                slices = initialSample.slices,
+                title = initialSample.title,
+                preset = preset,
+            )
+        }
     }
 
     fun togglePlaying() {
@@ -54,7 +58,7 @@ class PieChartViewModel(
     }
 
     fun refresh() {
-        refreshCurrentPreset()
+        regenerateDataSet()
     }
 
     override fun onCleared() {
@@ -62,44 +66,12 @@ class PieChartViewModel(
         super.onCleared()
     }
 
-    private fun applyInitialPresetData(preset: ChartPreset) {
-        val sample =
-            when (preset) {
-                ChartPreset.Default -> initialDefaultSample
-                ChartPreset.Custom -> initialCustomSample
-            }
-        _uiState.update {
-            it.copy(
-                slices = sample.slices,
-                title = sample.title,
-            )
-        }
-    }
-
-    private fun refreshCurrentPreset() {
-        when (_uiState.value.preset) {
-            ChartPreset.Default -> regenerateDefaultDataSet()
-            ChartPreset.Custom -> regenerateCustomDataSet()
-        }
-    }
-
-    private fun regenerateDefaultDataSet() {
+    private fun regenerateDataSet() {
         val sample =
             pieSampleUseCase.pieSample(
                 range = refreshRange,
-                numOfPoints = defaultSegmentCount..defaultSegmentCount,
+                numOfPoints = segmentCount..segmentCount,
             )
-        _uiState.update {
-            it.copy(
-                slices = sample.slices,
-                title = sample.title,
-            )
-        }
-    }
-
-    private fun regenerateCustomDataSet(range: IntRange = refreshRange) {
-        val sample =
-            pieSampleUseCase.pieCustomSample(range)
         _uiState.update {
             it.copy(
                 slices = sample.slices,
@@ -122,10 +94,10 @@ class PieChartViewModel(
         liveUpdatesJob?.cancel()
         liveUpdatesJob =
             viewModelScope.launch {
-                refreshCurrentPreset()
+                regenerateDataSet()
                 while (isActive) {
                     delay(LIVE_UPDATE_INTERVAL_MS)
-                    refreshCurrentPreset()
+                    regenerateDataSet()
                 }
             }
     }

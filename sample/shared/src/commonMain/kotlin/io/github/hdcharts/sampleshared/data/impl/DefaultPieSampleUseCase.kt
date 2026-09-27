@@ -6,17 +6,37 @@ import io.github.hdcharts.sampleshared.data.PieSampleUseCase
 
 internal class DefaultPieSampleUseCase : PieSampleUseCase {
     companion object {
-        private const val DEFAULT_TITLE = "Household Energy"
-        private const val CUSTOM_TITLE = "Monthly Budget Allocation"
+        private const val DEFAULT_TITLE = "Website Traffic by Source"
+        private const val MANY_SLICES_TITLE = "App Downloads by Country"
         private val REFRESH_RANGE = 5..45
     }
 
-    private val pieDefaultValues = listOf(32.0, 21.0, 24.0, 14.0, 9.0)
+    // Share of sessions, in percent.
+    private val pieDefaultValues = listOf(38.4, 21.7, 14.2, 11.6, 8.3, 5.8)
     private val pieDefaultLabels =
-        listOf("Heating", "Cooling", "Appliances", "Water Heating", "Lighting")
-    private val pieCustomValues = listOf(35.0, 20.0, 12.0, 8.0, 18.0, 7.0)
-    private val pieCustomLabels =
-        listOf("Housing", "Food", "Transport", "Healthcare", "Savings", "Leisure")
+        listOf("Organic Search", "Direct", "Social", "Referral", "Email", "Paid Ads")
+
+    // Share of downloads, in percent. The long tail ends in slices under 2%.
+    private val pieManySlicesValues =
+        listOf(28.4, 14.1, 9.6, 7.8, 6.9, 6.1, 5.2, 4.7, 4.3, 3.9, 2.8, 2.4, 1.6, 1.2, 0.8)
+    private val pieManySlicesLabels =
+        listOf(
+            "United States",
+            "India",
+            "Brazil",
+            "Germany",
+            "United Kingdom",
+            "Japan",
+            "France",
+            "Canada",
+            "Mexico",
+            "Indonesia",
+            "Italy",
+            "Spain",
+            "Poland",
+            "Netherlands",
+            "Sweden",
+        )
 
     override fun initialPieSample(): PieSampleData =
         buildPieSample(
@@ -25,11 +45,11 @@ internal class DefaultPieSampleUseCase : PieSampleUseCase {
             title = DEFAULT_TITLE,
         )
 
-    override fun initialPieCustomSample(): PieSampleData =
+    override fun initialManySlicesPieSample(): PieSampleData =
         buildPieSample(
-            values = pieCustomValues,
-            labels = pieCustomLabels,
-            title = CUSTOM_TITLE,
+            values = pieManySlicesValues,
+            labels = pieManySlicesLabels,
+            title = MANY_SLICES_TITLE,
         )
 
     override fun pieRefreshRange(): IntRange = REFRESH_RANGE
@@ -47,19 +67,10 @@ internal class DefaultPieSampleUseCase : PieSampleUseCase {
         )
     }
 
-    override fun pieCustomSample(range: IntRange): PieSampleData {
-        val values = List(pieCustomLabels.size) { range.random().toDouble() }
-        return buildPieSample(
-            values = values,
-            labels = pieCustomLabels,
-            title = CUSTOM_TITLE,
-        )
-    }
-
     private fun buildPieSample(
         values: List<Double>,
         labels: List<String>,
-        title: String = DEFAULT_TITLE,
+        title: String,
     ): PieSampleData {
         val slices =
             values.mapIndexed { index, value ->

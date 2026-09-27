@@ -1,49 +1,32 @@
 package io.github.hdcharts.app.screenshot
 
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.android.tools.screenshot.PreviewTest
+import io.github.hdcharts.app.screenshot.shared.SCREENSHOT_ANIMATE_ON_START
 import io.github.hdcharts.app.screenshot.shared.SCREENSHOT_PIE_SAMPLE_USE_CASE
+import io.github.hdcharts.app.screenshot.shared.ScreenshotChartSurface
 import io.github.hdcharts.app.screenshot.shared.ScreenshotPreview
-import io.github.hdcharts.app.screenshot.shared.ScreenshotSurface
 import io.github.hdcharts.charts.PieChart
 import io.github.hdcharts.charts.model.staticChartSelection
-import io.github.hdcharts.charts.style.ChartContainerDefaults
 import io.github.hdcharts.charts.style.PieChartDefaults
-import io.github.hdcharts.sampleshared.fixtures.ChartTestStyleFixtures
+import io.github.hdcharts.sampleshared.theme.LocalChartColors
+import io.github.hdcharts.sampleshared.theme.seriesColor
+import io.github.hdcharts.sampleshared.theme.seriesColors
+
+private const val PIE_SELECTION_INDEX = 1
+private const val DONUT_HOLE_PERCENTAGE = 55f
+private const val BASE_COLOR_INDEX = 1
 
 @PreviewTest
 @ScreenshotPreview
 @Composable
 fun PieChartDefaultPreview() {
     val sample = SCREENSHOT_PIE_SAMPLE_USE_CASE.initialPieSample()
-    ScreenshotSurface {
+    ScreenshotChartSurface {
         PieChart(
             data = sample.slices,
             title = sample.title,
-        )
-    }
-}
-
-@PreviewTest
-@ScreenshotPreview
-@Composable
-fun PieChartCustomPreview() {
-    val sample = SCREENSHOT_PIE_SAMPLE_USE_CASE.initialPieCustomSample()
-    ScreenshotSurface {
-        val slices = ChartTestStyleFixtures.pieCustomSlices(sample.slices)
-        PieChart(
-            data = slices,
-            title = sample.title,
-            style =
-                ChartTestStyleFixtures.pieCustomStyle(
-                    chartContainerStyle = ChartContainerDefaults.style(),
-                ),
+            animateOnStart = SCREENSHOT_ANIMATE_ON_START,
         )
     }
 }
@@ -53,10 +36,13 @@ fun PieChartCustomPreview() {
 @Composable
 fun PieChartSelectedSlicePreview() {
     val sample = SCREENSHOT_PIE_SAMPLE_USE_CASE.initialPieSample()
-    ScreenshotSurface {
+    ScreenshotChartSurface {
         PieChart(
             data = sample.slices,
-            selection = staticChartSelection(1),
+            title = sample.title,
+            animateOnStart = SCREENSHOT_ANIMATE_ON_START,
+            interactionEnabled = false,
+            selection = staticChartSelection(PIE_SELECTION_INDEX),
         )
     }
 }
@@ -64,20 +50,76 @@ fun PieChartSelectedSlicePreview() {
 @PreviewTest
 @ScreenshotPreview
 @Composable
-fun PieChartRectangularPlotAreaPreview() {
-    val sample = SCREENSHOT_PIE_SAMPLE_USE_CASE.initialPieSample()
-    ScreenshotSurface {
+fun PieChartManySlicesPreview() {
+    val sample = SCREENSHOT_PIE_SAMPLE_USE_CASE.initialManySlicesPieSample()
+    ScreenshotChartSurface {
         PieChart(
             data = sample.slices,
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .height(350.dp)
-                    .wrapContentSize(Alignment.Center),
-            style =
-                PieChartDefaults.style(
-                    legend = PieChartDefaults.legend(visible = false),
-                ),
+            title = sample.title,
+            animateOnStart = SCREENSHOT_ANIMATE_ON_START,
+        )
+    }
+}
+
+@PreviewTest
+@ScreenshotPreview
+@Composable
+fun PieChartDonutPreview() {
+    val sample = SCREENSHOT_PIE_SAMPLE_USE_CASE.initialPieSample()
+    ScreenshotChartSurface {
+        PieChart(
+            data = sample.slices,
+            title = sample.title,
+            style = PieChartDefaults.style(donut = PieChartDefaults.donut(holePercentage = DONUT_HOLE_PERCENTAGE)),
+            animateOnStart = SCREENSHOT_ANIMATE_ON_START,
+        )
+    }
+}
+
+@PreviewTest
+@ScreenshotPreview
+@Composable
+fun PieChartHiddenLegendPreview() {
+    val sample = SCREENSHOT_PIE_SAMPLE_USE_CASE.initialPieSample()
+    ScreenshotChartSurface {
+        PieChart(
+            data = sample.slices,
+            title = sample.title,
+            style = PieChartDefaults.style(legend = PieChartDefaults.legend(visible = false)),
+            animateOnStart = SCREENSHOT_ANIMATE_ON_START,
+        )
+    }
+}
+
+/** Slices without their own color get shades generated from the style's base color. */
+@PreviewTest
+@ScreenshotPreview
+@Composable
+fun PieChartBaseColorPreview() {
+    val sample = SCREENSHOT_PIE_SAMPLE_USE_CASE.initialPieSample()
+    ScreenshotChartSurface {
+        val baseColor = LocalChartColors.current.seriesColor(BASE_COLOR_INDEX)
+        PieChart(
+            data = sample.slices,
+            title = sample.title,
+            style = PieChartDefaults.style(slices = PieChartDefaults.slices(baseColor = baseColor)),
+            animateOnStart = SCREENSHOT_ANIMATE_ON_START,
+        )
+    }
+}
+
+/** Colors set on each slice take precedence over the style's base color. */
+@PreviewTest
+@ScreenshotPreview
+@Composable
+fun PieChartSliceColorsPreview() {
+    val sample = SCREENSHOT_PIE_SAMPLE_USE_CASE.initialPieSample()
+    ScreenshotChartSurface {
+        val colors = LocalChartColors.current.seriesColors(sample.slices.size)
+        PieChart(
+            data = sample.slices.mapIndexed { index, slice -> slice.copy(color = colors[index]) },
+            title = sample.title,
+            animateOnStart = SCREENSHOT_ANIMATE_ON_START,
         )
     }
 }
