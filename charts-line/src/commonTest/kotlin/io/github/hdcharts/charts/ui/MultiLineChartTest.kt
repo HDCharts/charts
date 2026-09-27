@@ -16,6 +16,7 @@ import io.github.hdcharts.charts.mock.MockTest.colors
 import io.github.hdcharts.charts.mock.MockTest.invalidMultiDataSet
 import io.github.hdcharts.charts.mock.MockTest.multiDataSet
 import io.github.hdcharts.charts.model.ChartSeries
+import io.github.hdcharts.charts.model.ChartValueFormatter
 import io.github.hdcharts.charts.model.ChartValueFormatters
 import io.github.hdcharts.charts.model.chartDataOf
 import io.github.hdcharts.charts.model.staticChartSelection
@@ -159,6 +160,35 @@ class MultiLineChartTest {
 
             onAllNodesWithTag(TestTags.LINE_CHART_X_AXIS_LABELS).assertCountEquals(0)
             onNodeWithTag(TestTags.LINE_CHART_Y_AXIS_LABELS).assertIsDisplayed()
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun multiLineChart_withBlankCategoriesAndSelection_hidesXAxisAndKeepsReadout() =
+        runComposeUiTest {
+            val dataSet =
+                chartDataOf(
+                    categories = listOf("", " ", "", ""),
+                    ChartSeries(name = "Item 1", values = listOf(10.0, 20.0, 30.0, 40.0)),
+                    ChartSeries(name = "Item 2", values = listOf(5.0, 15.0, 25.0, 35.0)),
+                )
+
+            setContent {
+                LineChart(
+                    data = dataSet,
+                    title = "Blank Categories",
+                    valueFormatter = ChartValueFormatter { value -> "v${value.toInt()}" },
+                    selection = staticChartSelection(index = 1),
+                    interactionEnabled = false,
+                    animateOnStart = false,
+                )
+            }
+
+            onAllNodesWithTag(TestTags.LINE_CHART_X_AXIS_LABELS).assertCountEquals(0)
+            onNodeWithTag(TestTags.LINE_CHART_Y_AXIS_LABELS).assertIsDisplayed()
+            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("Blank Categories")
+            onNodeWithText("Item 1 - v20").assertIsDisplayed()
+            onNodeWithText("Item 2 - v15").assertIsDisplayed()
         }
 
     @OptIn(ExperimentalTestApi::class)

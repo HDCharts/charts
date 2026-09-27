@@ -46,6 +46,7 @@ fun LineChart(
             ?.values
             ?.size ?: 0
     val selectedIndex = selection.selectedIndex?.takeIf { it in 0 until pointCount } ?: NO_SELECTION
+    val selectedCategory = data.categories.getOrNull(selectedIndex)?.takeIf(String::isNotBlank)
     rememberSelectionLifecycle(
         selection = selection,
         data = data,
@@ -79,9 +80,9 @@ fun LineChart(
                     null
                 } else if (data.series.size == 1) {
                     val value = valueFormatter.format(data.series.single().values[selectedIndex])
-                    data.categories.getOrNull(selectedIndex)?.let { "$it: $value" } ?: value
+                    selectedCategory?.let { "$it: $value" } ?: value
                 } else {
-                    data.categories.getOrNull(selectedIndex)
+                    selectedCategory
                 },
         )
     }

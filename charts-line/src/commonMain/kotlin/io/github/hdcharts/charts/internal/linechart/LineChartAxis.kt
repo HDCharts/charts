@@ -57,19 +57,21 @@ internal fun LineYAxisLabels(
     )
 }
 
-internal fun resolveLineXAxisLabels(data: MultiChartData): List<String> =
-    when {
-        data.hasSingleItem() ->
-            data.items
-                .firstOrNull()
-                ?.item
-                ?.labels
-                ?.toList()
-                ?.takeUnless { labels -> labels.all(String::isBlank) }
-                .orEmpty()
-        data.hasCategories() -> data.categories.toList()
-        else -> emptyList()
-    }
+internal fun resolveLineXAxisLabels(data: MultiChartData): List<String> {
+    val labels =
+        when {
+            data.hasSingleItem() ->
+                data.items
+                    .firstOrNull()
+                    ?.item
+                    ?.labels
+                    ?.toList()
+                    .orEmpty()
+            data.hasCategories() -> data.categories.toList()
+            else -> emptyList()
+        }
+    return labels.takeUnless { it.all(String::isBlank) }.orEmpty()
+}
 
 internal fun buildLineXAxisTicks(
     labels: List<String>,
