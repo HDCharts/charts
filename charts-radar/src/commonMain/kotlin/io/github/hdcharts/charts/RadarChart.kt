@@ -4,9 +4,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
@@ -106,7 +108,8 @@ fun RadarChart(
         }
     BoxWithConstraints(modifier = modifier) {
         val boundedHeight = maxHeight != Dp.Infinity
-        Column {
+        // Match the width the caller asks for, so the plot centers in a wide chart.
+        Column(modifier = Modifier.widthIn(min = minWidth)) {
             if (effectiveTitle.isNotBlank()) {
                 Text(
                     modifier =
@@ -118,7 +121,12 @@ fun RadarChart(
             }
             val plotModifier =
                 if (boundedHeight) Modifier.weight(1f, fill = false) else Modifier
-            Box(modifier = plotModifier.aspectRatio(1f)) {
+            Box(
+                modifier =
+                    plotModifier
+                        .aspectRatio(1f)
+                        .align(Alignment.CenterHorizontally),
+            ) {
                 RadarChart(
                     data = internalData,
                     style = style,

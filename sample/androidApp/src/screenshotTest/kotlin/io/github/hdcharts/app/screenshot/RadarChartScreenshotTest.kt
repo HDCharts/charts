@@ -1,6 +1,8 @@
 package io.github.hdcharts.app.screenshot
 
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import com.android.tools.screenshot.PreviewTest
 import io.github.hdcharts.app.screenshot.shared.SCREENSHOT_ANIMATE_ON_START
 import io.github.hdcharts.app.screenshot.shared.SCREENSHOT_RADAR_SAMPLE_USE_CASE
@@ -52,6 +54,23 @@ fun RadarChartAxisLabelsPreview() {
             data = data,
             title = data.series.single().name,
             style = RadarChartDefaults.style(axes = RadarChartDefaults.axes(labelVisible = true)),
+            animateOnStart = SCREENSHOT_ANIMATE_ON_START,
+        )
+    }
+}
+
+/** A full-width chart with no legend keeps the radar centered, not pinned to the start edge. */
+@PreviewTest
+@ScreenshotPreview
+@Composable
+fun RadarChartHiddenLegendPreview() {
+    ScreenshotChartSurface {
+        val data = SCREENSHOT_RADAR_SAMPLE_USE_CASE.initialSingleSeriesRadarData()
+        RadarChart(
+            data = data,
+            modifier = Modifier.fillMaxWidth(),
+            title = data.series.single().name,
+            style = RadarChartDefaults.style(categories = RadarChartDefaults.categories(legendVisible = false)),
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
         )
     }

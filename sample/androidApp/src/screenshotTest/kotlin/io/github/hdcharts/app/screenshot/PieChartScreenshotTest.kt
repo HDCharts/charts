@@ -1,6 +1,8 @@
 package io.github.hdcharts.app.screenshot
 
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import com.android.tools.screenshot.PreviewTest
 import io.github.hdcharts.app.screenshot.shared.SCREENSHOT_ANIMATE_ON_START
 import io.github.hdcharts.app.screenshot.shared.SCREENSHOT_PIE_SAMPLE_USE_CASE
@@ -76,6 +78,7 @@ fun PieChartDonutPreview() {
     }
 }
 
+/** A full-width chart with no legend keeps the pie centered, not pinned to the start edge. */
 @PreviewTest
 @ScreenshotPreview
 @Composable
@@ -84,6 +87,7 @@ fun PieChartHiddenLegendPreview() {
     ScreenshotChartSurface {
         PieChart(
             data = sample.slices,
+            modifier = Modifier.fillMaxWidth(),
             title = sample.title,
             style = PieChartDefaults.style(legend = PieChartDefaults.legend(visible = false)),
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
