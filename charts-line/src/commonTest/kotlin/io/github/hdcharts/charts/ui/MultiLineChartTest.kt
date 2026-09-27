@@ -10,7 +10,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.v2.runComposeUiTest
 import io.github.hdcharts.charts.LineChart
-import io.github.hdcharts.charts.LineChartRenderMode
+import io.github.hdcharts.charts.LiveLineChart
 import io.github.hdcharts.charts.internal.TestTags
 import io.github.hdcharts.charts.mock.MockTest.colors
 import io.github.hdcharts.charts.mock.MockTest.invalidMultiDataSet
@@ -46,19 +46,17 @@ class MultiLineChartTest {
 
     @OptIn(ExperimentalTestApi::class)
     @Test
-    fun multiLineChart_withTimelineRenderMode_displaysChart() =
+    fun liveLineChart_withMultiSeries_displaysChart() =
         runComposeUiTest {
             // Arrange
             val expectedTitle = "Title"
-            val expectedCurrentValueItem1 = "Item 1 - \$45000.57"
+            val expectedCurrentValueItem1 = "Item 1 - 45000.57"
 
             // Act
             setContent {
-                LineChart(
+                LiveLineChart(
                     data = multiDataSet,
                     title = expectedTitle,
-                    valueFormatter = ChartValueFormatters.prefix("$"),
-                    renderMode = LineChartRenderMode.Timeline,
                 )
             }
 
@@ -97,6 +95,23 @@ class MultiLineChartTest {
             // The selected axis title is the stable public readout contract; legend layout is
             // rendered by the shared FlowRow and is covered by screenshot/platform tests.
             onNodeWithTag(TestTags.LINE_CHART).assertIsDisplayed()
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun multiLineChart_withSelection_legendShowsFormattedValuesAtSelection() =
+        runComposeUiTest {
+            setContent {
+                LineChart(
+                    data = multiDataSet,
+                    valueFormatter = ChartValueFormatters.prefix("$"),
+                    animateOnStart = false,
+                    selection = staticChartSelection(2),
+                )
+            }
+
+            onNodeWithText("Item 1 - \$32000.57").assertIsDisplayed()
+            onNodeWithText("Item 3 - \$30245.81").assertIsDisplayed()
         }
 
     @OptIn(ExperimentalTestApi::class)

@@ -5,25 +5,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
-import io.github.hdcharts.charts.internal.InternalChartsApi
 import io.github.hdcharts.charts.style.ChartContainerStyle
+import io.github.hdcharts.charts.style.LineVisualStyle
 
 /** Flat renderer style retained temporarily behind the grouped v3 line API. */
-@InternalChartsApi
 @Immutable
-class LineChartInternalStyle(
+internal class LineChartInternalStyle(
     val modifier: Modifier,
     val chartContainerStyle: ChartContainerStyle,
-    val dragPointColorSameAsLine: Boolean,
-    val pointColorSameAsLine: Boolean,
     val pointColor: Color,
     val pointVisible: Boolean,
     val pointSize: Dp,
-    val lineColor: Color,
-    val lineAlpha: Float,
-    val lineColors: List<Color>,
-    val bezier: Boolean,
-    val lineStrokeWidth: Dp,
+    val line: LineVisualStyle,
     val dragPointSize: Dp,
     val dragPointVisible: Boolean,
     val dragActivePointSize: Dp,

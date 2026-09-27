@@ -2,4 +2,4 @@
 
 - type: `fix`
 - module: `charts-line`
-- release_note: `Timeline line charts rescale as large values leave the window.`
+- release_note: `Live line charts rescale as large values leave the window.`

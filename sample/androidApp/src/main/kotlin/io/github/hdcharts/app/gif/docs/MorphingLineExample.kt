@@ -7,7 +7,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.hdcharts.charts.LineChart
-import io.github.hdcharts.charts.LineChartRenderMode
 import io.github.hdcharts.charts.model.toChartData
 import io.github.hdcharts.charts.style.LineChartDefaults
 import kotlinx.coroutines.CoroutineScope
@@ -62,6 +61,5 @@ fun ShowMorphingLine(viewModel: MorphingLineViewModel = viewModel()) {
                 range = LineChartDefaults.range(min = AXIS_MIN, max = AXIS_MAX),
             ),
         animateOnStart = false,
-        renderMode = LineChartRenderMode.Morph,
     )
 }

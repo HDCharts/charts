@@ -2,12 +2,12 @@ package io.github.hdcharts.charts.unit.helpers
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import io.github.hdcharts.charts.LineChartRenderMode
 import io.github.hdcharts.charts.internal.ANIMATION_DURATION_LINE_CHART
 import io.github.hdcharts.charts.internal.common.bezier.cubicControlPointsForSegment
 import io.github.hdcharts.charts.internal.common.model.ChartDataItem
 import io.github.hdcharts.charts.internal.common.model.MultiChartData
 import io.github.hdcharts.charts.internal.common.model.toChartData
+import io.github.hdcharts.charts.internal.linechart.LineChartRenderMode
 import io.github.hdcharts.charts.internal.linechart.LineChartTransitionMode
 import io.github.hdcharts.charts.internal.linechart.MIN_TIMELINE_DURATION_MS
 import io.github.hdcharts.charts.internal.linechart.aggregateForCompactDensity
@@ -448,7 +448,6 @@ class LineChartHelpersTest {
                 currentRawSeries = listOf(listOf(2.0, 3.0)),
                 currentMinMax = 2.0 to 3.0,
                 renderMode = LineChartRenderMode.Morph,
-                animationDuration = 500.milliseconds,
             )
 
         assertEquals(expected = LineChartTransitionMode.Morph, actual = mode)
@@ -461,8 +460,7 @@ class LineChartHelpersTest {
                 previousRawSeries = null,
                 currentRawSeries = listOf(listOf(2.0, 3.0)),
                 currentMinMax = 2.0 to 3.0,
-                renderMode = LineChartRenderMode.Timeline,
-                animationDuration = 500.milliseconds,
+                renderMode = LineChartRenderMode.Timeline(shiftDuration = 500.milliseconds),
             )
 
         assertEquals(expected = LineChartTransitionMode.Morph, actual = mode)
@@ -478,15 +476,13 @@ class LineChartHelpersTest {
                 previousRawSeries = previousSeries,
                 currentRawSeries = currentSeries,
                 currentMinMax = 20.0 to 60.0,
-                renderMode = LineChartRenderMode.Timeline,
-                animationDuration = 500.milliseconds,
+                renderMode = LineChartRenderMode.Timeline(shiftDuration = 500.milliseconds),
             )
 
         val shift = assertIs<LineChartTransitionMode.TimelineShift>(mode)
         assertEquals(expected = 20.0 to 60.0, actual = shift.transitionData.minMax)
         assertEquals(expected = previousSeries, actual = shift.transitionData.previousSeries)
         assertEquals(expected = currentSeries, actual = shift.transitionData.currentSeries)
-        assertEquals(expected = 500.milliseconds, actual = shift.animationDuration)
     }
 
     @Test
@@ -507,8 +503,7 @@ class LineChartHelpersTest {
                 previousRawSeries = listOf(listOf(10.0, 20.0, 30.0)),
                 currentRawSeries = listOf(listOf(90.0, 80.0, 70.0)),
                 currentMinMax = 70.0 to 90.0,
-                renderMode = LineChartRenderMode.Timeline,
-                animationDuration = 500.milliseconds,
+                renderMode = LineChartRenderMode.Timeline(shiftDuration = 500.milliseconds),
             )
 
         assertEquals(expected = LineChartTransitionMode.Morph, actual = mode)
@@ -521,8 +516,7 @@ class LineChartHelpersTest {
                 previousRawSeries = listOf(listOf(10.0, 20.0, 30.0), listOf(1.0, 2.0, 3.0)),
                 currentRawSeries = listOf(listOf(20.0, 30.0, 40.0), listOf(7.0, 8.0, 9.0)),
                 currentMinMax = 1.0 to 40.0,
-                renderMode = LineChartRenderMode.Timeline,
-                animationDuration = 500.milliseconds,
+                renderMode = LineChartRenderMode.Timeline(shiftDuration = 500.milliseconds),
             )
 
         assertEquals(expected = LineChartTransitionMode.Morph, actual = mode)
@@ -535,8 +529,7 @@ class LineChartHelpersTest {
                 previousRawSeries = listOf(listOf(10.0, 20.0, 30.0)),
                 currentRawSeries = listOf(listOf(20.0, 30.0, 40.0)),
                 currentMinMax = 20.0 to 40.0,
-                renderMode = LineChartRenderMode.Timeline,
-                animationDuration = 500.milliseconds,
+                renderMode = LineChartRenderMode.Timeline(shiftDuration = 500.milliseconds),
             )
 
         assertIs<LineChartTransitionMode.TimelineShift>(mode)
@@ -558,8 +551,7 @@ class LineChartHelpersTest {
     fun lineChartValueAnimationSpec_inTimelineMode_usesTheRequestedDuration() {
         val spec =
             lineChartValueAnimationSpec(
-                renderMode = LineChartRenderMode.Timeline,
-                animationDuration = 160.milliseconds,
+                renderMode = LineChartRenderMode.Timeline(shiftDuration = 160.milliseconds),
             )
 
         assertEquals(
@@ -575,8 +567,7 @@ class LineChartHelpersTest {
     fun lineChartValueAnimationSpec_inTimelineMode_clampsANonPositiveDuration() {
         val spec =
             lineChartValueAnimationSpec(
-                renderMode = LineChartRenderMode.Timeline,
-                animationDuration = Duration.ZERO,
+                renderMode = LineChartRenderMode.Timeline(shiftDuration = Duration.ZERO),
             )
 
         assertEquals(expected = MIN_TIMELINE_DURATION_MS, actual = spec.durationMillis)
@@ -587,7 +578,6 @@ class LineChartHelpersTest {
         val spec =
             lineChartValueAnimationSpec(
                 renderMode = LineChartRenderMode.Morph,
-                animationDuration = 160.milliseconds,
             )
 
         assertEquals(expected = ANIMATION_DURATION_LINE_CHART, actual = spec.durationMillis)

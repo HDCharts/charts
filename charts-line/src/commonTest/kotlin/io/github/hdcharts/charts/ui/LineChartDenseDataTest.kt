@@ -5,6 +5,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
@@ -15,7 +17,6 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeLeft
 import androidx.compose.ui.test.v2.runComposeUiTest
 import io.github.hdcharts.charts.LineChart
-import io.github.hdcharts.charts.LineChartRenderMode
 import io.github.hdcharts.charts.internal.TestTags
 import io.github.hdcharts.charts.model.ChartData
 import io.github.hdcharts.charts.model.ChartSelection
@@ -71,6 +72,45 @@ class LineChartDenseDataTest {
         }
 
     @Test
+    fun lineChart_interactionDisabled_hidesDensityToggle() =
+        runComposeUiTest {
+            setContent {
+                LineChart(data = largeDataSet(), interactionEnabled = false)
+            }
+
+            onNodeWithTag(TestTags.LINE_CHART).assertIsDisplayed()
+            onAllNodesWithTag(TestTags.LINE_CHART_DENSE_EXPAND).assertCountEquals(0)
+            onAllNodesWithTag(TestTags.LINE_CHART_DENSE_COLLAPSE).assertCountEquals(0)
+        }
+
+    @Test
+    fun lineChart_interactionDisabledWhileExpanded_returnsToCompactMode() =
+        runComposeUiTest {
+            val interactionEnabled = mutableStateOf(true)
+            setContent {
+                LineChart(data = largeDataSet(), interactionEnabled = interactionEnabled.value)
+            }
+
+            onNodeWithTag(TestTags.LINE_CHART_DENSE_EXPAND).performTouchInput { click() }
+            onNodeWithTag(TestTags.LINE_CHART_ZOOM_IN).performTouchInput { click() }
+            onNodeWithTag(TestTags.LINE_CHART_PLOT)
+                .assert(SemanticsMatcher.keyIsDefined(SemanticsProperties.HorizontalScrollAxisRange))
+
+            runOnIdle { interactionEnabled.value = false }
+
+            onAllNodesWithTag(TestTags.LINE_CHART_DENSE_COLLAPSE).assertCountEquals(0)
+            onAllNodesWithTag(TestTags.LINE_CHART_ZOOM_OUT).assertCountEquals(0)
+            onAllNodesWithTag(TestTags.LINE_CHART_ZOOM_IN).assertCountEquals(0)
+            onNodeWithTag(TestTags.LINE_CHART_PLOT)
+                .assert(SemanticsMatcher.keyNotDefined(SemanticsProperties.HorizontalScrollAxisRange))
+
+            runOnIdle { interactionEnabled.value = true }
+
+            onNodeWithTag(TestTags.LINE_CHART_DENSE_EXPAND).assertIsDisplayed()
+            onAllNodesWithTag(TestTags.LINE_CHART_DENSE_COLLAPSE).assertCountEquals(0)
+        }
+
+    @Test
     fun lineChart_compactMode_programmaticSelectionUsesSourceIndex() =
         runComposeUiTest {
             val dataSet = largeDataSet()
@@ -78,25 +118,6 @@ class LineChartDenseDataTest {
             setContent {
                 LineChart(
                     data = dataSet,
-                    selection = ChartSelection(initialIndex = sourceIndex),
-                    animateOnStart = false,
-                )
-            }
-
-            onNodeWithTag(TestTags.CHART_TITLE)
-                .assertTextEquals("${dataSet.categories[sourceIndex]}: ${dataSet.series.single().values[sourceIndex]}")
-                .assertIsDisplayed()
-        }
-
-    @Test
-    fun lineChart_timelineMode_programmaticSelectionUsesSourceIndex() =
-        runComposeUiTest {
-            val dataSet = largeDataSet()
-            val sourceIndex = 80
-            setContent {
-                LineChart(
-                    data = dataSet,
-                    renderMode = LineChartRenderMode.Timeline,
                     selection = ChartSelection(initialIndex = sourceIndex),
                     animateOnStart = false,
                 )

@@ -26,8 +26,7 @@ import io.github.hdcharts.app.demo.timeline.LiveTimelineControlsState
 import io.github.hdcharts.app.demo.timeline.timelineAnimationDurationMillis
 import io.github.hdcharts.app.ui.composable.ChartDemo
 import io.github.hdcharts.app.ui.composable.DemoSlider
-import io.github.hdcharts.charts.LineChart
-import io.github.hdcharts.charts.LineChartRenderMode
+import io.github.hdcharts.charts.LiveLineChart
 import io.github.hdcharts.charts.style.ChartContainerDefaults
 import io.github.hdcharts.charts.style.LineChartDefaults
 import io.github.hdcharts.sampleshared.theme.Dimens
@@ -38,8 +37,8 @@ import kotlin.time.Duration.Companion.milliseconds
 /**
  * Live line chart whose values swing between magnitudes.
  *
- * The window runs in the millions, drops below one hundred, and climbs back, so the timeline render
- * mode is seen rescaling while it streams. [presetContent] keeps the shared line demo presets
+ * The window runs in the millions, drops below one hundred, and climbs back, so [LiveLineChart] is
+ * seen rescaling while it streams. [presetContent] keeps the shared line demo presets
  * reachable.
  */
 @Composable
@@ -95,7 +94,7 @@ fun LineScaleDropDemo(
             )
         },
     ) {
-        LineChart(
+        LiveLineChart(
             data = uiState.dataSet,
             modifier = Modifier.fillMaxWidth(),
             title =
@@ -104,8 +103,7 @@ fun LineScaleDropDemo(
                     ?.name
                     .orEmpty(),
             style = LineChartDefaults.style(chartContainerStyle = chartContainerStyle),
-            renderMode = LineChartRenderMode.Timeline,
-            animationDuration = animationDuration.milliseconds,
+            shiftDuration = animationDuration.milliseconds,
         )
     }
 }

@@ -12,7 +12,6 @@ import io.github.hdcharts.charts.internal.ANIMATION_TARGET
 import io.github.hdcharts.charts.internal.NO_SELECTION
 import io.github.hdcharts.charts.internal.common.bezier.cubicControlPointsForSegment
 import io.github.hdcharts.charts.internal.linechart.LineChartInternalStyle
-import kotlinx.collections.immutable.ImmutableList
 
 internal fun DrawScope.drawChartPath(
     values: List<Float>,
@@ -57,7 +56,7 @@ internal fun DrawScope.drawChartPath(
                 )
             moveTo(initX, initY)
 
-            if (!style.bezier) {
+            if (!style.line.bezier) {
                 for (i in 1 until valuesSize) {
                     val x = horizontalOffsetPx + (i * stepX)
                     val y =
@@ -105,7 +104,10 @@ internal fun DrawScope.drawChartPath(
 
     val lineStroke =
         Stroke(
-            width = style.lineStrokeWidth.toPx().coerceAtLeast(0.5f),
+            width =
+                style.line.strokeWidth
+                    .toPx()
+                    .coerceAtLeast(0.5f),
             cap = StrokeCap.Round,
             join = StrokeJoin.Round,
         )
@@ -120,7 +122,7 @@ internal fun DrawScope.drawChartPath(
         } else {
             val revealX = (canvasWidth * lineAnimationProgress).coerceIn(0f, canvasWidth)
             // Reveal from left to right to keep perceived speed steady across steep curves.
-            clipRect(left = 0f, top = 0f, right = revealX + style.lineStrokeWidth.toPx(), bottom = canvasHeight) {
+            clipRect(left = 0f, top = 0f, right = revealX + style.line.strokeWidth.toPx(), bottom = canvasHeight) {
                 drawPath(
                     path = path,
                     color = lineColor,
@@ -132,7 +134,6 @@ internal fun DrawScope.drawChartPath(
         tryDrawPathPoints(
             values = values,
             style = style,
-            lineColor = lineColor,
             markerRevealProgress = markerRevealProgress,
             stepX = stepX,
             horizontalOffsetPx = horizontalOffsetPx,
@@ -152,7 +153,6 @@ internal fun DrawScope.drawChartPath(
 private fun DrawScope.tryDrawPathPoints(
     values: List<Float>,
     style: LineChartInternalStyle,
-    lineColor: Color,
     markerRevealProgress: Float,
     stepX: Float,
     horizontalOffsetPx: Float,
@@ -160,13 +160,8 @@ private fun DrawScope.tryDrawPathPoints(
 ) {
     if (!style.pointVisible || values.size <= 1 || size.width <= 0f || markerRevealProgress <= 0f) return
 
-    val pointColor =
-        when (style.pointColorSameAsLine) {
-            true -> lineColor
-            else -> style.pointColor
-        }
     val progress = markerRevealProgress.coerceIn(0f, 1f)
-    val animatedColor = pointColor.copy(alpha = pointColor.alpha * progress)
+    val animatedColor = style.pointColor.copy(alpha = style.pointColor.alpha * progress)
     val animatedRadius =
         style.pointSize.toPx() * (MARKER_REVEAL_START_SCALE + (1f - MARKER_REVEAL_START_SCALE) * progress)
 
@@ -190,7 +185,6 @@ internal fun DrawScope.drawDragMarker(
     touchX: Float,
     values: List<Float>,
     style: LineChartInternalStyle,
-    lineColor: Color,
     bezierTension: Float,
     verticalInset: Float,
 ) {
@@ -204,11 +198,6 @@ internal fun DrawScope.drawDragMarker(
         )
     if (selectedIndex == NO_SELECTION) return
 
-    val dragPointColor =
-        when (style.dragPointColorSameAsLine) {
-            true -> lineColor
-            else -> style.dragPointColor
-        }
     val maxDragY = (size.height - verticalInset).coerceAtLeast(verticalInset)
 
     if (style.pointVisible) {
@@ -223,7 +212,7 @@ internal fun DrawScope.drawDragMarker(
         drawCircle(
             center = Offset(selectedX, selectedY),
             radius = style.dragActivePointSize.toPx(),
-            color = dragPointColor,
+            color = style.dragPointColor,
         )
     }
 
@@ -233,7 +222,7 @@ internal fun DrawScope.drawDragMarker(
                 touchX = touchX,
                 scaledValues = values,
                 size = size,
-                bezier = style.bezier,
+                bezier = style.line.bezier,
                 verticalInset = verticalInset,
                 bezierTension = bezierTension,
             )
@@ -247,16 +236,7 @@ internal fun DrawScope.drawDragMarker(
         drawCircle(
             center = draggingCircleOffset,
             radius = style.dragPointSize.toPx(),
-            color = dragPointColor,
+            color = style.dragPointColor,
         )
     }
 }
-
-internal fun resolveSelectionLineColor(
-    style: LineChartInternalStyle,
-    colors: ImmutableList<Color>,
-): Color =
-    when (style.dragPointColorSameAsLine) {
-        true -> colors.firstOrNull() ?: style.dragPointColor
-        else -> style.dragPointColor
-    }

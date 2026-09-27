@@ -1,16 +1,10 @@
 package io.github.hdcharts.charts.mock
 
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.github.hdcharts.charts.internal.common.model.ChartDataItem
-import io.github.hdcharts.charts.internal.common.model.MultiChartData
-import io.github.hdcharts.charts.internal.common.model.toChartData
-import io.github.hdcharts.charts.internal.linechart.LineChartInternalStyle
 import io.github.hdcharts.charts.model.ChartData
 import io.github.hdcharts.charts.model.ChartSeries
 import io.github.hdcharts.charts.model.chartDataOf
@@ -48,74 +42,6 @@ internal object MockTest {
 
     private val categories = listOf("Jan", "Feb", "Mar", "Apr")
     val colors = listOf(Color.Red, Color.Green, Color.Cyan, Color.Black)
-    val colorsAsymmetric =
-        listOf(Color.Red, Color.Green, Color.Cyan, Color.Black, Color.Blue, Color.Yellow)
-
-    private val dataItems =
-        listOf(
-            ChartDataItem(FIRST_ITEM_NAME, FIRST_ITEM.toChartData()),
-            ChartDataItem(SECOND_ITEM_NAME, SECOND_ITEM.toChartData()),
-            ChartDataItem(THIRD_ITEM_NAME, THIRD_ITEM.toChartData()),
-            ChartDataItem(FOURTH_ITEM_NAME, FOURTH_ITEM.toChartData()),
-        )
-
-    val multiDataSet =
-        MultiChartData(
-            items = dataItems,
-            categories = categories,
-            title = TITLE,
-        )
-
-    val asymmetricMultiDataSet =
-        MultiChartData(
-            items =
-                listOf(
-                    ChartDataItem(FIRST_ITEM_NAME, (FIRST_ITEM + 5f).toChartData()),
-                    ChartDataItem(SECOND_ITEM_NAME, (SECOND_ITEM + 5f).toChartData()),
-                    ChartDataItem(THIRD_ITEM_NAME, (THIRD_ITEM + 5f).toChartData()),
-                ),
-            categories = categories + "May",
-            title = TITLE,
-        )
-
-    fun invalidMultiDataSet(): MultiChartData {
-        val items =
-            listOf(
-                ChartDataItem(FIRST_ITEM_NAME, FIRST_ITEM.dropLast(1).toChartData()),
-                ChartDataItem(SECOND_ITEM_NAME, SECOND_ITEM.toChartData()),
-                ChartDataItem(THIRD_ITEM_NAME, THIRD_ITEM.dropLast(1).toChartData()),
-                ChartDataItem(FOURTH_ITEM_NAME, FOURTH_ITEM.toChartData()),
-            )
-
-        return MultiChartData(
-            items = items,
-            categories = categories.dropLast(1),
-            title = TITLE,
-        )
-    }
-
-    fun invalidMultiDataSet(
-        index: Int,
-        empty: Boolean = false,
-    ): MultiChartData {
-        val updatedDataItems = dataItems.toMutableList()
-        val current = updatedDataItems[index]
-        val values = if (empty) emptyList() else current.item.points.drop(2)
-        updatedDataItems[index] = current.copy(item = values.toChartData())
-
-        return MultiChartData(
-            items = updatedDataItems,
-            categories = categories,
-            title = TITLE,
-        )
-    }
-
-    fun invalidDataSetCategories(): MultiChartData =
-        MultiChartData(
-            items = dataItems,
-            categories = categories.drop(1),
-            title = TITLE,
-        )
 
     // ChartData helpers for stacked-area tests
     val multiDataSetItems: ChartData =
@@ -170,41 +96,6 @@ internal object MockTest {
         )
 
     // Mock styles
-    fun mockLineChartStyle(lineColors: List<Color> = colors): LineChartInternalStyle =
-        LineChartInternalStyle(
-            modifier = Modifier.fillMaxSize(),
-            chartContainerStyle = mockChartContainerStyle(),
-            dragPointColorSameAsLine = true,
-            pointColorSameAsLine = true,
-            pointColor = Color.Red,
-            pointVisible = true,
-            pointSize = 10.dp,
-            lineColor = Color.Green,
-            lineAlpha = 1f,
-            lineColors = lineColors,
-            bezier = true,
-            lineStrokeWidth = 1.dp,
-            dragPointSize = 7.dp,
-            dragPointVisible = true,
-            dragActivePointSize = 12.dp,
-            dragPointColor = Color.Red,
-            axisVisible = true,
-            axisColor = Color.Gray,
-            axisLineWidth = 1.dp,
-            minValue = null,
-            maxValue = null,
-            yAxisLabelsVisible = true,
-            yAxisLabelColor = Color.Gray,
-            yAxisLabelSize = 11.sp,
-            yAxisLabelCount = 5,
-            xAxisLabelsVisible = true,
-            xAxisLabelColor = Color.Gray,
-            xAxisLabelSize = 11.sp,
-            xAxisLabelMaxCount = 6,
-            legendVisible = true,
-            zoomControlsVisible = true,
-        )
-
     fun mockStackedBarChartStyle(barColors: List<Color> = colors): StackedBarChartStyle =
         StackedBarChartStyle(
             chartContainerStyle = mockChartContainerStyle(),
