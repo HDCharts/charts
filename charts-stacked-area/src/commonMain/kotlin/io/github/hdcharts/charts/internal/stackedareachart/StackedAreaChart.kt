@@ -47,6 +47,8 @@ import io.github.hdcharts.charts.internal.common.axis.estimateXAxisLabelFootprin
 import io.github.hdcharts.charts.internal.common.axis.estimateYAxisLabelWidthPx
 import io.github.hdcharts.charts.internal.common.axis.planAxisXLabels
 import io.github.hdcharts.charts.internal.common.bezier.cubicControlPointsForSegment
+import io.github.hdcharts.charts.internal.common.composable.ChartHeader
+import io.github.hdcharts.charts.internal.common.composable.ChartHeaderTestTags
 import io.github.hdcharts.charts.internal.common.composable.rememberDenseExpandedState
 import io.github.hdcharts.charts.internal.common.composable.rememberShowState
 import io.github.hdcharts.charts.internal.common.composable.rememberZoomScaleState
@@ -55,8 +57,10 @@ import io.github.hdcharts.charts.internal.common.composable.zoomOutScale
 import io.github.hdcharts.charts.internal.common.interaction.buildHorizontalDragGestureModifier
 import io.github.hdcharts.charts.internal.common.interaction.buildPinchZoomModifier
 import io.github.hdcharts.charts.internal.common.interaction.buildTapGestureModifier
+import io.github.hdcharts.charts.internal.common.layout.fillMaxSizeChartModifier
 import io.github.hdcharts.charts.internal.common.model.MultiChartData
 import io.github.hdcharts.charts.internal.common.model.normalizeStackedAreaValues
+import io.github.hdcharts.charts.style.StackedAreaChartStyle
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
@@ -67,12 +71,19 @@ private const val ZOOM_MIN = 1f
 private const val ZOOM_MAX = 4f
 private const val ZOOM_STEP = 1.25f
 private const val FIXED_X_AXIS_LABEL_TILT_DEGREES = 34f
+private val HEADER_TEST_TAGS =
+    ChartHeaderTestTags(
+        denseExpand = TestTags.STACKED_AREA_CHART_DENSE_EXPAND,
+        denseCollapse = TestTags.STACKED_AREA_CHART_DENSE_COLLAPSE,
+        zoomOut = TestTags.STACKED_AREA_CHART_ZOOM_OUT,
+        zoomIn = TestTags.STACKED_AREA_CHART_ZOOM_IN,
+    )
 
 @Composable
 internal fun StackedAreaChart(
     data: MultiChartData,
     title: String,
-    style: StackedAreaInternalStyle,
+    style: StackedAreaChartStyle,
     areaColors: ImmutableList<Color>,
     lineColors: ImmutableList<Color>,
     interactionEnabled: Boolean,
@@ -233,13 +244,14 @@ internal fun StackedAreaChart(
 
     Column(
         modifier =
-            style.modifier
+            fillMaxSizeChartModifier(style.chartContainerStyle)
                 .onGloballyPositioned { show = true },
     ) {
         if (showHeader) {
-            StackedAreaChartHeader(
+            ChartHeader(
                 title = title,
-                style = style,
+                titleTextStyle = style.chartContainerStyle.styleTitle,
+                testTags = HEADER_TEST_TAGS,
                 showDensityToggle = showCompactToggle,
                 denseExpanded = denseExpanded,
                 onToggleDensity = { denseExpanded = !denseExpanded },
@@ -291,7 +303,7 @@ internal fun StackedAreaChart(
 @Composable
 private fun StackedAreaChartContent(
     data: MultiChartData,
-    style: StackedAreaInternalStyle,
+    style: StackedAreaChartStyle,
     areaColors: ImmutableList<Color>,
     lineColors: ImmutableList<Color>,
     interactionEnabled: Boolean,
@@ -311,9 +323,11 @@ private fun StackedAreaChartContent(
     onZoomScaleChange: (Float) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val xLabels = style.axis.xLabels
+    val yLabels = style.axis.yLabels
     val xAxisLabels = remember(data) { if (data.hasCategories()) data.categories.toList() else emptyList() }
-    val showYAxisLabels = style.yAxisLabelsVisible
-    val showXAxisLabelsCandidate = style.xAxisLabelsVisible && xAxisLabels.isNotEmpty()
+    val showYAxisLabels = yLabels.visible
+    val showXAxisLabelsCandidate = xLabels.visible && xAxisLabels.isNotEmpty()
     val dragInteractionEnabled = interactionEnabled && !isScrollable
     val tapInteractionEnabled = interactionEnabled && isScrollable
     val currentToggleSelection by rememberUpdatedState(onToggleSelection)
@@ -325,7 +339,7 @@ private fun StackedAreaChartContent(
     BoxWithConstraints(modifier = modifier) {
         val density = LocalDensity.current
         val xAxisTilt = FIXED_X_AXIS_LABEL_TILT_DEGREES
-        val xAxisLabelSizePx = with(density) { style.xAxisLabelSize.toPx() }
+        val xAxisLabelSizePx = with(density) { xLabels.size.toPx() }
         val xAxisLabelFootprintPx =
             remember(xAxisLabels, pointsCount, xAxisLabelSizePx, xAxisTilt) {
                 estimateXAxisLabelFootprintPx(
@@ -350,14 +364,14 @@ private fun StackedAreaChartContent(
                 resolveStackedAreaTotalsRange(data)
             }
         val yAxisTicks =
-            remember(minTotal, maxTotal, chartHeightPx, style.yAxisLabelCount, showYAxisLabels) {
+            remember(minTotal, maxTotal, chartHeightPx, yLabels.count, showYAxisLabels) {
                 if (!showYAxisLabels) {
                     emptyList()
                 } else {
                     buildStackedAreaYAxisTicks(
                         minValue = minTotal,
                         maxValue = maxTotal,
-                        labelCount = style.yAxisLabelCount,
+                        labelCount = yLabels.count,
                         plotHeightPx = chartHeightPx,
                     )
                 }
@@ -366,7 +380,7 @@ private fun StackedAreaChartContent(
             if (showYAxisLabels) {
                 estimateYAxisLabelWidthPx(
                     labels = yAxisTicks.map { tick -> tick.label },
-                    fontSizePx = with(density) { style.yAxisLabelSize.toPx() },
+                    fontSizePx = with(density) { yLabels.size.toPx() },
                 )
             } else {
                 0f
@@ -408,7 +422,7 @@ private fun StackedAreaChartContent(
         val xAxisPlan =
             remember(
                 pointsCount,
-                style.xAxisLabelMaxCount,
+                xLabels.count,
                 isScrollable,
                 fitStepX,
                 denseStepX,
@@ -420,7 +434,7 @@ private fun StackedAreaChartContent(
                     request =
                         AxisXPlanRequest(
                             dataSize = pointsCount,
-                            requestedMaxLabelCount = style.xAxisLabelMaxCount,
+                            requestedMaxLabelCount = xLabels.count,
                             isScrollable = isScrollable,
                             unitWidthPx =
                                 if (isScrollable) {
@@ -542,8 +556,8 @@ private fun StackedAreaChartContent(
             if (showYAxisLabels) {
                 StackedAreaYAxisLabels(
                     ticks = yAxisTicks,
-                    color = style.yAxisLabelColor,
-                    fontSize = style.yAxisLabelSize,
+                    color = yLabels.color,
+                    fontSize = yLabels.size,
                     modifier =
                         Modifier
                             .align(Alignment.TopStart)
@@ -585,8 +599,8 @@ private fun StackedAreaChartContent(
                                 series.map { value -> value.value * size.height }
                             }
                         val emptyLower = List(pointsCount) { 0f }
-                        val lineWidthPx = style.lineWidth.toPx()
-                        val selectionLineWidthPx = style.selectionLineWidth.toPx()
+                        val lineWidthPx = style.boundary.width.toPx()
+                        val selectionLineWidthPx = style.selection.width.toPx()
 
                         val clampedVisibleRange =
                             when {
@@ -610,13 +624,13 @@ private fun StackedAreaChartContent(
                                 fillColor =
                                     areaColors
                                         .getOrElse(index) { areaColors.lastOrNull() ?: Color.Transparent }
-                                        .copy(alpha = style.fillAlpha),
-                                bezier = style.bezier,
+                                        .copy(alpha = style.fill.alpha),
+                                bezier = style.boundary.bezier,
                                 revealProgress = revealProgress,
                                 visibleStart = rangeStart,
                                 visibleEnd = rangeEnd,
                             )
-                            if (style.lineVisible && lineWidthPx > 0f) {
+                            if (style.boundary.visible && lineWidthPx > 0f) {
                                 drawStackedAreaLine(
                                     upperSeries = upperSeries,
                                     lineColor =
@@ -624,7 +638,7 @@ private fun StackedAreaChartContent(
                                             lineColors.lastOrNull() ?: Color.Transparent
                                         },
                                     lineWidth = lineWidthPx,
-                                    bezier = style.bezier,
+                                    bezier = style.boundary.bezier,
                                     revealProgress = revealProgress,
                                     visibleStart = rangeStart,
                                     visibleEnd = rangeEnd,
@@ -632,13 +646,13 @@ private fun StackedAreaChartContent(
                             }
                         }
 
-                        if (style.selectionLineVisible && selectedIndex != NO_SELECTION && pointsCount > 1) {
+                        if (style.selection.visible && selectedIndex != NO_SELECTION && pointsCount > 1) {
                             val safeIndex = selectedIndex.coerceIn(0, pointsCount - 1)
                             val stepX = if (isScrollable) denseStepX else fitStepX
                             if (stepX > 0f) {
                                 val selectedX = safeIndex * stepX
                                 drawLine(
-                                    color = style.selectionLineColor,
+                                    color = style.selection.color,
                                     start = Offset(selectedX, 0f),
                                     end = Offset(selectedX, size.height),
                                     strokeWidth = selectionLineWidthPx,
@@ -653,8 +667,8 @@ private fun StackedAreaChartContent(
         if (showXAxisLabels) {
             StackedAreaXAxisLabels(
                 ticks = xAxisTicks,
-                color = style.xAxisLabelColor,
-                fontSize = style.xAxisLabelSize,
+                color = xLabels.color,
+                fontSize = xLabels.size,
                 tiltDegrees = xAxisTilt,
                 modifier =
                     Modifier

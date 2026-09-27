@@ -30,6 +30,7 @@ import io.github.hdcharts.charts.internal.common.axis.AxisXPlanRequest
 import io.github.hdcharts.charts.internal.common.composable.ChartErrors
 import io.github.hdcharts.charts.internal.common.model.ChartData
 import io.github.hdcharts.charts.model.ChartValueFormatter
+import io.github.hdcharts.charts.style.BarChartStyle
 import kotlinx.collections.immutable.persistentListOf
 import kotlin.math.roundToInt
 
@@ -39,7 +40,7 @@ private const val FIXED_X_AXIS_LABEL_TILT_DEGREES = 34f
 @Composable
 internal fun BarChartContent(
     chartData: ChartData,
-    style: BarChartInternalStyle,
+    style: BarChartStyle,
     interactionEnabled: Boolean,
     dragSelectionEnabled: Boolean,
     animatedValues: List<Animatable<Float, AnimationVector1D>>,
@@ -63,8 +64,10 @@ internal fun BarChartContent(
     onZoomScaleChange: (Float) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val xLabels = style.axis.xLabels
+    val yLabels = style.axis.yLabels
     val dataSize = chartData.points.size
-    val showXLabels = style.xAxisLabelsVisible && chartData.labels.any { it.isNotBlank() }
+    val showXLabels = xLabels.visible && chartData.labels.any { it.isNotBlank() }
     val currentToggleSelection by rememberUpdatedState(onToggleSelection)
     val currentSelectIndex by rememberUpdatedState(onSelectIndex)
     val currentClearSelection by rememberUpdatedState(onClearSelection)
@@ -74,7 +77,7 @@ internal fun BarChartContent(
     BoxWithConstraints(modifier = modifier) {
         val density = LocalDensity.current
         val xAxisTilt = FIXED_X_AXIS_LABEL_TILT_DEGREES
-        val xAxisLabelSizePx = with(density) { style.xAxisLabelSize.toPx() }
+        val xAxisLabelSizePx = with(density) { xLabels.size.toPx() }
         val xAxisLabelFootprintPx =
             remember(chartData.labels, dataSize, xAxisLabelSizePx, xAxisTilt) {
                 estimateXAxisLabelFootprintPx(
@@ -95,42 +98,19 @@ internal fun BarChartContent(
         val xAxisHeight = with(density) { xAxisHeightPx.toDp() }
         val chartHeightPx = (constraints.maxHeight - xAxisHeightPx).coerceAtLeast(0).toFloat()
         val chartHeight = with(density) { chartHeightPx.toDp() }
-        val yAxisTicks =
-            remember(fixedMin, fixedMax, chartHeightPx, style.yAxisLabelCount, axisValueFormatter) {
-                buildYAxisTicks(
-                    minValue = fixedMin,
-                    maxValue = fixedMax,
-                    labelCount = style.yAxisLabelCount,
-                    chartHeightPx = chartHeightPx,
-                    formatter = axisValueFormatter,
-                )
-            }
-        val yAxisWidthPx =
-            if (style.yAxisLabelsVisible) {
-                barYAxisWidthPx(
-                    ticks = yAxisTicks,
-                    fontSizePx = with(density) { style.yAxisLabelSize.toPx() },
-                    availableWidthPx = constraints.maxWidth,
-                )
-            } else {
-                0f
-            }
-        val yAxisGapPx =
-            if (style.yAxisLabelsVisible) {
-                with(density) { AXIS_LABEL_CHART_GAP.roundToPx().toFloat() }.coerceAtMost(
-                    (
-                        constraints.maxWidth -
-                            yAxisWidthPx -
-                            1f
-                    ).coerceAtLeast(0f),
-                )
-            } else {
-                0f
-            }
-        val yAxisWidth = with(density) { yAxisWidthPx.toDp() }
-        val plotStartPadding = with(density) { (yAxisWidthPx + yAxisGapPx).toDp() }
+        val yAxisLayout =
+            rememberBarYAxisLayout(
+                labels = yLabels,
+                minValue = fixedMin,
+                maxValue = fixedMax,
+                chartHeightPx = chartHeightPx,
+                formatter = axisValueFormatter,
+                availableWidthPx = constraints.maxWidth,
+            )
+        val yAxisWidth = with(density) { yAxisLayout.widthPx.toDp() }
+        val plotStartPadding = with(density) { (yAxisLayout.widthPx + yAxisLayout.gapPx).toDp() }
         val viewportWidthPx =
-            (constraints.maxWidth.toFloat() - yAxisWidthPx - yAxisGapPx).coerceAtLeast(1f)
+            (constraints.maxWidth.toFloat() - yAxisLayout.widthPx - yAxisLayout.gapPx).coerceAtLeast(1f)
 
         // Preserve subpixel bins in fit mode, and reduce excessive spacing in narrow parents.
         val effectiveSpacingPx =
@@ -234,7 +214,7 @@ internal fun BarChartContent(
         val xAxisPlan =
             remember(
                 dataSize,
-                style.xAxisLabelMaxCount,
+                xLabels.count,
                 isScrollable,
                 unitWidthPx,
                 viewportWidthPx,
@@ -246,7 +226,7 @@ internal fun BarChartContent(
                     request =
                         AxisXPlanRequest(
                             dataSize = dataSize,
-                            requestedMaxLabelCount = style.xAxisLabelMaxCount,
+                            requestedMaxLabelCount = xLabels.count,
                             isScrollable = isScrollable,
                             unitWidthPx = unitWidthPx,
                             viewportWidthPx = viewportWidthPx,
@@ -289,11 +269,11 @@ internal fun BarChartContent(
                     .height(chartHeight)
                     .testTag(TestTags.BAR_CHART),
         ) {
-            if (style.yAxisLabelsVisible) {
+            if (yLabels.visible) {
                 BarYAxisLabels(
-                    ticks = yAxisTicks,
-                    color = style.yAxisLabelColor,
-                    fontSize = style.yAxisLabelSize,
+                    ticks = yAxisLayout.ticks,
+                    color = yLabels.color,
+                    fontSize = yLabels.size,
                     modifier =
                         Modifier
                             .align(Alignment.TopStart)
@@ -344,8 +324,8 @@ internal fun BarChartContent(
         if (showXLabels) {
             BarXAxisLabels(
                 ticks = ticks,
-                color = style.xAxisLabelColor,
-                fontSize = style.xAxisLabelSize,
+                color = xLabels.color,
+                fontSize = xLabels.size,
                 tiltDegrees = xAxisTilt,
                 modifier =
                     Modifier

@@ -24,7 +24,7 @@ internal fun LineChartEntry(
     modifier: Modifier,
     style: LineChartStyle,
     title: String?,
-    content: @Composable (data: MultiChartData, style: LineChartInternalStyle) -> Unit,
+    content: @Composable (data: MultiChartData) -> Unit,
 ) {
     val density = LocalDensity.current
     val errors = remember(data, style, density) { validateLineInput(data = data, style = style, density = density) }
@@ -40,7 +40,7 @@ internal fun LineChartEntry(
         remember(data, title) {
             toInternalLineData(data = data, title = title)
         }
-    content(internalData, style.toInternal())
+    content(internalData)
 }
 
 internal fun validateLineInput(

@@ -37,6 +37,7 @@ import io.github.hdcharts.charts.internal.common.layout.fillMaxSizeChartModifier
 import io.github.hdcharts.charts.internal.common.model.MultiChartData
 import io.github.hdcharts.charts.internal.common.model.minMax
 import io.github.hdcharts.charts.internal.common.model.normalizeByMinMax
+import io.github.hdcharts.charts.style.RadarChartStyle
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.coroutineScope
@@ -50,7 +51,7 @@ import kotlin.math.sin
 @Composable
 internal fun RadarChart(
     data: MultiChartData,
-    style: RadarInternalStyle,
+    style: RadarChartStyle,
     colors: ImmutableList<Color>,
     categoryColors: ImmutableList<Color>,
     axisLabels: ImmutableList<String> = persistentListOf(),
@@ -144,8 +145,8 @@ internal fun RadarChart(
             }
 
         val labelRadius =
-            remember(radius, style.axisLabelPadding, density) {
-                radius + with(density) { style.axisLabelPadding.toPx() }
+            remember(radius, style.axes.labelPadding, density) {
+                radius + with(density) { style.axes.labelPadding.toPx() }
             }
 
         val labelPositions =
@@ -211,12 +212,12 @@ internal fun RadarChart(
                 )
             }
 
-            if (style.axisLabelVisible && axisLabels.isNotEmpty()) {
+            if (style.axes.labelVisible && axisLabels.isNotEmpty()) {
                 RadarAxisLabels(
                     labels = axisLabels,
                     labelPositions = labelPositions,
-                    color = style.axisLabelColor,
-                    fontSize = style.axisLabelSize,
+                    color = style.axes.labelColor,
+                    fontSize = style.axes.labelSize,
                 )
             }
         }
@@ -225,7 +226,7 @@ internal fun RadarChart(
 
 private fun DrawScope.drawRadar(
     data: MultiChartData,
-    style: RadarInternalStyle,
+    style: RadarChartStyle,
     colors: ImmutableList<Color>,
     categoryColors: ImmutableList<Color>,
     axisCount: Int,
@@ -239,28 +240,28 @@ private fun DrawScope.drawRadar(
 
     val startAngle = (-PI / 2f).toFloat()
     val angleStep = (2f * PI / axisCount).toFloat()
-    if (style.gridVisible && style.gridSteps > 0) {
+    if (style.grid.visible && style.grid.steps > 0) {
         drawGrid(
             axisCount = axisCount,
             center = center,
             radius = radius,
-            steps = style.gridSteps,
+            steps = style.grid.steps,
             startAngle = startAngle,
             angleStep = angleStep,
-            color = style.gridColor,
-            strokeWidth = style.gridLineWidth.toPx(),
+            color = style.grid.color,
+            strokeWidth = style.grid.lineWidth.toPx(),
         )
     }
 
-    if (style.axisVisible) {
+    if (style.axes.visible) {
         drawAxes(
             axisCount = axisCount,
             center = center,
             radius = radius,
             startAngle = startAngle,
             angleStep = angleStep,
-            color = style.axisLineColor,
-            strokeWidth = style.axisLineWidth.toPx(),
+            color = style.axes.lineColor,
+            strokeWidth = style.axes.lineWidth.toPx(),
         )
     }
 
@@ -272,7 +273,7 @@ private fun DrawScope.drawRadar(
                     val normalized = seriesNormalized?.getOrNull(pointIndex) ?: 0f
                     normalized * radius
                 }
-            val lineColor = colors.getOrNull(index) ?: style.lineColor
+            val lineColor = colors.getOrNull(index) ?: style.polygon.lineColor
             scaledValues to lineColor
         }
 
@@ -285,34 +286,34 @@ private fun DrawScope.drawRadar(
                 angleStep = angleStep,
             )
 
-        if (style.fillVisible) {
+        if (style.polygon.fillVisible) {
             drawPath(
                 path = path,
-                color = lineColor.copy(alpha = style.fillAlpha),
+                color = lineColor.copy(alpha = style.polygon.fillAlpha),
             )
         }
 
-        if (style.lineWidth > 0.dp) {
+        if (style.polygon.lineWidth > 0.dp) {
             drawPath(
                 path = path,
                 color = lineColor,
-                style = Stroke(width = style.lineWidth.toPx()),
+                style = Stroke(width = style.polygon.lineWidth.toPx()),
             )
         }
     }
 
-    if (style.pointVisible) {
+    if (style.points.visible) {
         seriesValues.forEach { (values, lineColor) ->
             drawPoints(
                 values = values,
                 center = center,
                 startAngle = startAngle,
                 angleStep = angleStep,
-                pointSize = style.pointSize.toPx(),
+                pointSize = style.points.size.toPx(),
                 pointColor =
-                    when (style.pointColorSameAsLine) {
+                    when (style.points.colorSameAsLine) {
                         true -> lineColor
-                        else -> style.pointColor
+                        else -> style.points.color
                     },
                 dragging = dragging,
                 selectedIndex = selectedIndex,
@@ -320,7 +321,7 @@ private fun DrawScope.drawRadar(
         }
     }
 
-    if (style.categoryPinsVisible && categoryColors.isNotEmpty()) {
+    if (style.categories.pinsVisible && categoryColors.isNotEmpty()) {
         drawCategoryPins(
             axisCount = axisCount,
             center = center,
@@ -328,7 +329,7 @@ private fun DrawScope.drawRadar(
             startAngle = startAngle,
             angleStep = angleStep,
             colors = categoryColors,
-            pinSize = style.categoryPinSize.toPx(),
+            pinSize = style.categories.pinSize.toPx(),
             dragging = dragging,
             selectedIndex = selectedIndex,
         )

@@ -279,7 +279,7 @@ class LineChartHelpersTest {
 
     @Test
     fun resolveLineRange_timelineFixedMin_staysPinnedAcrossLiveTicksEvenWhenDataDipsBelowIt() {
-        // LineChartContent recomputes minMax via remember(data, style.minValue, style.maxValue) on every tick.
+        // LineChartContent recomputes minMax via remember(data, style.range.min, style.range.max) on every tick.
         val tickBeforeDip = singleSeriesData(listOf(5.0, 8.0, 12.0))
         val tickDuringDip = singleSeriesData(listOf(8.0, 12.0, -3.0))
         val tickAfterDip = singleSeriesData(listOf(12.0, -3.0, 6.0))

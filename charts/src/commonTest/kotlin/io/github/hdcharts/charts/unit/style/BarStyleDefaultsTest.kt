@@ -11,8 +11,6 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
-import io.github.hdcharts.charts.internal.barchart.BarChartInternalStyle
-import io.github.hdcharts.charts.internal.barchart.toInternal
 import io.github.hdcharts.charts.internal.validateBarStyle
 import io.github.hdcharts.charts.model.ChartValueFormatters
 import io.github.hdcharts.charts.style.BarBarsStyle
@@ -167,11 +165,10 @@ class BarStyleDefaultsTest {
     }
 
     @Test
-    fun strokes_passDefaultAndExplicitDpToInternalStyle() =
+    fun strokesAndRange_keepDpWidthsAndDoublePrecision() =
         runComposeUiTest {
             lateinit var defaultStyle: BarChartStyle
-            lateinit var defaultInternalStyle: BarChartInternalStyle
-            lateinit var customInternalStyle: BarChartInternalStyle
+            lateinit var customStyle: BarChartStyle
             val min = 16_777_216.25
             val max = 16_777_216.75
 
@@ -179,19 +176,16 @@ class BarStyleDefaultsTest {
                 CompositionLocalProvider(LocalDensity provides Density(density = 2f, fontScale = 1.5f)) {
                     MaterialTheme {
                         val defaults = BarChartDefaults.style()
-                        val defaultInternal = defaults.toInternal()
-                        val customInternal =
-                            BarChartDefaults
-                                .style(
-                                    range = BarChartDefaults.range(min = min, max = max),
-                                    grid = BarChartDefaults.grid(lineWidth = 2.dp),
-                                    axis = BarChartDefaults.axis(lineWidth = 2.dp),
-                                    selectionLine = BarChartDefaults.selectionLine(width = 2.dp),
-                                ).toInternal()
+                        val custom =
+                            BarChartDefaults.style(
+                                range = BarChartDefaults.range(min = min, max = max),
+                                grid = BarChartDefaults.grid(lineWidth = 2.dp),
+                                axis = BarChartDefaults.axis(lineWidth = 2.dp),
+                                selectionLine = BarChartDefaults.selectionLine(width = 2.dp),
+                            )
                         SideEffect {
                             defaultStyle = defaults
-                            defaultInternalStyle = defaultInternal
-                            customInternalStyle = customInternal
+                            customStyle = custom
                         }
                     }
                 }
@@ -201,14 +195,11 @@ class BarStyleDefaultsTest {
                 assertEquals(expected = 1.dp, actual = defaultStyle.grid.lineWidth)
                 assertEquals(expected = 1.dp, actual = defaultStyle.axis.lineWidth)
                 assertEquals(expected = 1.dp, actual = defaultStyle.selectionLine.width)
-                assertEquals(expected = 1.dp, actual = defaultInternalStyle.gridLineWidth)
-                assertEquals(expected = 1.dp, actual = defaultInternalStyle.axisLineWidth)
-                assertEquals(expected = 1.dp, actual = defaultInternalStyle.selectionLineWidth)
-                assertEquals(expected = 2.dp, actual = customInternalStyle.gridLineWidth)
-                assertEquals(expected = 2.dp, actual = customInternalStyle.axisLineWidth)
-                assertEquals(expected = 2.dp, actual = customInternalStyle.selectionLineWidth)
-                assertEquals(expected = min, actual = customInternalStyle.minValue)
-                assertEquals(expected = max, actual = customInternalStyle.maxValue)
+                assertEquals(expected = 2.dp, actual = customStyle.grid.lineWidth)
+                assertEquals(expected = 2.dp, actual = customStyle.axis.lineWidth)
+                assertEquals(expected = 2.dp, actual = customStyle.selectionLine.width)
+                assertEquals(expected = min, actual = customStyle.range.min)
+                assertEquals(expected = max, actual = customStyle.range.max)
             }
         }
 

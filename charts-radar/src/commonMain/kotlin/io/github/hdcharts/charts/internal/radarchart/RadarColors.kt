@@ -1,6 +1,7 @@
 package io.github.hdcharts.charts.internal.radarchart
 
 import androidx.compose.ui.graphics.Color
+import io.github.hdcharts.charts.style.RadarCategoryStyle
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 
@@ -25,13 +26,13 @@ private val DefaultCategoryColors =
     )
 
 internal fun categoryColors(
-    style: RadarInternalStyle,
+    style: RadarCategoryStyle,
     count: Int,
 ): ImmutableList<Color> {
     if (count <= 0) return emptyList<Color>().toImmutableList()
     val baseColors =
-        if (style.categoryColors.isNotEmpty()) {
-            style.categoryColors
+        if (style.colors.isNotEmpty()) {
+            style.colors
         } else {
             DefaultCategoryColors
         }

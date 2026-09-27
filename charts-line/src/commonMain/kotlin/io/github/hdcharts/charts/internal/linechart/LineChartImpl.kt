@@ -7,23 +7,34 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.github.hdcharts.charts.internal.NO_SELECTION
+import io.github.hdcharts.charts.internal.TestTags
+import io.github.hdcharts.charts.internal.common.composable.ChartHeader
+import io.github.hdcharts.charts.internal.common.composable.ChartHeaderTestTags
 import io.github.hdcharts.charts.internal.common.composable.rememberDenseExpandedState
 import io.github.hdcharts.charts.internal.common.composable.rememberZoomScaleState
 import io.github.hdcharts.charts.internal.common.composable.zoomInScale
 import io.github.hdcharts.charts.internal.common.composable.zoomOutScale
 import io.github.hdcharts.charts.internal.common.model.MultiChartData
+import io.github.hdcharts.charts.style.LineChartStyle
 import kotlinx.collections.immutable.ImmutableList
 
 private const val LINE_ZOOM_MIN = 1f
 private const val LINE_ZOOM_MAX = 4f
 private const val LINE_ZOOM_STEP = 1.25f
+private val HEADER_TEST_TAGS =
+    ChartHeaderTestTags(
+        denseExpand = TestTags.LINE_CHART_DENSE_EXPAND,
+        denseCollapse = TestTags.LINE_CHART_DENSE_COLLAPSE,
+        zoomOut = TestTags.LINE_CHART_ZOOM_OUT,
+        zoomIn = TestTags.LINE_CHART_ZOOM_IN,
+    )
 
 /** Interactive line chart: dense fit/expand, zoom, scrolling and selection. */
 @Composable
 internal fun LineChartImpl(
     data: MultiChartData,
     modifier: Modifier = Modifier,
-    style: LineChartInternalStyle,
+    style: LineChartStyle,
     interactionEnabled: Boolean,
     animateOnStart: Boolean,
     selectedPointIndex: Int = NO_SELECTION,
@@ -90,9 +101,10 @@ internal fun LineChartImpl(
         legendLabels = legendLabels,
         header = {
             if (showHeader) {
-                LineChartHeader(
+                ChartHeader(
                     title = title,
-                    style = style,
+                    titleTextStyle = style.chartContainerStyle.styleTitle,
+                    testTags = HEADER_TEST_TAGS,
                     showDensityToggle = showCompactToggle,
                     denseExpanded = denseExpanded,
                     onToggleDensity = { denseExpanded = !denseExpanded },
@@ -108,7 +120,7 @@ internal fun LineChartImpl(
                     },
                     modifier =
                         lineHeaderModifier(
-                            style = style,
+                            contentPadding = style.chartContainerStyle.contentPadding,
                             bottom =
                                 if (showZoomControlsInHeader) {
                                     style.chartContainerStyle.contentPadding

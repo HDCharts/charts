@@ -49,10 +49,11 @@ import io.github.hdcharts.charts.internal.common.bezier.DEFAULT_BEZIER_TENSION
 import io.github.hdcharts.charts.internal.common.composable.rememberShowState
 import io.github.hdcharts.charts.internal.common.interaction.buildHorizontalDragGestureModifier
 import io.github.hdcharts.charts.internal.common.interaction.buildTapGestureModifier
+import io.github.hdcharts.charts.internal.common.layout.wrapContentChartModifier
 import io.github.hdcharts.charts.internal.common.model.MultiChartData
 import io.github.hdcharts.charts.internal.common.model.normalizeByMinMax
-import io.github.hdcharts.charts.internal.linechart.LineChartInternalStyle
 import io.github.hdcharts.charts.model.ChartValueFormatter
+import io.github.hdcharts.charts.style.LineChartStyle
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
@@ -66,11 +67,11 @@ internal const val LINE_DENSE_MIN_STEP_PX = 12f
 internal const val FIXED_X_AXIS_LABEL_TILT_DEGREES = 34f
 
 /** Space kept above and below the plot so the line, points, and selection markers fit at the min and max values. */
-internal fun Density.lineVerticalSafeInset(style: LineChartInternalStyle): Float {
-    val pointRadius = if (style.pointVisible) style.pointSize.toPx() else 0f
+internal fun Density.lineVerticalSafeInset(style: LineChartStyle): Float {
+    val pointRadius = if (style.points.visible) style.points.size.toPx() else 0f
     val markerRadius =
-        if (style.pointVisible || style.dragPointVisible) {
-            max(style.dragPointSize.toPx(), style.dragActivePointSize.toPx())
+        if (style.points.visible || style.selection.visible) {
+            max(style.selection.size.toPx(), style.selection.activeSize.toPx())
         } else {
             0f
         }
@@ -80,7 +81,7 @@ internal fun Density.lineVerticalSafeInset(style: LineChartInternalStyle): Float
 @Composable
 internal fun LineChartContent(
     data: MultiChartData,
-    style: LineChartInternalStyle,
+    style: LineChartStyle,
     colors: ImmutableList<Color>,
     interactionEnabled: Boolean,
     animateOnStart: Boolean,
@@ -91,6 +92,8 @@ internal fun LineChartContent(
     onValueChanged: (Int) -> Unit = {},
     axisValueFormatter: ChartValueFormatter,
 ) {
+    val xLabels = style.axis.xLabels
+    val yLabels = style.axis.yLabels
     val isPreview = LocalInspectionMode.current
     var show by rememberShowState(isPreviewMode = isPreview || !animateOnStart)
     val touchX = remember { mutableFloatStateOf(0f) }
@@ -125,8 +128,8 @@ internal fun LineChartContent(
     val rawSeries = remember(data) { data.items.map { item -> item.item.points } }
     val xAxisLabels = remember(data) { resolveLineXAxisLabels(data) }
     val minMax =
-        remember(data, style.minValue, style.maxValue) {
-            data.resolveLineRange(style.minValue, style.maxValue)
+        remember(data, style.range.min, style.range.max) {
+            data.resolveLineRange(style.range.min, style.range.max)
         }
     val targetNormalized = remember(rawSeries, minMax) { data.normalizeByMinMax(minMax, 0f) }
     val pointsCount = rawSeries.firstOrNull()?.size ?: 0
@@ -341,22 +344,22 @@ internal fun LineChartContent(
             },
         )
 
-    val showYAxisLabels = style.yAxisLabelsVisible
+    val showYAxisLabels = yLabels.visible
     val showXAxisLabelsCandidate =
-        style.xAxisLabelsVisible &&
+        xLabels.visible &&
             xAxisLabels.isNotEmpty()
-    val showAxisLines = style.axisVisible
+    val showAxisLines = style.axis.visible
 
     BoxWithConstraints(
         modifier =
-            style.modifier
+            wrapContentChartModifier(style.chartContainerStyle)
                 .onGloballyPositioned {
                     show = true
                 },
     ) {
         val density = LocalDensity.current
         val xAxisTilt = FIXED_X_AXIS_LABEL_TILT_DEGREES
-        val xAxisLabelSizePx = with(density) { style.xAxisLabelSize.toPx() }
+        val xAxisLabelSizePx = with(density) { xLabels.size.toPx() }
         val xAxisLabelFootprintPx =
             remember(xAxisLabels, pointsCount, xAxisLabelSizePx, xAxisTilt) {
                 estimateXAxisLabelFootprintPx(
@@ -381,7 +384,7 @@ internal fun LineChartContent(
             remember(
                 minMax,
                 chartHeightPx,
-                style.yAxisLabelCount,
+                yLabels.count,
                 showYAxisLabels,
                 lineVerticalInsetPx,
                 axisValueFormatter,
@@ -392,14 +395,14 @@ internal fun LineChartContent(
                     buildLineYAxisTicks(
                         minValue = minMax.first,
                         maxValue = minMax.second,
-                        labelCount = style.yAxisLabelCount,
+                        labelCount = yLabels.count,
                         plotHeightPx = chartHeightPx,
                         verticalInsetPx = lineVerticalInsetPx,
                         formatter = axisValueFormatter,
                     )
                 }
             }
-        val yAxisLabelSizePx = with(density) { style.yAxisLabelSize.toPx() }
+        val yAxisLabelSizePx = with(density) { yLabels.size.toPx() }
         val yAxisWidthPx =
             if (showYAxisLabels) {
                 estimateYAxisLabelWidthPx(
@@ -445,7 +448,7 @@ internal fun LineChartContent(
         val xAxisPlan =
             remember(
                 pointsCount,
-                style.xAxisLabelMaxCount,
+                xLabels.count,
                 isDenseMode,
                 fitStepX,
                 denseStepX,
@@ -457,7 +460,7 @@ internal fun LineChartContent(
                     request =
                         AxisXPlanRequest(
                             dataSize = pointsCount,
-                            requestedMaxLabelCount = style.xAxisLabelMaxCount,
+                            requestedMaxLabelCount = xLabels.count,
                             isScrollable = isDenseMode,
                             unitWidthPx =
                                 if (isDenseMode) {
@@ -513,8 +516,8 @@ internal fun LineChartContent(
             if (showYAxisLabels) {
                 LineYAxisLabels(
                     ticks = yAxisTicks,
-                    color = style.yAxisLabelColor,
-                    fontSize = style.yAxisLabelSize,
+                    color = yLabels.color,
+                    fontSize = yLabels.size,
                     modifier =
                         Modifier
                             .align(Alignment.TopStart)
@@ -562,16 +565,16 @@ internal fun LineChartContent(
                                         )
 
                                 drawLine(
-                                    color = style.axisColor,
+                                    color = style.axis.color,
                                     start = Offset(0f, 0f),
                                     end = Offset(0f, size.height),
-                                    strokeWidth = style.axisLineWidth.toPx(),
+                                    strokeWidth = style.axis.lineWidth.toPx(),
                                 )
                                 drawLine(
-                                    color = style.axisColor,
+                                    color = style.axis.color,
                                     start = Offset(0f, baselineY),
                                     end = Offset(size.width, baselineY),
-                                    strokeWidth = style.axisLineWidth.toPx(),
+                                    strokeWidth = style.axis.lineWidth.toPx(),
                                 )
                             }
 
@@ -626,16 +629,19 @@ internal fun LineChartContent(
                                 val stepX = if (isDenseMode) denseStepX else fitStepX
                                 if (stepX > 0f) {
                                     val selectedX = safeSelectedIndex * stepX
-                                    val selectionStrokeWidth = max(style.axisLineWidth.toPx(), 1f)
+                                    val selectionStrokeWidth = max(style.axis.lineWidth.toPx(), 1f)
                                     drawLine(
-                                        color = style.dragPointColor,
+                                        color = style.selection.color,
                                         start = Offset(selectedX, 0f),
                                         end = Offset(selectedX, size.height),
                                         strokeWidth = selectionStrokeWidth,
                                     )
 
-                                    if (!dragging.value && (style.dragPointVisible || style.pointVisible)) {
-                                        val markerRadius = style.dragActivePointSize.toPx().coerceAtLeast(1f)
+                                    if (!dragging.value && (style.selection.visible || style.points.visible)) {
+                                        val markerRadius =
+                                            style.selection.activeSize
+                                                .toPx()
+                                                .coerceAtLeast(1f)
                                         data.items.forEachIndexed { seriesIndex, _ ->
                                             val normalized =
                                                 animatedValues
@@ -650,7 +656,7 @@ internal fun LineChartContent(
                                                     verticalInset = lineVerticalInsetPx,
                                                 )
                                             drawCircle(
-                                                color = style.dragPointColor,
+                                                color = style.selection.color,
                                                 radius = markerRadius,
                                                 center = Offset(selectedX, y),
                                             )
@@ -690,8 +696,8 @@ internal fun LineChartContent(
         if (showXAxisLabels) {
             LineXAxisLabels(
                 ticks = xAxisTicks,
-                color = style.xAxisLabelColor,
-                fontSize = style.xAxisLabelSize,
+                color = xLabels.color,
+                fontSize = xLabels.size,
                 tiltDegrees = xAxisTilt,
                 modifier =
                     Modifier

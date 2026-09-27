@@ -13,26 +13,36 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.hdcharts.charts.internal.NO_SELECTION
+import io.github.hdcharts.charts.internal.TestTags
+import io.github.hdcharts.charts.internal.common.composable.ChartHeader
+import io.github.hdcharts.charts.internal.common.composable.ChartHeaderTestTags
 import io.github.hdcharts.charts.internal.common.composable.rememberDenseExpandedState
 import io.github.hdcharts.charts.internal.common.composable.rememberZoomScaleState
 import io.github.hdcharts.charts.internal.common.composable.zoomInScale
 import io.github.hdcharts.charts.internal.common.composable.zoomOutScale
+import io.github.hdcharts.charts.internal.common.layout.fillMaxSizeChartModifier
 import io.github.hdcharts.charts.internal.common.model.ChartData
 import io.github.hdcharts.charts.model.ChartValueFormatter
+import io.github.hdcharts.charts.style.BarChartStyle
 
 private const val ZOOM_MIN = 1f
 private const val ZOOM_MAX = 4f
 private const val ZOOM_STEP = 1.25f
-private val Y_AXIS_CHART_GAP: Dp = 10.dp
+private val HEADER_TEST_TAGS =
+    ChartHeaderTestTags(
+        denseExpand = TestTags.BAR_CHART_DENSE_EXPAND,
+        denseCollapse = TestTags.BAR_CHART_DENSE_COLLAPSE,
+        zoomOut = TestTags.BAR_CHART_ZOOM_OUT,
+        zoomIn = TestTags.BAR_CHART_ZOOM_IN,
+    )
 
 @Composable
 internal fun BarChart(
     chartData: ChartData,
     title: String,
-    style: BarChartInternalStyle,
+    style: BarChartStyle,
     interactionEnabled: Boolean,
     animateOnStart: Boolean,
     selectedBarIndex: Int = NO_SELECTION,
@@ -41,54 +51,32 @@ internal fun BarChart(
     valueFormatter: ChartValueFormatter,
     axisValueFormatter: ChartValueFormatter,
 ) {
-    val baseBarColor = style.barColor.copy(alpha = style.barAlpha)
+    val baseBarColor = style.bars.color.copy(alpha = style.bars.alpha)
     val sourceBarColors =
-        remember(style.barColors, style.barAlpha) {
-            style.barColors.map { color -> color.copy(alpha = style.barAlpha) }
+        remember(style.bars.colors, style.bars.alpha) {
+            style.bars.colors.map { color -> color.copy(alpha = style.bars.alpha) }
         }
     val isPreview = LocalInspectionMode.current
     val sourceDataSize = chartData.points.size
-    BoxWithConstraints(modifier = style.modifier) {
+    BoxWithConstraints(modifier = fillMaxSizeChartModifier(style.chartContainerStyle)) {
         val density = LocalDensity.current
-        val spacingPx = with(density) { style.space.toPx() }
-        val minBarWidthPx = with(density) { style.minBarWidth.toPx() }
+        val spacingPx = with(density) { style.bars.space.toPx() }
+        val minBarWidthPx = with(density) { style.bars.minBarWidth.toPx() }
         val (fixedMin, fixedMax) =
-            remember(chartData, style.minValue, style.maxValue) {
-                chartData.resolveBarRange(style.minValue, style.maxValue)
+            remember(chartData, style.range.min, style.range.max) {
+                chartData.resolveBarRange(style.range.min, style.range.max)
             }
-        val yAxisTicks =
-            remember(fixedMin, fixedMax, style.yAxisLabelCount, axisValueFormatter) {
-                buildYAxisTicks(
-                    minValue = fixedMin,
-                    maxValue = fixedMax,
-                    labelCount = style.yAxisLabelCount,
-                    chartHeightPx = 1f,
-                    formatter = axisValueFormatter,
-                )
-            }
-        val yAxisWidthPx =
-            if (style.yAxisLabelsVisible) {
-                barYAxisWidthPx(
-                    ticks = yAxisTicks,
-                    fontSizePx = with(density) { style.yAxisLabelSize.toPx() },
-                    availableWidthPx = constraints.maxWidth,
-                )
-            } else {
-                0f
-            }
-        val yAxisGapPx =
-            if (style.yAxisLabelsVisible) {
-                with(density) { Y_AXIS_CHART_GAP.roundToPx().toFloat() }.coerceAtMost(
-                    (
-                        constraints.maxWidth -
-                            yAxisWidthPx -
-                            1f
-                    ).coerceAtLeast(0f),
-                )
-            } else {
-                0f
-            }
-        val viewportWidthPx = (constraints.maxWidth.toFloat() - yAxisWidthPx - yAxisGapPx).coerceAtLeast(1f)
+        val yAxisLayout =
+            rememberBarYAxisLayout(
+                labels = style.axis.yLabels,
+                minValue = fixedMin,
+                maxValue = fixedMax,
+                chartHeightPx = 1f,
+                formatter = axisValueFormatter,
+                availableWidthPx = constraints.maxWidth,
+            )
+        val viewportWidthPx =
+            (constraints.maxWidth.toFloat() - yAxisLayout.widthPx - yAxisLayout.gapPx).coerceAtLeast(1f)
         val maxFitBars =
             remember(viewportWidthPx, spacingPx, minBarWidthPx) {
                 maxBarsThatFit(
@@ -193,9 +181,10 @@ internal fun BarChart(
 
         Column(modifier = Modifier.fillMaxSize()) {
             if (showHeader) {
-                BarChartHeader(
+                ChartHeader(
                     title = resolvedTitle,
-                    style = style,
+                    titleTextStyle = style.chartContainerStyle.styleTitle,
+                    testTags = HEADER_TEST_TAGS,
                     showDensityToggle = showCompactToggle,
                     denseExpanded = denseExpanded,
                     onToggleDensity = { denseExpanded = !denseExpanded },

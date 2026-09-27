@@ -8,11 +8,11 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 import io.github.hdcharts.charts.internal.NO_SELECTION
-import io.github.hdcharts.charts.internal.barchart.BarChartInternalStyle
+import io.github.hdcharts.charts.style.BarChartStyle
 import kotlin.math.abs
 
 internal fun DrawScope.drawBars(
-    style: BarChartInternalStyle,
+    style: BarChartStyle,
     animatedValues: List<Animatable<Float, AnimationVector1D>>,
     visibleRange: IntRange,
     selectedIndex: Int,
@@ -33,32 +33,32 @@ internal fun DrawScope.drawBars(
             heightPx = size.height,
         )
 
-    if (style.gridVisible && style.gridSteps > 0) {
-        val safeSteps = style.gridSteps.coerceAtLeast(1)
+    if (style.grid.visible && style.grid.steps > 0) {
+        val safeSteps = style.grid.steps.coerceAtLeast(1)
         repeat(safeSteps + 1) { step ->
             val progress = step / safeSteps.toFloat()
             val y = size.height * progress
             drawLine(
-                color = style.gridColor,
+                color = style.grid.color,
                 start = Offset(0f, y),
                 end = Offset(size.width, y),
-                strokeWidth = style.gridLineWidth.toPx(),
+                strokeWidth = style.grid.lineWidth.toPx(),
             )
         }
     }
 
-    if (style.axisVisible) {
+    if (style.axis.visible) {
         drawLine(
-            color = style.axisColor,
+            color = style.axis.color,
             start = Offset(0f, 0f),
             end = Offset(0f, size.height),
-            strokeWidth = style.axisLineWidth.toPx(),
+            strokeWidth = style.axis.lineWidth.toPx(),
         )
         drawLine(
-            color = style.axisColor,
+            color = style.axis.color,
             start = Offset(0f, clampedBaselineY),
             end = Offset(size.width, clampedBaselineY),
-            strokeWidth = style.axisLineWidth.toPx(),
+            strokeWidth = style.axis.lineWidth.toPx(),
         )
     }
 
@@ -84,18 +84,18 @@ internal fun DrawScope.drawBars(
         )
     }
 
-    if (style.selectionLineVisible && selectedIndex != NO_SELECTION && selectedCenterX.isFinite()) {
+    if (style.selectionLine.visible && selectedIndex != NO_SELECTION && selectedCenterX.isFinite()) {
         drawLine(
-            color = style.selectionLineColor,
+            color = style.selectionLine.color,
             start = Offset(selectedCenterX, 0f),
             end = Offset(selectedCenterX, size.height),
-            strokeWidth = style.selectionLineWidth.toPx(),
+            strokeWidth = style.selectionLine.width.toPx(),
         )
         drawCircle(
-            color = style.selectionLineColor,
+            color = style.selectionLine.color,
             radius = 3.dp.toPx(),
             center = Offset(selectedCenterX, clampedBaselineY),
-            style = Stroke(width = style.selectionLineWidth.toPx()),
+            style = Stroke(width = style.selectionLine.width.toPx()),
         )
     }
 }

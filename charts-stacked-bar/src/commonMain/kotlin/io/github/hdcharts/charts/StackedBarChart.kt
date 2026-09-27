@@ -10,7 +10,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import io.github.hdcharts.charts.internal.NO_SELECTION
-import io.github.hdcharts.charts.internal.barstackedchart.toInternal
 import io.github.hdcharts.charts.internal.common.composable.ChartErrors
 import io.github.hdcharts.charts.internal.common.composable.Legend
 import io.github.hdcharts.charts.internal.common.model.ChartDataItem
@@ -59,7 +58,6 @@ fun StackedBarChart(
     }
 
     val internalData = remember(data, title) { toInternalStackedData(data, title) }
-    val internalStyle = style.toInternal(showXAxisLabels = data.categories.isNotEmpty())
     val colors =
         remember(style.segments, data.series.size) {
             style.segments
@@ -86,8 +84,9 @@ fun StackedBarChart(
                 StackedBarChartInternal(
                     data = internalData,
                     title = effectiveTitle,
-                    style = internalStyle,
+                    style = style,
                     colors = colors,
+                    showXAxisLabels = style.axis.xLabels.visible && data.categories.any { it.isNotBlank() },
                     interactionEnabled = interactionEnabled,
                     animateOnStart = animateOnStart,
                     selectedBarIndex = selectedIndex,
