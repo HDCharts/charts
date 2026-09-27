@@ -7,6 +7,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.isDisplayed
@@ -174,6 +175,54 @@ class StackedAreaChartTest {
 
             onAllNodesWithTag(TestTags.STACKED_AREA_CHART_X_AXIS_LABELS).assertCountEquals(0)
             onNodeWithTag(TestTags.STACKED_AREA_CHART_Y_AXIS_LABELS).isDisplayed()
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun stackedAreaChart_withBlankCategoriesAndSelection_hidesXAxisAndKeepsTitleAndLegend() =
+        runComposeUiTest {
+            val data =
+                chartDataOf(
+                    categories = listOf("", " ", "", ""),
+                    ChartSeries(name = "Series A", values = listOf(10.0, 20.0, 30.0, 25.0)),
+                    ChartSeries(name = "Series B", values = listOf(5.0, 15.0, 20.0, 18.0)),
+                )
+
+            setContent {
+                StackedAreaChart(
+                    data = data,
+                    title = "Blank Categories",
+                    selection = staticChartSelection(index = 1),
+                    interactionEnabled = false,
+                    animateOnStart = false,
+                )
+            }
+
+            onAllNodesWithTag(TestTags.STACKED_AREA_CHART_X_AXIS_LABELS).assertCountEquals(0)
+            onNodeWithTag(TestTags.STACKED_AREA_CHART_Y_AXIS_LABELS).assertIsDisplayed()
+            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("Blank Categories")
+            onNodeWithText("Series A", substring = true).assertIsDisplayed()
+            onNodeWithText("Series B", substring = true).assertIsDisplayed()
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun stackedAreaChart_withLabelsBlankAfterCompactAggregation_hidesXAxisLayer() =
+        runComposeUiTest {
+            val points = 120
+            val data =
+                chartDataOf(
+                    categories = List(points) { index -> if (index == 0) "Start" else "" },
+                    ChartSeries(name = "Series A", values = List(points) { index -> 40.0 + (index % 8) }),
+                    ChartSeries(name = "Series B", values = List(points) { index -> 25.0 + (index % 6) }),
+                )
+
+            setContent {
+                StackedAreaChart(data = data, animateOnStart = false)
+            }
+
+            onAllNodesWithTag(TestTags.STACKED_AREA_CHART_X_AXIS_LABELS).assertCountEquals(0)
+            onNodeWithTag(TestTags.STACKED_AREA_CHART_Y_AXIS_LABELS).assertIsDisplayed()
         }
 
     @OptIn(ExperimentalTestApi::class)

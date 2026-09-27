@@ -325,7 +325,13 @@ private fun StackedAreaChartContent(
 ) {
     val xLabels = style.axis.xLabels
     val yLabels = style.axis.yLabels
-    val xAxisLabels = remember(data) { if (data.hasCategories()) data.categories.toList() else emptyList() }
+    val xAxisLabels =
+        remember(data) {
+            data.categories
+                .toList()
+                .takeUnless { it.all(String::isBlank) }
+                .orEmpty()
+        }
     val showYAxisLabels = yLabels.visible
     val showXAxisLabelsCandidate = xLabels.visible && xAxisLabels.isNotEmpty()
     val dragInteractionEnabled = interactionEnabled && !isScrollable

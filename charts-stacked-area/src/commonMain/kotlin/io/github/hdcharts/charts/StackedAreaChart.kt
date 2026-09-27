@@ -66,7 +66,7 @@ fun StackedAreaChart(
             style.boundary.resolveColors(data.series.size)
         }
     val seriesNames = data.series.map { it.name.orEmpty() }.toImmutableList()
-    val selectedTitle = data.categories.getOrNull(selectedIndex)
+    val selectedTitle = data.categories.getOrNull(selectedIndex)?.takeIf(String::isNotBlank)
     val effectiveTitle = selectedTitle ?: title.orEmpty()
     val selectedLabels =
         if (selectedIndex == NO_SELECTION) {
@@ -149,14 +149,12 @@ private fun toInternalStackedAreaData(
     val categories = data.categories
     val items =
         data.series.map { series ->
-            val labels =
-                if (categories.isNotEmpty()) categories else emptyList()
             ChartDataItem(
                 label = series.name.orEmpty(),
                 item =
                     InternalChartData(
                         series.values.mapIndexed { index, value ->
-                            labels.getOrNull(index).orEmpty() to value
+                            categories.getOrNull(index).orEmpty() to value
                         },
                     ),
             )

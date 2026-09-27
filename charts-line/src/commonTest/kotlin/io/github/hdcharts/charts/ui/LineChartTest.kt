@@ -12,6 +12,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
@@ -27,6 +28,9 @@ import io.github.hdcharts.charts.mock.MockTest.dataSet
 import io.github.hdcharts.charts.mock.MockTest.multiDataSet
 import io.github.hdcharts.charts.model.ChartData
 import io.github.hdcharts.charts.model.ChartSeries
+import io.github.hdcharts.charts.model.ChartValueFormatter
+import io.github.hdcharts.charts.model.chartDataOf
+import io.github.hdcharts.charts.model.staticChartSelection
 import io.github.hdcharts.charts.model.toChartData
 import io.github.hdcharts.charts.style.ChartContainerDefaults
 import io.github.hdcharts.charts.style.LineChartDefaults
@@ -311,6 +315,29 @@ class LineChartTest {
 
             onNodeWithTag(TestTags.CHART_ERROR).assertIsDisplayed()
             onNodeWithText("At least two line values are required.", substring = true).assertIsDisplayed()
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun lineChart_withBlankCategoriesAndSelection_titleShowsValueOnly() =
+        runComposeUiTest {
+            val dataSet =
+                chartDataOf(
+                    categories = listOf("", "", ""),
+                    ChartSeries(values = listOf(10.0, 20.0, 30.0)),
+                )
+
+            setContent {
+                LineChart(
+                    data = dataSet,
+                    valueFormatter = ChartValueFormatter { value -> "v${value.toInt()}" },
+                    selection = staticChartSelection(index = 1),
+                    interactionEnabled = false,
+                    animateOnStart = false,
+                )
+            }
+
+            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("v20")
         }
 
     private fun largeDataSet(points: Int = 120): ChartData {
