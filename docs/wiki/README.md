@@ -22,8 +22,10 @@ This `README.md` is excluded from the sync and does not appear as a wiki page.
   `charts-docs/content/dev/` with `.github/scripts/sync-dev-docs.sh`, on snapshot syncs only,
   and appear under `/dev` on the docs site. Each subfolder is a
   sidebar section (for example `dev/releases/`, how HDCharts ships) with an `index.md`; every
-  page gets its own sidebar item, ordered by the `order` frontmatter field. Link pages in the
-  same section as `page.md`.
+  page gets its own sidebar item, ordered by the `order` frontmatter field. Pages sit directly in
+  their section folder: a nested folder is not served. Link a page in the same section as
+  `page.md`. Any other `.md` link fails the docs build, so name pages in other sections in plain
+  text.
 - `migration.md` — hand-written migration overview only. Each release's breaking changes
   get their own page instead, generated from `release-notes/` at `/wiki/migration/{release}`
   in `charts-docs` — nothing here to edit when a release ships breaking changes.

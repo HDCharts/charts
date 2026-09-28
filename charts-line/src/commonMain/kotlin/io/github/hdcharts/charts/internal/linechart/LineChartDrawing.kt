@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.drawscope.clipRect
 import io.github.hdcharts.charts.internal.ANIMATION_TARGET
 import io.github.hdcharts.charts.internal.NO_SELECTION
 import io.github.hdcharts.charts.internal.common.bezier.cubicControlPointsForSegment
+import io.github.hdcharts.charts.internal.common.interaction.selectedIndexForTouchX
 import io.github.hdcharts.charts.style.LineChartStyle
 
 internal fun DrawScope.drawChartPath(
@@ -191,9 +192,9 @@ internal fun DrawScope.drawDragMarker(
     if ((!style.selection.visible && !style.points.visible) || values.size <= 1 || size.width <= 0f) return
 
     val selectedIndex =
-        selectedIndexForTouch(
+        selectedIndexForTouchX(
             touchX = touchX,
-            width = size.width,
+            widthPx = size.width,
             pointsCount = values.size,
         )
     if (selectedIndex == NO_SELECTION) return

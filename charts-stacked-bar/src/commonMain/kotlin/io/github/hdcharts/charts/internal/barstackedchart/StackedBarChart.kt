@@ -36,24 +36,32 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
-import io.github.hdcharts.charts.internal.AXIS_LABEL_CHART_GAP
 import io.github.hdcharts.charts.internal.AnimationSpec
 import io.github.hdcharts.charts.internal.NO_SELECTION
 import io.github.hdcharts.charts.internal.TestTags
-import io.github.hdcharts.charts.internal.common.axis.AxisXPlanRequest
-import io.github.hdcharts.charts.internal.common.axis.estimateXAxisLabelFootprintPx
-import io.github.hdcharts.charts.internal.common.axis.planAxisXLabels
+import io.github.hdcharts.charts.internal.common.axis.AxisXItems
+import io.github.hdcharts.charts.internal.common.axis.AxisXLabelsLayout
+import io.github.hdcharts.charts.internal.common.axis.AxisYLabelsLayout
+import io.github.hdcharts.charts.internal.common.axis.defaultAxisValueFormatter
+import io.github.hdcharts.charts.internal.common.axis.estimateXAxisLabelExtent
+import io.github.hdcharts.charts.internal.common.axis.rememberNumericYAxisLayout
+import io.github.hdcharts.charts.internal.common.axis.rememberXAxisLabelPlan
+import io.github.hdcharts.charts.internal.common.axis.xAxisLabelRowHeightPx
+import io.github.hdcharts.charts.internal.common.composable.ChartErrors
 import io.github.hdcharts.charts.internal.common.composable.ChartHeader
 import io.github.hdcharts.charts.internal.common.composable.ChartHeaderTestTags
 import io.github.hdcharts.charts.internal.common.composable.rememberDenseExpandedState
 import io.github.hdcharts.charts.internal.common.composable.rememberZoomScaleState
 import io.github.hdcharts.charts.internal.common.composable.zoomInScale
 import io.github.hdcharts.charts.internal.common.composable.zoomOutScale
+import io.github.hdcharts.charts.internal.common.layout.chartCanvasFits
 import io.github.hdcharts.charts.internal.common.layout.fillMaxSizeChartModifier
+import io.github.hdcharts.charts.internal.common.layout.placedHorizontalScrollPx
 import io.github.hdcharts.charts.internal.common.model.MultiChartData
 import io.github.hdcharts.charts.internal.common.model.normalizeStackedValues
 import io.github.hdcharts.charts.style.StackedBarChartStyle
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
@@ -61,7 +69,6 @@ import kotlin.math.roundToInt
 private const val ZOOM_MIN = 1f
 private const val ZOOM_MAX = 4f
 private const val ZOOM_STEP = 1.25f
-private const val FIXED_X_AXIS_LABEL_TILT_DEGREES = 34f
 private val HEADER_TEST_TAGS =
     ChartHeaderTestTags(
         denseExpand = TestTags.STACKED_BAR_CHART_DENSE_EXPAND,
@@ -94,11 +101,15 @@ internal fun StackedBarChart(
                 resolveStackedTotalsRange(data)
             }
         val yAxisLayout =
-            rememberStackedBarYAxisLayout(
+            rememberNumericYAxisLayout(
                 labels = style.axis.yLabels,
                 minValue = sourceMinTotal,
                 maxValue = sourceMaxTotal,
-                chartHeightPx = 1f,
+                // The plot height is not known yet. A short plot can show fewer ticks than this estimate.
+                chartHeightPx = constraints.maxHeight.toFloat(),
+                verticalInsetPx = 0f,
+                formatter = defaultAxisValueFormatter,
+                availableWidthPx = constraints.maxWidth,
             )
         val viewportWidthPx =
             (constraints.maxWidth.toFloat() - yAxisLayout.widthPx - yAxisLayout.gapPx).coerceAtLeast(1f)
@@ -320,33 +331,35 @@ private fun StackedBarChartContent(
 
     BoxWithConstraints(modifier = modifier) {
         val density = LocalDensity.current
-        val xAxisTilt = FIXED_X_AXIS_LABEL_TILT_DEGREES
         val xAxisLabelSizePx = with(density) { xLabels.size.toPx() }
-        val xAxisLabelFootprintPx =
-            remember(labels, dataSize, xAxisLabelSizePx, xAxisTilt) {
-                estimateXAxisLabelFootprintPx(
-                    labels = labels,
-                    dataSize = dataSize,
-                    fontSizePx = xAxisLabelSizePx,
-                    tiltDegrees = xAxisTilt,
-                )
-            }
-        val xAxisHeight =
-            if (!showXAxisLabels) {
-                0.dp
-            } else {
-                with(density) {
-                    (xAxisLabelFootprintPx.height + AXIS_LABEL_CHART_GAP.toPx()).toDp()
+        val xAxisRowHeightPx =
+            remember(showXAxisLabels, labels, dataSize, xAxisLabelSizePx, density) {
+                if (showXAxisLabels) {
+                    with(density) {
+                        xAxisLabelRowHeightPx(
+                            estimateXAxisLabelExtent(
+                                labels = labels,
+                                dataSize = dataSize,
+                                fontSizePx = xAxisLabelSizePx,
+                            ),
+                        )
+                    }
+                } else {
+                    0f
                 }
             }
+        val xAxisHeight = with(density) { xAxisRowHeightPx.toDp() }
         val chartHeight = (maxHeight - xAxisHeight).coerceAtLeast(0.dp)
         val chartHeightPx = with(density) { chartHeight.toPx() }.coerceAtLeast(1f)
         val yAxisLayout =
-            rememberStackedBarYAxisLayout(
+            rememberNumericYAxisLayout(
                 labels = yLabels,
                 minValue = fixedMinTotal,
                 maxValue = fixedMaxTotal,
                 chartHeightPx = chartHeightPx,
+                verticalInsetPx = 0f,
+                formatter = defaultAxisValueFormatter,
+                availableWidthPx = constraints.maxWidth,
             )
         val yAxisWidth = with(density) { yAxisLayout.widthPx.toDp() }
         val plotStartPadding = with(density) { (yAxisLayout.widthPx + yAxisLayout.gapPx).toDp() }
@@ -366,8 +379,21 @@ private fun StackedBarChartContent(
             } else {
                 viewportWidthPx
             }
+        if (!chartCanvasFits(contentWidthPx, chartHeightPx)) {
+            ChartErrors(
+                style = style.chartContainerStyle,
+                errors = persistentListOf("Chart exceeds layout limits. Reduce zoom, minimum bar width, or spacing."),
+                modifier = Modifier.fillMaxWidth(),
+            )
+            return@BoxWithConstraints
+        }
         val canvasWidth = with(density) { contentWidthPx.toDp() }
-        val scrollOffsetPx = if (isScrollable) scrollState.value.toFloat() else 0f
+        val scrollOffsetPx =
+            if (isScrollable) {
+                with(density) { placedHorizontalScrollPx(scrollState.value, canvasWidth, viewportWidthPx) }.toFloat()
+            } else {
+                0f
+            }
 
         LaunchedEffect(contentWidthPx, viewportWidthPx, isScrollable) {
             val maxScroll = (contentWidthPx - viewportWidthPx).roundToInt().coerceAtLeast(0)
@@ -385,7 +411,6 @@ private fun StackedBarChartContent(
                 dataSize = dataSize,
                 spacingPx = spacingPx,
                 viewportWidthPx = viewportWidthPx,
-                chartHeightPx = chartHeightPx,
                 onTapIndex = { currentToggleSelection(it) },
             )
 
@@ -397,7 +422,6 @@ private fun StackedBarChartContent(
                 dataSize = dataSize,
                 spacingPx = spacingPx,
                 viewportWidthPx = viewportWidthPx,
-                chartHeightPx = chartHeightPx,
                 onDragIndex = { currentSelectIndex(it) },
                 onDragFinished = { currentClearSelection() },
             )
@@ -425,48 +449,25 @@ private fun StackedBarChartContent(
                 setZoomScale = { currentZoomChange(it) },
             )
 
-        val xAxisPlan =
-            remember(
-                dataSize,
-                xLabels.count,
-                isScrollable,
-                unitWidthPx,
-                viewportWidthPx,
-                scrollOffsetPx,
-                barWidthPx,
-                xAxisLabelFootprintPx.width,
-            ) {
-                planAxisXLabels(
-                    request =
-                        AxisXPlanRequest(
-                            dataSize = dataSize,
-                            requestedMaxLabelCount = xLabels.count,
-                            isScrollable = isScrollable,
-                            unitWidthPx = unitWidthPx,
-                            viewportWidthPx = viewportWidthPx,
-                            scrollOffsetPx = scrollOffsetPx,
-                            firstCenterPx = barWidthPx / 2f,
-                            labelWidthPx = xAxisLabelFootprintPx.width,
-                        ),
-                )
-            }
-        val visibleRange = xAxisPlan.visibleRange
+        val xAxisLabelPlan =
+            rememberXAxisLabelPlan(
+                labels = labels,
+                dataSize = dataSize,
+                maxLabelCount = xLabels.maxCount,
+                isScrollable = isScrollable,
+                unitWidthPx = unitWidthPx,
+                viewportWidthPx = viewportWidthPx,
+                fontSizePx = xAxisLabelSizePx,
+                items = AxisXItems.Bars(barWidthPx),
+                scrollOffsetPx = scrollOffsetPx,
+            )
+        val visibleRange = xAxisLabelPlan.visibleRange
+        val xAxisTicks = xAxisLabelPlan.ticks
         val selectedCenterXContent =
             if (selectedIndex in 0 until dataSize) {
                 selectedIndex * unitWidthPx + barWidthPx / 2f
             } else {
                 Float.NaN
-            }
-        val labelIndices = xAxisPlan.labelIndices
-        val xAxisTicks =
-            remember(labels, labelIndices, barWidthPx, unitWidthPx, scrollOffsetPx) {
-                buildStackedBarXAxisTicks(
-                    labels = labels,
-                    labelIndices = labelIndices,
-                    barWidthPx = barWidthPx,
-                    unitWidthPx = unitWidthPx,
-                    scrollOffsetPx = scrollOffsetPx,
-                )
             }
 
         val interactionModifier =
@@ -484,7 +485,7 @@ private fun StackedBarChartContent(
                     .testTag(TestTags.STACKED_BAR_CHART),
         ) {
             if (yLabels.visible) {
-                StackedBarYAxisLabels(
+                AxisYLabelsLayout(
                     ticks = yAxisLayout.ticks,
                     color = yLabels.color,
                     fontSize = yLabels.size,
@@ -492,7 +493,8 @@ private fun StackedBarChartContent(
                         Modifier
                             .align(Alignment.TopStart)
                             .fillMaxHeight()
-                            .width(yAxisWidth),
+                            .width(yAxisWidth)
+                            .testTag(TestTags.STACKED_BAR_CHART_Y_AXIS_LABELS),
                 )
             }
 
@@ -534,17 +536,17 @@ private fun StackedBarChartContent(
         }
 
         if (showXAxisLabels) {
-            StackedBarXAxisLabels(
+            AxisXLabelsLayout(
                 ticks = xAxisTicks,
                 color = xLabels.color,
                 fontSize = xLabels.size,
-                tiltDegrees = xAxisTilt,
                 modifier =
                     Modifier
                         .align(Alignment.BottomStart)
                         .fillMaxWidth()
                         .padding(start = plotStartPadding)
-                        .height(xAxisHeight),
+                        .height(xAxisHeight)
+                        .testTag(TestTags.STACKED_BAR_CHART_X_AXIS_LABELS),
             )
         }
     }

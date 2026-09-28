@@ -13,9 +13,10 @@ import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Displays a live window of one or more aligned indexed series. When [data] drops its oldest point
- * and appends a new one, the line slides one step to the left and the Y axis rescales to the
- * current window. Other changes that keep the number of points and series morph the line over
- * [shiftDuration]; changes to either count redraw immediately.
+ * and appends a new one, the line slides one step to the left, X-axis labels stay on their points
+ * and slide with them, and the Y axis rescales to the current window. Other changes that keep the
+ * number of points and series morph the line over [shiftDuration]; changes to either count redraw
+ * immediately.
  *
  * The chart is display-only: it has no selection and ignores gestures.
  *

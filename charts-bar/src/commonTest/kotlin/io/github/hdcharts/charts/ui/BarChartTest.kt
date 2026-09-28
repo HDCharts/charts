@@ -14,6 +14,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import io.github.hdcharts.charts.BarChart
 import io.github.hdcharts.charts.internal.TestTags
 import io.github.hdcharts.charts.internal.ValidationErrors.MIN_REQUIRED_BAR
@@ -33,9 +34,29 @@ import io.github.hdcharts.charts.model.toChartData
 import io.github.hdcharts.charts.style.BarChartDefaults
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 class BarChartTest {
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun barChart_withEmAxisLabelSize_displaysValidationError() =
+        runComposeUiTest {
+            setContent {
+                BarChart(
+                    data = listOf(10.0, 20.0, 30.0).toChartData(),
+                    style =
+                        BarChartDefaults.style(
+                            axis = BarChartDefaults.axis(xLabels = BarChartDefaults.xLabels(size = 1.em)),
+                        ),
+                )
+            }
+
+            onNodeWithTag(TestTags.CHART_ERROR).assertIsDisplayed()
+            onNodeWithText(
+                "X-axis label size must be a finite, positive sp value.",
+                substring = true,
+            ).assertIsDisplayed()
+        }
+
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun barChart_withValidData_displaysChart() =
@@ -106,24 +127,57 @@ class BarChartTest {
 
     @OptIn(ExperimentalTestApi::class)
     @Test
-    fun barChart_lastXAxisLabel_hasRightEdgePadding() =
+    fun barChart_lastXAxisLabel_centeredUnderLastBar() =
         runComposeUiTest {
-            val edgeData =
-                listOf(320.0, 280.0, 260.0, 300.0).toChartData(
-                    categories = listOf("Region 4", "Region 36", "Region 68", "Region 100"),
-                )
+            val categories = listOf("Region 4", "Region 36", "Region 68", "Region 100")
+            val edgeData = listOf(320.0, 280.0, 260.0, 300.0).toChartData(categories = categories)
 
             setContent {
                 BarChart(
                     data = edgeData,
                     title = "Quarterly Revenue by Region",
+                    style = BarChartDefaults.style(bars = BarChartDefaults.bars(space = 0.dp)),
                 )
             }
 
-            val axisBounds = onNodeWithTag(TestTags.BAR_CHART_X_AXIS_LABELS).fetchSemanticsNode().boundsInRoot
-            val lastLabelBounds = onNodeWithText("Region 100").fetchSemanticsNode().boundsInRoot
+            val plotBounds = onNodeWithTag(TestTags.BAR_CHART_PLOT).fetchSemanticsNode().boundsInRoot
+            val barWidth = plotBounds.width / categories.size
+            val lastLabelBounds = onNodeWithText("Region 100").assertIsDisplayed().fetchSemanticsNode().boundsInRoot
 
-            assertTrue(lastLabelBounds.right <= axisBounds.right - 1f)
+            assertEquals(
+                expected = plotBounds.right - barWidth / 2f,
+                actual = lastLabelBounds.center.x,
+                absoluteTolerance = 1.5f,
+            )
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun barChart_xAxisLabels_centeredUnderBars() =
+        runComposeUiTest {
+            val categories = listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun")
+
+            setContent {
+                BarChart(
+                    data = listOf(4.0, 7.0, 3.0, 8.0, 5.0, 6.0).toChartData(categories = categories),
+                    modifier = Modifier.size(width = 600.dp, height = 400.dp),
+                    animateOnStart = false,
+                    style = BarChartDefaults.style(bars = BarChartDefaults.bars(space = 0.dp)),
+                )
+            }
+
+            val plotBounds = onNodeWithTag(TestTags.BAR_CHART_PLOT).fetchSemanticsNode().boundsInRoot
+            val barWidth = plotBounds.width / categories.size
+            categories.forEachIndexed { index, label ->
+                val labelBounds = onNodeWithText(label).assertIsDisplayed().fetchSemanticsNode().boundsInRoot
+
+                assertEquals(
+                    expected = plotBounds.left + barWidth * (index + 0.5f),
+                    actual = labelBounds.center.x,
+                    absoluteTolerance = 1.5f,
+                    message = label,
+                )
+            }
         }
 
     @OptIn(ExperimentalTestApi::class)

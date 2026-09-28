@@ -24,18 +24,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
-import io.github.hdcharts.charts.internal.AXIS_LABEL_CHART_GAP
 import io.github.hdcharts.charts.internal.TestTags
-import io.github.hdcharts.charts.internal.common.axis.AxisXPlanRequest
+import io.github.hdcharts.charts.internal.common.axis.AxisXItems
+import io.github.hdcharts.charts.internal.common.axis.AxisXLabelsLayout
+import io.github.hdcharts.charts.internal.common.axis.AxisYLabelsLayout
+import io.github.hdcharts.charts.internal.common.axis.estimateXAxisLabelExtent
+import io.github.hdcharts.charts.internal.common.axis.rememberNumericYAxisLayout
+import io.github.hdcharts.charts.internal.common.axis.rememberXAxisLabelPlan
+import io.github.hdcharts.charts.internal.common.axis.xAxisLabelRowHeightPx
 import io.github.hdcharts.charts.internal.common.composable.ChartErrors
+import io.github.hdcharts.charts.internal.common.layout.chartCanvasFits
+import io.github.hdcharts.charts.internal.common.layout.placedHorizontalScrollPx
 import io.github.hdcharts.charts.internal.common.model.ChartData
 import io.github.hdcharts.charts.model.ChartValueFormatter
 import io.github.hdcharts.charts.style.BarChartStyle
 import kotlinx.collections.immutable.persistentListOf
 import kotlin.math.roundToInt
-
-// X Axis label layout constants
-private const val FIXED_X_AXIS_LABEL_TILT_DEGREES = 34f
 
 @Composable
 internal fun BarChartContent(
@@ -76,34 +80,34 @@ internal fun BarChartContent(
 
     BoxWithConstraints(modifier = modifier) {
         val density = LocalDensity.current
-        val xAxisTilt = FIXED_X_AXIS_LABEL_TILT_DEGREES
         val xAxisLabelSizePx = with(density) { xLabels.size.toPx() }
-        val xAxisLabelFootprintPx =
-            remember(chartData.labels, dataSize, xAxisLabelSizePx, xAxisTilt) {
-                estimateXAxisLabelFootprintPx(
-                    labels = chartData.labels,
-                    dataSize = dataSize,
-                    fontSizePx = xAxisLabelSizePx,
-                    tiltDegrees = xAxisTilt,
-                )
+        val xAxisRowHeightPx =
+            remember(showXLabels, chartData.labels, dataSize, xAxisLabelSizePx, density) {
+                if (showXLabels) {
+                    with(density) {
+                        xAxisLabelRowHeightPx(
+                            estimateXAxisLabelExtent(
+                                labels = chartData.labels,
+                                dataSize = dataSize,
+                                fontSizePx = xAxisLabelSizePx,
+                            ),
+                        )
+                    }
+                } else {
+                    0f
+                }
             }
-        val xAxisHeightPx =
-            if (!showXLabels) {
-                0
-            } else {
-                (xAxisLabelFootprintPx.height + with(density) { AXIS_LABEL_CHART_GAP.toPx() })
-                    .roundToInt()
-                    .coerceIn(0, constraints.maxHeight)
-            }
+        val xAxisHeightPx = xAxisRowHeightPx.roundToInt().coerceIn(0, constraints.maxHeight)
         val xAxisHeight = with(density) { xAxisHeightPx.toDp() }
         val chartHeightPx = (constraints.maxHeight - xAxisHeightPx).coerceAtLeast(0).toFloat()
         val chartHeight = with(density) { chartHeightPx.toDp() }
         val yAxisLayout =
-            rememberBarYAxisLayout(
+            rememberNumericYAxisLayout(
                 labels = yLabels,
                 minValue = fixedMin,
                 maxValue = fixedMax,
                 chartHeightPx = chartHeightPx,
+                verticalInsetPx = 0f,
                 formatter = axisValueFormatter,
                 availableWidthPx = constraints.maxWidth,
             )
@@ -137,7 +141,7 @@ internal fun BarChartContent(
             } else {
                 viewportWidthPx
             }
-        if (!barCanvasFits(contentWidthPx, chartHeightPx)) {
+        if (!chartCanvasFits(contentWidthPx, chartHeightPx)) {
             ChartErrors(
                 style = style.chartContainerStyle,
                 errors = persistentListOf("Chart exceeds layout limits. Reduce zoom, minimum bar width, or spacing."),
@@ -146,7 +150,12 @@ internal fun BarChartContent(
             return@BoxWithConstraints
         }
         val canvasWidth = with(density) { contentWidthPx.toDp() }
-        val scrollOffsetPx = if (isScrollable) scrollState.value.toFloat() else 0f
+        val scrollOffsetPx =
+            if (isScrollable) {
+                with(density) { placedHorizontalScrollPx(scrollState.value, canvasWidth, viewportWidthPx) }.toFloat()
+            } else {
+                0f
+            }
 
         LaunchedEffect(contentWidthPx, viewportWidthPx, isScrollable) {
             val maxScroll = (contentWidthPx - viewportWidthPx).roundToInt().coerceAtLeast(0)
@@ -211,50 +220,20 @@ internal fun BarChartContent(
                 Float.NaN
             }
 
-        val xAxisPlan =
-            remember(
-                dataSize,
-                xLabels.count,
-                isScrollable,
-                unitWidthPx,
-                viewportWidthPx,
-                scrollOffsetPx,
-                barWidthPx,
-                xAxisLabelFootprintPx.width,
-            ) {
-                planAxisXLabels(
-                    request =
-                        AxisXPlanRequest(
-                            dataSize = dataSize,
-                            requestedMaxLabelCount = xLabels.count,
-                            isScrollable = isScrollable,
-                            unitWidthPx = unitWidthPx,
-                            viewportWidthPx = viewportWidthPx,
-                            scrollOffsetPx = scrollOffsetPx,
-                            firstCenterPx = barWidthPx / 2f,
-                            labelWidthPx = xAxisLabelFootprintPx.width,
-                        ),
-                )
-            }
-        val visibleRange = xAxisPlan.visibleRange
-        val labelIndices = xAxisPlan.labelIndices
-
-        val ticks =
-            remember(
-                chartData.labels,
-                labelIndices,
-                barWidthPx,
-                unitWidthPx,
-                scrollOffsetPx,
-            ) {
-                buildAxisTicks(
-                    chartData = chartData,
-                    labelIndices = labelIndices,
-                    barWidthPx = barWidthPx,
-                    unitWidthPx = unitWidthPx,
-                    scrollOffsetPx = scrollOffsetPx,
-                )
-            }
+        val xAxisLabelPlan =
+            rememberXAxisLabelPlan(
+                labels = chartData.labels,
+                dataSize = dataSize,
+                maxLabelCount = xLabels.maxCount,
+                isScrollable = isScrollable,
+                unitWidthPx = unitWidthPx,
+                viewportWidthPx = viewportWidthPx,
+                fontSizePx = xAxisLabelSizePx,
+                items = AxisXItems.Bars(barWidthPx),
+                scrollOffsetPx = scrollOffsetPx,
+            )
+        val visibleRange = xAxisLabelPlan.visibleRange
+        val ticks = xAxisLabelPlan.ticks
         val interactionModifier =
             Modifier
                 .then(fitTapModifier)
@@ -270,7 +249,7 @@ internal fun BarChartContent(
                     .testTag(TestTags.BAR_CHART),
         ) {
             if (yLabels.visible) {
-                BarYAxisLabels(
+                AxisYLabelsLayout(
                     ticks = yAxisLayout.ticks,
                     color = yLabels.color,
                     fontSize = yLabels.size,
@@ -278,7 +257,8 @@ internal fun BarChartContent(
                         Modifier
                             .align(Alignment.TopStart)
                             .fillMaxHeight()
-                            .width(yAxisWidth),
+                            .width(yAxisWidth)
+                            .testTag(TestTags.BAR_CHART_Y_AXIS_LABELS),
                 )
             }
 
@@ -322,17 +302,17 @@ internal fun BarChartContent(
         }
 
         if (showXLabels) {
-            BarXAxisLabels(
+            AxisXLabelsLayout(
                 ticks = ticks,
                 color = xLabels.color,
                 fontSize = xLabels.size,
-                tiltDegrees = xAxisTilt,
                 modifier =
                     Modifier
                         .align(Alignment.BottomStart)
                         .fillMaxWidth()
                         .padding(start = plotStartPadding)
-                        .height(xAxisHeight),
+                        .height(xAxisHeight)
+                        .testTag(TestTags.BAR_CHART_X_AXIS_LABELS),
             )
         }
     }

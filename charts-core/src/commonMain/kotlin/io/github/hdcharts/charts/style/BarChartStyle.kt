@@ -153,13 +153,13 @@ object BarChartDefaults {
             androidx.compose.material3.MaterialTheme.colorScheme.onSurface
                 .copy(alpha = 0.75f),
         size: androidx.compose.ui.unit.TextUnit = 11.sp,
-        count: Int = 6,
+        maxCount: Int? = null,
     ): AxisLabelStyle =
         AxisLabelStyle(
             visible = visible,
             color = color,
             size = size,
-            count = count,
+            maxCount = maxCount,
         )
 
     /**
@@ -172,13 +172,13 @@ object BarChartDefaults {
             androidx.compose.material3.MaterialTheme.colorScheme.onSurface
                 .copy(alpha = 0.75f),
         size: androidx.compose.ui.unit.TextUnit = 11.sp,
-        count: Int = 5,
+        maxCount: Int? = null,
     ): AxisLabelStyle =
         AxisLabelStyle(
             visible = visible,
             color = color,
             size = size,
-            count = count,
+            maxCount = maxCount,
         )
 
     /**

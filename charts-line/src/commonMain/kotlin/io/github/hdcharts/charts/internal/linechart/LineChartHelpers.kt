@@ -81,6 +81,23 @@ internal fun aggregateForCompactDensity(
     )
 }
 
+/** X-axis labels of a line chart: the item labels of a single series, or the shared categories. */
+internal fun resolveLineXAxisLabels(data: MultiChartData): List<String> {
+    val labels =
+        when {
+            data.hasSingleItem() ->
+                data.items
+                    .firstOrNull()
+                    ?.item
+                    ?.labels
+                    ?.toList()
+                    .orEmpty()
+            data.hasCategories() -> data.categories.toList()
+            else -> emptyList()
+        }
+    return labels.takeUnless { it.all(String::isBlank) }.orEmpty()
+}
+
 /**
  * Resolves the Y-axis domain, applying [minValue] and [maxValue] independently over the
  * data-derived range. If either override is null, that bound falls back to the data range. If

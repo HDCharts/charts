@@ -6,8 +6,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import io.github.hdcharts.charts.internal.NO_SELECTION
+import io.github.hdcharts.charts.internal.common.axis.validateAxisLabels
 import io.github.hdcharts.charts.internal.common.composable.ChartErrors
 import io.github.hdcharts.charts.internal.common.composable.Legend
 import io.github.hdcharts.charts.internal.common.model.ChartDataItem
@@ -35,7 +38,8 @@ fun StackedAreaChart(
     interactionEnabled: Boolean = true,
     animateOnStart: Boolean = true,
 ) {
-    val errors = remember(data, style) { validateStackedAreaInput(data, style) }
+    val density = LocalDensity.current
+    val errors = remember(data, style, density) { validateStackedAreaInput(data, style, density) }
     val pointCount =
         data.series
             .firstOrNull()
@@ -110,6 +114,7 @@ fun StackedAreaChart(
 private fun validateStackedAreaInput(
     data: ChartData,
     style: StackedAreaChartStyle,
+    density: Density,
 ): List<String> {
     val errors = mutableListOf<String>()
     if (data.series.isEmpty()) return listOf("At least one stacked area series is required.")
@@ -136,9 +141,7 @@ private fun validateStackedAreaInput(
     if (!style.fill.alpha.isFinite() || style.fill.alpha !in 0f..1f) {
         errors += "Fill alpha must be in 0..1."
     }
-    if (style.axis.xLabels.count < 2 || style.axis.yLabels.count < 2) {
-        errors += "Axis label counts must be at least two."
-    }
+    errors += validateAxisLabels(style.axis.xLabels, style.axis.yLabels, density)
     return errors
 }
 

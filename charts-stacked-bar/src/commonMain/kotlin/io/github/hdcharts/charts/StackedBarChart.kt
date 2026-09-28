@@ -10,6 +10,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import io.github.hdcharts.charts.internal.NO_SELECTION
+import io.github.hdcharts.charts.internal.common.axis.validateAxisLabels
 import io.github.hdcharts.charts.internal.common.composable.ChartErrors
 import io.github.hdcharts.charts.internal.common.composable.Legend
 import io.github.hdcharts.charts.internal.common.model.ChartDataItem
@@ -134,9 +135,7 @@ private fun validateStackedBarInput(
     if (!style.segments.alpha.isFinite() || style.segments.alpha !in 0f..1f) {
         errors += "Segment alpha must be in 0..1."
     }
-    if (style.axis.xLabels.count < 2 || style.axis.yLabels.count < 2) {
-        errors += "Axis label counts must be at least two."
-    }
+    errors += validateAxisLabels(style.axis.xLabels, style.axis.yLabels, density)
     errors +=
         validateSizes(
             density,

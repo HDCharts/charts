@@ -16,6 +16,7 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.unit.dp
 import io.github.hdcharts.charts.internal.NO_SELECTION
 import io.github.hdcharts.charts.internal.TestTags
+import io.github.hdcharts.charts.internal.common.axis.rememberNumericYAxisLayout
 import io.github.hdcharts.charts.internal.common.composable.ChartHeader
 import io.github.hdcharts.charts.internal.common.composable.ChartHeaderTestTags
 import io.github.hdcharts.charts.internal.common.composable.rememberDenseExpandedState
@@ -67,11 +68,13 @@ internal fun BarChart(
                 chartData.resolveBarRange(style.range.min, style.range.max)
             }
         val yAxisLayout =
-            rememberBarYAxisLayout(
+            rememberNumericYAxisLayout(
                 labels = style.axis.yLabels,
                 minValue = fixedMin,
                 maxValue = fixedMax,
-                chartHeightPx = 1f,
+                // The plot height is not known yet. A short plot can show fewer ticks than this estimate.
+                chartHeightPx = constraints.maxHeight.toFloat(),
+                verticalInsetPx = 0f,
                 formatter = axisValueFormatter,
                 availableWidthPx = constraints.maxWidth,
             )

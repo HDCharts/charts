@@ -127,13 +127,45 @@ class LineValidationTest {
             assertEquals(expected = listOf("Series 0 contains a non-finite value."), actual = validate(data = data))
         }
 
+    @Test
+    fun axisLabelMaxCountsBelowTwo_reportEachAxis() =
+        runComposeUiTest {
+            assertEquals(
+                expected =
+                    listOf(
+                        "X-axis label max count must be in 2..1000.",
+                        "Y-axis label max count must be in 2..1000.",
+                    ),
+                actual = validate(data = multiDataSet, lineColors = colors, xLabelMaxCount = 1, yLabelMaxCount = 0),
+            )
+        }
+
+    @Test
+    fun axisLabelMaxCountsAtLimit_noErrors() =
+        runComposeUiTest {
+            assertEquals(
+                expected = emptyList(),
+                actual = validate(data = multiDataSet, lineColors = colors, xLabelMaxCount = 2, yLabelMaxCount = 2),
+            )
+        }
+
     private fun ComposeUiTest.validate(
         data: ChartData,
         lineColors: List<Color> = emptyList(),
+        xLabelMaxCount: Int? = null,
+        yLabelMaxCount: Int? = null,
     ): List<String> {
         var errors: List<String>? = null
         setContent {
-            val style = LineChartDefaults.style(line = LineChartDefaults.line(colors = lineColors))
+            val style =
+                LineChartDefaults.style(
+                    line = LineChartDefaults.line(colors = lineColors),
+                    axis =
+                        LineChartDefaults.axis(
+                            xLabels = LineChartDefaults.xLabels(maxCount = xLabelMaxCount),
+                            yLabels = LineChartDefaults.yLabels(maxCount = yLabelMaxCount),
+                        ),
+                )
             SideEffect { errors = validateLineInput(data = data, style = style, density = Density(1f)) }
         }
         return runOnIdle { checkNotNull(errors) }

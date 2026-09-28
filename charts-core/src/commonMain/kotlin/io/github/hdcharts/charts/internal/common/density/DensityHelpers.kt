@@ -2,6 +2,7 @@ package io.github.hdcharts.charts.internal.common.density
 
 import io.github.hdcharts.charts.internal.InternalChartsApi
 import kotlin.math.ceil
+import kotlin.math.max
 
 @InternalChartsApi
 const val DEFAULT_DENSE_THRESHOLD = 50
@@ -11,6 +12,27 @@ fun shouldUseScrollableDensity(
     pointsCount: Int,
     threshold: Int = DEFAULT_DENSE_THRESHOLD,
 ): Boolean = pointsCount >= threshold
+
+/** Smallest distance, in pixels, between neighboring points of a scrolling line or area chart. */
+@InternalChartsApi
+const val DENSE_POINT_MIN_STEP_PX = 12f
+
+/**
+ * Distance between neighboring points of a scrolling line or area chart whose plot is [viewportWidth]
+ * wide: the step that fits every point, but at least [DENSE_POINT_MIN_STEP_PX], times [zoomScale]
+ * (at least 1). Returns 0 without two points or width. Drawing, X-axis labels and tap selection all
+ * use this step, so the points, their labels and their hit areas stay aligned.
+ */
+@InternalChartsApi
+fun denseStepForViewport(
+    viewportWidth: Float,
+    pointsCount: Int,
+    zoomScale: Float,
+): Float {
+    if (viewportWidth <= 0f || pointsCount <= 1) return 0f
+    val fitStep = viewportWidth / (pointsCount - 1)
+    return max(fitStep, DENSE_POINT_MIN_STEP_PX) * zoomScale.coerceAtLeast(1f)
+}
 
 @InternalChartsApi
 fun bucketSizeForTarget(

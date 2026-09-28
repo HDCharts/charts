@@ -1,9 +1,9 @@
 package io.github.hdcharts.charts.internal
 
 import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.TextUnitType
 import io.github.hdcharts.charts.internal.ValidationErrors.MIN_REQUIRED_BAR
 import io.github.hdcharts.charts.internal.ValidationErrors.RULE_COLORS_SIZE_MISMATCH
+import io.github.hdcharts.charts.internal.common.axis.validateAxisLabels
 import io.github.hdcharts.charts.model.ChartData
 import io.github.hdcharts.charts.style.BarChartStyle
 
@@ -63,13 +63,6 @@ fun validateBarStyle(
         errors.add("Range bounds must be finite.")
     }
     if (style.grid.steps !in 0..1000) errors.add("Grid steps must be in 0..1000.")
-    listOf(style.axis.xLabels, style.axis.yLabels).forEach { labels ->
-        if (labels.size.type != TextUnitType.Sp || !labels.size.value.isFinite() || labels.size.value <= 0f) {
-            errors.add("Axis label size must be finite, positive sp.")
-        } else if (with(density) { labels.size.toPx() }.let { !it.isFinite() || it > MAX_SIZE_PX }) {
-            errors.add("Axis label size must resolve to at most ${MAX_SIZE_PX.toInt()} pixels.")
-        }
-        if (labels.count !in 2..1000) errors.add("Axis label count must be in 2..1000.")
-    }
+    errors += validateAxisLabels(style.axis.xLabels, style.axis.yLabels, density)
     return errors
 }

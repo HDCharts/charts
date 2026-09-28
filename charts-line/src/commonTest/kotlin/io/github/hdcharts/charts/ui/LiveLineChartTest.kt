@@ -5,29 +5,62 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertHeightIsEqualTo
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertWidthIsEqualTo
+import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.v2.runComposeUiTest
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import io.github.hdcharts.charts.LiveLineChart
 import io.github.hdcharts.charts.internal.TestTags
 import io.github.hdcharts.charts.model.ChartSeries
 import io.github.hdcharts.charts.model.chartDataOf
 import io.github.hdcharts.charts.model.toChartData
+import io.github.hdcharts.charts.style.LineChartDefaults
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalTestApi::class)
 class LiveLineChartTest {
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun liveLineChart_withUnspecifiedAxisLabelSize_displaysValidationError() =
+        runComposeUiTest {
+            setContent {
+                LiveLineChart(
+                    data = listOf(10.0, 20.0, 30.0).toChartData(),
+                    style =
+                        LineChartDefaults.style(
+                            axis =
+                                LineChartDefaults.axis(
+                                    yLabels = LineChartDefaults.yLabels(size = TextUnit.Unspecified),
+                                ),
+                        ),
+                    animateOnStart = false,
+                )
+            }
+
+            onNodeWithTag(TestTags.CHART_ERROR).assertIsDisplayed()
+            onNodeWithText(
+                "Y-axis label size must be a finite, positive sp value.",
+                substring = true,
+            ).assertIsDisplayed()
+        }
+
     @Test
     fun heldDrag_leavesPlotUnchanged() =
         runComposeUiTest {
@@ -76,6 +109,127 @@ class LiveLineChartTest {
         }
 
     @Test
+    fun slidingWindow_keepsXLabelsOnTheirSamples() =
+        runComposeUiTest {
+            val firstSample = mutableStateOf(0)
+            setContent {
+                LiveLineChart(
+                    data = liveWindow(firstSample.value),
+                    modifier = Modifier.size(width = 600.dp, height = 300.dp),
+                    animateOnStart = false,
+                )
+            }
+            val before = displayedXLabels()
+
+            firstSample.value = 1
+            waitForIdle()
+            val after = displayedXLabels()
+
+            // Samples 1 to 29 are in both windows; about every other one has room for a label.
+            val shared = (1 until WINDOW_SIZE).map { sample -> "S$sample" }.toSet()
+            assertTrue(before.size in 2 until WINDOW_SIZE, "labels before: $before")
+            assertEquals(expected = before.intersect(shared), actual = after.intersect(shared))
+        }
+
+    @Test
+    fun slidingWindow_xLabelsMoveWithTheirPoints() =
+        runComposeUiTest {
+            val firstSample = mutableStateOf(0)
+            setContent {
+                LiveLineChart(
+                    data = liveWindow(firstSample.value),
+                    modifier = Modifier.size(width = 600.dp, height = 300.dp),
+                    shiftDuration = 10.seconds,
+                    animateOnStart = false,
+                )
+            }
+            mainClock.autoAdvance = false
+            firstSample.value = 1
+            // Halfway through the linear shift, every point is half a step right of its new place.
+            mainClock.advanceTimeBy(milliseconds = 5_000L)
+            // The new window can change the Y-axis labels and so the plot, so measure it now.
+            val plot = onNodeWithTag(TestTags.LINE_CHART_PLOT).fetchSemanticsNode().boundsInRoot
+            val step = plot.width / (WINDOW_SIZE - 1)
+            val midShift = displayedXLabelCenters()
+            mainClock.advanceTimeBy(milliseconds = 10_000L)
+            val settled = displayedXLabelCenters()
+
+            assertTrue(midShift.size >= 2 && settled.size >= 2, "mid-shift $midShift, settled $settled")
+            midShift.forEach { (label, centerX) ->
+                val windowIndex = label.removePrefix("S").toInt() - 1
+                assertEquals(
+                    expected = plot.left + (windowIndex + 0.5f) * step,
+                    actual = centerX,
+                    absoluteTolerance = 1.5f,
+                    message = label,
+                )
+            }
+            settled.forEach { (label, centerX) ->
+                val windowIndex = label.removePrefix("S").toInt() - 1
+                assertEquals(
+                    expected = plot.left + windowIndex * step,
+                    actual = centerX,
+                    absoluteTolerance = 1.5f,
+                    message = label,
+                )
+            }
+        }
+
+    @Test
+    fun slidingWindow_xLabelsNeverStepBackOnTheFrameTheWindowMoves() =
+        runComposeUiTest {
+            val firstSample = mutableStateOf(0)
+            setContent {
+                LiveLineChart(
+                    data = liveWindow(firstSample.value),
+                    modifier = Modifier.size(width = 600.dp, height = 300.dp),
+                    shiftDuration = 10.seconds,
+                    animateOnStart = false,
+                )
+            }
+            mainClock.autoAdvance = false
+            val frames = mutableListOf(displayedXLabelCenters())
+            firstSample.value = 1
+            repeat(4) {
+                mainClock.advanceTimeByFrame()
+                frames += displayedXLabelCenters()
+            }
+
+            // Labels only slide left, so no frame may draw one further right than the frame before.
+            frames.zipWithNext().forEachIndexed { frame, (before, after) ->
+                before.keys.intersect(after.keys).forEach { label ->
+                    assertTrue(
+                        after.getValue(label) <= before.getValue(label) + 1f,
+                        "$label moved right on frame ${frame + 1}: $before -> $after",
+                    )
+                }
+            }
+        }
+
+    @Test
+    fun changingShiftDuration_keepsXLabelsOnTheirSamples() =
+        runComposeUiTest {
+            val firstSample = mutableStateOf(0)
+            val shiftDuration = mutableStateOf(1.seconds)
+            setContent {
+                LiveLineChart(
+                    data = liveWindow(firstSample.value),
+                    modifier = Modifier.size(width = 600.dp, height = 300.dp),
+                    shiftDuration = shiftDuration.value,
+                    animateOnStart = false,
+                )
+            }
+            firstSample.value = 1
+            waitForIdle()
+            val before = displayedXLabels()
+
+            shiftDuration.value = 2.seconds
+            waitForIdle()
+
+            assertEquals(expected = before, actual = displayedXLabels())
+        }
+
+    @Test
     fun malformedDataPreservesModifierAndRendersErrorInsteadOfDrawing() =
         runComposeUiTest {
             val invalid =
@@ -100,4 +254,24 @@ class LiveLineChartTest {
             onAllNodesWithTag(TestTags.LINE_CHART).assertCountEquals(0)
             onNodeWithText("Series 1 is not aligned", substring = true).assertIsDisplayed()
         }
+
+    // A window of samples firstSample until firstSample + WINDOW_SIZE; sample s is labeled "S<s>" and
+    // keeps its value, so moving the window by one is a timeline shift.
+    private fun liveWindow(firstSample: Int) =
+        List(WINDOW_SIZE) { index -> ((firstSample + index) * 37 % 50).toDouble() }
+            .toChartData(categories = List(WINDOW_SIZE) { index -> "S${firstSample + index}" })
+
+    private fun ComposeUiTest.displayedXLabelCenters(): Map<String, Float> =
+        onAllNodes(hasAnyAncestor(hasTestTag(TestTags.LINE_CHART_X_AXIS_LABELS)) and hasText("S", substring = true))
+            .fetchSemanticsNodes()
+            .filter { node -> node.layoutInfo.isPlaced }
+            .associate { node ->
+                node.config[SemanticsProperties.Text].joinToString() to node.boundsInRoot.center.x
+            }
+
+    private fun ComposeUiTest.displayedXLabels(): Set<String> = displayedXLabelCenters().keys
+
+    private companion object {
+        const val WINDOW_SIZE = 30
+    }
 }

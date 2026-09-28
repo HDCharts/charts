@@ -45,8 +45,8 @@ private fun ShowStyledBar() {
             visible = true,
             color = Color.Gray,
             lineWidth = 1.dp,
-            yLabels = AxisLabelStyle(visible = true, color = Color.Gray, size = 11.sp, count = 6),
-            xLabels = AxisLabelStyle(visible = true, color = Color.Gray, size = 11.sp, count = 6),
+            yLabels = AxisLabelStyle(visible = true, color = Color.Gray, size = 11.sp, maxCount = 6),
+            xLabels = AxisLabelStyle(visible = true, color = Color.Gray, size = 11.sp, maxCount = 6),
         ),
     )
 
@@ -63,6 +63,29 @@ private fun ShowStyledBar() {
 Chart chrome (background, shape, shadow, and outer padding) lives on the caller-supplied `modifier`; sizing is fully modifier-driven. The `chartContainerStyle` block only carries `contentPadding` and the title text style.
 
 Here `valueFormatter` adds currency to selected raw values only; Y ticks keep the independent `axisValueFormatter` default. Titles do not generate labels: omitting `categories` hides X labels and leaves only the formatted value in selected readouts.
+
+## Axis Labels
+
+Cartesian charts take `xLabels(...)` and `yLabels(...)` from their `*ChartDefaults`. Their `maxCount` is null by default, which lets the chart choose:
+
+- X labels show as many categories as fit, evenly spaced from the first item, and never overlapping. Wider charts show more labels.
+- Y labels show up to five values, evenly spaced from the lowest to the highest value. Short charts show fewer, so labels never overlap.
+
+Set `maxCount` to cap the number of labels; it must be in 2..1000. Labels never overlap, so a chart can show fewer than `maxCount`:
+
+- X labels use the densest even grid from the first item with at most `maxCount` labels. When the chart scrolls, the cap applies per screen. Without scrolling, a grid that ends on the last item wins when it shows at most one label fewer.
+- Y labels show `maxCount` values when they fit.
+
+```kotlin
+val style =
+    BarChartDefaults.style(
+        axis =
+            BarChartDefaults.axis(
+                xLabels = BarChartDefaults.xLabels(maxCount = 4),
+                yLabels = BarChartDefaults.yLabels(maxCount = 6),
+            ),
+    )
+```
 
 ## Sizing
 

@@ -1,6 +1,7 @@
 package io.github.hdcharts.charts.ui
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -17,6 +18,7 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import io.github.hdcharts.charts.StackedBarChart
 import io.github.hdcharts.charts.internal.TestTags
 import io.github.hdcharts.charts.mock.MockTest.colors
@@ -26,9 +28,66 @@ import io.github.hdcharts.charts.model.chartDataOf
 import io.github.hdcharts.charts.model.staticChartSelection
 import io.github.hdcharts.charts.style.StackedBarChartDefaults
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class StackedBarChartTest {
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun stackedBarChart_expandedPastLayoutLimits_displaysErrorInsteadOfCrashing() =
+        runComposeUiTest {
+            // 14,000 bars of at least 10 dp plus 10 dp spacing need 279,990 px or more, past the 262,143 px
+            // Compose can measure.
+            val bars = 14_000
+            val data =
+                chartDataOf(
+                    categories = List(bars) { index -> "B$index" },
+                    ChartSeries(name = "S1", values = List(bars) { index -> 1.0 + index % 3 }),
+                    ChartSeries(name = "S2", values = List(bars) { index -> 2.0 + index % 5 }),
+                )
+            setContent {
+                StackedBarChart(
+                    data = data,
+                    modifier = Modifier.size(width = 400.dp, height = 300.dp),
+                    animateOnStart = false,
+                )
+            }
+
+            onNodeWithTag(TestTags.STACKED_BAR_CHART_DENSE_EXPAND).performTouchInput { click() }
+
+            onNodeWithTag(TestTags.CHART_ERROR).assertIsDisplayed()
+            onNodeWithText("Chart exceeds layout limits.", substring = true).assertIsDisplayed()
+            onNodeWithTag(TestTags.STACKED_BAR_CHART_DENSE_COLLAPSE).assertIsDisplayed()
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun stackedBarChart_withEmAxisLabelSize_displaysValidationError() =
+        runComposeUiTest {
+            val data =
+                chartDataOf(
+                    categories = listOf("Bar 1", "Bar 2"),
+                    ChartSeries(name = "S1", values = listOf(10.0, 2.0)),
+                    ChartSeries(name = "S2", values = listOf(5.0, 8.0)),
+                )
+
+            setContent {
+                StackedBarChart(
+                    data = data,
+                    style =
+                        StackedBarChartDefaults.style(
+                            axis = StackedBarChartDefaults.axis(xLabels = StackedBarChartDefaults.xLabels(size = 1.em)),
+                        ),
+                )
+            }
+
+            onNodeWithTag(TestTags.CHART_ERROR).assertIsDisplayed()
+            onNodeWithText(
+                "X-axis label size must be a finite, positive sp value.",
+                substring = true,
+            ).assertIsDisplayed()
+        }
+
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun stackedBarChart_withValidData_displaysChart() =
@@ -344,7 +403,7 @@ class StackedBarChartTest {
 
     @OptIn(ExperimentalTestApi::class)
     @Test
-    fun stackedBarChart_lastXAxisLabel_hasRightEdgePadding() =
+    fun stackedBarChart_lastXAxisLabel_centeredUnderLastBar() =
         runComposeUiTest {
             val dataSet =
                 listOf(
@@ -357,16 +416,51 @@ class StackedBarChartTest {
             setContent {
                 StackedBarChart(
                     data = transpose(dataSet, listOf("S1", "S2", "S3")),
+                    style = StackedBarChartDefaults.style(layout = StackedBarChartDefaults.layout(space = 0.dp)),
                 )
             }
 
-            val axisBounds =
-                onNodeWithTag(TestTags.STACKED_BAR_CHART_X_AXIS_LABELS)
-                    .fetchSemanticsNode()
-                    .boundsInRoot
-            val lastLabelBounds = onNodeWithText("Region 4").fetchSemanticsNode().boundsInRoot
+            val plotBounds = onNodeWithTag(TestTags.STACKED_BAR_CHART_PLOT).fetchSemanticsNode().boundsInRoot
+            val barWidth = plotBounds.width / dataSet.size
+            val lastLabelBounds = onNodeWithText("Region 4").assertIsDisplayed().fetchSemanticsNode().boundsInRoot
 
-            assertTrue(lastLabelBounds.right <= axisBounds.right - 1f)
+            assertEquals(
+                expected = plotBounds.right - barWidth / 2f,
+                actual = lastLabelBounds.center.x,
+                absoluteTolerance = 1.5f,
+            )
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun stackedBarChart_xAxisLabels_centeredUnderBars() =
+        runComposeUiTest {
+            val categories = listOf("Q1 '24", "Q2 '24", "Q3 '24", "Q4 '24", "Q1 '25", "Q2 '25", "Q3 '25", "Q4 '25")
+
+            setContent {
+                StackedBarChart(
+                    data =
+                        stackedData(
+                            rows = categories.mapIndexed { index, label -> label to listOf(20f + index, 10f + index) },
+                            segmentNames = listOf("Hardware", "Services"),
+                        ),
+                    modifier = Modifier.size(width = 800.dp, height = 400.dp),
+                    style = StackedBarChartDefaults.style(layout = StackedBarChartDefaults.layout(space = 0.dp)),
+                )
+            }
+
+            val plotBounds = onNodeWithTag(TestTags.STACKED_BAR_CHART_PLOT).fetchSemanticsNode().boundsInRoot
+            val barWidth = plotBounds.width / categories.size
+            categories.forEachIndexed { index, label ->
+                val labelBounds = onNodeWithText(label).assertIsDisplayed().fetchSemanticsNode().boundsInRoot
+
+                assertEquals(
+                    expected = plotBounds.left + barWidth * (index + 0.5f),
+                    actual = labelBounds.center.x,
+                    absoluteTolerance = 1.5f,
+                    message = label,
+                )
+            }
         }
 
     @OptIn(ExperimentalTestApi::class)

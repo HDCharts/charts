@@ -21,6 +21,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -32,29 +33,41 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import io.github.hdcharts.charts.internal.ANIMATION_TARGET
-import io.github.hdcharts.charts.internal.AXIS_LABEL_CHART_GAP
 import io.github.hdcharts.charts.internal.AnimationSpec
 import io.github.hdcharts.charts.internal.NO_SELECTION
 import io.github.hdcharts.charts.internal.TestTags
-import io.github.hdcharts.charts.internal.common.axis.AxisXPlanRequest
+import io.github.hdcharts.charts.internal.common.axis.AxisXItems
+import io.github.hdcharts.charts.internal.common.axis.AxisXLabelsLayout
+import io.github.hdcharts.charts.internal.common.axis.AxisYLabelsLayout
 import io.github.hdcharts.charts.internal.common.axis.baselineYForRange
-import io.github.hdcharts.charts.internal.common.axis.estimateXAxisLabelFootprintPx
-import io.github.hdcharts.charts.internal.common.axis.estimateYAxisLabelWidthPx
-import io.github.hdcharts.charts.internal.common.axis.planAxisXLabels
+import io.github.hdcharts.charts.internal.common.axis.estimateXAxisLabelExtent
+import io.github.hdcharts.charts.internal.common.axis.rememberNumericYAxisLayout
+import io.github.hdcharts.charts.internal.common.axis.rememberXAxisLabelPlan
+import io.github.hdcharts.charts.internal.common.axis.xAxisLabelEdgeInsetPx
+import io.github.hdcharts.charts.internal.common.axis.xAxisLabelRowHeightPx
 import io.github.hdcharts.charts.internal.common.bezier.DEFAULT_BEZIER_TENSION
+import io.github.hdcharts.charts.internal.common.composable.ChartErrors
 import io.github.hdcharts.charts.internal.common.composable.rememberShowState
+import io.github.hdcharts.charts.internal.common.density.denseStepForViewport
 import io.github.hdcharts.charts.internal.common.interaction.buildHorizontalDragGestureModifier
 import io.github.hdcharts.charts.internal.common.interaction.buildTapGestureModifier
+import io.github.hdcharts.charts.internal.common.interaction.horizontalScrollGestures
+import io.github.hdcharts.charts.internal.common.interaction.nearestPointIndexForContentX
+import io.github.hdcharts.charts.internal.common.interaction.selectedIndexForTouchX
+import io.github.hdcharts.charts.internal.common.layout.chartCanvasFits
+import io.github.hdcharts.charts.internal.common.layout.placedHorizontalScrollPx
 import io.github.hdcharts.charts.internal.common.layout.wrapContentChartModifier
 import io.github.hdcharts.charts.internal.common.model.MultiChartData
 import io.github.hdcharts.charts.internal.common.model.normalizeByMinMax
 import io.github.hdcharts.charts.model.ChartValueFormatter
 import io.github.hdcharts.charts.style.LineChartStyle
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlin.math.max
@@ -63,8 +76,6 @@ import kotlin.math.roundToInt
 internal const val MARKER_REVEAL_DURATION_MS = 260
 internal const val MARKER_REVEAL_THRESHOLD = 0.999f
 internal const val MARKER_REVEAL_START_SCALE = 0.7f
-internal const val LINE_DENSE_MIN_STEP_PX = 12f
-internal const val FIXED_X_AXIS_LABEL_TILT_DEGREES = 34f
 
 /** Space kept above and below the plot so the line, points, and selection markers fit at the min and max values. */
 internal fun Density.lineVerticalSafeInset(style: LineChartStyle): Float {
@@ -127,6 +138,14 @@ internal fun LineChartContent(
 
     val rawSeries = remember(data) { data.items.map { item -> item.item.points } }
     val xAxisLabels = remember(data) { resolveLineXAxisLabels(data) }
+    // X labels of a live window count from the points it has dropped, so each stays on its point.
+    val timelineWindowCounter = remember { TimelineWindowCounter() }
+    // Keyed on the mode type, not the instance: a new shiftDuration must not count the same window twice.
+    val isTimeline = renderMode is LineChartRenderMode.Timeline
+    val droppedTimelinePoints =
+        remember(rawSeries, isTimeline) {
+            if (isTimeline) timelineWindowCounter.next(rawSeries) else null
+        }
     val minMax =
         remember(data, style.range.min, style.range.max) {
             data.resolveLineRange(style.range.min, style.range.max)
@@ -157,6 +176,9 @@ internal fun LineChartContent(
     val previousRawSeries = remember { mutableStateOf<List<List<Double>>?>(null) }
     val timelineTransitionData = remember { mutableStateOf<TimelineTransitionData?>(null) }
     val timelineProgress = remember { Animatable(ANIMATION_TARGET) }
+    // Dropped points of the window the line draws. It trails droppedTimelinePoints until the update
+    // effect below picks up the new data.
+    val drawnTimelinePoints = remember { mutableLongStateOf(0L) }
     val dragInteractionEnabled = interactionEnabled && !isDenseMode
     val tapInteractionEnabled = interactionEnabled && isDenseMode
 
@@ -195,6 +217,7 @@ internal fun LineChartContent(
 
         val previousRawSnapshot = previousRawSeries.value
         previousRawSeries.value = rawSeries
+        drawnTimelinePoints.longValue = droppedTimelinePoints ?: 0L
 
         val transitionMode =
             decideLineChartUpdate(
@@ -264,88 +287,8 @@ internal fun LineChartContent(
         }
     }
 
-    val dragInteractionModifier =
-        buildHorizontalDragGestureModifier(
-            dragInteractionEnabled,
-            pointsCount,
-            onDragStart = { offset ->
-                dragging.value = true
-                touchX.floatValue = offset.x
-                val selectedIndex =
-                    selectedIndexForTouch(
-                        touchX = offset.x,
-                        width = size.width.toFloat(),
-                        pointsCount = pointsCount,
-                    )
-                if (reportedSelection.intValue != selectedIndex) {
-                    reportedSelection.intValue = selectedIndex
-                    currentOnValueChanged(selectedIndex)
-                }
-            },
-            onHorizontalDrag = { position ->
-                touchX.floatValue = position.x
-                val selectedIndex =
-                    selectedIndexForTouch(
-                        touchX = position.x,
-                        width = size.width.toFloat(),
-                        pointsCount = pointsCount,
-                    )
-                if (reportedSelection.intValue != selectedIndex) {
-                    reportedSelection.intValue = selectedIndex
-                    currentOnValueChanged(selectedIndex)
-                }
-            },
-            onDragEnd = {
-                dragging.value = false
-                if (reportedSelection.intValue != NO_SELECTION) {
-                    reportedSelection.intValue = NO_SELECTION
-                    currentOnValueChanged(NO_SELECTION)
-                }
-            },
-            onDragCancel = {
-                dragging.value = false
-                if (reportedSelection.intValue != NO_SELECTION) {
-                    reportedSelection.intValue = NO_SELECTION
-                    currentOnValueChanged(NO_SELECTION)
-                }
-            },
-        )
-
-    val denseTapInteractionModifier =
-        buildTapGestureModifier(
-            tapInteractionEnabled,
-            pointsCount,
-            zoomScale,
-            onTap = { offset ->
-                val stepX =
-                    denseStepForViewport(
-                        viewportWidth = size.width.toFloat(),
-                        pointsCount = pointsCount,
-                        zoomScale = zoomScale,
-                    )
-                val selectedIndex =
-                    selectedIndexForContentX(
-                        contentX = offset.x + scrollState.value.toFloat(),
-                        pointsCount = pointsCount,
-                        stepX = stepX,
-                    )
-                if (selectedIndex != NO_SELECTION) {
-                    val toggledSelection =
-                        if (reportedSelection.intValue == selectedIndex) {
-                            NO_SELECTION
-                        } else {
-                            selectedIndex
-                        }
-                    if (reportedSelection.intValue != toggledSelection) {
-                        reportedSelection.intValue = toggledSelection
-                        currentOnValueChanged(toggledSelection)
-                    }
-                }
-            },
-        )
-
     val showYAxisLabels = yLabels.visible
-    val showXAxisLabelsCandidate =
+    val showXAxisLabels =
         xLabels.visible &&
             xAxisLabels.isNotEmpty()
     val showAxisLines = style.axis.visible
@@ -358,65 +301,54 @@ internal fun LineChartContent(
                 },
     ) {
         val density = LocalDensity.current
-        val xAxisTilt = FIXED_X_AXIS_LABEL_TILT_DEGREES
+        val layoutDirection = LocalLayoutDirection.current
         val xAxisLabelSizePx = with(density) { xLabels.size.toPx() }
-        val xAxisLabelFootprintPx =
-            remember(xAxisLabels, pointsCount, xAxisLabelSizePx, xAxisTilt) {
-                estimateXAxisLabelFootprintPx(
-                    labels = xAxisLabels,
-                    dataSize = pointsCount,
-                    fontSizePx = xAxisLabelSizePx,
-                    tiltDegrees = xAxisTilt,
-                )
-            }
-        val xAxisHeight =
-            if (!showXAxisLabelsCandidate) {
-                0.dp
-            } else {
-                with(density) {
-                    (xAxisLabelFootprintPx.height + AXIS_LABEL_CHART_GAP.toPx()).toDp()
+        val xAxisLabelExtent =
+            remember(showXAxisLabels, xAxisLabels, pointsCount, xAxisLabelSizePx) {
+                if (showXAxisLabels) {
+                    estimateXAxisLabelExtent(
+                        labels = xAxisLabels,
+                        dataSize = pointsCount,
+                        fontSizePx = xAxisLabelSizePx,
+                    )
+                } else {
+                    null
                 }
             }
+        val xAxisRowHeightPx = xAxisLabelExtent?.let { with(density) { xAxisLabelRowHeightPx(it) } } ?: 0f
+        val xAxisHeight = with(density) { xAxisRowHeightPx.toDp() }
         val chartHeight = (maxHeight - xAxisHeight).coerceAtLeast(0.dp)
         val chartHeightPx = with(density) { chartHeight.toPx() }.coerceAtLeast(1f)
         val lineVerticalInsetPx = with(density) { lineVerticalSafeInset(style) }.coerceAtMost(chartHeightPx / 2f)
-        val yAxisTicks =
-            remember(
-                minMax,
-                chartHeightPx,
-                yLabels.count,
-                showYAxisLabels,
-                lineVerticalInsetPx,
-                axisValueFormatter,
-            ) {
-                if (!showYAxisLabels) {
-                    emptyList()
-                } else {
-                    buildLineYAxisTicks(
-                        minValue = minMax.first,
-                        maxValue = minMax.second,
-                        labelCount = yLabels.count,
-                        plotHeightPx = chartHeightPx,
-                        verticalInsetPx = lineVerticalInsetPx,
-                        formatter = axisValueFormatter,
-                    )
-                }
-            }
-        val yAxisLabelSizePx = with(density) { yLabels.size.toPx() }
-        val yAxisWidthPx =
-            if (showYAxisLabels) {
-                estimateYAxisLabelWidthPx(
-                    labels = yAxisTicks.map { tick -> tick.label },
-                    fontSizePx = yAxisLabelSizePx,
-                )
-            } else {
-                0f
-            }
-        val yAxisGapPx = if (showYAxisLabels) with(density) { AXIS_LABEL_CHART_GAP.toPx() } else 0f
+        val yAxisLayout =
+            rememberNumericYAxisLayout(
+                labels = yLabels,
+                minValue = minMax.first,
+                maxValue = minMax.second,
+                chartHeightPx = chartHeightPx,
+                verticalInsetPx = lineVerticalInsetPx,
+                formatter = axisValueFormatter,
+                availableWidthPx = constraints.maxWidth,
+            )
+        val yAxisWidthPx = yAxisLayout.widthPx
+        val yAxisGapPx = yAxisLayout.gapPx
         val yAxisWidth = with(density) { yAxisWidthPx.toDp() }
-        val plotStartPadding = with(density) { (yAxisWidthPx + yAxisGapPx).toDp() }
+        // The first and last points sit on the plot edges, so their centered labels reach past them. The
+        // plot moves in by the part that the chart padding, and on the left the Y-axis gutter, cannot hold.
+        val xAxisLabelEdgeInsetPx =
+            xAxisLabelExtent?.let {
+                xAxisLabelEdgeInsetPx(
+                    it,
+                    edgeSlackPx = with(density) { style.chartContainerStyle.contentPadding.toPx() },
+                    availableWidthPx = constraints.maxWidth,
+                )
+            } ?: 0f
+        val plotStartInsetPx = (xAxisLabelEdgeInsetPx - yAxisWidthPx - yAxisGapPx).coerceAtLeast(0f)
+        val plotStartPadding = with(density) { (yAxisWidthPx + yAxisGapPx + plotStartInsetPx).toDp() }
+        val plotEndPadding = with(density) { xAxisLabelEdgeInsetPx.toDp() }
         val plotViewportWidthPx =
-            (constraints.maxWidth.toFloat() - yAxisWidthPx - yAxisGapPx).coerceAtLeast(1f)
+            (constraints.maxWidth.toFloat() - yAxisWidthPx - yAxisGapPx - plotStartInsetPx - xAxisLabelEdgeInsetPx)
+                .coerceAtLeast(1f)
         val fitStepX =
             when {
                 pointsCount <= 1 -> plotViewportWidthPx
@@ -434,8 +366,22 @@ internal fun LineChartContent(
             } else {
                 plotViewportWidthPx
             }
+        if (!chartCanvasFits(plotContentWidthPx, chartHeightPx)) {
+            ChartErrors(
+                style = style.chartContainerStyle,
+                errors = persistentListOf("Chart exceeds layout limits. Reduce zoom or collapse the chart."),
+                modifier = Modifier.fillMaxWidth(),
+            )
+            return@BoxWithConstraints
+        }
         val plotContentWidth = with(density) { plotContentWidthPx.toDp() }
-        val scrollOffsetPx = if (isDenseMode) scrollState.value.toFloat() else 0f
+        val scrollOffsetPx =
+            if (isDenseMode) {
+                with(density) { placedHorizontalScrollPx(scrollState.value, plotContentWidth, plotViewportWidthPx) }
+                    .toFloat()
+            } else {
+                0f
+            }
         LaunchedEffect(plotContentWidthPx, plotViewportWidthPx, isDenseMode) {
             val maxScroll = (plotContentWidthPx - plotViewportWidthPx).roundToInt().coerceAtLeast(0)
             if (!isDenseMode && scrollState.value != 0) {
@@ -445,66 +391,95 @@ internal fun LineChartContent(
             }
         }
 
-        val xAxisPlan =
-            remember(
+        val dragInteractionModifier =
+            buildHorizontalDragGestureModifier(
+                dragInteractionEnabled,
                 pointsCount,
-                xLabels.count,
-                isDenseMode,
-                fitStepX,
-                denseStepX,
                 plotViewportWidthPx,
-                scrollOffsetPx,
-                xAxisLabelFootprintPx.width,
-            ) {
-                planAxisXLabels(
-                    request =
-                        AxisXPlanRequest(
-                            dataSize = pointsCount,
-                            requestedMaxLabelCount = xLabels.count,
-                            isScrollable = isDenseMode,
-                            unitWidthPx =
-                                if (isDenseMode) {
-                                    denseStepX.coerceAtLeast(1f)
-                                } else {
-                                    fitStepX.coerceAtLeast(1f)
-                                },
-                            viewportWidthPx = plotViewportWidthPx,
-                            scrollOffsetPx = scrollOffsetPx,
-                            firstCenterPx = 0f,
-                            labelWidthPx = xAxisLabelFootprintPx.width,
-                        ),
-                )
-            }
-        val xAxisLabelIndices =
-            if (showXAxisLabelsCandidate) {
-                xAxisPlan.labelIndices
-            } else {
-                emptyList()
-            }
-        val showXAxisLabels = showXAxisLabelsCandidate && xAxisLabelIndices.isNotEmpty()
-        val xAxisTicks =
-            remember(
-                xAxisLabels,
-                xAxisLabelIndices,
+                onDragStart = { offset ->
+                    dragging.value = true
+                    touchX.floatValue = offset.x
+                    val selectedIndex =
+                        selectedIndexForTouchX(
+                            touchX = offset.x,
+                            widthPx = plotViewportWidthPx,
+                            pointsCount = pointsCount,
+                        )
+                    if (reportedSelection.intValue != selectedIndex) {
+                        reportedSelection.intValue = selectedIndex
+                        currentOnValueChanged(selectedIndex)
+                    }
+                },
+                onHorizontalDrag = { position ->
+                    touchX.floatValue = position.x
+                    val selectedIndex =
+                        selectedIndexForTouchX(
+                            touchX = position.x,
+                            widthPx = plotViewportWidthPx,
+                            pointsCount = pointsCount,
+                        )
+                    if (reportedSelection.intValue != selectedIndex) {
+                        reportedSelection.intValue = selectedIndex
+                        currentOnValueChanged(selectedIndex)
+                    }
+                },
+                onDragEnd = {
+                    dragging.value = false
+                    if (reportedSelection.intValue != NO_SELECTION) {
+                        reportedSelection.intValue = NO_SELECTION
+                        currentOnValueChanged(NO_SELECTION)
+                    }
+                },
+                onDragCancel = {
+                    dragging.value = false
+                    if (reportedSelection.intValue != NO_SELECTION) {
+                        reportedSelection.intValue = NO_SELECTION
+                        currentOnValueChanged(NO_SELECTION)
+                    }
+                },
+            )
+
+        val denseTapInteractionModifier =
+            buildTapGestureModifier(
+                tapInteractionEnabled,
                 pointsCount,
-                fitStepX,
                 denseStepX,
-                isDenseMode,
-                scrollOffsetPx,
-                showXAxisLabels,
-            ) {
-                if (!showXAxisLabels) {
-                    emptyList()
-                } else {
-                    buildLineXAxisTicks(
-                        labels = xAxisLabels,
-                        labelIndices = xAxisLabelIndices,
-                        pointsCount = pointsCount,
-                        stepX = if (isDenseMode) denseStepX else fitStepX,
-                        scrollOffsetPx = scrollOffsetPx,
-                    )
-                }
-            }
+                onTap = { offset ->
+                    val selectedIndex =
+                        nearestPointIndexForContentX(
+                            contentX = offset.x + scrollState.value.toFloat(),
+                            pointsCount = pointsCount,
+                            stepPx = denseStepX,
+                        )
+                    if (selectedIndex != NO_SELECTION) {
+                        val toggledSelection =
+                            if (reportedSelection.intValue == selectedIndex) {
+                                NO_SELECTION
+                            } else {
+                                selectedIndex
+                            }
+                        if (reportedSelection.intValue != toggledSelection) {
+                            reportedSelection.intValue = toggledSelection
+                            currentOnValueChanged(toggledSelection)
+                        }
+                    }
+                },
+            )
+
+        val xAxisLabelPlan =
+            rememberXAxisLabelPlan(
+                labels = xAxisLabels,
+                dataSize = pointsCount,
+                maxLabelCount = xLabels.maxCount,
+                isScrollable = isDenseMode,
+                unitWidthPx = if (isDenseMode) denseStepX else fitStepX,
+                viewportWidthPx = plotViewportWidthPx,
+                fontSizePx = xAxisLabelSizePx,
+                items = AxisXItems.Points,
+                scrollOffsetPx = scrollOffsetPx,
+                firstItemIndex = droppedTimelinePoints,
+            )
+        val xAxisTicks = xAxisLabelPlan.ticks
 
         Box(
             modifier =
@@ -514,30 +489,45 @@ internal fun LineChartContent(
                     .testTag(TestTags.LINE_CHART),
         ) {
             if (showYAxisLabels) {
-                LineYAxisLabels(
-                    ticks = yAxisTicks,
+                AxisYLabelsLayout(
+                    ticks = yAxisLayout.ticks,
                     color = yLabels.color,
                     fontSize = yLabels.size,
                     modifier =
                         Modifier
                             .align(Alignment.TopStart)
                             .fillMaxHeight()
-                            .width(yAxisWidth),
+                            .width(yAxisWidth)
+                            .testTag(TestTags.LINE_CHART_Y_AXIS_LABELS),
                 )
             }
 
+            // Gestures cover the end inset too, so a touch right of the last point still selects it.
             Box(
                 modifier =
                     Modifier
                         .fillMaxSize()
-                        .padding(start = plotStartPadding),
+                        .padding(start = plotStartPadding)
+                        .then(denseTapInteractionModifier)
+                        .then(dragInteractionModifier)
+                        .then(
+                            if (isDenseMode) {
+                                Modifier.horizontalScrollGestures(
+                                    state = scrollState,
+                                    enabled = interactionEnabled,
+                                    layoutDirection = layoutDirection,
+                                )
+                            } else {
+                                Modifier
+                            },
+                        ),
             ) {
                 Box(
                     modifier =
                         Modifier
                             .fillMaxSize()
+                            .padding(end = plotEndPadding)
                             .testTag(TestTags.LINE_CHART_PLOT)
-                            .then(denseTapInteractionModifier)
                             .then(
                                 if (isDenseMode) {
                                     Modifier.horizontalScroll(state = scrollState, enabled = interactionEnabled)
@@ -669,10 +659,7 @@ internal fun LineChartContent(
 
                     if (dragInteractionEnabled) {
                         Canvas(
-                            modifier =
-                                Modifier
-                                    .fillMaxSize()
-                                    .then(dragInteractionModifier),
+                            modifier = Modifier.fillMaxSize(),
                             onDraw = {
                                 if (!dragging.value) return@Canvas
                                 data.items.forEachIndexed { index, _ ->
@@ -694,17 +681,35 @@ internal fun LineChartContent(
         }
 
         if (showXAxisLabels) {
-            LineXAxisLabels(
+            AxisXLabelsLayout(
                 ticks = xAxisTicks,
                 color = xLabels.color,
                 fontSize = xLabels.size,
-                tiltDegrees = xAxisTilt,
                 modifier =
                     Modifier
                         .align(Alignment.BottomStart)
                         .fillMaxWidth()
-                        .padding(start = plotStartPadding)
-                        .height(xAxisHeight),
+                        .padding(start = plotStartPadding, end = plotEndPadding)
+                        .height(xAxisHeight)
+                        .testTag(TestTags.LINE_CHART_X_AXIS_LABELS),
+                tickOffsetPx = {
+                    // The labels are planned for the newest window, but the line draws the window it
+                    // last shifted to until the update effect starts the next shift. Each label sits
+                    // one step right per point the drawn line lags behind, less the part of the shift
+                    // that has run, so it stays on its point.
+                    val pendingPoints = (droppedTimelinePoints ?: 0L) - drawnTimelinePoints.longValue
+                    val progress =
+                        if (timelineTransitionData.value != null) {
+                            timelineProgress.value.coerceIn(0f, ANIMATION_TARGET)
+                        } else {
+                            ANIMATION_TARGET
+                        }
+                    if (pendingPoints in 0L..1L) {
+                        (pendingPoints + ANIMATION_TARGET - progress) * fitStepX
+                    } else {
+                        0f
+                    }
+                },
             )
         }
     }

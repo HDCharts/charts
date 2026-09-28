@@ -2,40 +2,11 @@ package io.github.hdcharts.charts.internal.barstackedchart
 
 import androidx.compose.foundation.ScrollState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.IntSize
-import io.github.hdcharts.charts.internal.NO_SELECTION
 import io.github.hdcharts.charts.internal.common.interaction.buildHorizontalDragGestureModifier
 import io.github.hdcharts.charts.internal.common.interaction.buildPinchZoomModifier
 import io.github.hdcharts.charts.internal.common.interaction.buildTapGestureModifier
-import kotlin.math.roundToInt
-import io.github.hdcharts.charts.internal.common.interaction.selectedIndexForBarFit as selectedIndexForBarFitCore
-import io.github.hdcharts.charts.internal.common.interaction.selectedIndexForContentX as selectedIndexForContentXCore
-
-internal fun selectedIndexForFit(
-    positionX: Float,
-    dataSize: Int,
-    canvasSize: IntSize,
-    spacingPx: Float,
-): Int =
-    selectedIndexForBarFitCore(
-        positionX = positionX,
-        dataSize = dataSize,
-        canvasWidthPx = canvasSize.width.toFloat(),
-        spacingPx = spacingPx,
-        invalidIndex = NO_SELECTION,
-    )
-
-internal fun selectedIndexForContentX(
-    contentX: Float,
-    dataSize: Int,
-    unitWidthPx: Float,
-): Int =
-    selectedIndexForContentXCore(
-        contentX = contentX,
-        dataSize = dataSize,
-        unitWidthPx = unitWidthPx,
-        invalidIndex = NO_SELECTION,
-    )
+import io.github.hdcharts.charts.internal.common.interaction.selectedIndexForBarFit
+import io.github.hdcharts.charts.internal.common.interaction.selectedIndexForContentX
 
 internal fun buildFitTapModifier(
     interactionEnabled: Boolean,
@@ -43,7 +14,6 @@ internal fun buildFitTapModifier(
     dataSize: Int,
     spacingPx: Float,
     viewportWidthPx: Float,
-    chartHeightPx: Float,
     onTapIndex: (Int) -> Unit,
 ): Modifier =
     buildTapGestureModifier(
@@ -51,17 +21,12 @@ internal fun buildFitTapModifier(
         dataSize,
         spacingPx,
         viewportWidthPx,
-        chartHeightPx,
         onTap = { offset ->
             val index =
-                selectedIndexForFit(
+                selectedIndexForBarFit(
                     positionX = offset.x,
                     dataSize = dataSize,
-                    canvasSize =
-                        IntSize(
-                            width = viewportWidthPx.roundToInt(),
-                            height = chartHeightPx.roundToInt(),
-                        ),
+                    canvasWidthPx = viewportWidthPx,
                     spacingPx = spacingPx,
                 )
             onTapIndex(index)
@@ -75,7 +40,6 @@ internal fun buildFitDragModifier(
     dataSize: Int,
     spacingPx: Float,
     viewportWidthPx: Float,
-    chartHeightPx: Float,
     onDragIndex: (Int) -> Unit,
     onDragFinished: () -> Unit,
 ): Modifier =
@@ -84,31 +48,22 @@ internal fun buildFitDragModifier(
         dataSize,
         spacingPx,
         viewportWidthPx,
-        chartHeightPx,
         onDragStart = { offset ->
             val index =
-                selectedIndexForFit(
+                selectedIndexForBarFit(
                     positionX = offset.x,
                     dataSize = dataSize,
-                    canvasSize =
-                        IntSize(
-                            width = viewportWidthPx.roundToInt(),
-                            height = chartHeightPx.roundToInt(),
-                        ),
+                    canvasWidthPx = viewportWidthPx,
                     spacingPx = spacingPx,
                 )
             onDragIndex(index)
         },
         onHorizontalDrag = { position ->
             val index =
-                selectedIndexForFit(
+                selectedIndexForBarFit(
                     positionX = position.x,
                     dataSize = dataSize,
-                    canvasSize =
-                        IntSize(
-                            width = viewportWidthPx.roundToInt(),
-                            height = chartHeightPx.roundToInt(),
-                        ),
+                    canvasWidthPx = viewportWidthPx,
                     spacingPx = spacingPx,
                 )
             onDragIndex(index)

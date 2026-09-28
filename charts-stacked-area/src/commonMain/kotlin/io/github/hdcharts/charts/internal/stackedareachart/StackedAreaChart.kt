@@ -35,18 +35,24 @@ import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import io.github.hdcharts.charts.internal.ANIMATION_TARGET
-import io.github.hdcharts.charts.internal.AXIS_LABEL_CHART_GAP
 import io.github.hdcharts.charts.internal.AnimationSpec
 import io.github.hdcharts.charts.internal.NO_SELECTION
 import io.github.hdcharts.charts.internal.TestTags
-import io.github.hdcharts.charts.internal.common.axis.AxisXPlanRequest
-import io.github.hdcharts.charts.internal.common.axis.estimateXAxisLabelFootprintPx
-import io.github.hdcharts.charts.internal.common.axis.estimateYAxisLabelWidthPx
-import io.github.hdcharts.charts.internal.common.axis.planAxisXLabels
+import io.github.hdcharts.charts.internal.common.axis.AxisXItems
+import io.github.hdcharts.charts.internal.common.axis.AxisXLabelsLayout
+import io.github.hdcharts.charts.internal.common.axis.AxisYLabelsLayout
+import io.github.hdcharts.charts.internal.common.axis.defaultAxisValueFormatter
+import io.github.hdcharts.charts.internal.common.axis.estimateXAxisLabelExtent
+import io.github.hdcharts.charts.internal.common.axis.rememberNumericYAxisLayout
+import io.github.hdcharts.charts.internal.common.axis.rememberXAxisLabelPlan
+import io.github.hdcharts.charts.internal.common.axis.xAxisLabelEdgeInsetPx
+import io.github.hdcharts.charts.internal.common.axis.xAxisLabelRowHeightPx
 import io.github.hdcharts.charts.internal.common.bezier.cubicControlPointsForSegment
+import io.github.hdcharts.charts.internal.common.composable.ChartErrors
 import io.github.hdcharts.charts.internal.common.composable.ChartHeader
 import io.github.hdcharts.charts.internal.common.composable.ChartHeaderTestTags
 import io.github.hdcharts.charts.internal.common.composable.rememberDenseExpandedState
@@ -54,14 +60,21 @@ import io.github.hdcharts.charts.internal.common.composable.rememberShowState
 import io.github.hdcharts.charts.internal.common.composable.rememberZoomScaleState
 import io.github.hdcharts.charts.internal.common.composable.zoomInScale
 import io.github.hdcharts.charts.internal.common.composable.zoomOutScale
+import io.github.hdcharts.charts.internal.common.density.denseStepForViewport
 import io.github.hdcharts.charts.internal.common.interaction.buildHorizontalDragGestureModifier
 import io.github.hdcharts.charts.internal.common.interaction.buildPinchZoomModifier
 import io.github.hdcharts.charts.internal.common.interaction.buildTapGestureModifier
+import io.github.hdcharts.charts.internal.common.interaction.horizontalScrollGestures
+import io.github.hdcharts.charts.internal.common.interaction.nearestPointIndexForContentX
+import io.github.hdcharts.charts.internal.common.interaction.selectedIndexForTouchX
+import io.github.hdcharts.charts.internal.common.layout.chartCanvasFits
 import io.github.hdcharts.charts.internal.common.layout.fillMaxSizeChartModifier
+import io.github.hdcharts.charts.internal.common.layout.placedHorizontalScrollPx
 import io.github.hdcharts.charts.internal.common.model.MultiChartData
 import io.github.hdcharts.charts.internal.common.model.normalizeStackedAreaValues
 import io.github.hdcharts.charts.style.StackedAreaChartStyle
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlin.math.max
@@ -70,7 +83,6 @@ import kotlin.math.roundToInt
 private const val ZOOM_MIN = 1f
 private const val ZOOM_MAX = 4f
 private const val ZOOM_STEP = 1.25f
-private const val FIXED_X_AXIS_LABEL_TILT_DEGREES = 34f
 private val HEADER_TEST_TAGS =
     ChartHeaderTestTags(
         denseExpand = TestTags.STACKED_AREA_CHART_DENSE_EXPAND,
@@ -333,7 +345,7 @@ private fun StackedAreaChartContent(
                 .orEmpty()
         }
     val showYAxisLabels = yLabels.visible
-    val showXAxisLabelsCandidate = xLabels.visible && xAxisLabels.isNotEmpty()
+    val showXAxisLabels = xLabels.visible && xAxisLabels.isNotEmpty()
     val dragInteractionEnabled = interactionEnabled && !isScrollable
     val tapInteractionEnabled = interactionEnabled && isScrollable
     val currentToggleSelection by rememberUpdatedState(onToggleSelection)
@@ -344,58 +356,57 @@ private fun StackedAreaChartContent(
 
     BoxWithConstraints(modifier = modifier) {
         val density = LocalDensity.current
-        val xAxisTilt = FIXED_X_AXIS_LABEL_TILT_DEGREES
+        val layoutDirection = LocalLayoutDirection.current
         val xAxisLabelSizePx = with(density) { xLabels.size.toPx() }
-        val xAxisLabelFootprintPx =
-            remember(xAxisLabels, pointsCount, xAxisLabelSizePx, xAxisTilt) {
-                estimateXAxisLabelFootprintPx(
-                    labels = xAxisLabels,
-                    dataSize = pointsCount,
-                    fontSizePx = xAxisLabelSizePx,
-                    tiltDegrees = xAxisTilt,
-                )
-            }
-        val xAxisHeight =
-            if (!showXAxisLabelsCandidate) {
-                0.dp
-            } else {
-                with(density) {
-                    (xAxisLabelFootprintPx.height + AXIS_LABEL_CHART_GAP.toPx()).toDp()
+        val xAxisLabelExtent =
+            remember(showXAxisLabels, xAxisLabels, pointsCount, xAxisLabelSizePx) {
+                if (showXAxisLabels) {
+                    estimateXAxisLabelExtent(
+                        labels = xAxisLabels,
+                        dataSize = pointsCount,
+                        fontSizePx = xAxisLabelSizePx,
+                    )
+                } else {
+                    null
                 }
             }
+        val xAxisRowHeightPx = xAxisLabelExtent?.let { with(density) { xAxisLabelRowHeightPx(it) } } ?: 0f
+        val xAxisHeight = with(density) { xAxisRowHeightPx.toDp() }
         val chartHeight = (maxHeight - xAxisHeight).coerceAtLeast(0.dp)
         val chartHeightPx = with(density) { chartHeight.toPx() }.coerceAtLeast(1f)
         val (minTotal, maxTotal) =
             remember(data) {
                 resolveStackedAreaTotalsRange(data)
             }
-        val yAxisTicks =
-            remember(minTotal, maxTotal, chartHeightPx, yLabels.count, showYAxisLabels) {
-                if (!showYAxisLabels) {
-                    emptyList()
-                } else {
-                    buildStackedAreaYAxisTicks(
-                        minValue = minTotal,
-                        maxValue = maxTotal,
-                        labelCount = yLabels.count,
-                        plotHeightPx = chartHeightPx,
-                    )
-                }
-            }
-        val yAxisWidthPx =
-            if (showYAxisLabels) {
-                estimateYAxisLabelWidthPx(
-                    labels = yAxisTicks.map { tick -> tick.label },
-                    fontSizePx = with(density) { yLabels.size.toPx() },
-                )
-            } else {
-                0f
-            }
-        val yAxisGapPx = if (showYAxisLabels) with(density) { AXIS_LABEL_CHART_GAP.toPx() } else 0f
+        val yAxisLayout =
+            rememberNumericYAxisLayout(
+                labels = yLabels,
+                minValue = minTotal,
+                maxValue = maxTotal,
+                chartHeightPx = chartHeightPx,
+                verticalInsetPx = 0f,
+                formatter = defaultAxisValueFormatter,
+                availableWidthPx = constraints.maxWidth,
+            )
+        val yAxisWidthPx = yAxisLayout.widthPx
+        val yAxisGapPx = yAxisLayout.gapPx
         val yAxisWidth = with(density) { yAxisWidthPx.toDp() }
-        val plotStartPadding = with(density) { (yAxisWidthPx + yAxisGapPx).toDp() }
+        // The first and last points sit on the plot edges, so their centered labels reach past them. The
+        // plot moves in by the part that the chart padding, and on the left the Y-axis gutter, cannot hold.
+        val xAxisLabelEdgeInsetPx =
+            xAxisLabelExtent?.let {
+                xAxisLabelEdgeInsetPx(
+                    it,
+                    edgeSlackPx = with(density) { style.chartContainerStyle.contentPadding.toPx() },
+                    availableWidthPx = constraints.maxWidth,
+                )
+            } ?: 0f
+        val plotStartInsetPx = (xAxisLabelEdgeInsetPx - yAxisWidthPx - yAxisGapPx).coerceAtLeast(0f)
+        val plotStartPadding = with(density) { (yAxisWidthPx + yAxisGapPx + plotStartInsetPx).toDp() }
+        val plotEndPadding = with(density) { xAxisLabelEdgeInsetPx.toDp() }
         val plotViewportWidthPx =
-            (constraints.maxWidth.toFloat() - yAxisWidthPx - yAxisGapPx).coerceAtLeast(1f)
+            (constraints.maxWidth.toFloat() - yAxisWidthPx - yAxisGapPx - plotStartInsetPx - xAxisLabelEdgeInsetPx)
+                .coerceAtLeast(1f)
         val fitStepX =
             when {
                 pointsCount <= 1 -> plotViewportWidthPx
@@ -413,8 +424,22 @@ private fun StackedAreaChartContent(
             } else {
                 plotViewportWidthPx
             }
+        if (!chartCanvasFits(plotContentWidthPx, chartHeightPx)) {
+            ChartErrors(
+                style = style.chartContainerStyle,
+                errors = persistentListOf("Chart exceeds layout limits. Reduce zoom or collapse the chart."),
+                modifier = Modifier.fillMaxWidth(),
+            )
+            return@BoxWithConstraints
+        }
         val plotContentWidth = with(density) { plotContentWidthPx.toDp() }
-        val scrollOffsetPx = if (isScrollable) scrollState.value.toFloat() else 0f
+        val scrollOffsetPx =
+            if (isScrollable) {
+                with(density) { placedHorizontalScrollPx(scrollState.value, plotContentWidth, plotViewportWidthPx) }
+                    .toFloat()
+            } else {
+                0f
+            }
 
         LaunchedEffect(plotContentWidthPx, plotViewportWidthPx, isScrollable) {
             val maxScroll = (plotContentWidthPx - plotViewportWidthPx).roundToInt().coerceAtLeast(0)
@@ -425,88 +450,40 @@ private fun StackedAreaChartContent(
             }
         }
 
-        val xAxisPlan =
-            remember(
-                pointsCount,
-                xLabels.count,
-                isScrollable,
-                fitStepX,
-                denseStepX,
-                plotViewportWidthPx,
-                scrollOffsetPx,
-                xAxisLabelFootprintPx.width,
-            ) {
-                planAxisXLabels(
-                    request =
-                        AxisXPlanRequest(
-                            dataSize = pointsCount,
-                            requestedMaxLabelCount = xLabels.count,
-                            isScrollable = isScrollable,
-                            unitWidthPx =
-                                if (isScrollable) {
-                                    denseStepX.coerceAtLeast(
-                                        1f,
-                                    )
-                                } else {
-                                    fitStepX.coerceAtLeast(1f)
-                                },
-                            viewportWidthPx = plotViewportWidthPx,
-                            scrollOffsetPx = scrollOffsetPx,
-                            firstCenterPx = 0f,
-                            labelWidthPx = xAxisLabelFootprintPx.width,
-                        ),
-                )
-            }
-        val visibleRange = xAxisPlan.visibleRange
-        val xAxisLabelIndices =
-            if (showXAxisLabelsCandidate) {
-                xAxisPlan.labelIndices
-            } else {
-                emptyList()
-            }
-        val showXAxisLabels = showXAxisLabelsCandidate && xAxisLabelIndices.isNotEmpty()
-        val xAxisTicks =
-            remember(
-                xAxisLabels,
-                xAxisLabelIndices,
-                pointsCount,
-                fitStepX,
-                denseStepX,
-                isScrollable,
-                scrollOffsetPx,
-                showXAxisLabels,
-            ) {
-                if (!showXAxisLabels) {
-                    emptyList()
-                } else {
-                    buildStackedAreaXAxisTicks(
-                        labels = xAxisLabels,
-                        labelIndices = xAxisLabelIndices,
-                        pointsCount = pointsCount,
-                        stepX = if (isScrollable) denseStepX else fitStepX,
-                        scrollOffsetPx = scrollOffsetPx,
-                    )
-                }
-            }
+        val xAxisLabelPlan =
+            rememberXAxisLabelPlan(
+                labels = xAxisLabels,
+                dataSize = pointsCount,
+                maxLabelCount = xLabels.maxCount,
+                isScrollable = isScrollable,
+                unitWidthPx = if (isScrollable) denseStepX else fitStepX,
+                viewportWidthPx = plotViewportWidthPx,
+                fontSizePx = xAxisLabelSizePx,
+                items = AxisXItems.Points,
+                scrollOffsetPx = scrollOffsetPx,
+            )
+        val visibleRange = xAxisLabelPlan.visibleRange
+        val xAxisTicks = xAxisLabelPlan.ticks
 
         val dragModifier =
             buildHorizontalDragGestureModifier(
                 enabled = dragInteractionEnabled,
                 pointsCount,
+                plotViewportWidthPx,
                 onDragStart = { offset ->
                     val selected =
-                        selectedIndexForTouch(
+                        selectedIndexForTouchX(
                             touchX = offset.x,
-                            width = size.width.toFloat(),
+                            widthPx = plotViewportWidthPx,
                             pointsCount = pointsCount,
                         )
                     currentSelectIndex(selected)
                 },
                 onHorizontalDrag = { position ->
                     val selected =
-                        selectedIndexForTouch(
+                        selectedIndexForTouchX(
                             touchX = position.x,
-                            width = size.width.toFloat(),
+                            widthPx = plotViewportWidthPx,
                             pointsCount = pointsCount,
                         )
                     currentSelectIndex(selected)
@@ -518,19 +495,13 @@ private fun StackedAreaChartContent(
             buildTapGestureModifier(
                 enabled = tapInteractionEnabled,
                 pointsCount,
-                zoomScale,
+                denseStepX,
                 onTap = { offset ->
-                    val stepX =
-                        denseStepForViewport(
-                            viewportWidth = size.width.toFloat(),
-                            pointsCount = pointsCount,
-                            zoomScale = zoomScale,
-                        )
                     val selected =
-                        selectedIndexForContentX(
+                        nearestPointIndexForContentX(
                             contentX = offset.x + scrollState.value.toFloat(),
                             pointsCount = pointsCount,
-                            stepX = stepX,
+                            stepPx = denseStepX,
                         )
                     if (selected != NO_SELECTION) {
                         currentToggleSelection(selected)
@@ -560,32 +531,46 @@ private fun StackedAreaChartContent(
                     .testTag(TestTags.STACKED_AREA_CHART),
         ) {
             if (showYAxisLabels) {
-                StackedAreaYAxisLabels(
-                    ticks = yAxisTicks,
+                AxisYLabelsLayout(
+                    ticks = yAxisLayout.ticks,
                     color = yLabels.color,
                     fontSize = yLabels.size,
                     modifier =
                         Modifier
                             .align(Alignment.TopStart)
                             .fillMaxHeight()
-                            .width(yAxisWidth),
+                            .width(yAxisWidth)
+                            .testTag(TestTags.STACKED_AREA_CHART_Y_AXIS_LABELS),
                 )
             }
 
+            // Gestures cover the end inset too, so a touch right of the last point still selects it.
             Box(
                 modifier =
                     Modifier
                         .fillMaxSize()
-                        .padding(start = plotStartPadding),
+                        .padding(start = plotStartPadding)
+                        .then(denseTapModifier)
+                        .then(dragModifier)
+                        .then(pinchModifier)
+                        .then(
+                            if (isScrollable) {
+                                Modifier.horizontalScrollGestures(
+                                    state = scrollState,
+                                    enabled = true,
+                                    layoutDirection = layoutDirection,
+                                )
+                            } else {
+                                Modifier
+                            },
+                        ),
             ) {
                 Box(
                     modifier =
                         Modifier
                             .fillMaxSize()
+                            .padding(end = plotEndPadding)
                             .testTag(TestTags.STACKED_AREA_CHART_PLOT)
-                            .then(denseTapModifier)
-                            .then(dragModifier)
-                            .then(pinchModifier)
                             .then(
                                 if (isScrollable) {
                                     Modifier.horizontalScroll(state = scrollState, enabled = true)
@@ -671,17 +656,17 @@ private fun StackedAreaChartContent(
         }
 
         if (showXAxisLabels) {
-            StackedAreaXAxisLabels(
+            AxisXLabelsLayout(
                 ticks = xAxisTicks,
                 color = xLabels.color,
                 fontSize = xLabels.size,
-                tiltDegrees = xAxisTilt,
                 modifier =
                     Modifier
                         .align(Alignment.BottomStart)
                         .fillMaxWidth()
-                        .padding(start = plotStartPadding)
-                        .height(xAxisHeight),
+                        .padding(start = plotStartPadding, end = plotEndPadding)
+                        .height(xAxisHeight)
+                        .testTag(TestTags.STACKED_AREA_CHART_X_AXIS_LABELS),
             )
         }
     }
