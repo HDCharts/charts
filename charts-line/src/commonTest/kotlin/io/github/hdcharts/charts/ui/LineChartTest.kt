@@ -1,25 +1,31 @@
 package io.github.hdcharts.charts.ui
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
+import androidx.compose.ui.test.click
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import io.github.hdcharts.charts.LineChart
 import io.github.hdcharts.charts.LiveLineChart
 import io.github.hdcharts.charts.internal.TestTags
@@ -27,6 +33,7 @@ import io.github.hdcharts.charts.mock.MockTest.TITLE
 import io.github.hdcharts.charts.mock.MockTest.dataSet
 import io.github.hdcharts.charts.mock.MockTest.multiDataSet
 import io.github.hdcharts.charts.model.ChartData
+import io.github.hdcharts.charts.model.ChartSelection
 import io.github.hdcharts.charts.model.ChartSeries
 import io.github.hdcharts.charts.model.ChartValueFormatter
 import io.github.hdcharts.charts.model.chartDataOf
@@ -40,6 +47,110 @@ import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
 class LineChartTest {
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun lineChart_longEdgeXAxisLabels_stayInsideChartBounds() =
+        runComposeUiTest {
+            val categories = listOf("Region 1", "Region 36", "Region 68", "Region 100")
+            setContent {
+                Box(modifier = Modifier.size(width = 400.dp, height = 300.dp).testTag("chart-bounds")) {
+                    LineChart(
+                        data = listOf(20.0, 28.0, 23.0, 30.0).toChartData(categories = categories),
+                        modifier = Modifier.fillMaxSize(),
+                        animateOnStart = false,
+                    )
+                }
+            }
+
+            val chartBounds = onNodeWithTag("chart-bounds").fetchSemanticsNode().boundsInRoot
+            val firstLabelBounds = onNodeWithText("Region 1").assertIsDisplayed().fetchSemanticsNode().boundsInRoot
+            val lastLabelBounds = onNodeWithText("Region 100").assertIsDisplayed().fetchSemanticsNode().boundsInRoot
+            val plotBounds = onNodeWithTag(TestTags.LINE_CHART_PLOT).fetchSemanticsNode().boundsInRoot
+
+            assertTrue(
+                lastLabelBounds.right <= chartBounds.right,
+                "last label ends at ${lastLabelBounds.right}, chart at ${chartBounds.right}",
+            )
+            assertTrue(firstLabelBounds.left >= chartBounds.left, "first label starts at ${firstLabelBounds.left}")
+            assertEquals(expected = plotBounds.right, actual = lastLabelBounds.center.x, absoluteTolerance = 1.5f)
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun lineChart_dragBesidePoint_selectsNearestPoint() =
+        runComposeUiTest {
+            val selection = ChartSelection()
+            setContent {
+                LineChart(
+                    data = listOf(10.0, 20.0, 30.0, 40.0, 50.0).toChartData(),
+                    selection = selection,
+                    modifier = Modifier.size(width = 400.dp, height = 300.dp),
+                    animateOnStart = false,
+                )
+            }
+            val plot = onNodeWithTag(TestTags.LINE_CHART_PLOT)
+            val widthPx =
+                plot
+                    .fetchSemanticsNode()
+                    .size.width
+                    .toFloat()
+            val stepPx = widthPx / 4f
+
+            plot.performTouchInput {
+                down(Offset(0f, centerY))
+                moveTo(Offset(stepPx - 2f, centerY))
+            }
+            val besidePointOne = runOnIdle { selection.selectedIndex }
+            plot.performTouchInput { moveTo(Offset(widthPx - 1f, centerY)) }
+            val onLastPixel = runOnIdle { selection.selectedIndex }
+            plot.performTouchInput { up() }
+
+            assertEquals(expected = 1, actual = besidePointOne)
+            assertEquals(expected = 4, actual = onLastPixel)
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun lineChart_expandedPastLayoutLimits_displaysErrorInsteadOfCrashing() =
+        runComposeUiTest {
+            // 22,000 points at the 12 px dense step need 263,988 px, past the 262,143 px Compose can measure.
+            setContent {
+                LineChart(
+                    data = List(22_000) { index -> (index % 17).toDouble() }.toChartData(),
+                    modifier = Modifier.size(width = 400.dp, height = 300.dp),
+                    animateOnStart = false,
+                )
+            }
+
+            onNodeWithTag(TestTags.LINE_CHART_DENSE_EXPAND).performTouchInput { click() }
+
+            onNodeWithTag(TestTags.CHART_ERROR).assertIsDisplayed()
+            onNodeWithText("Chart exceeds layout limits.", substring = true).assertIsDisplayed()
+            onNodeWithTag(TestTags.LINE_CHART_DENSE_COLLAPSE).assertIsDisplayed()
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun lineChart_withEmAxisLabelSize_displaysValidationError() =
+        runComposeUiTest {
+            setContent {
+                LineChart(
+                    data = listOf(10.0, 20.0, 30.0).toChartData(),
+                    style =
+                        LineChartDefaults.style(
+                            axis = LineChartDefaults.axis(xLabels = LineChartDefaults.xLabels(size = 1.em)),
+                        ),
+                    animateOnStart = false,
+                )
+            }
+
+            onNodeWithTag(TestTags.CHART_ERROR).assertIsDisplayed()
+            onNodeWithText(
+                "X-axis label size must be a finite, positive sp value.",
+                substring = true,
+            ).assertIsDisplayed()
+        }
+
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun lineChart_withValidData_displaysChart() =
@@ -282,7 +393,7 @@ class LineChartTest {
 
     @OptIn(ExperimentalTestApi::class)
     @Test
-    fun lineChart_lastXAxisLabel_hasRightEdgePadding() =
+    fun lineChart_lastXAxisLabel_centeredOnLastPoint() =
         runComposeUiTest {
             val edgeDataSet =
                 listOf(20f, 28f, 23f, 30f)
@@ -296,11 +407,39 @@ class LineChartTest {
                 LineChart(data = edgeDataSet)
             }
 
-            val axisBounds = onNodeWithTag(TestTags.LINE_CHART_X_AXIS_LABELS).fetchSemanticsNode().boundsInRoot
-            val rightMostVisibleLabelBounds = onNodeWithText("Region 68").fetchSemanticsNode().boundsInRoot
+            val plotBounds = onNodeWithTag(TestTags.LINE_CHART_PLOT).fetchSemanticsNode().boundsInRoot
+            val lastLabelBounds = onNodeWithText("Region 100").assertIsDisplayed().fetchSemanticsNode().boundsInRoot
 
-            onAllNodesWithText("Region 100").assertCountEquals(0)
-            assertTrue(rightMostVisibleLabelBounds.right <= axisBounds.right - 1f)
+            assertEquals(expected = plotBounds.right, actual = lastLabelBounds.center.x, absoluteTolerance = 1.5f)
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun lineChart_xAxisLabels_centeredOnTheirPoints() =
+        runComposeUiTest {
+            val categories = listOf("Mon", "Tue", "Wed", "Thu", "Fri")
+
+            setContent {
+                LineChart(
+                    data =
+                        listOf(12.0, 18.0, 15.0, 22.0, 19.0)
+                            .toChartData(seriesName = "Visits", categories = categories),
+                    modifier = Modifier.size(width = 600.dp, height = 400.dp),
+                )
+            }
+
+            val plotBounds = onNodeWithTag(TestTags.LINE_CHART_PLOT).fetchSemanticsNode().boundsInRoot
+            val pointStep = plotBounds.width / (categories.size - 1)
+            categories.forEachIndexed { index, label ->
+                val labelBounds = onNodeWithText(label).assertIsDisplayed().fetchSemanticsNode().boundsInRoot
+
+                assertEquals(
+                    expected = plotBounds.left + pointStep * index,
+                    actual = labelBounds.center.x,
+                    absoluteTolerance = 1.5f,
+                    message = label,
+                )
+            }
         }
 
     @OptIn(ExperimentalTestApi::class)

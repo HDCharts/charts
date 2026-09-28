@@ -1,67 +1,17 @@
 package io.github.hdcharts.charts.internal.barchart
 
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntSize
-import io.github.hdcharts.charts.internal.common.axis.AxisLabelFootprintPx
-import io.github.hdcharts.charts.internal.common.axis.AxisXPlanRequest
-import io.github.hdcharts.charts.internal.common.axis.AxisXPlanResult
 import io.github.hdcharts.charts.internal.common.model.ChartData
 import io.github.hdcharts.charts.internal.common.model.resolveOptionalRange
 import kotlin.math.abs
 import kotlin.math.max
-import kotlin.math.roundToInt
-import io.github.hdcharts.charts.internal.common.axis.centeredLabelIndexRange as centeredLabelIndexRangeCore
-import io.github.hdcharts.charts.internal.common.axis.estimateXAxisLabelFootprintPx as estimateXAxisLabelFootprintPxCore
-import io.github.hdcharts.charts.internal.common.axis.estimateYAxisLabelWidthPx as estimateYAxisLabelWidthPxCore
-import io.github.hdcharts.charts.internal.common.axis.planAxisXLabels as planAxisXLabelsCore
-import io.github.hdcharts.charts.internal.common.axis.resolveAxisLabel as resolveAxisLabelCore
-import io.github.hdcharts.charts.internal.common.axis.sampledLabelIndices as sampledLabelIndicesCore
-import io.github.hdcharts.charts.internal.common.axis.scrollableLabelIndices as scrollableLabelIndicesCore
-import io.github.hdcharts.charts.internal.common.axis.visibleIndexRange as visibleIndexRangeCore
 import io.github.hdcharts.charts.internal.common.density.aggregateLabelsByCenterValue as aggregateLabelsByCenterValueCore
 import io.github.hdcharts.charts.internal.common.density.bucketSizeForTarget as bucketSizeForTargetCore
 import io.github.hdcharts.charts.internal.common.density.buildBucketRanges as buildBucketRangesCore
 import io.github.hdcharts.charts.internal.common.density.shouldUseScrollableDensity as shouldUseScrollableDensityCore
 
 internal const val BAR_DENSE_THRESHOLD = 50
-
-internal fun resolveAxisLabel(
-    labels: List<String>,
-    index: Int,
-): String = resolveAxisLabelCore(labels = labels, index = index)
-
-internal fun estimateXAxisLabelFootprintPx(
-    labels: List<String>,
-    dataSize: Int,
-    fontSizePx: Float,
-    tiltDegrees: Float,
-): AxisLabelFootprintPx =
-    estimateXAxisLabelFootprintPxCore(
-        labels = labels,
-        dataSize = dataSize,
-        fontSizePx = fontSizePx,
-        tiltDegrees = tiltDegrees,
-    )
-
-internal fun estimateYAxisLabelWidthPx(
-    ticks: List<YAxisTick>,
-    fontSizePx: Float,
-): Float =
-    estimateYAxisLabelWidthPxCore(
-        labels = ticks.map { it.label },
-        fontSizePx = fontSizePx,
-    )
-
-internal fun barYAxisWidthPx(
-    ticks: List<YAxisTick>,
-    fontSizePx: Float,
-    availableWidthPx: Int,
-): Float =
-    estimateYAxisLabelWidthPx(ticks, fontSizePx)
-        .coerceIn(0f, availableWidthPx.coerceAtLeast(0) * 0.4f)
-        .roundToInt()
-        .toFloat()
 
 internal fun getSelectedIndex(
     position: Offset,
@@ -154,15 +104,6 @@ internal fun contentWidth(
     return max(1f, dataSize * unitWidthPx - spacingPx)
 }
 
-internal fun barCanvasFits(
-    widthPx: Float,
-    heightPx: Float,
-): Boolean {
-    if (!widthPx.isFinite() || !heightPx.isFinite() || widthPx < 0f || heightPx < 0f) return false
-    // Compose shares a packed bit budget between width and height, so check the pair.
-    return runCatching { Constraints.fixed(widthPx.roundToInt(), heightPx.roundToInt()) }.isSuccess
-}
-
 internal fun baselineYForRange(
     minValue: Double,
     maxValue: Double,
@@ -196,59 +137,3 @@ internal fun barValueYFraction(
         (max / scale - clamped / scale) / (max / scale - min / scale)
     }.coerceIn(0.0, 1.0)
 }
-
-internal fun visibleIndexRange(
-    dataSize: Int,
-    viewportWidthPx: Float,
-    scrollOffsetPx: Float,
-    unitWidthPx: Float,
-): IntRange =
-    visibleIndexRangeCore(
-        dataSize = dataSize,
-        viewportWidthPx = viewportWidthPx,
-        scrollOffsetPx = scrollOffsetPx,
-        unitWidthPx = unitWidthPx,
-    )
-
-internal fun sampledLabelIndices(
-    dataSize: Int,
-    maxCount: Int,
-    visibleRange: IntRange? = null,
-): List<Int> =
-    sampledLabelIndicesCore(
-        dataSize = dataSize,
-        maxCount = maxCount,
-        visibleRange = visibleRange,
-    )
-
-internal fun scrollableLabelIndices(
-    dataSize: Int,
-    maxCount: Int,
-    visibleRange: IntRange,
-): List<Int> =
-    scrollableLabelIndicesCore(
-        dataSize = dataSize,
-        maxCount = maxCount,
-        visibleRange = visibleRange,
-    )
-
-internal fun centeredLabelIndexRange(
-    dataSize: Int,
-    unitWidthPx: Float,
-    viewportWidthPx: Float,
-    scrollOffsetPx: Float,
-    firstCenterPx: Float = 0f,
-    labelWidthPx: Float = 0f,
-    edgePaddingPx: Float = 0f,
-): IntRange =
-    centeredLabelIndexRangeCore(
-        dataSize = dataSize,
-        unitWidthPx = unitWidthPx,
-        viewportWidthPx = viewportWidthPx,
-        scrollOffsetPx = scrollOffsetPx,
-        firstCenterPx = firstCenterPx,
-        labelWidthPx = labelWidthPx,
-        edgePaddingPx = edgePaddingPx,
-    )
-
-internal fun planAxisXLabels(request: AxisXPlanRequest): AxisXPlanResult = planAxisXLabelsCore(request)

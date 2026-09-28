@@ -8,11 +8,6 @@ import kotlin.math.sin
  * Shared, generic value/label generators for the docs GIF scenario fixtures. Scenario-specific
  * data (which parameters, which title) lives with each scenario's own composable in
  * `io.github.hdcharts.app.gif.docs`; only the reusable math lives here.
- *
- * Each scenario uses 21 data points so the default `xLabels.count = 6`
- * produces a stride of exactly 4 between visible labels
- * (max count - 1 = 5; 20 / 5 = 4). Using 18 leaves a non-integer stride
- * (17 / 5 ≈ 3.4) that causes uneven spacing.
  */
 internal object DocsGifScenariosData {
     internal const val POINTS = 21

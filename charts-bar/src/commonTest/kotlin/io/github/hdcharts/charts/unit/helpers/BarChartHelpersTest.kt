@@ -2,23 +2,17 @@ package io.github.hdcharts.charts.unit.helpers
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.IntSize
-import io.github.hdcharts.charts.internal.barchart.YAxisTick
 import io.github.hdcharts.charts.internal.barchart.aggregateForCompactDensity
-import io.github.hdcharts.charts.internal.barchart.buildYAxisTicks
 import io.github.hdcharts.charts.internal.barchart.compactDensityCenterIndices
 import io.github.hdcharts.charts.internal.barchart.contentWidth
-import io.github.hdcharts.charts.internal.barchart.estimateXAxisLabelFootprintPx
-import io.github.hdcharts.charts.internal.barchart.estimateYAxisLabelWidthPx
-import io.github.hdcharts.charts.internal.barchart.formatAxisValue
 import io.github.hdcharts.charts.internal.barchart.getSelectedIndex
 import io.github.hdcharts.charts.internal.barchart.getSelectedIndexForContentX
 import io.github.hdcharts.charts.internal.barchart.maxBarsThatFit
-import io.github.hdcharts.charts.internal.barchart.sampledLabelIndices
-import io.github.hdcharts.charts.internal.barchart.scrollableLabelIndices
 import io.github.hdcharts.charts.internal.barchart.shouldUseScrollableDensity
 import io.github.hdcharts.charts.internal.barchart.unitWidth
-import io.github.hdcharts.charts.internal.barchart.visibleIndexRange
+import io.github.hdcharts.charts.internal.common.axis.visibleIndexRange
 import io.github.hdcharts.charts.internal.common.model.ChartData
+import io.github.hdcharts.charts.style.BarChartDefaults
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -182,26 +176,6 @@ class BarChartHelpersTest {
     }
 
     @Test
-    fun sampledLabelIndices_withVisibleRangeIncludesEndpoints() {
-        val sampled =
-            sampledLabelIndices(
-                dataSize = 120,
-                maxCount = 6,
-                visibleRange = 20..30,
-            )
-
-        assertEquals(expected = 20, actual = sampled.first())
-        assertEquals(expected = 30, actual = sampled.last())
-        assertTrue(sampled.size <= 6)
-    }
-
-    @Test
-    fun sampledLabelIndices_maxCountBelowTwoStillReturnsTwoEndpoints() {
-        val sampled = sampledLabelIndices(dataSize = 10, maxCount = 1)
-        assertEquals(expected = listOf(0, 9), actual = sampled)
-    }
-
-    @Test
     fun visibleIndexRange_invalidInputsReturnEmpty() {
         val noData =
             visibleIndexRange(
@@ -243,135 +217,10 @@ class BarChartHelpersTest {
     }
 
     @Test
-    fun scrollableLabelIndices_includesFirstAtLeftBoundary() {
-        val indices =
-            scrollableLabelIndices(
-                dataSize = 120,
-                maxCount = 6,
-                visibleRange = 0..12,
-            )
-        assertEquals(expected = 0, actual = indices.first())
-    }
-
-    @Test
-    fun scrollableLabelIndices_includesLastAtRightBoundary() {
-        val indices =
-            scrollableLabelIndices(
-                dataSize = 120,
-                maxCount = 6,
-                visibleRange = 108..119,
-            )
-        assertEquals(expected = 119, actual = indices.last())
-    }
-
-    @Test
-    fun scrollableLabelIndices_returnsStrictlyIncreasingDistinctIndices() {
-        val indices =
-            scrollableLabelIndices(
-                dataSize = 120,
-                maxCount = 6,
-                visibleRange = 24..67,
-            )
-
-        assertEquals(expected = indices.distinct().size, actual = indices.size)
-        assertTrue(indices.zipWithNext().all { (left, right) -> left < right })
-    }
-
-    @Test
-    fun scrollableLabelIndices_densityBoundedRelativeToMaxCount() {
-        val maxCount = 6
-        val indices =
-            scrollableLabelIndices(
-                dataSize = 120,
-                maxCount = maxCount,
-                visibleRange = 20..30,
-            )
-        assertTrue(indices.size <= maxCount + 2)
-    }
-
-    @Test
-    fun buildYAxisTicks_includesBothRangeEndpoints() {
-        val ticks =
-            buildYAxisTicks(
-                minValue = -10.0,
-                maxValue = 30.0,
-                labelCount = 5,
-                chartHeightPx = 200f,
-            )
-
-        assertEquals(expected = 5, actual = ticks.size)
-        assertEquals(expected = "30", actual = ticks.first().label)
-        assertEquals(expected = "-10", actual = ticks.last().label)
-        assertEquals(expected = 0f, actual = ticks.first().centerY)
-        assertEquals(expected = 200f, actual = ticks.last().centerY)
-    }
-
-    @Test
-    fun formatAxisValue_trimsRedundantZeros() {
-        assertEquals(expected = "12", actual = formatAxisValue(12.0))
-        assertEquals(expected = "12.5", actual = formatAxisValue(12.5))
-        assertEquals(expected = "12.35", actual = formatAxisValue(12.345))
-        assertEquals(expected = "0", actual = formatAxisValue(-0.0001))
-    }
-
-    @Test
-    fun estimateXAxisLabelFootprintPx_usesLongestResolvedLabel() {
-        val footprint =
-            estimateXAxisLabelFootprintPx(
-                labels = listOf("Jan", "", "September"),
-                dataSize = 3,
-                fontSizePx = 10f,
-                tiltDegrees = 0f,
-            )
-
-        assertTrue(kotlin.math.abs(footprint.width - 52.2f) < 0.001f)
-        assertTrue(kotlin.math.abs(footprint.height - 12f) < 0.001f)
-    }
-
-    @Test
-    fun estimateXAxisLabelFootprintPx_withTiltIncreasesHeightAndReducesWidth() {
-        val horizontal =
-            estimateXAxisLabelFootprintPx(
-                labels = listOf("September"),
-                dataSize = 1,
-                fontSizePx = 10f,
-                tiltDegrees = 0f,
-            )
-        val tilted =
-            estimateXAxisLabelFootprintPx(
-                labels = listOf("September"),
-                dataSize = 1,
-                fontSizePx = 10f,
-                tiltDegrees = 45f,
-            )
-
-        assertTrue(tilted.height > horizontal.height)
-        assertTrue(tilted.width < horizontal.width)
-    }
-
-    @Test
-    fun estimateYAxisLabelWidthPx_usesLongestTickLabelWithoutPadding() {
-        val width =
-            estimateYAxisLabelWidthPx(
-                ticks =
-                    listOf(
-                        YAxisTick(label = "5", centerY = 0f),
-                        YAxisTick(label = "-123.45", centerY = 50f),
-                    ),
-                fontSizePx = 10f,
-            )
-
-        assertTrue(kotlin.math.abs(width - 40.6f) < 0.001f)
-    }
-
-    @Test
-    fun estimateYAxisLabelWidthPx_emptyTicksReturnsZero() {
-        val width =
-            estimateYAxisLabelWidthPx(
-                ticks = emptyList(),
-                fontSizePx = 10f,
-            )
-
-        assertEquals(expected = 0f, actual = width)
+    fun axisValueFormatter_trimsRedundantZeros() {
+        assertEquals(expected = "12", actual = BarChartDefaults.axisValueFormatter.format(12.0))
+        assertEquals(expected = "12.5", actual = BarChartDefaults.axisValueFormatter.format(12.5))
+        assertEquals(expected = "12.35", actual = BarChartDefaults.axisValueFormatter.format(12.345))
+        assertEquals(expected = "0", actual = BarChartDefaults.axisValueFormatter.format(-0.0001))
     }
 }

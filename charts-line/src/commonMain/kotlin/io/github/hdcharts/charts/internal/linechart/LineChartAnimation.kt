@@ -110,6 +110,23 @@ internal fun lineChartValueAnimationSpec(renderMode: LineChartRenderMode): Tween
     }
 
 /**
+ * Counts the points a live timeline window has dropped since its data was last replaced, so X-axis
+ * labels can stay on their points while the window slides.
+ */
+internal class TimelineWindowCounter {
+    private var previousSeries: List<List<Double>>? = null
+    private var droppedPoints = 0L
+
+    /** Takes [series] as the next window and returns how many points the window has dropped. */
+    fun next(series: List<List<Double>>): Long {
+        val previous = previousSeries
+        droppedPoints = if (previous != null && isTimelineAdvance(previous, series)) droppedPoints + 1 else 0L
+        previousSeries = series
+        return droppedPoints
+    }
+}
+
+/**
  * Reports whether [current] is [previous] advanced by exactly one point in every series.
  *
  * A live timeline window drops its oldest point and appends a new one, so every remaining value is

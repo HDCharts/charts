@@ -103,8 +103,8 @@ internal object MockTest {
             layout = StackedBarLayoutStyle(space = Dp(10f), minBarWidth = Dp(10f)),
             axis =
                 StackedBarAxisStyle(
-                    xLabels = AxisLabelStyle(visible = true, color = Color.Gray, size = 11.sp, count = 6),
-                    yLabels = AxisLabelStyle(visible = true, color = Color.Gray, size = 11.sp, count = 5),
+                    xLabels = AxisLabelStyle(visible = true, color = Color.Gray, size = 11.sp, maxCount = 6),
+                    yLabels = AxisLabelStyle(visible = true, color = Color.Gray, size = 11.sp, maxCount = 5),
                 ),
             selection = StackedBarSelectionStyle(visible = true, color = Color.Magenta, width = Dp(1f)),
             zoomControlsVisible = true,
@@ -132,8 +132,8 @@ internal object MockTest {
                 ),
             axis =
                 StackedAreaAxisStyle(
-                    xLabels = AxisLabelStyle(visible = true, color = Color.Gray, size = 11.sp, count = 6),
-                    yLabels = AxisLabelStyle(visible = true, color = Color.Gray, size = 11.sp, count = 5),
+                    xLabels = AxisLabelStyle(visible = true, color = Color.Gray, size = 11.sp, maxCount = 6),
+                    yLabels = AxisLabelStyle(visible = true, color = Color.Gray, size = 11.sp, maxCount = 5),
                 ),
             selection =
                 StackedAreaSelectionStyle(
@@ -151,8 +151,8 @@ internal object MockTest {
             layout = StackedBarLayoutStyle(space = Dp(10f), minBarWidth = Dp(10f)),
             axis =
                 StackedBarAxisStyle(
-                    xLabels = AxisLabelStyle(visible = true, color = Color.Gray, size = 11.sp, count = 6),
-                    yLabels = AxisLabelStyle(visible = true, color = Color.Gray, size = 11.sp, count = 5),
+                    xLabels = AxisLabelStyle(visible = true, color = Color.Gray, size = 11.sp, maxCount = 6),
+                    yLabels = AxisLabelStyle(visible = true, color = Color.Gray, size = 11.sp, maxCount = 5),
                 ),
             selection = StackedBarSelectionStyle(visible = true, color = Color.Magenta, width = Dp(1f)),
             zoomControlsVisible = true,

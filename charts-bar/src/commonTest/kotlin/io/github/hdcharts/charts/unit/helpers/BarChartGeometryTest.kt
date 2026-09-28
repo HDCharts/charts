@@ -1,35 +1,24 @@
 package io.github.hdcharts.charts.unit.helpers
 
 import io.github.hdcharts.charts.internal.barchart.aggregateForCompactDensity
-import io.github.hdcharts.charts.internal.barchart.barCanvasFits
 import io.github.hdcharts.charts.internal.barchart.barValueYFraction
-import io.github.hdcharts.charts.internal.barchart.barYAxisWidthPx
 import io.github.hdcharts.charts.internal.barchart.baselineYForRange
-import io.github.hdcharts.charts.internal.barchart.buildYAxisTicks
 import io.github.hdcharts.charts.internal.barchart.compactDensityRanges
 import io.github.hdcharts.charts.internal.barchart.getSelectedIndexForContentX
 import io.github.hdcharts.charts.internal.barchart.resolveBarRange
 import io.github.hdcharts.charts.internal.barchart.unitWidth
 import io.github.hdcharts.charts.internal.common.axis.AxisXPlanRequest
+import io.github.hdcharts.charts.internal.common.axis.buildNumericYAxisTicks
 import io.github.hdcharts.charts.internal.common.axis.planAxisXLabels
+import io.github.hdcharts.charts.internal.common.axis.yAxisLabelColumnWidthPx
 import io.github.hdcharts.charts.internal.common.model.toChartData
 import io.github.hdcharts.charts.model.ChartValueFormatter
+import io.github.hdcharts.charts.style.BarChartDefaults
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class BarChartGeometryTest {
-    @Test
-    fun expandedCanvas_checksCombinedDimensionsAndZoomBeforeMeasurement() {
-        assertTrue(barCanvasFits(200_000f, 240f))
-        assertFalse(barCanvasFits(17 * 16_384f, 240f))
-        assertFalse(barCanvasFits(200_000f * 2f, 240f))
-        assertFalse(barCanvasFits(200_000f, 16_384f))
-        assertFalse(barCanvasFits(Float.POSITIVE_INFINITY, 240f))
-        assertFalse(barCanvasFits(Float.NaN, 240f))
-    }
-
     @Test
     fun automaticRanges_includeZeroAndMatchDrawingAndTicks() {
         val fixtures =
@@ -45,11 +34,12 @@ class BarChartGeometryTest {
             assertEquals(expected, min to max)
             val tickValues = mutableListOf<Double>()
             val ticks =
-                buildYAxisTicks(
+                buildNumericYAxisTicks(
                     min,
                     max,
                     5,
                     200f,
+                    0f,
                     ChartValueFormatter {
                         tickValues.add(it)
                         it.toString()
@@ -82,11 +72,12 @@ class BarChartGeometryTest {
         assertEquals(0.5, barValueYFraction(0.0, min, max))
         assertEquals(0.0, barValueYFraction(max, min, max))
         val ticks =
-            buildYAxisTicks(
+            buildNumericYAxisTicks(
                 min,
                 max,
                 5,
                 100f,
+                0f,
                 ChartValueFormatter {
                     assertTrue(it.isFinite())
                     it.toString()
@@ -114,19 +105,16 @@ class BarChartGeometryTest {
         assertEquals(0.1f, unit)
         assertEquals(17, getSelectedIndexForContentX(1.75f, 1000, unit))
         assertEquals(999, getSelectedIndexForContentX(99.95f, 1000, unit))
-        val plan =
-            planAxisXLabels(
-                AxisXPlanRequest(
-                    dataSize = 1000,
-                    requestedMaxLabelCount = 6,
-                    isScrollable = false,
-                    unitWidthPx = unit,
-                    viewportWidthPx = 100f,
-                    scrollOffsetPx = 0f,
-                    firstCenterPx = 0.05f,
-                    labelWidthPx = 10f,
-                ),
+        val request =
+            AxisXPlanRequest(
+                dataSize = 1000,
+                maxLabelCount = 6,
+                isScrollable = false,
+                unitWidthPx = unit,
+                viewportWidthPx = 100f,
+                minLabelSpacingPx = 10f,
             )
+        val plan = planAxisXLabels(request = request, scrollOffsetPx = 0f)
         assertEquals(0..999, plan.visibleRange)
         assertTrue(plan.labelIndices.last() > 800)
         assertTrue(plan.labelIndices.zipWithNext().all { (a, b) -> (b - a) * unit >= 10f })
@@ -134,8 +122,8 @@ class BarChartGeometryTest {
 
     @Test
     fun longAxisLabels_reserveBoundedWholePixels() {
-        val ticks = buildYAxisTicks(0.0, 1e50, 5, 100f)
-        val width = barYAxisWidthPx(ticks, 11f, 240)
+        val ticks = buildNumericYAxisTicks(0.0, 1e50, 5, 100f, 0f, BarChartDefaults.axisValueFormatter)
+        val width = yAxisLabelColumnWidthPx(ticks.map { it.label }, 11f, 240)
         assertTrue(width <= 96f)
         assertEquals(width.toInt().toFloat(), width)
     }

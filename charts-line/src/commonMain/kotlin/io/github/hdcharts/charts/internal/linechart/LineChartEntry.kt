@@ -5,6 +5,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
+import io.github.hdcharts.charts.internal.common.axis.validateAxisLabels
 import io.github.hdcharts.charts.internal.common.composable.ChartErrors
 import io.github.hdcharts.charts.internal.common.model.ChartDataItem
 import io.github.hdcharts.charts.internal.common.model.MultiChartData
@@ -80,11 +81,7 @@ internal fun validateLineInput(
             "Active selection size" to style.selection.activeSize,
             "Axis line width" to style.axis.lineWidth,
         )
-    if (style.axis.xLabels.count < 2 ||
-        style.axis.yLabels.count < 2
-    ) {
-        errors += "Axis label counts must be at least two."
-    }
+    errors += validateAxisLabels(style.axis.xLabels, style.axis.yLabels, density)
     return errors
 }
 

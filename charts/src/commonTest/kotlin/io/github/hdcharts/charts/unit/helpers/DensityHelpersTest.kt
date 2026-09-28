@@ -2,18 +2,49 @@ package io.github.hdcharts.charts.unit.helpers
 
 import io.github.hdcharts.charts.internal.common.composable.zoomInScale
 import io.github.hdcharts.charts.internal.common.composable.zoomOutScale
+import io.github.hdcharts.charts.internal.common.density.DENSE_POINT_MIN_STEP_PX
 import io.github.hdcharts.charts.internal.common.density.aggregateLabelsByCenterValue
 import io.github.hdcharts.charts.internal.common.density.aggregateLabelsByLastValue
 import io.github.hdcharts.charts.internal.common.density.aggregatePointsByAverage
 import io.github.hdcharts.charts.internal.common.density.bucketCenterIndex
 import io.github.hdcharts.charts.internal.common.density.bucketSizeForTarget
 import io.github.hdcharts.charts.internal.common.density.buildBucketRanges
+import io.github.hdcharts.charts.internal.common.density.denseStepForViewport
 import io.github.hdcharts.charts.internal.common.density.shouldUseScrollableDensity
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class DensityHelpersTest {
+    @Test
+    fun denseStepForViewport_usesFitStepButAtLeastMinimumStepTimesZoom() {
+        assertEquals(
+            expected = 100f,
+            actual = denseStepForViewport(viewportWidth = 400f, pointsCount = 5, zoomScale = 1f),
+        )
+        assertEquals(
+            expected = DENSE_POINT_MIN_STEP_PX,
+            actual = denseStepForViewport(viewportWidth = 400f, pointsCount = 1_000, zoomScale = 1f),
+        )
+        assertEquals(
+            expected = DENSE_POINT_MIN_STEP_PX * 4f,
+            actual = denseStepForViewport(viewportWidth = 400f, pointsCount = 1_000, zoomScale = 4f),
+        )
+        assertEquals(
+            expected = DENSE_POINT_MIN_STEP_PX,
+            actual = denseStepForViewport(viewportWidth = 400f, pointsCount = 1_000, zoomScale = 0.5f),
+        )
+    }
+
+    @Test
+    fun denseStepForViewport_withoutTwoPointsOrWidth_returnsZero() {
+        assertEquals(
+            expected = 0f,
+            actual = denseStepForViewport(viewportWidth = 400f, pointsCount = 1, zoomScale = 1f),
+        )
+        assertEquals(expected = 0f, actual = denseStepForViewport(viewportWidth = 0f, pointsCount = 10, zoomScale = 1f))
+    }
+
     @Test
     fun shouldUseScrollableDensity_respectsThreshold() {
         assertEquals(expected = false, actual = shouldUseScrollableDensity(pointsCount = 49, threshold = 50))

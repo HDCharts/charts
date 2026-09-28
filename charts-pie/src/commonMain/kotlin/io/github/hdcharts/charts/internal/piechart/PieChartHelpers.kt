@@ -4,7 +4,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.center
 import io.github.hdcharts.charts.internal.NO_SELECTION
-import io.github.hdcharts.charts.internal.common.model.ChartData
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.atan
@@ -118,8 +117,6 @@ internal fun getSelectedIndex(
                 touchDegree < slice.endDeg
         }.takeIf { it != NO_SELECTION } ?: NO_SELECTION
 }
-
-internal fun createPieSlices(data: ChartData): List<SliceGeometry> = createPieSlices(data.points)
 
 internal fun createPieSlices(values: List<Double>): List<SliceGeometry> =
     mutableListOf<SliceGeometry>().apply {

@@ -158,16 +158,16 @@ object LineChartDefaults {
         visible: Boolean = true,
         color: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f),
         size: TextUnit = 11.sp,
-        count: Int = 6,
-    ): AxisLabelStyle = AxisLabelStyle(visible, color, size, count)
+        maxCount: Int? = null,
+    ): AxisLabelStyle = AxisLabelStyle(visible, color, size, maxCount)
 
     @Composable
     fun yLabels(
         visible: Boolean = true,
         color: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f),
         size: TextUnit = 11.sp,
-        count: Int = 5,
-    ): AxisLabelStyle = AxisLabelStyle(visible, color, size, count)
+        maxCount: Int? = null,
+    ): AxisLabelStyle = AxisLabelStyle(visible, color, size, maxCount)
 
     /**
      * Returns a [LegendStyle] with the provided visibility.

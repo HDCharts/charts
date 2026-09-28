@@ -1,14 +1,19 @@
 package io.github.hdcharts.charts.internal.common.interaction
 
+import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.ScrollableDefaults
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.calculateZoom
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChanged
+import androidx.compose.ui.unit.LayoutDirection
 import io.github.hdcharts.charts.internal.InternalChartsApi
 import kotlin.math.abs
 
@@ -100,3 +105,26 @@ fun buildPinchZoomModifier(
         }
     }
 }
+
+/**
+ * Lets a horizontal drag on this element scroll [state] the same way `horizontalScroll` does. Charts
+ * put it on a gesture area wider than their scrolling plot, so a drag that starts beside the plot, in
+ * the room kept for edge labels, still scrolls it.
+ */
+@InternalChartsApi
+fun Modifier.horizontalScrollGestures(
+    state: ScrollState,
+    enabled: Boolean,
+    layoutDirection: LayoutDirection,
+): Modifier =
+    scrollable(
+        state = state,
+        orientation = Orientation.Horizontal,
+        enabled = enabled,
+        reverseDirection =
+            ScrollableDefaults.reverseDirection(
+                layoutDirection = layoutDirection,
+                orientation = Orientation.Horizontal,
+                reverseScrolling = false,
+            ),
+    )

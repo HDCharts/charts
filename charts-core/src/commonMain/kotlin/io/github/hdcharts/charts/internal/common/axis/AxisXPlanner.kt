@@ -1,449 +1,233 @@
 package io.github.hdcharts.charts.internal.common.axis
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import io.github.hdcharts.charts.internal.InternalChartsApi
-import kotlin.math.abs
 import kotlin.math.ceil
+import kotlin.math.max
+import kotlin.math.min
 
-private const val AXIS_X_EDGE_PADDING_PX = 4f
-private const val AXIS_X_MIN_SPACING_FACTOR = 1.15f
-private const val AXIS_X_MIN_PREFERRED_RANGE_COUNT = 2
-private const val AXIS_X_SMALL_DATASET_LABEL_THRESHOLD = 3
+// A screen draws the labels whose tick is within X_AXIS_LABEL_EDGE_TOLERANCE_PX of a label row, and
+// the row is up to 1 px wider than the viewport after rounding.
+private const val SCREEN_TICK_SLACK_PX = 1f + 2f * X_AXIS_LABEL_EDGE_TOLERANCE_PX
 
+/**
+ * Layout inputs for planning X-axis labels.
+ *
+ * @property dataSize number of items on the X axis.
+ * @property maxLabelCount most labels to show, per screen while scrolling, or null for as many as fit.
+ * @property isScrollable whether the items are wider than the viewport and scroll.
+ * @property unitWidthPx distance between neighboring items.
+ * @property viewportWidthPx width of the visible plot.
+ * @property minLabelSpacingPx smallest distance allowed between two labeled items.
+ * @property isSliding whether the items are a live window that drops its oldest item as new ones
+ * arrive. Labels then follow their items through the window, so the last item plays no part.
+ */
 @InternalChartsApi
 data class AxisXPlanRequest(
     val dataSize: Int,
-    val requestedMaxLabelCount: Int,
+    val maxLabelCount: Int?,
     val isScrollable: Boolean,
     val unitWidthPx: Float,
     val viewportWidthPx: Float,
-    val scrollOffsetPx: Float,
-    val firstCenterPx: Float = 0f,
-    val labelWidthPx: Float = 0f,
+    val minLabelSpacingPx: Float,
+    val isSliding: Boolean = false,
 )
 
+/**
+ * Planned X-axis labels: the [labelIndices] of the items that get a label, and the [visibleRange]
+ * of items in the viewport.
+ */
 @InternalChartsApi
 data class AxisXPlanResult(
     val labelIndices: List<Int>,
     val visibleRange: IntRange,
-    val safeRange: IntRange,
 )
 
+/**
+ * Picks the label stride: the densest grid that keeps labels at least the minimum spacing apart and
+ * shows at most [AxisXPlanRequest.maxLabelCount] labels, per screen while scrolling. Without
+ * scrolling or sliding, a grid that ends on the last item wins when it shows at most one label
+ * fewer. The stride does not depend on the scroll position, so labels stay on the same items while
+ * scrolling.
+ * The search checks the divisors of the last index, so it takes about the square root of the item
+ * count in steps.
+ */
 @InternalChartsApi
-fun planAxisXLabels(request: AxisXPlanRequest): AxisXPlanResult {
+fun planAxisXLabelStride(request: AxisXPlanRequest): Int {
+    val dataSize = request.dataSize
+    if (dataSize <= 0 || request.viewportWidthPx <= 0f || request.unitWidthPx <= 0f) return 1
+
+    val minStride = ceil(request.minLabelSpacingPx / request.unitWidthPx).toInt().coerceIn(1, dataSize)
+    val ticksOnScreen =
+        if (request.isScrollable) {
+            val spanPx = request.viewportWidthPx + SCREEN_TICK_SLACK_PX
+            (spanPx / request.unitWidthPx).toInt().coerceIn(0, dataSize - 1) + 1
+        } else {
+            dataSize
+        }
+    // Any ticksOnScreen items in a row hold at most ceil(ticksOnScreen / stride) grid items.
+    val countStride = request.maxLabelCount?.let { maxCount -> ceilDiv(ticksOnScreen, maxCount.coerceAtLeast(1)) } ?: 1
+    val densestStride = max(minStride, countStride).coerceAtMost(dataSize)
+    if (request.isScrollable || request.isSliding) return densestStride
+
+    // Grids from item 0 end on the last item when the stride divides the last index. Only strides
+    // that still show at least one label fewer than the densest grid are worth it.
+    val densestCount = ceilDiv(dataSize, densestStride)
+    val widestStride = if (densestCount >= 3) ceilDiv(dataSize, densestCount - 2) - 1 else dataSize
+    return smallestDivisorIn(value = dataSize - 1, from = densestStride, to = widestStride) ?: densestStride
+}
+
+private fun ceilDiv(
+    dividend: Int,
+    divisor: Int,
+): Int = (dividend - 1) / divisor + 1
+
+// Smallest divisor of value in from..to, or null. Every stride divides 0, the last index of one item.
+private fun smallestDivisorIn(
+    value: Int,
+    from: Int,
+    to: Int,
+): Int? {
+    if (from > to) return null
+    if (value == 0) return from
+    var smallest: Int? = null
+    var divisor = 1
+    while (divisor.toLong() * divisor <= value) {
+        if (value % divisor == 0) {
+            for (candidate in intArrayOf(divisor, value / divisor)) {
+                if (candidate in from..to && (smallest == null || candidate < smallest)) smallest = candidate
+            }
+        }
+        divisor++
+    }
+    return smallest
+}
+
+/**
+ * Plans X-axis labels on one grid: every stride-th item, with the stride from
+ * [planAxisXLabelStride], so labels are always evenly spaced. The grid is anchored to the item that
+ * [firstItemIndex] places at index 0 of the whole series: item `i` is labeled when
+ * `firstItemIndex + i` is a multiple of the stride. With the default of 0, labels stay on the same
+ * items while scrolling; a live window that passes the count of items it has dropped keeps labels
+ * on the same items while it slides. While scrolling, labels are planned one item past the far edge
+ * of [AxisXPlanResult.visibleRange], which stays exact for drawing bars. The label layout draws only
+ * the labels whose tick is inside the plot.
+ */
+@InternalChartsApi
+fun planAxisXLabels(
+    request: AxisXPlanRequest,
+    scrollOffsetPx: Float,
+    stride: Int = planAxisXLabelStride(request),
+    firstItemIndex: Long = 0L,
+): AxisXPlanResult {
     if (request.dataSize <= 0 || request.viewportWidthPx <= 0f || request.unitWidthPx <= 0f) {
-        return AxisXPlanResult(
-            labelIndices = emptyList(),
-            visibleRange = IntRange.EMPTY,
-            safeRange = IntRange.EMPTY,
-        )
+        return AxisXPlanResult(labelIndices = emptyList(), visibleRange = IntRange.EMPTY)
     }
 
-    val clampedScrollOffset = if (request.isScrollable) request.scrollOffsetPx.coerceAtLeast(0f) else 0f
-    val safeUnitWidth = request.unitWidthPx.coerceAtLeast(Float.MIN_VALUE)
-    val safeLabelWidth = request.labelWidthPx.coerceAtLeast(1f)
+    val safeStride = stride.coerceIn(1, request.dataSize)
+    val safeScrollOffsetPx = scrollOffsetPx.coerceAtLeast(0f)
     val visibleRange =
         if (request.isScrollable) {
             visibleIndexRange(
                 dataSize = request.dataSize,
                 viewportWidthPx = request.viewportWidthPx,
-                scrollOffsetPx = clampedScrollOffset,
-                unitWidthPx = safeUnitWidth,
+                scrollOffsetPx = safeScrollOffsetPx,
+                unitWidthPx = request.unitWidthPx,
             )
         } else {
-            0..(request.dataSize - 1)
+            0 until request.dataSize
         }
-    val safeRange =
-        centeredLabelIndexRange(
-            dataSize = request.dataSize,
-            unitWidthPx = safeUnitWidth,
-            viewportWidthPx = request.viewportWidthPx,
-            scrollOffsetPx = clampedScrollOffset,
-            firstCenterPx = request.firstCenterPx,
-            labelWidthPx = safeLabelWidth,
-            edgePaddingPx = AXIS_X_EDGE_PADDING_PX,
-        )
-    val selectedRange =
-        resolveLabelRangeWithFallback(
-            dataSize = request.dataSize,
-            preferredRange = safeRange,
-            fallbackRange = visibleRange,
-        )
-    if (selectedRange.isEmpty()) {
-        return AxisXPlanResult(
-            labelIndices = emptyList(),
-            visibleRange = visibleRange,
-            safeRange = safeRange,
-        )
-    }
-
-    val selectedRangeCount = rangeCount(selectedRange)
-    val stableVisibleCount =
-        if (request.isScrollable) {
-            resolveStableVisibleLabelCount(
-                dataSize = request.dataSize,
-                unitWidthPx = safeUnitWidth,
-                viewportWidthPx = request.viewportWidthPx,
-                labelWidthPx = safeLabelWidth,
-                edgePaddingPx = AXIS_X_EDGE_PADDING_PX,
-            )
-        } else {
-            0
-        }
-    val shouldShowAllVisibleLabels =
-        when {
-            selectedRangeCount <= 1 -> true
-            request.isScrollable -> {
-                stableVisibleCount in 1..AXIS_X_SMALL_DATASET_LABEL_THRESHOLD &&
-                    selectedRangeCount <= AXIS_X_SMALL_DATASET_LABEL_THRESHOLD
-            }
-            else -> selectedRangeCount <= AXIS_X_SMALL_DATASET_LABEL_THRESHOLD
-        }
-    val maxVisibleLabels =
-        when {
-            shouldShowAllVisibleLabels -> selectedRangeCount
-            request.isScrollable -> {
-                val stableRange =
-                    stableRangeForCount(
-                        dataSize = request.dataSize,
-                        targetCount = stableVisibleCount,
-                    )
-                resolveMaxXAxisLabelCount(
-                    requestedMaxCount = request.requestedMaxLabelCount,
-                    visibleRange =
-                        when {
-                            stableRange.isEmpty() -> selectedRange
-                            else -> stableRange
-                        },
-                    unitWidthPx = safeUnitWidth,
-                    labelWidthPx = safeLabelWidth,
-                )
-            }
-
-            else ->
-                resolveMaxXAxisLabelCount(
-                    requestedMaxCount = request.requestedMaxLabelCount,
-                    visibleRange = selectedRange,
-                    unitWidthPx = safeUnitWidth,
-                    labelWidthPx = safeLabelWidth,
-                )
-        }
-
-    if (maxVisibleLabels <= 0) {
-        return AxisXPlanResult(
-            labelIndices = emptyList(),
-            visibleRange = visibleRange,
-            safeRange = safeRange,
-        )
-    }
-
-    val cadenceCandidate =
-        when {
-            shouldShowAllVisibleLabels -> selectedRange.toList()
-            request.isScrollable -> {
-                scrollableLabelIndices(
-                    dataSize = request.dataSize,
-                    maxCount = maxVisibleLabels.coerceAtLeast(2),
-                    visibleRange = selectedRange,
-                    stableVisibleCount = stableVisibleCount,
-                )
-            }
-
-            else ->
-                chooseNonScrollCadenceCandidate(
-                    dataSize = request.dataSize,
-                    maxVisibleLabels = maxVisibleLabels.coerceAtLeast(2),
-                    range = selectedRange,
-                )
-        }
-
-    val balancedIndices =
-        if (request.isScrollable) {
-            cadenceCandidate.distinct().sorted()
-        } else {
-            expandEdgeLabelsIfSpacingAllows(
-                indices = cadenceCandidate,
-                range = selectedRange,
-                unitWidthPx = safeUnitWidth,
-                labelWidthPx = safeLabelWidth,
-            )
-        }
-
+    // The layout draws ticks up to 1 px past the viewport. Scrolling items are at least 1 px wide, so
+    // one more item covers that slack.
+    val lastLabelIndex = min(visibleRange.last + 1, request.dataSize - 1)
+    // Item i is on the grid when gridOffset + i is a multiple of the stride.
+    val gridOffset = firstItemIndex.mod(safeStride)
+    val firstGridPosition = (visibleRange.first.toLong() + gridOffset + safeStride - 1) / safeStride * safeStride
+    val firstLabelIndex = (firstGridPosition - gridOffset).toInt()
     return AxisXPlanResult(
-        labelIndices = balancedIndices,
+        labelIndices = (firstLabelIndex..lastLabelIndex step safeStride).toList(),
         visibleRange = visibleRange,
-        safeRange = safeRange,
     )
 }
 
-private fun resolveLabelRangeWithFallback(
-    dataSize: Int,
-    preferredRange: IntRange,
-    fallbackRange: IntRange,
-): IntRange {
-    if (dataSize <= 0) return IntRange.EMPTY
-    val clampedPreferred = preferredRange.clampToDataSize(dataSize)
-    val clampedFallback = fallbackRange.clampToDataSize(dataSize)
-    return when {
-        rangeCount(clampedPreferred) >= AXIS_X_MIN_PREFERRED_RANGE_COUNT -> clampedPreferred
-        rangeCount(clampedFallback) >= AXIS_X_MIN_PREFERRED_RANGE_COUNT -> clampedFallback
-        rangeCount(clampedPreferred) > 0 -> clampedPreferred
-        else -> clampedFallback
-    }
+/** What sits at each X-axis index, which decides where the first label's tick is. */
+@InternalChartsApi
+sealed interface AxisXItems {
+    /** Items are points on the plot edge, such as in line and area charts. Item 0 sits at 0. */
+    data object Points : AxisXItems
+
+    /** Items are bars [widthPx] wide, so item 0 is centered half a bar in. */
+    data class Bars(
+        val widthPx: Float,
+    ) : AxisXItems
 }
 
-private fun resolveMaxXAxisLabelCount(
-    requestedMaxCount: Int,
-    visibleRange: IntRange,
-    unitWidthPx: Float,
-    labelWidthPx: Float,
-): Int {
-    val labelsInRange = rangeCount(visibleRange)
-    if (labelsInRange <= 0) return 0
-    if (labelsInRange <= AXIS_X_SMALL_DATASET_LABEL_THRESHOLD) return labelsInRange
+/** X-axis label [ticks] to draw and the [visibleRange] of items the plan covers. */
+@InternalChartsApi
+data class AxisXLabelPlan(
+    val ticks: List<AxisXLayoutTick>,
+    val visibleRange: IntRange,
+)
 
-    val requested = requestedMaxCount.coerceAtLeast(2).coerceAtMost(labelsInRange)
-    val safeUnitWidth = unitWidthPx.coerceAtLeast(Float.MIN_VALUE)
-    val safeLabelWidth = labelWidthPx.coerceAtLeast(1f)
-    val requiredSpacingPx = (safeLabelWidth * AXIS_X_MIN_SPACING_FACTOR).coerceAtLeast(1f)
-    val spanPx = (labelsInRange - 1) * safeUnitWidth
-    val fitCount = ((spanPx / requiredSpacingPx).toInt() + 1).coerceIn(2, labelsInRange)
-    return fitCount.coerceIn(2, requested)
-}
-
-private fun resolveStableVisibleLabelCount(
+/**
+ * Plans the X-axis labels for one chart and places them on their ticks.
+ *
+ * The stride is planned once per layout; the labeled items and tick positions follow
+ * [scrollOffsetPx]. Item `i` sits at
+ * `firstTickPx + i * unitWidthPx`, where `firstTickPx` follows from [items]. For a live window that
+ * slides, [firstItemIndex] is the number of items it has dropped, which keeps each label on its
+ * item; null means the items do not slide.
+ */
+@Composable
+@InternalChartsApi
+fun rememberXAxisLabelPlan(
+    labels: List<String>,
     dataSize: Int,
+    maxLabelCount: Int?,
+    isScrollable: Boolean,
     unitWidthPx: Float,
     viewportWidthPx: Float,
-    labelWidthPx: Float,
-    edgePaddingPx: Float,
-): Int {
-    if (dataSize <= 0 || unitWidthPx <= 0f || viewportWidthPx <= 0f) return 0
-
-    val safeLabelHalfWidth = labelWidthPx.coerceAtLeast(0f) / 2f
-    val safeEdgePadding = edgePaddingPx.coerceAtLeast(0f)
-    val minCenterX = safeLabelHalfWidth + safeEdgePadding
-    val maxCenterX = viewportWidthPx - safeLabelHalfWidth - safeEdgePadding
-    if (maxCenterX < minCenterX) return 0
-
-    val spanPx = (maxCenterX - minCenterX).coerceAtLeast(0f)
-    val safeUnitWidth = unitWidthPx.coerceAtLeast(Float.MIN_VALUE)
-    val count = (spanPx / safeUnitWidth).toInt() + 1
-    return count.coerceIn(1, dataSize)
-}
-
-private fun stableRangeForCount(
-    dataSize: Int,
-    targetCount: Int,
-): IntRange {
-    if (dataSize <= 0 || targetCount <= 0) return IntRange.EMPTY
-    val count = targetCount.coerceIn(1, dataSize)
-    return 0..(count - 1)
-}
-
-private fun chooseNonScrollCadenceCandidate(
-    dataSize: Int,
-    maxVisibleLabels: Int,
-    range: IntRange,
-): List<Int> {
-    if (range.isEmpty()) return emptyList()
-    val edgeAnchoredCandidate =
-        sampledLabelIndices(
+    fontSizePx: Float,
+    items: AxisXItems,
+    scrollOffsetPx: Float,
+    firstItemIndex: Long? = null,
+): AxisXLabelPlan {
+    // A chart with a single item reports no step; there is nothing to space, so any width works.
+    val safeUnitWidthPx = if (unitWidthPx > 0f) unitWidthPx else 1f
+    val request =
+        AxisXPlanRequest(
             dataSize = dataSize,
-            maxCount = maxVisibleLabels,
-            visibleRange = range,
+            maxLabelCount = maxLabelCount,
+            isScrollable = isScrollable,
+            unitWidthPx = safeUnitWidthPx,
+            viewportWidthPx = viewportWidthPx,
+            minLabelSpacingPx = xAxisLabelMinSpacingPx(fontSizePx),
+            isSliding = firstItemIndex != null,
         )
-    val centeredCandidate =
-        centeredCadenceLabelIndices(
-            range = range,
-            targetCount = maxVisibleLabels,
-        )
-
-    val bestAtRequestedCount =
-        chooseEvenerCadenceCandidate(
-            primary = edgeAnchoredCandidate,
-            secondary = centeredCandidate,
-        )
-    val requestedCandidate =
-        preferEdgeAnchoredWhenSingleSlotOmitted(
-            range = range,
-            targetCount = maxVisibleLabels,
-            edgeAnchored = edgeAnchoredCandidate,
-            chosen = bestAtRequestedCount,
-        )
-    // When only one slot is omitted from the safe range, keep requested cadence density.
-    // Compacting to one fewer label in this specific case causes visibly sparse x-axis labeling.
-    if (rangeCount(range) == maxVisibleLabels + 1) {
-        return requestedCandidate
-    }
-    val compactTargetCount = maxVisibleLabels - 1
-    if (compactTargetCount < 3 || requestedCandidate.size < 4) {
-        return requestedCandidate
-    }
-
-    val compactEdgeAnchoredCandidate =
-        sampledLabelIndices(
-            dataSize = dataSize,
-            maxCount = compactTargetCount,
-            visibleRange = range,
-        )
-    val compactCenteredCandidate =
-        centeredCadenceLabelIndices(
-            range = range,
-            targetCount = compactTargetCount,
-        )
-    val bestCompactCandidate =
-        chooseEvenerCadenceCandidate(
-            primary = compactEdgeAnchoredCandidate,
-            secondary = compactCenteredCandidate,
-        )
-
-    return when {
-        shouldPreferCompactCadenceForEvenness(
-            primary = requestedCandidate,
-            compact = bestCompactCandidate,
-        ) -> bestCompactCandidate
-        else -> requestedCandidate
-    }
-}
-
-private fun preferEdgeAnchoredWhenSingleSlotOmitted(
-    range: IntRange,
-    targetCount: Int,
-    edgeAnchored: List<Int>,
-    chosen: List<Int>,
-): List<Int> {
-    if (range.isEmpty() || targetCount <= 1) return chosen
-    val countInRange = rangeCount(range)
-    if (countInRange != targetCount + 1) return chosen
-
-    val edge = edgeAnchored.distinct().sorted()
-    val selected = chosen.distinct().sorted()
-    if (edge.size != targetCount || selected.size != targetCount) return chosen
-
-    val edgeAnchorsBothEdges = edge.firstOrNull() == range.first && edge.lastOrNull() == range.last
-    if (!edgeAnchorsBothEdges) return chosen
-    val selectedAnchorsBothEdges = selected.firstOrNull() == range.first && selected.lastOrNull() == range.last
-    if (selectedAnchorsBothEdges) return chosen
-
-    return edge
-}
-
-private fun centeredCadenceLabelIndices(
-    range: IntRange,
-    targetCount: Int,
-): List<Int> {
-    if (range.isEmpty()) return emptyList()
-    val countInRange = rangeCount(range)
-    val safeTarget = targetCount.coerceIn(1, countInRange)
-    if (countInRange <= safeTarget) return range.toList()
-    if (safeTarget == 1) return listOf((range.first + range.last) / 2)
-
-    val span = countInRange - 1
-    val stride = (span / (safeTarget - 1)).coerceAtLeast(1)
-    val coveredSpan = stride * (safeTarget - 1)
-    val slack = (span - coveredSpan).coerceAtLeast(0)
-    val startOffset = (slack + 1) / 2
-    val start = range.first + startOffset
-
-    val centered =
-        (0 until safeTarget)
-            .map { index -> start + index * stride }
-            .filter { index -> index in range }
-    if (centered.size == safeTarget) {
-        return centered
-    }
-
-    val fallbackStart = (range.last - stride * (safeTarget - 1)).coerceAtLeast(range.first)
-    return (0 until safeTarget)
-        .map { index -> fallbackStart + index * stride }
-        .filter { index -> index in range }
-}
-
-private fun chooseEvenerCadenceCandidate(
-    primary: List<Int>,
-    secondary: List<Int>,
-): List<Int> {
-    if (primary.isEmpty()) return secondary
-    if (secondary.isEmpty()) return primary
-
-    val primaryOrdered = primary.distinct().sorted()
-    val secondaryOrdered = secondary.distinct().sorted()
-    if (secondaryOrdered.size != primaryOrdered.size) return primaryOrdered
-
-    val primarySpan = labelSpan(primaryOrdered)
-    val secondarySpan = labelSpan(secondaryOrdered)
-    if (secondarySpan < primarySpan - 1) return primaryOrdered
-
-    val primaryVariance = spacingVariance(primaryOrdered)
-    val secondaryVariance = spacingVariance(secondaryOrdered)
-    return if (secondaryVariance < primaryVariance) secondaryOrdered else primaryOrdered
-}
-
-private fun spacingVariance(indices: List<Int>): Int {
-    if (indices.size < 3) return 0
-    val gaps = indices.zipWithNext { first, second -> second - first }
-    val maxGap = gaps.maxOrNull() ?: return 0
-    val minGap = gaps.minOrNull() ?: return 0
-    return maxGap - minGap
-}
-
-private fun labelSpan(indices: List<Int>): Int =
-    when (indices.size) {
-        0, 1 -> 0
-        else -> indices.last() - indices.first()
-    }
-
-private fun shouldPreferCompactCadenceForEvenness(
-    primary: List<Int>,
-    compact: List<Int>,
-): Boolean {
-    if (primary.isEmpty() || compact.isEmpty()) return false
-    if (compact.size != primary.size - 1) return false
-
-    val primaryVariance = spacingVariance(primary)
-    val compactVariance = spacingVariance(compact)
-    if (compactVariance >= primaryVariance) return false
-
-    val primarySpan = labelSpan(primary)
-    val compactSpan = labelSpan(compact)
-    if (compactSpan < primarySpan - 1) return false
-
-    return true
-}
-
-private fun expandEdgeLabelsIfSpacingAllows(
-    indices: List<Int>,
-    range: IntRange,
-    unitWidthPx: Float,
-    labelWidthPx: Float,
-): List<Int> {
-    if (indices.isEmpty() || range.isEmpty()) return indices
-
-    val requiredIndexSpacing =
-        ceil(
-            ((labelWidthPx.coerceAtLeast(1f) * AXIS_X_MIN_SPACING_FACTOR) / unitWidthPx.coerceAtLeast(Float.MIN_VALUE))
-                .coerceAtLeast(1f),
-        ).toInt().coerceAtLeast(1)
-    val expanded = indices.distinct().sorted().toMutableList()
-    val edgeCandidates = listOf(range.first, range.last).distinct()
-    edgeCandidates.forEach { edgeIndex ->
-        val canInsert =
-            expanded.none { existingIndex ->
-                abs(existingIndex - edgeIndex) < requiredIndexSpacing
-            }
-        if (canInsert) {
-            expanded.add(edgeIndex)
+    val firstTickPx =
+        when (items) {
+            AxisXItems.Points -> 0f
+            is AxisXItems.Bars -> items.widthPx / 2f
         }
+    // The stride depends only on the layout, so scrolling reuses it.
+    val stride = remember(request) { planAxisXLabelStride(request) }
+    return remember(request, stride, scrollOffsetPx, labels, firstTickPx, firstItemIndex) {
+        val plan =
+            planAxisXLabels(
+                request = request,
+                scrollOffsetPx = scrollOffsetPx,
+                stride = stride,
+                firstItemIndex = firstItemIndex ?: 0L,
+            )
+        val ticks =
+            buildXAxisLayoutTicks(
+                labels = labels,
+                labelIndices = plan.labelIndices,
+                unitWidthPx = safeUnitWidthPx,
+                firstTickPx = firstTickPx,
+                scrollOffsetPx = scrollOffsetPx,
+            )
+        AxisXLabelPlan(ticks = ticks, visibleRange = plan.visibleRange)
     }
-
-    return expanded.distinct().sorted()
 }
-
-private fun IntRange.clampToDataSize(dataSize: Int): IntRange {
-    if (isEmpty() || dataSize <= 0) return IntRange.EMPTY
-    val start = first.coerceIn(0, dataSize - 1)
-    val end = last.coerceIn(start, dataSize - 1)
-    return start..end
-}
-
-private fun rangeCount(range: IntRange): Int = if (range.isEmpty()) 0 else range.last - range.first + 1

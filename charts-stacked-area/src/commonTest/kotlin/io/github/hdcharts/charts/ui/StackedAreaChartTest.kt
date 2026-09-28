@@ -1,10 +1,15 @@
 package io.github.hdcharts.charts.ui
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
@@ -12,23 +17,121 @@ import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.onAllNodesWithTag
-import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import io.github.hdcharts.charts.StackedAreaChart
 import io.github.hdcharts.charts.internal.TestTags
 import io.github.hdcharts.charts.mock.MockTest.multiDataSet
+import io.github.hdcharts.charts.model.ChartSelection
 import io.github.hdcharts.charts.model.ChartSeries
 import io.github.hdcharts.charts.model.chartDataOf
 import io.github.hdcharts.charts.model.staticChartSelection
 import io.github.hdcharts.charts.style.StackedAreaChartDefaults
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class StackedAreaChartTest {
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun stackedAreaChart_longEdgeXAxisLabels_stayInsideChartBounds() =
+        runComposeUiTest {
+            val categories = listOf("Region 1", "Region 36", "Region 68", "Region 100")
+            setContent {
+                Box(modifier = Modifier.size(width = 400.dp, height = 300.dp).testTag("chart-bounds")) {
+                    StackedAreaChart(
+                        data =
+                            chartDataOf(
+                                categories = categories,
+                                ChartSeries(name = "S1", values = listOf(20.0, 28.0, 23.0, 30.0)),
+                                ChartSeries(name = "S2", values = listOf(5.0, 6.0, 7.0, 8.0)),
+                            ),
+                        modifier = Modifier.fillMaxSize(),
+                        animateOnStart = false,
+                    )
+                }
+            }
+
+            val chartBounds = onNodeWithTag("chart-bounds").fetchSemanticsNode().boundsInRoot
+            val firstLabelBounds = onNodeWithText("Region 1").assertIsDisplayed().fetchSemanticsNode().boundsInRoot
+            val lastLabelBounds = onNodeWithText("Region 100").assertIsDisplayed().fetchSemanticsNode().boundsInRoot
+            val plotBounds = onNodeWithTag(TestTags.STACKED_AREA_CHART_PLOT).fetchSemanticsNode().boundsInRoot
+
+            assertTrue(
+                lastLabelBounds.right <= chartBounds.right,
+                "last label ends at ${lastLabelBounds.right}, chart at ${chartBounds.right}",
+            )
+            assertTrue(firstLabelBounds.left >= chartBounds.left, "first label starts at ${firstLabelBounds.left}")
+            assertEquals(expected = plotBounds.right, actual = lastLabelBounds.center.x, absoluteTolerance = 1.5f)
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun stackedAreaChart_dragBesidePoint_selectsNearestPoint() =
+        runComposeUiTest {
+            val selection = ChartSelection()
+            setContent {
+                StackedAreaChart(
+                    data =
+                        chartDataOf(
+                            categories = listOf("A", "B", "C", "D", "E"),
+                            ChartSeries(name = "S1", values = listOf(10.0, 20.0, 30.0, 40.0, 50.0)),
+                            ChartSeries(name = "S2", values = listOf(5.0, 6.0, 7.0, 8.0, 9.0)),
+                        ),
+                    selection = selection,
+                    modifier = Modifier.size(width = 400.dp, height = 300.dp),
+                    animateOnStart = false,
+                )
+            }
+            val plot = onNodeWithTag(TestTags.STACKED_AREA_CHART_PLOT)
+            val widthPx =
+                plot
+                    .fetchSemanticsNode()
+                    .size.width
+                    .toFloat()
+            val stepPx = widthPx / 4f
+
+            plot.performTouchInput {
+                down(Offset(0f, centerY))
+                moveTo(Offset(stepPx - 2f, centerY))
+            }
+            val besidePointOne = runOnIdle { selection.selectedIndex }
+            plot.performTouchInput { moveTo(Offset(widthPx - 1f, centerY)) }
+            val onLastPixel = runOnIdle { selection.selectedIndex }
+            plot.performTouchInput { up() }
+
+            assertEquals(expected = 1, actual = besidePointOne)
+            assertEquals(expected = 4, actual = onLastPixel)
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun stackedAreaChart_withEmAxisLabelSize_displaysValidationError() =
+        runComposeUiTest {
+            setContent {
+                StackedAreaChart(
+                    data = multiDataSet,
+                    style =
+                        StackedAreaChartDefaults.style(
+                            axis =
+                                StackedAreaChartDefaults.axis(
+                                    yLabels = StackedAreaChartDefaults.yLabels(size = 1.em),
+                                ),
+                        ),
+                )
+            }
+
+            onNodeWithTag(TestTags.CHART_ERROR).assertIsDisplayed()
+            onNodeWithText(
+                "Y-axis label size must be a finite, positive sp value.",
+                substring = true,
+            ).assertIsDisplayed()
+        }
+
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun stackedAreaChart_withValidData_displaysChart() =
@@ -309,7 +412,7 @@ class StackedAreaChartTest {
 
     @OptIn(ExperimentalTestApi::class)
     @Test
-    fun stackedAreaChart_lastXAxisLabel_hasRightEdgePadding() =
+    fun stackedAreaChart_lastXAxisLabel_centeredOnLastPoint() =
         runComposeUiTest {
             val edgeData =
                 chartDataOf(
@@ -323,11 +426,42 @@ class StackedAreaChartTest {
                 StackedAreaChart(data = edgeData, title = "Quarterly Revenue by Region")
             }
 
-            val axisBounds = onNodeWithTag(TestTags.STACKED_AREA_CHART_X_AXIS_LABELS).fetchSemanticsNode().boundsInRoot
-            val rightMostVisibleLabelBounds = onNodeWithText("Region 68").fetchSemanticsNode().boundsInRoot
+            val plotBounds = onNodeWithTag(TestTags.STACKED_AREA_CHART_PLOT).fetchSemanticsNode().boundsInRoot
+            val lastLabelBounds = onNodeWithText("Region 100").assertIsDisplayed().fetchSemanticsNode().boundsInRoot
 
-            onAllNodesWithText("Region 100").assertCountEquals(0)
-            assertTrue(rightMostVisibleLabelBounds.right <= axisBounds.right - 1f)
+            assertEquals(expected = plotBounds.right, actual = lastLabelBounds.center.x, absoluteTolerance = 1.5f)
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun stackedAreaChart_xAxisLabels_centeredOnTheirPoints() =
+        runComposeUiTest {
+            val categories = listOf("Mon", "Tue", "Wed", "Thu", "Fri")
+
+            setContent {
+                StackedAreaChart(
+                    data =
+                        chartDataOf(
+                            categories = categories,
+                            ChartSeries(name = "Web", values = listOf(12.0, 18.0, 15.0, 22.0, 19.0)),
+                            ChartSeries(name = "App", values = listOf(8.0, 9.0, 11.0, 10.0, 12.0)),
+                        ),
+                    modifier = Modifier.size(width = 600.dp, height = 400.dp),
+                )
+            }
+
+            val plotBounds = onNodeWithTag(TestTags.STACKED_AREA_CHART_PLOT).fetchSemanticsNode().boundsInRoot
+            val pointStep = plotBounds.width / (categories.size - 1)
+            categories.forEachIndexed { index, label ->
+                val labelBounds = onNodeWithText(label).assertIsDisplayed().fetchSemanticsNode().boundsInRoot
+
+                assertEquals(
+                    expected = plotBounds.left + pointStep * index,
+                    actual = labelBounds.center.x,
+                    absoluteTolerance = 1.5f,
+                    message = label,
+                )
+            }
         }
 
     private val seriesColors =

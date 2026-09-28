@@ -258,7 +258,7 @@ class BarStyleDefaultsTest {
                                 ),
                         ),
                         BarChartDefaults.style(
-                            axis = BarChartDefaults.axis(xLabels = BarChartDefaults.xLabels(count = 0)),
+                            axis = BarChartDefaults.axis(xLabels = BarChartDefaults.xLabels(maxCount = 0)),
                         ),
                     )
                 val validation = styles.map { validateBarStyle(it, Density(2f)) }

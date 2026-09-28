@@ -11,8 +11,6 @@ import io.github.hdcharts.charts.internal.linechart.LineChartRenderMode
 import io.github.hdcharts.charts.internal.linechart.LineChartTransitionMode
 import io.github.hdcharts.charts.internal.linechart.MIN_TIMELINE_DURATION_MS
 import io.github.hdcharts.charts.internal.linechart.aggregateForCompactDensity
-import io.github.hdcharts.charts.internal.linechart.buildLineXAxisTicks
-import io.github.hdcharts.charts.internal.linechart.buildLineYAxisTicks
 import io.github.hdcharts.charts.internal.linechart.compactDensityRanges
 import io.github.hdcharts.charts.internal.linechart.decideLineChartUpdate
 import io.github.hdcharts.charts.internal.linechart.findNearestPoint
@@ -383,61 +381,6 @@ class LineChartHelpersTest {
         val labels = resolveLineXAxisLabels(data)
 
         assertTrue(labels.isEmpty())
-    }
-
-    @Test
-    fun buildLineXAxisTicks_spreadsCentersAcrossPlotWidth() {
-        val ticks =
-            buildLineXAxisTicks(
-                labels = listOf("A", "B", "C", "D"),
-                labelIndices = listOf(0, 2, 3),
-                pointsCount = 4,
-                stepX = 100f,
-            )
-
-        assertEquals(expected = 3, actual = ticks.size)
-        assertEquals(expected = "A", actual = ticks[0].label)
-        assertEquals(expected = 0f, actual = ticks[0].centerX)
-        assertEquals(expected = "C", actual = ticks[1].label)
-        assertEquals(expected = 200f, actual = ticks[1].centerX)
-        assertEquals(expected = "D", actual = ticks[2].label)
-        assertEquals(expected = 300f, actual = ticks[2].centerX)
-    }
-
-    @Test
-    fun buildLineXAxisTicks_appliesScrollOffsetForViewportPositions() {
-        val ticks =
-            buildLineXAxisTicks(
-                labels = listOf("A", "B", "C", "D"),
-                labelIndices = listOf(1, 3),
-                pointsCount = 4,
-                stepX = 100f,
-                scrollOffsetPx = 50f,
-            )
-
-        assertEquals(expected = 2, actual = ticks.size)
-        assertEquals(expected = "B", actual = ticks[0].label)
-        assertEquals(expected = 50f, actual = ticks[0].centerX)
-        assertEquals(expected = "D", actual = ticks[1].label)
-        assertEquals(expected = 250f, actual = ticks[1].centerX)
-    }
-
-    @Test
-    fun buildLineYAxisTicks_appliesInsetToFirstAndLastTick() {
-        val ticks =
-            buildLineYAxisTicks(
-                minValue = 0.0,
-                maxValue = 100.0,
-                labelCount = 5,
-                plotHeightPx = 200f,
-                verticalInsetPx = 10f,
-            )
-
-        assertEquals(expected = 5, actual = ticks.size)
-        assertEquals(expected = "100", actual = ticks.first().label)
-        assertEquals(expected = "0", actual = ticks.last().label)
-        assertEquals(expected = 10f, actual = ticks.first().centerY)
-        assertEquals(expected = 190f, actual = ticks.last().centerY)
     }
 
     @Test
