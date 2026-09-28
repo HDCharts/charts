@@ -18,6 +18,22 @@ window, an expanded stacked area chart, and a collapsed histogram at 10,000, 100
 
 ## Confirmed
 
+### Stacked area charts stay busy after a swipe on Android and iOS
+
+After a swipe on an expanded stacked area chart, Compose never goes idle on Android and iOS. A test
+that waits for idle after the swipe hangs until its timeout, and a tap after the swipe does not
+select a new point in time. Line charts settle within about a second. JVM tests settle, so the
+cause is likely the platform fling or overscroll.
+
+Confirmed by `stackedAreaChart_scrollThenTap_changesSelectedLabelAtSameViewportX`, which timed out
+on the iOS simulator, and a rewrite that waited for idle and hung on an API 35 Nexus 6 emulator.
+The test was removed until this is fixed.
+
+Options:
+
+- Find what keeps the chart busy after a swipe, starting from the scroll wiring in
+  `StackedAreaChartContent`, and add the scroll-then-tap test back.
+
 ### Line charts rebuild every point on every frame
 
 During the reveal, a morph, or a live shift, every frame copies every value of every series,

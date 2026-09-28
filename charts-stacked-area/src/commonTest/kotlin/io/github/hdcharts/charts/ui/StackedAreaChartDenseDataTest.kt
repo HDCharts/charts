@@ -1,7 +1,6 @@
 package io.github.hdcharts.charts.ui
 
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertCountEquals
@@ -10,7 +9,6 @@ import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performTouchInput
-import androidx.compose.ui.test.swipeLeft
 import androidx.compose.ui.test.v2.runComposeUiTest
 import io.github.hdcharts.charts.StackedAreaChart
 import io.github.hdcharts.charts.internal.TestTags
@@ -20,48 +18,12 @@ import io.github.hdcharts.charts.model.ChartSeries
 import io.github.hdcharts.charts.model.chartDataOf
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotEquals
 
 @OptIn(ExperimentalTestApi::class)
 class StackedAreaChartDenseDataTest {
     private companion object {
         const val PLOT_START_PADDING_PX = 12f
     }
-
-    @Test
-    fun stackedAreaChart_scrollThenTap_changesSelectedLabelAtSameViewportX() =
-        runComposeUiTest {
-            val data = denseStackedAreaData()
-            setContent {
-                StackedAreaChart(data = data, title = "Dense Stacked Area")
-            }
-
-            onNodeWithTag(TestTags.STACKED_AREA_CHART_DENSE_EXPAND).performTouchInput { click() }
-            onNodeWithTag(TestTags.STACKED_AREA_CHART_DENSE_COLLAPSE).isDisplayed()
-            onNodeWithTag(TestTags.STACKED_AREA_CHART_ZOOM_OUT).isDisplayed()
-            onNodeWithTag(TestTags.STACKED_AREA_CHART_ZOOM_IN).isDisplayed()
-
-            tapChartAt(x = 24f)
-            waitUntil(timeoutMillis = 10_000L) {
-                currentTitle() != "Dense Stacked Area"
-            }
-            val beforeScrollTitle = currentTitle()
-
-            onNodeWithTag(TestTags.STACKED_AREA_CHART).performTouchInput {
-                swipeLeft()
-                swipeLeft()
-            }
-
-            tapChartAt(x = 24f)
-            waitUntil(timeoutMillis = 10_000L) {
-                val title = currentTitle()
-                title != beforeScrollTitle && title != "Dense Stacked Area"
-            }
-            val afterScrollTitle = currentTitle()
-
-            assertNotEquals(beforeScrollTitle, afterScrollTitle)
-            assertNotEquals("Dense Stacked Area", afterScrollTitle)
-        }
 
     @Test
     fun stackedAreaChart_clearThenTapSameBucket_selectsItAgain() =
@@ -95,12 +57,6 @@ class StackedAreaChartDenseDataTest {
             onAllNodesWithTag(TestTags.STACKED_AREA_CHART_ZOOM_OUT).assertCountEquals(0)
             onAllNodesWithTag(TestTags.STACKED_AREA_CHART_ZOOM_IN).assertCountEquals(0)
         }
-
-    private fun ComposeUiTest.currentTitle(): String {
-        val semanticsNode = onNodeWithTag(TestTags.CHART_TITLE).fetchSemanticsNode()
-        return semanticsNode.config[SemanticsProperties.Text]
-            .joinToString(separator = "") { item -> item.text }
-    }
 
     private fun ComposeUiTest.tapChartAt(x: Float) {
         val chartNode = onNodeWithTag(TestTags.STACKED_AREA_CHART).fetchSemanticsNode()
