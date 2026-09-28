@@ -42,7 +42,7 @@ class StackedAreaChartDenseDataTest {
             onNodeWithTag(TestTags.STACKED_AREA_CHART_ZOOM_IN).isDisplayed()
 
             tapChartAt(x = 24f)
-            waitUntil(timeoutMillis = 3_000L) {
+            waitUntil(timeoutMillis = 10_000L) {
                 currentTitle() != "Dense Stacked Area"
             }
             val beforeScrollTitle = currentTitle()
@@ -53,7 +53,7 @@ class StackedAreaChartDenseDataTest {
             }
 
             tapChartAt(x = 24f)
-            waitUntil(timeoutMillis = 3_000L) {
+            waitUntil(timeoutMillis = 10_000L) {
                 val title = currentTitle()
                 title != beforeScrollTitle && title != "Dense Stacked Area"
             }

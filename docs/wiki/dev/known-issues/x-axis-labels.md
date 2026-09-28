@@ -116,18 +116,29 @@ Options:
 - Detect a shift from the X-axis labels as well as the values, or let the caller say that the
   window moved.
 
-### A live window resizes its plot when its longest label changes length
+### A live window resizes its plot when its labels change width
 
-The label row height and the edge insets come from the longest label in the window. When a live
-window's longest label gains or loses a character, such as `9:59:59` becoming `10:00:00`, the plot
-changes width and height by a few dp. Every point and label then jumps once instead of sliding.
+A live window can change the width of its plot on any update:
 
-Confirmed by the code: `LineChartContent` keys `estimateXAxisLabelExtent` on the X-axis labels,
-which change on every live update.
+- The label row height and the edge insets come from the longest X label in the window. When it
+  gains or loses a character, such as `9:59:59` becoming `10:00:00`, the plot changes width and
+  height by a few dp.
+- The Y axis rescales to each window, so its labels change, such as `36.75` becoming `37`. A
+  narrower Y column gives the plot more width.
+
+Every point and label then jumps once instead of sliding. When the new width changes the label
+stride, every X label also moves to other points, such as from every 4th point to every 3rd.
+
+Confirmed by `LiveLineChartTest.slidingWindow_keepsXLabelsOnTheirSamples` on an API 35 Nexus 6
+emulator, with a window whose Y range went from 0–49 to 1–49. The test now keeps the Y range
+fixed.
 
 Options:
 
-- Let a live window only grow its label extent, so the plot resizes once and then stays.
+- Let a live window keep its stride while it slides: grow it when labels would overlap, and shrink
+  it only when the data is replaced or the chart is resized.
+- Let a live window only grow its label extent and Y column, so the plot resizes once and then
+  stays.
 
 ### Each chart computes its own X geometry
 

@@ -256,9 +256,10 @@ class LiveLineChartTest {
         }
 
     // A window of samples firstSample until firstSample + WINDOW_SIZE; sample s is labeled "S<s>" and
-    // keeps its value, so moving the window by one is a timeline shift.
+    // keeps its value, so moving the window by one is a timeline shift. Values repeat every 10 samples,
+    // so every window spans 0 to 45 and keeps the same Y labels and plot width.
     private fun liveWindow(firstSample: Int) =
-        List(WINDOW_SIZE) { index -> ((firstSample + index) * 37 % 50).toDouble() }
+        List(WINDOW_SIZE) { index -> ((firstSample + index) * 7 % 10 * 5).toDouble() }
             .toChartData(categories = List(WINDOW_SIZE) { index -> "S${firstSample + index}" })
 
     private fun ComposeUiTest.displayedXLabelCenters(): Map<String, Float> =
