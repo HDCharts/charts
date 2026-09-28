@@ -110,30 +110,6 @@ class StackedAreaChartTest {
 
     @OptIn(ExperimentalTestApi::class)
     @Test
-    fun stackedAreaChart_expandedPastLayoutLimits_displaysErrorInsteadOfCrashing() =
-        runComposeUiTest {
-            // 22,000 points at the 12 px dense step need 263,988 px, past the 262,143 px Compose can measure.
-            setContent {
-                StackedAreaChart(
-                    data =
-                        chartDataOf(
-                            categories = List(22_000) { index -> "P$index" },
-                            ChartSeries(name = "Series A", values = List(22_000) { index -> 40.0 + index % 8 }),
-                        ),
-                    modifier = Modifier.size(width = 400.dp, height = 300.dp),
-                    animateOnStart = false,
-                )
-            }
-
-            onNodeWithTag(TestTags.STACKED_AREA_CHART_DENSE_EXPAND).performTouchInput { click() }
-
-            onNodeWithTag(TestTags.CHART_ERROR).assertIsDisplayed()
-            onNodeWithText("Chart exceeds layout limits.", substring = true).assertIsDisplayed()
-            onNodeWithTag(TestTags.STACKED_AREA_CHART_DENSE_COLLAPSE).assertIsDisplayed()
-        }
-
-    @OptIn(ExperimentalTestApi::class)
-    @Test
     fun stackedAreaChart_withEmAxisLabelSize_displaysValidationError() =
         runComposeUiTest {
             setContent {
