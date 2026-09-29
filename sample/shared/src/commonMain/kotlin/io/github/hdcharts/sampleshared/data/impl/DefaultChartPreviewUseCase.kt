@@ -55,11 +55,6 @@ class DefaultChartPreviewUseCase : ChartPreviewUseCase {
             jitter(value, from = -6, until = 6, min = 8.0, max = 55.0)
         }
 
-    override fun nextLinePreview(values: List<Double>): List<Double> =
-        values.map { value ->
-            jitter(value, from = -6, until = 6, min = 6.0, max = 28.0)
-        }
-
     override fun nextBarPreview(values: List<Double>): List<Double> =
         values.map { value ->
             jitter(value, from = -8, until = 9, min = 0.0, max = 100.0)
@@ -68,14 +63,6 @@ class DefaultChartPreviewUseCase : ChartPreviewUseCase {
     override fun nextHistogramPreview(values: List<Double>): List<Double> =
         values.map { value ->
             jitter(value, from = -4, until = 5, min = 0.0, max = 60.0)
-        }
-
-    override fun nextMultiLinePreview(): List<Pair<String, List<Double>>> =
-        previewMultiLineSeries.map { (label, values) ->
-            label to
-                values.map { value ->
-                    jitter(value, from = -5, until = 6, min = 6.0, max = 22.0)
-                }
         }
 
     override fun nextStackedAreaPreview(): List<Pair<String, List<Double>>> =

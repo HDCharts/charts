@@ -1,13 +1,9 @@
 package io.github.hdcharts.app.demo.multiline
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import io.github.hdcharts.app.demo.timeline.LiveTimelineControlsState
 import io.github.hdcharts.app.demo.timeline.LiveTimelineDefaults
-import io.github.hdcharts.app.demo.timeline.LiveTimelineStreamer
 import io.github.hdcharts.charts.model.ChartData
 import io.github.hdcharts.charts.model.toChartData
-import io.github.hdcharts.sampleshared.data.LiveLatencyMultiSeriesWindow
 import io.github.hdcharts.sampleshared.data.LiveLatencyTimelineUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,7 +12,6 @@ import kotlinx.coroutines.flow.update
 
 data class MultiLineChartState(
     val dataSet: ChartData,
-    val seriesKeys: List<String> = emptyList(),
     val title: String,
 )
 
@@ -26,18 +21,9 @@ data class MultiLineChartDataControlsState(
     val maxValue: Int,
 )
 
-enum class MultiLineDemoPreset {
-    Default,
-    Timeline,
-    Custom,
-}
-
 data class MultiLineChartUiState(
     val dataSet: MultiLineChartState,
     val dataControlsState: MultiLineChartDataControlsState,
-    val controlsState: LiveTimelineControlsState,
-    val preset: MultiLineDemoPreset = MultiLineDemoPreset.Default,
-    val isPlaying: Boolean = false,
 )
 
 class MultiLineChartViewModel(
@@ -52,7 +38,6 @@ class MultiLineChartViewModel(
         private const val DEFAULT_MAX_VALUE = 220
     }
 
-    private val initialControlsState = LiveTimelineControlsState()
     private val initialDataControlsState =
         MultiLineChartDataControlsState(
             points = LiveTimelineDefaults.DEFAULT_WINDOW_SIZE.coerceIn(MIN_SUPPORTED_POINTS, MAX_SUPPORTED_POINTS),
@@ -60,93 +45,20 @@ class MultiLineChartViewModel(
             maxValue = DEFAULT_MAX_VALUE,
         )
 
-    private var timelineWindow: LiveLatencyMultiSeriesWindow =
-        liveLatencyTimelineUseCase.createMultiWindow(
-            windowSize = initialControlsState.windowSize,
-        )
-
     private val _uiState =
         MutableStateFlow(
             MultiLineChartUiState(
                 dataSet = buildGeneratedDataSet(initialDataControlsState),
                 dataControlsState = initialDataControlsState,
-                controlsState = initialControlsState,
             ),
         )
     val uiState: StateFlow<MultiLineChartUiState> = _uiState.asStateFlow()
 
-    private val liveUpdates =
-        LiveTimelineStreamer(
-            scope = viewModelScope,
-            intervalMillis = {
-                _uiState.value.controlsState.updateIntervalMs
-                    .toLong()
-            },
-            onTick = ::appendLiveTick,
-        )
-
     fun refresh() {
-        refreshForSelectedPreset()
-    }
-
-    fun refreshForSelectedPreset() {
-        when (_uiState.value.preset) {
-            MultiLineDemoPreset.Timeline -> refreshTimeline()
-            MultiLineDemoPreset.Default,
-            MultiLineDemoPreset.Custom,
-            -> refreshGeneratedData()
-        }
-    }
-
-    fun refreshTimeline() {
-        regenerateWindow()
-    }
-
-    fun refreshGeneratedData() {
         val controls = _uiState.value.dataControlsState
         val dataSet = buildGeneratedDataSet(controls)
         _uiState.update { state ->
             state.copy(dataSet = dataSet)
-        }
-    }
-
-    fun updateInterval(intervalMs: Int) {
-        val safeInterval =
-            intervalMs.coerceIn(
-                minimumValue = LiveTimelineDefaults.MIN_UPDATE_INTERVAL_MS,
-                maximumValue = LiveTimelineDefaults.MAX_UPDATE_INTERVAL_MS,
-            )
-        val controls = _uiState.value.controlsState
-        if (safeInterval == controls.updateIntervalMs) return
-
-        _uiState.update { state ->
-            state.copy(
-                controlsState = state.controlsState.copy(updateIntervalMs = safeInterval),
-            )
-        }
-        liveUpdates.restartIfRunning()
-    }
-
-    fun updateWindowSize(windowSize: Int) {
-        val safeWindowSize =
-            windowSize.coerceIn(
-                minimumValue = LiveTimelineDefaults.MIN_WINDOW_SIZE,
-                maximumValue = LiveTimelineDefaults.MAX_WINDOW_SIZE,
-            )
-        val controls = _uiState.value.controlsState
-        if (safeWindowSize == controls.windowSize) return
-
-        timelineWindow =
-            liveLatencyTimelineUseCase.createMultiWindow(
-                windowSize = safeWindowSize,
-                endTick = timelineWindow.endTick,
-            )
-        val timelineDataSet = buildTimelineDataSet(timelineWindow)
-        _uiState.update { state ->
-            state.copy(
-                controlsState = state.controlsState.copy(windowSize = safeWindowSize),
-                dataSet = timelineDataSet,
-            )
         }
     }
 
@@ -184,88 +96,8 @@ class MultiLineChartViewModel(
         }
     }
 
-    fun togglePlaying() {
-        setPlaying(!_uiState.value.isPlaying)
-    }
-
-    fun onPresetSelected(selectedPreset: MultiLineDemoPreset) {
-        val previousPreset = _uiState.value.preset
-        if (selectedPreset == previousPreset) return
-
-        if (selectedPreset == MultiLineDemoPreset.Timeline && previousPreset != MultiLineDemoPreset.Timeline) {
-            refreshTimeline()
-        }
-
-        _uiState.update { state ->
-            state.copy(preset = selectedPreset)
-        }
-
-        when (selectedPreset) {
-            MultiLineDemoPreset.Timeline -> setPlaying(true)
-            MultiLineDemoPreset.Default,
-            MultiLineDemoPreset.Custom,
-            -> {
-                setPlaying(false)
-                if (previousPreset == MultiLineDemoPreset.Timeline) {
-                    refreshGeneratedData()
-                }
-            }
-        }
-    }
-
-    override fun onCleared() {
-        liveUpdates.stop()
-        super.onCleared()
-    }
-
-    private fun regenerateWindow() {
-        val controls = _uiState.value.controlsState
-        timelineWindow =
-            liveLatencyTimelineUseCase.createMultiWindow(
-                windowSize = controls.windowSize,
-                endTick = timelineWindow.endTick,
-            )
-        publishDataSet()
-    }
-
-    private fun appendLiveTick() {
-        timelineWindow = liveLatencyTimelineUseCase.advanceMultiWindow(timelineWindow)
-        publishDataSet()
-    }
-
-    private fun publishDataSet() {
-        val timelineDataSet = buildTimelineDataSet(timelineWindow)
-        _uiState.update { state ->
-            state.copy(dataSet = timelineDataSet)
-        }
-    }
-
-    private fun buildTimelineDataSet(window: LiveLatencyMultiSeriesWindow): MultiLineChartState =
-        MultiLineChartState(
-            dataSet = liveLatencyTimelineUseCase.toMultiDataSet(window),
-            seriesKeys = liveLatencyTimelineUseCase.multiSeriesKeys,
-            title = liveLatencyTimelineUseCase.multiSeriesTitle,
-        )
-
-    private fun setPlaying(playing: Boolean) {
-        if (_uiState.value.isPlaying == playing) return
-
-        _uiState.update { state ->
-            state.copy(isPlaying = playing)
-        }
-        if (playing) {
-            liveUpdates.start()
-        } else {
-            liveUpdates.stop()
-        }
-    }
-
     private fun buildGeneratedDataSet(controls: MultiLineChartDataControlsState): MultiLineChartState {
-        val baseWindow =
-            liveLatencyTimelineUseCase.createMultiWindow(
-                windowSize = controls.points,
-                endTick = timelineWindow.endTick,
-            )
+        val baseWindow = liveLatencyTimelineUseCase.createMultiWindow(windowSize = controls.points)
         val labels = baseWindow.labels.toList()
         val safeMin = controls.minValue.toDouble()
         val safeMax = controls.maxValue.toDouble().coerceAtLeast(safeMin + 1.0)
@@ -295,7 +127,6 @@ class MultiLineChartViewModel(
 
         return MultiLineChartState(
             dataSet = multiDataSet,
-            seriesKeys = seriesKeys,
             title = liveLatencyTimelineUseCase.multiSeriesTitle,
         )
     }

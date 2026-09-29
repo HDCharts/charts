@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -24,6 +26,8 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import hdcharts.app.generated.resources.Res
+import hdcharts.app.generated.resources.cd_pause_live_updates
+import hdcharts.app.generated.resources.cd_play_live_updates
 import hdcharts.app.generated.resources.cd_refresh_data
 import hdcharts.app.generated.resources.cd_regenerate_chart
 import hdcharts.app.generated.resources.ic_replay
@@ -39,7 +43,6 @@ fun ChartDemo(
     modifier: Modifier = Modifier,
     refreshVisible: Boolean = true,
     extraButtons: @Composable RowScope.() -> Unit = {},
-    presetContent: @Composable () -> Unit = {},
     controlsContent: @Composable () -> Unit = {},
     chartItem: @Composable () -> Unit,
 ) {
@@ -53,13 +56,6 @@ fun ChartDemo(
                 .padding(Dimens.cardPadding),
         verticalArrangement = Arrangement.spacedBy(Dimens.md),
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center,
-        ) {
-            presetContent()
-        }
-
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center,
@@ -99,5 +95,26 @@ fun ChartDemo(
         }
 
         controlsContent()
+    }
+}
+
+@Composable
+fun PlayPauseButton(
+    isPlaying: Boolean,
+    onToggle: () -> Unit,
+) {
+    IconButton(onClick = onToggle) {
+        Icon(
+            imageVector = if (isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
+            tint = MaterialTheme.colorScheme.onSurface,
+            contentDescription =
+                stringResource(
+                    if (isPlaying) {
+                        Res.string.cd_pause_live_updates
+                    } else {
+                        Res.string.cd_play_live_updates
+                    },
+                ),
+        )
     }
 }

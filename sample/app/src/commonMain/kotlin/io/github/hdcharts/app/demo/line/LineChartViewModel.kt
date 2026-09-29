@@ -1,13 +1,9 @@
 package io.github.hdcharts.app.demo.line
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import io.github.hdcharts.app.demo.timeline.LiveTimelineControlsState
 import io.github.hdcharts.app.demo.timeline.LiveTimelineDefaults
-import io.github.hdcharts.app.demo.timeline.LiveTimelineStreamer
 import io.github.hdcharts.charts.model.ChartData
 import io.github.hdcharts.charts.model.toChartData
-import io.github.hdcharts.sampleshared.data.LiveLatencySingleSeriesWindow
 import io.github.hdcharts.sampleshared.data.LiveLatencyTimelineUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,19 +16,9 @@ data class LineChartDataControlsState(
     val maxValue: Int,
 )
 
-enum class LineDemoPreset {
-    Default,
-    Timeline,
-    ScaleDrop,
-    Custom,
-}
-
 data class LineChartUiState(
     val dataSet: ChartData,
     val dataControlsState: LineChartDataControlsState,
-    val timelineControlsState: LiveTimelineControlsState,
-    val preset: LineDemoPreset = LineDemoPreset.Default,
-    val isPlaying: Boolean = false,
 )
 
 class LineChartViewModel(
@@ -47,7 +33,6 @@ class LineChartViewModel(
         private const val DEFAULT_MAX_VALUE = 220
     }
 
-    private val initialTimelineControlsState = LiveTimelineControlsState()
     private val initialDataControlsState =
         LineChartDataControlsState(
             points = LiveTimelineDefaults.DEFAULT_WINDOW_SIZE.coerceIn(MIN_SUPPORTED_POINTS, MAX_SUPPORTED_POINTS),
@@ -55,91 +40,20 @@ class LineChartViewModel(
             maxValue = DEFAULT_MAX_VALUE,
         )
 
-    private var timelineWindow: LiveLatencySingleSeriesWindow =
-        liveLatencyTimelineUseCase.createSingleWindow(
-            windowSize = initialTimelineControlsState.windowSize,
-        )
-
     private val _uiState =
         MutableStateFlow(
             LineChartUiState(
                 dataSet = buildGeneratedDataSet(initialDataControlsState),
                 dataControlsState = initialDataControlsState,
-                timelineControlsState = initialTimelineControlsState,
             ),
         )
     val uiState: StateFlow<LineChartUiState> = _uiState.asStateFlow()
 
-    private val liveUpdates =
-        LiveTimelineStreamer(
-            scope = viewModelScope,
-            intervalMillis = {
-                _uiState.value.timelineControlsState.updateIntervalMs
-                    .toLong()
-            },
-            onTick = ::appendLiveTick,
-        )
-
-    fun refreshForSelectedPreset() {
-        when (_uiState.value.preset) {
-            LineDemoPreset.Timeline -> refreshTimeline()
-            // Unreachable: LineScaleDropDemo renders the preset and hides the refresh button.
-            LineDemoPreset.ScaleDrop -> Unit
-            LineDemoPreset.Default,
-            LineDemoPreset.Custom,
-            -> refreshGeneratedData()
-        }
-    }
-
-    fun refreshTimeline() {
-        regenerateWindow()
-    }
-
-    fun refreshGeneratedData() {
+    fun refresh() {
         val controls = _uiState.value.dataControlsState
         val dataSet = buildGeneratedDataSet(controls)
         _uiState.update { state ->
             state.copy(dataSet = dataSet)
-        }
-    }
-
-    fun updateInterval(intervalMs: Int) {
-        val safeInterval =
-            intervalMs.coerceIn(
-                minimumValue = LiveTimelineDefaults.MIN_UPDATE_INTERVAL_MS,
-                maximumValue = LiveTimelineDefaults.MAX_UPDATE_INTERVAL_MS,
-            )
-        val controls = _uiState.value.timelineControlsState
-        if (safeInterval == controls.updateIntervalMs) return
-
-        _uiState.update { state ->
-            state.copy(
-                timelineControlsState = state.timelineControlsState.copy(updateIntervalMs = safeInterval),
-            )
-        }
-        liveUpdates.restartIfRunning()
-    }
-
-    fun updateWindowSize(windowSize: Int) {
-        val safeWindowSize =
-            windowSize.coerceIn(
-                minimumValue = LiveTimelineDefaults.MIN_WINDOW_SIZE,
-                maximumValue = LiveTimelineDefaults.MAX_WINDOW_SIZE,
-            )
-        val controls = _uiState.value.timelineControlsState
-        if (safeWindowSize == controls.windowSize) return
-
-        timelineWindow =
-            liveLatencyTimelineUseCase.createSingleWindow(
-                windowSize = safeWindowSize,
-                endTick = timelineWindow.endTick,
-            )
-        val dataSet = liveLatencyTimelineUseCase.toSingleDataSet(timelineWindow)
-        _uiState.update { state ->
-            state.copy(
-                timelineControlsState = state.timelineControlsState.copy(windowSize = safeWindowSize),
-                dataSet = dataSet,
-            )
         }
     }
 
@@ -177,82 +91,8 @@ class LineChartViewModel(
         }
     }
 
-    fun togglePlaying() {
-        setPlaying(!_uiState.value.isPlaying)
-    }
-
-    fun onPresetSelected(selectedPreset: LineDemoPreset) {
-        val previousPreset = _uiState.value.preset
-        if (selectedPreset == previousPreset) return
-
-        if (selectedPreset == LineDemoPreset.Timeline && previousPreset != LineDemoPreset.Timeline) {
-            refreshTimeline()
-        }
-
-        _uiState.update { state ->
-            state.copy(preset = selectedPreset)
-        }
-
-        when (selectedPreset) {
-            LineDemoPreset.Timeline -> setPlaying(true)
-            // The scale drop preset streams its own data, so this view model only stops its updates.
-            LineDemoPreset.ScaleDrop -> setPlaying(false)
-            LineDemoPreset.Default,
-            LineDemoPreset.Custom,
-            -> {
-                setPlaying(false)
-                if (previousPreset == LineDemoPreset.Timeline) {
-                    refreshGeneratedData()
-                }
-            }
-        }
-    }
-
-    override fun onCleared() {
-        liveUpdates.stop()
-        super.onCleared()
-    }
-
-    private fun regenerateWindow() {
-        val controls = _uiState.value.timelineControlsState
-        timelineWindow =
-            liveLatencyTimelineUseCase.createSingleWindow(
-                windowSize = controls.windowSize,
-                endTick = timelineWindow.endTick,
-            )
-        val dataSet = liveLatencyTimelineUseCase.toSingleDataSet(timelineWindow)
-        _uiState.update { state ->
-            state.copy(dataSet = dataSet)
-        }
-    }
-
-    private fun appendLiveTick() {
-        timelineWindow = liveLatencyTimelineUseCase.advanceSingleWindow(timelineWindow)
-        val dataSet = liveLatencyTimelineUseCase.toSingleDataSet(timelineWindow)
-        _uiState.update { state ->
-            state.copy(dataSet = dataSet)
-        }
-    }
-
-    private fun setPlaying(playing: Boolean) {
-        if (_uiState.value.isPlaying == playing) return
-
-        _uiState.update { state ->
-            state.copy(isPlaying = playing)
-        }
-        if (playing) {
-            liveUpdates.start()
-        } else {
-            liveUpdates.stop()
-        }
-    }
-
     private fun buildGeneratedDataSet(controls: LineChartDataControlsState): ChartData {
-        val baseWindow =
-            liveLatencyTimelineUseCase.createSingleWindow(
-                windowSize = controls.points,
-                endTick = timelineWindow.endTick,
-            )
+        val baseWindow = liveLatencyTimelineUseCase.createSingleWindow(windowSize = controls.points)
         val baseDataSet = liveLatencyTimelineUseCase.toSingleDataSet(baseWindow)
         val basePoints = baseDataSet.series.first().values
         val labels = baseDataSet.categories.toList()

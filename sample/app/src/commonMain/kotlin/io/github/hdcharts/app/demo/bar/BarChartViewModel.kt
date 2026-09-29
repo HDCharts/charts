@@ -2,7 +2,6 @@ package io.github.hdcharts.app.demo.bar
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import io.github.hdcharts.app.ui.composable.ChartPreset
 import io.github.hdcharts.charts.model.ChartData
 import io.github.hdcharts.sampleshared.data.BarSampleUseCase
 import kotlinx.coroutines.Job
@@ -23,7 +22,6 @@ data class BarChartControlsState(
 data class BarChartUiState(
     val dataSet: ChartData,
     val controlsState: BarChartControlsState,
-    val preset: ChartPreset = ChartPreset.Default,
     val isPlaying: Boolean = false,
 )
 
@@ -72,11 +70,6 @@ class BarChartViewModel(
 
     val uiState: StateFlow<BarChartUiState> = _uiState.asStateFlow()
     private var liveUpdatesJob: Job? = null
-
-    fun onPresetSelected(preset: ChartPreset) {
-        if (preset == _uiState.value.preset) return
-        _uiState.update { it.copy(preset = preset) }
-    }
 
     fun togglePlaying() {
         setPlaying(!_uiState.value.isPlaying)

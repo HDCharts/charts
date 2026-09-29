@@ -1,153 +1,53 @@
 package io.github.hdcharts.app.demo.multiline
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Pause
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.role
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import hdcharts.app.generated.resources.Res
-import hdcharts.app.generated.resources.cd_pause_live_updates
-import hdcharts.app.generated.resources.cd_play_live_updates
-import hdcharts.app.generated.resources.chart_custom
-import hdcharts.app.generated.resources.chart_default
-import hdcharts.app.generated.resources.chart_timeline
 import hdcharts.app.generated.resources.line_data_points
 import hdcharts.app.generated.resources.line_data_points_range
-import io.github.hdcharts.app.demo.timeline.LiveTimelineControls
-import io.github.hdcharts.app.demo.timeline.timelineAnimationDurationMillis
 import io.github.hdcharts.app.ui.composable.ChartDemo
 import io.github.hdcharts.app.ui.composable.DemoRangeSlider
 import io.github.hdcharts.app.ui.composable.DemoSlider
 import io.github.hdcharts.charts.LineChart
-import io.github.hdcharts.charts.LiveLineChart
 import io.github.hdcharts.charts.model.ChartValueFormatters
 import io.github.hdcharts.charts.style.ChartContainerDefaults
 import io.github.hdcharts.charts.style.LineChartDefaults
-import io.github.hdcharts.sampleshared.fixtures.ChartTestStyleFixtures
 import io.github.hdcharts.sampleshared.theme.Dimens
-import io.github.hdcharts.sampleshared.theme.LocalChartColors
-import io.github.hdcharts.sampleshared.theme.seriesColors
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
-import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun MultiLineChartDemo(viewModel: MultiLineChartViewModel = koinViewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val chartColors = LocalChartColors.current
-    val lineColors = chartColors.seriesColors(uiState.dataSet.seriesKeys.size)
-    val timelineAnimationDuration = timelineAnimationDurationMillis(uiState.controlsState.updateIntervalMs)
     val chartContainerStyle = ChartContainerDefaults.style()
 
     ChartDemo(
-        onRefresh = viewModel::refreshForSelectedPreset,
-        refreshVisible = uiState.preset != MultiLineDemoPreset.Timeline,
-        presetContent = {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(Dimens.controlSpacing),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                MultiLineDemoPresetToggle(
-                    selectedPreset = uiState.preset,
-                    onPresetSelected = viewModel::onPresetSelected,
-                )
-            }
-        },
-        extraButtons = {
-            if (uiState.preset == MultiLineDemoPreset.Timeline) {
-                IconButton(
-                    onClick = viewModel::togglePlaying,
-                ) {
-                    Icon(
-                        imageVector = if (uiState.isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
-                        tint = MaterialTheme.colorScheme.onSurface,
-                        contentDescription =
-                            stringResource(
-                                if (uiState.isPlaying) {
-                                    Res.string.cd_pause_live_updates
-                                } else {
-                                    Res.string.cd_play_live_updates
-                                },
-                            ),
-                    )
-                }
-            }
-        },
+        onRefresh = viewModel::refresh,
         controlsContent = {
-            if (uiState.preset == MultiLineDemoPreset.Timeline) {
-                LiveTimelineControls(
-                    controlsState = uiState.controlsState,
-                    onUpdateIntervalChange = viewModel::updateInterval,
-                    onWindowSizeChange = viewModel::updateWindowSize,
-                )
-            } else {
-                MultiLineDataPointsControls(
-                    points = uiState.dataControlsState.points,
-                    minValue = uiState.dataControlsState.minValue,
-                    maxValue = uiState.dataControlsState.maxValue,
-                    onPointsChange = viewModel::updateDataPoints,
-                    onRangeChange = viewModel::updateDataRange,
-                )
-            }
+            MultiLineDataPointsControls(
+                points = uiState.dataControlsState.points,
+                minValue = uiState.dataControlsState.minValue,
+                maxValue = uiState.dataControlsState.maxValue,
+                onPointsChange = viewModel::updateDataPoints,
+                onRangeChange = viewModel::updateDataRange,
+            )
         },
     ) {
-        when (uiState.preset) {
-            MultiLineDemoPreset.Default -> {
-                LineChart(
-                    data = uiState.dataSet.dataSet,
-                    modifier = Modifier.fillMaxWidth(),
-                    title = uiState.dataSet.title,
-                    valueFormatter = ChartValueFormatters.suffix(" ms"),
-                    style = LineChartDefaults.style(chartContainerStyle = chartContainerStyle),
-                )
-            }
-
-            MultiLineDemoPreset.Timeline -> {
-                LiveLineChart(
-                    data = uiState.dataSet.dataSet,
-                    modifier = Modifier.fillMaxWidth(),
-                    title = uiState.dataSet.title,
-                    style = LineChartDefaults.style(chartContainerStyle = chartContainerStyle),
-                    shiftDuration = timelineAnimationDuration.milliseconds,
-                )
-            }
-
-            MultiLineDemoPreset.Custom -> {
-                val customStyle =
-                    ChartTestStyleFixtures.multiLineCustomStyle(
-                        chartContainerStyle = chartContainerStyle,
-                        seriesCount = lineColors.size,
-                    )
-                LineChart(
-                    data = uiState.dataSet.dataSet,
-                    modifier = Modifier.fillMaxWidth(),
-                    title = uiState.dataSet.title,
-                    valueFormatter = ChartValueFormatters.suffix(" ms"),
-                    style = customStyle,
-                )
-            }
-        }
+        LineChart(
+            data = uiState.dataSet.dataSet,
+            modifier = Modifier.fillMaxWidth(),
+            title = uiState.dataSet.title,
+            valueFormatter = ChartValueFormatters.suffix(" ms"),
+            style = LineChartDefaults.style(chartContainerStyle = chartContainerStyle),
+        )
     }
 }
 
@@ -188,67 +88,4 @@ private fun MultiLineDataPointsControls(
             )
         }
     }
-}
-
-@Composable
-private fun MultiLineDemoPresetToggle(
-    selectedPreset: MultiLineDemoPreset,
-    onPresetSelected: (MultiLineDemoPreset) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Row(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(Dimens.sm),
-    ) {
-        MultiLineDemoPresetItem(
-            label = stringResource(Res.string.chart_default),
-            selected = selectedPreset == MultiLineDemoPreset.Default,
-            onClick = { onPresetSelected(MultiLineDemoPreset.Default) },
-        )
-        MultiLineDemoPresetItem(
-            label = stringResource(Res.string.chart_timeline),
-            selected = selectedPreset == MultiLineDemoPreset.Timeline,
-            onClick = { onPresetSelected(MultiLineDemoPreset.Timeline) },
-        )
-        MultiLineDemoPresetItem(
-            label = stringResource(Res.string.chart_custom),
-            selected = selectedPreset == MultiLineDemoPreset.Custom,
-            onClick = { onPresetSelected(MultiLineDemoPreset.Custom) },
-        )
-    }
-}
-
-@Composable
-private fun MultiLineDemoPresetItem(
-    label: String,
-    selected: Boolean,
-    onClick: () -> Unit,
-) {
-    val shape = RoundedCornerShape(Dimens.md)
-    val backgroundColor =
-        if (selected) {
-            MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
-        } else {
-            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
-        }
-    val textColor =
-        if (selected) {
-            MaterialTheme.colorScheme.primary
-        } else {
-            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
-        }
-
-    Text(
-        text = label,
-        color = textColor,
-        style = MaterialTheme.typography.labelLarge,
-        fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
-        modifier =
-            Modifier
-                .clip(shape)
-                .background(backgroundColor, shape)
-                .clickable(onClick = onClick)
-                .semantics { role = Role.Button }
-                .padding(horizontal = 14.dp, vertical = Dimens.sm),
-    )
 }

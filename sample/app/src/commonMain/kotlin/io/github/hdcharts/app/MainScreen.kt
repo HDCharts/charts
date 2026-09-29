@@ -274,6 +274,9 @@ private fun List<ChartDestination>.topBarTitleByRoute(): Map<String, StringResou
     buildMap {
         this@topBarTitleByRoute.forEach { destination ->
             put(destination.route, destination.title)
+            destination.examples.forEach { example ->
+                put(destination.exampleRoute(example), example.title)
+            }
         }
     }
 

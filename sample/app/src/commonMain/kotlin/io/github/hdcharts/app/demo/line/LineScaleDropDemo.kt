@@ -4,21 +4,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Pause
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import hdcharts.app.generated.resources.Res
-import hdcharts.app.generated.resources.cd_pause_live_updates
-import hdcharts.app.generated.resources.cd_play_live_updates
 import hdcharts.app.generated.resources.timeline_scale_switch
 import hdcharts.app.generated.resources.timeline_scale_switch_hint
 import io.github.hdcharts.app.demo.timeline.LiveTimelineControls
@@ -26,6 +19,7 @@ import io.github.hdcharts.app.demo.timeline.LiveTimelineControlsState
 import io.github.hdcharts.app.demo.timeline.timelineAnimationDurationMillis
 import io.github.hdcharts.app.ui.composable.ChartDemo
 import io.github.hdcharts.app.ui.composable.DemoSlider
+import io.github.hdcharts.app.ui.composable.PlayPauseButton
 import io.github.hdcharts.charts.LiveLineChart
 import io.github.hdcharts.charts.style.ChartContainerDefaults
 import io.github.hdcharts.charts.style.LineChartDefaults
@@ -38,12 +32,10 @@ import kotlin.time.Duration.Companion.milliseconds
  * Live line chart whose values swing between magnitudes.
  *
  * The window runs in the millions, drops below one hundred, and climbs back, so [LiveLineChart] is
- * seen rescaling while it streams. [presetContent] keeps the shared line demo presets
- * reachable.
+ * seen rescaling while it streams.
  */
 @Composable
 fun LineScaleDropDemo(
-    presetContent: @Composable () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: LineScaleDropViewModel = koinViewModel(),
 ) {
@@ -52,31 +44,17 @@ fun LineScaleDropDemo(
     val animationDuration = timelineAnimationDurationMillis(controls.updateIntervalMs)
     val chartContainerStyle = ChartContainerDefaults.style()
 
-    DisposableEffect(viewModel) {
+    LifecycleStartEffect(viewModel) {
         viewModel.onEnterDemo()
-        onDispose { viewModel.onLeaveDemo() }
+        onStopOrDispose { viewModel.onLeaveDemo() }
     }
 
     ChartDemo(
         onRefresh = {},
         modifier = modifier,
         refreshVisible = false,
-        presetContent = presetContent,
         extraButtons = {
-            IconButton(onClick = viewModel::togglePlaying) {
-                Icon(
-                    imageVector = if (uiState.isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
-                    tint = MaterialTheme.colorScheme.onSurface,
-                    contentDescription =
-                        stringResource(
-                            if (uiState.isPlaying) {
-                                Res.string.cd_pause_live_updates
-                            } else {
-                                Res.string.cd_play_live_updates
-                            },
-                        ),
-                )
-            }
+            PlayPauseButton(isPlaying = uiState.isPlaying, onToggle = viewModel::togglePlaying)
         },
         controlsContent = {
             LiveTimelineControls(

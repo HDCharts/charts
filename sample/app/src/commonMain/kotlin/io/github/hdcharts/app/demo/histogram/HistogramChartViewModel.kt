@@ -2,7 +2,6 @@ package io.github.hdcharts.app.demo.histogram
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import io.github.hdcharts.app.ui.composable.ChartPreset
 import io.github.hdcharts.charts.model.ChartData
 import io.github.hdcharts.sampleshared.data.HistogramSampleUseCase
 import kotlinx.coroutines.Job
@@ -23,7 +22,6 @@ data class HistogramChartControlsState(
 data class HistogramChartUiState(
     val dataSet: ChartData,
     val controlsState: HistogramChartControlsState,
-    val preset: ChartPreset = ChartPreset.Default,
     val isPlaying: Boolean = false,
 )
 
@@ -72,11 +70,6 @@ class HistogramChartViewModel(
 
     val uiState: StateFlow<HistogramChartUiState> = _uiState.asStateFlow()
     private var liveUpdatesJob: Job? = null
-
-    fun onPresetSelected(preset: ChartPreset) {
-        if (preset == _uiState.value.preset) return
-        _uiState.update { it.copy(preset = preset) }
-    }
 
     fun togglePlaying() {
         setPlaying(!_uiState.value.isPlaying)

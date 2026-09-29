@@ -6,6 +6,8 @@ import io.github.hdcharts.app.demo.bar.BarChartViewModel
 import io.github.hdcharts.app.demo.histogram.HistogramChartViewModel
 import io.github.hdcharts.app.demo.line.LineChartViewModel
 import io.github.hdcharts.app.demo.line.LineScaleDropViewModel
+import io.github.hdcharts.app.demo.line.LiveLineChartViewModel
+import io.github.hdcharts.app.demo.multiline.LiveMultiLineChartViewModel
 import io.github.hdcharts.app.demo.multiline.MultiLineChartViewModel
 import io.github.hdcharts.app.demo.pie.PieChartViewModel
 import io.github.hdcharts.app.demo.radar.RadarChartViewModel
@@ -14,9 +16,7 @@ import io.github.hdcharts.app.demo.stackedbar.StackedBarChartViewModel
 import io.github.hdcharts.sampleshared.data.BarSampleUseCase
 import io.github.hdcharts.sampleshared.data.ChartPreviewUseCase
 import io.github.hdcharts.sampleshared.data.HistogramSampleUseCase
-import io.github.hdcharts.sampleshared.data.LineSampleUseCase
 import io.github.hdcharts.sampleshared.data.LiveLatencyTimelineUseCase
-import io.github.hdcharts.sampleshared.data.MultiLineSampleUseCase
 import io.github.hdcharts.sampleshared.data.PieSampleUseCase
 import io.github.hdcharts.sampleshared.data.RadarSampleUseCase
 import io.github.hdcharts.sampleshared.data.StackedAreaSampleUseCase
@@ -24,9 +24,7 @@ import io.github.hdcharts.sampleshared.data.StackedBarSampleUseCase
 import io.github.hdcharts.sampleshared.data.barSampleUseCase
 import io.github.hdcharts.sampleshared.data.chartPreviewUseCase
 import io.github.hdcharts.sampleshared.data.histogramSampleUseCase
-import io.github.hdcharts.sampleshared.data.lineSampleUseCase
 import io.github.hdcharts.sampleshared.data.liveLatencyTimelineUseCase
-import io.github.hdcharts.sampleshared.data.multiLineSampleUseCase
 import io.github.hdcharts.sampleshared.data.pieSampleUseCase
 import io.github.hdcharts.sampleshared.data.radarSampleUseCase
 import io.github.hdcharts.sampleshared.data.stackedAreaSampleUseCase
@@ -39,8 +37,6 @@ val appModule =
         single<ChartPreviewUseCase> { chartPreviewUseCase() }
         single<LiveLatencyTimelineUseCase> { liveLatencyTimelineUseCase() }
         single<PieSampleUseCase> { pieSampleUseCase() }
-        single<LineSampleUseCase> { lineSampleUseCase() }
-        single<MultiLineSampleUseCase> { multiLineSampleUseCase() }
         single<BarSampleUseCase> { barSampleUseCase() }
         single<HistogramSampleUseCase> { histogramSampleUseCase() }
         single<StackedBarSampleUseCase> { stackedBarSampleUseCase() }
@@ -50,8 +46,10 @@ val appModule =
         viewModel { ChartGalleryViewModel(get()) }
         viewModel { MainViewModel() }
         viewModel { LineChartViewModel(get()) }
+        viewModel { LiveLineChartViewModel(get()) }
         viewModel { LineScaleDropViewModel(get()) }
         viewModel { MultiLineChartViewModel(get()) }
+        viewModel { LiveMultiLineChartViewModel(get()) }
         viewModel { BarChartViewModel(get()) }
         viewModel { HistogramChartViewModel(get()) }
         viewModel { StackedBarChartViewModel(get()) }
