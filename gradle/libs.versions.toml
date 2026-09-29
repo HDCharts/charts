@@ -9,7 +9,7 @@ min-sdk = "24"
 target-sdk = "37"
 
 # Android gradle plugin version
-agp = "9.3.1"
+agp = "9.4.1"
 
 androidx-navigation = "2.9.2"
 androidx-lifecycle = "2.11.0"
@@ -62,10 +62,10 @@ dokka = "2.2.0"
 # https://github.com/vanniktech/gradle-maven-publish-plugin
 mavenPublish = "0.37.0"
 # https://github.com/gmazzo/gradle-buildconfig-plugin
-buildConfig = "6.0.10"
+buildConfig = "6.1.2"
 # https://github.com/JLLeitschuh/ktlint-gradle
 ktlint = "14.2.0"
-axion-release = "1.21.3"
+axion-release = "1.21.4"
 # https://insert-koin.io
 # https://mvnrepository.com/artifact/io.insert-koin/koin-bom
 koin-bom = "4.2.2"
