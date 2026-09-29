@@ -21,6 +21,27 @@
             height: 100%;
             background: inherit;
         }
+        #startup-loader {
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: inherit;
+        }
+        #startup-loader::after {
+            content: "";
+            width: 32px;
+            height: 32px;
+            border: 3px solid rgba(57, 119, 122, 0.2);
+            border-top-color: #39777a;
+            border-radius: 50%;
+            animation: startup-spin 0.8s linear infinite;
+        }
+        @keyframes startup-spin {
+            to { transform: rotate(360deg); }
+        }
         @media (prefers-color-scheme: dark) {
             html, body {
                 background: #09090f;
@@ -29,6 +50,7 @@
     </style>
 </head>
 <body>
+<div id="startup-loader" role="progressbar" aria-label="Loading HDCharts"></div>
 <div id="HDCharts"></div>
 <script type="module" src="HDCharts.js"></script>
 </body>
