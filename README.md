@@ -49,6 +49,11 @@ https://charts.hdcode.dev/playground
 
 ## Get Started
 
+> [!IMPORTANT]
+> To try HDCharts, use the latest [snapshot](https://central.sonatype.com/repository/maven-snapshots/io/github/hdcharts/charts/maven-metadata.xml).
+> It is the most capable build, with many new features and bug fixes.
+> Add `maven("https://central.sonatype.com/repository/maven-snapshots/")` to your repositories to use it.
+
 ```kotlin
 dependencyResolutionManagement {
     repositories {
