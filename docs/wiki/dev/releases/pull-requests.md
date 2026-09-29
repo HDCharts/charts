@@ -63,7 +63,7 @@ sequenceDiagram
 | `Assemble` | Runs `./gradlew ciAssemble`. |
 | `Compile` | Runs `./gradlew ciCompile`, including the `smoke-line` consumer. |
 | `Lint` | Runs `./gradlew ktlintCheck buildSrcKtlintCheck`. |
-| `Test` | Runs the JVM, Android, Wasm, and iOS test jobs; see [CI Test Matrix](ci-test-matrix.md). Each job uploads Gradle's HTML and XML reports. |
+| `Test` | Runs the JVM, Android, Wasm, and iOS test jobs; see [Validation Matrix](validation-matrix.md). Each job uploads Gradle's HTML and XML reports. |
 | `Compare Public API Against Baseline` | Runs `./gradlew apiCompatibilityCheck` against the latest release tag; see [API Compatibility](api-compatibility.md). |
 | `GIF Baseline Validation` | Records the docs GIF scenarios on an Android emulator and compares them with `gif-baselines`. |
 
