@@ -101,7 +101,7 @@ Project skills use the `hdc-` prefix. The canonical source is
 
 ## Validation
 
-Choose focused checks from `docs/wiki/dev/releases/ci-test-matrix.md` based on the
+Choose focused checks from `docs/wiki/dev/releases/validation-matrix.md` based on the
 affected scope.
 
 Do not run `./gradlew validateDocsGifBaselines` or instrumented Android tests

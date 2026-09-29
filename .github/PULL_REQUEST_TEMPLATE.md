@@ -14,6 +14,7 @@
 - [ ] `./gradlew ciCompile`
 - [ ] `./gradlew chartsCheck`
 - [ ] `./gradlew apiCompatibilityCheck`
+- [ ] `../charts-playground/gradlew -p ../charts-playground -DchartsLocalPath="$PWD" ciCompile`
 - [ ] `./gradlew :androidApp:validateDebugScreenshotTest`
 - [ ] `./gradlew updateScreenshots`
 

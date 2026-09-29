@@ -1,9 +1,9 @@
 ---
-title: CI Test Matrix
+title: Validation Matrix
 order: 2
 ---
 
-# CI Test Matrix
+# Validation Matrix
 
 Each pull-request test job checks the same merge commit prepared by `Prepare PR`. The jobs run
 only when the pull request changes code or build files. Workflow:
@@ -31,8 +31,12 @@ Use the smallest applicable command:
 | Compile gate | `./gradlew ciCompile` |
 | Repository checks | `./gradlew chartsCheck` |
 | Public API compatibility | `./gradlew apiCompatibilityCheck` |
+| Playground compile (library or `sample/shared` changes) | `../charts-playground/gradlew -p ../charts-playground -DchartsLocalPath="$PWD" ciCompile` |
 | Compose or screenshots | `./gradlew :androidApp:validateDebugScreenshotTest` |
 | Intentional screenshot updates | `./gradlew updateScreenshots` |
+
+The playground command expects `charts-playground` next to this checkout. From a git worktree,
+replace both `../charts-playground` paths with the path to your playground checkout.
 
 CI owns `chartsTestAndroid`, `chartsTestWasm`, `chartsTestIos`, and
 `validateDocsGifBaselines` unless explicitly requested locally.
