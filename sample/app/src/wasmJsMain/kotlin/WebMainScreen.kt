@@ -93,7 +93,14 @@ private fun rememberWebDemoStartupResourcesReady(): Boolean {
         remember(galleryDestinations, drawerStrings) {
             StartupResources(
                 vectorDrawables = (galleryDestinations.map { it.icon } + SharedRes.drawable.ic_github).distinct(),
-                strings = (galleryDestinations.map { it.title } + drawerStrings).distinct(),
+                strings =
+                    (
+                        galleryDestinations.map { it.title } +
+                            galleryDestinations.flatMap { destination ->
+                                destination.examples.flatMap { listOf(it.title, it.summary) }
+                            } +
+                            drawerStrings
+                    ).distinct(),
             )
         }
 

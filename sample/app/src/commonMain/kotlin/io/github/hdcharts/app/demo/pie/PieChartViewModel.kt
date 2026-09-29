@@ -2,7 +2,6 @@ package io.github.hdcharts.app.demo.pie
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import io.github.hdcharts.app.ui.composable.ChartPreset
 import io.github.hdcharts.charts.model.PieSlice
 import io.github.hdcharts.sampleshared.data.PieSampleUseCase
 import kotlinx.coroutines.Job
@@ -19,7 +18,6 @@ private const val LIVE_UPDATE_INTERVAL_MS = 2000L
 data class PieChartUiState(
     val slices: List<PieSlice>,
     val title: String,
-    val preset: ChartPreset = ChartPreset.Default,
     val isPlaying: Boolean = false,
 )
 
@@ -36,22 +34,10 @@ class PieChartViewModel(
             PieChartUiState(
                 slices = initialSample.slices,
                 title = initialSample.title,
-                preset = ChartPreset.Default,
             ),
         )
 
     val uiState: StateFlow<PieChartUiState> = _uiState.asStateFlow()
-
-    fun onPresetSelected(preset: ChartPreset) {
-        if (preset == _uiState.value.preset) return
-        _uiState.update {
-            it.copy(
-                slices = initialSample.slices,
-                title = initialSample.title,
-                preset = preset,
-            )
-        }
-    }
 
     fun togglePlaying() {
         setPlaying(!_uiState.value.isPlaying)

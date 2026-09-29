@@ -2,7 +2,6 @@ package io.github.hdcharts.app.demo.radar
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import io.github.hdcharts.app.ui.composable.ChartPreset
 import io.github.hdcharts.charts.model.ChartData
 import io.github.hdcharts.sampleshared.data.RadarSampleData
 import io.github.hdcharts.sampleshared.data.RadarSampleUseCase
@@ -19,13 +18,11 @@ private const val LIVE_UPDATE_INTERVAL_MS = 2000L
 
 data class RadarChartState(
     val data: ChartData,
-    val seriesKeys: List<String> = emptyList(),
     val title: String,
 )
 
 data class RadarChartUiState(
     val chart: RadarChartState,
-    val preset: ChartPreset = ChartPreset.Default,
     val isPlaying: Boolean = false,
 )
 
@@ -40,16 +37,10 @@ class RadarChartViewModel(
         MutableStateFlow(
             RadarChartUiState(
                 chart = initialSample.toChartState(),
-                preset = ChartPreset.Default,
             ),
         )
 
     val uiState: StateFlow<RadarChartUiState> = _uiState.asStateFlow()
-
-    fun onPresetSelected(preset: ChartPreset) {
-        if (preset == _uiState.value.preset) return
-        _uiState.update { it.copy(chart = initialSample.toChartState(), preset = preset) }
-    }
 
     fun togglePlaying() {
         setPlaying(!_uiState.value.isPlaying)
@@ -95,7 +86,6 @@ class RadarChartViewModel(
     private fun RadarSampleData.toChartState(): RadarChartState =
         RadarChartState(
             data = data,
-            seriesKeys = seriesKeys,
             title = title,
         )
 }

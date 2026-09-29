@@ -59,11 +59,15 @@
     <string name="multi_line_chart">Multi Line</string>
     <string name="radar_chart">Radar</string>
 
-    <string name="chart_basic">Basic</string>
-    <string name="chart_default">Default</string>
-    <string name="chart_timeline">Timeline</string>
-    <string name="chart_scale_drop">Scale drop</string>
-    <string name="chart_custom">Custom</string>
+
+    <string name="example_defaults_title">Defaults</string>
+    <string name="example_defaults_summary">Every style option left at its default.</string>
+    <string name="example_live_latency_title">Live API latency</string>
+    <string name="example_live_latency_summary">Streams a new reading each tick and slides the time window.</string>
+    <string name="example_backlog_drain_title">Queue backlog drain</string>
+    <string name="example_backlog_drain_summary">Values swing from millions to tens, so the axis rescales while it streams.</string>
+    <string name="example_live_percentiles_title">Live P50 and P95 latency</string>
+    <string name="example_live_percentiles_summary">Streams two series together and slides the time window.</string>
 
     <string translatable="false" name="github_url">https://github.com/HDCharts/charts</string>
 

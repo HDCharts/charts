@@ -2,7 +2,6 @@ package io.github.hdcharts.app.demo.stackedbar
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import io.github.hdcharts.app.ui.composable.ChartPreset
 import io.github.hdcharts.charts.model.ChartData
 import io.github.hdcharts.sampleshared.data.StackedBarSampleUseCase
 import kotlinx.coroutines.Job
@@ -24,14 +23,12 @@ data class StackedBarChartControlsState(
 
 data class StackedBarChartState(
     val dataSet: ChartData,
-    val segmentKeys: List<String> = emptyList(),
     val title: String = "",
 )
 
 data class StackedBarChartUiState(
     val chart: StackedBarChartState,
     val controlsState: StackedBarChartControlsState,
-    val preset: ChartPreset = ChartPreset.Default,
     val isPlaying: Boolean = false,
 )
 
@@ -73,7 +70,6 @@ class StackedBarChartViewModel(
                 chart =
                     StackedBarChartState(
                         dataSet = initialSample.dataSet,
-                        segmentKeys = initialSample.segmentKeys,
                         title = initialSample.title,
                     ),
                 controlsState = initialControlsState,
@@ -82,11 +78,6 @@ class StackedBarChartViewModel(
 
     val uiState: StateFlow<StackedBarChartUiState> = _uiState.asStateFlow()
     private var liveUpdatesJob: Job? = null
-
-    fun onPresetSelected(preset: ChartPreset) {
-        if (preset == _uiState.value.preset) return
-        _uiState.update { it.copy(preset = preset) }
-    }
 
     fun togglePlaying() {
         setPlaying(!_uiState.value.isPlaying)
@@ -165,7 +156,6 @@ class StackedBarChartViewModel(
         val chart =
             StackedBarChartState(
                 dataSet = sample.dataSet,
-                segmentKeys = sample.segmentKeys,
                 title = sample.title,
             )
         if (onRegenerated != null) {
