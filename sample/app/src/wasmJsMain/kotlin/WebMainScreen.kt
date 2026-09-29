@@ -23,9 +23,8 @@ import io.github.hdcharts.app.ChartDestination
 import io.github.hdcharts.app.LocalChartGalleryColumns
 import io.github.hdcharts.app.MainScreen
 import io.github.hdcharts.app.ui.composable.LocalChartDemoMaxWidth
-import io.github.hdcharts.sampleshared.startup.ChartsStartupGate
+import io.github.hdcharts.sampleshared.startup.StartupGate
 import io.github.hdcharts.sampleshared.startup.StartupResources
-import io.github.hdcharts.sampleshared.startup.rememberStartupResourcesReady
 import io.github.hdcharts.sampleshared.theme.AppTheme
 import io.github.hdcharts.sampleshared.theme.docsSlate
 import hdcharts.app.generated.resources.Res as AppRes
@@ -33,15 +32,13 @@ import hdcharts.sample_shared.generated.resources.Res as SharedRes
 
 @Composable
 internal fun WebMainScreen() {
-    val startupReady = rememberWebDemoStartupResourcesReady()
+    val startupResources = rememberWebDemoStartupResources()
 
     AppTheme(
         theme = docsSlate,
         useDynamicColors = false,
     ) {
-        ChartsStartupGate(
-            isContentReady = startupReady,
-        ) {
+        StartupGate(startupResources) {
             CompositionLocalProvider(
                 LocalChartDemoMaxWidth provides 500.dp,
                 LocalChartGalleryColumns provides 3,
@@ -52,8 +49,9 @@ internal fun WebMainScreen() {
     }
 }
 
+// Only what the gallery and the settings panel show on the first screen. Other screens load their text when opened.
 @Composable
-private fun rememberWebDemoStartupResourcesReady(): Boolean {
+private fun rememberWebDemoStartupResources(): StartupResources {
     val galleryDestinations =
         remember {
             listOf(
@@ -89,20 +87,10 @@ private fun rememberWebDemoStartupResourcesReady(): Boolean {
             )
         }
 
-    val resources =
-        remember(galleryDestinations, drawerStrings) {
-            StartupResources(
-                vectorDrawables = (galleryDestinations.map { it.icon } + SharedRes.drawable.ic_github).distinct(),
-                strings =
-                    (
-                        galleryDestinations.map { it.title } +
-                            galleryDestinations.flatMap { destination ->
-                                destination.examples.flatMap { listOf(it.title, it.summary) }
-                            } +
-                            drawerStrings
-                    ).distinct(),
-            )
-        }
-
-    return rememberStartupResourcesReady(resources)
+    return remember(galleryDestinations, drawerStrings) {
+        StartupResources(
+            vectorDrawables = (galleryDestinations.map { it.icon } + SharedRes.drawable.ic_github).distinct(),
+            strings = (galleryDestinations.map { it.title } + drawerStrings).distinct(),
+        )
+    }
 }
