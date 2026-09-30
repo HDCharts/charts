@@ -49,7 +49,7 @@ kotlin {
 
     sourceSets {
         all {
-            languageSettings.optIn("io.github.hdcharts.charts.internal.InternalChartsApi")
+            languageSettings.optIn("io.github.hdcharts.core.internal.InternalChartsApi")
         }
 
         commonMain.dependencies {

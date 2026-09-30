@@ -46,10 +46,10 @@ release, one section per version, newest first:
 
 ```text
 ## 3.0.0
-charts-line | io.github.hdcharts.charts.style.LineChartStyle | <init>(io.github.hdcharts.charts.style.ChartContainerStyle, boolean) | CONSTRUCTOR_REMOVED
+charts-line | io.github.hdcharts.line.LineChartStyle | <init>(io.github.hdcharts.core.style.ChartContainerStyle, boolean) | CONSTRUCTOR_REMOVED
 
 ## 2.4.0
-charts-pie | io.github.hdcharts.charts.style.PieChartStyle | <init>() | CONSTRUCTOR_REMOVED
+charts-pie | io.github.hdcharts.pie.PieChartStyle | <init>() | CONSTRUCTOR_REMOVED
 ```
 
 An entry records only what was accepted. Why it was accepted lives in git:

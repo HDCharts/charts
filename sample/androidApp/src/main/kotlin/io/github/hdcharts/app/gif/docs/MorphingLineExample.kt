@@ -6,9 +6,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
-import io.github.hdcharts.charts.LineChart
-import io.github.hdcharts.charts.model.toChartData
-import io.github.hdcharts.charts.style.LineChartDefaults
+import io.github.hdcharts.core.model.toChartData
+import io.github.hdcharts.line.LineChart
+import io.github.hdcharts.line.LineChartDefaults
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted

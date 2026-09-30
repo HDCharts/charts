@@ -17,9 +17,9 @@ import io.github.hdcharts.app.ui.composable.ChartDemo
 import io.github.hdcharts.app.ui.composable.DemoRangeSlider
 import io.github.hdcharts.app.ui.composable.DemoSlider
 import io.github.hdcharts.app.ui.composable.PlayPauseButton
-import io.github.hdcharts.charts.HistogramChart
-import io.github.hdcharts.charts.style.ChartContainerDefaults
-import io.github.hdcharts.charts.style.HistogramChartDefaults
+import io.github.hdcharts.core.style.ChartContainerDefaults
+import io.github.hdcharts.core.style.HistogramChartDefaults
+import io.github.hdcharts.histogram.HistogramChart
 import io.github.hdcharts.sampleshared.theme.Dimens
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel

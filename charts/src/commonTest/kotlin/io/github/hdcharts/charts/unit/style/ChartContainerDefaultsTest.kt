@@ -22,9 +22,9 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
-import io.github.hdcharts.charts.internal.InternalChartsApi
-import io.github.hdcharts.charts.internal.common.layout.fillMaxSizeChartModifier
-import io.github.hdcharts.charts.style.ChartContainerDefaults
+import io.github.hdcharts.core.internal.InternalChartsApi
+import io.github.hdcharts.core.internal.layout.fillMaxSizeChartModifier
+import io.github.hdcharts.core.style.ChartContainerDefaults
 import kotlin.test.Test
 
 @OptIn(InternalChartsApi::class)

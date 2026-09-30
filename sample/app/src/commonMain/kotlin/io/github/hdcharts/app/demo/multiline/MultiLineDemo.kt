@@ -16,10 +16,10 @@ import hdcharts.app.generated.resources.line_data_points_range
 import io.github.hdcharts.app.ui.composable.ChartDemo
 import io.github.hdcharts.app.ui.composable.DemoRangeSlider
 import io.github.hdcharts.app.ui.composable.DemoSlider
-import io.github.hdcharts.charts.LineChart
-import io.github.hdcharts.charts.model.ChartValueFormatters
-import io.github.hdcharts.charts.style.ChartContainerDefaults
-import io.github.hdcharts.charts.style.LineChartDefaults
+import io.github.hdcharts.core.model.ChartValueFormatters
+import io.github.hdcharts.core.style.ChartContainerDefaults
+import io.github.hdcharts.line.LineChart
+import io.github.hdcharts.line.LineChartDefaults
 import io.github.hdcharts.sampleshared.theme.Dimens
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel

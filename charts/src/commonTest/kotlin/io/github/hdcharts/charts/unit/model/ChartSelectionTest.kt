@@ -6,9 +6,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.v2.runComposeUiTest
-import io.github.hdcharts.charts.model.ChartSelection
-import io.github.hdcharts.charts.model.rememberChartSelection
-import io.github.hdcharts.charts.model.staticChartSelection
+import io.github.hdcharts.core.model.ChartSelection
+import io.github.hdcharts.core.model.rememberChartSelection
+import io.github.hdcharts.core.model.staticChartSelection
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull

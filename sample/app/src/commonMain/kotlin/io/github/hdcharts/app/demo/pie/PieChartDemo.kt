@@ -5,8 +5,8 @@ import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.hdcharts.app.ui.composable.ChartDemo
 import io.github.hdcharts.app.ui.composable.PlayPauseButton
-import io.github.hdcharts.charts.PieChart
-import io.github.hdcharts.charts.style.PieChartDefaults
+import io.github.hdcharts.pie.PieChart
+import io.github.hdcharts.pie.PieChartDefaults
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable

@@ -1,9 +1,9 @@
 package io.github.hdcharts.charts.unit.model
 
-import io.github.hdcharts.charts.model.ChartData
-import io.github.hdcharts.charts.model.ChartSeries
-import io.github.hdcharts.charts.model.chartDataOf
-import io.github.hdcharts.charts.model.toChartData
+import io.github.hdcharts.core.model.ChartData
+import io.github.hdcharts.core.model.ChartSeries
+import io.github.hdcharts.core.model.chartDataOf
+import io.github.hdcharts.core.model.toChartData
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals

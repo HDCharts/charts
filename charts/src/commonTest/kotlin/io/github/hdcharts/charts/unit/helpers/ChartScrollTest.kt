@@ -2,7 +2,7 @@ package io.github.hdcharts.charts.unit.helpers
 
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
-import io.github.hdcharts.charts.internal.common.layout.placedHorizontalScrollPx
+import io.github.hdcharts.core.internal.layout.placedHorizontalScrollPx
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

@@ -14,15 +14,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import io.github.hdcharts.charts.PieChart
-import io.github.hdcharts.charts.RadarChart
-import io.github.hdcharts.charts.model.ChartSelection
-import io.github.hdcharts.charts.model.ChartSeries
-import io.github.hdcharts.charts.model.PieSlice
-import io.github.hdcharts.charts.model.chartDataOf
-import io.github.hdcharts.charts.model.rememberChartSelection
-import io.github.hdcharts.charts.style.PieChartDefaults
-import io.github.hdcharts.charts.style.RadarChartDefaults
+import io.github.hdcharts.core.model.ChartSelection
+import io.github.hdcharts.core.model.ChartSeries
+import io.github.hdcharts.core.model.chartDataOf
+import io.github.hdcharts.core.model.rememberChartSelection
+import io.github.hdcharts.pie.PieChart
+import io.github.hdcharts.pie.PieChartDefaults
+import io.github.hdcharts.pie.PieSlice
+import io.github.hdcharts.radar.RadarChart
+import io.github.hdcharts.radar.RadarChartDefaults
 import io.github.hdcharts.sampleshared.theme.Dimens
 
 /**

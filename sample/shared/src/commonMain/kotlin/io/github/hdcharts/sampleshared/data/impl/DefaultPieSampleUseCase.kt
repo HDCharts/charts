@@ -1,6 +1,6 @@
 package io.github.hdcharts.sampleshared.data.impl
 
-import io.github.hdcharts.charts.model.PieSlice
+import io.github.hdcharts.pie.PieSlice
 import io.github.hdcharts.sampleshared.data.PieSampleData
 import io.github.hdcharts.sampleshared.data.PieSampleUseCase
 

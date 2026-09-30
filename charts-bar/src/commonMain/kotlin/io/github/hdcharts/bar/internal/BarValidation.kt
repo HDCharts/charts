@@ -1,0 +1,72 @@
+package io.github.hdcharts.bar.internal
+
+import androidx.compose.ui.unit.Density
+import io.github.hdcharts.core.internal.InternalChartsApi
+import io.github.hdcharts.core.internal.ValidationErrors
+import io.github.hdcharts.core.internal.ValidationErrors.MIN_REQUIRED_BAR
+import io.github.hdcharts.core.internal.ValidationErrors.RULE_COLORS_SIZE_MISMATCH
+import io.github.hdcharts.core.internal.axis.validateAxisLabels
+import io.github.hdcharts.core.internal.format
+import io.github.hdcharts.core.internal.validateSizes
+import io.github.hdcharts.core.model.ChartData
+import io.github.hdcharts.core.style.BarChartStyle
+
+@InternalChartsApi
+fun validateBarData(
+    data: ChartData,
+    colorsSize: Int = 0,
+): List<String> {
+    val validationErrors = mutableListOf<String>()
+    if (data.series.size != 1) return listOf("Exactly one series is required; got ${data.series.size}.")
+    val points = data.series.single().values
+    val pointsSize = points.size
+
+    if (pointsSize < MIN_REQUIRED_BAR) {
+        val validationError =
+            ValidationErrors.RULE_DATA_POINTS_LESS_THAN_MIN.format(MIN_REQUIRED_BAR)
+        validationErrors.add(validationError)
+        return validationErrors
+    }
+
+    if (colorsSize > 0 && colorsSize != pointsSize) {
+        val validationError =
+            RULE_COLORS_SIZE_MISMATCH.format(colorsSize, pointsSize)
+        validationErrors.add(validationError)
+    }
+
+    if (data.categories.isNotEmpty() && data.categories.size != pointsSize) {
+        validationErrors.add("Category count (${data.categories.size}) must match value count ($pointsSize).")
+    }
+
+    points.forEachIndexed { index, value ->
+        if (!value.isFinite()) {
+            val validationError = ValidationErrors.RULE_DATA_POINT_NOT_NUMBER.format(index)
+            validationErrors.add(validationError)
+        }
+    }
+    return validationErrors
+}
+
+@InternalChartsApi
+fun validateBarStyle(
+    style: BarChartStyle,
+    density: Density = Density(1f),
+): List<String> {
+    val errors = mutableListOf<String>()
+    errors +=
+        validateSizes(
+            density,
+            "Bar spacing" to style.bars.space,
+            "Minimum bar width" to style.bars.minBarWidth,
+            "Grid line width" to style.grid.lineWidth,
+            "Axis line width" to style.axis.lineWidth,
+            "Selection line width" to style.selectionLine.width,
+        )
+    if (!style.bars.alpha.isFinite() || style.bars.alpha !in 0f..1f) errors.add("Bar alpha must be in 0..1.")
+    if (style.range.min?.isFinite() == false || style.range.max?.isFinite() == false) {
+        errors.add("Range bounds must be finite.")
+    }
+    if (style.grid.steps !in 0..1000) errors.add("Grid steps must be in 0..1000.")
+    errors += validateAxisLabels(style.axis.xLabels, style.axis.yLabels, density)
+    return errors
+}

@@ -2,14 +2,14 @@ package io.github.hdcharts.charts.unit.style
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import io.github.hdcharts.charts.internal.common.palette.generateColorShades
-import io.github.hdcharts.charts.style.BarBarsStyle
-import io.github.hdcharts.charts.style.LineVisualStyle
-import io.github.hdcharts.charts.style.PieChartSlicesStyle
-import io.github.hdcharts.charts.style.RadarPolygonStyle
-import io.github.hdcharts.charts.style.StackedAreaBoundaryStyle
-import io.github.hdcharts.charts.style.StackedAreaFillStyle
-import io.github.hdcharts.charts.style.StackedBarSegmentStyle
+import io.github.hdcharts.core.internal.palette.generateColorShades
+import io.github.hdcharts.core.style.BarBarsStyle
+import io.github.hdcharts.line.LineVisualStyle
+import io.github.hdcharts.pie.PieChartSlicesStyle
+import io.github.hdcharts.radar.RadarPolygonStyle
+import io.github.hdcharts.stackedarea.StackedAreaBoundaryStyle
+import io.github.hdcharts.stackedarea.StackedAreaFillStyle
+import io.github.hdcharts.stackedbar.StackedBarSegmentStyle
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

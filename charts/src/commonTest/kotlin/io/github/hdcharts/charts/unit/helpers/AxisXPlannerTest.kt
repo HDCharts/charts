@@ -1,10 +1,10 @@
 package io.github.hdcharts.charts.unit.helpers
 
-import io.github.hdcharts.charts.internal.common.axis.AxisXPlanRequest
-import io.github.hdcharts.charts.internal.common.axis.AxisXPlanResult
-import io.github.hdcharts.charts.internal.common.axis.placeXAxisLabel
-import io.github.hdcharts.charts.internal.common.axis.planAxisXLabelStride
-import io.github.hdcharts.charts.internal.common.axis.planAxisXLabels
+import io.github.hdcharts.core.internal.axis.AxisXPlanRequest
+import io.github.hdcharts.core.internal.axis.AxisXPlanResult
+import io.github.hdcharts.core.internal.axis.placeXAxisLabel
+import io.github.hdcharts.core.internal.axis.planAxisXLabelStride
+import io.github.hdcharts.core.internal.axis.planAxisXLabels
 import kotlin.math.ceil
 import kotlin.test.Test
 import kotlin.test.assertEquals

@@ -1,9 +1,9 @@
 package io.github.hdcharts.sampleshared.data.impl
 
-import io.github.hdcharts.charts.model.ChartData
-import io.github.hdcharts.charts.model.ChartSeries
-import io.github.hdcharts.charts.model.chartDataOf
-import io.github.hdcharts.charts.model.toChartData
+import io.github.hdcharts.core.model.ChartData
+import io.github.hdcharts.core.model.ChartSeries
+import io.github.hdcharts.core.model.chartDataOf
+import io.github.hdcharts.core.model.toChartData
 import io.github.hdcharts.sampleshared.data.RadarSampleData
 import io.github.hdcharts.sampleshared.data.RadarSampleUseCase
 

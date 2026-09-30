@@ -7,9 +7,9 @@ import io.github.hdcharts.app.screenshot.shared.SCREENSHOT_BAR_SAMPLE_USE_CASE
 import io.github.hdcharts.app.screenshot.shared.ScreenshotChartSurface
 import io.github.hdcharts.app.screenshot.shared.ScreenshotPreview
 import io.github.hdcharts.app.screenshot.shared.categoryIndex
-import io.github.hdcharts.charts.BarChart
-import io.github.hdcharts.charts.model.staticChartSelection
-import io.github.hdcharts.charts.style.BarChartDefaults
+import io.github.hdcharts.bar.BarChart
+import io.github.hdcharts.core.model.staticChartSelection
+import io.github.hdcharts.core.style.BarChartDefaults
 import io.github.hdcharts.sampleshared.theme.LocalChartColors
 import io.github.hdcharts.sampleshared.theme.seriesColor
 

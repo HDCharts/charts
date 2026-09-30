@@ -1,0 +1,45 @@
+package io.github.hdcharts.pie
+
+import androidx.compose.runtime.Composable
+import io.github.hdcharts.core.ChartsPreviewLightDark
+import io.github.hdcharts.core.ChartsPreviewTheme
+import io.github.hdcharts.core.style.ChartContainerDefaults
+
+private const val PIE_CHART_TITLE = "Pie Chart"
+private val PIE_VALUES = listOf(32.0, 21.0, 24.0, 14.0, 9.0)
+private val PIE_LABELS = listOf("North", "East", "South", "West", "Other")
+private val PIE_SLICES =
+    PIE_LABELS.mapIndexed { index, label -> PieSlice(label = label, value = PIE_VALUES[index]) }
+
+@Composable
+private fun PieChartPreviewContent() {
+    val style: PieChartStyle =
+        PieChartDefaults.style(
+            chartContainerStyle = ChartContainerDefaults.style(),
+        )
+    PieChart(
+        data = PIE_SLICES,
+        style = style,
+        title = PIE_CHART_TITLE,
+    )
+}
+
+@ChartsPreviewLightDark
+@Composable
+private fun PieChartPreview() {
+    ChartsPreviewTheme {
+        PieChartPreviewContent()
+    }
+}
+
+@ChartsPreviewLightDark
+@Composable
+private fun PieChartErrorPreview() {
+    ChartsPreviewTheme {
+        PieChart(
+            data = listOf(PieSlice(label = "Slice 1", value = 42.0)),
+            style = PieChartDefaults.style(),
+            title = PIE_CHART_TITLE,
+        )
+    }
+}

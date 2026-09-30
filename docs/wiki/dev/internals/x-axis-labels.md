@@ -28,7 +28,7 @@ flowchart LR
 | Tick positions | `buildXAxisLayoutTicks` | `AxisLabelLayouts.kt` |
 | Drawing | `AxisXLabelsLayout`, `placeXAxisLabel` | `AxisLabelLayouts.kt`, `AxisHelpers.kt` |
 
-All files are in `charts-core/src/commonMain/kotlin/io/github/hdcharts/charts/internal/common/axis/`.
+All files are in `charts-core/src/commonMain/kotlin/io/github/hdcharts/core/internal/axis/`.
 
 Every chart calls `rememberXAxisLabelPlan` and draws the returned ticks. It re-plans the labeled
 items and tick positions as the chart scrolls. The step depends only on the layout and is

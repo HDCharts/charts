@@ -17,10 +17,10 @@ import io.github.hdcharts.app.ui.composable.ChartDemo
 import io.github.hdcharts.app.ui.composable.DemoRangeSlider
 import io.github.hdcharts.app.ui.composable.DemoSlider
 import io.github.hdcharts.app.ui.composable.PlayPauseButton
-import io.github.hdcharts.charts.StackedBarChart
-import io.github.hdcharts.charts.style.ChartContainerDefaults
-import io.github.hdcharts.charts.style.StackedBarChartDefaults
+import io.github.hdcharts.core.style.ChartContainerDefaults
 import io.github.hdcharts.sampleshared.theme.Dimens
+import io.github.hdcharts.stackedbar.StackedBarChart
+import io.github.hdcharts.stackedbar.StackedBarChartDefaults
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 

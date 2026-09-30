@@ -1,6 +1,6 @@
 package io.github.hdcharts.sampleshared.data
 
-import io.github.hdcharts.charts.model.ChartData
+import io.github.hdcharts.core.model.ChartData
 
 enum class LiveTimelineProfile {
     Latency,

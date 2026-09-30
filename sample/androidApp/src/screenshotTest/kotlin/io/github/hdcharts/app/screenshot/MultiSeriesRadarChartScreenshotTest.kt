@@ -6,9 +6,9 @@ import io.github.hdcharts.app.screenshot.shared.SCREENSHOT_ANIMATE_ON_START
 import io.github.hdcharts.app.screenshot.shared.SCREENSHOT_RADAR_SAMPLE_USE_CASE
 import io.github.hdcharts.app.screenshot.shared.ScreenshotChartSurface
 import io.github.hdcharts.app.screenshot.shared.ScreenshotPreview
-import io.github.hdcharts.charts.RadarChart
-import io.github.hdcharts.charts.model.staticChartSelection
-import io.github.hdcharts.charts.style.RadarChartDefaults
+import io.github.hdcharts.core.model.staticChartSelection
+import io.github.hdcharts.radar.RadarChart
+import io.github.hdcharts.radar.RadarChartDefaults
 import io.github.hdcharts.sampleshared.theme.LocalChartColors
 import io.github.hdcharts.sampleshared.theme.seriesColors
 

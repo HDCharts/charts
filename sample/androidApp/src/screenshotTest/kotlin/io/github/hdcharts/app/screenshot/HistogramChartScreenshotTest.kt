@@ -7,9 +7,9 @@ import io.github.hdcharts.app.screenshot.shared.SCREENSHOT_HISTOGRAM_SAMPLE_USE_
 import io.github.hdcharts.app.screenshot.shared.ScreenshotChartSurface
 import io.github.hdcharts.app.screenshot.shared.ScreenshotPreview
 import io.github.hdcharts.app.screenshot.shared.categoryIndex
-import io.github.hdcharts.charts.HistogramChart
-import io.github.hdcharts.charts.model.staticChartSelection
-import io.github.hdcharts.charts.style.HistogramChartDefaults
+import io.github.hdcharts.core.model.staticChartSelection
+import io.github.hdcharts.core.style.HistogramChartDefaults
+import io.github.hdcharts.histogram.HistogramChart
 import io.github.hdcharts.sampleshared.theme.LocalChartColors
 import io.github.hdcharts.sampleshared.theme.seriesColor
 

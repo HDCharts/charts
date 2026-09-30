@@ -1,11 +1,11 @@
 package io.github.hdcharts.charts.unit.validation
 
-import io.github.hdcharts.charts.internal.ValidationErrors
-import io.github.hdcharts.charts.internal.ValidationErrors.MIN_REQUIRED_BAR
-import io.github.hdcharts.charts.internal.format
-import io.github.hdcharts.charts.internal.validateHistogramData
-import io.github.hdcharts.charts.model.ChartData
-import io.github.hdcharts.charts.model.toChartData
+import io.github.hdcharts.core.internal.ValidationErrors
+import io.github.hdcharts.core.internal.ValidationErrors.MIN_REQUIRED_BAR
+import io.github.hdcharts.core.internal.format
+import io.github.hdcharts.core.model.ChartData
+import io.github.hdcharts.core.model.toChartData
+import io.github.hdcharts.histogram.internal.validateHistogramData
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

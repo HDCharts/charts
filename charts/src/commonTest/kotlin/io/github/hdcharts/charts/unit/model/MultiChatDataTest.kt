@@ -1,10 +1,10 @@
 package io.github.hdcharts.charts.unit.model
 
-import io.github.hdcharts.charts.internal.common.model.ChartDataItem
-import io.github.hdcharts.charts.internal.common.model.MultiChartData
-import io.github.hdcharts.charts.internal.common.model.minMax
-import io.github.hdcharts.charts.internal.common.model.normalizeByMinMax
-import io.github.hdcharts.charts.internal.common.model.toChartData
+import io.github.hdcharts.core.internal.model.ChartDataItem
+import io.github.hdcharts.core.internal.model.MultiChartData
+import io.github.hdcharts.core.internal.model.minMax
+import io.github.hdcharts.core.internal.model.normalizeByMinMax
+import io.github.hdcharts.core.internal.model.toChartData
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals

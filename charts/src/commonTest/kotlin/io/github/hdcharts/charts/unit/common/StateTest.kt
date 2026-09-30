@@ -2,8 +2,8 @@ package io.github.hdcharts.charts.unit.common
 
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.v2.runComposeUiTest
-import io.github.hdcharts.charts.internal.common.composable.rememberAnimationState
-import io.github.hdcharts.charts.internal.common.composable.rememberShowState
+import io.github.hdcharts.core.internal.composable.rememberAnimationState
+import io.github.hdcharts.core.internal.composable.rememberShowState
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue

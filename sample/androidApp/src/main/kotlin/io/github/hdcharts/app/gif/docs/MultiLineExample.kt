@@ -7,10 +7,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.hdcharts.app.gif.DocsGifScenariosData
 import io.github.hdcharts.app.gif.DocsGifScenariosData.POINTS
-import io.github.hdcharts.charts.LineChart
-import io.github.hdcharts.charts.model.ChartData
-import io.github.hdcharts.charts.model.ChartValueFormatters
-import io.github.hdcharts.charts.model.toChartData
+import io.github.hdcharts.core.model.ChartData
+import io.github.hdcharts.core.model.ChartValueFormatters
+import io.github.hdcharts.core.model.toChartData
+import io.github.hdcharts.line.LineChart
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

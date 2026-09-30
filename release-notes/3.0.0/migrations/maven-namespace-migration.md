@@ -12,12 +12,29 @@ longer receives new artifacts.
 | Modules | `io.github.dautovicharis:charts-line` | `io.github.hdcharts:line` |
 | BOM | `io.github.dautovicharis:charts-bom` | `io.github.hdcharts:bom` |
 
-The Kotlin package also moves with the group:
+## Packages
 
-- `io.github.dautovicharis.charts.*` -> `io.github.hdcharts.charts.*`
+Each module now has its own Kotlin package, named after its artifact:
+
+| Before (2.x) | After (3.0.0) |
+|---|---|
+| Shared models: `io.github.dautovicharis.charts.model.*` | `io.github.hdcharts.core.model.*` |
+| Shared styles: `io.github.dautovicharis.charts.style.*` | `io.github.hdcharts.core.style.*` |
+| `LineChart`, `LiveLineChart`, `LineChartStyle`, `LineChartDefaults` | `io.github.hdcharts.line.*` |
+| `PieChart`, `PieChartStyle`, `PieChartDefaults`, `PieSlice` | `io.github.hdcharts.pie.*` |
+| `BarChart` | `io.github.hdcharts.bar.*` |
+| `HistogramChart` | `io.github.hdcharts.histogram.*` |
+| `StackedBarChart`, `StackedBarChartStyle`, `StackedBarChartDefaults` | `io.github.hdcharts.stackedbar.*` |
+| `StackedAreaChart`, `StackedAreaChartStyle`, `StackedAreaChartDefaults` | `io.github.hdcharts.stackedarea.*` |
+| `RadarChart`, `RadarChartStyle`, `RadarChartDefaults` | `io.github.hdcharts.radar.*` |
+
+`BarChartStyle`, `BarChartDefaults`, `HistogramChartStyle`, and
+`HistogramChartDefaults` are shared by the bar and histogram modules, so they
+live in `io.github.hdcharts.core.style`.
 
 Update both the dependency coordinates and the `import` statements in your
-project.
+project. Removing the old imports and letting the IDE re-import each symbol
+picks the new packages.
 
 ## Before
 
@@ -33,8 +50,8 @@ commonMain.dependencies {
 ## After
 
 ```kotlin
-import io.github.hdcharts.charts.LineChart
-import io.github.hdcharts.charts.model.toChartData
+import io.github.hdcharts.core.model.toChartData
+import io.github.hdcharts.line.LineChart
 
 commonMain.dependencies {
     implementation("io.github.hdcharts:line:3.0.0")

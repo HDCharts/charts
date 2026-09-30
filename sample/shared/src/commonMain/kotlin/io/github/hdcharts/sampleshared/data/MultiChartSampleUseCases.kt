@@ -1,6 +1,6 @@
 package io.github.hdcharts.sampleshared.data
 
-import io.github.hdcharts.charts.model.ChartData
+import io.github.hdcharts.core.model.ChartData
 
 // Sample data for the demo app (the chart view models in sample/app) and the screenshot tests
 // (sample/androidApp/src/screenshotTest). Functions starting with `initial` return the same data on
