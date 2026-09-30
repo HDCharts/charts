@@ -5,7 +5,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 /**
  * Immutable v3 style for [io.github.hdcharts.histogram.HistogramChart].
@@ -48,10 +50,10 @@ object HistogramChartDefaults {
     fun style(
         chartContainerStyle: ChartContainerStyle = ChartContainerDefaults.style(),
         bars: BarBarsStyle = bars(),
-        range: BarRangeStyle = BarChartDefaults.range(min = 0.0),
-        grid: BarGridStyle = BarChartDefaults.grid(),
-        axis: BarAxisStyle = BarChartDefaults.axis(),
-        selectionLine: BarSelectionLineStyle = BarChartDefaults.selectionLine(),
+        range: BarRangeStyle = range(),
+        grid: BarGridStyle = grid(),
+        axis: BarAxisStyle = axis(),
+        selectionLine: BarSelectionLineStyle = selectionLine(),
         zoomControlsVisible: Boolean = true,
     ): HistogramChartStyle =
         HistogramChartStyle(
@@ -69,7 +71,7 @@ object HistogramChartDefaults {
      *
      * @param color The fallback bar color.
      * @param colors Optional explicit per-bin colors; must match bin count or be empty.
-     * @param alpha The bar alpha. Defaults to `defaultChartAlpha()`.
+     * @param alpha The bar alpha. Defaults to 1f.
      * @param space The spacing between bins. Defaults to 0.dp.
      * @param minBarWidth The minimum width of each bin. Defaults to 10.dp.
      */
@@ -77,7 +79,7 @@ object HistogramChartDefaults {
     fun bars(
         color: Color = MaterialTheme.colorScheme.primary,
         colors: List<Color> = emptyList(),
-        alpha: Float = defaultChartAlpha(),
+        alpha: Float = 1f,
         space: Dp = 0.dp,
         minBarWidth: Dp = 10.dp,
     ): BarBarsStyle =
@@ -87,5 +89,99 @@ object HistogramChartDefaults {
             alpha = alpha,
             space = space,
             minBarWidth = minBarWidth,
+        )
+
+    /**
+     * Returns a [BarRangeStyle] for the optional fixed Y-axis range. Defaults to a zero
+     * minimum so a bin count of zero renders at the baseline.
+     */
+    fun range(
+        min: Double? = 0.0,
+        max: Double? = null,
+    ): BarRangeStyle = BarChartDefaults.range(min = min, max = max)
+
+    /**
+     * Returns a [BarGridStyle] for horizontal grid configuration.
+     */
+    @Composable
+    fun grid(
+        visible: Boolean = true,
+        steps: Int = 4,
+        color: Color = MaterialTheme.colorScheme.outlineVariant,
+        lineWidth: Dp = 1.dp,
+    ): BarGridStyle =
+        BarChartDefaults.grid(
+            visible = visible,
+            steps = steps,
+            color = color,
+            lineWidth = lineWidth,
+        )
+
+    /**
+     * Returns a [BarAxisStyle] for axis and label configuration.
+     */
+    @Composable
+    fun axis(
+        visible: Boolean = true,
+        color: Color = MaterialTheme.colorScheme.outline,
+        lineWidth: Dp = 1.dp,
+        xLabels: AxisLabelStyle = xLabels(),
+        yLabels: AxisLabelStyle = yLabels(),
+    ): BarAxisStyle =
+        BarChartDefaults.axis(
+            visible = visible,
+            color = color,
+            lineWidth = lineWidth,
+            xLabels = xLabels,
+            yLabels = yLabels,
+        )
+
+    /**
+     * Returns an [AxisLabelStyle] for X-axis labels.
+     */
+    @Composable
+    fun xLabels(
+        visible: Boolean = true,
+        color: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+        size: TextUnit = 11.sp,
+        maxCount: Int? = null,
+    ): AxisLabelStyle =
+        BarChartDefaults.xLabels(
+            visible = visible,
+            color = color,
+            size = size,
+            maxCount = maxCount,
+        )
+
+    /**
+     * Returns an [AxisLabelStyle] for Y-axis labels.
+     */
+    @Composable
+    fun yLabels(
+        visible: Boolean = true,
+        color: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+        size: TextUnit = 11.sp,
+        maxCount: Int? = null,
+    ): AxisLabelStyle =
+        BarChartDefaults.yLabels(
+            visible = visible,
+            color = color,
+            size = size,
+            maxCount = maxCount,
+        )
+
+    /**
+     * Returns a [BarSelectionLineStyle] for the selection indicator.
+     */
+    @Composable
+    fun selectionLine(
+        visible: Boolean = true,
+        color: Color = MaterialTheme.colorScheme.primary,
+        width: Dp = 1.dp,
+    ): BarSelectionLineStyle =
+        BarChartDefaults.selectionLine(
+            visible = visible,
+            color = color,
+            width = width,
         )
 }

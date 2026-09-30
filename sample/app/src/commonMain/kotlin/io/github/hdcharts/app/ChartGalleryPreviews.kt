@@ -224,11 +224,10 @@ private fun HistogramChartPreview(values: List<Double>) {
         modifier = Modifier.size(PreviewChartSize),
         style =
             HistogramChartDefaults.style(
-                range = BarChartDefaults.range(min = 0.0),
                 axis =
-                    BarChartDefaults.axis(
-                        xLabels = BarChartDefaults.xLabels(visible = false),
-                        yLabels = BarChartDefaults.yLabels(visible = false),
+                    HistogramChartDefaults.axis(
+                        xLabels = HistogramChartDefaults.xLabels(visible = false),
+                        yLabels = HistogramChartDefaults.yLabels(visible = false),
                     ),
                 chartContainerStyle = previewChartContainerStyle(),
             ),

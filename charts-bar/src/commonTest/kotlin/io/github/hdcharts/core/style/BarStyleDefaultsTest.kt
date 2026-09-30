@@ -96,16 +96,19 @@ class BarStyleDefaultsTest {
     fun histogramDefaults_useAdjacentBinsWithTenDpMinimumWidth() =
         runComposeUiTest {
             lateinit var barBars: BarBarsStyle
+            lateinit var barStyle: BarChartStyle
             lateinit var histogramBars: BarBarsStyle
             lateinit var histogramStyle: HistogramChartStyle
 
             setContent {
                 MaterialTheme {
                     val bars = BarChartDefaults.bars()
+                    val bar = BarChartDefaults.style()
                     val bins = HistogramChartDefaults.bars()
                     val style = HistogramChartDefaults.style()
                     SideEffect {
                         barBars = bars
+                        barStyle = bar
                         histogramBars = bins
                         histogramStyle = style
                     }
@@ -117,9 +120,13 @@ class BarStyleDefaultsTest {
                 assertEquals(expected = 10.dp, actual = barBars.minBarWidth)
                 assertEquals(expected = 0.dp, actual = histogramBars.space)
                 assertEquals(expected = 10.dp, actual = histogramBars.minBarWidth)
+                assertEquals(expected = 1f, actual = histogramBars.alpha)
                 assertEquals(expected = histogramBars, actual = histogramStyle.bars)
                 assertEquals(expected = 0.0, actual = histogramStyle.range.min)
                 assertNull(histogramStyle.range.max)
+                assertEquals(expected = barStyle.grid, actual = histogramStyle.grid)
+                assertEquals(expected = barStyle.axis, actual = histogramStyle.axis)
+                assertEquals(expected = barStyle.selectionLine, actual = histogramStyle.selectionLine)
             }
         }
 

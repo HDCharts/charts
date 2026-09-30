@@ -16,7 +16,6 @@ import io.github.hdcharts.core.style.ChartContainerDefaults
 import io.github.hdcharts.core.style.ChartContainerStyle
 import io.github.hdcharts.core.style.LegendDefaults
 import io.github.hdcharts.core.style.LegendStyle
-import io.github.hdcharts.core.style.defaultChartAlpha
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 
@@ -121,7 +120,7 @@ object LineChartDefaults {
     @Composable
     fun line(
         color: Color = MaterialTheme.colorScheme.primary,
-        alpha: Float = defaultChartAlpha(),
+        alpha: Float = 1f,
         colors: List<Color> = emptyList(),
         strokeWidth: Dp = 2.dp,
         bezier: Boolean = true,
@@ -145,7 +144,7 @@ object LineChartDefaults {
     @Composable
     fun axis(
         visible: Boolean = true,
-        color: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
+        color: Color = MaterialTheme.colorScheme.outline,
         lineWidth: Dp = 1.dp,
         xLabels: AxisLabelStyle = xLabels(),
         yLabels: AxisLabelStyle = yLabels(),
@@ -162,7 +161,7 @@ object LineChartDefaults {
     @Composable
     fun xLabels(
         visible: Boolean = true,
-        color: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f),
+        color: Color = MaterialTheme.colorScheme.onSurfaceVariant,
         size: TextUnit = 11.sp,
         maxCount: Int? = null,
     ): AxisLabelStyle = AxisLabelStyle(visible, color, size, maxCount)
@@ -170,7 +169,7 @@ object LineChartDefaults {
     @Composable
     fun yLabels(
         visible: Boolean = true,
-        color: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f),
+        color: Color = MaterialTheme.colorScheme.onSurfaceVariant,
         size: TextUnit = 11.sp,
         maxCount: Int? = null,
     ): AxisLabelStyle = AxisLabelStyle(visible, color, size, maxCount)

@@ -12,7 +12,6 @@ import io.github.hdcharts.core.internal.palette.resolvePaletteColors
 import io.github.hdcharts.core.style.AxisLabelStyle
 import io.github.hdcharts.core.style.ChartContainerDefaults
 import io.github.hdcharts.core.style.ChartContainerStyle
-import io.github.hdcharts.core.style.defaultChartAlpha
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 
@@ -116,7 +115,7 @@ object StackedAreaChartDefaults {
     fun fill(
         color: Color = MaterialTheme.colorScheme.primary,
         colors: List<Color> = emptyList(),
-        alpha: Float = defaultChartAlpha(),
+        alpha: Float = 1f,
     ): StackedAreaFillStyle = StackedAreaFillStyle(color, colors, alpha.coerceIn(0f, 1f))
 
     @Composable
@@ -137,7 +136,7 @@ object StackedAreaChartDefaults {
     @Composable
     fun xLabels(
         visible: Boolean = true,
-        color: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f),
+        color: Color = MaterialTheme.colorScheme.onSurfaceVariant,
         size: TextUnit = 11.sp,
         maxCount: Int? = null,
     ): AxisLabelStyle = AxisLabelStyle(visible, color, size, maxCount)
@@ -145,7 +144,7 @@ object StackedAreaChartDefaults {
     @Composable
     fun yLabels(
         visible: Boolean = true,
-        color: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f),
+        color: Color = MaterialTheme.colorScheme.onSurfaceVariant,
         size: TextUnit = 11.sp,
         maxCount: Int? = null,
     ): AxisLabelStyle = AxisLabelStyle(visible, color, size, maxCount)
@@ -153,7 +152,7 @@ object StackedAreaChartDefaults {
     @Composable
     fun selection(
         visible: Boolean = true,
-        color: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+        color: Color = MaterialTheme.colorScheme.outline,
         width: Dp = 1.dp,
     ): StackedAreaSelectionStyle = StackedAreaSelectionStyle(visible, color, width.coerceAtLeast(0.dp))
 }

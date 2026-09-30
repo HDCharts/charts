@@ -75,7 +75,7 @@ object BarChartDefaults {
      *
      * @param color The fallback bar color.
      * @param colors Optional explicit per-bar colors; must match bar count or be empty.
-     * @param alpha The bar alpha. Defaults to `defaultChartAlpha()`.
+     * @param alpha The bar alpha. Defaults to 1f.
      * @param space The spacing between bars. Defaults to 10.dp.
      * @param minBarWidth The minimum width of each bar. Defaults to 10.dp.
      */
@@ -83,7 +83,7 @@ object BarChartDefaults {
     fun bars(
         color: Color = MaterialTheme.colorScheme.primary,
         colors: List<Color> = emptyList(),
-        alpha: Float = defaultChartAlpha(),
+        alpha: Float = 1f,
         space: Dp = 10.dp,
         minBarWidth: Dp = 10.dp,
     ): BarBarsStyle =
@@ -110,9 +110,7 @@ object BarChartDefaults {
     fun grid(
         visible: Boolean = true,
         steps: Int = 4,
-        color: Color =
-            androidx.compose.material3.MaterialTheme.colorScheme.onSurface
-                .copy(alpha = 0.15f),
+        color: Color = MaterialTheme.colorScheme.outlineVariant,
         lineWidth: Dp = 1.dp,
     ): BarGridStyle =
         BarGridStyle(
@@ -128,9 +126,7 @@ object BarChartDefaults {
     @Composable
     fun axis(
         visible: Boolean = true,
-        color: Color =
-            androidx.compose.material3.MaterialTheme.colorScheme.onSurface
-                .copy(alpha = 0.3f),
+        color: Color = MaterialTheme.colorScheme.outline,
         lineWidth: Dp = 1.dp,
         xLabels: AxisLabelStyle = xLabels(),
         yLabels: AxisLabelStyle = yLabels(),
@@ -149,9 +145,7 @@ object BarChartDefaults {
     @Composable
     fun xLabels(
         visible: Boolean = true,
-        color: Color =
-            androidx.compose.material3.MaterialTheme.colorScheme.onSurface
-                .copy(alpha = 0.75f),
+        color: Color = MaterialTheme.colorScheme.onSurfaceVariant,
         size: androidx.compose.ui.unit.TextUnit = 11.sp,
         maxCount: Int? = null,
     ): AxisLabelStyle =
@@ -168,9 +162,7 @@ object BarChartDefaults {
     @Composable
     fun yLabels(
         visible: Boolean = true,
-        color: Color =
-            androidx.compose.material3.MaterialTheme.colorScheme.onSurface
-                .copy(alpha = 0.75f),
+        color: Color = MaterialTheme.colorScheme.onSurfaceVariant,
         size: androidx.compose.ui.unit.TextUnit = 11.sp,
         maxCount: Int? = null,
     ): AxisLabelStyle =
@@ -187,9 +179,7 @@ object BarChartDefaults {
     @Composable
     fun selectionLine(
         visible: Boolean = true,
-        color: Color =
-            androidx.compose.material3.MaterialTheme.colorScheme.primary
-                .copy(alpha = 0.6f),
+        color: Color = MaterialTheme.colorScheme.primary,
         width: Dp = 1.dp,
     ): BarSelectionLineStyle =
         BarSelectionLineStyle(
