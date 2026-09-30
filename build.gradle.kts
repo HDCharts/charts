@@ -147,7 +147,7 @@ tasks.register("chartsTestWasm") {
     dependsOn(ChartsModules.library.map { "$it:wasmJsTest" })
 }
 
-tasks.register("chartsTestAndroid") {
+tasks.register("chartsTestAndroidInstrumented") {
     group = "verification"
     description = "Runs Android instrumented tests for chart modules"
     dependsOn(
@@ -284,11 +284,16 @@ tasks.register("ciTestJvm") {
     dependsOn("chartsTestJvm")
 }
 
-tasks.register("ciTestAndroid") {
+tasks.register("ciTestAndroidInstrumented") {
     group = "CI"
-    description = "CI entry point for Android tests"
+    description = "CI entry point for Android instrumented tests"
+    dependsOn("chartsTestAndroidInstrumented")
+}
+
+tasks.register("ciTestScreenshot") {
+    group = "CI"
+    description = "CI entry point for Android screenshot validation"
     dependsOn(":androidApp:validateDebugScreenshotTest")
-    dependsOn("chartsTestAndroid")
 }
 
 tasks.register("ciTestWeb") {

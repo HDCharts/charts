@@ -55,8 +55,8 @@ jobs:
             **/build/reports/tests/**
             **/build/test-results/**
 
-  android-tests:
-    name: Android Tests
+  android-instrumented-tests:
+    name: Android Instrumented Tests
     if: ${{ inputs.should-run }}
     runs-on: ubuntu-26.04
     steps:
@@ -78,7 +78,7 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
-      - name: Run Android tests on emulator
+      - name: Run Android instrumented tests on emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 35
@@ -86,18 +86,47 @@ jobs:
           arch: x86_64
           profile: Nexus 6
           emulator-options: -no-window -no-audio -gpu swiftshader_indirect -no-snapshot
-          script: ./gradlew ciTestAndroid --no-daemon
+          script: ./gradlew ciTestAndroidInstrumented --no-daemon
 
-      - name: Upload Android test reports
+      - name: Upload Android instrumented test reports
         if: ${{ always() }}
         uses: actions/upload-artifact@v7
         with:
-          name: android-test-reports
+          name: android-instrumented-test-reports
           if-no-files-found: warn
           path: |
-            **/build/reports/tests/**
-            **/build/test-results/**
-            sample/androidApp/build/reports/**
+            **/build/reports/androidTests/connected/**
+            **/build/outputs/androidTest-results/connected/**
+
+  screenshot-tests:
+    name: Screenshot Tests
+    if: ${{ inputs.should-run }}
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
+          ref: ${{ inputs.source-sha }}
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v6.0.0
+        with:
+          java-version: 17
+          distribution: 'zulu'
+          cache: gradle
+
+      - name: Run screenshot tests
+        run: ./gradlew ciTestScreenshot --no-daemon
+
+      - name: Upload screenshot test reports
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: screenshot-test-reports
+          if-no-files-found: warn
+          path: |
+            sample/androidApp/build/reports/screenshotTest/**
+            sample/androidApp/build/test-results/validateDebugScreenshotTest/**
 
   web-tests:
     name: Wasm Tests
