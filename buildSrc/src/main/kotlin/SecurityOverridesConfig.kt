@@ -104,6 +104,7 @@ fun Project.configureJsSecurityOverrides(versionCatalog: VersionCatalog) {
     val jsYamlSecurityVersion = versionCatalog.requiredVersion("js-yaml-security")
     val qsSecurityVersion = versionCatalog.requiredVersion("qs-security")
     val fastUriSecurityVersion = versionCatalog.requiredVersion("fast-uri-security")
+    val engineIoSecurityVersion = versionCatalog.requiredVersion("engine-io-security")
     val yarnRootExtension = resolveYarnRootExtension()
 
     // Keep Kotlin/JS transitive dependencies patched in kotlin-js-store/yarn.lock.
@@ -112,6 +113,7 @@ fun Project.configureJsSecurityOverrides(versionCatalog: VersionCatalog) {
     yarnRootExtension.applyResolution("js-yaml", jsYamlSecurityVersion)
     yarnRootExtension.applyResolution("qs", qsSecurityVersion)
     yarnRootExtension.applyResolution("fast-uri", fastUriSecurityVersion)
+    yarnRootExtension.applyResolution("engine.io", engineIoSecurityVersion)
 }
 
 private fun Project.resolveYarnRootExtension(): Any {
