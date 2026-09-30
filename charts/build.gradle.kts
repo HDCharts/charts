@@ -37,9 +37,6 @@ kotlin {
                     .fromTarget(libs.versions.java.get()),
             )
         }
-        withDeviceTestBuilder {
-            sourceSetTreeName = "test"
-        }
     }
 
     iosArm64()
@@ -66,13 +63,6 @@ kotlin {
             api(projects.chartsStackedBar)
             api(projects.chartsStackedArea)
             api(projects.chartsRadar)
-        }
-
-        commonTest.dependencies {
-            implementation(kotlin("test"))
-            implementation(kotlin("test-common"))
-            implementation(kotlin("test-annotations-common"))
-            implementation(libs.compose.mpp.ui.test)
         }
 
         androidMain.dependencies {

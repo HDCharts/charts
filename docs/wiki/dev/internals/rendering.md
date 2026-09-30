@@ -63,9 +63,9 @@ or a live shift.
 
 | Behavior | Tests |
 | --- | --- |
-| Canvas limit | `ChartCanvasLimitsTest` in `charts/src/commonTest` |
+| Canvas limit | `ChartCanvasLimitsTest` in `charts-core/src/commonTest` |
 | Error instead of a crash past the limit | `*_expandedPastLayoutLimits_displaysErrorInsteadOfCrashing` in `charts-line`, `charts-stacked-area`, and `charts-stacked-bar` |
-| Scroll clamp after a zoom-out | `ChartScrollTest` in `charts/src/commonTest`, `BarChartScrollFrameTest` in `charts-bar/src/jvmTest` |
+| Scroll clamp after a zoom-out | `ChartScrollTest` in `charts-core/src/commonTest`, `BarChartScrollFrameTest` in `charts-bar/src/jvmTest` |
 
 ## Known Issues
 
