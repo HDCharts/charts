@@ -2,7 +2,7 @@ package io.github.hdcharts.app.demo.radar
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import io.github.hdcharts.charts.model.ChartData
+import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.sampleshared.data.RadarSampleData
 import io.github.hdcharts.sampleshared.data.RadarSampleUseCase
 import kotlinx.coroutines.Job

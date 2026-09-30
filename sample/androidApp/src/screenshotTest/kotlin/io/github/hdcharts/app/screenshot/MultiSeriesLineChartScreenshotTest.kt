@@ -8,9 +8,9 @@ import io.github.hdcharts.app.screenshot.shared.SCREENSHOT_THOUSANDS_OF_DOLLARS
 import io.github.hdcharts.app.screenshot.shared.ScreenshotChartSurface
 import io.github.hdcharts.app.screenshot.shared.ScreenshotPreview
 import io.github.hdcharts.app.screenshot.shared.categoryIndex
-import io.github.hdcharts.charts.LineChart
-import io.github.hdcharts.charts.model.staticChartSelection
-import io.github.hdcharts.charts.style.LineChartDefaults
+import io.github.hdcharts.core.model.staticChartSelection
+import io.github.hdcharts.line.LineChart
+import io.github.hdcharts.line.LineChartDefaults
 import io.github.hdcharts.sampleshared.theme.LocalChartColors
 import io.github.hdcharts.sampleshared.theme.seriesColors
 

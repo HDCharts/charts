@@ -1,10 +1,10 @@
 package io.github.hdcharts.charts.unit.helpers
 
-import io.github.hdcharts.charts.internal.NO_SELECTION
-import io.github.hdcharts.charts.internal.common.interaction.nearestPointIndexForContentX
-import io.github.hdcharts.charts.internal.common.interaction.selectedIndexForBarFit
-import io.github.hdcharts.charts.internal.common.interaction.selectedIndexForContentX
-import io.github.hdcharts.charts.internal.common.interaction.selectedIndexForTouchX
+import io.github.hdcharts.core.internal.NO_SELECTION
+import io.github.hdcharts.core.internal.interaction.nearestPointIndexForContentX
+import io.github.hdcharts.core.internal.interaction.selectedIndexForBarFit
+import io.github.hdcharts.core.internal.interaction.selectedIndexForContentX
+import io.github.hdcharts.core.internal.interaction.selectedIndexForTouchX
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

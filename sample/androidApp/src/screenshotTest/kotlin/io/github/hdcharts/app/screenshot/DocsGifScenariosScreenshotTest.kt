@@ -12,14 +12,14 @@ import io.github.hdcharts.app.gif.docs.StackedAreaViewModel
 import io.github.hdcharts.app.gif.docs.StackedBarViewModel
 import io.github.hdcharts.app.screenshot.shared.DocsGifLandscapePreview
 import io.github.hdcharts.app.screenshot.shared.ScreenshotSurface
-import io.github.hdcharts.charts.BarChart
-import io.github.hdcharts.charts.HistogramChart
-import io.github.hdcharts.charts.LineChart
-import io.github.hdcharts.charts.PieChart
-import io.github.hdcharts.charts.RadarChart
-import io.github.hdcharts.charts.StackedAreaChart
-import io.github.hdcharts.charts.StackedBarChart
-import io.github.hdcharts.charts.model.ChartValueFormatters
+import io.github.hdcharts.bar.BarChart
+import io.github.hdcharts.core.model.ChartValueFormatters
+import io.github.hdcharts.histogram.HistogramChart
+import io.github.hdcharts.line.LineChart
+import io.github.hdcharts.pie.PieChart
+import io.github.hdcharts.radar.RadarChart
+import io.github.hdcharts.stackedarea.StackedAreaChart
+import io.github.hdcharts.stackedbar.StackedBarChart
 
 /**
  * Landscape screenshot tests that mirror the docs GIF scenarios. Each chart

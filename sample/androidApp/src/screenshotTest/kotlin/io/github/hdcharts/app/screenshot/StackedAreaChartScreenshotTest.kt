@@ -7,11 +7,11 @@ import io.github.hdcharts.app.screenshot.shared.SCREENSHOT_STACKED_AREA_SAMPLE_U
 import io.github.hdcharts.app.screenshot.shared.ScreenshotChartSurface
 import io.github.hdcharts.app.screenshot.shared.ScreenshotPreview
 import io.github.hdcharts.app.screenshot.shared.categoryIndex
-import io.github.hdcharts.charts.StackedAreaChart
-import io.github.hdcharts.charts.model.staticChartSelection
-import io.github.hdcharts.charts.style.StackedAreaChartDefaults
+import io.github.hdcharts.core.model.staticChartSelection
 import io.github.hdcharts.sampleshared.theme.LocalChartColors
 import io.github.hdcharts.sampleshared.theme.seriesColors
+import io.github.hdcharts.stackedarea.StackedAreaChart
+import io.github.hdcharts.stackedarea.StackedAreaChartDefaults
 
 // As Pro closes in on Starter.
 private const val STACKED_AREA_SELECTION_LABEL = "Sep '25"

@@ -1,16 +1,16 @@
 package io.github.hdcharts.charts.unit.helpers
 
-import io.github.hdcharts.charts.internal.common.composable.zoomInScale
-import io.github.hdcharts.charts.internal.common.composable.zoomOutScale
-import io.github.hdcharts.charts.internal.common.density.DENSE_POINT_MIN_STEP_PX
-import io.github.hdcharts.charts.internal.common.density.aggregateLabelsByCenterValue
-import io.github.hdcharts.charts.internal.common.density.aggregateLabelsByLastValue
-import io.github.hdcharts.charts.internal.common.density.aggregatePointsByAverage
-import io.github.hdcharts.charts.internal.common.density.bucketCenterIndex
-import io.github.hdcharts.charts.internal.common.density.bucketSizeForTarget
-import io.github.hdcharts.charts.internal.common.density.buildBucketRanges
-import io.github.hdcharts.charts.internal.common.density.denseStepForViewport
-import io.github.hdcharts.charts.internal.common.density.shouldUseScrollableDensity
+import io.github.hdcharts.core.internal.composable.zoomInScale
+import io.github.hdcharts.core.internal.composable.zoomOutScale
+import io.github.hdcharts.core.internal.density.DENSE_POINT_MIN_STEP_PX
+import io.github.hdcharts.core.internal.density.aggregateLabelsByCenterValue
+import io.github.hdcharts.core.internal.density.aggregateLabelsByLastValue
+import io.github.hdcharts.core.internal.density.aggregatePointsByAverage
+import io.github.hdcharts.core.internal.density.bucketCenterIndex
+import io.github.hdcharts.core.internal.density.bucketSizeForTarget
+import io.github.hdcharts.core.internal.density.buildBucketRanges
+import io.github.hdcharts.core.internal.density.denseStepForViewport
+import io.github.hdcharts.core.internal.density.shouldUseScrollableDensity
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

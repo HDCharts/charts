@@ -21,7 +21,7 @@ the bottom, each label is centered on its tick, and every label stays inside its
 | Drawing | `AxisYLabelsLayout`, `placeYAxisLabel` | `AxisLabelLayouts.kt`, `AxisHelpers.kt` |
 | Line chart zero line | `baselineYForRange` | `AxisHelpers.kt` |
 
-All files are in `charts-core/src/commonMain/kotlin/io/github/hdcharts/charts/internal/common/axis/`.
+All files are in `charts-core/src/commonMain/kotlin/io/github/hdcharts/core/internal/axis/`.
 
 ## Ticks
 

@@ -5,7 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.hdcharts.app.ui.composable.ChartDemo
 import io.github.hdcharts.app.ui.composable.PlayPauseButton
-import io.github.hdcharts.charts.RadarChart
+import io.github.hdcharts.radar.RadarChart
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable

@@ -14,7 +14,7 @@ Stateless, app-independent sample data used by the chart demos:
 ## Constraints
 
 - No dependency on `sample/app` or any view-model layer.
-- Depends only on the public `io.github.hdcharts.charts` model API and Compose.
+- Depends only on the public `io.github.hdcharts.core.model` API and Compose.
 - Pure logic; safe to reuse from any host (Android, JVM, iOS, Wasm).
 
 ## Usage

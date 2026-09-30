@@ -14,15 +14,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.github.hdcharts.charts.BarChart
-import io.github.hdcharts.charts.model.ChartValueFormatters
-import io.github.hdcharts.charts.model.toChartData
-import io.github.hdcharts.charts.style.AxisLabelStyle
-import io.github.hdcharts.charts.style.BarAxisStyle
-import io.github.hdcharts.charts.style.BarBarsStyle
-import io.github.hdcharts.charts.style.BarChartDefaults
-import io.github.hdcharts.charts.style.BarGridStyle
-import io.github.hdcharts.charts.style.BarSelectionLineStyle
+import io.github.hdcharts.bar.BarChart
+import io.github.hdcharts.core.model.ChartValueFormatters
+import io.github.hdcharts.core.model.toChartData
+import io.github.hdcharts.core.style.AxisLabelStyle
+import io.github.hdcharts.core.style.BarAxisStyle
+import io.github.hdcharts.core.style.BarBarsStyle
+import io.github.hdcharts.core.style.BarChartDefaults
+import io.github.hdcharts.core.style.BarGridStyle
+import io.github.hdcharts.core.style.BarSelectionLineStyle
 
 @Composable
 private fun ShowStyledBar() {

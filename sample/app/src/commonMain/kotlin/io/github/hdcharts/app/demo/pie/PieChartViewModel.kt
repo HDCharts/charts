@@ -2,7 +2,7 @@ package io.github.hdcharts.app.demo.pie
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import io.github.hdcharts.charts.model.PieSlice
+import io.github.hdcharts.pie.PieSlice
 import io.github.hdcharts.sampleshared.data.PieSampleUseCase
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay

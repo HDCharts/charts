@@ -1,7 +1,7 @@
 package io.github.hdcharts.sampleshared.data.impl
 
-import io.github.hdcharts.charts.model.ChartData
-import io.github.hdcharts.charts.model.toChartData
+import io.github.hdcharts.core.model.ChartData
+import io.github.hdcharts.core.model.toChartData
 import io.github.hdcharts.sampleshared.data.LineSampleUseCase
 import kotlin.random.Random
 

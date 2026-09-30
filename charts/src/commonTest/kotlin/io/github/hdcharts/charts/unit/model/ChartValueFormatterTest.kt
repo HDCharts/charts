@@ -1,7 +1,7 @@
 package io.github.hdcharts.charts.unit.model
 
-import io.github.hdcharts.charts.model.ChartValueFormatter
-import io.github.hdcharts.charts.model.ChartValueFormatters
+import io.github.hdcharts.core.model.ChartValueFormatter
+import io.github.hdcharts.core.model.ChartValueFormatters
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith

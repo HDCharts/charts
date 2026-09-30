@@ -17,26 +17,26 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import io.github.hdcharts.charts.BarChart
-import io.github.hdcharts.charts.HistogramChart
-import io.github.hdcharts.charts.LineChart
-import io.github.hdcharts.charts.PieChart
-import io.github.hdcharts.charts.RadarChart
-import io.github.hdcharts.charts.StackedAreaChart
-import io.github.hdcharts.charts.StackedBarChart
-import io.github.hdcharts.charts.model.PieSlice
-import io.github.hdcharts.charts.model.toChartData
-import io.github.hdcharts.charts.style.BarChartDefaults
-import io.github.hdcharts.charts.style.ChartContainerDefaults
-import io.github.hdcharts.charts.style.ChartContainerStyle
-import io.github.hdcharts.charts.style.HistogramChartDefaults
-import io.github.hdcharts.charts.style.LineChartDefaults
-import io.github.hdcharts.charts.style.PieChartDefaults
-import io.github.hdcharts.charts.style.RadarChartDefaults
-import io.github.hdcharts.charts.style.StackedAreaChartDefaults
-import io.github.hdcharts.charts.style.StackedBarChartDefaults
+import io.github.hdcharts.bar.BarChart
+import io.github.hdcharts.core.model.toChartData
+import io.github.hdcharts.core.style.BarChartDefaults
+import io.github.hdcharts.core.style.ChartContainerDefaults
+import io.github.hdcharts.core.style.ChartContainerStyle
+import io.github.hdcharts.core.style.HistogramChartDefaults
+import io.github.hdcharts.histogram.HistogramChart
+import io.github.hdcharts.line.LineChart
+import io.github.hdcharts.line.LineChartDefaults
+import io.github.hdcharts.pie.PieChart
+import io.github.hdcharts.pie.PieChartDefaults
+import io.github.hdcharts.pie.PieSlice
+import io.github.hdcharts.radar.RadarChart
+import io.github.hdcharts.radar.RadarChartDefaults
 import io.github.hdcharts.sampleshared.data.ChartGalleryPreview
 import io.github.hdcharts.sampleshared.theme.Dimens
+import io.github.hdcharts.stackedarea.StackedAreaChart
+import io.github.hdcharts.stackedarea.StackedAreaChartDefaults
+import io.github.hdcharts.stackedbar.StackedBarChart
+import io.github.hdcharts.stackedbar.StackedBarChartDefaults
 
 private val PreviewShape = RoundedCornerShape(18.dp)
 private val PreviewChartSize = 140.dp

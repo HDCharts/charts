@@ -54,7 +54,7 @@ kotlin {
 
     sourceSets {
         all {
-            languageSettings.optIn("io.github.hdcharts.charts.internal.InternalChartsApi")
+            languageSettings.optIn("io.github.hdcharts.core.internal.InternalChartsApi")
         }
 
         commonMain.dependencies {
@@ -88,14 +88,14 @@ kotlin {
 
 private val apiSourceRoots =
     listOf(
-        project.rootDir.resolve("charts-core/src/commonMain/kotlin/io/github/hdcharts/charts"),
-        project.rootDir.resolve("charts-line/src/commonMain/kotlin/io/github/hdcharts/charts"),
-        project.rootDir.resolve("charts-pie/src/commonMain/kotlin/io/github/hdcharts/charts"),
-        project.rootDir.resolve("charts-bar/src/commonMain/kotlin/io/github/hdcharts/charts"),
-        project.rootDir.resolve("charts-histogram/src/commonMain/kotlin/io/github/hdcharts/charts"),
-        project.rootDir.resolve("charts-stacked-bar/src/commonMain/kotlin/io/github/hdcharts/charts"),
-        project.rootDir.resolve("charts-stacked-area/src/commonMain/kotlin/io/github/hdcharts/charts"),
-        project.rootDir.resolve("charts-radar/src/commonMain/kotlin/io/github/hdcharts/charts"),
+        project.rootDir.resolve("charts-core/src/commonMain/kotlin/io/github/hdcharts/core"),
+        project.rootDir.resolve("charts-line/src/commonMain/kotlin/io/github/hdcharts/line"),
+        project.rootDir.resolve("charts-pie/src/commonMain/kotlin/io/github/hdcharts/pie"),
+        project.rootDir.resolve("charts-bar/src/commonMain/kotlin/io/github/hdcharts/bar"),
+        project.rootDir.resolve("charts-histogram/src/commonMain/kotlin/io/github/hdcharts/histogram"),
+        project.rootDir.resolve("charts-stacked-bar/src/commonMain/kotlin/io/github/hdcharts/stackedbar"),
+        project.rootDir.resolve("charts-stacked-area/src/commonMain/kotlin/io/github/hdcharts/stackedarea"),
+        project.rootDir.resolve("charts-radar/src/commonMain/kotlin/io/github/hdcharts/radar"),
     )
 
 dokka {
@@ -129,7 +129,7 @@ dokka {
         skipEmptyPackages.set(true)
 
         perPackageOption {
-            matchingRegex.set("io\\.github\\.hdcharts\\.charts\\.internal(\\..*)?")
+            matchingRegex.set("io\\.github\\.hdcharts\\.\\w+\\.internal(\\..*)?")
             suppress.set(true)
         }
     }

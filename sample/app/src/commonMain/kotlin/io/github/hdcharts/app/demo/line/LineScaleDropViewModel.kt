@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.hdcharts.app.demo.timeline.LiveTimelineDefaults
 import io.github.hdcharts.app.demo.timeline.LiveTimelineStreamer
-import io.github.hdcharts.charts.model.ChartData
+import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.sampleshared.data.LiveLatencySingleSeriesWindow
 import io.github.hdcharts.sampleshared.data.LiveLatencyTimelineUseCase
 import io.github.hdcharts.sampleshared.data.LiveTimelineProfile

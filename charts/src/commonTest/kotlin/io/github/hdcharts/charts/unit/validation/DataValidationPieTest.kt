@@ -1,13 +1,13 @@
 package io.github.hdcharts.charts.unit.validation
 
-import io.github.hdcharts.charts.internal.ValidationErrors.MIN_REQUIRED_PIE
-import io.github.hdcharts.charts.internal.ValidationErrors.RULE_DATA_POINTS_LESS_THAN_MIN
-import io.github.hdcharts.charts.internal.ValidationErrors.RULE_DATA_POINT_NEGATIVE
-import io.github.hdcharts.charts.internal.ValidationErrors.RULE_DATA_POINT_NOT_FINITE
-import io.github.hdcharts.charts.internal.ValidationErrors.RULE_DATA_POINT_NOT_NUMBER
-import io.github.hdcharts.charts.internal.format
-import io.github.hdcharts.charts.internal.validatePieData
-import io.github.hdcharts.charts.model.PieSlice
+import io.github.hdcharts.core.internal.ValidationErrors.MIN_REQUIRED_PIE
+import io.github.hdcharts.core.internal.ValidationErrors.RULE_DATA_POINTS_LESS_THAN_MIN
+import io.github.hdcharts.core.internal.ValidationErrors.RULE_DATA_POINT_NEGATIVE
+import io.github.hdcharts.core.internal.ValidationErrors.RULE_DATA_POINT_NOT_FINITE
+import io.github.hdcharts.core.internal.ValidationErrors.RULE_DATA_POINT_NOT_NUMBER
+import io.github.hdcharts.core.internal.format
+import io.github.hdcharts.pie.PieSlice
+import io.github.hdcharts.pie.internal.validatePieData
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

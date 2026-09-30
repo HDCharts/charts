@@ -1,9 +1,9 @@
 package io.github.hdcharts.charts.unit.validation
 
-import io.github.hdcharts.charts.internal.ValidationErrors
-import io.github.hdcharts.charts.internal.format
-import io.github.hdcharts.charts.internal.validateBarData
-import io.github.hdcharts.charts.model.toChartData
+import io.github.hdcharts.bar.internal.validateBarData
+import io.github.hdcharts.core.internal.ValidationErrors
+import io.github.hdcharts.core.internal.format
+import io.github.hdcharts.core.model.toChartData
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

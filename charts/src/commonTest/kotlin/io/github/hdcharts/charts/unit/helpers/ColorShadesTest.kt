@@ -1,7 +1,7 @@
 package io.github.hdcharts.charts.unit.helpers
 
 import androidx.compose.ui.graphics.Color
-import io.github.hdcharts.charts.internal.common.palette.generateColorShades
+import io.github.hdcharts.core.internal.palette.generateColorShades
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

@@ -14,9 +14,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.min
-import io.github.hdcharts.charts.model.ChartData
-import io.github.hdcharts.charts.model.ChartValueFormatter
-import io.github.hdcharts.charts.style.LineChartDefaults
+import io.github.hdcharts.core.model.ChartData
+import io.github.hdcharts.core.model.ChartValueFormatter
+import io.github.hdcharts.line.LineChartDefaults
 import io.github.hdcharts.sampleshared.data.MultiLineSampleData
 import io.github.hdcharts.sampleshared.data.barSampleUseCase
 import io.github.hdcharts.sampleshared.data.histogramSampleUseCase

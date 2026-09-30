@@ -5,8 +5,8 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
-import io.github.hdcharts.charts.internal.common.axis.validateAxisLabels
-import io.github.hdcharts.charts.style.AxisLabelStyle
+import io.github.hdcharts.core.internal.axis.validateAxisLabels
+import io.github.hdcharts.core.style.AxisLabelStyle
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

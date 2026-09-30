@@ -1,6 +1,6 @@
 package io.github.hdcharts.charts.unit.helpers
 
-import io.github.hdcharts.charts.internal.common.layout.chartCanvasFits
+import io.github.hdcharts.core.internal.layout.chartCanvasFits
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue

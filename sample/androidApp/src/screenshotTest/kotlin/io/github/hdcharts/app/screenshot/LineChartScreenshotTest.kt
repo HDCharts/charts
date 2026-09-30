@@ -7,9 +7,9 @@ import io.github.hdcharts.app.screenshot.shared.SCREENSHOT_LINE_SAMPLE_USE_CASE
 import io.github.hdcharts.app.screenshot.shared.ScreenshotChartSurface
 import io.github.hdcharts.app.screenshot.shared.ScreenshotPreview
 import io.github.hdcharts.app.screenshot.shared.categoryIndex
-import io.github.hdcharts.charts.LineChart
-import io.github.hdcharts.charts.model.staticChartSelection
-import io.github.hdcharts.charts.style.LineChartDefaults
+import io.github.hdcharts.core.model.staticChartSelection
+import io.github.hdcharts.line.LineChart
+import io.github.hdcharts.line.LineChartDefaults
 
 private const val LINE_SELECTION_LABEL = "Jun 18"
 

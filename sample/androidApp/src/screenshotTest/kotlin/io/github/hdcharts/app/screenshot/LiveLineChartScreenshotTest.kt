@@ -6,9 +6,9 @@ import io.github.hdcharts.app.screenshot.shared.SCREENSHOT_ANIMATE_ON_START
 import io.github.hdcharts.app.screenshot.shared.ScreenshotChartSurface
 import io.github.hdcharts.app.screenshot.shared.ScreenshotPreview
 import io.github.hdcharts.app.screenshot.shared.screenshotLiveLatencySample
-import io.github.hdcharts.charts.LiveLineChart
-import io.github.hdcharts.charts.model.ChartValueFormatter
-import io.github.hdcharts.charts.style.LineChartDefaults
+import io.github.hdcharts.core.model.ChartValueFormatter
+import io.github.hdcharts.line.LineChartDefaults
+import io.github.hdcharts.line.LiveLineChart
 
 private val MILLISECONDS =
     ChartValueFormatter { value -> LineChartDefaults.axisValueFormatter.format(value) + " ms" }

@@ -12,9 +12,9 @@ import com.android.tools.screenshot.PreviewTest
 import io.github.hdcharts.app.screenshot.shared.SCREENSHOT_ANIMATE_ON_START
 import io.github.hdcharts.app.screenshot.shared.SCREENSHOT_MULTI_LINE_SAMPLE_USE_CASE
 import io.github.hdcharts.app.screenshot.shared.ScreenshotSurface
-import io.github.hdcharts.charts.LineChart
-import io.github.hdcharts.charts.model.ChartValueFormatters
-import io.github.hdcharts.charts.style.LineChartDefaults
+import io.github.hdcharts.core.model.ChartValueFormatters
+import io.github.hdcharts.line.LineChart
+import io.github.hdcharts.line.LineChartDefaults
 
 /**
  * Chart image for the charts-docs landing page hero, drawn with the default

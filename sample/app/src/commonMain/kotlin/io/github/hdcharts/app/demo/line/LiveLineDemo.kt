@@ -10,9 +10,9 @@ import io.github.hdcharts.app.demo.timeline.LiveTimelineControls
 import io.github.hdcharts.app.demo.timeline.timelineAnimationDurationMillis
 import io.github.hdcharts.app.ui.composable.ChartDemo
 import io.github.hdcharts.app.ui.composable.PlayPauseButton
-import io.github.hdcharts.charts.LiveLineChart
-import io.github.hdcharts.charts.style.ChartContainerDefaults
-import io.github.hdcharts.charts.style.LineChartDefaults
+import io.github.hdcharts.core.style.ChartContainerDefaults
+import io.github.hdcharts.line.LineChartDefaults
+import io.github.hdcharts.line.LiveLineChart
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.time.Duration.Companion.milliseconds
 

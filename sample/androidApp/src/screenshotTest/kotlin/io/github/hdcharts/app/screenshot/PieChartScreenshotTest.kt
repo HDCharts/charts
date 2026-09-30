@@ -8,9 +8,9 @@ import io.github.hdcharts.app.screenshot.shared.SCREENSHOT_ANIMATE_ON_START
 import io.github.hdcharts.app.screenshot.shared.SCREENSHOT_PIE_SAMPLE_USE_CASE
 import io.github.hdcharts.app.screenshot.shared.ScreenshotChartSurface
 import io.github.hdcharts.app.screenshot.shared.ScreenshotPreview
-import io.github.hdcharts.charts.PieChart
-import io.github.hdcharts.charts.model.staticChartSelection
-import io.github.hdcharts.charts.style.PieChartDefaults
+import io.github.hdcharts.core.model.staticChartSelection
+import io.github.hdcharts.pie.PieChart
+import io.github.hdcharts.pie.PieChartDefaults
 import io.github.hdcharts.sampleshared.theme.LocalChartColors
 import io.github.hdcharts.sampleshared.theme.seriesColor
 import io.github.hdcharts.sampleshared.theme.seriesColors

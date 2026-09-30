@@ -7,11 +7,11 @@ import io.github.hdcharts.app.screenshot.shared.SCREENSHOT_STACKED_BAR_SAMPLE_US
 import io.github.hdcharts.app.screenshot.shared.ScreenshotChartSurface
 import io.github.hdcharts.app.screenshot.shared.ScreenshotPreview
 import io.github.hdcharts.app.screenshot.shared.categoryIndex
-import io.github.hdcharts.charts.StackedBarChart
-import io.github.hdcharts.charts.model.staticChartSelection
-import io.github.hdcharts.charts.style.StackedBarChartDefaults
+import io.github.hdcharts.core.model.staticChartSelection
 import io.github.hdcharts.sampleshared.theme.LocalChartColors
 import io.github.hdcharts.sampleshared.theme.seriesColors
+import io.github.hdcharts.stackedbar.StackedBarChart
+import io.github.hdcharts.stackedbar.StackedBarChartDefaults
 
 // The holiday quarter.
 private const val STACKED_BAR_SELECTION_LABEL = "Q4 '25"

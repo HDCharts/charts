@@ -1,7 +1,7 @@
 package io.github.hdcharts.charts.unit.validation
 
-import io.github.hdcharts.charts.internal.ValidationErrors.RULE_ITEM_POINTS_SIZE
-import io.github.hdcharts.charts.internal.format
+import io.github.hdcharts.core.internal.ValidationErrors.RULE_ITEM_POINTS_SIZE
+import io.github.hdcharts.core.internal.format
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

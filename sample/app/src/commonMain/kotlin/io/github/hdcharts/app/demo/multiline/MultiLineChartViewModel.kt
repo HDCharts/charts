@@ -2,8 +2,8 @@ package io.github.hdcharts.app.demo.multiline
 
 import androidx.lifecycle.ViewModel
 import io.github.hdcharts.app.demo.timeline.LiveTimelineDefaults
-import io.github.hdcharts.charts.model.ChartData
-import io.github.hdcharts.charts.model.toChartData
+import io.github.hdcharts.core.model.ChartData
+import io.github.hdcharts.core.model.toChartData
 import io.github.hdcharts.sampleshared.data.LiveLatencyTimelineUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
