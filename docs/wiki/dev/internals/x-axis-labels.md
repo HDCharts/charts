@@ -227,8 +227,8 @@ both live in `AxisLabelLayouts.kt`.
 
 | Behavior | Tests |
 | --- | --- |
-| Step choice, even spacing, scrolling | `AxisXPlannerTest` in `charts/src/commonTest` |
-| Tick positions, placement, spacing, row height | `AxisHelpersTest` in `charts/src/commonTest` |
+| Step choice, even spacing, scrolling | `AxisXPlannerTest` in `charts-core/src/commonTest` |
+| Tick positions, placement, spacing, row height | `AxisHelpersTest` in `charts-core/src/commonTest` |
 | Labels centered on bars in rendered charts | `*_xAxisLabels_centeredUnderBars` in `charts-bar` and `charts-stacked-bar` |
 | Labels centered on points in rendered charts | `*_xAxisLabels_centeredOnTheirPoints` in `charts-line` and `charts-stacked-area` |
 | Long last label drawn and centered at the plot edge | `*_lastXAxisLabel_centeredUnderLastBar` and `*_lastXAxisLabel_centeredOnLastPoint` in the same modules |

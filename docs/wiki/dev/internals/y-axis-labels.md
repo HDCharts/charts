@@ -86,7 +86,7 @@ or gap.
 
 | Behavior | Tests |
 | --- | --- |
-| Tick count, tick values, formatting, placement, zero line | `AxisHelpersTest` in `charts/src/commonTest` |
+| Tick count, tick values, formatting, placement, zero line | `AxisHelpersTest` in `charts-core/src/commonTest` |
 
 ### Brute-Force Checks
 

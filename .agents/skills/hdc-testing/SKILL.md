@@ -11,6 +11,7 @@ layer and assert the public contract.
 ## Test Placement
 
 - Put portable library tests in each module's `commonTest`.
+- Put each test in the package of the code it tests, named `<Subject>Test`.
 - Keep model, validation, formatting, geometry, transformation, and Compose
   behavior tests with the owning module.
 - Keep Android screenshots in `sample/androidApp/src/screenshotTest`.

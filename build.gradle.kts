@@ -147,12 +147,15 @@ tasks.register("chartsTestWasm") {
     dependsOn(ChartsModules.library.map { "$it:wasmJsTest" })
 }
 
+// Library modules with no Android device tests.
+val modulesWithoutDeviceTests = setOf(":charts-core", ":charts")
+
 tasks.register("chartsTestAndroidInstrumented") {
     group = "verification"
     description = "Runs Android instrumented tests for chart modules"
     dependsOn(
         ChartsModules.library
-            .filter { it != ":charts-core" }
+            .filter { it !in modulesWithoutDeviceTests }
             .map { "$it:connectedAndroidTest" },
     )
 }
@@ -291,7 +294,7 @@ val androidTestShard1 = listOf(":charts-line", ":charts-bar", ":charts-radar")
 tasks.register("ciTestAndroidInstrumented") {
     group = "CI"
     description = "CI entry point for Android instrumented tests"
-    val modules = ChartsModules.library.filter { it != ":charts-core" }
+    val modules = ChartsModules.library.filter { it !in modulesWithoutDeviceTests }
     val selected =
         when (val shard = providers.gradleProperty("androidTestShard").orNull) {
             null -> modules
