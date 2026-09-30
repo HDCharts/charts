@@ -56,9 +56,13 @@ jobs:
             **/build/test-results/**
 
   android-instrumented-tests:
-    name: Android Instrumented Tests
+    name: Android Instrumented Tests ${{ matrix.shard }}/2
     if: ${{ inputs.should-run }}
     runs-on: ubuntu-26.04
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2]
     steps:
       - uses: actions/checkout@v7
         with:
@@ -86,13 +90,13 @@ jobs:
           arch: x86_64
           profile: Nexus 6
           emulator-options: -no-window -no-audio -gpu swiftshader_indirect -no-snapshot
-          script: ./gradlew ciTestAndroidInstrumented --no-daemon
+          script: ./gradlew ciTestAndroidInstrumented -PandroidTestShard=${{ matrix.shard }} --no-daemon
 
       - name: Upload Android instrumented test reports
         if: ${{ always() }}
         uses: actions/upload-artifact@v7
         with:
-          name: android-instrumented-test-reports
+          name: android-instrumented-test-reports-${{ matrix.shard }}
           if-no-files-found: warn
           path: |
             **/build/reports/androidTests/connected/**

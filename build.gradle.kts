@@ -284,10 +284,22 @@ tasks.register("ciTestJvm") {
     dependsOn("chartsTestJvm")
 }
 
+// CI splits instrumented tests across two emulator jobs with -PandroidTestShard=1|2.
+// Shard 1 holds the slowest modules; shard 2 takes the rest, so new modules need no edit here.
+val androidTestShard1 = listOf(":charts-line", ":charts-bar", ":charts-radar")
+
 tasks.register("ciTestAndroidInstrumented") {
     group = "CI"
     description = "CI entry point for Android instrumented tests"
-    dependsOn("chartsTestAndroidInstrumented")
+    val modules = ChartsModules.library.filter { it != ":charts-core" }
+    val selected =
+        when (val shard = providers.gradleProperty("androidTestShard").orNull) {
+            null -> modules
+            "1" -> modules.filter { it in androidTestShard1 }
+            "2" -> modules.filterNot { it in androidTestShard1 }
+            else -> error("androidTestShard must be 1 or 2, was $shard")
+        }
+    dependsOn(selected.map { "$it:connectedAndroidTest" })
 }
 
 tasks.register("ciTestScreenshot") {
