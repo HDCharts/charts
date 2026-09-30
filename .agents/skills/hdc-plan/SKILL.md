@@ -1,11 +1,11 @@
 ---
 name: hdc-plan
-description: Create a local HDCharts implementation plan for complex feature work.
+description: Create an HDCharts implementation plan for complex feature work.
 ---
 
 # Plan Feature Work
 
-This skill writes local planning documents for complex feature work.
+This skill writes planning documents for complex feature work.
 
 ## Required Workflow
 
@@ -17,20 +17,20 @@ This skill writes local planning documents for complex feature work.
    platform differences, tests, validation, and sequencing.
 5. Split the work into the smallest practical sequence of independently
    reviewable implementation pull requests.
-6. Write all plan files under the git-ignored directory:
+6. Write all plan files under:
 
    ```text
-   plans/<feature-name>/
+   docs/plans/<feature-name>/
    ```
 
-7. Present the created local plan files.
+7. Present the created plan files.
 
 ## Main Plan File
 
 Create:
 
 ```text
-plans/<feature-name>/plan-<feature-name>.md
+docs/plans/<feature-name>/plan-<feature-name>.md
 ```
 
 The index contains only this structure:
@@ -51,7 +51,7 @@ implementation work.
 Create one file per index row:
 
 ```text
-plans/<feature-name>/pr-<number>-<short-name>.md
+docs/plans/<feature-name>/pr-<number>-<short-name>.md
 ```
 
 Use this structure:

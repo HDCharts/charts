@@ -48,6 +48,5 @@ Pods/
 # Generated docs artifacts
 /docs/static/
 
-# Local implementation plans
-/plans/
+# Local scratch files
 /temp/

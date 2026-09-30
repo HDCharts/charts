@@ -9,8 +9,7 @@ API compatibility, release-note, and documentation workflows alongside them.
 For a complex or multi-step feature, optionally ask whether the user wants an
 implementation plan before coding. Present the choices `Create a plan` and
 `Skip planning`. If the user chooses `Create a plan`, use `hdc-plan` to write
-the plan locally under `plans/`. Plans are local working documents and must not
-be committed or published in a planning pull request.
+the plan under `docs/plans/`.
 
 ## Repository Structure
 
@@ -47,9 +46,6 @@ Read the relevant documentation before substantial changes:
   skills must not load or invoke them implicitly.
 - **Use stable release information in release notes.** New release-note
   filenames and content remain stable throughout the contribution lifecycle.
-- **Keep plans local.** Write plans only under the git-ignored `plans/`
-  directory. Do not create a plan PR or include plan files in implementation
-  or feature PRs.
 - Inspect the relevant existing code, documentation, and workflow before
   editing; preserve unrelated working-tree changes.
 - Load only the project skills relevant to the task. Do not load every skill by
@@ -94,7 +90,7 @@ Project skills use the `hdc-` prefix. The canonical source is
 | `hdc-concurrency` | Coroutine ownership, Compose effects, animations, live previews, delayed selection, and cancellation. | `.agents/skills/hdc-concurrency/SKILL.md` |
 | `hdc-testing` | Kotlin, Compose interaction, rendering, API, platform, and screenshot testing. | `.agents/skills/hdc-testing/SKILL.md` |
 | `hdc-pr` | The user explicitly asks to create, open, publish, or ship a pull request. | `.agents/skills/hdc-pr/SKILL.md` |
-| `hdc-plan` | The user chooses local planning for a complex or multi-step feature. | `.agents/skills/hdc-plan/SKILL.md` |
+| `hdc-plan` | The user chooses planning for a complex or multi-step feature. | `.agents/skills/hdc-plan/SKILL.md` |
 | `hdc-changeset` | The user directly requests creating or updating a release note. | `.agents/skills/hdc-changeset/SKILL.md` |
 | `hdc-rc` | The user directly requests API compatibility or migration work. | `.agents/skills/hdc-rc/SKILL.md` |
 | `hdc-gif` | Recording or updating docs GIF scenarios locally against a running emulator. | `.agents/skills/hdc-gif/SKILL.md` |
