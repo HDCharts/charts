@@ -54,6 +54,7 @@ Open an issue: https://github.com/HDCharts/charts/issues
 ## Test types in this project
 - Kotlin/JVM test runs for core and chart modules (`jvmTest` executes shared `commonTest` suites).
 - Compose UI tests for chart modules (`:charts-*`, KMP Compose UI test APIs via `commonTest`).
+- Android instrumented tests for chart modules (`connectedAndroidTest` runs the shared `commonTest` suites on an emulator).
 - Android screenshot tests (baseline image validation in `:androidApp` `screenshotTest`).
 - Android instrumented GIF recording scenarios via `compose-gif-recorder` in `:androidApp` (device/emulator workflow).
 - Smoke compile checks (module-level compile validation).

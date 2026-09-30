@@ -21,6 +21,6 @@
 <!-- CI handles these — do not run locally; they are machine-dependent and slow:
 
      ./gradlew validateDocsGifBaselines
-     ./gradlew chartsTestAndroid
+     ./gradlew chartsTestAndroidInstrumented
      ./gradlew chartsTestIos
      ./gradlew chartsTestWasm -->
