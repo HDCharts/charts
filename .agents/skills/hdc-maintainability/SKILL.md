@@ -12,8 +12,8 @@ not whether it is correct; use `hdc-review` for correctness.
 ## Guardrails
 
 - Report findings before any fix. Do not modify files until the user asks.
-- Review the requested scope: a diff, branch, pull request, or local plan under
-  `plans/`. Read outward from it only to measure what it drags along.
+- Review the requested scope: a diff, branch, pull request, or plan under
+  `docs/plans/`. Read outward from it only to measure what it drags along.
 - Judge proportionality: weigh the ongoing cost against how often the problem
   or need actually occurs.
 
