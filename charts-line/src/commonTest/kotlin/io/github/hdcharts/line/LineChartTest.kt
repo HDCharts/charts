@@ -199,18 +199,22 @@ class LineChartTest {
 
     @OptIn(ExperimentalTestApi::class)
     @Test
-    fun lineChart_withUnspecifiedPointSize_displaysValidationError() =
+    fun lineChart_withInvalidNumericStyleValues_drawsClampedChart() =
         runComposeUiTest {
             setContent {
                 LineChart(
                     data = listOf(10.0, 20.0, 30.0).toChartData(),
-                    style = LineChartDefaults.style(points = LineChartDefaults.points(size = Dp.Unspecified)),
+                    style =
+                        LineChartDefaults.style(
+                            line = LineChartDefaults.line(alpha = 1.5f, strokeWidth = (-1).dp),
+                            points = LineChartDefaults.points(size = Dp.Unspecified, visible = true),
+                        ),
                     animateOnStart = false,
                 )
             }
 
-            onNodeWithTag(TestTags.CHART_ERROR).assertIsDisplayed()
-            onNodeWithText("Point size must resolve to 0..16384 pixels.", substring = true).assertIsDisplayed()
+            onNodeWithTag(TestTags.LINE_CHART_PLOT).assertIsDisplayed()
+            onNodeWithTag(TestTags.CHART_ERROR).assertDoesNotExist()
         }
 
     @OptIn(ExperimentalTestApi::class)
@@ -450,7 +454,7 @@ class LineChartTest {
             }
 
             onNodeWithTag(TestTags.CHART_ERROR).assertIsDisplayed()
-            onNodeWithText("At least two line values are required.", substring = true).assertIsDisplayed()
+            onNodeWithText("At least 2 values are required.", substring = true).assertIsDisplayed()
         }
 
     @OptIn(ExperimentalTestApi::class)

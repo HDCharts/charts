@@ -1,22 +1,24 @@
 package io.github.hdcharts.pie
 
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import io.github.hdcharts.core.internal.DONUT_MAX_PERCENTAGE
 import io.github.hdcharts.core.internal.DONUT_MIN_PERCENTAGE
 import io.github.hdcharts.core.internal.InternalChartsApi
+import io.github.hdcharts.core.internal.clampAlpha
+import io.github.hdcharts.core.internal.clampSize
 import io.github.hdcharts.core.internal.layout.fillMaxSizeChartModifier
 import io.github.hdcharts.core.internal.palette.resolvePaletteColors
 import io.github.hdcharts.core.style.ChartContainerDefaults
 import io.github.hdcharts.core.style.ChartContainerStyle
 import io.github.hdcharts.core.style.LegendDefaults
 import io.github.hdcharts.core.style.LegendStyle
+import io.github.hdcharts.core.style.StyleDefaults
 import kotlinx.collections.immutable.ImmutableList
 
 /**
@@ -41,9 +43,9 @@ class PieChartStyle(
 /**
  * Donut configuration for a [PieChartStyle].
  *
- * @property holePercentage The percentage of the chart that is a donut hole.
- * Must be between [io.github.hdcharts.core.internal.DONUT_MIN_PERCENTAGE]
- * and [io.github.hdcharts.core.internal.DONUT_MAX_PERCENTAGE].
+ * @property holePercentage The percentage of the chart that is a donut hole. The chart clamps it to
+ * [io.github.hdcharts.core.internal.DONUT_MIN_PERCENTAGE]..[io.github.hdcharts.core.internal.DONUT_MAX_PERCENTAGE]
+ * when drawing.
  */
 @Immutable
 data class PieChartDonutStyle(
@@ -127,14 +129,8 @@ object PieChartDefaults {
      * @param holePercentage The percentage of the chart that is a donut hole. Defaults to 0f.
      */
     @Composable
-    fun donut(holePercentage: Float = 0f): PieChartDonutStyle =
-        PieChartDonutStyle(
-            holePercentage =
-                holePercentage.coerceIn(
-                    DONUT_MIN_PERCENTAGE,
-                    DONUT_MAX_PERCENTAGE,
-                ),
-        )
+    fun donut(holePercentage: Float = StyleDefaults.pieDonutHole): PieChartDonutStyle =
+        PieChartDonutStyle(holePercentage = holePercentage)
 
     /**
      * Returns a [PieChartSlicesStyle] with the provided parameters or their default values.
@@ -146,11 +142,11 @@ object PieChartDefaults {
      */
     @Composable
     fun slices(
-        baseColor: Color = MaterialTheme.colorScheme.primary,
-        alpha: Float = 1f,
+        baseColor: Color = StyleDefaults.seriesColor,
+        alpha: Float = StyleDefaults.seriesAlpha,
     ): PieChartSlicesStyle =
         PieChartSlicesStyle(
-            alpha = alpha.coerceIn(0f, 1f),
+            alpha = alpha,
             baseColor = baseColor,
         )
 
@@ -162,8 +158,8 @@ object PieChartDefaults {
      */
     @Composable
     fun border(
-        color: Color = MaterialTheme.colorScheme.surface,
-        width: Dp = 1.dp,
+        color: Color = StyleDefaults.pieBorderColor,
+        width: Dp = StyleDefaults.lineWidth,
     ): PieChartBorderStyle =
         PieChartBorderStyle(
             width = width,
@@ -178,3 +174,22 @@ object PieChartDefaults {
     @Composable
     fun legend(visible: Boolean = true): LegendStyle = LegendDefaults.style(visible = visible)
 }
+
+/** Returns [this] with alpha, donut hole, and sizes clamped to drawable values. */
+internal fun PieChartStyle.clamped(density: Density): PieChartStyle =
+    PieChartStyle(
+        modifier = modifier,
+        chartContainerStyle = chartContainerStyle,
+        donut =
+            donut.copy(
+                holePercentage =
+                    if (donut.holePercentage.isNaN()) {
+                        StyleDefaults.pieDonutHole
+                    } else {
+                        donut.holePercentage.coerceIn(DONUT_MIN_PERCENTAGE, DONUT_MAX_PERCENTAGE)
+                    },
+            ),
+        slices = slices.copy(alpha = slices.alpha.clampAlpha()),
+        border = border.copy(width = border.width.clampSize(fallback = StyleDefaults.lineWidth, density = density)),
+        legend = legend,
+    )

@@ -50,12 +50,26 @@ removed. Use the `title` and `selection` parameters instead. Use
 ## Styles
 
 Move customizations to the grouped `RadarChartStyle` sections such as `grid`,
-`axes`, `polygon`, `points`, and `categories`.
+`axes`, `polygon`, `points`, and `selection`.
+
+Axis labels are on by default: each category name sits at the end of its axis, and the web shrinks
+to leave room for them. Pass `axes(labelVisible = false)` for a web that fills the chart.
+
+Data points are hidden by default, like on line charts; the selected axis still
+shows its points. Pass `points(visible = true)` to show every point.
+
+The category legend is gone: the axis labels already name every category, and the legend only
+repeated them with a color that meant nothing. 2.x `categoryColors`, `categoryPinsVisible`, and
+`categoryPinSize` have no 3.x equivalent. The legend still names the series and shows each value
+while an axis is selected.
+
+Selecting an axis dims the data points and labels of the other axes to 70% opacity. Polygons keep
+their full shape and color. Pass `selection(unselectedAlpha = 1f)` to keep every point solid.
 
 Sizes are `Dp` and scale with screen density. The 2.x `Float` sizes were
-pixels, so divide them by the screen density when migrating. Point and pin
-sizes are radii. The defaults are `1.dp` grid and axis lines, `3.dp` label
-padding, a `2.dp` polygon line, `4.dp` points, and `2.dp` category pins.
+pixels, so divide them by the screen density when migrating. Point sizes are
+radii. The defaults are `1.dp` grid and axis lines, 4 grid rings, `10.dp`
+label padding, a `2.dp` polygon line, and `4.dp` data points.
 
 ## Behavior
 
@@ -65,3 +79,11 @@ padding, a `2.dp` polygon line, `4.dp` points, and `2.dp` category pins.
   selected title and exposes the raw value for each series.
 - `interactionEnabled = false` disables drag gestures while programmatic
   selection remains visible.
+- Dragging selects an axis and the selection stays after the drag, so the
+  values can be read. A tap clears it, so touch alone returns the chart to
+  rest.
+- With more than one series, tapping a series outline focuses it and fades
+  the others to 35% opacity. Where series overlap, each
+  tap moves to the next one, and tapping empty space clears the focus. The
+  focused series is held in the new `seriesSelection` parameter.
+  `interactionEnabled = false` also disables these taps.

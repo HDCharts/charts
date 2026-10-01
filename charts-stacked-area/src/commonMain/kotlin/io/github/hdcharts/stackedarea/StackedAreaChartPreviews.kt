@@ -40,8 +40,7 @@ private fun StackedAreaChartPreviewContent() {
         )
     val style =
         StackedAreaChartDefaults.style(
-            fill = StackedAreaChartDefaults.fill(colors = colors, alpha = 0.32f),
-            boundary = StackedAreaChartDefaults.boundary(colors = colors, bezier = false),
+            fill = StackedAreaChartDefaults.fill(colors = colors, alpha = 0.32f, bezier = false),
         )
     StackedAreaChart(
         data = chartDataOf(categories = CATEGORIES, *STACKED_AREA_VALUES.toTypedArray()),

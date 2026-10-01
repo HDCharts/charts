@@ -1,99 +1,134 @@
 package io.github.hdcharts.core.internal
 
-import io.github.hdcharts.core.internal.model.MultiChartData
+import io.github.hdcharts.core.model.ChartData
 
+/** Data error messages shared by every chart, so the same rule reads the same way everywhere. */
 @InternalChartsApi
 object ValidationErrors {
-    const val RULE_ITEM_POINTS_SIZE: String = "Item at index %d has %d points, expected %d."
-    const val RULE_ITEM_POINT_NOT_NUMBER: String =
-        "Item at index %d has non-numeric value at index %d."
-    const val RULE_CATEGORIES_SIZE_MISMATCH: String =
-        "Categories size %d does not match expected %d."
-    const val RULE_COLORS_SIZE_MISMATCH: String = "Colors size %d does not match expected %d."
-    const val RULE_DATA_POINTS_LESS_THAN_MIN: String =
-        "Data points size should be greater than or equal to %d."
-    const val RULE_DATA_POINT_NOT_NUMBER: String =
-        "Data point at index %d is not a valid number."
-    const val RULE_DATA_POINT_NOT_FINITE: String =
-        "Data point at index %d is not finite."
-    const val RULE_DATA_POINT_NEGATIVE: String =
-        "Data point at index %d must be non-negative."
-    const val RULE_ITEM_POINT_NEGATIVE: String =
-        "Item at index %d has negative value at index %d."
+    /** Fewest values a chart needs to draw. */
+    const val MIN_VALUES: Int = 2
 
-    const val MIN_REQUIRED_PIE: Int = 2
-    const val MIN_REQUIRED_LINE: Int = 2
-    const val MIN_REQUIRED_STACKED_AREA: Int = 2
-    const val MIN_REQUIRED_STACKED_BAR: Int = 1
-    const val MIN_REQUIRED_BAR: Int = 2
-    const val MIN_REQUIRED_HISTOGRAM: Int = 2
-    const val MIN_REQUIRED_RADAR: Int = 3
+    /** Fewest values a radar chart needs to draw a polygon. */
+    const val MIN_RADAR_VALUES: Int = 3
+
+    fun noSeries(): String = "At least one series is required."
+
+    fun exactlyOneSeries(count: Int): String = "Exactly one series is required; got $count."
+
+    fun tooFewValues(min: Int): String = "At least $min values are required."
+
+    fun categoryCountMismatch(
+        categories: Int,
+        values: Int,
+    ): String = "Category count ($categories) must match value count ($values)."
+
+    /** [target] names what the colors are matched to, such as "value" or "series". */
+    fun colorCountMismatch(
+        colors: Int,
+        expected: Int,
+        target: String,
+    ): String = "Color count ($colors) must match $target count ($expected)."
+
+    fun seriesNotAligned(series: Int): String = "Series $series is not aligned with the first series."
+
+    fun nonFiniteSeriesValue(series: Int): String = "Series $series contains a non-finite value."
+
+    fun negativeSeriesValue(series: Int): String = "Series $series contains a negative value."
+
+    fun nonFiniteValue(index: Int): String = "Value at index $index is not finite."
+
+    fun negativeValue(index: Int): String = "Value at index $index is negative."
+
+    fun nonFiniteRange(): String = "Range bounds must be finite."
 }
 
+/**
+ * Returns the errors of charts that draw aligned series: no series, fewer than [minValues] values, a
+ * category count that does not match, misaligned series, non-finite values, and [colorCount] colors
+ * that do not match the series count. With [allowNegative] set to `false`, negative values are errors.
+ */
 @InternalChartsApi
-fun String.format(vararg args: Any?): String {
-    if (args.isEmpty()) return this
-    return args.fold(this) { formattedString, arg ->
-        formattedString.replaceFirst("%d", arg.toString())
-    }
-}
-
-@InternalChartsApi
-fun validateMultiSeriesChartData(
-    data: MultiChartData,
-    pointsSize: Int,
-    minRequiredPointsSize: Int,
-    colorsSize: Int,
-    expectedColorsSize: Int,
+fun validateSeries(
+    data: ChartData,
+    minValues: Int,
+    allowNegative: Boolean = true,
+    colorCount: Int = 0,
 ): List<String> {
-    val validationErrors = mutableListOf<String>()
-
-    // Rule 1: pointsSize should be greater than minRequiredPointsSize
-    if (pointsSize < minRequiredPointsSize) {
-        val validationError =
-            ValidationErrors.RULE_DATA_POINTS_LESS_THAN_MIN.format(minRequiredPointsSize)
-        validationErrors.add(validationError)
-        return validationErrors
+    if (data.series.isEmpty()) return listOf(ValidationErrors.noSeries())
+    val errors = mutableListOf<String>()
+    val valueCount =
+        data.series
+            .first()
+            .values.size
+    if (valueCount < minValues) errors += ValidationErrors.tooFewValues(min = minValues)
+    if (data.categories.isNotEmpty() && data.categories.size != valueCount) {
+        errors += ValidationErrors.categoryCountMismatch(categories = data.categories.size, values = valueCount)
     }
-
-    // Rule 2: Each item should have the same number of points
-    data.items.forEachIndexed { index, dataItem ->
-        if (dataItem.item.points.size != pointsSize) {
-            val validationError =
-                ValidationErrors.RULE_ITEM_POINTS_SIZE.format(
-                    index,
-                    dataItem.item.points.size,
-                    pointsSize,
-                )
-            validationErrors.add(validationError)
+    data.series.forEachIndexed { index, series ->
+        if (series.values.size != valueCount) errors += ValidationErrors.seriesNotAligned(series = index)
+        if (series.values.any { !it.isFinite() }) errors += ValidationErrors.nonFiniteSeriesValue(series = index)
+        if (!allowNegative && series.values.any { it < 0.0 }) {
+            errors += ValidationErrors.negativeSeriesValue(series = index)
         }
     }
-
-    // Rule 3: If categories are not empty, it should match pointsSize
-    if (data.hasCategories() && data.categories.size != pointsSize) {
-        val validationError =
-            ValidationErrors.RULE_CATEGORIES_SIZE_MISMATCH.format(
-                data.categories.size,
-                pointsSize,
-            )
-        validationErrors.add(validationError)
-    }
-
-    // Rule 4: If colors are not empty, it should match expectedColorsSize
-    if (colorsSize > 0 && colorsSize != expectedColorsSize) {
-        val validationError =
-            ValidationErrors.RULE_COLORS_SIZE_MISMATCH.format(colorsSize, expectedColorsSize)
-        validationErrors.add(validationError)
-    }
-
-    data.items.forEachIndexed { itemIndex, dataItem ->
-        dataItem.item.points.forEachIndexed { pointIndex, value ->
-            if (value.isNaN()) {
-                val validationError =
-                    ValidationErrors.RULE_ITEM_POINT_NOT_NUMBER.format(itemIndex, pointIndex)
-                validationErrors.add(validationError)
-            }
-        }
-    }
-    return validationErrors
+    errors += validateColorCount(colors = colorCount, expected = data.series.size, target = "series")
+    return errors
 }
+
+/**
+ * Returns the errors of charts that draw one series: not exactly one series, too few values, [colorCount]
+ * colors that do not match the value count, a category count that does not match, and each bad value.
+ */
+@InternalChartsApi
+fun validateSingleSeries(
+    data: ChartData,
+    colorCount: Int = 0,
+    allowNegative: Boolean = true,
+): List<String> {
+    if (data.series.size != 1) return listOf(ValidationErrors.exactlyOneSeries(count = data.series.size))
+    val values = data.series.single().values
+    if (values.size < ValidationErrors.MIN_VALUES) {
+        return listOf(ValidationErrors.tooFewValues(min = ValidationErrors.MIN_VALUES))
+    }
+    val errors = validateColorCount(colors = colorCount, expected = values.size, target = "value").toMutableList()
+    if (data.categories.isNotEmpty() && data.categories.size != values.size) {
+        errors += ValidationErrors.categoryCountMismatch(categories = data.categories.size, values = values.size)
+    }
+    errors += validateValues(values = values, allowNegative = allowNegative)
+    return errors
+}
+
+/** Returns an error for each value that is not finite or, with [allowNegative] set to `false`, negative. */
+@InternalChartsApi
+fun validateValues(
+    values: List<Double>,
+    allowNegative: Boolean = true,
+): List<String> =
+    values.mapIndexedNotNull { index, value ->
+        when {
+            !value.isFinite() -> ValidationErrors.nonFiniteValue(index = index)
+            !allowNegative && value < 0.0 -> ValidationErrors.negativeValue(index = index)
+            else -> null
+        }
+    }
+
+/** Returns an error when [colors] is set and does not match [expected]; [target] names what they color. */
+@InternalChartsApi
+fun validateColorCount(
+    colors: Int,
+    expected: Int,
+    target: String,
+): List<String> =
+    if (colors > 0 && colors != expected) {
+        listOf(ValidationErrors.colorCountMismatch(colors = colors, expected = expected, target = target))
+    } else {
+        emptyList()
+    }
+
+/** Returns an error when a fixed range bound is not finite. */
+@InternalChartsApi
+fun validateRange(
+    min: Double?,
+    max: Double?,
+): List<String> =
+    if (min?.isFinite() == false || max?.isFinite() == false) listOf(ValidationErrors.nonFiniteRange()) else emptyList()

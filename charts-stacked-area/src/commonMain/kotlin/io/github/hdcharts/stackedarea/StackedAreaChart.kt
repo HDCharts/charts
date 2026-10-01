@@ -7,14 +7,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import io.github.hdcharts.core.internal.NO_SELECTION
+import io.github.hdcharts.core.internal.ValidationErrors
 import io.github.hdcharts.core.internal.axis.validateAxisLabels
 import io.github.hdcharts.core.internal.composable.ChartErrors
 import io.github.hdcharts.core.internal.composable.Legend
 import io.github.hdcharts.core.internal.model.ChartDataItem
 import io.github.hdcharts.core.internal.model.MultiChartData
+import io.github.hdcharts.core.internal.validateSeries
 import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.model.ChartSelection
 import io.github.hdcharts.core.model.ChartValueFormatters
@@ -37,7 +38,16 @@ fun StackedAreaChart(
     animateOnStart: Boolean = true,
 ) {
     val density = LocalDensity.current
-    val errors = remember(data, style, density) { validateStackedAreaInput(data, style, density) }
+    val errors =
+        remember(data, style, density) {
+            validateSeries(
+                data = data,
+                minValues = ValidationErrors.MIN_VALUES,
+                allowNegative = false,
+                colorCount = style.fill.colors.size,
+            ) + validateAxisLabels(style.axis.xLabels, style.axis.yLabels, density)
+        }
+    val drawStyle = remember(style, density) { style.clamped(density) }
     val pointCount =
         data.series
             .firstOrNull()
@@ -57,15 +67,11 @@ fun StackedAreaChart(
 
     val internalData = remember(data, title) { toInternalStackedAreaData(data, title) }
     val colors =
-        remember(style.fill, data.series.size) {
-            style.fill
+        remember(drawStyle.fill, data.series.size) {
+            drawStyle.fill
                 .resolveColors(data.series.size)
-                .map { it.copy(alpha = style.fill.alpha) }
+                .map { it.copy(alpha = drawStyle.fill.alpha) }
                 .toImmutableList()
-        }
-    val lineColors =
-        remember(style.boundary, data.series.size) {
-            style.boundary.resolveColors(data.series.size)
         }
     val seriesNames = data.series.map { it.name.orEmpty() }.toImmutableList()
     val selectedTitle = data.categories.getOrNull(selectedIndex)?.takeIf(String::isNotBlank)
@@ -86,9 +92,8 @@ fun StackedAreaChart(
                 StackedAreaChart(
                     data = internalData,
                     title = effectiveTitle,
-                    style = style,
+                    style = drawStyle,
                     areaColors = colors,
-                    lineColors = lineColors,
                     interactionEnabled = interactionEnabled,
                     animateOnStart = animateOnStart,
                     selectedPointIndex = selectedIndex,
@@ -107,40 +112,6 @@ fun StackedAreaChart(
             }
         }
     }
-}
-
-private fun validateStackedAreaInput(
-    data: ChartData,
-    style: StackedAreaChartStyle,
-    density: Density,
-): List<String> {
-    val errors = mutableListOf<String>()
-    if (data.series.isEmpty()) return listOf("At least one stacked area series is required.")
-    val pointCount =
-        data.series
-            .first()
-            .values.size
-    if (pointCount < 2) errors += "At least two stacked area values are required."
-    if (data.categories.isNotEmpty() && data.categories.size != pointCount) {
-        errors += "Category count (${data.categories.size}) must match value count ($pointCount)."
-    }
-    data.series.forEachIndexed { index, series ->
-        if (series.values.size != pointCount) errors += "Series $index is not aligned with the first series."
-        if (series.values.any { !it.isFinite() || it < 0.0 }) {
-            errors += "Series $index contains a negative or non-finite contribution."
-        }
-    }
-    if (style.fill.colors.isNotEmpty() && style.fill.colors.size != data.series.size) {
-        errors += "Fill color count must match series count (${data.series.size})."
-    }
-    if (style.boundary.colors.isNotEmpty() && style.boundary.colors.size != data.series.size) {
-        errors += "Boundary color count must match series count (${data.series.size})."
-    }
-    if (!style.fill.alpha.isFinite() || style.fill.alpha !in 0f..1f) {
-        errors += "Fill alpha must be in 0..1."
-    }
-    errors += validateAxisLabels(style.axis.xLabels, style.axis.yLabels, density)
-    return errors
 }
 
 private fun toInternalStackedAreaData(

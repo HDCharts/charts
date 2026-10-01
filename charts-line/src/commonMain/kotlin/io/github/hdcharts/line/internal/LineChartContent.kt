@@ -54,6 +54,7 @@ import io.github.hdcharts.core.internal.bezier.DEFAULT_BEZIER_TENSION
 import io.github.hdcharts.core.internal.composable.ChartErrors
 import io.github.hdcharts.core.internal.composable.rememberShowState
 import io.github.hdcharts.core.internal.density.denseStepForViewport
+import io.github.hdcharts.core.internal.drawing.drawSelectionLine
 import io.github.hdcharts.core.internal.interaction.buildHorizontalDragGestureModifier
 import io.github.hdcharts.core.internal.interaction.buildTapGestureModifier
 import io.github.hdcharts.core.internal.interaction.horizontalScrollGestures
@@ -82,7 +83,7 @@ internal fun Density.lineVerticalSafeInset(style: LineChartStyle): Float {
     val pointRadius = if (style.points.visible) style.points.size.toPx() else 0f
     val markerRadius =
         if (style.points.visible || style.selection.visible) {
-            max(style.selection.size.toPx(), style.selection.activeSize.toPx())
+            max(style.selection.markerSize.toPx(), style.selection.pointSize.toPx())
         } else {
             0f
         }
@@ -619,17 +620,17 @@ internal fun LineChartContent(
                                 val stepX = if (isDenseMode) denseStepX else fitStepX
                                 if (stepX > 0f) {
                                     val selectedX = safeSelectedIndex * stepX
-                                    val selectionStrokeWidth = max(style.axis.lineWidth.toPx(), 1f)
-                                    drawLine(
-                                        color = style.selection.color,
-                                        start = Offset(selectedX, 0f),
-                                        end = Offset(selectedX, size.height),
-                                        strokeWidth = selectionStrokeWidth,
-                                    )
+                                    if (style.selection.visible) {
+                                        drawSelectionLine(
+                                            x = selectedX,
+                                            color = style.selection.color,
+                                            strokeWidth = style.selection.width.toPx(),
+                                        )
+                                    }
 
                                     if (!dragging.value && (style.selection.visible || style.points.visible)) {
                                         val markerRadius =
-                                            style.selection.activeSize
+                                            style.selection.pointSize
                                                 .toPx()
                                                 .coerceAtLeast(1f)
                                         data.items.forEachIndexed { seriesIndex, _ ->
@@ -646,7 +647,7 @@ internal fun LineChartContent(
                                                     verticalInset = lineVerticalInsetPx,
                                                 )
                                             drawCircle(
-                                                color = style.selection.color,
+                                                color = style.selection.markerColor,
                                                 radius = markerRadius,
                                                 center = Offset(selectedX, y),
                                             )

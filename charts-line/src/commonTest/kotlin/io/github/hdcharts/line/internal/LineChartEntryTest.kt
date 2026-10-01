@@ -38,7 +38,7 @@ class LineChartEntryTest {
     fun lineColorCountMismatch_reportsColorError() =
         runComposeUiTest {
             assertEquals(
-                expected = listOf("Line color count must match series count (4)."),
+                expected = listOf("Color count (2) must match series count (4)."),
                 actual = validate(data = multiDataSet, lineColors = colors.drop(2)),
             )
         }
@@ -79,7 +79,7 @@ class LineChartEntryTest {
         }
 
     @Test
-    fun categoriesMatchFirstSeriesOnly_reportsCategoryErrorOnce() =
+    fun categoriesMatchFirstSeriesOnly_reportsOnlyAlignmentErrors() =
         runComposeUiTest {
             val data =
                 ChartData(
@@ -95,7 +95,6 @@ class LineChartEntryTest {
             assertEquals(
                 expected =
                     listOf(
-                        "Category count (3) must match every series value count.",
                         "Series 1 is not aligned with the first series.",
                         "Series 2 is not aligned with the first series.",
                     ),
@@ -115,7 +114,7 @@ class LineChartEntryTest {
                         ),
                 )
 
-            assertEquals(expected = listOf("At least two line values are required."), actual = validate(data = data))
+            assertEquals(expected = listOf("At least 2 values are required."), actual = validate(data = data))
         }
 
     @Test

@@ -36,11 +36,11 @@ fun LiveLineChart(
         modifier = modifier,
         style = style,
         title = title,
-    ) { internalData ->
+    ) { internalData, drawStyle ->
         LiveLineChartImpl(
             data = internalData,
             modifier = modifier,
-            style = style,
+            style = drawStyle,
             shiftDuration = shiftDuration,
             animateOnStart = animateOnStart,
             axisValueFormatter = axisValueFormatter,

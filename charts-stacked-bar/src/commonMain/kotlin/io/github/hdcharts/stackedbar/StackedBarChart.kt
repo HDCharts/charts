@@ -7,15 +7,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import io.github.hdcharts.core.internal.NO_SELECTION
+import io.github.hdcharts.core.internal.ValidationErrors
 import io.github.hdcharts.core.internal.axis.validateAxisLabels
 import io.github.hdcharts.core.internal.composable.ChartErrors
 import io.github.hdcharts.core.internal.composable.Legend
 import io.github.hdcharts.core.internal.model.ChartDataItem
 import io.github.hdcharts.core.internal.model.MultiChartData
-import io.github.hdcharts.core.internal.validateSizes
+import io.github.hdcharts.core.internal.validateSeries
 import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.model.ChartSelection
 import io.github.hdcharts.core.model.ChartValueFormatters
@@ -38,7 +38,16 @@ fun StackedBarChart(
     animateOnStart: Boolean = true,
 ) {
     val density = LocalDensity.current
-    val errors = remember(data, style, density) { validateStackedBarInput(data, style, density) }
+    val errors =
+        remember(data, style, density) {
+            validateSeries(
+                data = data,
+                minValues = ValidationErrors.MIN_VALUES,
+                allowNegative = false,
+                colorCount = style.segments.colors.size,
+            ) + validateAxisLabels(style.axis.xLabels, style.axis.yLabels, density)
+        }
+    val drawStyle = remember(style, density) { style.clamped(density) }
     val pointCount =
         data.series
             .firstOrNull()
@@ -58,10 +67,10 @@ fun StackedBarChart(
 
     val internalData = remember(data, title) { toInternalStackedData(data, title) }
     val colors =
-        remember(style.segments, data.series.size) {
-            style.segments
+        remember(drawStyle.segments, data.series.size) {
+            drawStyle.segments
                 .resolveColors(data.series.size)
-                .map { it.copy(alpha = style.segments.alpha) }
+                .map { it.copy(alpha = drawStyle.segments.alpha) }
                 .toImmutableList()
         }
     val segmentNames = data.series.map { it.name.orEmpty() }.toImmutableList()
@@ -83,7 +92,7 @@ fun StackedBarChart(
                 StackedBarChartInternal(
                     data = internalData,
                     title = effectiveTitle,
-                    style = style,
+                    style = drawStyle,
                     colors = colors,
                     showXAxisLabels = style.axis.xLabels.visible && data.categories.any { it.isNotBlank() },
                     interactionEnabled = interactionEnabled,
@@ -104,44 +113,6 @@ fun StackedBarChart(
             }
         }
     }
-}
-
-private fun validateStackedBarInput(
-    data: ChartData,
-    style: StackedBarChartStyle,
-    density: Density,
-): List<String> {
-    val errors = mutableListOf<String>()
-    if (data.series.isEmpty()) return listOf("At least one stacked segment is required.")
-    val barCount =
-        data.series
-            .first()
-            .values.size
-    if (barCount < 2) errors += "At least two stacked bars are required."
-    if (data.categories.isNotEmpty() && data.categories.size != barCount) {
-        errors += "Category count (${data.categories.size}) must match bar count ($barCount)."
-    }
-    data.series.forEachIndexed { index, series ->
-        if (series.values.size != barCount) errors += "Segment $index is not aligned with the first segment."
-        if (series.values.any { !it.isFinite() || it < 0.0 }) {
-            errors += "Segment $index contains a negative or non-finite contribution."
-        }
-    }
-    if (style.segments.colors.isNotEmpty() && style.segments.colors.size != data.series.size) {
-        errors += "Segment color count must match segment count (${data.series.size})."
-    }
-    if (!style.segments.alpha.isFinite() || style.segments.alpha !in 0f..1f) {
-        errors += "Segment alpha must be in 0..1."
-    }
-    errors += validateAxisLabels(style.axis.xLabels, style.axis.yLabels, density)
-    errors +=
-        validateSizes(
-            density,
-            "Bar spacing" to style.layout.space,
-            "Minimum bar width" to style.layout.minBarWidth,
-            "Selection line width" to style.selection.width,
-        )
-    return errors
 }
 
 private fun toInternalStackedData(

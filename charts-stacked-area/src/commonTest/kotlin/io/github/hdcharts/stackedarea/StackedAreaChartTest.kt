@@ -385,7 +385,32 @@ class StackedAreaChartTest {
             }
 
             onNodeWithTag(TestTags.CHART_ERROR).isDisplayed()
-            onNodeWithText("Fill color count must match series count (4).\n").isDisplayed()
+            onNodeWithText("Color count (2) must match series count (4).\n").isDisplayed()
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun stackedAreaChart_withInvalidNumericStyleValues_drawsClampedChart() =
+        runComposeUiTest {
+            setContent {
+                StackedAreaChart(
+                    data = multiDataSet,
+                    style =
+                        StackedAreaChartDefaults.style(
+                            fill = StackedAreaChartDefaults.fill(alpha = Float.NaN),
+                            selection =
+                                StackedAreaChartDefaults.selection(
+                                    width = (-1).dp,
+                                    unselectedAlpha = -0.1f,
+                                ),
+                        ),
+                    selection = staticChartSelection(1),
+                    animateOnStart = false,
+                )
+            }
+
+            onNodeWithTag(TestTags.STACKED_AREA_CHART_PLOT).assertIsDisplayed()
+            onNodeWithTag(TestTags.CHART_ERROR).assertDoesNotExist()
         }
 
     @OptIn(ExperimentalTestApi::class)
@@ -404,7 +429,7 @@ class StackedAreaChartTest {
             }
 
             onNodeWithTag(TestTags.CHART_ERROR).isDisplayed()
-            onNodeWithText("Series 0 contains a negative or non-finite contribution.\n").isDisplayed()
+            onNodeWithText("Series 0 contains a negative value.\n").isDisplayed()
         }
 
     @OptIn(ExperimentalTestApi::class)

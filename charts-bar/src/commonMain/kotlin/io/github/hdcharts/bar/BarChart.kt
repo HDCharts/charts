@@ -6,15 +6,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import io.github.hdcharts.bar.internal.BarChartInternalPlot
 import io.github.hdcharts.bar.internal.rememberBarSelection
-import io.github.hdcharts.bar.internal.validateBarData
-import io.github.hdcharts.bar.internal.validateBarStyle
+import io.github.hdcharts.core.internal.axis.validateAxisLabels
 import io.github.hdcharts.core.internal.composable.ChartErrors
+import io.github.hdcharts.core.internal.validateRange
+import io.github.hdcharts.core.internal.validateSingleSeries
 import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.model.ChartSelection
 import io.github.hdcharts.core.model.ChartValueFormatter
 import io.github.hdcharts.core.model.rememberChartSelection
 import io.github.hdcharts.core.style.BarChartDefaults
 import io.github.hdcharts.core.style.BarChartStyle
+import io.github.hdcharts.core.style.clamped
 import kotlinx.collections.immutable.toImmutableList
 
 /**
@@ -47,15 +49,18 @@ fun BarChart(
     val selectedIndex = rememberBarSelection(data, selection)
     val errors =
         remember(data, style, density) {
-            validateBarData(data, style.bars.colors.size) + validateBarStyle(style, density)
+            validateSingleSeries(data = data, colorCount = style.bars.colors.size) +
+                validateRange(min = style.range.min, max = style.range.max) +
+                validateAxisLabels(style.axis.xLabels, style.axis.yLabels, density)
         }
+    val drawStyle = remember(style, density) { style.clamped(density) }
     if (errors.isNotEmpty()) {
         ChartErrors(style.chartContainerStyle, errors.toImmutableList(), modifier)
     } else {
         BarChartInternalPlot(
             data = data,
             title = title,
-            style = style,
+            style = drawStyle,
             selection = selection,
             selectedIndex = selectedIndex,
             interactionEnabled = interactionEnabled,

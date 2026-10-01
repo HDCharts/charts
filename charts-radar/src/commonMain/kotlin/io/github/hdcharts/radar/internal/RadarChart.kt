@@ -3,6 +3,7 @@ package io.github.hdcharts.radar.internal
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,6 +13,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -25,8 +27,10 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import io.github.hdcharts.core.internal.AnimationSpec
@@ -37,28 +41,30 @@ import io.github.hdcharts.core.internal.layout.fillMaxSizeChartModifier
 import io.github.hdcharts.core.internal.model.MultiChartData
 import io.github.hdcharts.core.internal.model.minMax
 import io.github.hdcharts.core.internal.model.normalizeByMinMax
+import io.github.hdcharts.core.style.StyleDefaults
 import io.github.hdcharts.radar.RadarChartStyle
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-import kotlin.math.PI
 import kotlin.math.cos
-import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlin.math.sin
+
+private val SERIES_TOUCH_RADIUS = 24.dp
 
 @Composable
 internal fun RadarChart(
     data: MultiChartData,
     style: RadarChartStyle,
     colors: ImmutableList<Color>,
-    categoryColors: ImmutableList<Color>,
     axisLabels: ImmutableList<String> = persistentListOf(),
     interactionEnabled: Boolean,
     animateOnStart: Boolean,
     selectedAxisIndex: Int = NO_SELECTION,
+    focusedSeriesIndex: Int = NO_SELECTION,
     onValueChanged: (Int) -> Unit = {},
+    onFocusedSeriesChanged: ((Int) -> Unit)? = null,
 ) {
     val isPreview = LocalInspectionMode.current
     var show by rememberShowState(isPreviewMode = isPreview || !animateOnStart)
@@ -139,9 +145,31 @@ internal fun RadarChart(
             remember(widthPx, heightPx) {
                 Offset(x = widthPx / 2f, y = heightPx / 2f)
             }
+        val showAxisLabels = style.axes.labelVisible && axisLabels.isNotEmpty()
+        val textMeasurer = rememberTextMeasurer()
+        // The web shrinks so the labels fit outside it, so it needs their measured size.
+        val labelSizePx =
+            remember(showAxisLabels, axisLabels, style.axes.labelSize, textMeasurer, density) {
+                if (!showAxisLabels) {
+                    IntSize.Zero
+                } else {
+                    val sizes =
+                        axisLabels.map { label ->
+                            textMeasurer.measure(text = label, style = TextStyle(fontSize = style.axes.labelSize)).size
+                        }
+                    IntSize(width = sizes.maxOf { it.width }, height = sizes.maxOf { it.height })
+                }
+            }
         val radius =
-            remember(widthPx, heightPx) {
-                min(widthPx, heightPx) / 2f
+            remember(widthPx, heightPx, labelSizePx, style.axes.labelPadding, density) {
+                radarPlotRadius(
+                    axisCount = axisCount,
+                    widthPx = widthPx,
+                    heightPx = heightPx,
+                    labelWidthPx = labelSizePx.width.toFloat(),
+                    labelHeightPx = labelSizePx.height.toFloat(),
+                    labelPaddingPx = with(density) { style.axes.labelPadding.toPx() },
+                )
             }
 
         val labelRadius =
@@ -159,6 +187,41 @@ internal fun RadarChart(
             }
 
         Box(modifier = Modifier.fillMaxSize()) {
+            val touchRadiusPx = with(density) { SERIES_TOUCH_RADIUS.toPx() }
+            val currentFocusedSeriesIndex by rememberUpdatedState(focusedSeriesIndex)
+            // A tap never selects: it clears the axis a drag left behind, then focuses a series when
+            // the chart has several. That way touch alone can always return the chart to rest.
+            val tapModifier =
+                if (interactionEnabled) {
+                    Modifier.pointerInput(targetNormalized, center, radius, touchRadiusPx) {
+                        detectTapGestures { offset ->
+                            onValueChanged(NO_SELECTION)
+                            if (onFocusedSeriesChanged != null && data.items.size > 1) {
+                                val polygons =
+                                    radarPolygons(
+                                        normalizedValues = targetNormalized,
+                                        axisCount = axisCount,
+                                        center = center,
+                                        radius = radius,
+                                    )
+                                val candidates =
+                                    seriesCandidatesAt(
+                                        tap = offset,
+                                        polygons = polygons,
+                                        touchRadius = touchRadiusPx,
+                                    )
+                                onFocusedSeriesChanged(
+                                    nextFocusedSeries(
+                                        candidates = candidates,
+                                        focusedIndex = currentFocusedSeriesIndex,
+                                    ),
+                                )
+                            }
+                        }
+                    }
+                } else {
+                    Modifier
+                }
             val interactionModifier =
                 if (interactionEnabled) {
                     Modifier.pointerInput(axisCount) {
@@ -193,13 +256,13 @@ internal fun RadarChart(
                         .fillMaxSize()
                         .testTag(TestTags.RADAR_CHART)
                         .onGloballyPositioned { show = true }
+                        .then(tapModifier)
                         .then(interactionModifier),
             ) {
                 drawRadar(
                     data = data,
                     style = style,
                     colors = colors,
-                    categoryColors = categoryColors,
                     axisCount = axisCount,
                     center = center,
                     radius = radius,
@@ -209,15 +272,21 @@ internal fun RadarChart(
                         },
                     dragging = dragging || hasForcedSelection,
                     selectedIndex = effectiveSelectedIndex,
+                    focusedSeriesIndex = focusedSeriesIndex,
                 )
             }
 
-            if (style.axes.labelVisible && axisLabels.isNotEmpty()) {
+            if (showAxisLabels) {
+                val selectionActive = (dragging || hasForcedSelection) && style.selection.visible
                 RadarAxisLabels(
                     labels = axisLabels,
                     labelPositions = labelPositions,
+                    center = center,
                     color = style.axes.labelColor,
                     fontSize = style.axes.labelSize,
+                    edgePadding = StyleDefaults.radarLabelEdgePadding,
+                    selectedIndex = if (selectionActive) effectiveSelectedIndex else NO_SELECTION,
+                    unselectedAlpha = style.selection.unselectedAlpha,
                 )
             }
         }
@@ -228,26 +297,24 @@ private fun DrawScope.drawRadar(
     data: MultiChartData,
     style: RadarChartStyle,
     colors: ImmutableList<Color>,
-    categoryColors: ImmutableList<Color>,
     axisCount: Int,
     center: Offset,
     radius: Float,
     normalizedValues: List<List<Float>>,
     dragging: Boolean,
     selectedIndex: Int,
+    focusedSeriesIndex: Int,
 ) {
     if (axisCount <= 0) return
 
-    val startAngle = (-PI / 2f).toFloat()
-    val angleStep = (2f * PI / axisCount).toFloat()
+    val frame = RadarFrame.of(axisCount)
     if (style.grid.visible && style.grid.steps > 0) {
         drawGrid(
             axisCount = axisCount,
             center = center,
             radius = radius,
             steps = style.grid.steps,
-            startAngle = startAngle,
-            angleStep = angleStep,
+            frame = frame,
             color = style.grid.color,
             strokeWidth = style.grid.lineWidth.toPx(),
         )
@@ -258,8 +325,7 @@ private fun DrawScope.drawRadar(
             axisCount = axisCount,
             center = center,
             radius = radius,
-            startAngle = startAngle,
-            angleStep = angleStep,
+            frame = frame,
             color = style.axes.lineColor,
             strokeWidth = style.axes.lineWidth.toPx(),
         )
@@ -277,95 +343,62 @@ private fun DrawScope.drawRadar(
             scaledValues to lineColor
         }
 
-    seriesValues.forEach { (values, lineColor) ->
+    val showSelection = style.selection.visible && dragging && selectedIndex in 0 until axisCount
+    val shownSelectedIndex = if (showSelection) selectedIndex else NO_SELECTION
+    val unselectedAlpha = if (showSelection) style.selection.unselectedAlpha else 1f
+
+    // The focused series draws last, so it sits on top of the dimmed ones.
+    val drawOrder = seriesValues.indices.sortedBy { it == focusedSeriesIndex }
+    val seriesAlphas =
+        seriesValues.indices.map { index ->
+            val unfocused =
+                style.selection.visible && focusedSeriesIndex != NO_SELECTION && index != focusedSeriesIndex
+            if (unfocused) style.selection.unfocusedSeriesAlpha else 1f
+        }
+
+    drawOrder.forEach { index ->
+        val (values, lineColor) = seriesValues[index]
+        val seriesAlpha = seriesAlphas[index]
         val path =
             buildPolygonPath(
                 values = values,
                 center = center,
-                startAngle = startAngle,
-                angleStep = angleStep,
+                frame = frame,
             )
 
         if (style.polygon.fillVisible) {
             drawPath(
                 path = path,
-                color = lineColor.copy(alpha = style.polygon.fillAlpha),
+                color = lineColor.copy(alpha = style.polygon.fillAlpha * seriesAlpha),
             )
         }
 
         if (style.polygon.lineWidth > 0.dp) {
             drawPath(
                 path = path,
-                color = lineColor,
+                color = lineColor.copy(alpha = lineColor.alpha * seriesAlpha),
                 style = Stroke(width = style.polygon.lineWidth.toPx()),
             )
         }
     }
 
-    if (style.points.visible) {
-        seriesValues.forEach { (values, lineColor) ->
+    // Hidden points still draw the selected axis, like the selected point on a line chart.
+    if (style.points.visible || shownSelectedIndex != NO_SELECTION) {
+        drawOrder.forEach { index ->
+            val (values, lineColor) = seriesValues[index]
+            val pointColor = if (style.points.colorSameAsLine) lineColor else style.points.color
             drawPoints(
                 values = values,
                 center = center,
-                startAngle = startAngle,
-                angleStep = angleStep,
+                frame = frame,
                 pointSize = style.points.size.toPx(),
-                pointColor =
-                    when (style.points.colorSameAsLine) {
-                        true -> lineColor
-                        else -> style.points.color
-                    },
-                dragging = dragging,
-                selectedIndex = selectedIndex,
+                selectedPointSize = style.selection.pointSize.toPx(),
+                pointColor = pointColor.copy(alpha = pointColor.alpha * seriesAlphas[index]),
+                selectedIndex = shownSelectedIndex,
+                unselectedAlpha = unselectedAlpha,
+                onlySelected = !style.points.visible,
             )
         }
-    }
-
-    if (style.categories.pinsVisible && categoryColors.isNotEmpty()) {
-        drawCategoryPins(
-            axisCount = axisCount,
-            center = center,
-            radius = radius,
-            startAngle = startAngle,
-            angleStep = angleStep,
-            colors = categoryColors,
-            pinSize = style.categories.pinSize.toPx(),
-            dragging = dragging,
-            selectedIndex = selectedIndex,
-        )
-    }
-}
-
-private fun DrawScope.drawCategoryPins(
-    axisCount: Int,
-    center: Offset,
-    radius: Float,
-    startAngle: Float,
-    angleStep: Float,
-    colors: ImmutableList<Color>,
-    pinSize: Float,
-    dragging: Boolean,
-    selectedIndex: Int,
-) {
-    repeat(axisCount) { index ->
-        val angle = startAngle + angleStep * index
-        val point =
-            Offset(
-                x = center.x + cos(angle) * radius,
-                y = center.y + sin(angle) * radius,
-            )
-        val color = colors.getOrNull(index) ?: colors.firstOrNull() ?: Color.Unspecified
-        val radiusSize =
-            if (dragging && selectedIndex == index) {
-                pinSize * 1.5f
-            } else {
-                pinSize
-            }
-        drawCircle(
-            color = color,
-            radius = radiusSize,
-            center = point,
-        )
     }
 }
 
@@ -374,8 +407,7 @@ private fun DrawScope.drawGrid(
     center: Offset,
     radius: Float,
     steps: Int,
-    startAngle: Float,
-    angleStep: Float,
+    frame: RadarFrame,
     color: Color,
     strokeWidth: Float,
 ) {
@@ -385,8 +417,7 @@ private fun DrawScope.drawGrid(
             buildPolygonPath(
                 values = List(axisCount) { r },
                 center = center,
-                startAngle = startAngle,
-                angleStep = angleStep,
+                frame = frame,
             )
         drawPath(
             path = path,
@@ -400,13 +431,12 @@ private fun DrawScope.drawAxes(
     axisCount: Int,
     center: Offset,
     radius: Float,
-    startAngle: Float,
-    angleStep: Float,
+    frame: RadarFrame,
     color: Color,
     strokeWidth: Float,
 ) {
     repeat(axisCount) { index ->
-        val angle = startAngle + angleStep * index
+        val angle = frame.angleAt(index)
         val end =
             Offset(
                 x = center.x + cos(angle) * radius,
@@ -424,28 +454,27 @@ private fun DrawScope.drawAxes(
 private fun DrawScope.drawPoints(
     values: List<Float>,
     center: Offset,
-    startAngle: Float,
-    angleStep: Float,
+    frame: RadarFrame,
     pointSize: Float,
+    selectedPointSize: Float,
     pointColor: Color,
-    dragging: Boolean,
     selectedIndex: Int,
+    unselectedAlpha: Float,
+    onlySelected: Boolean,
 ) {
     values.forEachIndexed { index, value ->
-        val angle = startAngle + angleStep * index
+        if (onlySelected && index != selectedIndex) return@forEachIndexed
+        val angle = frame.angleAt(index)
         val point =
             Offset(
                 x = center.x + cos(angle) * value,
                 y = center.y + sin(angle) * value,
             )
-        val radius =
-            if (dragging && selectedIndex == index) {
-                pointSize * 1.6f
-            } else {
-                pointSize
-            }
+        val isSelected = selectedIndex == index
+        val dimmed = selectedIndex != NO_SELECTION && !isSelected
+        val radius = if (isSelected) selectedPointSize else pointSize
         drawCircle(
-            color = pointColor,
+            color = if (dimmed) pointColor.copy(alpha = pointColor.alpha * unselectedAlpha) else pointColor,
             radius = radius,
             center = point,
         )
@@ -455,12 +484,11 @@ private fun DrawScope.drawPoints(
 private fun buildPolygonPath(
     values: List<Float>,
     center: Offset,
-    startAngle: Float,
-    angleStep: Float,
+    frame: RadarFrame,
 ): Path {
     val path = Path()
     values.forEachIndexed { index, value ->
-        val angle = startAngle + angleStep * index
+        val angle = frame.angleAt(index)
         val point =
             Offset(
                 x = center.x + cos(angle) * value,
@@ -482,16 +510,24 @@ private fun RadarAxisLabels(
     labelPositions: List<Offset>,
     color: Color,
     fontSize: TextUnit,
-    edgePadding: Dp = 6.dp,
+    center: Offset,
+    selectedIndex: Int,
+    unselectedAlpha: Float,
+    edgePadding: Dp,
 ) {
     val edgePaddingPx = with(LocalDensity.current) { edgePadding.toPx() }.roundToInt()
     androidx.compose.ui.layout.Layout(
         modifier = Modifier.fillMaxSize(),
         content = {
-            labels.forEach { label ->
+            labels.forEachIndexed { index, label ->
+                val dimmed = selectedIndex != NO_SELECTION && index != selectedIndex
                 androidx.compose.material3.Text(
                     text = label,
-                    style = TextStyle(color = color, fontSize = fontSize),
+                    style =
+                        TextStyle(
+                            color = if (dimmed) color.copy(alpha = color.alpha * unselectedAlpha) else color,
+                            fontSize = fontSize,
+                        ),
                     maxLines = 1,
                 )
             }
@@ -512,8 +548,15 @@ private fun RadarAxisLabels(
         layout(constraints.maxWidth, constraints.maxHeight) {
             placeables.forEachIndexed { index, placeable ->
                 val position = labelPositions.getOrNull(index) ?: return@forEachIndexed
-                val rawX = (position.x - placeable.width / 2f).roundToInt()
-                val rawY = (position.y - placeable.height / 2f).roundToInt()
+                val topLeft =
+                    axisLabelTopLeft(
+                        anchor = position,
+                        center = center,
+                        widthPx = placeable.width,
+                        heightPx = placeable.height,
+                    )
+                val rawX = topLeft.x.roundToInt()
+                val rawY = topLeft.y.roundToInt()
 
                 val maxX =
                     (constraints.maxWidth - placeable.width - edgePaddingPx)

@@ -27,10 +27,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.ClipOp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
@@ -61,6 +61,7 @@ import io.github.hdcharts.core.internal.composable.rememberZoomScaleState
 import io.github.hdcharts.core.internal.composable.zoomInScale
 import io.github.hdcharts.core.internal.composable.zoomOutScale
 import io.github.hdcharts.core.internal.density.denseStepForViewport
+import io.github.hdcharts.core.internal.drawing.drawSelectionLine
 import io.github.hdcharts.core.internal.interaction.buildHorizontalDragGestureModifier
 import io.github.hdcharts.core.internal.interaction.buildPinchZoomModifier
 import io.github.hdcharts.core.internal.interaction.buildTapGestureModifier
@@ -83,6 +84,7 @@ import kotlin.math.roundToInt
 private const val ZOOM_MIN = 1f
 private const val ZOOM_MAX = 4f
 private const val ZOOM_STEP = 1.25f
+private val SELECTION_COLUMN_MIN_WIDTH = 6.dp
 private val HEADER_TEST_TAGS =
     ChartHeaderTestTags(
         denseExpand = TestTags.STACKED_AREA_CHART_DENSE_EXPAND,
@@ -97,7 +99,6 @@ internal fun StackedAreaChart(
     title: String,
     style: StackedAreaChartStyle,
     areaColors: ImmutableList<Color>,
-    lineColors: ImmutableList<Color>,
     interactionEnabled: Boolean,
     animateOnStart: Boolean,
     selectedPointIndex: Int = NO_SELECTION,
@@ -285,7 +286,6 @@ internal fun StackedAreaChart(
             data = renderData,
             style = style,
             areaColors = areaColors,
-            lineColors = lineColors,
             interactionEnabled = interactionEnabled,
             isScrollable = isScrollable,
             animatedValues = animatedValues,
@@ -317,7 +317,6 @@ private fun StackedAreaChartContent(
     data: MultiChartData,
     style: StackedAreaChartStyle,
     areaColors: ImmutableList<Color>,
-    lineColors: ImmutableList<Color>,
     interactionEnabled: Boolean,
     isScrollable: Boolean,
     animatedValues: List<List<Animatable<Float, *>>>,
@@ -590,8 +589,6 @@ private fun StackedAreaChartContent(
                                 series.map { value -> value.value * size.height }
                             }
                         val emptyLower = List(pointsCount) { 0f }
-                        val lineWidthPx = style.boundary.width.toPx()
-                        val selectionLineWidthPx = style.selection.width.toPx()
 
                         val clampedVisibleRange =
                             when {
@@ -607,29 +604,17 @@ private fun StackedAreaChartContent(
                             (clampedVisibleRange.last + 1)
                                 .coerceAtMost(pointsCount - 1)
 
-                        stackedUpperBounds.forEachIndexed { index, upperSeries ->
-                            val lowerSeries = stackedUpperBounds.getOrNull(index - 1) ?: emptyLower
-                            drawStackedAreaSeries(
-                                upperSeries = upperSeries,
-                                lowerSeries = lowerSeries,
-                                fillColor =
-                                    areaColors
-                                        .getOrElse(index) { areaColors.lastOrNull() ?: Color.Transparent }
-                                        .copy(alpha = style.fill.alpha),
-                                bezier = style.boundary.bezier,
-                                revealProgress = revealProgress,
-                                visibleStart = rangeStart,
-                                visibleEnd = rangeEnd,
-                            )
-                            if (style.boundary.visible && lineWidthPx > 0f) {
-                                drawStackedAreaLine(
+                        fun drawLayers(alphaFactor: Float) {
+                            stackedUpperBounds.forEachIndexed { index, upperSeries ->
+                                val lowerSeries = stackedUpperBounds.getOrNull(index - 1) ?: emptyLower
+                                drawStackedAreaSeries(
                                     upperSeries = upperSeries,
-                                    lineColor =
-                                        lineColors.getOrElse(index) {
-                                            lineColors.lastOrNull() ?: Color.Transparent
-                                        },
-                                    lineWidth = lineWidthPx,
-                                    bezier = style.boundary.bezier,
+                                    lowerSeries = lowerSeries,
+                                    fillColor =
+                                        areaColors
+                                            .getOrElse(index) { areaColors.lastOrNull() ?: Color.Transparent }
+                                            .copy(alpha = style.fill.alpha * alphaFactor),
+                                    bezier = style.fill.bezier,
                                     revealProgress = revealProgress,
                                     visibleStart = rangeStart,
                                     visibleEnd = rangeEnd,
@@ -637,18 +622,39 @@ private fun StackedAreaChartContent(
                             }
                         }
 
-                        if (style.selection.visible && selectedIndex != NO_SELECTION && pointsCount > 1) {
+                        val stepX = if (isScrollable) denseStepX else fitStepX
+                        val showSelection =
+                            style.selection.visible && selectedIndex != NO_SELECTION && pointsCount > 1 && stepX > 0f
+                        if (!showSelection) {
+                            drawLayers(alphaFactor = 1f)
+                        } else {
+                            // The selected column shows the selection; the line stays above the stack for contrast.
                             val safeIndex = selectedIndex.coerceIn(0, pointsCount - 1)
-                            val stepX = if (isScrollable) denseStepX else fitStepX
-                            if (stepX > 0f) {
-                                val selectedX = safeIndex * stepX
-                                drawLine(
-                                    color = style.selection.color,
-                                    start = Offset(selectedX, 0f),
-                                    end = Offset(selectedX, size.height),
-                                    strokeWidth = selectionLineWidthPx,
-                                )
+                            val selectedX = safeIndex * stepX
+                            val columnHalfWidth = max(stepX, SELECTION_COLUMN_MIN_WIDTH.toPx()) / 2f
+                            val columnLeft = selectedX - columnHalfWidth
+                            val columnRight = selectedX + columnHalfWidth
+                            clipRect(
+                                left = columnLeft,
+                                top = 0f,
+                                right = columnRight,
+                                bottom = size.height,
+                                clipOp = ClipOp.Difference,
+                            ) {
+                                drawLayers(alphaFactor = style.selection.unselectedAlpha)
                             }
+                            clipRect(left = columnLeft, top = 0f, right = columnRight, bottom = size.height) {
+                                drawLayers(alphaFactor = 1f)
+                            }
+
+                            val stackHeight =
+                                (stackedUpperBounds.maxOfOrNull { it[safeIndex] } ?: 0f).coerceIn(0f, size.height)
+                            drawSelectionLine(
+                                x = selectedX,
+                                color = style.selection.color,
+                                strokeWidth = style.selection.width.toPx(),
+                                mark = (size.height - stackHeight)..size.height,
+                            )
                         }
                     }
                 }
@@ -714,43 +720,6 @@ private fun DrawScope.drawStackedAreaSeries(
             drawPath(
                 path = areaPath,
                 color = fillColor,
-            )
-        }
-    }
-}
-
-private fun DrawScope.drawStackedAreaLine(
-    upperSeries: List<Float>,
-    lineColor: Color,
-    lineWidth: Float,
-    bezier: Boolean,
-    revealProgress: Float,
-    visibleStart: Int,
-    visibleEnd: Int,
-) {
-    if (upperSeries.size <= 1 || size.width <= 0f) return
-    if (visibleEnd <= visibleStart || visibleEnd >= upperSeries.size || visibleStart < 0) return
-
-    val linePoints = buildSeriesPoints(upperSeries).subList(visibleStart, visibleEnd + 1)
-    val linePath =
-        Path().apply {
-            moveTo(linePoints.first().x, linePoints.first().y)
-            appendSeriesPath(points = linePoints, bezier = bezier)
-        }
-
-    val revealX = (size.width * revealProgress).coerceIn(0f, size.width)
-    if (revealProgress >= ANIMATION_TARGET) {
-        drawPath(
-            path = linePath,
-            color = lineColor,
-            style = Stroke(width = lineWidth),
-        )
-    } else {
-        clipRect(left = 0f, top = 0f, right = revealX + lineWidth, bottom = size.height) {
-            drawPath(
-                path = linePath,
-                color = lineColor,
-                style = Stroke(width = lineWidth),
             )
         }
     }

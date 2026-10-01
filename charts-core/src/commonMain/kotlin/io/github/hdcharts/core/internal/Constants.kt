@@ -1,18 +1,16 @@
 package io.github.hdcharts.core.internal
 
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
-
 const val NO_SELECTION = -1
 const val ANIMATION_TARGET = 1.0f
 
 const val DEFAULT_SCALE = 1f
 const val MAX_SCALE = 1.05f
 
-val AXIS_LABEL_CHART_GAP: Dp = 10.dp
-
-// Largest style size, in pixels, that validation accepts
+// Largest style size, in pixels, that charts draw; larger sizes are clamped
 const val MAX_SIZE_PX = 16_384f
+
+// Most grid steps that charts draw; more steps are clamped
+const val MAX_GRID_STEPS = 1000
 
 // Animation duration
 const val ANIMATION_DURATION = 200
