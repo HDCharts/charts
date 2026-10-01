@@ -1,13 +1,8 @@
 package io.github.hdcharts.pie
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -22,12 +17,12 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
 import io.github.hdcharts.core.internal.InternalChartsApi
 import io.github.hdcharts.core.internal.NO_SELECTION
 import io.github.hdcharts.core.internal.TestTags
 import io.github.hdcharts.core.internal.ValidationErrors
 import io.github.hdcharts.core.internal.composable.ChartErrors
+import io.github.hdcharts.core.internal.composable.ChartSquarePlotLayout
 import io.github.hdcharts.core.internal.composable.Legend
 import io.github.hdcharts.core.internal.layout.modifierTopTitle
 import io.github.hdcharts.core.internal.validateValues
@@ -153,10 +148,14 @@ private fun PieChartContent(
         selection.selectedIndex?.takeIf { it in points.indices } ?: NO_SELECTION
     val hasSelection = forcedSelectedIndex != NO_SELECTION
 
-    BoxWithConstraints(modifier = modifier) {
-        val boundedHeight = maxHeight != Dp.Infinity
-        // Match the width the caller asks for, so the plot centers in a wide chart.
-        Column(modifier = Modifier.widthIn(min = minWidth)) {
+    val chartData =
+        remember(labels, points) {
+            toInternalChartData(labels = labels, points = points)
+        }
+
+    ChartSquarePlotLayout(
+        modifier = modifier,
+        title = {
             val displayedTitle = if (hasSelection) labels[forcedSelectedIndex] else title.orEmpty()
             if (displayedTitle.isNotBlank()) {
                 if (hasSelection) {
@@ -191,36 +190,8 @@ private fun PieChartContent(
                     )
                 }
             }
-
-            val chartData =
-                remember(labels, points) {
-                    toInternalChartData(labels = labels, points = points)
-                }
-            val plotModifier =
-                if (boundedHeight) Modifier.weight(1f, fill = false) else Modifier
-            Box(
-                modifier =
-                    plotModifier
-                        .aspectRatio(1f)
-                        .align(Alignment.CenterHorizontally),
-            ) {
-                PieChart(
-                    chartData = chartData,
-                    colors = colors,
-                    style = style,
-                    interactionEnabled = interactionEnabled,
-                    animateOnStart = animateOnStart,
-                    selectedSliceIndex = forcedSelectedIndex,
-                ) { index ->
-                    if (index != NO_SELECTION) {
-                        selection.select(index)
-                        onSelectionInteraction()
-                    } else {
-                        selection.clear()
-                    }
-                }
-            }
-
+        },
+        legend = {
             if (style.legend.visible) {
                 Legend(
                     chartContainerStyle = style.chartContainerStyle,
@@ -228,8 +199,25 @@ private fun PieChartContent(
                     colors = colors,
                 )
             }
-        }
-    }
+        },
+        plot = {
+            PieChart(
+                chartData = chartData,
+                colors = colors,
+                style = style,
+                interactionEnabled = interactionEnabled,
+                animateOnStart = animateOnStart,
+                selectedSliceIndex = forcedSelectedIndex,
+            ) { index ->
+                if (index != NO_SELECTION) {
+                    selection.select(index)
+                    onSelectionInteraction()
+                } else {
+                    selection.clear()
+                }
+            }
+        },
+    )
 }
 
 private fun resolveSliceColors(
