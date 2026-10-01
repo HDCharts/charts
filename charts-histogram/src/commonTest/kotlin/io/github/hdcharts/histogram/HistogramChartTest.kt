@@ -35,7 +35,6 @@ import io.github.hdcharts.core.model.ChartValueFormatter
 import io.github.hdcharts.core.model.ChartValueFormatters
 import io.github.hdcharts.core.model.staticChartSelection
 import io.github.hdcharts.core.model.toChartData
-import io.github.hdcharts.core.style.BarChartDefaults
 import io.github.hdcharts.core.style.ChartContainerDefaults
 import io.github.hdcharts.core.style.HistogramChartDefaults
 import kotlinx.coroutines.CoroutineScope
@@ -280,7 +279,7 @@ class HistogramChartTest {
                     selection = selection,
                     valueFormatter = valueFormatter.value,
                     axisValueFormatter = axisFormatter.value,
-                    style = HistogramChartDefaults.style(range = BarChartDefaults.range(min = 0.0, max = 1.0)),
+                    style = HistogramChartDefaults.style(range = HistogramChartDefaults.range(min = 0.0, max = 1.0)),
                     animateOnStart = false,
                 )
             }
@@ -325,12 +324,12 @@ class HistogramChartTest {
                         HistogramChartDefaults.style(
                             chartContainerStyle = ChartContainerDefaults.style(contentPadding = 0.dp),
                             bars = HistogramChartDefaults.bars(colors = colors, alpha = 1f),
-                            range = BarChartDefaults.range(min = 0.0, max = 1.0),
-                            grid = BarChartDefaults.grid(visible = false),
+                            range = HistogramChartDefaults.range(min = 0.0, max = 1.0),
+                            grid = HistogramChartDefaults.grid(visible = false),
                             axis =
-                                BarChartDefaults.axis(
+                                HistogramChartDefaults.axis(
                                     visible = false,
-                                    yLabels = BarChartDefaults.yLabels(visible = false),
+                                    yLabels = HistogramChartDefaults.yLabels(visible = false),
                                 ),
                         ),
                 )

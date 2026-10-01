@@ -17,7 +17,6 @@ import io.github.hdcharts.core.style.ChartContainerDefaults
 import io.github.hdcharts.core.style.ChartContainerStyle
 import io.github.hdcharts.core.style.LegendDefaults
 import io.github.hdcharts.core.style.LegendStyle
-import io.github.hdcharts.core.style.defaultChartAlpha
 import kotlinx.collections.immutable.ImmutableList
 
 /**
@@ -143,13 +142,12 @@ object PieChartDefaults {
      * @param baseColor The base color used to generate shades for slices that do not specify
      * their own color via [io.github.hdcharts.pie.PieSlice.color]. Defaults to
      * the primary color of the MaterialTheme.
-     * @param alpha The alpha value applied to rendered pie slices. Defaults to 0.4f in light
-     * theme and 0.6f in dark theme.
+     * @param alpha The alpha value applied to rendered pie slices. Defaults to 1f.
      */
     @Composable
     fun slices(
         baseColor: Color = MaterialTheme.colorScheme.primary,
-        alpha: Float = defaultChartAlpha(),
+        alpha: Float = 1f,
     ): PieChartSlicesStyle =
         PieChartSlicesStyle(
             alpha = alpha.coerceIn(0f, 1f),

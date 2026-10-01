@@ -11,7 +11,6 @@ import androidx.compose.ui.unit.sp
 import io.github.hdcharts.core.internal.palette.resolvePaletteColors
 import io.github.hdcharts.core.style.ChartContainerDefaults
 import io.github.hdcharts.core.style.ChartContainerStyle
-import io.github.hdcharts.core.style.defaultChartAlpha
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 
@@ -119,7 +118,7 @@ object RadarChartDefaults {
     @Composable
     fun grid(
         visible: Boolean = true,
-        color: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.22f),
+        color: Color = MaterialTheme.colorScheme.outlineVariant,
         lineWidth: Dp = 1.dp,
         steps: Int = 5,
     ): RadarGridStyle = RadarGridStyle(visible, color, lineWidth, steps)
@@ -127,7 +126,7 @@ object RadarChartDefaults {
     @Composable
     fun axes(
         visible: Boolean = true,
-        lineColor: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
+        lineColor: Color = MaterialTheme.colorScheme.outline,
         lineWidth: Dp = 1.dp,
         labelColor: Color = MaterialTheme.colorScheme.onSurface,
         labelSize: TextUnit = 12.sp,
@@ -147,7 +146,7 @@ object RadarChartDefaults {
     @Composable
     fun polygon(
         fillVisible: Boolean = true,
-        fillAlpha: Float = defaultChartAlpha(light = 0.25f, dark = 0.2f),
+        fillAlpha: Float = 0.25f,
         lineColor: Color = MaterialTheme.colorScheme.primary,
         lineColors: List<Color> = emptyList(),
         lineWidth: Dp = 2.dp,
