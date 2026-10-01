@@ -1,19 +1,22 @@
 package io.github.hdcharts.core.style
 
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.TextUnit
+import io.github.hdcharts.core.internal.InternalChartsApi
+import io.github.hdcharts.core.internal.clampAlpha
+import io.github.hdcharts.core.internal.clampGridSteps
+import io.github.hdcharts.core.internal.clampSize
 import io.github.hdcharts.core.model.ChartValueFormatter
 import io.github.hdcharts.core.model.ChartValueFormatters
 
 /**
  * Immutable v3 style for vertical [io.github.hdcharts.bar.BarChart].
  *
- * Configuration is grouped into [bars], [range], [grid], [axis], and [selectionLine]
+ * Configuration is grouped into [bars], [range], [grid], [axis], and [selection]
  * blocks. The chart-level selection state is a top-level composable parameter, not part
  * of this style. Compose with [BarChartDefaults.style] for theme-aware defaults.
  *
@@ -22,7 +25,7 @@ import io.github.hdcharts.core.model.ChartValueFormatters
  * @property range Optional fixed Y-axis range.
  * @property grid Horizontal grid configuration.
  * @property axis Axis lines and X/Y label configuration.
- * @property selectionLine Selection indicator configuration.
+ * @property selection Selection indicator configuration.
  * @property zoomControlsVisible Whether zoom controls appear in the chart header.
  */
 @Stable
@@ -32,7 +35,7 @@ class BarChartStyle(
     val range: BarRangeStyle,
     val grid: BarGridStyle,
     val axis: BarAxisStyle,
-    val selectionLine: BarSelectionLineStyle,
+    val selection: BarSelectionStyle,
     val zoomControlsVisible: Boolean,
 )
 
@@ -57,7 +60,7 @@ object BarChartDefaults {
         range: BarRangeStyle = range(),
         grid: BarGridStyle = grid(),
         axis: BarAxisStyle = axis(),
-        selectionLine: BarSelectionLineStyle = selectionLine(),
+        selection: BarSelectionStyle = selection(),
         zoomControlsVisible: Boolean = true,
     ): BarChartStyle =
         BarChartStyle(
@@ -66,7 +69,7 @@ object BarChartDefaults {
             range = range,
             grid = grid,
             axis = axis,
-            selectionLine = selectionLine,
+            selection = selection,
             zoomControlsVisible = zoomControlsVisible,
         )
 
@@ -81,11 +84,11 @@ object BarChartDefaults {
      */
     @Composable
     fun bars(
-        color: Color = MaterialTheme.colorScheme.primary,
+        color: Color = StyleDefaults.seriesColor,
         colors: List<Color> = emptyList(),
-        alpha: Float = 1f,
-        space: Dp = 10.dp,
-        minBarWidth: Dp = 10.dp,
+        alpha: Float = StyleDefaults.seriesAlpha,
+        space: Dp = StyleDefaults.barSpacing,
+        minBarWidth: Dp = StyleDefaults.minBarWidth,
     ): BarBarsStyle =
         BarBarsStyle(
             color = color,
@@ -109,9 +112,9 @@ object BarChartDefaults {
     @Composable
     fun grid(
         visible: Boolean = true,
-        steps: Int = 4,
-        color: Color = MaterialTheme.colorScheme.outlineVariant,
-        lineWidth: Dp = 1.dp,
+        steps: Int = StyleDefaults.gridSteps,
+        color: Color = StyleDefaults.gridColor,
+        lineWidth: Dp = StyleDefaults.lineWidth,
     ): BarGridStyle =
         BarGridStyle(
             visible = visible,
@@ -126,8 +129,8 @@ object BarChartDefaults {
     @Composable
     fun axis(
         visible: Boolean = true,
-        color: Color = MaterialTheme.colorScheme.outline,
-        lineWidth: Dp = 1.dp,
+        color: Color = StyleDefaults.axisColor,
+        lineWidth: Dp = StyleDefaults.lineWidth,
         xLabels: AxisLabelStyle = xLabels(),
         yLabels: AxisLabelStyle = yLabels(),
     ): BarAxisStyle =
@@ -145,8 +148,8 @@ object BarChartDefaults {
     @Composable
     fun xLabels(
         visible: Boolean = true,
-        color: Color = MaterialTheme.colorScheme.onSurfaceVariant,
-        size: androidx.compose.ui.unit.TextUnit = 11.sp,
+        color: Color = StyleDefaults.axisLabelColor,
+        size: TextUnit = StyleDefaults.axisLabelSize,
         maxCount: Int? = null,
     ): AxisLabelStyle =
         AxisLabelStyle(
@@ -162,8 +165,8 @@ object BarChartDefaults {
     @Composable
     fun yLabels(
         visible: Boolean = true,
-        color: Color = MaterialTheme.colorScheme.onSurfaceVariant,
-        size: androidx.compose.ui.unit.TextUnit = 11.sp,
+        color: Color = StyleDefaults.axisLabelColor,
+        size: TextUnit = StyleDefaults.axisLabelSize,
         maxCount: Int? = null,
     ): AxisLabelStyle =
         AxisLabelStyle(
@@ -174,17 +177,45 @@ object BarChartDefaults {
         )
 
     /**
-     * Returns a [BarSelectionLineStyle] for the selection indicator.
+     * Returns a [BarSelectionStyle] for the selection indicator.
      */
     @Composable
-    fun selectionLine(
+    fun selection(
         visible: Boolean = true,
-        color: Color = MaterialTheme.colorScheme.primary,
-        width: Dp = 1.dp,
-    ): BarSelectionLineStyle =
-        BarSelectionLineStyle(
+        color: Color = StyleDefaults.selectionColor,
+        width: Dp = StyleDefaults.lineWidth,
+        unselectedAlpha: Float = StyleDefaults.unselectedAlpha,
+    ): BarSelectionStyle =
+        BarSelectionStyle(
             visible = visible,
             color = color,
             width = width,
+            unselectedAlpha = unselectedAlpha,
         )
 }
+
+/** Returns [this] with alphas, sizes, and grid steps clamped to drawable values. */
+@InternalChartsApi
+fun BarChartStyle.clamped(density: Density): BarChartStyle =
+    BarChartStyle(
+        chartContainerStyle = chartContainerStyle,
+        bars =
+            bars.copy(
+                alpha = bars.alpha.clampAlpha(),
+                space = bars.space.clampSize(fallback = StyleDefaults.barSpacing, density = density),
+                minBarWidth = bars.minBarWidth.clampSize(fallback = StyleDefaults.minBarWidth, density = density),
+            ),
+        range = range,
+        grid =
+            grid.copy(
+                steps = grid.steps.clampGridSteps(),
+                lineWidth = grid.lineWidth.clampSize(fallback = StyleDefaults.lineWidth, density = density),
+            ),
+        axis = axis.copy(lineWidth = axis.lineWidth.clampSize(fallback = StyleDefaults.lineWidth, density = density)),
+        selection =
+            selection.copy(
+                width = selection.width.clampSize(fallback = StyleDefaults.lineWidth, density = density),
+                unselectedAlpha = selection.unselectedAlpha.clampAlpha(),
+            ),
+        zoomControlsVisible = zoomControlsVisible,
+    )

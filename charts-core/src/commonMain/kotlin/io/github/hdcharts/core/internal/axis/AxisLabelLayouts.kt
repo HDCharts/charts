@@ -14,10 +14,10 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
-import io.github.hdcharts.core.internal.AXIS_LABEL_CHART_GAP
 import io.github.hdcharts.core.internal.InternalChartsApi
 import io.github.hdcharts.core.model.ChartValueFormatter
 import io.github.hdcharts.core.style.AxisLabelStyle
+import io.github.hdcharts.core.style.StyleDefaults
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.roundToInt
@@ -128,7 +128,7 @@ fun rememberNumericYAxisLayout(
                 emptyList()
             }
         }
-    val chartGapPx = with(density) { AXIS_LABEL_CHART_GAP.roundToPx().toFloat() }
+    val chartGapPx = with(density) { StyleDefaults.axisLabelPadding.roundToPx().toFloat() }
     // Scrolling charts recompose on every scrolled pixel, so the width is only measured again when the
     // ticks or the space change.
     return remember(ticks, labels.visible, fontSizePx, availableWidthPx, chartGapPx) {
@@ -152,7 +152,8 @@ fun rememberNumericYAxisLayout(
  * labels, which [AxisXLabelsLayout] leaves before centering them.
  */
 @InternalChartsApi
-fun Density.xAxisLabelRowHeightPx(extent: AxisXLabelExtent): Float = extent.heightPx + AXIS_LABEL_CHART_GAP.toPx()
+fun Density.xAxisLabelRowHeightPx(extent: AxisXLabelExtent): Float =
+    extent.heightPx + StyleDefaults.axisLabelPadding.toPx()
 
 /**
  * Whole pixels a plot keeps free past an edge where an item sits, so the longest label of [extent],
@@ -211,7 +212,7 @@ fun AxisXLabelsLayout(
                 )
             }
         // Labels share one center line: the middle of the row below the plot gap.
-        val topPx = AXIS_LABEL_CHART_GAP.toPx()
+        val topPx = StyleDefaults.axisLabelPadding.toPx()
         val centerY = topPx + (constraints.maxHeight - topPx) / 2f
 
         layout(constraints.maxWidth, constraints.maxHeight) {

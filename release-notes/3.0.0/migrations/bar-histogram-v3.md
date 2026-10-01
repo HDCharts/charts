@@ -59,8 +59,13 @@ top-level `selection` parameter instead.
 
 Styles are grouped. Migrate customizations to the corresponding blocks on
 `BarChartStyle` or `HistogramChartStyle`, such as `bars`, `range`, `grid`,
-`axis`, and `selectionLine`. Create them with `BarChartDefaults` or
-`HistogramChartDefaults` rather than the removed flat style parameters.
+`axis`, and `selection`. Create bar styles with `BarChartDefaults` and
+histogram styles with `HistogramChartDefaults`, rather than the removed flat
+style parameters.
+
+Selecting a bar dims the other bars to 70% opacity, and the selection line is
+drawn only outside the selected bar. Pass
+`selection(unselectedAlpha = 1f)` to keep every bar solid.
 
 Grid, axis, and selection line widths default to `1.dp`. In 2.x they were one
 pixel, so they now look heavier on high-density screens.

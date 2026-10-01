@@ -5,12 +5,21 @@ import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.unit.dp
-import io.github.hdcharts.core.internal.NO_SELECTION
+import io.github.hdcharts.core.internal.drawing.drawSelectionLine
 import io.github.hdcharts.core.style.BarChartStyle
 import kotlin.math.abs
 
+/**
+ * Draws the bar chart bars with selection visualization.
+ *
+ * When [style.selection.visible] is true and [selectedIndex] falls within [visibleRange]:
+ * - The selected bar draws at full opacity.
+ * - Other visible bars draw at [style.selection.unselectedAlpha] opacity so the selection stands out.
+ * - A vertical selection line draws at [selectedCenterX], skipping the selected bar's vertical span
+ *   so the bar itself shows through.
+ *
+ * Selection has no visual effect when [selectedIndex] is outside [visibleRange] (e.g., scrolled out of view).
+ */
 internal fun DrawScope.drawBars(
     style: BarChartStyle,
     animatedValues: List<Animatable<Float, AnimationVector1D>>,
@@ -65,6 +74,8 @@ internal fun DrawScope.drawBars(
     val unitWidth = unitWidth(barWidthPx, spacingPx)
     val firstVisible = visibleRange.first.coerceIn(0, animatedValues.lastIndex)
     val lastVisible = visibleRange.last.coerceIn(firstVisible, animatedValues.lastIndex)
+    val showSelection = style.selection.visible && selectedIndex in firstVisible..lastVisible
+    var selectedMark: ClosedFloatingPointRange<Float>? = null
     for (index in firstVisible..lastVisible) {
         val animatedValue = animatedValues[index]
         val value = animatedValue.value
@@ -72,9 +83,17 @@ internal fun DrawScope.drawBars(
         val top = if (value >= 0f) clampedBaselineY - barHeight else clampedBaselineY
         val left = unitWidth * index
         val resolvedBarColor = barColors.getOrNull(index) ?: defaultBarColor
+        val isSelected = showSelection && index == selectedIndex
+        val barColor =
+            if (showSelection && !isSelected) {
+                resolvedBarColor.copy(alpha = resolvedBarColor.alpha * style.selection.unselectedAlpha)
+            } else {
+                resolvedBarColor
+            }
+        if (isSelected) selectedMark = top..(top + barHeight)
 
         drawRect(
-            color = resolvedBarColor,
+            color = barColor,
             topLeft = Offset(x = left, y = top),
             size =
                 androidx.compose.ui.geometry.Size(
@@ -84,18 +103,13 @@ internal fun DrawScope.drawBars(
         )
     }
 
-    if (style.selectionLine.visible && selectedIndex != NO_SELECTION && selectedCenterX.isFinite()) {
-        drawLine(
-            color = style.selectionLine.color,
-            start = Offset(selectedCenterX, 0f),
-            end = Offset(selectedCenterX, size.height),
-            strokeWidth = style.selectionLine.width.toPx(),
-        )
-        drawCircle(
-            color = style.selectionLine.color,
-            radius = 3.dp.toPx(),
-            center = Offset(selectedCenterX, clampedBaselineY),
-            style = Stroke(width = style.selectionLine.width.toPx()),
+    if (showSelection && selectedCenterX.isFinite()) {
+        // The selected bar shows the selection; the line stays over the background for contrast.
+        drawSelectionLine(
+            x = selectedCenterX,
+            color = style.selection.color,
+            strokeWidth = style.selection.width.toPx(),
+            mark = selectedMark,
         )
     }
 }

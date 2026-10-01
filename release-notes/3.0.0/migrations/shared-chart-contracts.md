@@ -53,6 +53,33 @@ Callbacks run only when the selected index changes. Use
 `staticChartSelection(index)` for an initial selection in a preview or
 screenshot.
 
+## Default colors
+
+Series colors draw at full opacity. `alpha` defaults to `1f` on bar, histogram,
+line, pie, stacked bar, and stacked area charts. For a softer look, pass `alpha`
+yourself. 2.x used `0.7f` in light mode and `0.6f` in dark mode:
+
+```kotlin
+BarChartDefaults.style(bars = BarChartDefaults.bars(alpha = 0.7f))
+```
+
+Grid, axis, label, and selection defaults use `MaterialTheme.colorScheme`
+roles. They follow your app's theme, not the system dark mode setting.
+
+`defaultChartAlpha()` is removed. Pass an explicit `alpha` instead.
+
+## Style values out of range
+
+Charts draw style values as close to what you pass as they can, instead of
+showing an error. Alphas are clamped to `0..1`, sizes to at least `0.dp`, and
+grid steps to at least `0`. A `NaN` alpha draws at full opacity, and a `NaN`
+size uses the chart's default. The style object keeps the values you passed.
+
+Data problems, such as misaligned series or a color count that does not match
+the series count, still show an error. Every chart words the same problem the
+same way, for example "At least 2 values are required." or "Series 1 is not
+aligned with the first series."
+
 ## Formatting
 
 `ChartValueFormatter` receives a `Double`. Value and axis formatters are

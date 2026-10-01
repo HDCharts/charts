@@ -212,8 +212,8 @@ internal fun DrawScope.drawDragMarker(
             )
         drawCircle(
             center = Offset(selectedX, selectedY),
-            radius = style.selection.activeSize.toPx(),
-            color = style.selection.color,
+            radius = style.selection.pointSize.toPx(),
+            color = style.selection.markerColor,
         )
     }
 
@@ -236,8 +236,8 @@ internal fun DrawScope.drawDragMarker(
 
         drawCircle(
             center = draggingCircleOffset,
-            radius = style.selection.size.toPx(),
-            color = style.selection.color,
+            radius = style.selection.markerSize.toPx(),
+            color = style.selection.markerColor,
         )
     }
 }

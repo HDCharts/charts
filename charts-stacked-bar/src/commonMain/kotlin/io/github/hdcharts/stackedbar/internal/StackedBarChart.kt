@@ -30,7 +30,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
@@ -54,6 +53,7 @@ import io.github.hdcharts.core.internal.composable.rememberDenseExpandedState
 import io.github.hdcharts.core.internal.composable.rememberZoomScaleState
 import io.github.hdcharts.core.internal.composable.zoomInScale
 import io.github.hdcharts.core.internal.composable.zoomOutScale
+import io.github.hdcharts.core.internal.drawing.drawSelectionLine
 import io.github.hdcharts.core.internal.layout.chartCanvasFits
 import io.github.hdcharts.core.internal.layout.fillMaxSizeChartModifier
 import io.github.hdcharts.core.internal.layout.placedHorizontalScrollPx
@@ -569,8 +569,11 @@ private fun DrawScope.drawStackedBars(
             visibleRange.isEmpty() -> 0 until data.items.size
             else -> visibleRange
         }
+    val showSelection = style.selection.visible && selectedIndex in data.items.indices
+    var selectedMark: ClosedFloatingPointRange<Float>? = null
     for (index in indices) {
         val item = data.items.getOrNull(index) ?: continue
+        val isSelected = showSelection && index == selectedIndex
         var topOffset = size.height
         val left = index * (barWidthPx + spacingPx)
         val barTotal = item.item.points.sum()
@@ -587,9 +590,15 @@ private fun DrawScope.drawStackedBars(
                     progress = progress.getOrNull(index)?.value ?: 0f,
                 )
             topOffset -= height
+            val segmentColor = colors.getOrElse(dataIndex) { colors.lastOrNull() ?: Color.Transparent }
 
             drawRect(
-                color = colors.getOrElse(dataIndex) { colors.lastOrNull() ?: Color.Transparent },
+                color =
+                    if (showSelection && !isSelected) {
+                        segmentColor.copy(alpha = segmentColor.alpha * style.selection.unselectedAlpha)
+                    } else {
+                        segmentColor
+                    },
                 topLeft =
                     androidx.compose.ui.geometry
                         .Offset(x = left, y = topOffset),
@@ -600,20 +609,16 @@ private fun DrawScope.drawStackedBars(
                     ),
             )
         }
+        if (isSelected) selectedMark = topOffset..size.height
     }
 
-    if (style.selection.visible && selectedIndex != NO_SELECTION && selectedCenterX.isFinite()) {
-        drawLine(
+    if (showSelection && selectedCenterX.isFinite()) {
+        // The selected stack shows the selection; the line stays over the background for contrast.
+        drawSelectionLine(
+            x = selectedCenterX,
             color = style.selection.color,
-            start = Offset(selectedCenterX, 0f),
-            end = Offset(selectedCenterX, size.height),
             strokeWidth = style.selection.width.toPx(),
-        )
-        drawCircle(
-            color = style.selection.color,
-            radius = 3.dp.toPx(),
-            center = Offset(selectedCenterX, size.height),
-            style = Stroke(width = style.selection.width.toPx()),
+            mark = selectedMark,
         )
     }
 }

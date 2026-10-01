@@ -18,6 +18,19 @@ window, an expanded stacked area chart, and a collapsed histogram at 10,000, 100
 
 ## Confirmed
 
+### The Y axis line scrolls away in expanded charts
+
+In an expanded bar, histogram, or line chart, the Y axis line scrolls off screen with the data.
+The Y axis labels stay in place, so after a scroll the labels have no axis line next to them.
+
+Confirmed by the code: `drawBars` in `BarChartDrawing.kt` and the canvas in `LineChartContent`
+draw the Y axis line at `x = 0` of the canvas inside `horizontalScroll`.
+
+Options:
+
+- Draw the Y axis line outside the scrolling canvas, at the left edge of the plot area, next to
+  the Y axis labels.
+
 ### Stacked area charts stay busy after a swipe on Android and iOS
 
 After a swipe on an expanded stacked area chart, Compose never goes idle on Android and iOS. A test

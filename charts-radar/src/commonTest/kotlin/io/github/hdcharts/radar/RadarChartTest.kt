@@ -10,6 +10,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
+import androidx.compose.ui.test.click
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -24,6 +25,7 @@ import io.github.hdcharts.core.model.chartDataOf
 import io.github.hdcharts.core.model.staticChartSelection
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class RadarChartTest {
@@ -56,7 +58,7 @@ class RadarChartTest {
                             .verticalScroll(rememberScrollState()),
                 ) {
                     RadarChart(
-                        data = data,
+                        data = multiSeriesData,
                         title = TITLE,
                         animateOnStart = false,
                     )
@@ -64,7 +66,7 @@ class RadarChartTest {
             }
 
             val chartBounds = onNodeWithTag(TestTags.RADAR_CHART).assertIsDisplayed().fetchSemanticsNode().boundsInRoot
-            val legendBounds = onNodeWithText("Categories").fetchSemanticsNode().boundsInRoot
+            val legendBounds = onNodeWithText("Alpha").fetchSemanticsNode().boundsInRoot
             assertTrue(
                 chartBounds.bottom <= legendBounds.top,
                 "Chart bounds $chartBounds overlap legend bounds $legendBounds",
@@ -86,23 +88,36 @@ class RadarChartTest {
             }
 
             onNodeWithTag(TestTags.CHART_ERROR).isDisplayed()
-            onNodeWithText("Data points size should be greater than or equal to 3.\n").isDisplayed()
+            onNodeWithText("At least 3 values are required.\n").isDisplayed()
         }
 
     @OptIn(ExperimentalTestApi::class)
     @Test
-    fun radarChart_withNegativePointSize_displaysValidationError() =
+    fun radarChart_withInvalidNumericStyleValues_drawsClampedChart() =
         runComposeUiTest {
             setContent {
                 RadarChart(
-                    data = data,
+                    data = multiSeriesData,
                     title = TITLE,
-                    style = RadarChartDefaults.style(points = RadarChartDefaults.points(size = (-1).dp)),
+                    style =
+                        RadarChartDefaults.style(
+                            grid = RadarChartDefaults.grid(steps = Int.MAX_VALUE),
+                            polygon = RadarChartDefaults.polygon(fillAlpha = Float.NaN),
+                            points = RadarChartDefaults.points(size = (-1).dp),
+                            selection =
+                                RadarChartDefaults.selection(
+                                    unselectedAlpha = Float.NaN,
+                                    unfocusedSeriesAlpha = 2f,
+                                ),
+                        ),
+                    selection = staticChartSelection(1),
+                    seriesSelection = staticChartSelection(0),
+                    animateOnStart = false,
                 )
             }
 
-            onNodeWithTag(TestTags.CHART_ERROR).assertIsDisplayed()
-            onNodeWithText("Point size must resolve to 0..16384 pixels.", substring = true).assertIsDisplayed()
+            onNodeWithTag(TestTags.RADAR_CHART).assertIsDisplayed()
+            onNodeWithTag(TestTags.CHART_ERROR).assertDoesNotExist()
         }
 
     @OptIn(ExperimentalTestApi::class)
@@ -110,7 +125,8 @@ class RadarChartTest {
     fun radarChart_withSelectedAxisIndex_displaysSelectedAxisDetails() =
         runComposeUiTest {
             val selectedAxisIndex = 1
-            val expectedTitle = data.categories[selectedAxisIndex]
+            // A single series has no legend, so the title carries the value.
+            val expectedTitle = "${data.categories[selectedAxisIndex]}: 20.0"
 
             setContent {
                 RadarChart(
@@ -150,14 +166,14 @@ class RadarChartTest {
                 moveTo(Offset(x = width - 8f, y = height / 2f))
                 up()
             }
-            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("B").isDisplayed()
+            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("B: 20.0").isDisplayed()
 
             chart.performTouchInput {
                 down(Offset(x = width / 2f, y = 8f))
                 moveTo(Offset(x = width / 2f, y = height - 8f))
                 up()
             }
-            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("C").isDisplayed()
+            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("C: 30.0").isDisplayed()
 
             runOnIdle {
                 assertEquals(2, selection.selectedIndex)
@@ -165,6 +181,79 @@ class RadarChartTest {
                 selection.clear()
             }
             onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(TITLE).isDisplayed()
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun radarChart_tapAfterDrag_clearsTheSelectedAxis() =
+        runComposeUiTest {
+            val selection = ChartSelection()
+            setContent {
+                RadarChart(
+                    data = data,
+                    modifier = Modifier.size(240.dp),
+                    title = TITLE,
+                    selection = selection,
+                    animateOnStart = false,
+                )
+            }
+
+            val chart = onNodeWithTag(TestTags.RADAR_CHART)
+            chart.performTouchInput {
+                down(Offset(x = 8f, y = height / 2f))
+                moveTo(Offset(x = width - 8f, y = height / 2f))
+                up()
+            }
+            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("B: 20.0").isDisplayed()
+
+            chart.performTouchInput { click(center) }
+            runOnIdle { assertNull(selection.selectedIndex) }
+            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(TITLE).isDisplayed()
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun radarChart_tapOnSeriesOutline_focusesSeriesAndTapOnEmptySpaceClears() =
+        runComposeUiTest {
+            val seriesSelection = ChartSelection()
+            setContent {
+                RadarChart(
+                    data = multiSeriesData,
+                    modifier = Modifier.size(240.dp),
+                    seriesSelection = seriesSelection,
+                    animateOnStart = false,
+                )
+            }
+
+            val chart = onNodeWithTag(TestTags.RADAR_CHART)
+            // Beta peaks on the top axis, where Alpha sits at the center. The web shrinks to leave
+            // room for the axis labels, so the peak sits between the top edge and the center.
+            chart.performTouchInput { click(Offset(x = width / 2f, y = height / 4f)) }
+            runOnIdle { assertEquals(expected = 1, actual = seriesSelection.selectedIndex) }
+
+            chart.performTouchInput { click(Offset(x = 2f, y = 2f)) }
+            runOnIdle { assertNull(seriesSelection.selectedIndex) }
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun radarChart_withInteractionDisabled_ignoresSeriesTap() =
+        runComposeUiTest {
+            val seriesSelection = ChartSelection()
+            setContent {
+                RadarChart(
+                    data = multiSeriesData,
+                    modifier = Modifier.size(240.dp),
+                    seriesSelection = seriesSelection,
+                    interactionEnabled = false,
+                    animateOnStart = false,
+                )
+            }
+
+            // Beta peaks on the top axis, where Alpha sits at the center.
+            onNodeWithTag(TestTags.RADAR_CHART)
+                .performTouchInput { click(Offset(x = width / 2f, y = height / 4f)) }
+            runOnIdle { assertNull(seriesSelection.selectedIndex) }
         }
 
     @OptIn(ExperimentalTestApi::class)
@@ -200,6 +289,13 @@ class RadarChartTest {
             chartDataOf(
                 categories = listOf("A", "B", "C", "D"),
                 ChartSeries(name = "Series", values = listOf(10.0, 20.0, 30.0, 40.0)),
+            )
+
+        val multiSeriesData: ChartData =
+            chartDataOf(
+                categories = listOf("A", "B", "C", "D"),
+                ChartSeries(name = "Alpha", values = listOf(10.0, 20.0, 30.0, 40.0)),
+                ChartSeries(name = "Beta", values = listOf(40.0, 30.0, 20.0, 10.0)),
             )
     }
 }

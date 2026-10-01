@@ -6,6 +6,7 @@ import io.github.hdcharts.core.ChartsPreviewLightDark
 import io.github.hdcharts.core.ChartsPreviewTheme
 import io.github.hdcharts.core.model.ChartSeries
 import io.github.hdcharts.core.model.chartDataOf
+import io.github.hdcharts.core.style.StyleDefaults
 
 private const val RADAR_CHART_TITLE = "Radar Chart"
 
@@ -33,10 +34,7 @@ private val RADAR_SINGLE_VALUES =
     )
 
 @Composable
-private fun RadarChartMultiSeriesPreviewContent(
-    categoryLegendVisible: Boolean = true,
-    categoryPinsVisible: Boolean = true,
-) {
+private fun RadarChartMultiSeriesPreviewContent(axisLabelsVisible: Boolean = StyleDefaults.radarAxisLabelsVisible) {
     val style =
         RadarChartDefaults.style(
             polygon =
@@ -47,11 +45,7 @@ private fun RadarChartMultiSeriesPreviewContent(
                             MaterialTheme.colorScheme.tertiary,
                         ),
                 ),
-            categories =
-                RadarChartDefaults.categories(
-                    legendVisible = categoryLegendVisible,
-                    pinsVisible = categoryPinsVisible,
-                ),
+            axes = RadarChartDefaults.axes(labelVisible = axisLabelsVisible),
         )
 
     RadarChart(
@@ -100,12 +94,9 @@ private fun RadarChartSinglePreview() {
 
 @ChartsPreviewLightDark
 @Composable
-private fun RadarChartHiddenLegendPreview() {
+private fun RadarChartHiddenLabelsPreview() {
     ChartsPreviewTheme {
-        RadarChartMultiSeriesPreviewContent(
-            categoryLegendVisible = false,
-            categoryPinsVisible = false,
-        )
+        RadarChartMultiSeriesPreviewContent(axisLabelsVisible = false)
     }
 }
 

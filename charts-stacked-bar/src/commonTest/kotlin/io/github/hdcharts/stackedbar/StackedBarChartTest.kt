@@ -162,7 +162,7 @@ class StackedBarChartTest {
 
             // Assert
             onNodeWithTag(TestTags.CHART_ERROR).assertIsDisplayed()
-            onNodeWithText("Segment 1 is not aligned with the first segment.\n").assertIsDisplayed()
+            onNodeWithText("Series 1 is not aligned with the first series.\n").assertIsDisplayed()
         }
 
     @OptIn(ExperimentalTestApi::class)
@@ -194,7 +194,40 @@ class StackedBarChartTest {
 
             // Assert
             onNodeWithTag(TestTags.CHART_ERROR).assertIsDisplayed()
-            onNodeWithText("Segment color count must match segment count (3).\n").assertIsDisplayed()
+            onNodeWithText("Color count (2) must match series count (3).\n").assertIsDisplayed()
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun stackedBarChart_withInvalidNumericStyleValues_drawsClampedChart() =
+        runComposeUiTest {
+            val data =
+                chartDataOf(
+                    categories = listOf("Bar 1", "Bar 2"),
+                    ChartSeries(name = "S1", values = listOf(10.0, 2.0)),
+                    ChartSeries(name = "S2", values = listOf(5.0, 8.0)),
+                )
+
+            setContent {
+                StackedBarChart(
+                    data = data,
+                    style =
+                        StackedBarChartDefaults.style(
+                            segments = StackedBarChartDefaults.segments(alpha = 2f),
+                            layout = StackedBarChartDefaults.layout(space = (-1).dp),
+                            selection =
+                                StackedBarChartDefaults.selection(
+                                    width = Dp.Unspecified,
+                                    unselectedAlpha = Float.NaN,
+                                ),
+                        ),
+                    selection = staticChartSelection(1),
+                    animateOnStart = false,
+                )
+            }
+
+            onNodeWithTag(TestTags.STACKED_BAR_CHART).assertIsDisplayed()
+            onNodeWithTag(TestTags.CHART_ERROR).assertDoesNotExist()
         }
 
     @OptIn(ExperimentalTestApi::class)
@@ -213,35 +246,7 @@ class StackedBarChartTest {
             }
 
             onNodeWithTag(TestTags.CHART_ERROR).assertIsDisplayed()
-            onNodeWithText("Segment 0 contains a negative or non-finite contribution.\n").assertIsDisplayed()
-        }
-
-    @OptIn(ExperimentalTestApi::class)
-    @Test
-    fun stackedBarChart_withUnspecifiedSelectionWidth_displaysError() =
-        runComposeUiTest {
-            val data =
-                chartDataOf(
-                    categories = listOf("Bar 1", "Bar 2"),
-                    ChartSeries(name = "S1", values = listOf(10.0, 2.0)),
-                    ChartSeries(name = "S2", values = listOf(5.0, 8.0)),
-                )
-
-            setContent {
-                StackedBarChart(
-                    data = data,
-                    style =
-                        StackedBarChartDefaults.style(
-                            selection = StackedBarChartDefaults.selection(width = Dp.Unspecified),
-                        ),
-                )
-            }
-
-            onNodeWithTag(TestTags.CHART_ERROR).assertIsDisplayed()
-            onNodeWithText(
-                "Selection line width must resolve to 0..16384 pixels.",
-                substring = true,
-            ).assertIsDisplayed()
+            onNodeWithText("Series 0 contains a negative value.\n").assertIsDisplayed()
         }
 
     @OptIn(ExperimentalTestApi::class)

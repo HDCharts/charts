@@ -57,6 +57,10 @@ Use `selection` instead of `selectedBarIndex`. Selection applies to a whole bar,
 not an individual segment. Use `staticChartSelection(index)` for a preset
 preview or screenshot.
 
+Selecting a bar dims the other bars to 70% opacity, and the selection line is
+drawn only above the selected bar. Pass `selection(unselectedAlpha = 1f)` to
+keep every bar solid.
+
 The selection line width is `Dp` and scales with screen density. The default is
 `1.dp`; in 2.x widths were pixels.
 

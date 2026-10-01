@@ -17,6 +17,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -25,16 +26,17 @@ import androidx.compose.ui.unit.Dp
 import io.github.hdcharts.core.internal.InternalChartsApi
 import io.github.hdcharts.core.internal.NO_SELECTION
 import io.github.hdcharts.core.internal.TestTags
+import io.github.hdcharts.core.internal.ValidationErrors
 import io.github.hdcharts.core.internal.composable.ChartErrors
 import io.github.hdcharts.core.internal.composable.Legend
 import io.github.hdcharts.core.internal.layout.modifierTopTitle
+import io.github.hdcharts.core.internal.validateValues
 import io.github.hdcharts.core.model.ChartSelection
 import io.github.hdcharts.core.model.SelectionLifetime
 import io.github.hdcharts.core.model.rememberChartSelection
 import io.github.hdcharts.core.model.rememberSelectionLifecycle
 import io.github.hdcharts.pie.internal.PieChart
 import io.github.hdcharts.pie.internal.calculatePercentages
-import io.github.hdcharts.pie.internal.validatePieData
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 
@@ -87,10 +89,16 @@ fun PieChart(
         autoDeselectTrigger = interactionNonce,
     )
 
+    val density = LocalDensity.current
     val validationErrors =
         remember(data) {
-            validatePieData(data)
+            if (data.size < ValidationErrors.MIN_VALUES) {
+                listOf(ValidationErrors.tooFewValues(min = ValidationErrors.MIN_VALUES))
+            } else {
+                validateValues(values = data.map { it.value }, allowNegative = false)
+            }
         }
+    val drawStyle = remember(style, density) { style.clamped(density) }
 
     if (validationErrors.isNotEmpty()) {
         ChartErrors(
@@ -102,8 +110,8 @@ fun PieChart(
     }
 
     val colors =
-        remember(data, style.slices) {
-            resolveSliceColors(slices = data, style = style.slices)
+        remember(data, drawStyle.slices) {
+            resolveSliceColors(slices = data, style = drawStyle.slices)
         }
     val labels = remember(data) { data.map { it.label }.toImmutableList() }
     val points = remember(data) { data.map { it.value }.toImmutableList() }
@@ -114,7 +122,7 @@ fun PieChart(
         labels = labels,
         points = points,
         colors = colors,
-        style = style,
+        style = drawStyle,
         selection = selection,
         interactionEnabled = interactionEnabled,
         animateOnStart = animateOnStart,

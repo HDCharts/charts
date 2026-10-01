@@ -22,12 +22,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import io.github.hdcharts.core.internal.TestTags
-import io.github.hdcharts.core.internal.ValidationErrors.MIN_REQUIRED_HISTOGRAM
-import io.github.hdcharts.core.internal.ValidationErrors.RULE_COLORS_SIZE_MISMATCH
-import io.github.hdcharts.core.internal.ValidationErrors.RULE_DATA_POINTS_LESS_THAN_MIN
-import io.github.hdcharts.core.internal.ValidationErrors.RULE_DATA_POINT_NEGATIVE
-import io.github.hdcharts.core.internal.ValidationErrors.RULE_DATA_POINT_NOT_NUMBER
-import io.github.hdcharts.core.internal.format
+import io.github.hdcharts.core.internal.ValidationErrors
 import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.model.ChartSelection
 import io.github.hdcharts.core.model.ChartSeries
@@ -75,7 +70,7 @@ class HistogramChartTest {
                 listOf(2.0, -1.0, 4.0).toChartData(
                     categories = listOf("0-10", "10-20", "20-30"),
                 )
-            val expectedError = RULE_DATA_POINT_NEGATIVE.format(1)
+            val expectedError = ValidationErrors.negativeValue(index = 1)
 
             setContent {
                 HistogramChart(
@@ -124,10 +119,7 @@ class HistogramChartTest {
                     .single()
                     .values.size
             val expectedError =
-                RULE_COLORS_SIZE_MISMATCH.format(
-                    2,
-                    pointsSize,
-                )
+                ValidationErrors.colorCountMismatch(colors = 2, expected = pointsSize, target = "value")
 
             setContent {
                 val style =
@@ -179,7 +171,7 @@ class HistogramChartTest {
     fun histogramChart_emptyOrSingleBin_displaysMinimumSizeError() =
         runComposeUiTest {
             val currentData = mutableStateOf(emptyList<Double>().toChartData())
-            val expectedError = RULE_DATA_POINTS_LESS_THAN_MIN.format(MIN_REQUIRED_HISTOGRAM)
+            val expectedError = ValidationErrors.tooFewValues(min = ValidationErrors.MIN_VALUES)
             setContent { HistogramChart(data = currentData.value, animateOnStart = false) }
 
             onNodeWithTag(TestTags.CHART_ERROR).assertIsDisplayed()
@@ -194,7 +186,7 @@ class HistogramChartTest {
     fun histogramChart_nonFiniteValues_displayValidationErrors() =
         runComposeUiTest {
             val currentData = mutableStateOf(listOf(1.0, Double.NaN).toChartData())
-            val expectedError = RULE_DATA_POINT_NOT_NUMBER.format(1)
+            val expectedError = ValidationErrors.nonFiniteValue(index = 1)
             setContent { HistogramChart(data = currentData.value, animateOnStart = false) }
 
             listOf(Double.NaN, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY).forEach { invalidValue ->

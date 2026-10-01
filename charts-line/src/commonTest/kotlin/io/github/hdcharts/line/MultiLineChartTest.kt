@@ -210,8 +210,7 @@ class MultiLineChartTest {
 
             // Assert
             onNodeWithTag(TestTags.CHART_ERROR).assertIsDisplayed()
-            onNodeWithText("Category count", substring = true).assertIsDisplayed()
             onNodeWithText("Series 1 is not aligned", substring = true).assertIsDisplayed()
-            onNodeWithText("Line color count", substring = true).assertIsDisplayed()
+            onNodeWithText("Color count", substring = true).assertIsDisplayed()
         }
 }

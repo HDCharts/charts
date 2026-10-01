@@ -108,7 +108,6 @@ fun StackedAreaChartSeriesColorsPreview() {
             style =
                 StackedAreaChartDefaults.style(
                     fill = StackedAreaChartDefaults.fill(colors = colors),
-                    boundary = StackedAreaChartDefaults.boundary(colors = colors),
                 ),
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
         )

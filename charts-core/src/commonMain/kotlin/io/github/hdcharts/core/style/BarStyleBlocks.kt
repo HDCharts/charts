@@ -128,13 +128,19 @@ data class BarAxisStyle(
 /**
  * Selection indicator configuration for vertical bar and histogram charts.
  *
- * @property visible Whether the selection line is visible.
+ * While a bar is selected, the other bars are drawn at [unselectedAlpha] so the selected bar
+ * stands out. The selection line is drawn only outside the selected bar.
+ *
+ * @property visible Whether the selection indicator is visible. `false` also keeps every bar solid.
  * @property color The selection line color.
  * @property width The selection line stroke width in density-independent pixels.
+ * @property unselectedAlpha The alpha multiplier for the other bars while a bar is selected, in
+ * `0..1`. `1f` keeps every bar solid.
  */
 @Immutable
-data class BarSelectionLineStyle(
+data class BarSelectionStyle(
     val visible: Boolean,
     val color: Color,
     val width: Dp,
+    val unselectedAlpha: Float,
 )

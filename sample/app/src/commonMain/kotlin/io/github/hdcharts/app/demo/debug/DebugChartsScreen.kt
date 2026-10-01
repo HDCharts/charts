@@ -22,7 +22,6 @@ import io.github.hdcharts.pie.PieChart
 import io.github.hdcharts.pie.PieChartDefaults
 import io.github.hdcharts.pie.PieSlice
 import io.github.hdcharts.radar.RadarChart
-import io.github.hdcharts.radar.RadarChartDefaults
 import io.github.hdcharts.sampleshared.theme.Dimens
 
 /**
@@ -77,7 +76,6 @@ private fun HeightOnlyRadarCase() {
         modifier = Modifier.height(300.dp).debugBounds(),
         title = "Radar",
         selection = selection,
-        style = RadarChartDefaults.style(categories = RadarChartDefaults.categories(legendVisible = false)),
     )
 }
 

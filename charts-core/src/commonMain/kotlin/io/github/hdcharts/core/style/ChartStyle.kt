@@ -1,18 +1,10 @@
 package io.github.hdcharts.core.style
 
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-
-private const val DEFAULT_CHART_CONTENT_PADDING_DP = 15
-
-private fun defaultChartContentPadding(): Dp = DEFAULT_CHART_CONTENT_PADDING_DP.dp
 
 /**
  * Presentation-only container style shared by every chart.
@@ -44,13 +36,13 @@ object ChartContainerDefaults {
      * @param contentPadding The spacing reserved inside the chart for axes and supporting content.
      */
     @Composable
-    fun style(contentPadding: Dp = defaultChartContentPadding()): ChartContainerStyle {
+    fun style(contentPadding: Dp = StyleDefaults.containerPadding): ChartContainerStyle {
         val titleStyle =
             TextStyle(
-                fontSize = 20.sp,
-                color = MaterialTheme.colorScheme.onSurface,
+                fontSize = StyleDefaults.titleSize,
+                color = StyleDefaults.titleColor,
                 textAlign = TextAlign.Start,
-                fontWeight = FontWeight.ExtraBold,
+                fontWeight = StyleDefaults.titleWeight,
             )
         return ChartContainerStyle(
             styleTitle = titleStyle,

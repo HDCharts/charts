@@ -81,7 +81,10 @@ Sizes are `Dp` and scale with screen density. The 2.x `Float` sizes were
 pixels, so divide them by the screen density when migrating. For example,
 `pointSize = 9f` looked like `points(size = 3.dp)` on a 3x screen. Point and
 selection sizes are radii. The defaults are a `2.dp` line, `4.dp` points,
-`3.dp` and `5.dp` selection markers, and a `1.dp` axis.
+`3.dp` and `5.dp` selection markers, and a `1.dp` axis and selection line.
+
+The selection line uses `onSurface`, like the other charts. Set its color and
+width with `selection(color, width)`; the markers use `markerColor`.
 
 `interactionEnabled = false` disables user controls, including fit/expand,
 zoom, and scrolling of dense data, while programmatic selection remains

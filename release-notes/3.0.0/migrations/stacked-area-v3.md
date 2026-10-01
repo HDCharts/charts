@@ -48,8 +48,15 @@ The old `MultiChartDataSet` and `selectedPointIndex` inputs are removed. Use
 ## Styles and selection
 
 Move customizations to the grouped `StackedAreaChartStyle` sections such as
-`fill`, `boundary`, `axis`, and `selection`. Series colors correspond to
+`fill`, `axis`, and `selection`. Series colors correspond to
 contribution series.
+
+Stacked areas no longer draw boundary lines. Set the curve with
+`StackedAreaChartDefaults.fill(bezier = true)`.
+
+Selecting a point keeps a column around it at full color and dims the rest of
+the stack to 70% opacity. The selection line is drawn only above the stack.
+Pass `selection(unselectedAlpha = 1f)` to keep the whole stack at full color.
 
 Use `staticChartSelection(index)` for a preset preview or screenshot. Replacing
 data clears selection; resizing and density changes preserve it.

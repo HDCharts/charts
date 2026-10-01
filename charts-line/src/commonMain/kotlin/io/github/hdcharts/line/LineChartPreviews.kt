@@ -40,7 +40,7 @@ private fun lineStyle(lineColors: List<Color>): LineChartStyle =
     LineChartDefaults.style(
         line = LineChartDefaults.line(colors = lineColors, bezier = true),
         points = LineChartDefaults.points(size = 4.dp, visible = true),
-        selection = LineChartDefaults.selection(size = 2.dp),
+        selection = LineChartDefaults.selection(markerSize = 2.dp),
     )
 
 @Composable

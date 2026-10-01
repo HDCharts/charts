@@ -23,9 +23,7 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import io.github.hdcharts.core.internal.TestTags
-import io.github.hdcharts.core.internal.ValidationErrors.MIN_REQUIRED_PIE
-import io.github.hdcharts.core.internal.ValidationErrors.RULE_DATA_POINTS_LESS_THAN_MIN
-import io.github.hdcharts.core.internal.format
+import io.github.hdcharts.core.internal.ValidationErrors
 import io.github.hdcharts.core.model.ChartSelection
 import io.github.hdcharts.core.model.staticChartSelection
 import io.github.hdcharts.pie.internal.calculatePercentages
@@ -140,7 +138,7 @@ class PieChartTest {
     fun pieChart_withInvalidData_displaysError() =
         runComposeUiTest {
             val invalidSlices = listOf(PieSlice(label = "A", value = 1.0))
-            val expectedError = RULE_DATA_POINTS_LESS_THAN_MIN.format(MIN_REQUIRED_PIE)
+            val expectedError = ValidationErrors.tooFewValues(min = ValidationErrors.MIN_VALUES)
 
             setContent {
                 PieChart(invalidSlices)

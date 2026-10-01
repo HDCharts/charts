@@ -408,7 +408,7 @@ class BarChartDenseDataTest {
                                     xLabels = BarChartDefaults.xLabels(visible = false),
                                     yLabels = BarChartDefaults.yLabels(visible = false),
                                 ),
-                            selectionLine = BarChartDefaults.selectionLine(color = Color.Magenta, width = 4.dp),
+                            selection = BarChartDefaults.selection(color = Color.Magenta, width = 4.dp),
                         ),
                 )
             }

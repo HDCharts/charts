@@ -2,14 +2,14 @@ package io.github.hdcharts.bar.internal
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.IntSize
+import io.github.hdcharts.core.internal.density.aggregateLabelsByCenterValue
+import io.github.hdcharts.core.internal.density.bucketSizeForTarget
+import io.github.hdcharts.core.internal.density.buildBucketRanges
+import io.github.hdcharts.core.internal.density.shouldUseScrollableDensity
 import io.github.hdcharts.core.internal.model.ChartData
 import io.github.hdcharts.core.internal.model.resolveOptionalRange
 import kotlin.math.abs
 import kotlin.math.max
-import io.github.hdcharts.core.internal.density.aggregateLabelsByCenterValue as aggregateLabelsByCenterValueCore
-import io.github.hdcharts.core.internal.density.bucketSizeForTarget as bucketSizeForTargetCore
-import io.github.hdcharts.core.internal.density.buildBucketRanges as buildBucketRangesCore
-import io.github.hdcharts.core.internal.density.shouldUseScrollableDensity as shouldUseScrollableDensityCore
 
 internal const val BAR_DENSE_THRESHOLD = 50
 
@@ -32,7 +32,7 @@ internal fun getSelectedIndexForContentX(
 ): Int = if (dataSize <= 0 || unitWidthPx <= 0f) 0 else (contentX / unitWidthPx).toInt().coerceIn(0, dataSize - 1)
 
 internal fun shouldUseScrollableDensity(pointsCount: Int): Boolean =
-    shouldUseScrollableDensityCore(
+    shouldUseScrollableDensity(
         pointsCount = pointsCount,
         threshold = BAR_DENSE_THRESHOLD,
     )
@@ -55,7 +55,7 @@ internal fun aggregateForCompactDensity(
                 (range.sumOf { data.points[it] / scale } / range.count()).coerceIn(-1.0, 1.0) * scale
             }
         }
-    val aggregatedLabels = aggregateLabelsByCenterValueCore(data.labels, bucketRanges)
+    val aggregatedLabels = aggregateLabelsByCenterValue(data.labels, bucketRanges)
     return ChartData(aggregatedLabels.zip(aggregatedPoints))
 }
 
@@ -64,8 +64,8 @@ internal fun compactDensityRanges(
     targetPoints: Int,
 ): List<IntRange> {
     if (sourcePointsCount <= 0) return emptyList()
-    val bucketSize = bucketSizeForTargetCore(sourcePointsCount, targetPoints.coerceAtLeast(1))
-    return buildBucketRangesCore(sourcePointsCount, bucketSize)
+    val bucketSize = bucketSizeForTarget(sourcePointsCount, targetPoints.coerceAtLeast(1))
+    return buildBucketRanges(sourcePointsCount, bucketSize)
 }
 
 internal fun compactDensityCenterIndices(

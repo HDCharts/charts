@@ -22,7 +22,7 @@ import io.github.hdcharts.core.style.BarAxisStyle
 import io.github.hdcharts.core.style.BarBarsStyle
 import io.github.hdcharts.core.style.BarChartDefaults
 import io.github.hdcharts.core.style.BarGridStyle
-import io.github.hdcharts.core.style.BarSelectionLineStyle
+import io.github.hdcharts.core.style.BarSelectionStyle
 
 @Composable
 private fun ShowStyledBar() {
@@ -40,7 +40,12 @@ private fun ShowStyledBar() {
             minBarWidth = 10.dp,
         ),
         grid = BarGridStyle(visible = true, steps = 5, color = Color(0xFF94A3B8), lineWidth = 1.dp),
-        selectionLine = BarSelectionLineStyle(visible = true, color = Color(0xFFEA580C), width = 1.dp),
+        selection = BarSelectionStyle(
+            visible = true,
+            color = Color(0xFFEA580C),
+            width = 1.dp,
+            unselectedAlpha = 0.7f,
+        ),
         axis = BarAxisStyle(
             visible = true,
             color = Color.Gray,
