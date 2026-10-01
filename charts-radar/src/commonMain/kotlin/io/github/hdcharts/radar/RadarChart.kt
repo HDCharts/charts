@@ -1,23 +1,17 @@
 package io.github.hdcharts.radar
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.unit.Dp
 import io.github.hdcharts.core.internal.InternalChartsApi
 import io.github.hdcharts.core.internal.NO_SELECTION
 import io.github.hdcharts.core.internal.TestTags
 import io.github.hdcharts.core.internal.ValidationErrors
 import io.github.hdcharts.core.internal.composable.ChartErrors
+import io.github.hdcharts.core.internal.composable.ChartSquarePlotLayout
 import io.github.hdcharts.core.internal.composable.Legend
 import io.github.hdcharts.core.internal.layout.modifierTopTitle
 import io.github.hdcharts.core.internal.model.ChartDataItem
@@ -118,10 +112,13 @@ fun RadarChart(
                     .map { series -> ChartValueFormatters.Default.format(series.values[selectedIndex]) }
                     .toImmutableList()
         }
-    BoxWithConstraints(modifier = modifier) {
-        val boundedHeight = maxHeight != Dp.Infinity
-        // Match the width the caller asks for, so the plot centers in a wide chart.
-        Column(modifier = Modifier.widthIn(min = minWidth)) {
+    // The legend names the series and shows each value while an axis is selected. Categories
+    // are named by the axis labels, and a single series needs no legend.
+    val legendSeries = if (hasMultipleSeries) seriesNames else persistentListOf()
+
+    ChartSquarePlotLayout(
+        modifier = modifier,
+        title = {
             if (effectiveTitle.isNotBlank()) {
                 Text(
                     modifier =
@@ -131,37 +128,8 @@ fun RadarChart(
                     style = style.chartContainerStyle.styleTitle,
                 )
             }
-            // The web is a circle, so the plot box stays square and is centered over the
-            // shorter side. This mirrors [PieChart]: it centers the chart and keeps the title
-            // sitting above it instead of pinning the title to the start edge of a full-width box.
-            val plotModifier =
-                if (boundedHeight) Modifier.weight(1f, fill = false) else Modifier
-            Box(
-                modifier =
-                    plotModifier
-                        .aspectRatio(1f)
-                        .align(Alignment.CenterHorizontally),
-            ) {
-                RadarChart(
-                    data = internalData,
-                    style = drawStyle,
-                    colors = lineColors,
-                    axisLabels = categories,
-                    interactionEnabled = interactionEnabled,
-                    animateOnStart = animateOnStart,
-                    selectedAxisIndex = selectedIndex,
-                    focusedSeriesIndex = focusedSeriesIndex,
-                    onValueChanged = { index ->
-                        if (index == NO_SELECTION) selection.clear() else selection.select(index)
-                    },
-                    onFocusedSeriesChanged = { index ->
-                        if (index == NO_SELECTION) seriesSelection.clear() else seriesSelection.select(index)
-                    },
-                )
-            }
-            // The legend names the series and shows each value while an axis is selected. Categories
-            // are named by the axis labels, and a single series needs no legend.
-            val legendSeries = if (hasMultipleSeries) seriesNames else persistentListOf()
+        },
+        legend = {
             if (legendSeries.isNotEmpty()) {
                 Legend(
                     chartContainerStyle = style.chartContainerStyle,
@@ -170,8 +138,26 @@ fun RadarChart(
                     labels = selectedLabels,
                 )
             }
-        }
-    }
+        },
+        plot = {
+            RadarChart(
+                data = internalData,
+                style = drawStyle,
+                colors = lineColors,
+                axisLabels = categories,
+                interactionEnabled = interactionEnabled,
+                animateOnStart = animateOnStart,
+                selectedAxisIndex = selectedIndex,
+                focusedSeriesIndex = focusedSeriesIndex,
+                onValueChanged = { index ->
+                    if (index == NO_SELECTION) selection.clear() else selection.select(index)
+                },
+                onFocusedSeriesChanged = { index ->
+                    if (index == NO_SELECTION) seriesSelection.clear() else seriesSelection.select(index)
+                },
+            )
+        },
+    )
 }
 
 /** The title for a selected axis: `Category: value`, or just the value when the category is blank. */
