@@ -34,3 +34,13 @@ sequenceDiagram
 | Pull request | `pull-request.yml`, `pull-request-api.yml`, `pull-request-gif-validation.yml` | Nothing; it gates the merge. |
 | Snapshot | `nightly.yml` → `snapshot-release.yml` | Maven snapshot, snapshot API reference and demo, snapshot Android APK, snapshot docs. |
 | Release | `release.yml` | Maven release and tag, versioned API reference and demo, release Android APK, versioned docs, GitHub release. |
+
+## What validates `main`
+
+The pull-request checks. No workflow triggers on `push`, so a merge is never re-validated after it
+lands. The nightly snapshot publishes `main` when the last 24 hours brought code changes, and it
+runs no test task on the way; `release.yml` runs only when a maintainer starts it.
+
+That makes the pull-request checks the only place where a commit is tested. See
+[Pull Requests](pull-requests.md) for the jobs they run and
+[Validation Matrix](validation-matrix.md) for what each one covers.
