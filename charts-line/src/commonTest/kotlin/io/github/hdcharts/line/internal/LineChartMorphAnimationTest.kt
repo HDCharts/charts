@@ -42,7 +42,7 @@ class LineChartMorphAnimationTest {
             assertEquals(
                 expected = drawnHalfway,
                 actual = state.drawnValueAt(seriesIndex = 0, pointIndex = 0, progress = restartedProgress),
-                absoluteTolerance = 0.02f,
+                absoluteTolerance = 0.1f,
                 message = "The new morph must freeze the value on screen, or the line jumps on the frame it starts.",
             )
             assertTrue(

@@ -48,7 +48,8 @@ internal sealed interface LineChartTransitionMode {
  * The advance is decided from [previousRawSeries], the window the chart last drew, because the
  * shift is built from it. A re-run of this decision for a window the chart has already drawn -
  * because the range or the shift duration changed - sees the same window on both sides, so
- * [previousRawSeries] === [currentRawSeries] covers it and it morphs.
+ * [previousRawSeries] === [currentRawSeries] covers it and it morphs. That identity check comes
+ * first because it settles those updates without comparing the windows point by point.
  */
 internal fun decideLineChartUpdate(
     previousRawSeries: List<List<Double>>?,
@@ -59,8 +60,8 @@ internal fun decideLineChartUpdate(
     if (
         renderMode !is LineChartRenderMode.Timeline ||
         previousRawSeries == null ||
-        !isTimelineAdvance(previousRawSeries, currentRawSeries) ||
-        previousRawSeries === currentRawSeries
+        previousRawSeries === currentRawSeries ||
+        !isTimelineAdvance(previousRawSeries, currentRawSeries)
     ) {
         return LineChartTransitionMode.Morph
     }

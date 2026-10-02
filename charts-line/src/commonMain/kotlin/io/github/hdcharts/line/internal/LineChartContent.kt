@@ -138,11 +138,10 @@ internal fun LineChartContent(
     val timelineWindowCounter = remember { TimelineWindowCounter() }
     // Keyed on the mode type, not the instance: a new shiftDuration must not count the same window twice.
     val isTimeline = renderMode is LineChartRenderMode.Timeline
-    val timelineWindowStep =
+    val droppedTimelinePoints: Long? =
         remember(rawSeries, isTimeline) {
             if (isTimeline) timelineWindowCounter.next(rawSeries) else null
         }
-    val droppedTimelinePoints = timelineWindowStep?.droppedPoints
     val minMax =
         remember(data, style.range.min, style.range.max) {
             data.resolveLineRange(style.range.min, style.range.max)

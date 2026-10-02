@@ -22,11 +22,6 @@ internal data class LineChartTimelineShiftData(
         )
 }
 
-/** How far a live window has advanced, decided once per update. */
-internal data class TimelineWindowStep(
-    val droppedPoints: Long,
-)
-
 /**
  * Counts the points a live timeline window has dropped since its data was last replaced, so X-axis
  * labels can stay on their points while the window slides.
@@ -39,17 +34,17 @@ internal class TimelineWindowCounter {
     // twice. remember rebuilds the window list, so the cache is compared by value and [next] still
     // answers the same way for a window it has already counted.
     private var lastSeries: List<List<Double>>? = null
-    private var lastStep = TimelineWindowStep(droppedPoints = 0L)
+    private var lastStep = 0L
 
-    /** Takes [series] as the next window and reports how far it has advanced. */
-    fun next(series: List<List<Double>>): TimelineWindowStep {
+    /** Takes [series] as the next window and returns how many points it has dropped in total. */
+    fun next(series: List<List<Double>>): Long {
         if (series == lastSeries) return lastStep
 
         val previous = previousSeries
         val isAdvance = previous != null && isTimelineAdvance(previous, series)
         droppedPoints = if (isAdvance) droppedPoints + 1 else 0L
 
-        return TimelineWindowStep(droppedPoints = droppedPoints)
+        return droppedPoints
             .also { step ->
                 previousSeries = series
                 lastSeries = series

@@ -53,10 +53,10 @@ or a live shift.
 
 - Line and live line: each draw blends or copies one series at a time into a reused `FloatArray`
   and builds one `Path` through every point with `drawChartPath` in `LineChartDrawing.kt`. A bezier
-  line maps each value to its height once and reads the shared heights per segment, so no frame
-  allocates per point. It still allocates per frame: one `CubicControlPoints` per segment, one
-  `FloatArray` of heights per series, and one `Path` per series. Visible point markers draw one circle
-  per point, and the expanded view draws every point, including the ones scrolled off screen.
+  line maps each value to its height once and reads the shared heights per segment. A frame
+  allocates one `CubicControlPoints` per segment, one `FloatArray` of heights per series, and one
+  `Path` per series. Visible point markers draw one circle per point, and the expanded view draws
+  every point, including the ones scrolled off screen.
 - Stacked area: each draw copies the values of every series, allocates a zero baseline, and builds
   an `Offset` for every point of each series before it keeps the visible range for the paths.
 - Bar and stacked bar: each draw walks only the bars in `visibleRange`.

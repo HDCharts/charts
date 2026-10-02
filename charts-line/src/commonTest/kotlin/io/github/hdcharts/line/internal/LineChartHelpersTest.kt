@@ -669,7 +669,7 @@ class LineChartHelpersTest {
         counter.next(first)
         val step = counter.next(second)
 
-        assertEquals(expected = 1L, actual = step.droppedPoints)
+        assertEquals(expected = 1L, actual = step)
         // remember rebuilds the window list, so composition running again brings an equal copy.
         assertEquals(expected = step, actual = counter.next(second.map { it.toList() }))
     }
@@ -681,7 +681,7 @@ class LineChartHelpersTest {
         counter.next(listOf(listOf(1.0, 2.0, 3.0)))
         val step = counter.next(listOf(listOf(9.0, 8.0, 7.0)))
 
-        assertEquals(expected = 0L, actual = step.droppedPoints)
+        assertEquals(expected = 0L, actual = step)
     }
 
     @Test
@@ -697,7 +697,7 @@ class LineChartHelpersTest {
                 counter.next(window)
             }
 
-        assertEquals(expected = listOf(1L, 2L, 3L), actual = steps.map { it.droppedPoints })
+        assertEquals(expected = listOf(1L, 2L, 3L), actual = steps)
     }
 
     private fun singleSeriesData(points: List<Double>): MultiChartData =
