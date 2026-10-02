@@ -39,8 +39,9 @@ class CubicControlPointsIntoTest {
 
     @Test
     fun firstSegment_repeatsTheStartPoint_writesTheExpectedControlPoints() {
-        // With no point before it, p0 is p1, so the first control point sits a third of a factor
-        // along the segment instead of a full one.
+        // With no point before it, p0 is p1, so c1x is offset by (p2 - p1) * factor instead of
+        // (p2 - p0) * factor. With evenly spaced points that is half the middle case, not two
+        // thirds of it: the middle case spans two steps to p0, this one spans one.
         // c1x = 10 + (20 - 10) * factor = 11.583333
         // c1y = 20 + (30 - 20) * factor = 21.583332
         // c2x = 20 - (30 - 10) * factor = 16.833334
@@ -67,8 +68,9 @@ class CubicControlPointsIntoTest {
 
     @Test
     fun lastSegment_repeatsTheEndPoint_writesTheExpectedControlPoints() {
-        // With no point after it, p3 is p2, so the second control point sits a third of a factor
-        // back from the end instead of a full one.
+        // With no point after it, p3 is p2, so c2x is offset by (p2 - p1) * factor instead of
+        // (p3 - p1) * factor. With evenly spaced points that is half the middle case, not two
+        // thirds of it: the middle case spans two steps to p3, this one spans one.
         // c1x = 10 + (20 - 0) * factor = 13.166667
         // c1y = 20 + (30 - 10) * factor = 23.166666
         // c2x = 20 - (20 - 10) * factor = 18.416666
@@ -150,10 +152,13 @@ class CubicControlPointsIntoTest {
     }
 
     @Test
-    fun reversedYBounds_clampsBetweenThemRatherThanSwapping() {
-        // Reversed bounds still describe one interval, so minY 100 and maxY 0 clamp to 100 and 0.
-        // Unclamped c1y = 20 + (30 - 0) * factor = 24.75 and c2y = 30 - (40 - 20) * factor =
-        // 26.833334, both inside the reversed interval once ordered, so both survive.
+    fun reversedYBounds_areOrderedBeforeClamping() {
+        // Reversed bounds still describe one interval, so minY 100 and maxY 0 are ordered into
+        // lower 0 and upper 100 before anything is clamped. p3y is far enough out that c2y would
+        // fall below the ordered lower bound, so a caller that clamped to the reversed pair, or
+        // skipped the ordering, would leave it unclamped.
+        // c1y = 20 + (30 - 0) * factor = 24.75, inside 0..100, unchanged
+        // c2y = 30 - (900 - 20) * factor = -109.333328, clamped up to the ordered lower bound 0
         // c1x = 10 + (20 - 0) * factor = 13.166667
         // c2x = 20 - (30 - 10) * factor = 16.833334
         val out = FloatArray(CUBIC_CONTROL_POINT_COUNT)
@@ -167,13 +172,13 @@ class CubicControlPointsIntoTest {
             p2x = 20f,
             p2y = 30f,
             p3x = 30f,
-            p3y = 40f,
+            p3y = 900f,
             minY = 100f,
             maxY = 0f,
         )
 
         assertControlPoints(
-            expected = floatArrayOf(13.166667f, 24.75f, 16.833334f, 26.833334f),
+            expected = floatArrayOf(13.166667f, 24.75f, 16.833334f, 0f),
             actual = out,
         )
     }
