@@ -2,4 +2,4 @@
 
 - type: `fix`
 - module: `charts-line`
-- release_note: `Expanded line charts draw only the points on screen, so scrolling and animating stay smooth with many points.`
+- release_note: `Line charts stay smooth with many points: each data update animates with a single animation, and an expanded chart draws only the points on screen.`
