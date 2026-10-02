@@ -52,11 +52,12 @@ Every draw reads the current animation values, so it runs on every frame of the 
 or a live shift.
 
 - Line and live line: each draw blends or copies one series at a time into a reused `FloatArray`
-  and builds one `Path` through every point with `drawChartPath` in `LineChartDrawing.kt`. A bezier
-  line maps each value to its height once and reads the shared heights per segment. A frame
-  allocates one `CubicControlPoints` per segment, one `FloatArray` of heights per series, and one
-  `Path` per series. Visible point markers draw one circle per point, and the expanded view draws
-  every point, including the ones scrolled off screen.
+  and builds one `Path` through the points of that series with `drawChartPath` in
+  `LineChartDrawing.kt`. The path, the canvas heights, and the bezier control points are held in a
+  `LineChartDrawScratch` the chart remembers, so a frame allocates nothing per point or per segment.
+  A bezier line maps each value to its canvas height once and reads the shared heights per segment.
+  An expanded chart draws only the points on screen, plus the overscan of the widest marker, so a
+  chart of a million points does not build a path through the whole series.
 - Stacked area: each draw copies the values of every series, allocates a zero baseline, and builds
   an `Offset` for every point of each series before it keeps the visible range for the paths.
 - Bar and stacked bar: each draw walks only the bars in `visibleRange`.
@@ -68,6 +69,8 @@ or a live shift.
 | Canvas limit | `ChartCanvasLimitsTest` in `charts-core/src/commonTest` |
 | Error instead of a crash past the limit | `*_expandedPastLayoutLimits_displaysErrorInsteadOfCrashing` in `charts-line`, `charts-stacked-area`, and `charts-stacked-bar` |
 | Scroll clamp after a zoom-out | `ChartScrollTest` in `charts-core/src/commonTest`, `BarChartScrollFrameTest` in `charts-bar/src/jvmTest` |
+| An expanded chart draws the same line as the whole series | `LineChartVisiblePointsTest` in `charts-line/src/commonTest` |
+| Control points without an object per segment | `CubicControlPointsIntoTest` in `charts-core/src/commonTest` |
 | An interrupted live shift runs a full step | `interruptedShift_startsAFullStepInsteadOfResumingTheInterruptedWindow` in `charts-line/src/commonTest` |
 
 ## Known Issues

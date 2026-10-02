@@ -1,7 +1,11 @@
 package io.github.hdcharts.line
 
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PixelMap
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
@@ -16,10 +20,12 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeLeft
 import androidx.compose.ui.test.v2.runComposeUiTest
+import androidx.compose.ui.unit.dp
 import io.github.hdcharts.core.internal.TestTags
 import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.model.ChartSelection
 import io.github.hdcharts.core.model.toChartData
+import io.github.hdcharts.core.style.ChartContainerDefaults
 import kotlin.test.Test
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
@@ -28,6 +34,9 @@ import kotlin.test.assertTrue
 class LineChartDenseDataTest {
     private companion object {
         const val PLOT_START_PADDING_PX = 12f
+
+        /** How far in from each edge of the plot to look for the line. */
+        const val EDGE_PROBE_PX = 3
     }
 
     @Test
@@ -196,6 +205,94 @@ class LineChartDenseDataTest {
                 afterScrollTitle,
             )
         }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun lineChart_expandedAndScrolled_keepsDrawingTheLineAcrossTheWholeViewport() =
+        runComposeUiTest {
+            val capturePixels =
+                setCapturedContent { captureModifier ->
+                    LineChart(
+                        data = largeDataSet(title = "Dense Line Chart"),
+                        modifier =
+                            captureModifier
+                                .testTag("dense-capture")
+                                .size(width = 240.dp, height = 200.dp),
+                        animateOnStart = false,
+                        style =
+                            LineChartDefaults.style(
+                                chartContainerStyle = ChartContainerDefaults.style(contentPadding = 0.dp),
+                                line =
+                                    LineChartDefaults.line(
+                                        color = Color.Blue,
+                                        alpha = 1f,
+                                        strokeWidth = 6.dp,
+                                        bezier = false,
+                                    ),
+                                points = LineChartDefaults.points(visible = false),
+                                axis = LineChartDefaults.axis(visible = false),
+                            ),
+                    )
+                }
+
+            onNodeWithTag(TestTags.LINE_CHART_DENSE_EXPAND).performTouchInput { click() }
+            onNodeWithTag(TestTags.LINE_CHART).assertIsDisplayed()
+
+            val plotBounds = onNodeWithTag(TestTags.LINE_CHART_PLOT).fetchSemanticsNode().boundsInRoot
+            val captureBounds = onNodeWithTag("dense-capture").fetchSemanticsNode().boundsInRoot
+            val plotLeft = (plotBounds.left - captureBounds.left).toInt()
+
+            // The chart draws only the points on screen, so the line has to be found at both ends
+            // of the viewport, not only where the series starts.
+            onNodeWithTag(TestTags.LINE_CHART).performTouchInput {
+                swipeLeft()
+                swipeLeft()
+            }
+            waitForIdle()
+
+            val scrolledPixels = capturePixels()
+            val plotWidth = plotBounds.width.toInt()
+            val plotHeight = plotBounds.height.toInt()
+            val plotTop = (plotBounds.top - captureBounds.top).toInt()
+
+            assertLineAtColumn(
+                pixels = scrolledPixels,
+                columnX = plotLeft + EDGE_PROBE_PX,
+                plotTop = plotTop,
+                plotHeight = plotHeight,
+                edge = "left",
+            )
+            assertLineAtColumn(
+                pixels = scrolledPixels,
+                columnX = plotLeft + plotWidth - EDGE_PROBE_PX,
+                plotTop = plotTop,
+                plotHeight = plotHeight,
+                edge = "right",
+            )
+        }
+
+    /**
+     * Asserts the line is drawn somewhere in the column [columnX], scanning the plot's height.
+     *
+     * A column rather than a single pixel, because where the line sits vertically depends on the
+     * data, and a scan over the whole height rather than a fixed row, because which row it crosses
+     * is not part of this behaviour.
+     */
+    private fun assertLineAtColumn(
+        pixels: PixelMap,
+        columnX: Int,
+        plotTop: Int,
+        plotHeight: Int,
+        edge: String,
+    ) {
+        val lineReachesColumn =
+            (0 until plotHeight).any { row -> pixels[columnX, plotTop + row] == Color.Blue }
+        assertTrue(
+            lineReachesColumn,
+            "The line must reach the $edge edge of the viewport, or the chart is not drawing the " +
+                "points that are on screen. Column: $columnX",
+        )
+    }
 
     private fun ComposeUiTest.currentTitle(): String {
         val semanticsNode = onNodeWithTag(TestTags.CHART_TITLE).fetchSemanticsNode()
