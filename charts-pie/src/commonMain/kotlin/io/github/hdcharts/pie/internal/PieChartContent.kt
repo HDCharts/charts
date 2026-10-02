@@ -50,7 +50,7 @@ internal data class SliceGeometry(
 )
 
 @Composable
-internal fun PieChart(
+internal fun PieChartContent(
     chartData: ChartData,
     colors: ImmutableList<Color>,
     style: PieChartStyle,

@@ -21,7 +21,7 @@ import io.github.hdcharts.core.model.ChartSelection
 import io.github.hdcharts.core.model.ChartValueFormatters
 import io.github.hdcharts.core.model.rememberChartSelection
 import io.github.hdcharts.core.model.rememberSelectionLifecycle
-import io.github.hdcharts.stackedarea.internal.StackedAreaChart
+import io.github.hdcharts.stackedarea.internal.StackedAreaChartImpl
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import io.github.hdcharts.core.internal.model.ChartData as InternalChartData
@@ -89,7 +89,7 @@ fun StackedAreaChart(
         Column {
             val plotModifier = if (boundedHeight) Modifier.weight(1f) else Modifier
             Box(modifier = plotModifier) {
-                StackedAreaChart(
+                StackedAreaChartImpl(
                     data = internalData,
                     title = effectiveTitle,
                     style = drawStyle,

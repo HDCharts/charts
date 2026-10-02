@@ -41,7 +41,7 @@ fun BarChartInternalPlot(
         }
     Box(modifier = modifier) {
         Box(modifier = if (chartTag == null) Modifier else Modifier.testTag(chartTag)) {
-            BarChart(
+            BarChartImpl(
                 chartData = chartData,
                 title = title.orEmpty(),
                 style = style,

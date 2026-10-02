@@ -22,7 +22,7 @@ import io.github.hdcharts.core.model.ChartSelection
 import io.github.hdcharts.core.model.ChartValueFormatters
 import io.github.hdcharts.core.model.rememberChartSelection
 import io.github.hdcharts.core.model.rememberSelectionLifecycle
-import io.github.hdcharts.radar.internal.RadarChart
+import io.github.hdcharts.radar.internal.RadarChartContent
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -139,7 +139,7 @@ fun RadarChart(
             }
         },
         plot = {
-            RadarChart(
+            RadarChartContent(
                 data = internalData,
                 style = drawStyle,
                 colors = lineColors,

@@ -40,7 +40,7 @@ private val HEADER_TEST_TAGS =
     )
 
 @Composable
-internal fun BarChart(
+internal fun BarChartImpl(
     chartData: ChartData,
     title: String,
     style: BarChartStyle,

@@ -94,7 +94,7 @@ private val HEADER_TEST_TAGS =
     )
 
 @Composable
-internal fun StackedAreaChart(
+internal fun StackedAreaChartImpl(
     data: MultiChartData,
     title: String,
     style: StackedAreaChartStyle,

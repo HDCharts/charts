@@ -54,7 +54,7 @@ import kotlin.math.sin
 private val SERIES_TOUCH_RADIUS = 24.dp
 
 @Composable
-internal fun RadarChart(
+internal fun RadarChartContent(
     data: MultiChartData,
     style: RadarChartStyle,
     colors: ImmutableList<Color>,
