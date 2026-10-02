@@ -13,8 +13,6 @@ import androidx.compose.ui.test.swipeLeft
 import androidx.compose.ui.test.v2.runComposeUiTest
 import io.github.hdcharts.core.internal.TestTags
 import io.github.hdcharts.core.model.ChartSelection
-import io.github.hdcharts.core.model.ChartSeries
-import io.github.hdcharts.core.model.chartDataOf
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
@@ -105,17 +103,6 @@ class StackedBarChartDenseDataTest {
         }
     }
 
-    private fun denseStackedBarDataSet(bars: Int = 120) =
-        List(bars) { index ->
-            "Bar ${index + 1}" to
-                listOf(
-                    50f + (index % 9),
-                    30f + (index % 7),
-                    20f + (index % 5),
-                    10f + (index % 3),
-                )
-        }.let { rows -> transpose(rows, listOf("S1", "S2", "S3", "S4")) }
-
     private fun smallStackedBarDataSet(bars: Int = 8) =
         List(bars) { index ->
             "Bar ${index + 1}" to
@@ -124,19 +111,5 @@ class StackedBarChartDenseDataTest {
                     10f + (index % 4),
                     8f + (index % 3),
                 )
-        }.let { rows -> transpose(rows, listOf("A", "B", "C")) }
-
-    private fun transpose(
-        rows: List<Pair<String, List<Float>>>,
-        segmentNames: List<String>,
-    ) = chartDataOf(
-        categories = rows.map { (barLabel, _) -> barLabel },
-        *segmentNames
-            .mapIndexed { segmentIndex, segmentName ->
-                ChartSeries(
-                    name = segmentName,
-                    values = rows.map { (_, values) -> values[segmentIndex].toDouble() },
-                )
-            }.toTypedArray(),
-    )
+        }.let { rows -> transposeStackedBars(rows, listOf("A", "B", "C")) }
 }

@@ -93,7 +93,7 @@ class StackedBarChartTest {
             // Arrange
             val expectedTitle = "Quarterly Revenue by Region"
             val data =
-                stackedData(
+                transposeStackedBars(
                     rows =
                         listOf(
                             "North America" to listOf(320f, 340f, 360f, 390f),
@@ -171,7 +171,7 @@ class StackedBarChartTest {
         runComposeUiTest {
             // Arrange
             val data =
-                stackedData(
+                transposeStackedBars(
                     rows =
                         listOf(
                             "Bar 1" to listOf(10f, 20f, 30f),
@@ -256,7 +256,7 @@ class StackedBarChartTest {
             // Arrange
             val selectedIndex = 1
             val data =
-                stackedData(
+                transposeStackedBars(
                     rows =
                         listOf(
                             "Bar 1" to listOf(10f, 20f, 30f),
@@ -394,7 +394,7 @@ class StackedBarChartTest {
 
             setContent {
                 StackedBarChart(
-                    data = transpose(dataSet, listOf("Q1", "Q2", "Q3", "Q4")),
+                    data = transposeStackedBars(dataSet, listOf("Q1", "Q2", "Q3", "Q4")),
                 )
             }
 
@@ -418,7 +418,7 @@ class StackedBarChartTest {
 
             setContent {
                 StackedBarChart(
-                    data = transpose(dataSet, listOf("S1", "S2", "S3")),
+                    data = transposeStackedBars(dataSet, listOf("S1", "S2", "S3")),
                     style = StackedBarChartDefaults.style(layout = StackedBarChartDefaults.layout(space = 0.dp)),
                 )
             }
@@ -443,7 +443,7 @@ class StackedBarChartTest {
             setContent {
                 StackedBarChart(
                     data =
-                        stackedData(
+                        transposeStackedBars(
                             rows = categories.mapIndexed { index, label -> label to listOf(20f + index, 10f + index) },
                             segmentNames = listOf("Hardware", "Services"),
                         ),
@@ -483,7 +483,7 @@ class StackedBarChartTest {
         }
 
     private fun validData() =
-        stackedData(
+        transposeStackedBars(
             rows =
                 listOf(
                     "Bar 1" to listOf(10f, 20f, 30f),
@@ -492,36 +492,6 @@ class StackedBarChartTest {
                 ),
             segmentNames = listOf("S1", "S2", "S3"),
         )
-
-    private fun denseStackedBarDataSet(bars: Int = 120) =
-        List(bars) { index ->
-            "Bar ${index + 1}" to
-                listOf(
-                    50f + (index % 9),
-                    30f + (index % 7),
-                    20f + (index % 5),
-                    10f + (index % 3),
-                )
-        }.let { rows -> stackedData(rows, listOf("S1", "S2", "S3", "S4")) }
-
-    private fun stackedData(
-        rows: List<Pair<String, List<Float>>>,
-        segmentNames: List<String>,
-    ) = chartDataOf(
-        categories = rows.map { (barLabel, _) -> barLabel },
-        *segmentNames
-            .mapIndexed { segmentIndex, segmentName ->
-                ChartSeries(
-                    name = segmentName,
-                    values = rows.map { (_, values) -> values.getOrNull(segmentIndex)?.toDouble() ?: Double.NaN },
-                )
-            }.toTypedArray(),
-    )
-
-    private fun transpose(
-        rows: List<Pair<String, List<Float>>>,
-        segmentNames: List<String>,
-    ) = stackedData(rows, segmentNames)
 
     private companion object {
         val colors = listOf(Color.Red, Color.Green, Color.Cyan, Color.Black)

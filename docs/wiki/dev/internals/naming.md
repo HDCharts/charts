@@ -107,6 +107,17 @@ A `Frame` gets its own file when more than one composable calls it, which is why
 `LineChartFrame.kt` exists. A frame with one caller stays in the file that owns it, which is why
 `PieChartFrame` sits inside `PieChart.kt`.
 
+### Test files
+
+Test source sets hold two kinds of file with no `@Test`, named differently.
+
+- **Shared fixtures** take the chart family prefix: `LineTestFixtures.kt` in `charts-line`,
+  `StackedBarTestFixtures.kt` in `charts-stacked-bar`. One file per module, holding the data,
+  colours, and builders that module's tests share. Never name one `*Test.kt` — nothing treats that
+  suffix as a suite unless the file holds tests.
+- **A test helper** is named for what it does, like any other file: `PixelCapture.kt` holds
+  `setCapturedContent`.
+
 ## Module Structure
 
 `charts-core` holds everything a chart shares, and a chart module holds only what is its own. The

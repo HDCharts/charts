@@ -27,7 +27,7 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalTestApi::class)
-class LineChartV3ContractTest {
+class LineChartContractTest {
     @Test
     fun externalSelectionAndDataReplacement_areAuthoritative() =
         runComposeUiTest {
