@@ -30,26 +30,19 @@ internal class TimelineWindowCounter {
     private var previousSeries: List<List<Double>>? = null
     private var droppedPoints = 0L
 
-    // Composition can be discarded and run again for the same window, which would count the drop
-    // twice. remember rebuilds the window list, so the cache is compared by value and [next] still
-    // answers the same way for a window it has already counted.
-    private var lastSeries: List<List<Double>>? = null
-    private var lastStep = 0L
-
     /** Takes [series] as the next window and returns how many points it has dropped in total. */
     fun next(series: List<List<Double>>): Long {
-        if (series == lastSeries) return lastStep
+        // Composition can be discarded and run again for the same window, which would count the drop
+        // twice. remember rebuilds the window list, so the window is compared by value and the count
+        // this window already reached is returned again.
+        if (series == previousSeries) return droppedPoints
 
         val previous = previousSeries
         val isAdvance = previous != null && isTimelineAdvance(previous, series)
         droppedPoints = if (isAdvance) droppedPoints + 1 else 0L
+        previousSeries = series
 
         return droppedPoints
-            .also { step ->
-                previousSeries = series
-                lastSeries = series
-                lastStep = step
-            }
     }
 }
 
