@@ -15,7 +15,6 @@ import io.github.hdcharts.core.internal.density.shouldUseScrollableDensity
 import io.github.hdcharts.core.internal.model.ChartDataItem
 import io.github.hdcharts.core.internal.model.MultiChartData
 import io.github.hdcharts.core.internal.model.minMax
-import io.github.hdcharts.core.internal.model.normalizeValue
 import io.github.hdcharts.core.internal.model.resolveOptionalRange
 import io.github.hdcharts.core.internal.model.toChartData
 
@@ -121,16 +120,6 @@ internal fun hasSameSeriesStructure(
 ): Boolean {
     if (previous.size != current.size) return false
     return previous.indices.all { index -> previous[index].size == current[index].size }
-}
-
-/** Normalizes each series onto 0..1 over [minMax], the form both animations draw from. */
-internal fun normalizeSeriesByMinMax(
-    series: List<List<Double>>,
-    minMax: Pair<Double, Double>,
-): List<List<Float>> {
-    val (minValue, maxValue) = minMax
-    val range = maxValue - minValue
-    return series.map { values -> values.map { value -> normalizeValue(value, minValue, range) } }
 }
 
 /**

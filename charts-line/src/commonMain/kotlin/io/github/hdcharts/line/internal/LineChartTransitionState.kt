@@ -60,7 +60,6 @@ internal class LineChartTransitionState(
         targetNormalized: List<List<Float>>,
         renderMode: LineChartRenderMode,
         animationSpec: TweenSpec<Float>,
-        isAdvance: Boolean,
         droppedTimelinePoints: Long,
         isPreview: Boolean,
     ) {
@@ -87,7 +86,6 @@ internal class LineChartTransitionState(
                 currentRawSeries = currentRawSeries,
                 currentMinMax = currentMinMax,
                 renderMode = renderMode,
-                isAdvance = isAdvance,
             )
 
         settle()

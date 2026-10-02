@@ -2,4 +2,4 @@
 
 - type: `refactor`
 - module: `charts-line`
-- release_note: `Line charts animate in constant cost per point.`
+- release_note: `Line charts animate each data update with a single animation, so charts with many points stay smooth.`

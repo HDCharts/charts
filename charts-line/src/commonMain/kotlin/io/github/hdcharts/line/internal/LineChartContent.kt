@@ -208,7 +208,6 @@ internal fun LineChartContent(
             targetNormalized = targetNormalized,
             renderMode = renderMode,
             animationSpec = valueAnimationSpec,
-            isAdvance = timelineWindowStep?.isAdvance == true,
             droppedTimelinePoints = droppedTimelinePoints ?: 0L,
             isPreview = isPreview,
         )

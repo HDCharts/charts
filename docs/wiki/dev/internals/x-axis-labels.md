@@ -70,10 +70,10 @@ minimum step of 2 get 0, 3, 6, 9, one label fewer than the densest grid.
 
 A live line chart drops its oldest point and appends a new one on every update. Its grid counts
 from the first point of the whole series, not of the window: `TimelineWindowCounter` in
-`LineChartAnimation.kt` counts the points the window has dropped since its data was last replaced,
-and `planAxisXLabels` labels window item `i` when `droppedPoints + i` is a multiple of the step. Each
-label therefore stays on its point. A sliding window has no fixed last item, so it skips the
-last-item rule (`AxisXPlanRequest.isSliding`).
+`LineChartTimelineShift.kt` counts the points the window has dropped since its data was last
+replaced, and `planAxisXLabels` labels window item `i` when `droppedPoints + i` is a multiple of the
+step. Each label therefore stays on its point. A sliding window has no fixed last item, so it skips
+the last-item rule (`AxisXPlanRequest.isSliding`).
 
 While the line slides, `AxisXLabelsLayout` moves every label by `(1 − progress) × step` through
 `tickOffsetPx`, so labels start on their points in the old window and slide with them. The labels

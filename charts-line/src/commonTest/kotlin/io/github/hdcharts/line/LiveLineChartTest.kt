@@ -109,42 +109,45 @@ class LiveLineChartTest {
     @Test
     fun interruptedShift_startsAFullStepInsteadOfResumingTheInterruptedWindow() =
         runComposeUiTest {
-            val data = mutableStateOf(listOf(10.0, 40.0, 20.0, 30.0, 50.0))
-            val capture =
-                setCapturedContent { modifier ->
-                    LiveLineChart(
-                        data = data.value.toChartData(),
-                        modifier = modifier.size(width = 240.dp, height = 200.dp),
-                        shiftDuration = 10.seconds,
-                        animateOnStart = false,
-                    )
-                }
-            capture()
-
+            val firstSample = mutableStateOf(0)
+            setContent {
+                LiveLineChart(
+                    data = liveWindow(firstSample.value),
+                    modifier = Modifier.size(width = 600.dp, height = 300.dp),
+                    shiftDuration = 10.seconds,
+                    animateOnStart = false,
+                )
+            }
             mainClock.autoAdvance = false
-            data.value = data.value.drop(1) + 15.0
+
+            firstSample.value = 1
             // One frame to launch the shift, then half of the 10s it runs for.
             mainClock.advanceTimeByFrame()
             mainClock.advanceTimeBy(milliseconds = 5_000L)
 
             // A third window arrives while the first shift is still running.
-            data.value = data.value.drop(1) + 25.0
+            firstSample.value = 2
             mainClock.advanceTimeByFrame()
             mainClock.advanceTimeBy(milliseconds = 5_000L)
-            val halfOfRestartedShift = capture()
-            mainClock.advanceTimeBy(milliseconds = 10_000L)
-            val settled = capture()
-            mainClock.advanceTimeBy(milliseconds = 10_000L)
-            val stillSettled = capture()
 
-            assertFalse(
-                halfOfRestartedShift.buffer.contentEquals(settled.buffer),
-                "A shift interrupted half-way still has a whole step of the new window to run.",
-            )
-            assertTrue(
-                settled.buffer.contentEquals(stillSettled.buffer),
-                "The restarted shift must settle once it has run its full step.",
-            )
+            // The new window can change the Y-axis labels and so the plot, so measure it now.
+            val plot = onNodeWithTag(TestTags.LINE_CHART_PLOT).fetchSemanticsNode().boundsInRoot
+            val step = plot.width / (WINDOW_SIZE - 1)
+            val halfOfRestartedShift = displayedXLabelCenters()
+
+            // A resumed shift would leave the labels a quarter step short of this.
+            assertTrue(halfOfRestartedShift.size >= 2, "half of the restarted shift $halfOfRestartedShift")
+            halfOfRestartedShift.forEach { (label, centerX) ->
+                val windowIndex = label.removePrefix("S").toInt() - 2
+                assertEquals(
+                    expected = plot.left + (windowIndex + 0.5f) * step,
+                    actual = centerX,
+                    absoluteTolerance = 1.5f,
+                    message =
+                        "$label is not half a step from its new place, so the interrupted shift " +
+                            "resumed instead of running a full step: $halfOfRestartedShift",
+                )
+            }
         }
 
     @Test

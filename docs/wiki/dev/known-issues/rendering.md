@@ -53,7 +53,8 @@ During the reveal, a morph, or a live shift, every frame still builds a new path
 point, including the ones scrolled off screen in the expanded view. Live line windows and expanded
 line charts are not compacted, so the cost grows with the item count. Each draw now scales one
 series at a time into a reused `FloatArray` and maps each value to its height once, so a frame
-allocates nothing per point.
+allocates nothing per point. A frame still allocates one `CubicControlPoints` per segment, one
+`FloatArray` of heights per series, and one `Path` per series.
 
 Confirmed by the code: `drawChartPath` in `LineChartDrawing.kt`, called once per series from
 `drawLineChartSeries` for every point the chart holds.
@@ -61,6 +62,7 @@ Confirmed by the code: `drawChartPath` in `LineChartDrawing.kt`, called once per
 Options:
 
 - Draw only the points in the visible range, plus one on each side.
+- Return the control points without allocating, and reuse the height buffer.
 
 ### One animation value per point or bar
 

@@ -5,17 +5,18 @@ import androidx.compose.animation.core.TweenSpec
 import io.github.hdcharts.core.internal.AnimationSpec
 import kotlin.time.Duration
 
-/**
- * The shared contract the line chart's animations agree on: how a chart is rendered, how one update
- * moves between two data sets, and how long each move takes.
- *
- * The animations themselves live in their own files, one per kind of movement:
- * [LineChartRevealWindow] for the reveal on first display, [LineChartMorphAnimation] for values
- * moving between two data sets, and [LineChartTimelineShiftData] for a live window sliding.
- */
 internal const val MIN_TIMELINE_DURATION_MS = 1
 
-/** How a line chart renders an update: values morph in place, or a live window slides sideways. */
+/**
+ * How a line chart renders an update: values morph in place, or a live window slides sideways.
+ *
+ * This is the shared contract the line chart's animations agree on: how a chart is rendered, how one
+ * update moves between two data sets, and how long each move takes.
+ *
+ * The animations themselves live in their own files, one per kind of movement: [LineChartRevealWindow]
+ * for the reveal on first display, [LineChartMorphState] for values moving between two data sets, and
+ * [LineChartTimelineShiftData] for a live window sliding.
+ */
 internal sealed interface LineChartRenderMode {
     data object Morph : LineChartRenderMode
 
@@ -44,23 +45,21 @@ internal sealed interface LineChartTransitionMode {
  * morphs instead, because sliding unrelated values across the plot and swapping them at the end
  * would animate a change that never happened.
  *
- * [isAdvance] comes from the timeline window counter, which already compared the window against the
- * one before it, so the comparison is not repeated here. The counter remembers the window pair from
- * the last data change, so a re-run of this decision for a window the chart has already drawn -
- * because the range or the shift duration changed - keeps [isAdvance] from that pair. Only a window
- * the chart has not drawn yet can shift.
+ * The advance is decided from [previousRawSeries], the window the chart last drew, because the
+ * shift is built from it. A re-run of this decision for a window the chart has already drawn -
+ * because the range or the shift duration changed - sees the same window on both sides, so
+ * [previousRawSeries] === [currentRawSeries] covers it and it morphs.
  */
 internal fun decideLineChartUpdate(
     previousRawSeries: List<List<Double>>?,
     currentRawSeries: List<List<Double>>,
     currentMinMax: Pair<Double, Double>,
     renderMode: LineChartRenderMode,
-    isAdvance: Boolean,
 ): LineChartTransitionMode {
     if (
         renderMode !is LineChartRenderMode.Timeline ||
         previousRawSeries == null ||
-        !isAdvance ||
+        !isTimelineAdvance(previousRawSeries, currentRawSeries) ||
         previousRawSeries === currentRawSeries
     ) {
         return LineChartTransitionMode.Morph

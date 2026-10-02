@@ -25,7 +25,6 @@ internal data class LineChartTimelineShiftData(
 /** How far a live window has advanced, decided once per update. */
 internal data class TimelineWindowStep(
     val droppedPoints: Long,
-    val isAdvance: Boolean,
 )
 
 /**
@@ -37,20 +36,20 @@ internal class TimelineWindowCounter {
     private var droppedPoints = 0L
 
     // Composition can be discarded and run again for the same window, which would count the drop
-    // twice. Caching the last window makes [next] answer the same way every time it is called with
-    // the same series.
+    // twice. remember rebuilds the window list, so the cache is compared by value and [next] still
+    // answers the same way for a window it has already counted.
     private var lastSeries: List<List<Double>>? = null
-    private var lastStep: TimelineWindowStep = TimelineWindowStep(droppedPoints = 0L, isAdvance = false)
+    private var lastStep = TimelineWindowStep(droppedPoints = 0L)
 
     /** Takes [series] as the next window and reports how far it has advanced. */
     fun next(series: List<List<Double>>): TimelineWindowStep {
-        if (series === lastSeries) return lastStep
+        if (series == lastSeries) return lastStep
 
         val previous = previousSeries
         val isAdvance = previous != null && isTimelineAdvance(previous, series)
         droppedPoints = if (isAdvance) droppedPoints + 1 else 0L
 
-        return TimelineWindowStep(droppedPoints = droppedPoints, isAdvance = isAdvance)
+        return TimelineWindowStep(droppedPoints = droppedPoints)
             .also { step ->
                 previousSeries = series
                 lastSeries = series
@@ -66,7 +65,7 @@ internal class TimelineWindowCounter {
  * carried over unchanged. Any other update replaced the window contents and cannot be drawn as a
  * shift.
  */
-private fun isTimelineAdvance(
+internal fun isTimelineAdvance(
     previous: List<List<Double>>,
     current: List<List<Double>>,
 ): Boolean {
