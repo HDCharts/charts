@@ -43,7 +43,7 @@ are on screen.
 | --- | --- | --- |
 | Bar, histogram | One `Animatable` per drawn bar, from `rememberBarChartAnimatedValues` | One coroutine per bar whose value changed; charts of up to 200 bars animate in a cascade |
 | Stacked bar | One `Animatable` per drawn bar | One coroutine per bar |
-| Line, live line | One `Animatable` per point of every series, plus one slide progress | A morph launches one coroutine per point. A live shift calls `snapTo` on every point, then animates the slide progress |
+| Line, live line | One `Animatable` progress for the whole chart, from `LineChartMorphState`, plus one slide progress | A morph tweens the single progress and the draw blends the two value sets. A live shift animates the slide progress over one full step |
 | Stacked area | One `Animatable` per point of every series | One coroutine per point |
 
 ## Drawing
@@ -51,10 +51,12 @@ are on screen.
 Every draw reads the current animation values, so it runs on every frame of the reveal, a morph,
 or a live shift.
 
-- Line and live line: each draw copies the values of every series into a new list and builds one
-  `Path` through every point with `drawChartPath` in `LineChartDrawing.kt`. Bezier lines also
-  allocate an `Offset` for every point, and visible point markers draw one circle per point. The
-  expanded view draws every point, including the ones scrolled off screen.
+- Line and live line: each draw blends or copies one series at a time into a reused `FloatArray`
+  and builds one `Path` through every point with `drawChartPath` in `LineChartDrawing.kt`. A bezier
+  line maps each value to its height once and reads the shared heights per segment. A frame
+  allocates one `CubicControlPoints` per segment, one `FloatArray` of heights per series, and one
+  `Path` per series. Visible point markers draw one circle per point, and the expanded view draws
+  every point, including the ones scrolled off screen.
 - Stacked area: each draw copies the values of every series, allocates a zero baseline, and builds
   an `Offset` for every point of each series before it keeps the visible range for the paths.
 - Bar and stacked bar: each draw walks only the bars in `visibleRange`.
@@ -66,6 +68,7 @@ or a live shift.
 | Canvas limit | `ChartCanvasLimitsTest` in `charts-core/src/commonTest` |
 | Error instead of a crash past the limit | `*_expandedPastLayoutLimits_displaysErrorInsteadOfCrashing` in `charts-line`, `charts-stacked-area`, and `charts-stacked-bar` |
 | Scroll clamp after a zoom-out | `ChartScrollTest` in `charts-core/src/commonTest`, `BarChartScrollFrameTest` in `charts-bar/src/jvmTest` |
+| An interrupted live shift runs a full step | `interruptedShift_startsAFullStepInsteadOfResumingTheInterruptedWindow` in `charts-line/src/commonTest` |
 
 ## Known Issues
 

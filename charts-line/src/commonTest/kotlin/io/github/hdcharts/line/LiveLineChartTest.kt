@@ -107,6 +107,50 @@ class LiveLineChartTest {
         }
 
     @Test
+    fun interruptedShift_startsAFullStepInsteadOfResumingTheInterruptedWindow() =
+        runComposeUiTest {
+            val firstSample = mutableStateOf(0)
+            setContent {
+                LiveLineChart(
+                    data = liveWindow(firstSample.value),
+                    modifier = Modifier.size(width = 600.dp, height = 300.dp),
+                    shiftDuration = 10.seconds,
+                    animateOnStart = false,
+                )
+            }
+            mainClock.autoAdvance = false
+
+            firstSample.value = 1
+            // One frame to launch the shift, then half of the 10s it runs for.
+            mainClock.advanceTimeByFrame()
+            mainClock.advanceTimeBy(milliseconds = 5_000L)
+
+            // A third window arrives while the first shift is still running.
+            firstSample.value = 2
+            mainClock.advanceTimeByFrame()
+            mainClock.advanceTimeBy(milliseconds = 5_000L)
+
+            // The new window can change the Y-axis labels and so the plot, so measure it now.
+            val plot = onNodeWithTag(TestTags.LINE_CHART_PLOT).fetchSemanticsNode().boundsInRoot
+            val step = plot.width / (WINDOW_SIZE - 1)
+            val halfOfRestartedShift = displayedXLabelCenters()
+
+            // A resumed shift would leave the labels a quarter step short of this.
+            assertTrue(halfOfRestartedShift.size >= 2, "half of the restarted shift $halfOfRestartedShift")
+            halfOfRestartedShift.forEach { (label, centerX) ->
+                val windowIndex = label.removePrefix("S").toInt() - 2
+                assertEquals(
+                    expected = plot.left + (windowIndex + 0.5f) * step,
+                    actual = centerX,
+                    absoluteTolerance = 1.5f,
+                    message =
+                        "$label is not half a step from its new place, so the interrupted shift " +
+                            "resumed instead of running a full step: $halfOfRestartedShift",
+                )
+            }
+        }
+
+    @Test
     fun slidingWindow_keepsXLabelsOnTheirSamples() =
         runComposeUiTest {
             val firstSample = mutableStateOf(0)
