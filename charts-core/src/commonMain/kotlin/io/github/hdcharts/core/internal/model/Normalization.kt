@@ -1,5 +1,21 @@
 package io.github.hdcharts.core.internal.model
 
+/**
+ * Normalizes [value] onto 0..1 over a range of [range] starting at [minValue], the form every chart
+ * animation draws from. A zero range has no scale to divide by, so it resolves to
+ * [zeroRangeValue].
+ */
+fun normalizeValue(
+    value: Double,
+    minValue: Double,
+    range: Double,
+    zeroRangeValue: Float = 0f,
+): Float =
+    when (range) {
+        0.0 -> zeroRangeValue
+        else -> ((value - minValue) / range).toFloat().coerceIn(0f, 1f)
+    }
+
 fun MultiChartData.normalizeByMinMax(
     minMax: Pair<Double, Double>,
     zeroRangeValue: Float,
@@ -7,12 +23,7 @@ fun MultiChartData.normalizeByMinMax(
     val (minValue, maxValue) = minMax
     val range = maxValue - minValue
     return items.map { item ->
-        item.item.points.map { value ->
-            when (range) {
-                0.0 -> zeroRangeValue
-                else -> ((value - minValue) / range).toFloat().coerceIn(0f, 1f)
-            }
-        }
+        item.item.points.map { value -> normalizeValue(value, minValue, range, zeroRangeValue) }
     }
 }
 

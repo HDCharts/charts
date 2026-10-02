@@ -70,18 +70,18 @@ minimum step of 2 get 0, 3, 6, 9, one label fewer than the densest grid.
 
 A live line chart drops its oldest point and appends a new one on every update. Its grid counts
 from the first point of the whole series, not of the window: `TimelineWindowCounter` in
-`LineChartAnimation.kt` counts the points the window has dropped since its data was last replaced,
-and `planAxisXLabels` labels window item `i` when `droppedPoints + i` is a multiple of the step. Each
-label therefore stays on its point. A sliding window has no fixed last item, so it skips the
-last-item rule (`AxisXPlanRequest.isSliding`).
+`LineChartTimelineShift.kt` counts the points the window has dropped since its data was last
+replaced, and `planAxisXLabels` labels window item `i` when `droppedPoints + i` is a multiple of the
+step. Each label therefore stays on its point. A sliding window has no fixed last item, so it skips
+the last-item rule (`AxisXPlanRequest.isSliding`).
 
 While the line slides, `AxisXLabelsLayout` moves every label by `(1 − progress) × step` through
 `tickOffsetPx`, so labels start on their points in the old window and slide with them. The labels
 are planned for the new window as soon as it is composed, but the slide starts a frame later, when
-the update effect runs. Until then the offset is one full step, because `LineChartContent` keeps the
-dropped count of the window the line draws next to the slide state. The offset is read only when
-the labels are placed, so the animation re-places labels without recomposing them. The label of
-the dropped point disappears as the slide starts, and the label of a new point
+the update effect runs. Until then the offset is one full step, because `LineChartTransitionState`
+keeps the dropped count of the window the line draws next to the slide state. The offset is read
+only when the labels are placed, so the animation re-places labels without recomposing them. The
+label of the dropped point disappears as the slide starts, and the label of a new point
 appears once its tick is inside the plot.
 
 ## Minimum Spacing
