@@ -5,7 +5,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.util.lerp
 import io.github.hdcharts.core.internal.NO_SELECTION
 import io.github.hdcharts.core.internal.bezier.DEFAULT_BEZIER_TENSION
-import io.github.hdcharts.core.internal.bezier.cubicControlPointsForSegment
+import io.github.hdcharts.core.internal.bezier.cubicControlPoints
 import io.github.hdcharts.core.internal.density.aggregateLabelsByCenterValue
 import io.github.hdcharts.core.internal.density.aggregatePointsByAverage
 import io.github.hdcharts.core.internal.density.bucketCenterIndex
@@ -15,6 +15,7 @@ import io.github.hdcharts.core.internal.density.shouldUseScrollableDensity
 import io.github.hdcharts.core.internal.model.ChartDataItem
 import io.github.hdcharts.core.internal.model.MultiChartData
 import io.github.hdcharts.core.internal.model.minMax
+import io.github.hdcharts.core.internal.model.normalizeValue
 import io.github.hdcharts.core.internal.model.resolveOptionalRange
 import io.github.hdcharts.core.internal.model.toChartData
 
@@ -113,31 +114,58 @@ internal fun MultiChartData.resolveLineRange(
     return resolveOptionalRange(dataMin, dataMax, minValue, maxValue)
 }
 
+/** Reports whether both data sets have the same number of series and the same number of points. */
+internal fun hasSameSeriesStructure(
+    previous: List<List<Double>>,
+    current: List<List<Double>>,
+): Boolean {
+    if (previous.size != current.size) return false
+    return previous.indices.all { index -> previous[index].size == current[index].size }
+}
+
+/** Normalizes each series onto 0..1 over [minMax], the form both animations draw from. */
+internal fun normalizeSeriesByMinMax(
+    series: List<List<Double>>,
+    minMax: Pair<Double, Double>,
+): List<List<Float>> {
+    val (minValue, maxValue) = minMax
+    val range = maxValue - minValue
+    return series.map { values -> values.map { value -> normalizeValue(value, minValue, range) } }
+}
+
+/**
+ * Returns the point nearest to [touchX] on a line drawn through [scaledValues].
+ *
+ * Reads [scaledValuesCount] values from [scaledValues] instead of taking a list, so a chart that
+ * redraws the drag marker on every touch frame reuses one buffer instead of allocating a list per
+ * series per frame.
+ */
 internal fun findNearestPoint(
     touchX: Float,
-    scaledValues: List<Float>,
+    scaledValues: FloatArray,
+    scaledValuesCount: Int,
     size: Size,
     bezier: Boolean,
     verticalInset: Float = 0f,
     bezierTension: Float = DEFAULT_BEZIER_TENSION,
 ): Offset {
-    if (scaledValues.isEmpty()) {
+    if (scaledValuesCount <= 0) {
         return Offset(0f, 0f)
     }
 
     val clampedX = touchX.coerceIn(0f, size.width)
-    if (scaledValues.size == 1 || size.width == 0f) {
+    if (scaledValuesCount == 1 || size.width == 0f) {
         return Offset(
             clampedX,
             mapScaledValueToCanvasY(
-                scaledValue = scaledValues.first(),
+                scaledValue = scaledValues[0],
                 canvasHeight = size.height,
                 verticalInset = verticalInset,
             ),
         )
     }
 
-    val lastIndex = scaledValues.size - 1
+    val lastIndex = scaledValuesCount - 1
     val step = size.width / lastIndex
     val index =
         (clampedX / step)
@@ -147,7 +175,7 @@ internal fun findNearestPoint(
     if (!bezier || index == lastIndex) {
         val pointBefore = scaledValues[index]
         val pointAfter =
-            when (index + 1 < scaledValues.size) {
+            when (index + 1 < scaledValuesCount) {
                 true -> scaledValues[index + 1]
                 else -> pointBefore
             }
@@ -164,25 +192,27 @@ internal fun findNearestPoint(
         )
     }
 
-    val points =
-        List(scaledValues.size) { pointIndex ->
-            Offset(
-                x = pointIndex * step,
-                y =
-                    mapScaledValueToCanvasY(
-                        scaledValue = scaledValues[pointIndex],
-                        canvasHeight = size.height,
-                        verticalInset = verticalInset,
-                    ),
+    val yAt: (Int) -> Float =
+        { pointIndex ->
+            mapScaledValueToCanvasY(
+                scaledValue = scaledValues[pointIndex],
+                canvasHeight = size.height,
+                verticalInset = verticalInset,
             )
         }
     val segmentStart = index.coerceIn(0, lastIndex - 1)
-    val startPoint = points[segmentStart]
-    val endPoint = points[segmentStart + 1]
+    val startPoint = Offset(segmentStart * step, yAt(segmentStart))
+    val endPoint = Offset((segmentStart + 1) * step, yAt(segmentStart + 1))
     val controls =
-        cubicControlPointsForSegment(
-            points = points,
-            segmentStartIndex = segmentStart,
+        cubicControlPoints(
+            p0 = Offset((segmentStart - 1).coerceAtLeast(0) * step, yAt((segmentStart - 1).coerceAtLeast(0))),
+            p1 = startPoint,
+            p2 = endPoint,
+            p3 =
+                Offset(
+                    x = (segmentStart + 2).coerceAtMost(lastIndex) * step,
+                    y = yAt((segmentStart + 2).coerceAtMost(lastIndex)),
+                ),
             tension = bezierTension,
             minY = verticalInset,
             maxY = size.height - verticalInset,

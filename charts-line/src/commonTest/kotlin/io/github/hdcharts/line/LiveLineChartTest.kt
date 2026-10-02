@@ -107,6 +107,47 @@ class LiveLineChartTest {
         }
 
     @Test
+    fun interruptedShift_startsAFullStepInsteadOfResumingTheInterruptedWindow() =
+        runComposeUiTest {
+            val data = mutableStateOf(listOf(10.0, 40.0, 20.0, 30.0, 50.0))
+            val capture =
+                setCapturedContent { modifier ->
+                    LiveLineChart(
+                        data = data.value.toChartData(),
+                        modifier = modifier.size(width = 240.dp, height = 200.dp),
+                        shiftDuration = 10.seconds,
+                        animateOnStart = false,
+                    )
+                }
+            capture()
+
+            mainClock.autoAdvance = false
+            data.value = data.value.drop(1) + 15.0
+            // One frame to launch the shift, then half of the 10s it runs for.
+            mainClock.advanceTimeByFrame()
+            mainClock.advanceTimeBy(milliseconds = 5_000L)
+
+            // A third window arrives while the first shift is still running.
+            data.value = data.value.drop(1) + 25.0
+            mainClock.advanceTimeByFrame()
+            mainClock.advanceTimeBy(milliseconds = 5_000L)
+            val halfOfRestartedShift = capture()
+            mainClock.advanceTimeBy(milliseconds = 10_000L)
+            val settled = capture()
+            mainClock.advanceTimeBy(milliseconds = 10_000L)
+            val stillSettled = capture()
+
+            assertFalse(
+                halfOfRestartedShift.buffer.contentEquals(settled.buffer),
+                "A shift interrupted half-way still has a whole step of the new window to run.",
+            )
+            assertTrue(
+                settled.buffer.contentEquals(stillSettled.buffer),
+                "The restarted shift must settle once it has run its full step.",
+            )
+        }
+
+    @Test
     fun slidingWindow_keepsXLabelsOnTheirSamples() =
         runComposeUiTest {
             val firstSample = mutableStateOf(0)
