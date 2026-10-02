@@ -29,6 +29,7 @@ sequenceDiagram
     Core-->>GH: PR Core Checks
   and API compatibility
     GH->>API: Start pull-request-api.yml
+    API->>API: Prepare PR detects code changes
     alt Code or build changes
       API->>API: Compare Public API Against Baseline
       API-->>GH: PR API Compatibility
@@ -59,13 +60,25 @@ sequenceDiagram
 
 | Job | What it does |
 | --- | --- |
-| `Prepare PR` | Detects code changes with `scripts/ci-has-code-changes.sh` and runs the self-tests of the release scripts. |
+| `Prepare PR` | Two jobs share this name, one per workflow, with the same steps. Each detects code changes with `scripts/ci-has-code-changes.sh` and runs the self-tests of the release scripts. |
 | `Assemble` | Runs `./gradlew ciAssemble`. |
 | `Compile` | Runs `./gradlew ciCompile`, including the `smoke-line` consumer. |
 | `Lint` | Runs `./gradlew ktlintCheck buildSrcKtlintCheck`. |
 | `Test` | Runs the JVM, Android instrumented, screenshot, Wasm, and iOS test jobs; see [Validation Matrix](validation-matrix.md). Each job uploads Gradle's HTML and XML reports. |
 | `Compare Public API Against Baseline` | Runs `./gradlew apiCompatibilityCheck` against the latest release tag; see [API Compatibility](api-compatibility.md). |
 | `GIF Baseline Validation` | Records the docs GIF scenarios on an Android emulator and compares them with `gif-baselines`. |
+
+## Checkout depth
+
+`Assemble`, `Compile`, and `Test` clone the single merge commit they check. Three jobs need the full
+history instead; `Lint` clones it without needing it.
+
+| Job | `fetch-depth` | Reason |
+| --- | --- | --- |
+| `Prepare PR`, both workflows | `0` | `scripts/ci-has-code-changes.sh` diffs the base and head SHAs, so both have to exist locally. |
+| `Compare Public API Against Baseline` | `0` | The check lists `git tag` for the baseline release and adds a worktree at the baseline commit; see [API Compatibility](api-compatibility.md). |
+| `Lint` | `0` | Nothing in the lint path reads git history, so the clone is deeper than the job needs. |
+| `Assemble`, `Compile`, `Test` | `1` | Each runs one Gradle task against `source-sha` and reads no history. |
 
 ## Merge gates
 
