@@ -54,7 +54,7 @@ or a live shift.
 - Line and live line: each draw blends or copies one series at a time into a reused `FloatArray`
   and builds one `Path` through the points of that series with `drawChartPath` in
   `LineChartDrawing.kt`. The path, the canvas heights, and the bezier control points are held in a
-  `LineChartDrawScratch` the chart remembers, so a frame allocates nothing per series or per segment.
+  `LineChartDrawScratch` the chart remembers, so a frame allocates nothing per point or per segment.
   A bezier line maps each value to its canvas height once and reads the shared heights per segment.
   An expanded chart draws only the points on screen, plus the overscan of the widest marker, so a
   chart of a million points does not build a path through the whole series.

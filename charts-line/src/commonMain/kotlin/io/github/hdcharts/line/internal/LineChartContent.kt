@@ -174,7 +174,8 @@ internal fun LineChartContent(
     val drawValuesBuffer = remember(pointsCount) { FloatArray(pointsCount + 1) }
     val dragValuesBuffer = remember(pointsCount) { FloatArray(pointsCount) }
     // The path, the canvas heights, and the control points are reused for every series of every
-    // frame, so an expanded chart of a million points draws without a frame allocating.
+    // frame, so an expanded chart of a million points draws without allocating per point or
+    // per segment.
     val drawScratch = remember(pointsCount) { LineChartDrawScratch(valuesCapacity = pointsCount + 1) }
 
     LaunchedEffect(dragInteractionEnabled, tapInteractionEnabled, hasForcedSelection) {

@@ -83,7 +83,7 @@ private fun DrawScope.maxLineDrawRadiusPx(style: LineChartStyle): Float =
  * Draws one series' line from [values], which hold heights already scaled to the canvas.
  *
  * Only [drawRange] is drawn. [scratch] holds the path, the canvas heights, and the control points,
- * so a frame allocates nothing per series or per segment.
+ * so a frame allocates nothing per point or per segment.
  *
  * [revealViewportStartPx] and [revealViewportWidthPx] describe the on-screen slice of this canvas,
  * which is the whole canvas unless the chart scrolls. The entry reveal sweeps that slice instead of

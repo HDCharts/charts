@@ -47,22 +47,6 @@ Options:
 - Find what keeps the chart busy after a swipe, starting from the scroll wiring in
   `StackedAreaChartContent`, and add the scroll-then-tap test back.
 
-### Line charts allocate per segment and per series
-
-Each line-chart frame used to allocate one `CubicControlPoints` per bezier segment, one `FloatArray`
-of heights per series, and one `Path` per series. An expanded chart also built its path and drew its
-markers through every point, including the ones scrolled off screen, so the cost grew with the point
-count instead of with the viewport.
-
-**Status:** addressed. `drawChartPath` takes a `LineChartDrawScratch` that holds the path, the canvas
-heights, and the control points, and `lineChartDrawRange` reduces an expanded chart to the points on
-screen plus the overscan of the widest marker. A two-series, 10,000-point bezier chart went from
-about 722 KB allocated per frame to about 1.4 KB.
-
-`LineChartVisiblePointsTest` in `charts-line/src/commonTest` compares the path of a culled draw
-against the path of a full draw, and `CubicControlPointsIntoTest` in `charts-core/src/commonTest`
-covers the control points.
-
 ### One animation value per point or bar
 
 Stacked area charts keep one `Animatable` per point of every series; bar, histogram, and stacked
