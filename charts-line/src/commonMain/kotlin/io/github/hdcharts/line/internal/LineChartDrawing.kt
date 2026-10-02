@@ -10,14 +10,80 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipRect
 import io.github.hdcharts.core.internal.ANIMATION_TARGET
 import io.github.hdcharts.core.internal.NO_SELECTION
-import io.github.hdcharts.core.internal.bezier.cubicControlPoints
+import io.github.hdcharts.core.internal.axis.visibleIndexRange
+import io.github.hdcharts.core.internal.bezier.CUBIC_CONTROL_POINT_COUNT
+import io.github.hdcharts.core.internal.bezier.cubicControlPointsInto
 import io.github.hdcharts.core.internal.drawing.drawSelectionLine
 import io.github.hdcharts.core.internal.interaction.selectedIndexForTouchX
 import io.github.hdcharts.line.LineChartStyle
 import kotlinx.collections.immutable.ImmutableList
+import kotlin.math.ceil
+import kotlin.math.max
+
+/**
+ * Draw resources one line chart frame reuses across its series.
+ *
+ * A chart of many points redraws every frame of the reveal, a morph, and a live shift, so the path,
+ * the canvas heights, and the control points all live here instead of being built per series.
+ */
+internal class LineChartDrawScratch(
+    valuesCapacity: Int,
+) {
+    /** Path of the series being drawn, rewound before each one. */
+    val path = Path()
+
+    /** Canvas heights of the points being drawn, indexed by point index. */
+    val heights = FloatArray(valuesCapacity)
+
+    /** Control points of the bezier segment being drawn. */
+    val controlPoints = FloatArray(CUBIC_CONTROL_POINT_COUNT)
+}
+
+/**
+ * Points an expanded chart draws: those on screen, plus the overscan that keeps the segments and
+ * markers crossing each viewport edge whole.
+ *
+ * The overscan covers the widest thing a point draws, so a half-visible marker is not dropped and
+ * the segment that enters the viewport is not cut. Returns the whole series for the modes that are
+ * always fully on screen, and for a viewport that covers the content.
+ */
+internal fun lineChartDrawRange(
+    valuesCount: Int,
+    stepX: Float,
+    viewportStartPx: Float,
+    viewportWidthPx: Float,
+    overscanPx: Float,
+): IntRange {
+    if (valuesCount <= 1 || stepX <= 0f) return 0..max(valuesCount - 1, 0)
+    val visible =
+        visibleIndexRange(
+            dataSize = valuesCount,
+            viewportWidthPx = viewportWidthPx,
+            scrollOffsetPx = viewportStartPx,
+            unitWidthPx = stepX,
+        )
+    if (visible.isEmpty()) return 0 until valuesCount
+    val overscanPoints = 1 + ceil(overscanPx / stepX).toInt()
+    return (visible.first - overscanPoints).coerceAtLeast(
+        0,
+    )..(visible.last + overscanPoints).coerceAtMost(valuesCount - 1)
+}
+
+/** Radius of the widest thing a point draws: its stroke, its markers, and the selection markers. */
+private fun DrawScope.maxLineDrawRadiusPx(style: LineChartStyle): Float =
+    max(
+        style.line.strokeWidth.toPx() / 2f,
+        max(
+            if (style.points.visible) style.points.size.toPx() else 0f,
+            max(style.selection.markerSize.toPx(), style.selection.pointSize.toPx()),
+        ),
+    )
 
 /**
  * Draws one series' line from [values], which hold heights already scaled to the canvas.
+ *
+ * Only [drawRange] is drawn. [scratch] holds the path, the canvas heights, and the control points,
+ * so a frame allocates nothing per series or per segment.
  *
  * [revealViewportStartPx] and [revealViewportWidthPx] describe the on-screen slice of this canvas,
  * which is the whole canvas unless the chart scrolls. The entry reveal sweeps that slice instead of
@@ -26,11 +92,14 @@ import kotlinx.collections.immutable.ImmutableList
 internal fun DrawScope.drawChartPath(
     values: FloatArray,
     valuesCount: Int,
+    drawRange: IntRange,
     style: LineChartStyle,
+    lineStroke: Stroke,
+    lineColor: Color,
+    bezierTension: Float,
+    scratch: LineChartDrawScratch,
     lineAnimationProgress: Float,
     markerRevealProgress: Float,
-    bezierTension: Float,
-    lineColor: Color,
     timelineWindowPoints: Int? = null,
     horizontalOffsetPx: Float = 0f,
     stepXOverride: Float? = null,
@@ -56,160 +125,187 @@ internal fun DrawScope.drawChartPath(
             }
             else -> return
         }
+    val firstIndex = drawRange.first.coerceIn(0, valuesLastIndex)
+    val lastIndex = drawRange.last.coerceIn(firstIndex, valuesLastIndex)
+    if (lastIndex < firstIndex) return
 
-    val path =
-        Path().apply {
-            val initX = horizontalOffsetPx
-            val initY =
-                mapScaledValueToCanvasY(
-                    scaledValue = values[0],
-                    canvasHeight = canvasHeight,
-                    verticalInset = verticalInset,
-                )
-            moveTo(initX, initY)
+    // Each value maps to its canvas height once, because a point is shared by the segments on
+    // either side of it. The one point of overscan on each side is what lets the segments at the
+    // edges of [drawRange] read their true neighbours.
+    val heights = scratch.heights
+    val heightsStart = (firstIndex - 1).coerceAtLeast(0)
+    val heightsEnd = (lastIndex + 1).coerceAtMost(valuesLastIndex)
+    for (index in heightsStart..heightsEnd) {
+        heights[index] =
+            mapScaledValueToCanvasY(
+                scaledValue = values[index],
+                canvasHeight = canvasHeight,
+                verticalInset = verticalInset,
+            )
+    }
 
-            if (!style.line.bezier) {
-                for (i in 1 until valuesCount) {
-                    val x = horizontalOffsetPx + (i * stepX)
-                    val y =
-                        mapScaledValueToCanvasY(
-                            scaledValue = values[i],
-                            canvasHeight = canvasHeight,
-                            verticalInset = verticalInset,
-                        )
-                    lineTo(x, y)
-                }
-            } else {
-                // Control points are read one segment at a time so a frame does not allocate an
-                // offset per point. Each value maps to its canvas height once, because a point is
-                // shared by the segments on either side of it.
-                val canvasYs =
-                    FloatArray(valuesCount) { index ->
-                        mapScaledValueToCanvasY(
-                            scaledValue = values[index],
-                            canvasHeight = canvasHeight,
-                            verticalInset = verticalInset,
-                        )
-                    }
-                for (segmentStart in 0 until valuesLastIndex) {
-                    val p1x = horizontalOffsetPx + (segmentStart * stepX)
-                    val p1y = canvasYs[segmentStart]
-                    val p2x = p1x + stepX
-                    val p2y = canvasYs[segmentStart + 1]
-                    val p0x = if (segmentStart > 0) p1x - stepX else p1x
-                    val p0y = if (segmentStart > 0) canvasYs[segmentStart - 1] else p1y
-                    val p3x = if (segmentStart + 2 < valuesCount) p2x + stepX else p2x
-                    val p3y = if (segmentStart + 2 < valuesCount) canvasYs[segmentStart + 2] else p2y
-                    val controls =
-                        cubicControlPoints(
-                            p0 = Offset(p0x, p0y),
-                            p1 = Offset(p1x, p1y),
-                            p2 = Offset(p2x, p2y),
-                            p3 = Offset(p3x, p3y),
-                            tension = bezierTension,
-                            minY = verticalInset,
-                            maxY = canvasHeight - verticalInset,
-                        )
-                    cubicTo(
-                        controls.first.x,
-                        controls.first.y,
-                        controls.second.x,
-                        controls.second.y,
-                        p2x,
-                        p2y,
-                    )
-                }
-            }
+    val path = scratch.path.apply { rewind() }
+    val controlPoints = scratch.controlPoints
+    path.moveTo(
+        horizontalOffsetPx + (firstIndex * stepX),
+        heights[firstIndex],
+    )
+
+    if (!style.line.bezier) {
+        for (i in firstIndex + 1..lastIndex) {
+            path.lineTo(
+                horizontalOffsetPx + (i * stepX),
+                heights[i],
+            )
         }
+    } else {
+        for (segmentStart in firstIndex until lastIndex) {
+            val p1x = horizontalOffsetPx + (segmentStart * stepX)
+            val p1y = heights[segmentStart]
+            val p2x = p1x + stepX
+            val p2y = heights[segmentStart + 1]
+            // The neighbours are the real points of the series, not the edges of the drawn range,
+            // so a culled range keeps the curve's shape where it meets the viewport edge.
+            val p0x = if (segmentStart > 0) p1x - stepX else p1x
+            val p0y = if (segmentStart > 0) heights[segmentStart - 1] else p1y
+            val hasP3 = segmentStart + 2 < valuesCount
+            val p3x = if (hasP3) p2x + stepX else p2x
+            val p3y = if (hasP3) heights[segmentStart + 2] else p2y
+            cubicControlPointsInto(
+                out = controlPoints,
+                p0x = p0x,
+                p0y = p0y,
+                p1x = p1x,
+                p1y = p1y,
+                p2x = p2x,
+                p2y = p2y,
+                p3x = p3x,
+                p3y = p3y,
+                tension = bezierTension,
+                minY = verticalInset,
+                maxY = canvasHeight - verticalInset,
+            )
+            path.cubicTo(
+                controlPoints[0],
+                controlPoints[1],
+                controlPoints[2],
+                controlPoints[3],
+                p2x,
+                p2y,
+            )
+        }
+    }
 
-    val lineStroke =
-        Stroke(
-            width =
-                style.line.strokeWidth
-                    .toPx()
-                    .coerceAtLeast(0.5f),
-            cap = StrokeCap.Round,
-            join = StrokeJoin.Round,
+    if (timelineWindowPoints != null) {
+        clipRect(left = 0f, top = 0f, right = canvasWidth, bottom = canvasHeight) {
+            drawChartLineAndMarkers(
+                path = path,
+                heights = heights,
+                drawRange = firstIndex..lastIndex,
+                style = style,
+                lineStroke = lineStroke,
+                lineColor = lineColor,
+                lineAnimationProgress = lineAnimationProgress,
+                markerRevealProgress = markerRevealProgress,
+                stepX = stepX,
+                horizontalOffsetPx = horizontalOffsetPx,
+                revealViewportStartPx = revealViewportStartPx,
+                revealViewportWidthPx = revealViewportWidthPx,
+            )
+        }
+    } else {
+        drawChartLineAndMarkers(
+            path = path,
+            heights = heights,
+            drawRange = firstIndex..lastIndex,
+            style = style,
+            lineStroke = lineStroke,
+            lineColor = lineColor,
+            lineAnimationProgress = lineAnimationProgress,
+            markerRevealProgress = markerRevealProgress,
+            stepX = stepX,
+            horizontalOffsetPx = horizontalOffsetPx,
+            revealViewportStartPx = revealViewportStartPx,
+            revealViewportWidthPx = revealViewportWidthPx,
         )
+    }
+}
 
-    val drawPathContent = {
-        if (lineAnimationProgress >= ANIMATION_TARGET) {
+/** Draws the line of one series and the markers of the points in [drawRange]. */
+private fun DrawScope.drawChartLineAndMarkers(
+    path: Path,
+    heights: FloatArray,
+    drawRange: IntRange,
+    style: LineChartStyle,
+    lineStroke: Stroke,
+    lineColor: Color,
+    lineAnimationProgress: Float,
+    markerRevealProgress: Float,
+    stepX: Float,
+    horizontalOffsetPx: Float,
+    revealViewportStartPx: Float,
+    revealViewportWidthPx: Float,
+) {
+    val canvasHeight = size.height
+    if (lineAnimationProgress >= ANIMATION_TARGET) {
+        drawPath(
+            path = path,
+            color = lineColor,
+            style = lineStroke,
+        )
+    } else {
+        val reveal =
+            lineChartRevealWindow(
+                viewportStartPx = revealViewportStartPx,
+                viewportWidthPx = revealViewportWidthPx,
+                canvasWidthPx = size.width,
+                progress = lineAnimationProgress,
+            )
+        // Reveal from left to right to keep perceived speed steady across steep curves.
+        clipRect(
+            left = reveal.leftPx,
+            top = 0f,
+            right = reveal.rightPx + style.line.strokeWidth.toPx(),
+            bottom = canvasHeight,
+        ) {
             drawPath(
                 path = path,
                 color = lineColor,
                 style = lineStroke,
             )
-        } else {
-            val reveal =
-                lineChartRevealWindow(
-                    viewportStartPx = revealViewportStartPx,
-                    viewportWidthPx = revealViewportWidthPx,
-                    canvasWidthPx = canvasWidth,
-                    progress = lineAnimationProgress,
-                )
-            // Reveal from left to right to keep perceived speed steady across steep curves.
-            clipRect(
-                left = reveal.leftPx,
-                top = 0f,
-                right = reveal.rightPx + style.line.strokeWidth.toPx(),
-                bottom = canvasHeight,
-            ) {
-                drawPath(
-                    path = path,
-                    color = lineColor,
-                    style = lineStroke,
-                )
-            }
         }
-
-        tryDrawPathPoints(
-            values = values,
-            valuesCount = valuesCount,
-            style = style,
-            markerRevealProgress = markerRevealProgress,
-            stepX = stepX,
-            horizontalOffsetPx = horizontalOffsetPx,
-            verticalInset = verticalInset,
-        )
     }
 
-    if (timelineWindowPoints != null) {
-        clipRect(left = 0f, top = 0f, right = canvasWidth, bottom = canvasHeight) {
-            drawPathContent()
-        }
-    } else {
-        drawPathContent()
-    }
+    tryDrawPathPoints(
+        heights = heights,
+        drawRange = drawRange,
+        style = style,
+        markerRevealProgress = markerRevealProgress,
+        stepX = stepX,
+        horizontalOffsetPx = horizontalOffsetPx,
+    )
 }
 
 private fun DrawScope.tryDrawPathPoints(
-    values: FloatArray,
-    valuesCount: Int,
+    heights: FloatArray,
+    drawRange: IntRange,
     style: LineChartStyle,
     markerRevealProgress: Float,
     stepX: Float,
     horizontalOffsetPx: Float,
-    verticalInset: Float,
 ) {
-    if (!style.points.visible || valuesCount <= 1 || size.width <= 0f || markerRevealProgress <= 0f) return
+    if (!style.points.visible || drawRange.isEmpty() || size.width <= 0f || markerRevealProgress <= 0f) return
 
     val progress = markerRevealProgress.coerceIn(0f, 1f)
     val animatedColor = style.points.color.copy(alpha = style.points.color.alpha * progress)
     val animatedRadius =
         style.points.size.toPx() * (MARKER_REVEAL_START_SCALE + (1f - MARKER_REVEAL_START_SCALE) * progress)
 
-    for (i in 0 until valuesCount) {
-        val x = horizontalOffsetPx + (i * stepX)
-        val y =
-            mapScaledValueToCanvasY(
-                scaledValue = values[i],
-                canvasHeight = size.height,
-                verticalInset = verticalInset,
-            )
+    for (i in drawRange) {
         drawCircle(
             color = animatedColor,
             radius = animatedRadius,
-            center = Offset(x, y),
+            center = Offset(horizontalOffsetPx + (i * stepX), heights[i]),
         )
     }
 }
@@ -225,6 +321,7 @@ internal fun DrawScope.drawLineChartSeries(
     seriesCount: Int,
     pointsCount: Int,
     valuesBuffer: FloatArray,
+    scratch: LineChartDrawScratch,
     style: LineChartStyle,
     colors: ImmutableList<Color>,
     bezierTension: Float,
@@ -245,6 +342,19 @@ internal fun DrawScope.drawLineChartSeries(
         } else {
             0f
         }
+    // Only an expanded chart scrolls, so only it has points off screen to cull. A live shift slides
+    // a window that is on screen for the whole frame, and a fitted chart is the plot itself.
+    val isExpanded = activeShift == null && isDenseMode
+    val lineStroke =
+        Stroke(
+            width =
+                style.line.strokeWidth
+                    .toPx()
+                    .coerceAtLeast(0.5f),
+            cap = StrokeCap.Round,
+            join = StrokeJoin.Round,
+        )
+    val overscanPx = maxLineDrawRadiusPx(style)
 
     for (index in 0 until seriesCount) {
         val valuesCount =
@@ -271,17 +381,32 @@ internal fun DrawScope.drawLineChartSeries(
                     scaleBy = size.height,
                 )
             }
+        val drawRange =
+            if (isExpanded) {
+                lineChartDrawRange(
+                    valuesCount = valuesCount,
+                    stepX = denseStepX,
+                    viewportStartPx = revealViewportStartPx,
+                    viewportWidthPx = revealViewportWidthPx,
+                    overscanPx = overscanPx,
+                )
+            } else {
+                0 until valuesCount
+            }
         drawChartPath(
             values = valuesBuffer,
             valuesCount = valuesCount,
+            drawRange = drawRange,
             style = style,
+            lineStroke = lineStroke,
+            lineColor = colors[index],
+            bezierTension = bezierTension,
+            scratch = scratch,
             lineAnimationProgress = lineAnimationProgress,
             markerRevealProgress = markerRevealProgress,
-            bezierTension = bezierTension,
-            lineColor = colors[index],
             timelineWindowPoints = if (activeShift != null) pointsCount else null,
             horizontalOffsetPx = shiftPx,
-            stepXOverride = if (activeShift == null && isDenseMode) denseStepX else null,
+            stepXOverride = if (isExpanded) denseStepX else null,
             verticalInset = verticalInset,
             revealViewportStartPx = revealViewportStartPx,
             revealViewportWidthPx = revealViewportWidthPx,

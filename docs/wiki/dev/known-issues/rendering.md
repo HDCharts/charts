@@ -47,22 +47,21 @@ Options:
 - Find what keeps the chart busy after a swipe, starting from the scroll wiring in
   `StackedAreaChartContent`, and add the scroll-then-tap test back.
 
-### Line charts build a path through points scrolled off screen
+### Line charts allocate per segment and per series
 
-During the reveal, a morph, or a live shift, every frame still builds a new path through every
-point, including the ones scrolled off screen in the expanded view. Live line windows and expanded
-line charts are not compacted, so the cost grows with the item count. Each draw now scales one
-series at a time into a reused `FloatArray` and maps each value to its height once. A frame still
-allocates one `CubicControlPoints` per segment, one `FloatArray` of heights per series, and one
-`Path` per series.
+Each line-chart frame used to allocate one `CubicControlPoints` per bezier segment, one `FloatArray`
+of heights per series, and one `Path` per series. An expanded chart also built its path and drew its
+markers through every point, including the ones scrolled off screen, so the cost grew with the point
+count instead of with the viewport.
 
-Confirmed by the code: `drawChartPath` in `LineChartDrawing.kt`, called once per series from
-`drawLineChartSeries` for every point the chart holds.
+**Status:** addressed. `drawChartPath` takes a `LineChartDrawScratch` that holds the path, the canvas
+heights, and the control points, and `lineChartDrawRange` reduces an expanded chart to the points on
+screen plus the overscan of the widest marker. A two-series, 10,000-point bezier chart went from
+about 722 KB allocated per frame to about 1.4 KB.
 
-Options:
-
-- Draw only the points in the visible range, plus one on each side.
-- Return the control points without allocating, and reuse the height buffer.
+`LineChartVisiblePointsTest` in `charts-line/src/commonTest` compares the path of a culled draw
+against the path of a full draw, and `CubicControlPointsIntoTest` in `charts-core/src/commonTest`
+covers the control points.
 
 ### One animation value per point or bar
 
