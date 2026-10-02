@@ -6,7 +6,7 @@ import io.github.hdcharts.core.model.ChartSeries
 import io.github.hdcharts.core.model.chartDataOf
 import io.github.hdcharts.core.model.toChartData
 
-internal object MockTest {
+internal object LineTestFixtures {
     const val TITLE = "Title"
 
     private val firstItem = listOf(26000.68f, 28000.34f, 32000.57f, 45000.57f)

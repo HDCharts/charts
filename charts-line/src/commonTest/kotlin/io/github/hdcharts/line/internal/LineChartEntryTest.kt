@@ -10,8 +10,8 @@ import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.model.ChartSeries
 import io.github.hdcharts.core.model.toChartData
 import io.github.hdcharts.line.LineChartDefaults
-import io.github.hdcharts.line.MockTest.colors
-import io.github.hdcharts.line.MockTest.multiDataSet
+import io.github.hdcharts.line.LineTestFixtures.colors
+import io.github.hdcharts.line.LineTestFixtures.multiDataSet
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
