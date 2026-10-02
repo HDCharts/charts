@@ -67,14 +67,16 @@ fun RadarChart(
     )
 
     val internalData = remember(data, title) { toInternalRadarData(data, title) }
-    val hasSingleSeries = data.series.size == 1
+    // A single series has no legend to carry its value, so the title takes it, like a bar or a line.
+    // Several series put their values in the legend, so the title only names the axis.
+    val singleSeries = data.series.singleOrNull()
     val density = LocalDensity.current
     val errors =
         remember(data, style, density) {
             validateSeries(
                 data = data,
                 minValues = ValidationErrors.MIN_RADAR_VALUES,
-                colorCount = if (hasSingleSeries) 0 else style.polygon.lineColors.size,
+                colorCount = if (singleSeries != null) 0 else style.polygon.lineColors.size,
             )
         }
     val drawStyle = remember(style, density) { style.clamped(density) }
@@ -90,9 +92,6 @@ fun RadarChart(
         }
     val categories: ImmutableList<String> = data.categories.toImmutableList()
     val seriesNames = data.series.map { it.name.orEmpty() }.toImmutableList()
-    // A single series has no legend to carry its value, so the title takes it, like a bar or a line.
-    // Several series put their values in the legend, so the title only names the axis.
-    val singleSeries = data.series.singleOrNull()
     val selectedTitle =
         when {
             selectedIndex == NO_SELECTION -> null
