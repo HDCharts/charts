@@ -21,10 +21,10 @@ import io.github.hdcharts.core.model.ChartSelection
 import io.github.hdcharts.core.model.ChartValueFormatters
 import io.github.hdcharts.core.model.rememberChartSelection
 import io.github.hdcharts.core.model.rememberSelectionLifecycle
+import io.github.hdcharts.stackedbar.internal.StackedBarChartImpl
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import io.github.hdcharts.core.internal.model.ChartData as InternalChartData
-import io.github.hdcharts.stackedbar.internal.StackedBarChart as StackedBarChartInternal
 
 /** Displays nonnegative absolute stacks from one aligned series per segment. */
 @Composable
@@ -89,7 +89,7 @@ fun StackedBarChart(
         Column {
             val plotModifier = if (boundedHeight) Modifier.weight(1f) else Modifier
             Box(modifier = plotModifier) {
-                StackedBarChartInternal(
+                StackedBarChartImpl(
                     data = internalData,
                     title = effectiveTitle,
                     style = drawStyle,

@@ -30,7 +30,7 @@ import io.github.hdcharts.core.model.ChartSelection
 import io.github.hdcharts.core.model.SelectionLifetime
 import io.github.hdcharts.core.model.rememberChartSelection
 import io.github.hdcharts.core.model.rememberSelectionLifecycle
-import io.github.hdcharts.pie.internal.PieChart
+import io.github.hdcharts.pie.internal.PieChartContent
 import io.github.hdcharts.pie.internal.calculatePercentages
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
@@ -111,7 +111,7 @@ fun PieChart(
     val labels = remember(data) { data.map { it.label }.toImmutableList() }
     val points = remember(data) { data.map { it.value }.toImmutableList() }
 
-    PieChartContent(
+    PieChartFrame(
         modifier = modifier,
         title = title,
         labels = labels,
@@ -128,7 +128,7 @@ fun PieChart(
 }
 
 @Composable
-private fun PieChartContent(
+private fun PieChartFrame(
     modifier: Modifier,
     title: String?,
     labels: ImmutableList<String>,
@@ -201,7 +201,7 @@ private fun PieChartContent(
             }
         },
         plot = {
-            PieChart(
+            PieChartContent(
                 chartData = chartData,
                 colors = colors,
                 style = style,
