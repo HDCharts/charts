@@ -5,6 +5,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import io.github.hdcharts.core.internal.composable.ChartErrors
+import io.github.hdcharts.core.internal.model.MultiChartData
 import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.style.ChartContainerStyle
 import kotlinx.collections.immutable.toImmutableList
@@ -29,12 +30,12 @@ import kotlinx.collections.immutable.toImmutableList
  */
 @InternalChartsApi
 @Composable
-fun <S : Any, M : Any> ChartEntry(
-    spec: ChartSpec<S, M>,
+fun <S : Any> ChartEntry(
+    spec: ChartSpec<S>,
     data: ChartData,
     style: S,
     errorStyle: ChartContainerStyle,
-    content: @Composable (data: M, style: S) -> Unit,
+    content: @Composable (data: MultiChartData, style: S) -> Unit,
     modifier: Modifier = Modifier,
     title: String? = null,
 ) {

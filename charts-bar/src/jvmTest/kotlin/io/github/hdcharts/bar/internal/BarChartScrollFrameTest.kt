@@ -12,7 +12,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Density
 import io.github.hdcharts.core.internal.NO_SELECTION
-import io.github.hdcharts.core.internal.model.ChartData
+import io.github.hdcharts.core.model.ChartData
+import io.github.hdcharts.core.model.ChartSeries
 import io.github.hdcharts.core.style.BarChartDefaults
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.skia.Bitmap
@@ -33,8 +34,8 @@ class BarChartScrollFrameTest {
                 BarChartContent(
                     chartData =
                         ChartData(
-                            labels = List(BAR_COUNT) { "B$it" },
-                            points = List(BAR_COUNT) { 50.0 },
+                            categories = List(BAR_COUNT) { "B$it" },
+                            series = listOf(ChartSeries(name = "Series", values = List(BAR_COUNT) { 50.0 })),
                         ),
                     style = BarChartDefaults.style(),
                     interactionEnabled = true,

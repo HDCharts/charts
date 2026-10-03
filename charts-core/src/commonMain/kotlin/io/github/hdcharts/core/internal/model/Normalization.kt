@@ -22,8 +22,8 @@ fun MultiChartData.normalizeByMinMax(
 ): List<List<Float>> {
     val (minValue, maxValue) = minMax
     val range = maxValue - minValue
-    return items.map { item ->
-        item.item.points.map { value -> normalizeValue(value, minValue, range, zeroRangeValue) }
+    return series.map { item ->
+        item.values.map { value -> normalizeValue(value, minValue, range, zeroRangeValue) }
     }
 }
 
@@ -53,28 +53,28 @@ fun resolveOptionalRange(
 }
 
 fun MultiChartData.normalizeStackedValues(): List<Float> {
-    val dataMax = items.maxOfOrNull { it.item.points.sum() } ?: 0.0
+    val dataMax = series.maxOfOrNull { it.values.sum() } ?: 0.0
     val range = if (dataMax == 0.0) 1.0 else dataMax
-    return items.map { item ->
-        (item.item.points.sum() / range).toFloat().coerceIn(0f, 1f)
+    return series.map { item ->
+        (item.values.sum() / range).toFloat().coerceIn(0f, 1f)
     }
 }
 
 fun MultiChartData.normalizeStackedAreaValues(): List<List<Float>> {
-    if (items.isEmpty()) return emptyList()
-    val pointsCount = getFirstPointsSize()
-    if (pointsCount == 0) return items.map { emptyList() }
+    if (series.isEmpty()) return emptyList()
+    val pointsCount = valueCount()
+    if (pointsCount == 0) return series.map { emptyList() }
 
     val maxStackedTotal =
         (0 until pointsCount)
             .maxOfOrNull { pointIndex ->
-                items.sumOf { it.item.points[pointIndex] }
+                series.sumOf { item -> item.values[pointIndex] }
             } ?: 0.0
     val range = if (maxStackedTotal == 0.0) 1.0 else maxStackedTotal
     val runningTotals = DoubleArray(pointsCount)
 
-    return items.map { item ->
-        item.item.points.mapIndexed { pointIndex, value ->
+    return series.map { item ->
+        item.values.mapIndexed { pointIndex, value ->
             runningTotals[pointIndex] += value
             (runningTotals[pointIndex] / range).toFloat().coerceIn(0f, 1f)
         }

@@ -148,11 +148,6 @@ private fun PieChartFrame(
         selection.selectedIndex?.takeIf { it in points.indices } ?: NO_SELECTION
     val hasSelection = forcedSelectedIndex != NO_SELECTION
 
-    val chartData =
-        remember(labels, points) {
-            toInternalChartData(labels = labels, points = points)
-        }
-
     ChartSquarePlotLayout(
         modifier = modifier,
         title = {
@@ -202,7 +197,7 @@ private fun PieChartFrame(
         },
         plot = {
             PieChartContent(
-                chartData = chartData,
+                values = points,
                 colors = colors,
                 style = style,
                 interactionEnabled = interactionEnabled,
@@ -230,15 +225,6 @@ private fun resolveSliceColors(
             (slice.color ?: defaultPalette[index]).copy(alpha = style.alpha)
         }.toImmutableList()
 }
-
-private fun toInternalChartData(
-    labels: ImmutableList<String>,
-    points: ImmutableList<Double>,
-): io.github.hdcharts.core.internal.model.ChartData =
-    io.github.hdcharts.core.internal.model.ChartData(
-        labels = List(points.size) { index -> labels.getOrNull(index) ?: index.toString() },
-        points = points,
-    )
 
 private fun selectedPercentageStyle(base: TextStyle): TextStyle =
     base.copy(

@@ -4,9 +4,9 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import io.github.hdcharts.core.internal.ANIMATION_DURATION_LINE_CHART
 import io.github.hdcharts.core.internal.bezier.cubicControlPointsForSegment
-import io.github.hdcharts.core.internal.model.ChartDataItem
 import io.github.hdcharts.core.internal.model.MultiChartData
-import io.github.hdcharts.core.internal.model.toChartData
+import io.github.hdcharts.core.model.ChartData
+import io.github.hdcharts.core.model.ChartSeries
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
@@ -17,6 +17,15 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
 class LineChartHelpersTest {
+    private fun lineData(
+        vararg series: ChartSeries,
+        categories: List<String> = emptyList(),
+        title: String = "Line",
+    ) = MultiChartData(
+        data = ChartData(categories = categories, series = series.toList()),
+        title = title,
+    )
+
     @Test
     fun toTimelineDurationMillis_boundsValuesToTweenRange() {
         assertEquals(expected = 1, actual = (-1).milliseconds.toTimelineDurationMillis())
@@ -38,26 +47,15 @@ class LineChartHelpersTest {
         val sourcePoints = List(120) { index -> (index + 1).toDouble() }
         val sourceLabels = List(120) { index -> "P${index + 1}" }
         val data =
-            MultiChartData(
-                items =
-                    listOf(
-                        ChartDataItem(
-                            label = "Series",
-                            item = sourcePoints.toChartData(labels = sourceLabels),
-                        ),
-                    ),
+            lineData(
+                ChartSeries(name = "Series", values = sourcePoints),
+                categories = sourceLabels,
                 title = "Dense",
             )
 
         val aggregated = aggregateForCompactDensity(data)
-        val aggregatedPoints =
-            aggregated.items
-                .first()
-                .item.points
-        val aggregatedLabels =
-            aggregated.items
-                .first()
-                .item.labels
+        val aggregatedPoints = aggregated.series.single().values
+        val aggregatedLabels = aggregated.categories
 
         assertTrue(aggregatedPoints.size < sourcePoints.size)
         assertEquals(expected = 40, actual = aggregatedPoints.size)
@@ -69,14 +67,9 @@ class LineChartHelpersTest {
     @Test
     fun aggregateForCompactDensity_belowThreshold_returnsOriginalData() {
         val data =
-            MultiChartData(
-                items =
-                    listOf(
-                        ChartDataItem(
-                            label = "Series",
-                            item = List(20) { index -> index.toDouble() }.toChartData(labels = List(20) { "L$it" }),
-                        ),
-                    ),
+            lineData(
+                ChartSeries(name = "Series", values = List(20) { index -> index.toDouble() }),
+                categories = List(20) { "L$it" },
                 title = "Small",
             )
 
@@ -288,8 +281,8 @@ class LineChartHelpersTest {
         assertEquals(0.0 to 0.0, minMax)
         val drawValues =
             timelineShiftValues(
-                previousSeries = listOf(allBelowFloor.items[0].item.points),
-                currentSeries = listOf(allBelowFloor.items[0].item.points),
+                previousSeries = listOf(allBelowFloor.series[0].values),
+                currentSeries = listOf(allBelowFloor.series[0].values),
                 minMax = minMax,
             )
         assertEquals(listOf(listOf(0f, 0f, 0f, 0f)), drawValues)
@@ -308,39 +301,11 @@ class LineChartHelpersTest {
     }
 
     @Test
-    fun resolveLineXAxisLabels_singleSeries_returnsItemLabels() {
+    fun resolveLineXAxisLabels_withCategories_returnsThem() {
         val data =
-            MultiChartData(
-                items =
-                    listOf(
-                        ChartDataItem(
-                            label = "Series",
-                            item = listOf(10.0, 20.0, 30.0).toChartData(labels = listOf("A", "B", "C")),
-                        ),
-                    ),
-                title = "Single",
-            )
-
-        val labels = resolveLineXAxisLabels(data)
-
-        assertEquals(listOf("A", "B", "C"), labels)
-    }
-
-    @Test
-    fun resolveLineXAxisLabels_multiSeriesWithCategories_prefersCategories() {
-        val data =
-            MultiChartData(
-                items =
-                    listOf(
-                        ChartDataItem(
-                            label = "Series 1",
-                            item = listOf(1.0, 2.0, 3.0).toChartData(labels = listOf("v1", "v2", "v3")),
-                        ),
-                        ChartDataItem(
-                            label = "Series 2",
-                            item = listOf(4.0, 5.0, 6.0).toChartData(labels = listOf("w1", "w2", "w3")),
-                        ),
-                    ),
+            lineData(
+                ChartSeries(name = "Series 1", values = listOf(1.0, 2.0, 3.0)),
+                ChartSeries(name = "Series 2", values = listOf(4.0, 5.0, 6.0)),
                 categories = listOf("Jan", "Feb", "Mar"),
                 title = "Multi",
             )
@@ -351,26 +316,29 @@ class LineChartHelpersTest {
     }
 
     @Test
-    fun resolveLineXAxisLabels_multiSeriesWithoutCategories_returnsEmpty() {
+    fun resolveLineXAxisLabels_withoutCategories_returnsEmpty() {
         val data =
-            MultiChartData(
-                items =
-                    listOf(
-                        ChartDataItem(
-                            label = "Series 1",
-                            item = listOf(1.0, 2.0, 3.0).toChartData(labels = listOf("v1", "v2", "v3")),
-                        ),
-                        ChartDataItem(
-                            label = "Series 2",
-                            item = listOf(4.0, 5.0, 6.0).toChartData(labels = listOf("w1", "w2", "w3")),
-                        ),
-                    ),
+            lineData(
+                ChartSeries(name = "Series 1", values = listOf(1.0, 2.0, 3.0)),
+                ChartSeries(name = "Series 2", values = listOf(4.0, 5.0, 6.0)),
                 title = "Multi",
             )
 
         val labels = resolveLineXAxisLabels(data)
 
         assertTrue(labels.isEmpty())
+    }
+
+    /** A caller that supplies only blanks gets no axis text rather than a row of empty labels. */
+    @Test
+    fun resolveLineXAxisLabels_withBlankCategories_returnsEmpty() {
+        val data =
+            lineData(
+                ChartSeries(name = "Series", values = listOf(1.0, 2.0)),
+                categories = listOf("", " "),
+            )
+
+        assertTrue(resolveLineXAxisLabels(data).isEmpty())
     }
 
     @Test
@@ -701,8 +669,5 @@ class LineChartHelpersTest {
     }
 
     private fun singleSeriesData(points: List<Double>): MultiChartData =
-        MultiChartData(
-            items = listOf(ChartDataItem(label = "Series", item = points.toChartData())),
-            title = "Single",
-        )
+        lineData(ChartSeries(name = "Series", values = points), title = "Single")
 }

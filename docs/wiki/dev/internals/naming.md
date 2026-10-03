@@ -81,7 +81,7 @@ Every chart except pie has an `Entry`: it names the chart's policy, style values
 conversion once, and runs them through the shared `ChartEntry` seam. An entry with one public
 composable calls the content itself; an entry shared by two takes the content as a lambda. Bar and
 histogram each have their own entry, because their policies differ, and then share
-`BarChartInternalPlot` and `toBarRenderData`.
+`BarChartInternalPlot`.
 
 ## Two Public Composables in One Module
 
@@ -151,9 +151,9 @@ annotated. `rememberAnimationState` has no production caller at all and should b
 than annotated.
 
 Keep one boundary composable per shared plot, and have every chart that needs that plot call the
-boundary rather than the other chart's internals. Histogram calls `BarChartInternalPlot` and
-`toBarRenderData` for this reason, and never reaches into `charts-bar` any further. A boundary is
-named as a distinct noun, not with a role suffix, because it is none of the four roles on its own.
+boundary rather than the other chart's internals. Histogram calls `BarChartInternalPlot` and nothing
+else in `charts-bar`. A boundary is named as a distinct noun, not with a role suffix, because it is
+none of the four roles on its own.
 
 ## Adding a Chart or a Public Composable
 

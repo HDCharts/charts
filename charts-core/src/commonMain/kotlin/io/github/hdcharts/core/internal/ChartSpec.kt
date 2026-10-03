@@ -1,6 +1,7 @@
 package io.github.hdcharts.core.internal
 
 import androidx.compose.ui.unit.Density
+import io.github.hdcharts.core.internal.model.MultiChartData
 import io.github.hdcharts.core.model.ChartData
 
 /**
@@ -13,10 +14,9 @@ import io.github.hdcharts.core.model.ChartData
  * composables shares one declaration.
  *
  * @param S The chart's style type.
- * @param M The chart's internal render model.
  */
 @InternalChartsApi
-interface ChartSpec<S : Any, M : Any> {
+interface ChartSpec<S : Any> {
     /** Which input checks apply to this chart. */
     val policy: ChartPolicy
 
@@ -42,12 +42,14 @@ interface ChartSpec<S : Any, M : Any> {
      * The validated [data] as this chart's render model. Runs once per data or title change, and
      * only after validation passes, so it may assume the data holds what [policy] checked for.
      *
-     * Most charts call the shared `toRenderModel(data, title, labels)` in `charts-core` and declare
-     * only where their point labels come from. Two build their own: bar and histogram share
-     * `toBarRenderData`, which has no categories, and stacked bar transposes a per-bar model.
+     * Passing the data through unchanged is the expected implementation, and the right one for every
+     * chart that draws its series as given, so it is the default. A chart overrides this when its
+     * render model differs from the caller's data: stacked bar stacks segments, so it transposes to
+     * a per-bar model with `transposeForStacking`. This is also where a chart with a per-chart input
+     * step of its own would put it.
      */
     fun convert(
         data: ChartData,
         title: String?,
-    ): M
+    ): MultiChartData = MultiChartData(data = data, title = title.orEmpty())
 }

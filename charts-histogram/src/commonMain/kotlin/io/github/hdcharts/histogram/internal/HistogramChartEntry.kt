@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Density
 import io.github.hdcharts.bar.internal.BarChartInternalPlot
-import io.github.hdcharts.bar.internal.toBarRenderData
 import io.github.hdcharts.core.internal.ChartEntry
 import io.github.hdcharts.core.internal.ChartPolicy
 import io.github.hdcharts.core.internal.ChartSpec
@@ -17,7 +16,6 @@ import io.github.hdcharts.core.model.ChartSelection
 import io.github.hdcharts.core.model.ChartValueFormatter
 import io.github.hdcharts.core.style.BarChartStyle
 import io.github.hdcharts.core.style.clamp
-import io.github.hdcharts.core.internal.model.ChartData as InternalChartData
 
 /**
  * Everything [io.github.hdcharts.histogram.HistogramChart] declares about its input. It draws the
@@ -25,7 +23,7 @@ import io.github.hdcharts.core.internal.model.ChartData as InternalChartData
  * negative, and compact mode does not aggregate, because the bins are already the aggregation.
  */
 @InternalChartsApi
-object HistogramChartSpec : ChartSpec<BarChartStyle, InternalChartData> {
+object HistogramChartSpec : ChartSpec<BarChartStyle> {
     override val policy =
         ChartPolicy(
             minValues = ValidationErrors.MIN_VALUES,
@@ -54,11 +52,6 @@ object HistogramChartSpec : ChartSpec<BarChartStyle, InternalChartData> {
         style: BarChartStyle,
         density: Density,
     ): BarChartStyle = style.clamp(density)
-
-    override fun convert(
-        data: ChartData,
-        title: String?,
-    ): InternalChartData = toBarRenderData(data = data)
 }
 
 /**
@@ -88,7 +81,6 @@ internal fun HistogramChartEntry(
         content = { renderData, drawStyle ->
             BarChartInternalPlot(
                 data = renderData,
-                title = title,
                 style = drawStyle,
                 selection = selection,
                 selectedIndex = selectedIndex,

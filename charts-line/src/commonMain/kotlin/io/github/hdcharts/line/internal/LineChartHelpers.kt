@@ -12,11 +12,11 @@ import io.github.hdcharts.core.internal.density.bucketCenterIndex
 import io.github.hdcharts.core.internal.density.bucketSizeForTarget
 import io.github.hdcharts.core.internal.density.buildBucketRanges
 import io.github.hdcharts.core.internal.density.shouldUseScrollableDensity
-import io.github.hdcharts.core.internal.model.ChartDataItem
 import io.github.hdcharts.core.internal.model.MultiChartData
 import io.github.hdcharts.core.internal.model.minMax
 import io.github.hdcharts.core.internal.model.resolveOptionalRange
-import io.github.hdcharts.core.internal.model.toChartData
+import io.github.hdcharts.core.model.ChartData
+import io.github.hdcharts.core.model.ChartSeries
 
 internal const val LINE_DENSE_THRESHOLD = 50
 
@@ -54,49 +54,34 @@ internal fun aggregateForCompactDensity(
     targetPoints: Int = LINE_DENSE_THRESHOLD,
 ): MultiChartData {
     if (targetPoints <= 1) return data
-    val sourcePointsCount =
-        data.items
-            .firstOrNull()
-            ?.item
-            ?.points
-            ?.size ?: return data
+    val sourcePointsCount = data.valueCount()
     if (sourcePointsCount <= targetPoints) return data
 
     val bucketRanges = compactDensityRanges(sourcePointsCount, targetPoints)
     val aggregatedCategories = aggregateLabelsByCenterValue(data.categories, bucketRanges)
-    val aggregatedItems =
-        data.items.map { item ->
-            val aggregatedPoints = aggregatePointsByAverage(item.item.points, bucketRanges)
-            val aggregatedLabels = aggregateLabelsByCenterValue(item.item.labels, bucketRanges)
-            ChartDataItem(
-                label = item.label,
-                item = aggregatedPoints.toChartData(labels = aggregatedLabels),
+    val aggregatedSeries =
+        data.series.map { series ->
+            ChartSeries(
+                name = series.name,
+                values = aggregatePointsByAverage(series.values, bucketRanges),
             )
         }
 
     return MultiChartData(
-        items = aggregatedItems,
-        categories = if (data.hasCategories()) aggregatedCategories else emptyList(),
+        data =
+            ChartData(
+                categories = if (data.hasCategories()) aggregatedCategories else emptyList(),
+                series = aggregatedSeries,
+            ),
         title = data.title,
     )
 }
 
-/** X-axis labels of a line chart: the item labels of a single series, or the shared categories. */
-internal fun resolveLineXAxisLabels(data: MultiChartData): List<String> {
-    val labels =
-        when {
-            data.hasSingleItem() ->
-                data.items
-                    .firstOrNull()
-                    ?.item
-                    ?.labels
-                    ?.toList()
-                    .orEmpty()
-            data.hasCategories() -> data.categories.toList()
-            else -> emptyList()
-        }
-    return labels.takeUnless { it.all(String::isBlank) }.orEmpty()
-}
+/** X-axis labels of a line chart: the shared categories, unless every one of them is blank. */
+internal fun resolveLineXAxisLabels(data: MultiChartData): List<String> =
+    data.categories
+        .takeUnless { it.all(String::isBlank) }
+        .orEmpty()
 
 /**
  * Resolves the Y-axis domain, applying [minValue] and [maxValue] independently over the

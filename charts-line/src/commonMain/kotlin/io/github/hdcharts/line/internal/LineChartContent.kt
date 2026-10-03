@@ -132,7 +132,7 @@ internal fun LineChartContent(
         label = "lineMarkerReveal",
     )
 
-    val rawSeries = remember(data) { data.items.map { item -> item.item.points } }
+    val rawSeries = remember(data) { data.series.map { item -> item.values } }
     val xAxisLabels = remember(data) { resolveLineXAxisLabels(data) }
     // X labels of a live window count from the points it has dropped, so each stays on its point.
     val timelineWindowCounter = remember { TimelineWindowCounter() }
@@ -534,7 +534,7 @@ internal fun LineChartContent(
                             onDraw = {
                                 if (!dragging.value) return@Canvas
                                 val morphProgress = transition.morph.progress.value
-                                data.items.forEachIndexed { index, _ ->
+                                data.series.forEachIndexed { index, _ ->
                                     val from =
                                         transition.morph.from
                                             .getOrNull(index)

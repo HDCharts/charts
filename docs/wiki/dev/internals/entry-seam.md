@@ -5,9 +5,9 @@ order: 8
 
 # Entry Seam and Chart Policy
 
-A chart takes public data, checks it, converts it into its own render model, clamps its style, then
-draws. Everything up to the clamp is written once, in `ChartEntry` in `charts-core`. A chart
-declares one `ChartSpec` object saying which checks apply to it and how it answers them.
+A chart takes public data, checks it, wraps it in the render model, clamps its style, then draws.
+Everything up to the clamp is written once, in `ChartEntry` in `charts-core`. A chart declares one
+`ChartSpec` object saying which checks apply to it and how it answers them.
 
 ## The pipeline
 
@@ -15,7 +15,7 @@ declares one `ChartSpec` object saying which checks apply to it and how it answe
 flowchart LR
   D["Public data<br/>ChartData"] --> V["Validate<br/>policy + style values"]
   V -->|errors| E["ChartErrors"]
-  V -->|valid| C["Convert<br/>to the render model"]
+  V -->|valid| C["Convert<br/>into the render model"]
   C --> K["Clamp the style<br/>at the ambient density"]
   K --> R["Content composable<br/>domain, aggregation, drawing"]
 ```
@@ -23,7 +23,7 @@ flowchart LR
 | Step | What happens | Where it runs |
 | --- | --- | --- |
 | Validate | Compares the data against the policy and against the values the style holds | Seam |
-| Convert | Turns public data into the chart's internal render model | Seam, through the spec's `convert` |
+| Convert | Wraps the validated data in the render model; only stacked bar changes its shape | Seam, through the spec's `convert` |
 | Clamp | Puts style values into their drawable ranges at the current density | Seam, through the spec's `clamp` |
 | Draw | Picks a domain, aggregates, resolves colors, lays out header, plot and legend, and draws | The chart's content composable |
 
@@ -49,7 +49,7 @@ public composables passes the content in as a lambda, so both share one entry �
 `ChartSpec` is the whole of a chart's input declaration. One object per chart:
 
 ```kotlin
-object LineChartSpec : ChartSpec<LineChartStyle, MultiChartData> {
+object LineChartSpec : ChartSpec<LineChartStyle> {
     override val policy = ChartPolicy(
         minValues = ValidationErrors.MIN_VALUES,
         allowNegative = true,
@@ -69,9 +69,6 @@ object LineChartSpec : ChartSpec<LineChartStyle, MultiChartData> {
         )
 
     override fun clamp(style: LineChartStyle, density: Density) = style.clamp(density)
-
-    override fun convert(data: ChartData, title: String?) =
-        toRenderModel(data, title, PointLabels.CATEGORIES_WHEN_SINGLE_SERIES)
 }
 ```
 
@@ -162,11 +159,14 @@ written by hand and change in the same commit.
 | Stacked area | 2 | no | no | yes | no | series count | yes |
 | Pie | — | — | — | — | — | — | exception |
 
-Every chart except pie is on the seam. Bar and histogram draw the same plot from the same render
-model, so they share `toBarRenderData` and share `BarChartInternalPlot`. Their specs differ in the
-policy — histogram forbids negative bin heights — and their entries differ in what they pass the
-shared plot: `aggregate = false`, because compact histogram bins are already the aggregation, and a
-histogram test tag.
+Every chart except pie is on the seam. Bar and histogram draw the same plot, so they share
+`BarChartInternalPlot`. Their specs differ in the policy — histogram forbids negative bin heights —
+and their entries differ in what they pass the shared plot: `aggregate = false`, because compact
+histogram bins are already the aggregation, and a histogram test tag.
+
+`convert` has a default implementation that passes the data through, so a chart whose render model
+is the caller's own data does not write one. **Stacked bar is the only chart that overrides it**,
+because it stacks segments and so transposes to one series per bar.
 
 Moving a chart means writing `internal/<Name>ChartEntry.kt` with the chart's spec — policy, style
 values, clamping and conversion — pointing the public composable at it, and deleting the validation,

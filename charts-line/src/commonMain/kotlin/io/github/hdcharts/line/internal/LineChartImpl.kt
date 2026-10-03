@@ -43,7 +43,7 @@ internal fun LineChartImpl(
     legendLabels: ImmutableList<String>,
     selectedTitle: String? = null,
 ) {
-    val sourcePointsCount = remember(data) { data.getFirstPointsSize() }
+    val sourcePointsCount = remember(data) { data.valueCount() }
     val isDenseData =
         remember(sourcePointsCount) {
             shouldUseScrollableDensity(sourcePointsCount)
@@ -89,7 +89,7 @@ internal fun LineChartImpl(
             maxZoom = LINE_ZOOM_MAX,
             initialZoom = LINE_ZOOM_MIN,
         )
-    val lineColors = rememberLineColors(style = style, count = renderData.items.size)
+    val lineColors = rememberLineColors(style = style, count = renderData.series.size)
     val showCompactToggle = interactionEnabled && isDenseData
     val showZoomControlsInHeader = interactionEnabled && isDenseMode && style.zoomControlsVisible
     val showHeader = title.isNotBlank() || showCompactToggle || showZoomControlsInHeader

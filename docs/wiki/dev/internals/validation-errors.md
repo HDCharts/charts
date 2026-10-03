@@ -114,16 +114,23 @@ what radar does.
 
 ## Internal model types
 
-Everything below the seam reads the render model the checks make possible, and trusts it. Three
-constraints on that model:
+Everything below the seam reads the render model the checks make possible, and trusts it. The model
+is `MultiChartData`: the caller's own `ChartData` plus the chart's `title`. Four constraints on it:
 
-**A value that is required is not optional, and optionality is explicit.** `MultiChartData` carries
-`title: String` and `ChartDataItem` carries `label: String`, where an absent title or an unnamed
-series is written as `""`. That makes "no label" indistinguishable from a blank one, and the cost
-shows up where a stage has to repair it: stacked bar's compaction invents `"Bucket ${bucketIndex + 1}"`
-for a blank category label, duplicating the fallback `resolveAxisLabel` already owns. Making the
-label nullable would let the renderer decide the text — one fallback, in one place. `ChartDataItem`
-is an internal type, so that costs no public API.
+**A value that is required is not optional, and optionality is explicit.** `MultiChartData.title` is a
+`String`, so an absent title is written as `""`, and `ChartSeries.name` is a `String?` that a chart
+converts to `""` when it draws a name. That makes "no label" indistinguishable from a blank one, and
+the cost shows up where a stage has to repair it: stacked bar's compaction invents
+`"Bucket ${bucketIndex + 1}"` for a blank category, duplicating the fallback `resolveAxisLabel`
+already owns. Deciding that in the renderer — one fallback, in one place — is the fix, and it touches
+no public API.
+
+**The model holds the caller's data, not a copy.** There is no second leaf type and no per-point copy
+of the category list, so nothing below the seam can drift from what the caller passed, and there is
+only one type named `ChartData` in the library. A label at an index is `categories[index]`, and
+validation has already made the categories either empty or exactly as long as the values, so no read
+site needs a fallback for a **missing** label. Blank is a different case and stays legal: that is
+`resolveAxisLabel`'s job, and X-Axis Labels owns it.
 
 **Not every guard below the seam is redundant.** `normalizeValue` ends with `.coerceIn(0f, 1f)`
 after dividing by the domain width, and the values inside that domain are finite by construction —
@@ -138,11 +145,11 @@ the obvious wrapper is wrong for this model: a `@JvmInline value class` element 
 boxed on JVM, Native and JS, so a ten-million-point chart would allocate ten million boxes and every
 arithmetic site would pay to unbox. Finiteness is therefore a property of construction — the only way
 into the model is through this page's checks — and the invariant is pinned by
-`RenderModelFactoryTest` rather than by throwing.
+`MultiChartDataTest` rather than by throwing.
 
 ## Tests
 
 `DataValidationTest` in `charts-core` covers every function and the message text. Each chart's
-tests check that its errors are shown for invalid input. `RenderModelFactoryTest` covers the model
-the checks make possible: each label strategy, the stacked-bar transpose, and that `errorsFor`
-rejects the data the factory assumes away.
+tests check that its errors are shown for invalid input. `MultiChartDataTest` covers the model the
+checks make possible: that it holds the caller's own series and categories, the stacked-bar transpose,
+and that `errorsFor` rejects the data the model assumes.

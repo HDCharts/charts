@@ -90,7 +90,7 @@ internal fun StackedBarChartImpl(
     onValueChanged: (Int) -> Unit = {},
 ) {
     val isPreview = LocalInspectionMode.current
-    val sourceDataSize = data.items.size
+    val sourceDataSize = data.series.size
     BoxWithConstraints(modifier = fillMaxSizeChartModifier(style.chartContainerStyle)) {
         val density = LocalDensity.current
         val spacingPx = with(density) { style.layout.space.toPx() }
@@ -139,7 +139,7 @@ internal fun StackedBarChartImpl(
                 }
             }
         val renderData = renderDataBundle.data
-        val renderDataSize = renderData.items.size
+        val renderDataSize = renderData.series.size
         val targetNormalized =
             remember(renderData) {
                 renderData.normalizeStackedValues()
@@ -150,7 +150,7 @@ internal fun StackedBarChartImpl(
             }
         val animatedValues =
             remember(renderDataSize, isPreview, animateOnStart) {
-                renderData.items.mapIndexed { index, _ ->
+                renderData.series.mapIndexed { index, _ ->
                     Animatable(initialValues?.getOrNull(index) ?: 0f)
                 }
             }
@@ -179,7 +179,7 @@ internal fun StackedBarChartImpl(
             )
 
         LaunchedEffect(targetNormalized) {
-            if (renderData.items.isEmpty()) return@LaunchedEffect
+            if (renderData.series.isEmpty()) return@LaunchedEffect
             coroutineScope {
                 animatedValues.forEachIndexed { index, animatable ->
                     val target = targetNormalized.getOrNull(index) ?: 0f
@@ -321,8 +321,8 @@ private fun StackedBarChartContent(
 ) {
     val xLabels = style.axis.xLabels
     val yLabels = style.axis.yLabels
-    val dataSize = data.items.size
-    val labels = remember(data) { data.items.map { item -> item.label } }
+    val dataSize = data.series.size
+    val labels = remember(data) { data.series.map { item -> item.name.orEmpty() } }
     val currentToggleSelection by rememberUpdatedState(onToggleSelection)
     val currentSelectIndex by rememberUpdatedState(onSelectIndex)
     val currentClearSelection by rememberUpdatedState(onClearSelection)
@@ -563,21 +563,21 @@ private fun DrawScope.drawStackedBars(
     spacingPx: Float,
     visibleRange: IntRange,
 ) {
-    if (barWidthPx <= 0f || data.items.isEmpty()) return
+    if (barWidthPx <= 0f || data.series.isEmpty()) return
     val indices =
         when {
-            visibleRange.isEmpty() -> 0 until data.items.size
+            visibleRange.isEmpty() -> 0 until data.series.size
             else -> visibleRange
         }
-    val showSelection = style.selection.visible && selectedIndex in data.items.indices
+    val showSelection = style.selection.visible && selectedIndex in data.series.indices
     var selectedMark: ClosedFloatingPointRange<Float>? = null
     for (index in indices) {
-        val item = data.items.getOrNull(index) ?: continue
+        val bar = data.series[index]
         val isSelected = showSelection && index == selectedIndex
         var topOffset = size.height
         val left = index * (barWidthPx + spacingPx)
-        val barTotal = item.item.points.sum()
-        item.item.points.forEachIndexed { dataIndex, value ->
+        val barTotal = bar.values.sum()
+        bar.values.forEachIndexed { dataIndex, value ->
             val segmentShare =
                 when {
                     barTotal == 0.0 -> 0f
