@@ -2,76 +2,38 @@ package io.github.hdcharts.core.internal.model
 
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
-import kotlin.jvm.JvmName
-import kotlin.math.abs
-import kotlin.math.roundToInt
 
-// Avoid displaying "-0.0" for tiny values after rounding to two decimals.
-private const val NEAR_ZERO_DISPLAY_EPSILON = 0.005
-
-class ChartData(
-    data: List<Pair<String, Double>>,
+/**
+ * One series of labels and values, stored as the two columns every reader wants.
+ *
+ * Drawing reads one column at a time, so labels and points are kept side by side rather than as
+ * label/value pairs: a stored pair list would be a third copy of every point that nothing reads.
+ *
+ * A data class so two models built from equal values are equal. The chart entry seam builds a new
+ * model on every data change, so identity equality made every `remember` keyed on a model miss.
+ *
+ * Labels and points are expected to have the same count. A point without a label reads as blank,
+ * which is what an unlabelled point draws as.
+ */
+data class ChartData(
+    val labels: ImmutableList<String>,
+    val points: ImmutableList<Double>,
 ) {
-    val data: ImmutableList<Pair<String, Double>> = data.toImmutableList()
-    val labels: ImmutableList<String> = this.data.map { it.first }.toImmutableList()
-    val points: ImmutableList<Double> = this.data.map { it.second }.toImmutableList()
+    constructor(
+        labels: List<String>,
+        points: List<Double>,
+    ) : this(
+        labels = labels.toImmutableList(),
+        points = points.toImmutableList(),
+    )
 }
 
-private fun parseStringToDouble(value: String): Double = value.toDoubleOrNull() ?: Double.NaN
-
-private fun formatNumericLabel(value: Double): String {
-    val rounded = ((value * 100.0).roundToInt()) / 100.0
-    val normalized = if (abs(rounded) < NEAR_ZERO_DISPLAY_EPSILON) 0.0 else rounded
-    return normalized.toString()
-}
-
-@JvmName("toDoubleChartData")
-fun List<Double>.toChartData(
-    prefix: String = "",
-    postfix: String = "",
-    labels: List<String>? = null,
-): ChartData =
+/**
+ * Pairs these values with [labels], one label per point. A point past the end of [labels] gets a
+ * blank label, and labels beyond the last point are dropped.
+ */
+fun List<Double>.toChartData(labels: List<String> = emptyList()): ChartData =
     ChartData(
-        this.mapIndexed { index, it ->
-            (if (!labels.isNullOrEmpty()) labels[index] else "${prefix}${formatNumericLabel(it)}$postfix") to it
-        },
-    )
-
-@JvmName("toFloatChartData")
-fun List<Float>.toChartData(
-    prefix: String = "",
-    postfix: String = "",
-    labels: List<String>? = null,
-): ChartData =
-    ChartData(
-        this.mapIndexed { index, it ->
-            (
-                if (!labels.isNullOrEmpty()) labels[index] else "${prefix}${formatNumericLabel(it.toDouble())}$postfix"
-            ) to it.toDouble()
-        },
-    )
-
-@JvmName("toStringChartData")
-fun List<String>.toChartData(
-    prefix: String = "",
-    postfix: String = "",
-    labels: List<String>? = null,
-): ChartData =
-    ChartData(
-        this.mapIndexed { index, value ->
-            val label = if (!labels.isNullOrEmpty()) labels[index] else "${prefix}${value}$postfix"
-            label to parseStringToDouble(value)
-        },
-    )
-
-@JvmName("toIntChartData")
-fun List<Int>.toChartData(
-    prefix: String = "",
-    postfix: String = "",
-    labels: List<String>? = null,
-): ChartData =
-    ChartData(
-        this.mapIndexed { index, it ->
-            (if (!labels.isNullOrEmpty()) labels[index] else "${prefix}${it}$postfix") to it.toDouble()
-        },
+        labels = List(size) { index -> labels.getOrNull(index).orEmpty() },
+        points = this,
     )

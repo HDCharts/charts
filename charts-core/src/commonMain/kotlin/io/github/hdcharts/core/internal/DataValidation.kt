@@ -39,20 +39,27 @@ object ValidationErrors {
 
     fun negativeValue(index: Int): String = "Value at index $index is negative."
 
+    fun missingAxisLabels(): String = "Axis label styles are missing."
+
     fun nonFiniteRange(): String = "Range bounds must be finite."
 }
 
 /**
  * Returns the errors of charts that draw aligned series: no series, fewer than [minValues] values, a
  * category count that does not match, misaligned series, non-finite values, and [colorCount] colors
- * that do not match the series count. With [allowNegative] set to `false`, negative values are errors.
+ * that do not match [expectedColors]. With [allowNegative] set to `false`, negative values are
+ * errors.
+ *
+ * [expectedColors] is null when the chart's policy skips the color check, which is how a chart whose
+ * color count depends on the data says so.
  */
 @InternalChartsApi
 fun validateSeries(
     data: ChartData,
     minValues: Int,
-    allowNegative: Boolean = true,
-    colorCount: Int = 0,
+    allowNegative: Boolean,
+    colorCount: Int,
+    expectedColors: Int?,
 ): List<String> {
     if (data.series.isEmpty()) return listOf(ValidationErrors.noSeries())
     val errors = mutableListOf<String>()
@@ -71,24 +78,26 @@ fun validateSeries(
             errors += ValidationErrors.negativeSeriesValue(series = index)
         }
     }
-    errors += validateColorCount(colors = colorCount, expected = data.series.size, target = "series")
+    errors += validateColorCount(colors = colorCount, expected = expectedColors, target = "series")
     return errors
 }
 
 /**
- * Returns the errors of charts that draw one series: not exactly one series, too few values, [colorCount]
- * colors that do not match the value count, a category count that does not match, and each bad value.
+ * Returns the errors of charts that draw one series: not exactly one series, fewer than [minValues]
+ * values, [colorCount] colors that do not match the value count, a category count that does not
+ * match, and each bad value. With [allowNegative] set to `false`, negative values are errors.
  */
 @InternalChartsApi
 fun validateSingleSeries(
     data: ChartData,
-    colorCount: Int = 0,
-    allowNegative: Boolean = true,
+    minValues: Int,
+    allowNegative: Boolean,
+    colorCount: Int,
 ): List<String> {
     if (data.series.size != 1) return listOf(ValidationErrors.exactlyOneSeries(count = data.series.size))
     val values = data.series.single().values
-    if (values.size < ValidationErrors.MIN_VALUES) {
-        return listOf(ValidationErrors.tooFewValues(min = ValidationErrors.MIN_VALUES))
+    if (values.size < minValues) {
+        return listOf(ValidationErrors.tooFewValues(min = minValues))
     }
     val errors = validateColorCount(colors = colorCount, expected = values.size, target = "value").toMutableList()
     if (data.categories.isNotEmpty() && data.categories.size != values.size) {
@@ -102,7 +111,7 @@ fun validateSingleSeries(
 @InternalChartsApi
 fun validateValues(
     values: List<Double>,
-    allowNegative: Boolean = true,
+    allowNegative: Boolean,
 ): List<String> =
     values.mapIndexedNotNull { index, value ->
         when {
@@ -112,14 +121,18 @@ fun validateValues(
         }
     }
 
-/** Returns an error when [colors] is set and does not match [expected]; [target] names what they color. */
+/**
+ * Returns an error when [colors] is set and does not match [expected]; [target] names what they
+ * color. A null [expected] is a chart that skips the check, and [colors] of zero is a style that sets
+ * none.
+ */
 @InternalChartsApi
 fun validateColorCount(
     colors: Int,
-    expected: Int,
+    expected: Int?,
     target: String,
 ): List<String> =
-    if (colors > 0 && colors != expected) {
+    if (expected != null && colors > 0 && colors != expected) {
         listOf(ValidationErrors.colorCountMismatch(colors = colors, expected = expected, target = target))
     } else {
         emptyList()

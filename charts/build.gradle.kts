@@ -65,6 +65,10 @@ kotlin {
             api(projects.chartsRadar)
         }
 
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+        }
+
         androidMain.dependencies {
             implementation(libs.compose.ui.tooling.preview)
             implementation(libs.compose.ui.tooling)

@@ -74,11 +74,10 @@ data class ChartSeries(
 fun List<Double>.toChartData(
     categories: List<String> = emptyList(),
     seriesName: String? = null,
-): ChartData =
-    ChartData(
-        categories = categories,
-        series = listOf(ChartSeries(name = seriesName, values = this)),
-    )
+) = ChartData(
+    categories = categories,
+    series = listOf(ChartSeries(name = seriesName, values = this)),
+)
 
 /**
  * Builds multi-series [ChartData] from a list of named series.
@@ -102,8 +101,7 @@ fun List<Pair<String, List<Double>>>.toChartData(categories: List<String> = empt
 fun chartDataOf(
     categories: List<String> = emptyList(),
     vararg series: ChartSeries,
-): ChartData =
-    ChartData(
-        categories = categories,
-        series = series.toList(),
-    )
+) = ChartData(
+    categories = categories,
+    series = series.toList(),
+)

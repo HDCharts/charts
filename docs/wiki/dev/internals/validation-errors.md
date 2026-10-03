@@ -8,6 +8,36 @@ order: 6
 A chart shows a validation error instead of drawing when its input has no correct fallback. The
 chart draws the errors as text in its container with `ChartErrors`, one error per line.
 
+## The rule
+
+**Styles are clamped, data is reported. Neither ever throws.**
+
+The two halves are deliberately different, because a wrong style value and a wrong data value are
+different mistakes:
+
+| | Out of range | Not finite | Effect |
+| --- | --- | --- | --- |
+| Style | Clamped to the nearest drawable value | Falls back to that value's `StyleDefaults` default | Drawn |
+| Data | Reported, if the chart cannot draw it | Reported | Nothing drawn |
+
+A style has an obvious correct answer — a negative bar spacing means zero spacing — so correcting it
+draws the chart the user meant. Data has no such answer: a `NaN` in a series is not a number to
+approximate, and drawing the other points as though it were fine would be a lie. So the chart says
+what is wrong and draws nothing.
+
+Three consequences worth stating, because each has been got wrong:
+
+- **A malformed value becomes a message, not an exception.** The checks below cover every value that
+  reaches them, so malformed input is reported rather than thrown. A `require` in the library is only
+  for a programmer's own argument — a formatter precision, a selection delay — never for chart data.
+- **A check reports everything it can.** `errorsFor` collects every enabled error and the container
+  lists them all. The one exception is a shape error that makes the rest unreadable: with no series
+  there is nothing to iterate, and a single-series chart stops at its first shape problem.
+- **Nothing downstream re-checks.** Validation runs once, at the entry seam. Conversion and drawing
+  take a validated model and may assume it: at least one series, the same number of points in each,
+  every value finite, and a label or a blank for every index. That is a precondition of the model,
+  not a check each stage repeats — and it is pinned by tests rather than by throwing.
+
 ## What is an error
 
 - **Data problems:** too few values, series of different lengths, values that are not finite, and
@@ -45,45 +75,74 @@ it per value, with its index.
 
 ## Where it happens
 
-All checks live in `DataValidation.kt` in `charts-core`. Charts have no validation code of their
-own; each chart combines these functions where it validates its input:
+All checks live in `DataValidation.kt` in `charts-core`. A chart writes no check and no message text
+of its own: it declares which checks apply in its `ChartSpec` and lets `ChartEntry` combine them.
+Every chart except pie is on the seam. The declaration and the per-chart table are on Entry Seam and
+Chart Policy.
 
 | Function | Checks | Charts |
 | --- | --- | --- |
 | `validateSeries` | No series, too few values, category count, series length, non-finite values, negative values with `allowNegative = false`, and the series color count | Line, radar, stacked bar, stacked area |
 | `validateSingleSeries` | One series, too few values, color count, category count, and each bad value | Bar, histogram |
 | `validateValues` | Each non-finite value, and each negative value with `allowNegative = false` | Pie, and inside `validateSingleSeries` |
-| `validateColorCount` | A color list that does not match what it colors | Inside the two series checks |
+| `validateColorCount` | A color list that does not match what it colors. A null expectation skips the check, and so does a style that sets no colors | Inside the two series checks |
 | `validateRange` | Non-finite range bounds | Bar, histogram, line |
 
 Axis label settings are checked by `validateAxisLabels` in `AxisLabelValidation.kt`.
 
-For example, stacked bar validates its input with:
-
-```kotlin
-validateSeries(
-    data = data,
-    minValues = ValidationErrors.MIN_VALUES,
-    allowNegative = false,
-    colorCount = style.segments.colors.size,
-) + validateAxisLabels(style.axis.xLabels, style.axis.yLabels, density)
-```
-
-Line keeps this combination in `validateLineInput` in `LineChartEntry.kt`, because `LineChart` and
-`LiveLineChart` share it.
+The seam composes the enabled checks in one order — data shape, then range, then axis labels — so two
+charts with the same policy report the same problems in the same sequence. `ChartPolicy.errorsFor` is
+the only caller of the four functions above, and Entry Seam and Chart Policy has which checks each
+chart enables.
 
 The minimums are `ValidationErrors.MIN_VALUES` (2) and `ValidationErrors.MIN_RADAR_VALUES` (3).
 With no series, `validateSeries` reports only that error, and `validateSingleSeries` stops at the
 first shape problem.
 
+`validateSeries` takes the expected color count as `expectedColors`, read from the data by the
+policy. A chart whose count depends on the data states the rule rather than a constant, which is
+what radar does.
+
 ## Adding a rule
 
 - Add the message to `ValidationErrors` and the check to `DataValidation.kt`. Do not write message
-  text or checks in a chart.
+  text or checks in a chart, and give no check parameter a default.
 - If the rule applies to more than one chart, add it to the function those charts already call.
 - Keep messages short, name the value or series, and say what is expected.
+- A rule belongs here, in the path that reports, rather than as an assertion further down. An
+  assertion in the conversion would fire on the same data and crash instead of drawing the message.
+
+## Internal model types
+
+Everything below the seam reads the render model the checks make possible, and trusts it. Three
+constraints on that model:
+
+**A value that is required is not optional, and optionality is explicit.** `MultiChartData` carries
+`title: String` and `ChartDataItem` carries `label: String`, where an absent title or an unnamed
+series is written as `""`. That makes "no label" indistinguishable from a blank one, and the cost
+shows up where a stage has to repair it: stacked bar's compaction invents `"Bucket ${bucketIndex + 1}"`
+for a blank category label, duplicating the fallback `resolveAxisLabel` already owns. Making the
+label nullable would let the renderer decide the text — one fallback, in one place. `ChartDataItem`
+is an internal type, so that costs no public API.
+
+**Not every guard below the seam is redundant.** `normalizeValue` ends with `.coerceIn(0f, 1f)`
+after dividing by the domain width, and the values inside that domain are finite by construction —
+yet line resolves its domain from the caller's `style.range`, so a caller who sets a maximum below
+their highest value gets a domain that clips the data. The clamp is what stops the line drawing
+outside the plot. The same reasoning keeps every zoom, reveal-progress and canvas-bounds clamp: a
+zero-size canvas and a mid-animation frame are real states, not bad data. A guard below the seam is
+worth classifying before it is removed — viewport, caller-chosen range, or data.
+
+**A numeric payload cannot be given a NaN-free type cheaply.** Kotlin has no NaN-free `Double`, and
+the obvious wrapper is wrong for this model: a `@JvmInline value class` element inside a `List` is
+boxed on JVM, Native and JS, so a ten-million-point chart would allocate ten million boxes and every
+arithmetic site would pay to unbox. Finiteness is therefore a property of construction — the only way
+into the model is through this page's checks — and the invariant is pinned by
+`RenderModelFactoryTest` rather than by throwing.
 
 ## Tests
 
 `DataValidationTest` in `charts-core` covers every function and the message text. Each chart's
-tests check that its errors are shown for invalid input.
+tests check that its errors are shown for invalid input. `RenderModelFactoryTest` covers the model
+the checks make possible: each label strategy, the stacked-bar transpose, and that `errorsFor`
+rejects the data the factory assumes away.

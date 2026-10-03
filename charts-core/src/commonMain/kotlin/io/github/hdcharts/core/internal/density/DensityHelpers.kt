@@ -80,17 +80,6 @@ fun aggregatePointsByAverage(
 }
 
 @InternalChartsApi
-fun aggregateLabelsByLastValue(
-    sourceLabels: List<String>,
-    bucketRanges: List<IntRange>,
-): List<String> {
-    if (bucketRanges.isEmpty()) return emptyList()
-    return bucketRanges.mapIndexed { bucketIndex, range ->
-        sourceLabels.getOrNull(range.last) ?: "Bucket ${bucketIndex + 1}"
-    }
-}
-
-@InternalChartsApi
 fun aggregateLabelsByCenterValue(
     sourceLabels: List<String>,
     bucketRanges: List<IntRange>,

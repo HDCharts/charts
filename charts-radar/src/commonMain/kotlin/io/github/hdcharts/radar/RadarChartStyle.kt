@@ -23,7 +23,19 @@ data class RadarGridStyle(
     val color: Color,
     val lineWidth: Dp,
     val steps: Int,
-)
+) {
+    /**
+     * Returns this block with [lineWidth] and [steps] clamped. Names every field instead of using
+     * `copy`, so a field added to the constructor fails to compile here until it is dealt with.
+     */
+    internal fun clamp(density: Density) =
+        RadarGridStyle(
+            visible = visible,
+            color = color,
+            lineWidth = lineWidth.clampSize(fallback = StyleDefaults.lineWidth, density = density),
+            steps = steps.clampGridSteps(),
+        )
+}
 
 @Immutable
 data class RadarAxesStyle(
@@ -34,7 +46,23 @@ data class RadarAxesStyle(
     val labelSize: TextUnit,
     val labelPadding: Dp,
     val labelVisible: Boolean,
-)
+) {
+    /**
+     * Returns this block with [lineWidth], [labelSize] and [labelPadding] clamped. Names every field
+     * instead of using `copy`, so a field added to the constructor fails to compile here until it is
+     * dealt with.
+     */
+    internal fun clamp(density: Density) =
+        RadarAxesStyle(
+            visible = visible,
+            lineColor = lineColor,
+            lineWidth = lineWidth.clampSize(fallback = StyleDefaults.lineWidth, density = density),
+            labelColor = labelColor,
+            labelSize = labelSize.clampTextSize(fallback = StyleDefaults.axisLabelSize, density = density),
+            labelPadding = labelPadding.clampSize(fallback = StyleDefaults.axisLabelPadding, density = density),
+            labelVisible = labelVisible,
+        )
+}
 
 @Immutable
 data class RadarPolygonStyle(
@@ -71,6 +99,19 @@ data class RadarPolygonStyle(
             count = seriesCount,
             singleItemUsesBase = true,
         )
+
+    /**
+     * Returns this block with [fillAlpha] and [lineWidth] clamped. Names every field instead of using
+     * `copy`, so a field added to the constructor fails to compile here until it is dealt with.
+     */
+    internal fun clamp(density: Density) =
+        RadarPolygonStyle(
+            fillVisible = fillVisible,
+            fillAlpha = fillAlpha.clampAlpha(),
+            lineColor = lineColor,
+            lineColors = lineColors,
+            lineWidth = lineWidth.clampSize(fallback = StyleDefaults.seriesLineWidth, density = density),
+        )
 }
 
 @Immutable
@@ -79,7 +120,19 @@ data class RadarPointStyle(
     val color: Color,
     val colorSameAsLine: Boolean,
     val size: Dp,
-)
+) {
+    /**
+     * Returns this block with [size] clamped. Names every field instead of using `copy`, so a field
+     * added to the constructor fails to compile here until it is dealt with.
+     */
+    internal fun clamp(density: Density) =
+        RadarPointStyle(
+            visible = visible,
+            color = color,
+            colorSameAsLine = colorSameAsLine,
+            size = size.clampSize(fallback = StyleDefaults.pointSize, density = density),
+        )
+}
 
 /**
  * Selection indicator configuration for radar charts.
@@ -102,7 +155,19 @@ data class RadarSelectionStyle(
     val pointSize: Dp,
     val unselectedAlpha: Float,
     val unfocusedSeriesAlpha: Float,
-)
+) {
+    /**
+     * Returns this block with [pointSize] and both alphas clamped. Names every field instead of using
+     * `copy`, so a field added to the constructor fails to compile here until it is dealt with.
+     */
+    internal fun clamp(density: Density) =
+        RadarSelectionStyle(
+            visible = visible,
+            pointSize = pointSize.clampSize(fallback = StyleDefaults.selectedPointSize, density = density),
+            unselectedAlpha = unselectedAlpha.clampAlpha(),
+            unfocusedSeriesAlpha = unfocusedSeriesAlpha.clampAlpha(),
+        )
+}
 
 @Immutable
 class RadarChartStyle(
@@ -124,15 +189,14 @@ object RadarChartDefaults {
         polygon: RadarPolygonStyle = polygon(),
         points: RadarPointStyle = points(),
         selection: RadarSelectionStyle = selection(),
-    ): RadarChartStyle =
-        RadarChartStyle(
-            chartContainerStyle = chartContainerStyle,
-            grid = grid,
-            axes = axes,
-            polygon = polygon,
-            points = points,
-            selection = selection,
-        )
+    ) = RadarChartStyle(
+        chartContainerStyle = chartContainerStyle,
+        grid = grid,
+        axes = axes,
+        polygon = polygon,
+        points = points,
+        selection = selection,
+    )
 
     /** Returns a [RadarGridStyle] for the grid rings. */
     @Composable
@@ -153,16 +217,15 @@ object RadarChartDefaults {
         labelSize: TextUnit = StyleDefaults.axisLabelSize,
         labelPadding: Dp = StyleDefaults.axisLabelPadding,
         labelVisible: Boolean = StyleDefaults.radarAxisLabelsVisible,
-    ): RadarAxesStyle =
-        RadarAxesStyle(
-            visible = visible,
-            lineColor = lineColor,
-            lineWidth = lineWidth,
-            labelColor = labelColor,
-            labelSize = labelSize,
-            labelPadding = labelPadding,
-            labelVisible = labelVisible,
-        )
+    ) = RadarAxesStyle(
+        visible = visible,
+        lineColor = lineColor,
+        lineWidth = lineWidth,
+        labelColor = labelColor,
+        labelSize = labelSize,
+        labelPadding = labelPadding,
+        labelVisible = labelVisible,
+    )
 
     /** Returns a [RadarPolygonStyle] for the series polygons. */
     @Composable
@@ -172,14 +235,13 @@ object RadarChartDefaults {
         lineColor: Color = StyleDefaults.seriesColor,
         lineColors: List<Color> = emptyList(),
         lineWidth: Dp = StyleDefaults.seriesLineWidth,
-    ): RadarPolygonStyle =
-        RadarPolygonStyle(
-            fillVisible = fillVisible,
-            fillAlpha = fillAlpha,
-            lineColor = lineColor,
-            lineColors = lineColors,
-            lineWidth = lineWidth,
-        )
+    ) = RadarPolygonStyle(
+        fillVisible = fillVisible,
+        fillAlpha = fillAlpha,
+        lineColor = lineColor,
+        lineColors = lineColors,
+        lineWidth = lineWidth,
+    )
 
     /** Returns a [RadarPointStyle] for the data points. */
     @Composable
@@ -188,13 +250,12 @@ object RadarChartDefaults {
         color: Color = StyleDefaults.pointColor,
         colorSameAsLine: Boolean = true,
         size: Dp = StyleDefaults.pointSize,
-    ): RadarPointStyle =
-        RadarPointStyle(
-            visible = visible,
-            color = color,
-            colorSameAsLine = colorSameAsLine,
-            size = size,
-        )
+    ) = RadarPointStyle(
+        visible = visible,
+        color = color,
+        colorSameAsLine = colorSameAsLine,
+        size = size,
+    )
 
     /** Returns a [RadarSelectionStyle] for axis selection and series focus. */
     @Composable
@@ -203,46 +264,21 @@ object RadarChartDefaults {
         pointSize: Dp = StyleDefaults.selectedPointSize,
         unselectedAlpha: Float = StyleDefaults.unselectedAlpha,
         unfocusedSeriesAlpha: Float = StyleDefaults.radarUnfocusedSeriesAlpha,
-    ): RadarSelectionStyle =
-        RadarSelectionStyle(
-            visible = visible,
-            pointSize = pointSize,
-            unselectedAlpha = unselectedAlpha,
-            unfocusedSeriesAlpha = unfocusedSeriesAlpha,
-        )
+    ) = RadarSelectionStyle(
+        visible = visible,
+        pointSize = pointSize,
+        unselectedAlpha = unselectedAlpha,
+        unfocusedSeriesAlpha = unfocusedSeriesAlpha,
+    )
 }
 
 /** Returns [this] with alphas, sizes, and grid steps clamped to drawable values. */
-internal fun RadarChartStyle.clamped(density: Density): RadarChartStyle =
+internal fun RadarChartStyle.clamp(density: Density) =
     RadarChartStyle(
         chartContainerStyle = chartContainerStyle,
-        grid =
-            grid.copy(
-                lineWidth = grid.lineWidth.clampSize(fallback = StyleDefaults.lineWidth, density = density),
-                steps = grid.steps.clampGridSteps(),
-            ),
-        axes =
-            axes.copy(
-                lineWidth = axes.lineWidth.clampSize(fallback = StyleDefaults.lineWidth, density = density),
-                labelSize = axes.labelSize.clampTextSize(fallback = StyleDefaults.axisLabelSize, density = density),
-                labelPadding =
-                    axes.labelPadding.clampSize(
-                        fallback = StyleDefaults.axisLabelPadding,
-                        density = density,
-                    ),
-            ),
-        polygon =
-            polygon.copy(
-                fillAlpha = polygon.fillAlpha.clampAlpha(),
-                lineWidth = polygon.lineWidth.clampSize(fallback = StyleDefaults.seriesLineWidth, density = density),
-            ),
-        points = points.copy(size = points.size.clampSize(fallback = StyleDefaults.pointSize, density = density)),
-        selection =
-            selection.copy(
-                pointSize =
-                    selection.pointSize.clampSize(fallback = StyleDefaults.selectedPointSize, density = density),
-                unselectedAlpha = selection.unselectedAlpha.clampAlpha(),
-                unfocusedSeriesAlpha =
-                    selection.unfocusedSeriesAlpha.clampAlpha(),
-            ),
+        grid = grid.clamp(density),
+        axes = axes.clamp(density),
+        polygon = polygon.clamp(density),
+        points = points.clamp(density),
+        selection = selection.clamp(density),
     )

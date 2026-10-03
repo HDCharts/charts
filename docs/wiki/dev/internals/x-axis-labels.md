@@ -39,6 +39,11 @@ remembered apart from the scroll position, so scrolling reuses it and labels sta
 `planAxisXLabels` puts labels on one grid: every `step`-th item, counted from item 0. Labels are
 always evenly spaced, and in dense mode they stay on the same items while the chart scrolls.
 
+A label comes from the render model's own labels for that index. `resolveAxisLabel` is the single
+place that turns a missing or blank label into text, and it falls back to the **1-based item number** —
+item 0 draws "1". There is no second fallback: `MultiChartData.getLabel`, which used to return
+`"Missing Label 3"`, had no callers and was removed.
+
 `planAxisXLabelStride` picks the step. It starts from the densest grid that keeps labels at least
 the [minimum spacing](#minimum-spacing) apart and shows at most `AxisLabelStyle.maxCount` labels.
 By default `maxCount` is null, so the grid is as dense as the spacing allows and wider charts show

@@ -93,7 +93,7 @@ fun PieChart(
                 validateValues(values = data.map { it.value }, allowNegative = false)
             }
         }
-    val drawStyle = remember(style, density) { style.clamped(density) }
+    val drawStyle = remember(style, density) { style.clamp(density) }
 
     if (validationErrors.isNotEmpty()) {
         ChartErrors(
@@ -236,10 +236,8 @@ private fun toInternalChartData(
     points: ImmutableList<Double>,
 ): io.github.hdcharts.core.internal.model.ChartData =
     io.github.hdcharts.core.internal.model.ChartData(
-        data =
-            points.mapIndexed { index, value ->
-                labels.getOrElse(index) { index.toString() } to value
-            },
+        labels = List(points.size) { index -> labels.getOrNull(index) ?: index.toString() },
+        points = points,
     )
 
 private fun selectedPercentageStyle(base: TextStyle): TextStyle =

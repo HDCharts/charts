@@ -18,7 +18,15 @@ class DataValidationTest {
                 ChartSeries(name = "Two", values = listOf(3.0, 4.0)),
             )
 
-        assertTrue(validateSeries(data = data, minValues = ValidationErrors.MIN_VALUES).isEmpty())
+        assertTrue(
+            validateSeries(
+                data = data,
+                minValues = ValidationErrors.MIN_VALUES,
+                allowNegative = true,
+                colorCount = 0,
+                expectedColors = null,
+            ).isEmpty(),
+        )
     }
 
     @Test
@@ -27,7 +35,14 @@ class DataValidationTest {
 
         assertEquals(
             expected = listOf("At least one series is required."),
-            actual = validateSeries(data = data, minValues = ValidationErrors.MIN_VALUES),
+            actual =
+                validateSeries(
+                    data = data,
+                    minValues = ValidationErrors.MIN_VALUES,
+                    allowNegative = true,
+                    colorCount = 0,
+                    expectedColors = null,
+                ),
         )
     }
 
@@ -49,15 +64,30 @@ class DataValidationTest {
                     "Series 1 contains a non-finite value.",
                     "Series 1 contains a negative value.",
                 ),
-            actual = validateSeries(data = data, minValues = ValidationErrors.MIN_VALUES, allowNegative = false),
+            actual =
+                validateSeries(
+                    data = data,
+                    minValues = ValidationErrors.MIN_VALUES,
+                    allowNegative = false,
+                    colorCount = 0,
+                    expectedColors = null,
+                ),
         )
     }
 
     @Test
-    fun validateSeries_allowsNegativeValuesByDefault() {
+    fun validateSeries_allowsNegativeValuesWhenTheyAreAllowed() {
         val data = chartDataOf(categories = emptyList(), ChartSeries(name = "One", values = listOf(-1.0, 2.0)))
 
-        assertTrue(validateSeries(data = data, minValues = ValidationErrors.MIN_VALUES).isEmpty())
+        assertTrue(
+            validateSeries(
+                data = data,
+                minValues = ValidationErrors.MIN_VALUES,
+                allowNegative = true,
+                colorCount = 0,
+                expectedColors = null,
+            ).isEmpty(),
+        )
     }
 
     @Test
@@ -82,7 +112,35 @@ class DataValidationTest {
 
         assertEquals(
             expected = listOf("Color count (3) must match series count (2)."),
-            actual = validateSeries(data = data, minValues = ValidationErrors.MIN_VALUES, colorCount = 3),
+            actual =
+                validateSeries(
+                    data = data,
+                    minValues = ValidationErrors.MIN_VALUES,
+                    allowNegative = true,
+                    colorCount = 3,
+                    expectedColors = 2,
+                ),
+        )
+    }
+
+    /** A null expectation is how a chart whose color count depends on the data skips the check. */
+    @Test
+    fun validateSeries_withANullColorExpectation_skipsTheColorCheck() {
+        val data =
+            chartDataOf(
+                categories = emptyList(),
+                ChartSeries(name = "One", values = listOf(1.0, 2.0)),
+                ChartSeries(name = "Two", values = listOf(3.0, 4.0)),
+            )
+
+        assertTrue(
+            validateSeries(
+                data = data,
+                minValues = ValidationErrors.MIN_VALUES,
+                allowNegative = true,
+                colorCount = 7,
+                expectedColors = null,
+            ).isEmpty(),
         )
     }
 
@@ -90,7 +148,13 @@ class DataValidationTest {
     fun validateSingleSeries_reportsShapeProblemsFirstAndAlone() {
         assertEquals(
             expected = listOf("Exactly one series is required; got 0."),
-            actual = validateSingleSeries(data = ChartData()),
+            actual =
+                validateSingleSeries(
+                    data = ChartData(),
+                    minValues = ValidationErrors.MIN_VALUES,
+                    allowNegative = true,
+                    colorCount = 0,
+                ),
         )
         assertEquals(
             expected = listOf("Exactly one series is required; got 2."),
@@ -100,11 +164,20 @@ class DataValidationTest {
                         ChartData(
                             series = listOf(ChartSeries(values = listOf(1.0, 2.0)), ChartSeries(values = listOf(3.0))),
                         ),
+                    minValues = ValidationErrors.MIN_VALUES,
+                    allowNegative = true,
+                    colorCount = 0,
                 ),
         )
         assertEquals(
             expected = listOf("At least 2 values are required."),
-            actual = validateSingleSeries(data = listOf(1.0).toChartData()),
+            actual =
+                validateSingleSeries(
+                    data = listOf(1.0).toChartData(),
+                    minValues = ValidationErrors.MIN_VALUES,
+                    allowNegative = true,
+                    colorCount = 0,
+                ),
         )
     }
 
@@ -120,14 +193,26 @@ class DataValidationTest {
                     "Value at index 1 is not finite.",
                     "Value at index 2 is negative.",
                 ),
-            actual = validateSingleSeries(data = data, colorCount = 2, allowNegative = false),
+            actual =
+                validateSingleSeries(
+                    data = data,
+                    minValues = ValidationErrors.MIN_VALUES,
+                    colorCount = 2,
+                    allowNegative = false,
+                ),
         )
     }
 
     @Test
-    fun validateSingleSeries_acceptsZerosNegativesAndExtremeFiniteValuesByDefault() {
-        assertTrue(validateSingleSeries(data = listOf(0.0, 0.0).toChartData()).isEmpty())
-        assertTrue(validateSingleSeries(data = listOf(-Double.MAX_VALUE, Double.MAX_VALUE).toChartData()).isEmpty())
+    fun validateSingleSeries_acceptsZerosNegativesAndExtremeFiniteValuesWhenNegativesAreAllowed() {
+        assertTrue(
+            validateSingleSeries(
+                data = listOf(-Double.MAX_VALUE, Double.MAX_VALUE).toChartData(),
+                minValues = ValidationErrors.MIN_VALUES,
+                allowNegative = true,
+                colorCount = 0,
+            ).isEmpty(),
+        )
     }
 
     @Test
@@ -146,7 +231,7 @@ class DataValidationTest {
         )
         assertEquals(
             expected = listOf("Value at index 1 is not finite."),
-            actual = validateValues(values = listOf(-1.0, Double.NaN)),
+            actual = validateValues(values = listOf(-1.0, Double.NaN), allowNegative = true),
         )
     }
 

@@ -84,9 +84,8 @@ class StackedAreaDensityTest {
                         label = series.name.orEmpty(),
                         item =
                             io.github.hdcharts.core.internal.model.ChartData(
-                                series.values.mapIndexed { index, value ->
-                                    data.categories.getOrNull(index).orEmpty() to value
-                                },
+                                labels = data.categories,
+                                points = series.values,
                             ),
                     )
                 },

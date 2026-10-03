@@ -294,7 +294,7 @@ class BarStyleDefaultsTest {
             }
             runOnIdle {
                 val density = Density(2f)
-                val clamped = style.clamped(density)
+                val clamped = style.clamp(density)
 
                 assertEquals(expected = with(density) { MAX_SIZE_PX.toDp() }, actual = clamped.bars.space)
                 assertEquals(expected = 0.dp, actual = clamped.bars.minBarWidth)

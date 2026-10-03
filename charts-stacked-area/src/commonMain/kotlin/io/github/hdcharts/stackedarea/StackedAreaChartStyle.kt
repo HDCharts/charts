@@ -54,6 +54,18 @@ data class StackedAreaFillStyle(
             count = seriesCount,
             singleItemUsesBase = true,
         )
+
+    /**
+     * Returns this block with [alpha] clamped. Names every field instead of using `copy`, so a field
+     * added to the constructor fails to compile here until it is dealt with.
+     */
+    internal fun clamp() =
+        StackedAreaFillStyle(
+            color = color,
+            colors = colors,
+            alpha = alpha.clampAlpha(),
+            bezier = bezier,
+        )
 }
 
 @Immutable
@@ -80,7 +92,19 @@ data class StackedAreaSelectionStyle(
     val color: Color,
     val width: Dp,
     val unselectedAlpha: Float,
-)
+) {
+    /**
+     * Returns this block with [width] and [unselectedAlpha] clamped. Names every field instead of
+     * `copy`, so a field added to the constructor fails to compile here until it is dealt with.
+     */
+    internal fun clamp(density: Density) =
+        StackedAreaSelectionStyle(
+            visible = visible,
+            color = color,
+            width = width.clampSize(fallback = StyleDefaults.lineWidth, density = density),
+            unselectedAlpha = unselectedAlpha.clampAlpha(),
+        )
+}
 
 @Immutable
 class StackedAreaChartStyle(
@@ -100,14 +124,13 @@ object StackedAreaChartDefaults {
         axis: StackedAreaAxisStyle = axis(),
         selection: StackedAreaSelectionStyle = selection(),
         zoomControlsVisible: Boolean = true,
-    ): StackedAreaChartStyle =
-        StackedAreaChartStyle(
-            chartContainerStyle = chartContainerStyle,
-            fill = fill,
-            axis = axis,
-            selection = selection,
-            zoomControlsVisible = zoomControlsVisible,
-        )
+    ) = StackedAreaChartStyle(
+        chartContainerStyle = chartContainerStyle,
+        fill = fill,
+        axis = axis,
+        selection = selection,
+        zoomControlsVisible = zoomControlsVisible,
+    )
 
     /** Returns a [StackedAreaFillStyle] for the stacked layers. */
     @Composable
@@ -116,13 +139,12 @@ object StackedAreaChartDefaults {
         colors: List<Color> = emptyList(),
         alpha: Float = StyleDefaults.seriesAlpha,
         bezier: Boolean = false,
-    ): StackedAreaFillStyle =
-        StackedAreaFillStyle(
-            color = color,
-            colors = colors,
-            alpha = alpha,
-            bezier = bezier,
-        )
+    ) = StackedAreaFillStyle(
+        color = color,
+        colors = colors,
+        alpha = alpha,
+        bezier = bezier,
+    )
 
     /** Returns a [StackedAreaAxisStyle] for axis labels. */
     @Composable
@@ -156,25 +178,20 @@ object StackedAreaChartDefaults {
         color: Color = StyleDefaults.selectionColor,
         width: Dp = StyleDefaults.lineWidth,
         unselectedAlpha: Float = StyleDefaults.unselectedAlpha,
-    ): StackedAreaSelectionStyle =
-        StackedAreaSelectionStyle(
-            visible = visible,
-            color = color,
-            width = width,
-            unselectedAlpha = unselectedAlpha,
-        )
+    ) = StackedAreaSelectionStyle(
+        visible = visible,
+        color = color,
+        width = width,
+        unselectedAlpha = unselectedAlpha,
+    )
 }
 
 /** Returns [this] with alphas and sizes clamped to drawable values. */
-internal fun StackedAreaChartStyle.clamped(density: Density): StackedAreaChartStyle =
+internal fun StackedAreaChartStyle.clamp(density: Density) =
     StackedAreaChartStyle(
         chartContainerStyle = chartContainerStyle,
-        fill = fill.copy(alpha = fill.alpha.clampAlpha()),
+        fill = fill.clamp(),
         axis = axis,
-        selection =
-            selection.copy(
-                width = selection.width.clampSize(fallback = StyleDefaults.lineWidth, density = density),
-                unselectedAlpha = selection.unselectedAlpha.clampAlpha(),
-            ),
+        selection = selection.clamp(density),
         zoomControlsVisible = zoomControlsVisible,
     )

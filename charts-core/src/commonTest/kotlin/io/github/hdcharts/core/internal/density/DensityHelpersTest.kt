@@ -4,7 +4,6 @@ import io.github.hdcharts.core.internal.composable.zoomInScale
 import io.github.hdcharts.core.internal.composable.zoomOutScale
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 class DensityHelpersTest {
     @Test
@@ -55,29 +54,15 @@ class DensityHelpersTest {
     }
 
     @Test
-    fun buildBucketRanges_andAggregateHelpers_matchCompactBehavior() {
+    fun buildBucketRanges_andAggregatePoints_matchCompactBehavior() {
         val ranges = buildBucketRanges(totalPoints = 6, bucketSize = 2)
         val aggregatedPoints =
             aggregatePointsByAverage(
                 sourcePoints = listOf(1.0, 3.0, 5.0, 7.0, 9.0, 11.0),
                 bucketRanges = ranges,
             )
-        val aggregatedLabels =
-            aggregateLabelsByLastValue(
-                sourceLabels = listOf("P1", "P2", "P3", "P4", "P5", "P6"),
-                bucketRanges = ranges,
-            )
-
         assertEquals(expected = listOf(0 until 2, 2 until 4, 4 until 6), actual = ranges)
         assertEquals(expected = listOf(2.0, 6.0, 10.0), actual = aggregatedPoints)
-        assertEquals(expected = listOf("P2", "P4", "P6"), actual = aggregatedLabels)
-    }
-
-    @Test
-    fun aggregateLabelsByLastValue_usesBucketFallbackWhenLabelMissing() {
-        val ranges = buildBucketRanges(totalPoints = 4, bucketSize = 2)
-        val labels = aggregateLabelsByLastValue(sourceLabels = listOf("Only"), bucketRanges = ranges)
-        assertTrue(labels[1].startsWith("Bucket "))
     }
 
     @Test

@@ -27,48 +27,6 @@ fun MultiChartData.normalizeByMinMax(
     }
 }
 
-fun ChartData.normalizeBarValues(
-    minValue: Double,
-    maxValue: Double,
-    useFixedRange: Boolean,
-): List<Float> {
-    val rangeValue = maxValue - minValue
-    if (rangeValue == 0.0) {
-        return points.map { value ->
-            when {
-                value > 0.0 -> 1f
-                value < 0.0 -> -1f
-                else -> 0f
-            }
-        }
-    }
-    val allPositive = minValue >= 0.0
-    val allNegative = maxValue <= 0.0
-    return points.map { value ->
-        val clamped = value.coerceIn(minValue, maxValue)
-        when {
-            allPositive ->
-                if (useFixedRange) {
-                    ((clamped - minValue) / rangeValue).toFloat()
-                } else {
-                    (clamped / maxValue).toFloat()
-                }
-            allNegative ->
-                if (useFixedRange) {
-                    ((clamped - maxValue) / rangeValue).toFloat()
-                } else {
-                    (clamped / kotlin.math.abs(minValue)).toFloat()
-                }
-            else -> (clamped / rangeValue).toFloat()
-        }
-    }
-}
-
-fun ChartData.resolveBarRange(
-    minValue: Float?,
-    maxValue: Float?,
-): Pair<Double, Double> = resolveOptionalRange(points.min(), points.max(), minValue?.toDouble(), maxValue?.toDouble())
-
 /**
  * Applies optional [minValue]/[maxValue] overrides to a data-derived domain, independently. A
  * null override falls back to the corresponding data bound. If both bounds are explicit
