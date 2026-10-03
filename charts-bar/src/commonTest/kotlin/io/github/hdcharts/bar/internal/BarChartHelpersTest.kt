@@ -154,7 +154,11 @@ class BarChartHelpersTest {
 
     @Test
     fun compactDensity_capacityOne_aggregatesToOneBucketAndItsCenterSourceIndex() {
-        val data = ChartData(List(10) { index -> "B$index" to (index + 1.0) })
+        val data =
+            ChartData(
+                labels = List(10) { "B$it" },
+                points = List(10) { (it + 1).toDouble() },
+            )
 
         val aggregated = aggregateForCompactDensity(data = data, targetPoints = 1)
         val centers = compactDensityCenterIndices(sourcePointsCount = 10, targetPoints = 1)

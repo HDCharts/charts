@@ -2,7 +2,6 @@ package io.github.hdcharts.bar.internal
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import io.github.hdcharts.core.internal.InternalChartsApi
@@ -14,11 +13,11 @@ import io.github.hdcharts.core.model.rememberSelectionLifecycle
 import io.github.hdcharts.core.style.BarChartStyle
 import io.github.hdcharts.core.internal.model.ChartData as InternalChartData
 
-/** Shared rendering boundary for already validated bar and histogram data. */
+/** Shared rendering boundary for the converted bar and histogram render model. */
 @InternalChartsApi
 @Composable
 fun BarChartInternalPlot(
-    data: ChartData,
+    data: InternalChartData,
     title: String?,
     style: BarChartStyle,
     selection: ChartSelection,
@@ -31,18 +30,10 @@ fun BarChartInternalPlot(
     modifier: Modifier = Modifier,
     chartTag: String? = null,
 ) {
-    val chartData =
-        remember(data) {
-            InternalChartData(
-                data.series.single().values.mapIndexed { index, value ->
-                    data.categories.getOrNull(index).orEmpty() to value
-                },
-            )
-        }
     Box(modifier = modifier) {
         Box(modifier = if (chartTag == null) Modifier else Modifier.testTag(chartTag)) {
             BarChartImpl(
-                chartData = chartData,
+                chartData = data,
                 title = title.orEmpty(),
                 style = style,
                 interactionEnabled = interactionEnabled,

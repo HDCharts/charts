@@ -8,6 +8,7 @@ import io.github.hdcharts.core.internal.density.buildBucketRanges
 import io.github.hdcharts.core.internal.density.shouldUseScrollableDensity
 import io.github.hdcharts.core.internal.model.ChartData
 import io.github.hdcharts.core.internal.model.resolveOptionalRange
+import io.github.hdcharts.core.internal.model.toChartData
 import kotlin.math.abs
 import kotlin.math.max
 
@@ -56,7 +57,7 @@ internal fun aggregateForCompactDensity(
             }
         }
     val aggregatedLabels = aggregateLabelsByCenterValue(data.labels, bucketRanges)
-    return ChartData(aggregatedLabels.zip(aggregatedPoints))
+    return aggregatedPoints.toChartData(labels = aggregatedLabels)
 }
 
 internal fun compactDensityRanges(

@@ -31,7 +31,11 @@ class BarChartScrollFrameTest {
             ImageComposeScene(width = 1000, height = 400, density = Density(1f)) {
                 val animatedValues = remember { List(BAR_COUNT) { Animatable(1f) } }
                 BarChartContent(
-                    chartData = ChartData(List(BAR_COUNT) { index -> "B$index" to 50.0 }),
+                    chartData =
+                        ChartData(
+                            labels = List(BAR_COUNT) { "B$it" },
+                            points = List(BAR_COUNT) { 50.0 },
+                        ),
                     style = BarChartDefaults.style(),
                     interactionEnabled = true,
                     dragSelectionEnabled = false,

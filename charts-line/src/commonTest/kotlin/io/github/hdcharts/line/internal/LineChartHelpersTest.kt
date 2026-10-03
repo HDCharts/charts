@@ -315,7 +315,7 @@ class LineChartHelpersTest {
                     listOf(
                         ChartDataItem(
                             label = "Series",
-                            item = listOf(10f, 20f, 30f).toChartData(labels = listOf("A", "B", "C")),
+                            item = listOf(10.0, 20.0, 30.0).toChartData(labels = listOf("A", "B", "C")),
                         ),
                     ),
                 title = "Single",
@@ -334,11 +334,11 @@ class LineChartHelpersTest {
                     listOf(
                         ChartDataItem(
                             label = "Series 1",
-                            item = listOf(1f, 2f, 3f).toChartData(labels = listOf("v1", "v2", "v3")),
+                            item = listOf(1.0, 2.0, 3.0).toChartData(labels = listOf("v1", "v2", "v3")),
                         ),
                         ChartDataItem(
                             label = "Series 2",
-                            item = listOf(4f, 5f, 6f).toChartData(labels = listOf("w1", "w2", "w3")),
+                            item = listOf(4.0, 5.0, 6.0).toChartData(labels = listOf("w1", "w2", "w3")),
                         ),
                     ),
                 categories = listOf("Jan", "Feb", "Mar"),
@@ -358,11 +358,11 @@ class LineChartHelpersTest {
                     listOf(
                         ChartDataItem(
                             label = "Series 1",
-                            item = listOf(1f, 2f, 3f).toChartData(labels = listOf("v1", "v2", "v3")),
+                            item = listOf(1.0, 2.0, 3.0).toChartData(labels = listOf("v1", "v2", "v3")),
                         ),
                         ChartDataItem(
                             label = "Series 2",
-                            item = listOf(4f, 5f, 6f).toChartData(labels = listOf("w1", "w2", "w3")),
+                            item = listOf(4.0, 5.0, 6.0).toChartData(labels = listOf("w1", "w2", "w3")),
                         ),
                     ),
                 title = "Multi",

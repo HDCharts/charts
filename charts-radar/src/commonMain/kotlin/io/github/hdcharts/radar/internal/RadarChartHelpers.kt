@@ -30,7 +30,7 @@ internal class RadarFrame private constructor(
     fun angleAt(index: Int): Float = startAngle + angleStep * index
 
     companion object {
-        fun of(axisCount: Int): RadarFrame =
+        fun of(axisCount: Int) =
             RadarFrame(
                 axisCount = axisCount.coerceAtLeast(0),
                 startAngle = (-PI / 2f).toFloat(),

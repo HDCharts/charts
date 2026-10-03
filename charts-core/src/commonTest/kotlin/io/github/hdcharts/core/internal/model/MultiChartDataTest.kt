@@ -64,7 +64,35 @@ class MultiChartDataTest {
     }
 
     @Test
-    fun selectionHelpers_preserveSingleAndMultipleSeriesLabelSemantics() {
+    fun getFirstPointsSize_withNoItems_isZeroRatherThanThrowing() {
+        assertEquals(0, data().getFirstPointsSize())
+    }
+
+    @Test
+    fun minMax_withNoItems_isZeroRatherThanThrowing() {
+        assertEquals(0.0 to 0.0, data().minMax())
+    }
+
+    @Test
+    fun minMax_skipsAnEmptySeriesAndBoundsTheRest() {
+        val multiChartData =
+            data(
+                ChartDataItem("Label1", emptyList<Double>().toChartData()),
+                ChartDataItem("Label2", listOf(2.0, 4.0).toChartData()),
+            )
+
+        assertEquals(2.0 to 4.0, multiChartData.minMax())
+    }
+
+    @Test
+    fun minMax_withNoPointsAtAll_isZeroRatherThanThrowing() {
+        val multiChartData = data(ChartDataItem("Label1", emptyList<Double>().toChartData()))
+
+        assertEquals(0.0 to 0.0, multiChartData.minMax())
+    }
+
+    @Test
+    fun selectionHelpers_reportSingleAndMultipleSeriesShape() {
         val single = data(ChartDataItem("Label1", listOf(1.0, 2.0).toChartData()))
         val multiple =
             data(
@@ -74,10 +102,35 @@ class MultiChartDataTest {
             )
 
         assertTrue(single.hasSingleItem())
-        assertEquals("2.0", single.getLabel(1))
+        assertFalse(single.hasCategories())
         assertFalse(multiple.hasSingleItem())
         assertTrue(multiple.hasCategories())
-        assertEquals("Feb", multiple.getLabel(1))
-        assertEquals("Missing Label 3", multiple.getLabel(2))
+    }
+
+    /**
+     * Two models built from equal values are equal, so a `remember` keyed on one does not recompute
+     * when the caller passes freshly allocated but identical data.
+     */
+    @Test
+    fun modelsWithEqualContent_areEqual() {
+        val first =
+            data(
+                ChartDataItem("Label1", listOf(1.0, 2.0).toChartData()),
+                categories = listOf("Jan", "Feb"),
+            )
+        val second =
+            data(
+                ChartDataItem("Label1", listOf(1.0, 2.0).toChartData()),
+                categories = listOf("Jan", "Feb"),
+            )
+        val different =
+            data(
+                ChartDataItem("Label1", listOf(1.0, 9.0).toChartData()),
+                categories = listOf("Jan", "Feb"),
+            )
+
+        assertEquals(expected = first, actual = second)
+        assertEquals(expected = first.hashCode(), actual = second.hashCode())
+        assertFalse(first == different)
     }
 }

@@ -39,13 +39,34 @@ data class StackedBarSegmentStyle(
             count = seriesCount,
             singleItemUsesBase = false,
         )
+
+    /**
+     * Returns this block with [alpha] clamped. Names every field instead of using `copy`, so a field
+     * added to the constructor fails to compile here until it is dealt with.
+     */
+    internal fun clamp() =
+        StackedBarSegmentStyle(
+            color = color,
+            colors = colors,
+            alpha = alpha.clampAlpha(),
+        )
 }
 
 @Immutable
 data class StackedBarLayoutStyle(
     val space: Dp,
     val minBarWidth: Dp,
-)
+) {
+    /**
+     * Returns this block with [space] and [minBarWidth] clamped. Names every field instead of using
+     * `copy`, so a field added to the constructor fails to compile here until it is dealt with.
+     */
+    internal fun clamp(density: Density) =
+        StackedBarLayoutStyle(
+            space = space.clampSize(fallback = StyleDefaults.barSpacing, density = density),
+            minBarWidth = minBarWidth.clampSize(fallback = StyleDefaults.minBarWidth, density = density),
+        )
+}
 
 @Immutable
 data class StackedBarAxisStyle(
@@ -71,7 +92,19 @@ data class StackedBarSelectionStyle(
     val color: Color,
     val width: Dp,
     val unselectedAlpha: Float,
-)
+) {
+    /**
+     * Returns this block with [width] and [unselectedAlpha] clamped. Names every field instead of
+     * using `copy`, so a field added to the constructor fails to compile here until it is dealt with.
+     */
+    internal fun clamp(density: Density) =
+        StackedBarSelectionStyle(
+            visible = visible,
+            color = color,
+            width = width.clampSize(fallback = StyleDefaults.lineWidth, density = density),
+            unselectedAlpha = unselectedAlpha.clampAlpha(),
+        )
+}
 
 @Immutable
 class StackedBarChartStyle(
@@ -93,15 +126,14 @@ object StackedBarChartDefaults {
         axis: StackedBarAxisStyle = axis(),
         selection: StackedBarSelectionStyle = selection(),
         zoomControlsVisible: Boolean = true,
-    ): StackedBarChartStyle =
-        StackedBarChartStyle(
-            chartContainerStyle = chartContainerStyle,
-            segments = segments,
-            layout = layout,
-            axis = axis,
-            selection = selection,
-            zoomControlsVisible = zoomControlsVisible,
-        )
+    ) = StackedBarChartStyle(
+        chartContainerStyle = chartContainerStyle,
+        segments = segments,
+        layout = layout,
+        axis = axis,
+        selection = selection,
+        zoomControlsVisible = zoomControlsVisible,
+    )
 
     /** Returns a [StackedBarSegmentStyle] for the stacked segments. */
     @Composable
@@ -150,30 +182,21 @@ object StackedBarChartDefaults {
         color: Color = StyleDefaults.selectionColor,
         width: Dp = StyleDefaults.lineWidth,
         unselectedAlpha: Float = StyleDefaults.unselectedAlpha,
-    ): StackedBarSelectionStyle =
-        StackedBarSelectionStyle(
-            visible = visible,
-            color = color,
-            width = width,
-            unselectedAlpha = unselectedAlpha,
-        )
+    ) = StackedBarSelectionStyle(
+        visible = visible,
+        color = color,
+        width = width,
+        unselectedAlpha = unselectedAlpha,
+    )
 }
 
 /** Returns [this] with alphas and sizes clamped to drawable values. */
-internal fun StackedBarChartStyle.clamped(density: Density): StackedBarChartStyle =
+internal fun StackedBarChartStyle.clamp(density: Density) =
     StackedBarChartStyle(
         chartContainerStyle = chartContainerStyle,
-        segments = segments.copy(alpha = segments.alpha.clampAlpha()),
-        layout =
-            layout.copy(
-                space = layout.space.clampSize(fallback = StyleDefaults.barSpacing, density = density),
-                minBarWidth = layout.minBarWidth.clampSize(fallback = StyleDefaults.minBarWidth, density = density),
-            ),
+        segments = segments.clamp(),
+        layout = layout.clamp(density),
         axis = axis,
-        selection =
-            selection.copy(
-                width = selection.width.clampSize(fallback = StyleDefaults.lineWidth, density = density),
-                unselectedAlpha = selection.unselectedAlpha.clampAlpha(),
-            ),
+        selection = selection.clamp(density),
         zoomControlsVisible = zoomControlsVisible,
     )

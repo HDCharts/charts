@@ -46,8 +46,8 @@ them should be split.
 | --- | --- | --- | --- |
 | Canvas | `Content` | A canvas and the drawing calls on it | `BarChartContent` |
 | State and interaction | `Impl` | Density mode, zoom, animation values, the header; delegates drawing | `BarChartImpl` |
-| Layout shell | `Frame` | Header, plot, and legend slots only, with no chart state | `LineChartFrame` |
-| Input preparation | `Entry` | Validates, clamps, and converts before handing over to the content | `LineChartEntry` |
+| Layout shell | `Frame` | Chrome slots — header, plot, legend — and no chart state. Not every frame has every slot | `LineChartFrame`, `StackedBarChartFrame` |
+| Input preparation | `Entry` | Names the chart's policy, style values, clamping and conversion once, runs them through the shared `ChartEntry` seam, and hands over to the content | `LineChartEntry`, `BarChartEntry`, and one per chart — see the chains below |
 
 A suffix outside this table is the signal that a composable is doing two jobs.
 
@@ -56,21 +56,32 @@ A boundary that a second chart calls is named as a distinct noun rather than wit
 
 ### The chains
 
-Every chain ends at a `Content`, which owns the canvas.
+Every chain ends at the composable that owns the canvas, which is a `Content` everywhere except the
+two stacked charts.
 
 | Chart | Chain |
 | --- | --- |
-| Line | `LineChart` → `LineChartEntry` → `LineChartImpl` → `LineChartContent` → `LineChartFrame` |
-| Live line | `LiveLineChart` → `LineChartEntry` → `LiveLineChartImpl` → `LineChartContent` |
-| Bar | `BarChart` → `BarChartInternalPlot` → `BarChartImpl` → `BarChartContent` |
-| Histogram | `HistogramChart` → `BarChartInternalPlot` → `BarChartImpl` → `BarChartContent` |
+| Line | `LineChart` → `LineChartEntry` → `LineChartImpl` → `LineChartFrame` → `LineChartContent` |
+| Live line | `LiveLineChart` → `LineChartEntry` → `LiveLineChartImpl` → `LineChartFrame` → `LineChartContent` |
+| Bar | `BarChart` → `BarChartEntry` → `BarChartInternalPlot` → `BarChartImpl` → `BarChartContent` |
+| Histogram | `HistogramChart` → `HistogramChartEntry` → `BarChartInternalPlot` → `BarChartImpl` → `BarChartContent` |
 | Pie | `PieChart` → `PieChartFrame` → `PieChartContent` |
-| Radar | `RadarChart` → `RadarChartContent` |
-| Stacked bar | `StackedBarChart` → `StackedBarChartImpl` → `StackedBarChartContent` |
-| Stacked area | `StackedAreaChart` → `StackedAreaChartImpl` → `StackedAreaChartContent` |
+| Radar | `RadarChart` → `RadarChartEntry` → `RadarChartContent` |
+| Stacked bar | `StackedBarChart` → `StackedBarChartEntry` → `StackedBarChartFrame` → `StackedBarChartImpl` |
+| Stacked area | `StackedAreaChart` → `StackedAreaChartEntry` → `StackedAreaChartFrame` → `StackedAreaChartImpl` |
 
 Radar and pie lay their plot out with `ChartSquarePlotLayout` from `charts-core`, which supplies
 the square plot, the header, and the legend.
+
+The stacked charts are the two that do not follow the rest: their `Frame` wraps the `Impl` and hands
+it the plot slot, where line and bar put the `Frame` inside the `Impl` and hand it a content slot.
+Neither stacked chart has a `Content`, so its `Impl` draws on the canvas itself.
+
+Every chart except pie has an `Entry`: it names the chart's policy, style values, clamping and
+conversion once, and runs them through the shared `ChartEntry` seam. An entry with one public
+composable calls the content itself; an entry shared by two takes the content as a lambda. Bar and
+histogram each have their own entry, because their policies differ, and then share
+`BarChartInternalPlot` and `toBarRenderData`.
 
 ## Two Public Composables in One Module
 
@@ -123,7 +134,8 @@ Test source sets hold two kinds of file with no `@Test`, named differently.
 `charts-core` holds everything a chart shares, and a chart module holds only what is its own. The
 shared code is organised by concern, in `internal/` sub-packages: `axis`, `bezier`, `composable`,
 `density`, `drawing`, `interaction`, `layout`, `model`, `palette`, and `theme`, plus the flat files
-`DataValidation.kt`, `StyleClamping.kt`, `Constants.kt`, and `AnimationSpec.kt`.
+`InternalChartsApi.kt`, `DataValidation.kt`, `StyleClamping.kt`, `ChartEntry.kt`, `ChartPolicy.kt`,
+`ChartSpec.kt`, `Constants.kt`, and `AnimationSpec.kt`.
 
 A chart module's own `internal/` package stays flat. Sub-package it by stage only once it holds more
 than about ten files, and match the core naming when you do.
@@ -139,14 +151,17 @@ annotated. `rememberAnimationState` has no production caller at all and should b
 than annotated.
 
 Keep one boundary composable per shared plot, and have every chart that needs that plot call the
-boundary rather than the other chart's internals. Histogram calls `BarChartInternalPlot` for this
-reason, and never reaches into `charts-bar` any further. A boundary is named as a distinct noun,
-not with a role suffix, because it is none of the four roles on its own.
+boundary rather than the other chart's internals. Histogram calls `BarChartInternalPlot` and
+`toBarRenderData` for this reason, and never reaches into `charts-bar` any further. A boundary is
+named as a distinct noun, not with a role suffix, because it is none of the four roles on its own.
 
 ## Adding a Chart or a Public Composable
 
 - Name the public composable after the file, and give it its own file.
 - Give each internal composable the suffix for its role, and give it a file to match.
+- Declare the chart's `ChartPolicy` in its entry file, and add its row to
+  `ChartPolicyConformanceTest` in the `charts` module. Entry Seam and Chart Policy has the fields
+  and the per-chart table.
 - Never repeat the public name on an internal composable, and never alias or shadow an import to
   work around a repeat.
 - Give the content composable the canvas, and keep state out of it.
