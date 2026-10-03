@@ -10,8 +10,6 @@ import io.github.hdcharts.core.internal.ChartValidationInputs
 import io.github.hdcharts.core.internal.InternalChartsApi
 import io.github.hdcharts.core.internal.ValidationErrors
 import io.github.hdcharts.core.internal.model.MultiChartData
-import io.github.hdcharts.core.internal.model.PointLabels
-import io.github.hdcharts.core.internal.model.toRenderModel
 import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.line.LineChartStyle
 import io.github.hdcharts.line.clamp
@@ -21,7 +19,7 @@ import io.github.hdcharts.line.clamp
  * negative values, Cartesian axes, and an optional fixed range; its colors match the series count.
  */
 @InternalChartsApi
-object LineChartSpec : ChartSpec<LineChartStyle, MultiChartData> {
+object LineChartSpec : ChartSpec<LineChartStyle> {
     override val policy =
         ChartPolicy(
             minValues = ValidationErrors.MIN_VALUES,
@@ -49,11 +47,6 @@ object LineChartSpec : ChartSpec<LineChartStyle, MultiChartData> {
         style: LineChartStyle,
         density: Density,
     ): LineChartStyle = style.clamp(density)
-
-    override fun convert(
-        data: ChartData,
-        title: String?,
-    ): MultiChartData = toRenderModel(data = data, title = title, labels = PointLabels.CATEGORIES_WHEN_SINGLE_SERIES)
 }
 
 /**

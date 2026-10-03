@@ -6,19 +6,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import io.github.hdcharts.core.internal.InternalChartsApi
 import io.github.hdcharts.core.internal.NO_SELECTION
+import io.github.hdcharts.core.internal.model.MultiChartData
 import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.model.ChartSelection
 import io.github.hdcharts.core.model.ChartValueFormatter
 import io.github.hdcharts.core.model.rememberSelectionLifecycle
 import io.github.hdcharts.core.style.BarChartStyle
-import io.github.hdcharts.core.internal.model.ChartData as InternalChartData
 
-/** Shared rendering boundary for the converted bar and histogram render model. */
+/**
+ * The plot bar and histogram share.
+ *
+ * [data] is validated and converted by the caller's entry, so nothing checks it again here. Bar
+ * draws a single series, so it reads the caller's own model and its categories rather than needing
+ * anything the model adds.
+ */
 @InternalChartsApi
 @Composable
 fun BarChartInternalPlot(
-    data: InternalChartData,
-    title: String?,
+    data: MultiChartData,
     style: BarChartStyle,
     selection: ChartSelection,
     selectedIndex: Int,
@@ -33,8 +38,8 @@ fun BarChartInternalPlot(
     Box(modifier = modifier) {
         Box(modifier = if (chartTag == null) Modifier else Modifier.testTag(chartTag)) {
             BarChartImpl(
-                chartData = data,
-                title = title.orEmpty(),
+                chartData = data.data,
+                title = data.title,
                 style = style,
                 interactionEnabled = interactionEnabled,
                 animateOnStart = animateOnStart,

@@ -11,9 +11,6 @@ import io.github.hdcharts.core.internal.ChartValidationInputs
 import io.github.hdcharts.core.internal.InternalChartsApi
 import io.github.hdcharts.core.internal.NO_SELECTION
 import io.github.hdcharts.core.internal.ValidationErrors
-import io.github.hdcharts.core.internal.model.MultiChartData
-import io.github.hdcharts.core.internal.model.PointLabels
-import io.github.hdcharts.core.internal.model.toRenderModel
 import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.model.ChartValueFormatters
 import io.github.hdcharts.stackedarea.StackedAreaChartStyle
@@ -26,7 +23,7 @@ import kotlinx.collections.immutable.toImmutableList
  * area stacks series, so it forbids negative values, has Cartesian axes, and has no fixed range.
  */
 @InternalChartsApi
-object StackedAreaChartSpec : ChartSpec<StackedAreaChartStyle, MultiChartData> {
+object StackedAreaChartSpec : ChartSpec<StackedAreaChartStyle> {
     override val policy =
         ChartPolicy(
             minValues = ValidationErrors.MIN_VALUES,
@@ -50,11 +47,6 @@ object StackedAreaChartSpec : ChartSpec<StackedAreaChartStyle, MultiChartData> {
         style: StackedAreaChartStyle,
         density: Density,
     ): StackedAreaChartStyle = style.clamp(density)
-
-    override fun convert(
-        data: ChartData,
-        title: String?,
-    ): MultiChartData = toRenderModel(data = data, title = title, labels = PointLabels.CATEGORIES)
 }
 
 /**

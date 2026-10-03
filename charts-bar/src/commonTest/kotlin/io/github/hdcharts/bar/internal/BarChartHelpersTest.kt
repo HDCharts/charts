@@ -7,8 +7,8 @@ import io.github.hdcharts.core.internal.axis.buildNumericYAxisTicks
 import io.github.hdcharts.core.internal.axis.planAxisXLabels
 import io.github.hdcharts.core.internal.axis.visibleIndexRange
 import io.github.hdcharts.core.internal.axis.yAxisLabelColumnWidthPx
-import io.github.hdcharts.core.internal.model.ChartData
-import io.github.hdcharts.core.internal.model.toChartData
+import io.github.hdcharts.core.model.ChartData
+import io.github.hdcharts.core.model.ChartSeries
 import io.github.hdcharts.core.model.ChartValueFormatter
 import io.github.hdcharts.core.style.BarChartDefaults
 import kotlin.test.Test
@@ -16,6 +16,15 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class BarChartHelpersTest {
+    /** Bar and histogram draw one series, so their data is one series and a category list. */
+    private fun barData(
+        values: List<Double>,
+        categories: List<String> = emptyList(),
+    ) = ChartData(
+        categories = categories,
+        series = listOf(ChartSeries(name = "Series", values = values)),
+    )
+
     private data class GetSelectedIndexTestCase(
         val position: Offset,
         val values: List<Double>,
@@ -154,17 +163,13 @@ class BarChartHelpersTest {
 
     @Test
     fun compactDensity_capacityOne_aggregatesToOneBucketAndItsCenterSourceIndex() {
-        val data =
-            ChartData(
-                labels = List(10) { "B$it" },
-                points = List(10) { (it + 1).toDouble() },
-            )
+        val data = barData(values = List(10) { (it + 1).toDouble() }, categories = List(10) { "B$it" })
 
         val aggregated = aggregateForCompactDensity(data = data, targetPoints = 1)
         val centers = compactDensityCenterIndices(sourcePointsCount = 10, targetPoints = 1)
 
-        assertEquals(expected = listOf(5.5), actual = aggregated.points)
-        assertEquals(expected = listOf("B4"), actual = aggregated.labels)
+        assertEquals(expected = listOf(5.5), actual = aggregated.barValues)
+        assertEquals(expected = listOf("B4"), actual = aggregated.categories.toList())
         assertEquals(expected = listOf(4), actual = centers)
     }
 
@@ -237,7 +242,7 @@ class BarChartHelpersTest {
                 listOf(0.0, 0.0) to (0.0 to 1.0),
             )
         fixtures.forEach { (values, expected) ->
-            val (min, max) = values.toChartData().resolveBarRange(null, null)
+            val (min, max) = barData(values).resolveBarRange(null, null)
             assertEquals(expected, min to max)
             val tickValues = mutableListOf<Double>()
             val ticks =
@@ -261,7 +266,7 @@ class BarChartHelpersTest {
 
     @Test
     fun explicitRanges_clipAndRetainDoublePrecision() {
-        val data = listOf(16_777_216.0, 16_777_217.0).toChartData()
+        val data = barData(listOf(16_777_216.0, 16_777_217.0))
         val (min, max) = data.resolveBarRange(16_777_216.0, 16_777_217.0)
         assertEquals(1.0, max - min)
         assertEquals(1.0, barValueYFraction(min - 100.0, min, max))
@@ -291,9 +296,9 @@ class BarChartHelpersTest {
                 },
             )
         assertTrue(ticks.all { it.centerY.isFinite() })
-        val values = listOf(max, max, min, min).toChartData(labels = listOf("A", "B", "C", "D"))
-        assertEquals(listOf(max, min), aggregateForCompactDensity(values, 2).points)
-        assertEquals(0.0, aggregateForCompactDensity(values, 1).points.single())
+        val values = barData(listOf(max, max, min, min), categories = listOf("A", "B", "C", "D"))
+        assertEquals(listOf(max, min), aggregateForCompactDensity(values, 2).barValues)
+        assertEquals(0.0, aggregateForCompactDensity(values, 1).barValues.single())
         assertEquals(0.0, barValueYFraction(Double.MIN_VALUE, 0.0, Double.MIN_VALUE))
     }
 

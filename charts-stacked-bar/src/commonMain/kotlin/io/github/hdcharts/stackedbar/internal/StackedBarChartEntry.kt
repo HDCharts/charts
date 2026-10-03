@@ -12,8 +12,6 @@ import io.github.hdcharts.core.internal.InternalChartsApi
 import io.github.hdcharts.core.internal.NO_SELECTION
 import io.github.hdcharts.core.internal.ValidationErrors
 import io.github.hdcharts.core.internal.model.MultiChartData
-import io.github.hdcharts.core.internal.model.PointLabels
-import io.github.hdcharts.core.internal.model.toRenderModel
 import io.github.hdcharts.core.internal.model.transposeForStacking
 import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.model.ChartValueFormatters
@@ -27,7 +25,7 @@ import kotlinx.collections.immutable.toImmutableList
  * stacks segments, so it forbids negative values, has Cartesian axes, and has no fixed range.
  */
 @InternalChartsApi
-object StackedBarChartSpec : ChartSpec<StackedBarChartStyle, MultiChartData> {
+object StackedBarChartSpec : ChartSpec<StackedBarChartStyle> {
     override val policy =
         ChartPolicy(
             minValues = ValidationErrors.MIN_VALUES,
@@ -52,11 +50,15 @@ object StackedBarChartSpec : ChartSpec<StackedBarChartStyle, MultiChartData> {
         density: Density,
     ): StackedBarChartStyle = style.clamp(density)
 
-    /** Series-major like every other chart. The entry transposes it for stacking. */
+    /**
+     * The one chart whose render model is not the caller's data: it draws one bar per category with
+     * the segments stacked inside it, so it transposes to a per-bar model here. Every other chart
+     * takes the default and passes the data through.
+     */
     override fun convert(
         data: ChartData,
         title: String?,
-    ): MultiChartData = toRenderModel(data = data, title = title, labels = PointLabels.CATEGORIES)
+    ): MultiChartData = MultiChartData(data = data, title = title.orEmpty()).transposeForStacking()
 }
 
 /**
@@ -82,8 +84,6 @@ internal fun StackedBarChartEntry(
         errorStyle = style.chartContainerStyle,
         title = title,
         content = { renderData, drawStyle ->
-            // One item per bar rather than per segment, which is how the chart stacks and draws.
-            val barData = remember(renderData) { renderData.transposeForStacking() }
             val colors =
                 remember(drawStyle.segments, data.series.size) {
                     drawStyle.segments
@@ -111,7 +111,7 @@ internal fun StackedBarChartEntry(
                 modifier = modifier,
             ) {
                 StackedBarChartImpl(
-                    data = barData,
+                    data = renderData,
                     title = effectiveTitle,
                     style = drawStyle,
                     colors = colors,

@@ -12,6 +12,7 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import io.github.hdcharts.core.internal.model.MultiChartData
 import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.model.ChartSeries
 import io.github.hdcharts.core.model.chartDataOf
@@ -37,7 +38,7 @@ class ChartEntryTest {
                     title = "Title",
                     style = TestEntryStyle(size = Dp.Unspecified),
                     content = { converted, drawStyle ->
-                        SideEffect { received = converted to drawStyle.size }
+                        SideEffect { received = converted.title to drawStyle.size }
                     },
                 )
             }
@@ -92,7 +93,7 @@ class ChartEntryTest {
         title: String?,
         style: TestEntryStyle = TestEntryStyle(size = 8.dp),
         spec: TestSpec = TestSpec(),
-        content: @Composable (data: String, style: TestEntryStyle) -> Unit = { _, _ -> },
+        content: @Composable (data: MultiChartData, style: TestEntryStyle) -> Unit = { _, _ -> },
     ) {
         ChartEntry(
             spec = spec,
@@ -111,7 +112,7 @@ class ChartEntryTest {
     /** A minimal chart: the checks every chart shares, minus the two this fake style cannot supply. */
     private class TestSpec(
         private val onClamp: (density: Density) -> Unit = {},
-    ) : ChartSpec<TestEntryStyle, String> {
+    ) : ChartSpec<TestEntryStyle> {
         override val policy =
             ChartPolicy(
                 minValues = ValidationErrors.MIN_VALUES,
@@ -139,10 +140,15 @@ class ChartEntryTest {
             return style.copy(size = style.size.clampSize(fallback = FALLBACK_SIZE, density = density))
         }
 
+        /** Marks the conversion so the test can tell the seam's output from the caller's input. */
         override fun convert(
             data: ChartData,
             title: String?,
-        ): String = "$title:${data.series.size}"
+        ): MultiChartData =
+            MultiChartData(
+                data = data,
+                title = "$title:${data.series.size}",
+            )
     }
 
     private companion object {

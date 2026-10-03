@@ -17,9 +17,6 @@ import io.github.hdcharts.core.internal.ValidationErrors
 import io.github.hdcharts.core.internal.composable.ChartSquarePlotLayout
 import io.github.hdcharts.core.internal.composable.Legend
 import io.github.hdcharts.core.internal.layout.modifierTopTitle
-import io.github.hdcharts.core.internal.model.MultiChartData
-import io.github.hdcharts.core.internal.model.PointLabels
-import io.github.hdcharts.core.internal.model.toRenderModel
 import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.model.ChartSelection
 import io.github.hdcharts.core.model.ChartValueFormatters
@@ -35,7 +32,7 @@ import kotlinx.collections.immutable.toImmutableList
  * allows negative values.
  */
 @InternalChartsApi
-object RadarChartSpec : ChartSpec<RadarChartStyle, MultiChartData> {
+object RadarChartSpec : ChartSpec<RadarChartStyle> {
     override val policy =
         ChartPolicy(
             minValues = ValidationErrors.MIN_RADAR_VALUES,
@@ -61,11 +58,6 @@ object RadarChartSpec : ChartSpec<RadarChartStyle, MultiChartData> {
         style: RadarChartStyle,
         density: Density,
     ): RadarChartStyle = style.clamp(density)
-
-    override fun convert(
-        data: ChartData,
-        title: String?,
-    ): MultiChartData = toRenderModel(data = data, title = title, labels = PointLabels.CATEGORIES)
 }
 
 /**

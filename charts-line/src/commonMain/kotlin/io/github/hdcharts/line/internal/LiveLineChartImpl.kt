@@ -20,7 +20,7 @@ internal fun LiveLineChartImpl(
     axisValueFormatter: ChartValueFormatter,
 ) {
     val renderMode = remember(shiftDuration) { LineChartRenderMode.Timeline(shiftDuration = shiftDuration) }
-    val colors = rememberLineColors(style = style, count = data.items.size)
+    val colors = rememberLineColors(style = style, count = data.series.size)
     LineChartFrame(
         data = data,
         style = style,

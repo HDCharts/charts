@@ -35,7 +35,7 @@ import io.github.hdcharts.core.internal.axis.xAxisLabelRowHeightPx
 import io.github.hdcharts.core.internal.composable.ChartErrors
 import io.github.hdcharts.core.internal.layout.chartCanvasFits
 import io.github.hdcharts.core.internal.layout.placedHorizontalScrollPx
-import io.github.hdcharts.core.internal.model.ChartData
+import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.model.ChartValueFormatter
 import io.github.hdcharts.core.style.BarChartStyle
 import kotlinx.collections.immutable.persistentListOf
@@ -70,8 +70,8 @@ internal fun BarChartContent(
 ) {
     val xLabels = style.axis.xLabels
     val yLabels = style.axis.yLabels
-    val dataSize = chartData.points.size
-    val showXLabels = xLabels.visible && chartData.labels.any { it.isNotBlank() }
+    val dataSize = chartData.barValues.size
+    val showXLabels = xLabels.visible && chartData.categories.any { it.isNotBlank() }
     val currentToggleSelection by rememberUpdatedState(onToggleSelection)
     val currentSelectIndex by rememberUpdatedState(onSelectIndex)
     val currentClearSelection by rememberUpdatedState(onClearSelection)
@@ -82,12 +82,12 @@ internal fun BarChartContent(
         val density = LocalDensity.current
         val xAxisLabelSizePx = with(density) { xLabels.size.toPx() }
         val xAxisRowHeightPx =
-            remember(showXLabels, chartData.labels, dataSize, xAxisLabelSizePx, density) {
+            remember(showXLabels, chartData.categories, dataSize, xAxisLabelSizePx, density) {
                 if (showXLabels) {
                     with(density) {
                         xAxisLabelRowHeightPx(
                             estimateXAxisLabelExtent(
-                                labels = chartData.labels,
+                                labels = chartData.categories,
                                 dataSize = dataSize,
                                 fontSizePx = xAxisLabelSizePx,
                             ),
@@ -222,7 +222,7 @@ internal fun BarChartContent(
 
         val xAxisLabelPlan =
             rememberXAxisLabelPlan(
-                labels = chartData.labels,
+                labels = chartData.categories,
                 dataSize = dataSize,
                 maxLabelCount = xLabels.maxCount,
                 isScrollable = isScrollable,
