@@ -13,6 +13,7 @@ import io.github.hdcharts.core.internal.NO_SELECTION
 import io.github.hdcharts.core.internal.ValidationErrors
 import io.github.hdcharts.core.internal.model.ChartRenderData
 import io.github.hdcharts.core.internal.model.transposeForStacking
+import io.github.hdcharts.core.internal.selectedCategoryTitle
 import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.model.ChartValueFormatters
 import io.github.hdcharts.stackedbar.StackedBarChartStyle
@@ -93,7 +94,12 @@ internal fun StackedBarChartEntry(
                 }
             val segmentNames = data.series.map { it.name.orEmpty() }.toImmutableList()
             // A selected category names the chart while it is selected; otherwise the caller's title does.
-            val effectiveTitle = data.categories.getOrNull(selectedIndex) ?: title.orEmpty()
+            val effectiveTitle =
+                selectedCategoryTitle(
+                    categories = data.categories,
+                    selectedIndex = selectedIndex,
+                    title = title,
+                )
             val selectedLabels =
                 if (selectedIndex == NO_SELECTION) {
                     persistentListOf()

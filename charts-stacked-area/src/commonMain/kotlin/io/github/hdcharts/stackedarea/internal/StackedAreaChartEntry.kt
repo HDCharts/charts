@@ -11,6 +11,7 @@ import io.github.hdcharts.core.internal.ChartValidationInputs
 import io.github.hdcharts.core.internal.InternalChartsApi
 import io.github.hdcharts.core.internal.NO_SELECTION
 import io.github.hdcharts.core.internal.ValidationErrors
+import io.github.hdcharts.core.internal.selectedCategoryTitle
 import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.model.ChartValueFormatters
 import io.github.hdcharts.stackedarea.StackedAreaChartStyle
@@ -81,7 +82,12 @@ internal fun StackedAreaChartEntry(
                 }
             val seriesNames = data.series.map { it.name.orEmpty() }.toImmutableList()
             // A selected category names the chart while it is selected; otherwise the caller's title does.
-            val effectiveTitle = data.categories.getOrNull(selectedIndex)?.takeIf(String::isNotBlank) ?: title.orEmpty()
+            val effectiveTitle =
+                selectedCategoryTitle(
+                    categories = data.categories,
+                    selectedIndex = selectedIndex,
+                    title = title,
+                )
             val selectedLabels =
                 if (selectedIndex == NO_SELECTION) {
                     persistentListOf()
