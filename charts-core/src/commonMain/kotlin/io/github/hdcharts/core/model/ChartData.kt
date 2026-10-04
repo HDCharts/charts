@@ -10,7 +10,6 @@ import kotlinx.collections.immutable.toImmutableList
  * Values at the same index in each series share a category. Categories are labels,
  * not numeric coordinates. Replace data to update a chart rather than mutating input lists.
  * Chart-specific validation determines permitted series counts, lengths, and values.
- * Pie charts use their own slice model instead of this table.
  *
  * @param categories The indexed-dimension labels, such as bar labels or radar axes.
  * Empty means no explicit labels; otherwise the count must match each series' value count.

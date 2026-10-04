@@ -18,9 +18,9 @@ import io.github.hdcharts.core.model.ChartSelection
 import io.github.hdcharts.core.model.ChartSeries
 import io.github.hdcharts.core.model.chartDataOf
 import io.github.hdcharts.core.model.rememberChartSelection
+import io.github.hdcharts.core.model.toChartData
 import io.github.hdcharts.pie.PieChart
 import io.github.hdcharts.pie.PieChartDefaults
-import io.github.hdcharts.pie.PieSlice
 import io.github.hdcharts.radar.RadarChart
 import io.github.hdcharts.sampleshared.theme.Dimens
 
@@ -50,9 +50,8 @@ private fun HeightOnlyPieCase() {
     ToggleSelectionButton(selection)
     PieChart(
         data =
-            listOf(
-                PieSlice(label = "A slice label wider than the plot", value = 60.0),
-                PieSlice(label = "B", value = 40.0),
+            listOf(60.0, 40.0).toChartData(
+                categories = listOf("A slice label wider than the plot", "B"),
             ),
         modifier = Modifier.height(160.dp).debugBounds(),
         title = "Pie",

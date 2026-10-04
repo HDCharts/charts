@@ -7,6 +7,7 @@ import io.github.hdcharts.core.internal.DONUT_MAX_PERCENTAGE
 import io.github.hdcharts.core.internal.DONUT_MIN_PERCENTAGE
 import io.github.hdcharts.core.internal.MAX_SIZE_PX
 import io.github.hdcharts.core.style.StyleDefaults
+import kotlinx.collections.immutable.persistentListOf
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -35,7 +36,9 @@ class PieStyleBlocksClampTest {
 
     @Test
     fun slices_clampsAlpha() {
-        assertEquals(expected = 1f, actual = PieChartSlicesStyle(alpha = 2f, baseColor = Color.Red).clamp().alpha)
+        val slices = PieChartSlicesStyle(alpha = 2f, baseColor = Color.Red, colors = persistentListOf())
+
+        assertEquals(expected = 1f, actual = slices.clamp().alpha)
     }
 
     @Test

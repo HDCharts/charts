@@ -1,6 +1,6 @@
 package io.github.hdcharts.sampleshared.data.impl
 
-import io.github.hdcharts.pie.PieSlice
+import io.github.hdcharts.core.model.toChartData
 import io.github.hdcharts.sampleshared.data.PieSampleData
 import io.github.hdcharts.sampleshared.data.PieSampleUseCase
 
@@ -71,16 +71,18 @@ internal class DefaultPieSampleUseCase : PieSampleUseCase {
         values: List<Double>,
         labels: List<String>,
         title: String,
-    ): PieSampleData {
-        val slices =
-            values.mapIndexed { index, value ->
-                PieSlice(label = labels.getOrNull(index) ?: "Segment ${index + 1}", value = value)
-            }
-        return PieSampleData(
-            slices = slices,
+    ): PieSampleData =
+        PieSampleData(
+            data = values.toChartData(categories = labels.withFallbackNames(values.size)),
             title = title,
         )
-    }
+
+    /**
+     * The slice names for [size] values. A generated name stands in for a caller that supplies more
+     * values than names, because a pie needs a label for every one of them.
+     */
+    private fun List<String>.withFallbackNames(size: Int): List<String> =
+        List(size) { index -> getOrNull(index) ?: "Segment ${index + 1}" }
 
     private fun defaultLabels(points: Int): List<String> {
         if (points <= pieDefaultLabels.size) {

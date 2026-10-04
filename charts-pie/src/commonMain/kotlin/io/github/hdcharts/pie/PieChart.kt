@@ -1,53 +1,36 @@
 package io.github.hdcharts.pie
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import io.github.hdcharts.core.internal.InternalChartsApi
-import io.github.hdcharts.core.internal.NO_SELECTION
-import io.github.hdcharts.core.internal.TestTags
-import io.github.hdcharts.core.internal.ValidationErrors
-import io.github.hdcharts.core.internal.composable.ChartErrors
-import io.github.hdcharts.core.internal.composable.ChartSquarePlotLayout
-import io.github.hdcharts.core.internal.composable.Legend
-import io.github.hdcharts.core.internal.layout.modifierTopTitle
-import io.github.hdcharts.core.internal.validateValues
+import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.model.ChartSelection
 import io.github.hdcharts.core.model.SelectionLifetime
 import io.github.hdcharts.core.model.rememberChartSelection
 import io.github.hdcharts.core.model.rememberSelectionLifecycle
-import io.github.hdcharts.pie.internal.PieChartContent
-import io.github.hdcharts.pie.internal.calculatePercentages
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.toImmutableList
+import io.github.hdcharts.pie.internal.PieChartEntry
 
-private const val SELECTED_TITLE_PERCENTAGE_SIZE_FACTOR = 0.72f
 internal const val PIE_SELECTION_AUTO_DESELECT_TIMEOUT_MS = 3000L
 
 /**
  * A composable function that displays a Pie Chart.
  *
- * [interactionEnabled] disables all user controls (tap-to-select and the auto-deselect
- * timeout), but programmatic selection still renders. [animateOnStart] controls the
- * initial reveal, not subsequent update animations.
+ * A pie is one series whose values are the slices. Categories are optional and name the slices in
+ * the legend and while they are selected; when present, there must be one per value. The slice
+ * colors come from the style, either as an explicit palette or as shades generated from its base
+ * color.
  *
- * @param data The chart data to display. Each [PieSlice] renders as a slice with its own
- * label, value, and optional color. Slices without a color fall back to shades generated
- * from the style's base color.
+ * [interactionEnabled] disables user controls (tap-to-select and the auto-deselect timeout), but
+ * programmatic selection still renders. [animateOnStart] controls the initial reveal, not subsequent
+ * update animations.
+ *
+ * @param data The chart data to display. One series of at least two nonnegative finite values.
+ * Categories are optional; when supplied they must match the value count. Invalid data renders the
+ * documented errors instead of a chart.
  * @param modifier The modifier to be applied to the chart. Also forwarded to the error
  * branch when the data fails validation.
  * @param style The style to be applied to the chart. If not provided, the default style will be used.
@@ -62,7 +45,7 @@ internal const val PIE_SELECTION_AUTO_DESELECT_TIMEOUT_MS = 3000L
 @OptIn(InternalChartsApi::class)
 @Composable
 fun PieChart(
-    data: List<PieSlice>,
+    data: ChartData,
     modifier: Modifier = Modifier,
     style: PieChartStyle = PieChartDefaults.style(),
     title: String? = null,
@@ -71,10 +54,15 @@ fun PieChart(
     animateOnStart: Boolean = true,
 ) {
     var interactionNonce by remember(data, selection) { mutableStateOf<Long?>(null) }
+    val sliceCount =
+        data.series
+            .firstOrNull()
+            ?.values
+            ?.size ?: 0
     rememberSelectionLifecycle(
         selection = selection,
         data = data,
-        itemCount = data.size,
+        itemCount = sliceCount,
         lifetime =
             if (interactionEnabled) {
                 SelectionLifetime.AutoDeselect(PIE_SELECTION_AUTO_DESELECT_TIMEOUT_MS)
@@ -84,40 +72,11 @@ fun PieChart(
         autoDeselectTrigger = interactionNonce,
     )
 
-    val density = LocalDensity.current
-    val validationErrors =
-        remember(data) {
-            if (data.size < ValidationErrors.MIN_VALUES) {
-                listOf(ValidationErrors.tooFewValues(min = ValidationErrors.MIN_VALUES))
-            } else {
-                validateValues(values = data.map { it.value }, allowNegative = false)
-            }
-        }
-    val drawStyle = remember(style, density) { style.clamp(density) }
-
-    if (validationErrors.isNotEmpty()) {
-        ChartErrors(
-            style = style.chartContainerStyle,
-            errors = validationErrors.toImmutableList(),
-            modifier = modifier,
-        )
-        return
-    }
-
-    val colors =
-        remember(data, drawStyle.slices) {
-            resolveSliceColors(slices = data, style = drawStyle.slices)
-        }
-    val labels = remember(data) { data.map { it.label }.toImmutableList() }
-    val points = remember(data) { data.map { it.value }.toImmutableList() }
-
-    PieChartFrame(
+    PieChartEntry(
+        data = data,
         modifier = modifier,
+        style = style,
         title = title,
-        labels = labels,
-        points = points,
-        colors = colors,
-        style = drawStyle,
         selection = selection,
         interactionEnabled = interactionEnabled,
         animateOnStart = animateOnStart,
@@ -126,108 +85,3 @@ fun PieChart(
         },
     )
 }
-
-@Composable
-private fun PieChartFrame(
-    modifier: Modifier,
-    title: String?,
-    labels: ImmutableList<String>,
-    points: ImmutableList<Double>,
-    colors: ImmutableList<Color>,
-    style: PieChartStyle,
-    selection: ChartSelection,
-    interactionEnabled: Boolean,
-    animateOnStart: Boolean,
-    onSelectionInteraction: () -> Unit,
-) {
-    val piePercentages =
-        remember(points) {
-            calculatePercentages(points)
-        }
-    val forcedSelectedIndex =
-        selection.selectedIndex?.takeIf { it in points.indices } ?: NO_SELECTION
-    val hasSelection = forcedSelectedIndex != NO_SELECTION
-
-    ChartSquarePlotLayout(
-        modifier = modifier,
-        title = {
-            val displayedTitle = if (hasSelection) labels[forcedSelectedIndex] else title.orEmpty()
-            if (displayedTitle.isNotBlank()) {
-                if (hasSelection) {
-                    Row(
-                        modifier =
-                            style.chartContainerStyle.modifierTopTitle
-                                .padding(end = style.chartContainerStyle.contentPadding),
-                        horizontalArrangement =
-                            Arrangement.spacedBy(style.chartContainerStyle.contentPadding),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(
-                            modifier = Modifier.testTag(TestTags.CHART_TITLE),
-                            text = displayedTitle,
-                            style = style.chartContainerStyle.styleTitle,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                        Text(
-                            text = "${piePercentages[forcedSelectedIndex]}%",
-                            style = selectedPercentageStyle(style.chartContainerStyle.styleTitle),
-                            maxLines = 1,
-                        )
-                    }
-                } else {
-                    Text(
-                        modifier =
-                            style.chartContainerStyle.modifierTopTitle
-                                .testTag(TestTags.CHART_TITLE),
-                        text = displayedTitle,
-                        style = style.chartContainerStyle.styleTitle,
-                    )
-                }
-            }
-        },
-        legend = {
-            if (style.legend.visible) {
-                Legend(
-                    chartContainerStyle = style.chartContainerStyle,
-                    legend = labels,
-                    colors = colors,
-                )
-            }
-        },
-        plot = {
-            PieChartContent(
-                values = points,
-                colors = colors,
-                style = style,
-                interactionEnabled = interactionEnabled,
-                animateOnStart = animateOnStart,
-                selectedSliceIndex = forcedSelectedIndex,
-            ) { index ->
-                if (index != NO_SELECTION) {
-                    selection.select(index)
-                    onSelectionInteraction()
-                } else {
-                    selection.clear()
-                }
-            }
-        },
-    )
-}
-
-private fun resolveSliceColors(
-    slices: List<PieSlice>,
-    style: PieChartSlicesStyle,
-): ImmutableList<Color> {
-    val defaultPalette = style.resolveColors(slices.size)
-    return slices
-        .mapIndexed { index, slice ->
-            (slice.color ?: defaultPalette[index]).copy(alpha = style.alpha)
-        }.toImmutableList()
-}
-
-private fun selectedPercentageStyle(base: TextStyle): TextStyle =
-    base.copy(
-        fontSize = base.fontSize * SELECTED_TITLE_PERCENTAGE_SIZE_FACTOR,
-        fontWeight = FontWeight.SemiBold,
-    )

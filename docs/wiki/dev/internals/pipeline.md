@@ -54,7 +54,7 @@ entry.
 **4. Formatting reads the caller's formatter and is never hardcoded in a content composable.** A
 chart without a formatter parameter falls back to its `Defaults`.
 
-Rules 1 and 2 hold for every chart but pie. Rule 3 holds everywhere. **Rule 4's exception** is
+Rules 1, 2 and 3 hold for every chart. **Rule 4's exception** is
 stacked bar, stacked area and radar, which format their readouts from `ChartValueFormatters.Default`
 because their public composables declare the formatter through `ChartValueFormatters.Default`.
 
@@ -104,7 +104,8 @@ Each of these is a decision, written down so the next change reads it.
 they skip the density decision and aggregation, and neither runs the Cartesian canvas guard. Radar
 labels its own axes in place of stage 9; pie has no axis and skips it. Every other chart runs all
 fifteen. A Cartesian chart with a compact mode and a polar or share-based chart are presented as one
-pipeline, and this is the shape the library has.
+pipeline, and this is the shape the library has. Pie runs the same stages 1 to 4 as every other
+chart, through `PieChartEntry`.
 
 **The domain has five shapes, and pie has none of them.** Bar and both stacked charts fold zero into
 the domain, so an all-positive series starts at the axis. Line and radar take the data's own range.
@@ -126,10 +127,10 @@ them. Bar's is a per-bar scalar computed at draw time. Each is the shape its cha
 `resolvePaletteColors` is pure in the clamped style and an item count, so by the test above it belongs
 at the seam. Each style exposes a thin wrapper over it — `resolveColors` in line, stacked bar and
 stacked area, `resolveLineColors` in radar — and pie's wrapper takes a slice count instead of a series
-count. Stacked bar (`StackedBarChartEntry`), stacked area (`StackedAreaChartEntry`) and radar
-(`RadarChartEntry`) resolve inside their entry. Line resolves it in `rememberLineColors`, which is
-declared in `LineChartFrame` and called from `LineChartImpl` and `LiveLineChartImpl`, one frame above
-where it is declared. Pie resolves it in its own file.
+count. Stacked bar (`StackedBarChartEntry`), stacked area (`StackedAreaChartEntry`), radar
+(`RadarChartEntry`) and pie (`PieChartEntry`) resolve inside their entry. Line resolves it in
+`rememberLineColors`, which is declared in `LineChartFrame` and called from `LineChartImpl` and
+`LiveLineChartImpl`, one frame above where it is declared.
 
 `singleItemUsesBase` is a boolean literal at each of the five call sites. A single-series chart draws
 its base colour on line, stacked area and radar, and a generated shade on pie and stacked bar.

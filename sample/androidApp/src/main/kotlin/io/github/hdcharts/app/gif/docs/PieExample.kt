@@ -5,8 +5,9 @@ import androidx.compose.runtime.getValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import io.github.hdcharts.core.model.ChartData
+import io.github.hdcharts.core.model.toChartData
 import io.github.hdcharts.pie.PieChart
-import io.github.hdcharts.pie.PieSlice
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,24 +17,20 @@ private const val TITLE = "Household Energy"
 class PieViewModel : ViewModel() {
     val title: String = TITLE
 
-    val slices: StateFlow<List<PieSlice>> = MutableStateFlow(buildSlices()).asStateFlow()
+    val data: StateFlow<ChartData> = MutableStateFlow(buildData()).asStateFlow()
 
-    private fun buildSlices(): List<PieSlice> =
-        listOf(
-            PieSlice(label = "Heating", value = 32.0),
-            PieSlice(label = "Cooling", value = 21.0),
-            PieSlice(label = "Appliances", value = 24.0),
-            PieSlice(label = "Water Heating", value = 14.0),
-            PieSlice(label = "Lighting", value = 9.0),
+    private fun buildData(): ChartData =
+        listOf(32.0, 21.0, 24.0, 14.0, 9.0).toChartData(
+            categories = listOf("Heating", "Cooling", "Appliances", "Water Heating", "Lighting"),
         )
 }
 
 @Composable
 fun ShowPie(viewModel: PieViewModel = viewModel()) {
-    val slices by viewModel.slices.collectAsStateWithLifecycle()
+    val data by viewModel.data.collectAsStateWithLifecycle()
 
     PieChart(
-        data = slices,
+        data = data,
         title = TITLE,
     )
 }

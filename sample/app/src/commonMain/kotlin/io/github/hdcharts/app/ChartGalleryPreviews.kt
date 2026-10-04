@@ -28,7 +28,6 @@ import io.github.hdcharts.line.LineChart
 import io.github.hdcharts.line.LineChartDefaults
 import io.github.hdcharts.pie.PieChart
 import io.github.hdcharts.pie.PieChartDefaults
-import io.github.hdcharts.pie.PieSlice
 import io.github.hdcharts.radar.RadarChart
 import io.github.hdcharts.radar.RadarChartDefaults
 import io.github.hdcharts.sampleshared.data.ChartGalleryPreview
@@ -98,9 +97,9 @@ internal fun ChartPreview(
 private fun PieChartPreview(values: List<Double>) {
     val data =
         remember(values) {
-            values.mapIndexed { index, value ->
-                PieSlice(label = "Segment ${index + 1}", value = value)
-            }
+            values.toChartData(
+                categories = values.indices.map { index -> "Segment ${index + 1}" },
+            )
         }
     PieChart(
         data = data,

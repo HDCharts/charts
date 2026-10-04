@@ -149,17 +149,17 @@ reader does not have to know the rule to compare two rows.
 Each chart has a row here and a row in `ChartPolicyConformanceTest`, in the `charts` module. Both are
 written by hand and change in the same commit.
 
-| Chart | `minValues` | `allowNegative` | `singleSeries` | `hasAxis` | `hasFixedRange` | `colorsMatch` | On the seam |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| Line | 2 | yes | no | yes | yes | series count | yes |
-| Bar | 2 | yes | yes | yes | yes | value count | yes |
-| Histogram | 2 | no | yes | yes | yes | value count | yes |
-| Radar | 3 | yes | no | no | no | series count, only with more than one series | yes |
-| Stacked bar | 2 | no | no | yes | no | series count | yes |
-| Stacked area | 2 | no | no | yes | no | series count | yes |
-| Pie | — | — | — | — | — | — | exception |
+| Chart | `minValues` | `allowNegative` | `singleSeries` | `hasAxis` | `hasFixedRange` | `colorsMatch` |
+| --- | --- | --- | --- | --- | --- | --- |
+| Line | 2 | yes | no | yes | yes | series count |
+| Bar | 2 | yes | yes | yes | yes | value count |
+| Histogram | 2 | no | yes | yes | yes | value count |
+| Radar | 3 | yes | no | no | no | series count, only with more than one series |
+| Stacked bar | 2 | no | no | yes | no | series count |
+| Stacked area | 2 | no | no | yes | no | series count |
+| Pie | 2 | no | yes | no | no | value count |
 
-Every chart except pie is on the seam. Bar and histogram draw the same plot, so they share
+Every chart is on the seam. Bar and histogram draw the same plot, so they share
 `BarChartInternalPlot`. Their specs differ in the policy — histogram forbids negative bin heights —
 and their entries differ in what they pass the shared plot: `aggregate = false`, because compact
 histogram bins are already the aggregation, and a histogram test tag.
@@ -168,21 +168,26 @@ histogram bins are already the aggregation, and a histogram test tag.
 is the caller's own data does not write one. **Stacked bar is the only chart that overrides it**,
 because it stacks segments and so transposes to one series per bar.
 
-Moving a chart means writing `internal/<Name>ChartEntry.kt` with the chart's spec — policy, style
-values, clamping and conversion — pointing the public composable at it, and deleting the validation,
-clamping and conversion it used to do. The seam runs those steps in the same order, so the chart
-behaves the same. One chart per change; the module's tests and the screenshot baselines show whether
-anything moved.
+Moving a chart onto the seam means writing `internal/<Name>ChartEntry.kt` with the chart's spec —
+policy, style values, clamping and conversion — pointing the public composable at it, and deleting the
+validation, clamping and conversion it used to do. The seam runs those steps in the same order, so
+the chart behaves the same. One chart per change; the module's tests and the screenshot baselines show
+whether anything moved.
 
 The public composable keeps what is not an input stage: the selection lifecycle, and the layout. The
 selection index is resolved before the seam, because it counts the public data rather than the render
 model.
 
-## Pie has its own path
+## Pie names its values by category
 
-Pie takes `List<PieSlice>`. The seam has no `ChartData` to validate and no render model to convert
-into. Pie has no Cartesian axis, and it formats its readouts from its own helper. It validates slice
-values with `validateValues` and draws without a spec.
+Pie is one series whose values are the slices, so it declares `singleSeries` and its categories are
+the slice names. It draws no Cartesian axis and formats its readouts from its own helper, so it
+declares `hasAxis` and `hasFixedRange` off. `colorsMatch` is declared and never read, like bar's and
+histogram's, so that every row of the table reads the same way.
+
+Empty categories are not an error for any chart, pie included. A chart with an X axis drops its
+labels and keeps the axis; a pie drops its legend and keeps the slices, and a selected slice with a
+blank category falls back to the chart title. See Pie Chart for what a pie shows without names.
 
 ## Adding a check
 

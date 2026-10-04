@@ -34,7 +34,7 @@ import io.github.hdcharts.stackedbar.StackedBarChart
 fun PieDocsGifScenarioPreview() {
     ScreenshotSurface {
         val viewModel = PieViewModel()
-        PieChart(data = viewModel.slices.value, title = viewModel.title)
+        PieChart(data = viewModel.data.value, title = viewModel.title)
     }
 }
 
