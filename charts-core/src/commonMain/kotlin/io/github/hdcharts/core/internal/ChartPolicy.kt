@@ -13,15 +13,16 @@ import io.github.hdcharts.core.style.AxisLabelStyle
  * @property minValues Fewest values a point needs. Passed to whichever series check runs.
  * @property allowNegative Whether a negative value is an error.
  * @property singleSeries Whether the chart needs exactly one series. Checked by
- *   [validateSingleSeries], which also matches the color count against the value count, so this
- *   policy's [colorsMatch] is not read.
+ *   [validateSingleSeries], which also matches the color count against the value count, so a policy
+ *   with this set declares no [colorsMatch].
  * @property hasAxis Whether the chart draws X and Y axes, and therefore validates its axis labels.
  * @property hasFixedRange Whether the chart's style carries optional range bounds, and therefore
  *   validates them.
- * @property colorsMatch How many colors the style must set, read from the data, or null to skip the
- *   check. Most charts match the series count. Radar matches it only when the data holds more than
- *   one series, and says so here rather than by reporting that it has no colors. Read once before
- *   the data-shape checks, so it must tolerate empty and misaligned data.
+ * @property colorsMatch How many colors the style must set, read from the data. Null skips the
+ *   check, except on a [ChartPolicy.singleSeries] chart, which counts colors against its value count
+ *   and so states no rule here. Most charts match the series count. Radar matches it only when the
+ *   data holds more than one series, and says so in its rule rather than by reporting that it has no
+ *   colors. Read once before the data-shape checks, so it must tolerate empty and misaligned data.
  */
 @InternalChartsApi
 data class ChartPolicy(
@@ -30,7 +31,7 @@ data class ChartPolicy(
     val singleSeries: Boolean,
     val hasAxis: Boolean,
     val hasFixedRange: Boolean,
-    val colorsMatch: (ChartData) -> Int?,
+    val colorsMatch: ((ChartData) -> Int?)?,
 )
 
 /**
@@ -81,7 +82,7 @@ fun ChartPolicy.errorsFor(
                 minValues = minValues,
                 allowNegative = allowNegative,
                 colorCount = inputs.colorCount,
-                expectedColors = colorsMatch(data),
+                expectedColors = colorsMatch?.invoke(data),
             )
         }.toMutableList()
     if (hasFixedRange) {

@@ -32,12 +32,7 @@ object BarChartSpec : ChartSpec<BarChartStyle> {
             singleSeries = true,
             hasAxis = true,
             hasFixedRange = true,
-            colorsMatch = { data ->
-                data.series
-                    .firstOrNull()
-                    ?.values
-                    ?.size
-            },
+            colorsMatch = null,
         )
 
     override fun validationInputs(style: BarChartStyle): ChartValidationInputs =

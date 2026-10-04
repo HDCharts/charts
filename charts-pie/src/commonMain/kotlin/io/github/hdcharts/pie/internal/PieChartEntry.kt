@@ -33,14 +33,8 @@ object PieChartSpec : ChartSpec<PieChartStyle> {
             singleSeries = true,
             hasAxis = false,
             hasFixedRange = false,
-            // A single-series chart already matches its value count, so this is never read. It is
-            // declared so this row reads the same way as every other chart's.
-            colorsMatch = { data ->
-                data.series
-                    .firstOrNull()
-                    ?.values
-                    ?.size
-            },
+            // A single-series chart counts its colors against its value count, so it states no rule.
+            colorsMatch = null,
         )
 
     /** A pie has no Cartesian axis, so there are no axis label styles to check, and no range bounds. */
