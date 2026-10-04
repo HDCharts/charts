@@ -287,6 +287,35 @@ class StackedBarChartTest {
 
     @OptIn(ExperimentalTestApi::class)
     @Test
+    fun stackedBarChart_selectedCategoryBlank_showsTheCallerTitle() =
+        runComposeUiTest {
+            // Arrange
+            val data =
+                chartDataOf(
+                    categories = listOf("Bar 1", "   ", "Bar 3"),
+                    ChartSeries(name = "S1", values = listOf(10.0, 20.0, 30.0)),
+                )
+            val expectedTitle = "Totals"
+
+            // Act
+            setContent {
+                StackedBarChart(
+                    data = data,
+                    title = expectedTitle,
+                    interactionEnabled = false,
+                    animateOnStart = false,
+                    selection = staticChartSelection(1),
+                )
+            }
+
+            // Assert
+            onNodeWithTag(TestTags.CHART_TITLE)
+                .assertTextEquals(expectedTitle)
+                .assertIsDisplayed()
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
     fun stackedBarChart_withXAxisLabelsHidden_doesNotRenderXAxisLayer() =
         runComposeUiTest {
             setContent {
