@@ -20,6 +20,7 @@ sync_source_dir() {
   local rel_path="$2"
   local cache_control="$3"
   local include_only_show_errors="${4:-false}"
+  local delete_extraneous="${5:-true}"
   local dst="${bucket_uri}/${rel_path}"
 
   if [[ ! -d "${src}" ]]; then
@@ -29,12 +30,15 @@ sync_source_dir() {
 
   local args=(
     aws s3 sync "${src}/" "${dst}/"
-    --delete
     --cache-control "${cache_control}"
   )
+  if [[ "${delete_extraneous}" == "true" ]]; then
+    args+=(--delete)
+  fi
   if [[ "${include_only_show_errors}" == "true" ]]; then
     args+=(--only-show-errors)
   fi
+  args+=("${@:6}")
 
   "${args[@]}"
 }
@@ -157,11 +161,17 @@ case "${mode}" in
         sync_subdir "${asset}/snapshot" "${cache_control_snapshot}" "true"
         ;;
       playground)
-        sync_source_dir \
-          "${PLAYGROUND_DIST_DIR:-playground/build/dist/js/developmentExecutable}" \
-          "playground/snapshot" \
-          "${cache_control_snapshot}" \
-          "true"
+        playground_dir="${PLAYGROUND_DIST_DIR:-playground/build/dist/wasmJs/productionExecutable}"
+        # Only content-hashed wasm is immutable; mirrors the wasm headers in charts-docs next.config.ts.
+        hashed_wasm="$(printf '[0-9a-f]%.0s' {1..20}).wasm"
+        cache_control_hashed="public, max-age=31536000, immutable"
+        # New wasm goes up first and old wasm is pruned last, so the live JS never points at a missing file.
+        sync_source_dir "${playground_dir}" "playground/snapshot" \
+          "${cache_control_hashed}" "true" "false" --exclude "*" --include "${hashed_wasm}"
+        sync_source_dir "${playground_dir}" "playground/snapshot" \
+          "${cache_control_snapshot}" "true" "true" --exclude "${hashed_wasm}"
+        sync_source_dir "${playground_dir}" "playground/snapshot" \
+          "${cache_control_hashed}" "true" "true" --exclude "*" --include "${hashed_wasm}"
         ;;
       shared)
         if [[ -d docs/static ]]; then
