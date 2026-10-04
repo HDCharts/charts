@@ -42,7 +42,7 @@ always evenly spaced, and in dense mode they stay on the same items while the ch
 A label comes from the data's own `categories` for that index — the render model holds the caller's
 categories rather than a copy of them. `resolveAxisLabel` is the single place that turns a missing or
 blank label into text, and it falls back to the **1-based item number** — item 0 draws "1". There is
-no second fallback: `MultiChartData.getLabel`, which used to return `"Missing Label 3"`, had no
+no second fallback: `ChartRenderData.getLabel`, which used to return `"Missing Label 3"`, had no
 callers and was removed.
 
 `planAxisXLabelStride` picks the step. It starts from the densest grid that keeps labels at least

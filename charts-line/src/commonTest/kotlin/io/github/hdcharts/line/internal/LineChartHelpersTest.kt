@@ -4,7 +4,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import io.github.hdcharts.core.internal.ANIMATION_DURATION_LINE_CHART
 import io.github.hdcharts.core.internal.bezier.cubicControlPointsForSegment
-import io.github.hdcharts.core.internal.model.MultiChartData
+import io.github.hdcharts.core.internal.model.ChartRenderData
 import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.model.ChartSeries
 import kotlin.test.Test
@@ -21,7 +21,7 @@ class LineChartHelpersTest {
         vararg series: ChartSeries,
         categories: List<String> = emptyList(),
         title: String = "Line",
-    ) = MultiChartData(
+    ) = ChartRenderData(
         data = ChartData(categories = categories, series = series.toList()),
         title = title,
     )
@@ -668,6 +668,6 @@ class LineChartHelpersTest {
         assertEquals(expected = listOf(1L, 2L, 3L), actual = steps)
     }
 
-    private fun singleSeriesData(points: List<Double>): MultiChartData =
+    private fun singleSeriesData(points: List<Double>): ChartRenderData =
         lineData(ChartSeries(name = "Series", values = points), title = "Single")
 }

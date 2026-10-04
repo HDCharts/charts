@@ -6,7 +6,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import io.github.hdcharts.core.internal.InternalChartsApi
 import io.github.hdcharts.core.internal.NO_SELECTION
-import io.github.hdcharts.core.internal.model.MultiChartData
+import io.github.hdcharts.core.internal.model.ChartRenderData
 import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.model.ChartSelection
 import io.github.hdcharts.core.model.ChartValueFormatter
@@ -23,7 +23,7 @@ import io.github.hdcharts.core.style.BarChartStyle
 @InternalChartsApi
 @Composable
 fun BarChartInternalPlot(
-    data: MultiChartData,
+    data: ChartRenderData,
     style: BarChartStyle,
     selection: ChartSelection,
     selectedIndex: Int,

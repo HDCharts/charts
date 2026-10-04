@@ -12,7 +12,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.hdcharts.core.internal.composable.Legend
-import io.github.hdcharts.core.internal.model.MultiChartData
+import io.github.hdcharts.core.internal.model.ChartRenderData
 import io.github.hdcharts.line.LineChartStyle
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -21,7 +21,7 @@ import kotlinx.collections.immutable.toImmutableList
 /** Header, plot and legend layout shared by [LineChartImpl] and [LiveLineChartImpl]. */
 @Composable
 internal fun LineChartFrame(
-    data: MultiChartData,
+    data: ChartRenderData,
     style: LineChartStyle,
     colors: ImmutableList<Color>,
     modifier: Modifier,

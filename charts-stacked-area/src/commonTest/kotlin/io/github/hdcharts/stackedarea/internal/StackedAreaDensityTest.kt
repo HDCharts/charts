@@ -1,6 +1,6 @@
 package io.github.hdcharts.stackedarea.internal
 
-import io.github.hdcharts.core.internal.model.MultiChartData
+import io.github.hdcharts.core.internal.model.ChartRenderData
 import io.github.hdcharts.core.model.ChartSeries
 import io.github.hdcharts.core.model.chartDataOf
 import kotlin.test.Test
@@ -74,8 +74,8 @@ class StackedAreaDensityTest {
     private fun seriesMajorData(
         points: Int,
         categories: List<String> = List(points) { index -> "P${index + 1}" },
-    ): MultiChartData =
-        MultiChartData(
+    ): ChartRenderData =
+        ChartRenderData(
             data =
                 chartDataOf(
                     categories = categories,

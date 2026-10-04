@@ -12,7 +12,7 @@ import io.github.hdcharts.core.internal.density.bucketCenterIndex
 import io.github.hdcharts.core.internal.density.bucketSizeForTarget
 import io.github.hdcharts.core.internal.density.buildBucketRanges
 import io.github.hdcharts.core.internal.density.shouldUseScrollableDensity
-import io.github.hdcharts.core.internal.model.MultiChartData
+import io.github.hdcharts.core.internal.model.ChartRenderData
 import io.github.hdcharts.core.internal.model.minMax
 import io.github.hdcharts.core.internal.model.resolveOptionalRange
 import io.github.hdcharts.core.model.ChartData
@@ -50,9 +50,9 @@ internal fun sourceIndexForRenderIndex(
         ?: NO_SELECTION
 
 internal fun aggregateForCompactDensity(
-    data: MultiChartData,
+    data: ChartRenderData,
     targetPoints: Int = LINE_DENSE_THRESHOLD,
-): MultiChartData {
+): ChartRenderData {
     if (targetPoints <= 1) return data
     val sourcePointsCount = data.valueCount()
     if (sourcePointsCount <= targetPoints) return data
@@ -67,7 +67,7 @@ internal fun aggregateForCompactDensity(
             )
         }
 
-    return MultiChartData(
+    return ChartRenderData(
         data =
             ChartData(
                 categories = if (data.hasCategories()) aggregatedCategories else emptyList(),
@@ -78,7 +78,7 @@ internal fun aggregateForCompactDensity(
 }
 
 /** X-axis labels of a line chart: the shared categories, unless every one of them is blank. */
-internal fun resolveLineXAxisLabels(data: MultiChartData): List<String> =
+internal fun resolveLineXAxisLabels(data: ChartRenderData): List<String> =
     data.categories
         .takeUnless { it.all(String::isBlank) }
         .orEmpty()
@@ -90,7 +90,7 @@ internal fun resolveLineXAxisLabels(data: MultiChartData): List<String> =
  * bound is overridden and the data-derived opposite bound crosses it, the override still wins and
  * the opposite bound is clamped to it. See [resolveOptionalRange].
  */
-internal fun MultiChartData.resolveLineRange(
+internal fun ChartRenderData.resolveLineRange(
     minValue: Double?,
     maxValue: Double?,
 ): Pair<Double, Double> {

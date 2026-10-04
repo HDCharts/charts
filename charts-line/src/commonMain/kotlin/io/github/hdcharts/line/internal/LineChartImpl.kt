@@ -14,7 +14,7 @@ import io.github.hdcharts.core.internal.composable.rememberDenseExpandedState
 import io.github.hdcharts.core.internal.composable.rememberZoomScaleState
 import io.github.hdcharts.core.internal.composable.zoomInScale
 import io.github.hdcharts.core.internal.composable.zoomOutScale
-import io.github.hdcharts.core.internal.model.MultiChartData
+import io.github.hdcharts.core.internal.model.ChartRenderData
 import io.github.hdcharts.line.LineChartStyle
 import kotlinx.collections.immutable.ImmutableList
 
@@ -32,7 +32,7 @@ private val HEADER_TEST_TAGS =
 /** Interactive line chart: dense fit/expand, zoom, scrolling and selection. */
 @Composable
 internal fun LineChartImpl(
-    data: MultiChartData,
+    data: ChartRenderData,
     modifier: Modifier = Modifier,
     style: LineChartStyle,
     interactionEnabled: Boolean,

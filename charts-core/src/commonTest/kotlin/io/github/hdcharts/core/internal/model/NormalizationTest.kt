@@ -7,7 +7,7 @@ import kotlin.test.assertContentEquals
 
 class NormalizationTest {
     private fun model(vararg values: List<Double>) =
-        MultiChartData(
+        ChartRenderData(
             data =
                 ChartData(
                     categories = emptyList(),

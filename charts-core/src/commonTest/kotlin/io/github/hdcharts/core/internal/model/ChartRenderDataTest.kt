@@ -24,12 +24,12 @@ import kotlin.test.assertFalse
  * is where that assumption is actually enforced: `errorsFor` rejects the same inputs, so the seam
  * never builds a model from them.
  */
-class MultiChartDataTest {
+class ChartRenderDataTest {
     private fun model(
         vararg series: ChartSeries,
         categories: List<String> = emptyList(),
         title: String = "Title",
-    ) = MultiChartData(
+    ) = ChartRenderData(
         data = ChartData(categories = categories, series = series.toList()),
         title = title,
     )
@@ -124,12 +124,41 @@ class MultiChartDataTest {
         )
     }
 
+    /** One total per series, in the caller's order, so a reader can index it like [series]. */
+    @Test
+    fun seriesTotals_sumsEachSeriesInOrder() {
+        val data =
+            model(
+                ChartSeries(name = "Bar1", values = listOf(1.0, 2.0)),
+                ChartSeries(name = "Bar2", values = listOf(4.0)),
+                ChartSeries(name = "Bar3", values = listOf(-1.0, 0.5)),
+            )
+
+        assertContentEquals(expected = listOf(3.0, 4.0, -0.5), actual = data.seriesTotals)
+    }
+
+    @Test
+    fun seriesTotals_withNoSeries_isEmpty() {
+        assertEquals(expected = emptyList(), actual = model().seriesTotals)
+    }
+
+    /**
+     * Cached, so a reader in the draw loop cannot see the totals change under it, and a second read
+     * costs nothing.
+     */
+    @Test
+    fun seriesTotals_isTheSameListOnEveryRead() {
+        val data = model(ChartSeries(name = "Bar1", values = listOf(1.0, 2.0)))
+
+        assertEquals(expected = data.seriesTotals, actual = data.seriesTotals)
+    }
+
     /** The model is the caller's data, not a copy of it, so nothing can drift between the two. */
     @Test
     fun seriesAndCategories_areTheCallersOwn() {
         val categories = listOf("Jan", "Feb")
         val series = listOf(ChartSeries(name = "One", values = listOf(1.0, 2.0)))
-        val data = MultiChartData(data = ChartData(categories = categories, series = series), title = "T")
+        val data = ChartRenderData(data = ChartData(categories = categories, series = series), title = "T")
 
         assertEquals(expected = listOf("One"), actual = data.series.map { it.name })
         assertContentEquals(expected = listOf(1.0, 2.0), actual = data.series.single().values)

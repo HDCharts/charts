@@ -1,7 +1,7 @@
 package io.github.hdcharts.stackedbar.internal
 
 import io.github.hdcharts.core.internal.NO_SELECTION
-import io.github.hdcharts.core.internal.model.MultiChartData
+import io.github.hdcharts.core.internal.model.ChartRenderData
 import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.model.ChartSeries
 import kotlin.math.max
@@ -10,7 +10,7 @@ import io.github.hdcharts.core.internal.density.bucketSizeForTarget as bucketSiz
 import io.github.hdcharts.core.internal.density.buildBucketRanges as buildBucketRangesCore
 
 internal data class StackedBarRenderData(
-    val data: MultiChartData,
+    val data: ChartRenderData,
     val sourceSize: Int,
     val sourceIndexByRenderIndex: List<Int>,
     val bucketRanges: List<IntRange>,
@@ -25,13 +25,11 @@ internal data class StackedBarRenderData(
     }
 }
 
-internal fun resolveStackedTotalsRange(data: MultiChartData): Pair<Double, Double> {
-    if (data.series.isEmpty()) return 0.0 to 1.0
-    val totals = data.series.map { item -> item.values.sum() }
-    val minTotal = totals.minOrNull() ?: 0.0
-    val maxTotal = totals.maxOrNull() ?: 0.0
-    val resolvedMin = minOf(0.0, minTotal)
-    val resolvedMax = maxOf(0.0, maxTotal)
+internal fun resolveStackedTotalsRange(data: ChartRenderData): Pair<Double, Double> {
+    val totals = data.seriesTotals
+    if (totals.isEmpty()) return 0.0 to 1.0
+    val resolvedMin = minOf(0.0, totals.min())
+    val resolvedMax = maxOf(0.0, totals.max())
     return if (resolvedMax <= resolvedMin) {
         resolvedMin to (resolvedMin + 1.0)
     } else {
@@ -66,7 +64,7 @@ internal fun contentWidth(
 }
 
 internal fun aggregateForCompactDensity(
-    data: MultiChartData,
+    data: ChartRenderData,
     targetBars: Int,
 ): StackedBarRenderData {
     val sourceSize = data.series.size
@@ -99,7 +97,7 @@ internal fun aggregateForCompactDensity(
 
     return StackedBarRenderData(
         data =
-            MultiChartData(
+            ChartRenderData(
                 data =
                     ChartData(
                         categories = data.categories,
@@ -113,7 +111,7 @@ internal fun aggregateForCompactDensity(
     )
 }
 
-internal fun identityRenderData(data: MultiChartData): StackedBarRenderData {
+internal fun identityRenderData(data: ChartRenderData): StackedBarRenderData {
     val sourceSize = data.series.size
     return StackedBarRenderData(
         data = data,

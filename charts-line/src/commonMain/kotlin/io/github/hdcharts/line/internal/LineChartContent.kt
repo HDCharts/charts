@@ -60,7 +60,7 @@ import io.github.hdcharts.core.internal.interaction.selectedIndexForTouchX
 import io.github.hdcharts.core.internal.layout.chartCanvasFits
 import io.github.hdcharts.core.internal.layout.placedHorizontalScrollPx
 import io.github.hdcharts.core.internal.layout.wrapContentChartModifier
-import io.github.hdcharts.core.internal.model.MultiChartData
+import io.github.hdcharts.core.internal.model.ChartRenderData
 import io.github.hdcharts.core.internal.model.normalizeByMinMax
 import io.github.hdcharts.core.model.ChartValueFormatter
 import io.github.hdcharts.line.LineChartStyle
@@ -87,7 +87,7 @@ internal fun Density.lineVerticalSafeInset(style: LineChartStyle): Float {
 
 @Composable
 internal fun LineChartContent(
-    data: MultiChartData,
+    data: ChartRenderData,
     style: LineChartStyle,
     colors: ImmutableList<Color>,
     interactionEnabled: Boolean,

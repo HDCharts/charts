@@ -1,7 +1,7 @@
 package io.github.hdcharts.core.internal
 
 import androidx.compose.ui.unit.Density
-import io.github.hdcharts.core.internal.model.MultiChartData
+import io.github.hdcharts.core.internal.model.ChartRenderData
 import io.github.hdcharts.core.model.ChartData
 
 /**
@@ -51,5 +51,5 @@ interface ChartSpec<S : Any> {
     fun convert(
         data: ChartData,
         title: String?,
-    ): MultiChartData = MultiChartData(data = data, title = title.orEmpty())
+    ): ChartRenderData = ChartRenderData(data = data, title = title.orEmpty())
 }
