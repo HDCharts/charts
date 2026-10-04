@@ -115,9 +115,9 @@ what radar does.
 ## Internal model types
 
 Everything below the seam reads the render model the checks make possible, and trusts it. The model
-is `MultiChartData`: the caller's own `ChartData` plus the chart's `title`. Four constraints on it:
+is `ChartRenderData`: the caller's own `ChartData` plus the chart's `title`. Four constraints on it:
 
-**A value that is required is not optional, and optionality is explicit.** `MultiChartData.title` is a
+**A value that is required is not optional, and optionality is explicit.** `ChartRenderData.title` is a
 `String`, so an absent title is written as `""`, and `ChartSeries.name` is a `String?` that a chart
 converts to `""` when it draws a name. That makes "no label" indistinguishable from a blank one, and
 the cost shows up where a stage has to repair it: stacked bar's compaction invents
@@ -145,11 +145,11 @@ the obvious wrapper is wrong for this model: a `@JvmInline value class` element 
 boxed on JVM, Native and JS, so a ten-million-point chart would allocate ten million boxes and every
 arithmetic site would pay to unbox. Finiteness is therefore a property of construction — the only way
 into the model is through this page's checks — and the invariant is pinned by
-`MultiChartDataTest` rather than by throwing.
+`ChartRenderDataTest` rather than by throwing.
 
 ## Tests
 
 `DataValidationTest` in `charts-core` covers every function and the message text. Each chart's
-tests check that its errors are shown for invalid input. `MultiChartDataTest` covers the model the
+tests check that its errors are shown for invalid input. `ChartRenderDataTest` covers the model the
 checks make possible: that it holds the caller's own series and categories, the stacked-bar transpose,
 and that `errorsFor` rejects the data the model assumes.

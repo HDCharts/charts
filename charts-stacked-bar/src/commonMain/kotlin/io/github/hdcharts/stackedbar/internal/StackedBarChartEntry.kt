@@ -11,7 +11,7 @@ import io.github.hdcharts.core.internal.ChartValidationInputs
 import io.github.hdcharts.core.internal.InternalChartsApi
 import io.github.hdcharts.core.internal.NO_SELECTION
 import io.github.hdcharts.core.internal.ValidationErrors
-import io.github.hdcharts.core.internal.model.MultiChartData
+import io.github.hdcharts.core.internal.model.ChartRenderData
 import io.github.hdcharts.core.internal.model.transposeForStacking
 import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.model.ChartValueFormatters
@@ -58,7 +58,7 @@ object StackedBarChartSpec : ChartSpec<StackedBarChartStyle> {
     override fun convert(
         data: ChartData,
         title: String?,
-    ): MultiChartData = MultiChartData(data = data, title = title.orEmpty()).transposeForStacking()
+    ): ChartRenderData = ChartRenderData(data = data, title = title.orEmpty()).transposeForStacking()
 }
 
 /**

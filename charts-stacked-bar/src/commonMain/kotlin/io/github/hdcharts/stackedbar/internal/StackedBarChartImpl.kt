@@ -57,7 +57,7 @@ import io.github.hdcharts.core.internal.drawing.drawSelectionLine
 import io.github.hdcharts.core.internal.layout.chartCanvasFits
 import io.github.hdcharts.core.internal.layout.fillMaxSizeChartModifier
 import io.github.hdcharts.core.internal.layout.placedHorizontalScrollPx
-import io.github.hdcharts.core.internal.model.MultiChartData
+import io.github.hdcharts.core.internal.model.ChartRenderData
 import io.github.hdcharts.core.internal.model.normalizeStackedValues
 import io.github.hdcharts.stackedbar.StackedBarChartStyle
 import kotlinx.collections.immutable.ImmutableList
@@ -79,7 +79,7 @@ private val HEADER_TEST_TAGS =
 
 @Composable
 internal fun StackedBarChartImpl(
-    data: MultiChartData,
+    data: ChartRenderData,
     title: String,
     style: StackedBarChartStyle,
     colors: ImmutableList<Color>,
@@ -295,7 +295,7 @@ internal fun StackedBarChartImpl(
 
 @Composable
 private fun StackedBarChartContent(
-    data: MultiChartData,
+    data: ChartRenderData,
     style: StackedBarChartStyle,
     colors: ImmutableList<Color>,
     showXAxisLabels: Boolean,
@@ -553,7 +553,7 @@ private fun StackedBarChartContent(
 }
 
 private fun DrawScope.drawStackedBars(
-    data: MultiChartData,
+    data: ChartRenderData,
     style: StackedBarChartStyle,
     progress: List<Animatable<Float, AnimationVector1D>>,
     selectedIndex: Int,
@@ -570,13 +570,14 @@ private fun DrawScope.drawStackedBars(
             else -> visibleRange
         }
     val showSelection = style.selection.visible && selectedIndex in data.series.indices
+    val barTotals = data.seriesTotals
     var selectedMark: ClosedFloatingPointRange<Float>? = null
     for (index in indices) {
         val bar = data.series[index]
         val isSelected = showSelection && index == selectedIndex
         var topOffset = size.height
         val left = index * (barWidthPx + spacingPx)
-        val barTotal = bar.values.sum()
+        val barTotal = barTotals[index]
         bar.values.forEachIndexed { dataIndex, value ->
             val segmentShare =
                 when {

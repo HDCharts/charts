@@ -1,7 +1,7 @@
 package io.github.hdcharts.stackedarea.internal
 
 import io.github.hdcharts.core.internal.NO_SELECTION
-import io.github.hdcharts.core.internal.model.MultiChartData
+import io.github.hdcharts.core.internal.model.ChartRenderData
 import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.model.ChartSeries
 import io.github.hdcharts.core.internal.density.aggregateLabelsByCenterValue as aggregateLabelsByCenterValueCore
@@ -13,7 +13,7 @@ import io.github.hdcharts.core.internal.density.shouldUseScrollableDensity as sh
 internal const val STACKED_AREA_DENSE_THRESHOLD = 50
 
 internal data class StackedAreaRenderData(
-    val data: MultiChartData,
+    val data: ChartRenderData,
     val sourcePointsCount: Int,
     val sourceIndexByRenderIndex: List<Int>,
     val bucketRanges: List<IntRange>,
@@ -34,7 +34,7 @@ internal fun shouldUseScrollableDensity(pointsCount: Int): Boolean =
         threshold = STACKED_AREA_DENSE_THRESHOLD,
     )
 
-internal fun resolveStackedAreaTotalsRange(data: MultiChartData): Pair<Double, Double> {
+internal fun resolveStackedAreaTotalsRange(data: ChartRenderData): Pair<Double, Double> {
     val pointsCount = data.valueCount()
     if (pointsCount <= 0) return 0.0 to 1.0
 
@@ -54,7 +54,7 @@ internal fun resolveStackedAreaTotalsRange(data: MultiChartData): Pair<Double, D
 }
 
 internal fun aggregateForCompactDensity(
-    data: MultiChartData,
+    data: ChartRenderData,
     targetPoints: Int = STACKED_AREA_DENSE_THRESHOLD,
 ): StackedAreaRenderData {
     val sourcePointsCount = data.valueCount()
@@ -76,7 +76,7 @@ internal fun aggregateForCompactDensity(
 
     return StackedAreaRenderData(
         data =
-            MultiChartData(
+            ChartRenderData(
                 data =
                     ChartData(
                         categories = if (data.hasCategories()) aggregatedCategories else emptyList(),
@@ -90,7 +90,7 @@ internal fun aggregateForCompactDensity(
     )
 }
 
-internal fun identityRenderData(data: MultiChartData): StackedAreaRenderData {
+internal fun identityRenderData(data: ChartRenderData): StackedAreaRenderData {
     val sourcePointsCount = data.valueCount()
     return StackedAreaRenderData(
         data = data,

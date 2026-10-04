@@ -12,7 +12,7 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import io.github.hdcharts.core.internal.model.MultiChartData
+import io.github.hdcharts.core.internal.model.ChartRenderData
 import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.model.ChartSeries
 import io.github.hdcharts.core.model.chartDataOf
@@ -93,7 +93,7 @@ class ChartEntryTest {
         title: String?,
         style: TestEntryStyle = TestEntryStyle(size = 8.dp),
         spec: TestSpec = TestSpec(),
-        content: @Composable (data: MultiChartData, style: TestEntryStyle) -> Unit = { _, _ -> },
+        content: @Composable (data: ChartRenderData, style: TestEntryStyle) -> Unit = { _, _ -> },
     ) {
         ChartEntry(
             spec = spec,
@@ -144,8 +144,8 @@ class ChartEntryTest {
         override fun convert(
             data: ChartData,
             title: String?,
-        ): MultiChartData =
-            MultiChartData(
+        ): ChartRenderData =
+            ChartRenderData(
                 data = data,
                 title = "$title:${data.series.size}",
             )

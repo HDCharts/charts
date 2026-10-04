@@ -9,7 +9,7 @@ import io.github.hdcharts.core.internal.ChartSpec
 import io.github.hdcharts.core.internal.ChartValidationInputs
 import io.github.hdcharts.core.internal.InternalChartsApi
 import io.github.hdcharts.core.internal.ValidationErrors
-import io.github.hdcharts.core.internal.model.MultiChartData
+import io.github.hdcharts.core.internal.model.ChartRenderData
 import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.line.LineChartStyle
 import io.github.hdcharts.line.clamp
@@ -30,11 +30,7 @@ object LineChartSpec : ChartSpec<LineChartStyle> {
             colorsMatch = { data -> data.series.size },
         )
 
-    /**
-     * The style values validation reads: series colors, the optional fixed range, and both axis label
-     * styles.
-     */
-    override fun validationInputs(style: LineChartStyle): ChartValidationInputs =
+    override fun validationInputs(style: LineChartStyle) =
         ChartValidationInputs(
             colorCount = style.line.colors.size,
             rangeMin = style.range.min,
@@ -46,7 +42,7 @@ object LineChartSpec : ChartSpec<LineChartStyle> {
     override fun clamp(
         style: LineChartStyle,
         density: Density,
-    ): LineChartStyle = style.clamp(density)
+    ) = style.clamp(density)
 }
 
 /**
@@ -59,7 +55,7 @@ internal fun LineChartEntry(
     modifier: Modifier,
     style: LineChartStyle,
     title: String?,
-    content: @Composable (data: MultiChartData, style: LineChartStyle) -> Unit,
+    content: @Composable (data: ChartRenderData, style: LineChartStyle) -> Unit,
 ) {
     ChartEntry(
         spec = LineChartSpec,

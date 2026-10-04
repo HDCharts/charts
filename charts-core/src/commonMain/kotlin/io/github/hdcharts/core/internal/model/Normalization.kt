@@ -16,7 +16,7 @@ fun normalizeValue(
         else -> ((value - minValue) / range).toFloat().coerceIn(0f, 1f)
     }
 
-fun MultiChartData.normalizeByMinMax(
+fun ChartRenderData.normalizeByMinMax(
     minMax: Pair<Double, Double>,
     zeroRangeValue: Float,
 ): List<List<Float>> {
@@ -52,15 +52,13 @@ fun resolveOptionalRange(
     }
 }
 
-fun MultiChartData.normalizeStackedValues(): List<Float> {
-    val dataMax = series.maxOfOrNull { it.values.sum() } ?: 0.0
+fun ChartRenderData.normalizeStackedValues(): List<Float> {
+    val dataMax = seriesTotals.maxOrNull() ?: 0.0
     val range = if (dataMax == 0.0) 1.0 else dataMax
-    return series.map { item ->
-        (item.values.sum() / range).toFloat().coerceIn(0f, 1f)
-    }
+    return seriesTotals.map { total -> (total / range).toFloat().coerceIn(0f, 1f) }
 }
 
-fun MultiChartData.normalizeStackedAreaValues(): List<List<Float>> {
+fun ChartRenderData.normalizeStackedAreaValues(): List<List<Float>> {
     if (series.isEmpty()) return emptyList()
     val pointsCount = valueCount()
     if (pointsCount == 0) return series.map { emptyList() }

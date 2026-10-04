@@ -5,7 +5,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import io.github.hdcharts.core.internal.composable.ChartErrors
-import io.github.hdcharts.core.internal.model.MultiChartData
+import io.github.hdcharts.core.internal.model.ChartRenderData
 import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.style.ChartContainerStyle
 import kotlinx.collections.immutable.toImmutableList
@@ -35,7 +35,7 @@ fun <S : Any> ChartEntry(
     data: ChartData,
     style: S,
     errorStyle: ChartContainerStyle,
-    content: @Composable (data: MultiChartData, style: S) -> Unit,
+    content: @Composable (data: ChartRenderData, style: S) -> Unit,
     modifier: Modifier = Modifier,
     title: String? = null,
 ) {
@@ -53,7 +53,9 @@ fun <S : Any> ChartEntry(
         )
         return
     }
+    // Convert to internal data
     val internalData = remember(data, title) { spec.convert(data, title) }
+    // Clamp unsafe styles
     val drawStyle = remember(style, density) { spec.clamp(style, density) }
     content(internalData, drawStyle)
 }

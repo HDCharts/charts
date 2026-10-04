@@ -38,7 +38,7 @@ import io.github.hdcharts.core.internal.NO_SELECTION
 import io.github.hdcharts.core.internal.TestTags
 import io.github.hdcharts.core.internal.composable.rememberShowState
 import io.github.hdcharts.core.internal.layout.fillMaxSizeChartModifier
-import io.github.hdcharts.core.internal.model.MultiChartData
+import io.github.hdcharts.core.internal.model.ChartRenderData
 import io.github.hdcharts.core.internal.model.minMax
 import io.github.hdcharts.core.internal.model.normalizeByMinMax
 import io.github.hdcharts.core.style.StyleDefaults
@@ -55,7 +55,7 @@ private val SERIES_TOUCH_RADIUS = 24.dp
 
 @Composable
 internal fun RadarChartContent(
-    data: MultiChartData,
+    data: ChartRenderData,
     style: RadarChartStyle,
     colors: ImmutableList<Color>,
     axisLabels: ImmutableList<String> = persistentListOf(),
@@ -87,7 +87,7 @@ internal fun RadarChartContent(
         selectedIndex.intValue = forcedSelectedIndex
     }
 
-    BoxWithConstraints(modifier = fillMaxSizeChartModifier(style.chartContainerStyle)) {
+    BoxWithConstraints(fillMaxSizeChartModifier(style.chartContainerStyle)) {
         val density = LocalDensity.current
         val widthPx = with(density) { maxWidth.toPx() }
         val heightPx = with(density) { maxHeight.toPx() }
@@ -294,7 +294,7 @@ internal fun RadarChartContent(
 }
 
 private fun DrawScope.drawRadar(
-    data: MultiChartData,
+    data: ChartRenderData,
     style: RadarChartStyle,
     colors: ImmutableList<Color>,
     axisCount: Int,

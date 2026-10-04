@@ -71,7 +71,7 @@ import io.github.hdcharts.core.internal.interaction.selectedIndexForTouchX
 import io.github.hdcharts.core.internal.layout.chartCanvasFits
 import io.github.hdcharts.core.internal.layout.fillMaxSizeChartModifier
 import io.github.hdcharts.core.internal.layout.placedHorizontalScrollPx
-import io.github.hdcharts.core.internal.model.MultiChartData
+import io.github.hdcharts.core.internal.model.ChartRenderData
 import io.github.hdcharts.core.internal.model.normalizeStackedAreaValues
 import io.github.hdcharts.stackedarea.StackedAreaChartStyle
 import kotlinx.collections.immutable.ImmutableList
@@ -95,7 +95,7 @@ private val HEADER_TEST_TAGS =
 
 @Composable
 internal fun StackedAreaChartImpl(
-    data: MultiChartData,
+    data: ChartRenderData,
     title: String,
     style: StackedAreaChartStyle,
     areaColors: ImmutableList<Color>,
@@ -304,7 +304,7 @@ internal fun StackedAreaChartImpl(
 
 @Composable
 private fun StackedAreaChartContent(
-    data: MultiChartData,
+    data: ChartRenderData,
     style: StackedAreaChartStyle,
     areaColors: ImmutableList<Color>,
     interactionEnabled: Boolean,

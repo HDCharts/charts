@@ -12,6 +12,8 @@ import kotlinx.collections.immutable.ImmutableList
  * It holds the public model rather than a copy of it, so nothing is converted twice and there is no
  * second type named `ChartData` for a reader to confuse with the caller's. [series] and [categories]
  * are the public model's own fields, so code below the seam reads them exactly as a caller does.
+ * The one value it works out for itself is [seriesTotals], which three readers would otherwise
+ * each walk the data to get.
  *
  * **Its contents are total because of where it comes from, not because it checks.** `ChartEntry`
  * validates, and only data that passes reaches this type: at least one series, the same number of
@@ -23,7 +25,7 @@ import kotlinx.collections.immutable.ImmutableList
  * [transposeForStacking] is the one construction that changes the orientation, and it is the one
  * place [categories] and [series] stop meaning what they mean everywhere else.
  */
-data class MultiChartData(
+data class ChartRenderData(
     val data: ChartData,
     val title: String,
 ) {
@@ -37,6 +39,21 @@ data class MultiChartData(
     fun valueCount(): Int = series.firstOrNull()?.values?.size ?: 0
 
     fun hasCategories(): Boolean = categories.isNotEmpty()
+
+    /**
+     * The sum of each series' values, one entry per series in [series]' order, worked out once.
+     *
+     * Stacked bar needs that one fact in three places — the axis domain, the height each bar
+     * animates to, and the share of a bar that each segment takes — and each of them is a separate
+     * walk over the same numbers, the last of them inside the draw loop and so once per frame.
+     * Cached here, the three read it instead.
+     *
+     * **Entry `i` is series `i]'s total, and which series that is depends on the chart.** In a
+     * transposed model a series is a bar, so this is the bar total. A chart that draws stacked
+     * area needs the same sums read the other way round, per point, and gets them from its own
+     * normalizer rather than from here.
+     */
+    val seriesTotals: List<Double> by lazy { series.map { item -> item.values.sum() } }
 }
 
 /**
@@ -45,7 +62,7 @@ data class MultiChartData(
  * One pass, with no seed: validation rejects non-finite values before a render model exists, so
  * every value read here is finite.
  */
-fun MultiChartData.minMax(): Pair<Double, Double> {
+fun ChartRenderData.minMax(): Pair<Double, Double> {
     var min = Double.POSITIVE_INFINITY
     var max = Double.NEGATIVE_INFINITY
     for (item in series) {
@@ -64,14 +81,14 @@ fun MultiChartData.minMax(): Pair<Double, Double> {
  * here, where it stacks, rather than storing a second model shape.
  *
  * **In a transposed model the two fields swap roles, and this is the only function where that is
- * true.** [MultiChartData.series] holds one entry per bar, so `series[i].name` labels the bar and
- * `series[i].values` are that bar's segment values. [MultiChartData.categories] holds the segment
+ * true.** [ChartRenderData.series] holds one entry per bar, so `series[i].name` labels the bar and
+ * `series[i].values` are that bar's segment values. [ChartRenderData.categories] holds the segment
  * names, because they label the *points* within each series. Stacked bar is the only reader.
  */
 @InternalChartsApi
-fun MultiChartData.transposeForStacking(): MultiChartData {
+fun ChartRenderData.transposeForStacking(): ChartRenderData {
     val segmentNames = series.map { it.name.orEmpty() }
-    return MultiChartData(
+    return ChartRenderData(
         data =
             ChartData(
                 categories = segmentNames,
