@@ -26,7 +26,7 @@ fun PieChartDefaultPreview() {
     val sample = SCREENSHOT_PIE_SAMPLE_USE_CASE.initialPieSample()
     ScreenshotChartSurface {
         PieChart(
-            data = sample.slices,
+            data = sample.data,
             title = sample.title,
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
         )
@@ -40,7 +40,7 @@ fun PieChartSelectedSlicePreview() {
     val sample = SCREENSHOT_PIE_SAMPLE_USE_CASE.initialPieSample()
     ScreenshotChartSurface {
         PieChart(
-            data = sample.slices,
+            data = sample.data,
             title = sample.title,
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
             interactionEnabled = false,
@@ -56,7 +56,7 @@ fun PieChartManySlicesPreview() {
     val sample = SCREENSHOT_PIE_SAMPLE_USE_CASE.initialManySlicesPieSample()
     ScreenshotChartSurface {
         PieChart(
-            data = sample.slices,
+            data = sample.data,
             title = sample.title,
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
         )
@@ -70,7 +70,7 @@ fun PieChartDonutPreview() {
     val sample = SCREENSHOT_PIE_SAMPLE_USE_CASE.initialPieSample()
     ScreenshotChartSurface {
         PieChart(
-            data = sample.slices,
+            data = sample.data,
             title = sample.title,
             style = PieChartDefaults.style(donut = PieChartDefaults.donut(holePercentage = DONUT_HOLE_PERCENTAGE)),
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
@@ -86,7 +86,7 @@ fun PieChartHiddenLegendPreview() {
     val sample = SCREENSHOT_PIE_SAMPLE_USE_CASE.initialPieSample()
     ScreenshotChartSurface {
         PieChart(
-            data = sample.slices,
+            data = sample.data,
             modifier = Modifier.fillMaxWidth(),
             title = sample.title,
             style = PieChartDefaults.style(legend = PieChartDefaults.legend(visible = false)),
@@ -95,7 +95,7 @@ fun PieChartHiddenLegendPreview() {
     }
 }
 
-/** Slices without their own color get shades generated from the style's base color. */
+/** With no palette set, slices get shades generated from the style's base color. */
 @PreviewTest
 @ScreenshotPreview
 @Composable
@@ -104,7 +104,7 @@ fun PieChartBaseColorPreview() {
     ScreenshotChartSurface {
         val baseColor = LocalChartColors.current.seriesColor(BASE_COLOR_INDEX)
         PieChart(
-            data = sample.slices,
+            data = sample.data,
             title = sample.title,
             style = PieChartDefaults.style(slices = PieChartDefaults.slices(baseColor = baseColor)),
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
@@ -112,17 +112,18 @@ fun PieChartBaseColorPreview() {
     }
 }
 
-/** Colors set on each slice take precedence over the style's base color. */
+/** A palette set on the style is drawn in slice order, one color per slice. */
 @PreviewTest
 @ScreenshotPreview
 @Composable
 fun PieChartSliceColorsPreview() {
     val sample = SCREENSHOT_PIE_SAMPLE_USE_CASE.initialPieSample()
     ScreenshotChartSurface {
-        val colors = LocalChartColors.current.seriesColors(sample.slices.size)
+        val colors = LocalChartColors.current.seriesColors(sample.data.categories.size)
         PieChart(
-            data = sample.slices.mapIndexed { index, slice -> slice.copy(color = colors[index]) },
+            data = sample.data,
             title = sample.title,
+            style = PieChartDefaults.style(slices = PieChartDefaults.slices(colors = colors)),
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
         )
     }

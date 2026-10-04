@@ -20,6 +20,7 @@ import io.github.hdcharts.core.style.LegendDefaults
 import io.github.hdcharts.core.style.LegendStyle
 import io.github.hdcharts.core.style.StyleDefaults
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 
 /**
  * The style for a Pie Chart, grouped into cohesive sub-styles.
@@ -70,23 +71,24 @@ data class PieChartDonutStyle(
  * Slice configuration for a [PieChartStyle].
  *
  * @property alpha The alpha value applied to rendered pie slices.
- * @property baseColor The base color used to generate shades for slices that do not
- * specify their own color via [io.github.hdcharts.pie.PieSlice.color].
+ * @property baseColor The base color used to generate shades when [colors] is empty.
+ * @property colors The colors the chart draws for slices, in slice order. When empty, a shade is
+ * generated for every slice from [baseColor]. When set, its count must match the slice count.
  */
 @Immutable
 data class PieChartSlicesStyle(
     val alpha: Float,
     val baseColor: Color,
+    val colors: ImmutableList<Color>,
 ) {
     /**
-     * Returns the default colors for [sliceCount] slices, before [alpha] is applied:
-     * generated shades of [baseColor]. A slice with its own
-     * [io.github.hdcharts.pie.PieSlice.color] uses that color instead.
+     * Returns the default colors for [sliceCount] slices, before `alpha` is applied:
+     * [colors] when set, or generated shades of [baseColor] when it is empty.
      */
     fun resolveColors(sliceCount: Int): ImmutableList<Color> =
         resolvePaletteColors(
             baseColor = baseColor,
-            colors = emptyList(),
+            colors = colors,
             count = sliceCount,
             singleItemUsesBase = false,
         )
@@ -99,6 +101,7 @@ data class PieChartSlicesStyle(
         PieChartSlicesStyle(
             alpha = alpha.clampAlpha(),
             baseColor = baseColor,
+            colors = colors,
         )
 }
 
@@ -168,18 +171,21 @@ object PieChartDefaults {
     /**
      * Returns a [PieChartSlicesStyle] with the provided parameters or their default values.
      *
-     * @param baseColor The base color used to generate shades for slices that do not specify
-     * their own color via [io.github.hdcharts.pie.PieSlice.color]. Defaults to
+     * @param baseColor The base color used to generate shades when [colors] is empty. Defaults to
      * the primary color of the MaterialTheme.
      * @param alpha The alpha value applied to rendered pie slices. Defaults to 1f.
+     * @param colors The colors to draw slices in, in slice order. Empty by default, which draws a
+     * generated shade per slice. When set, the count must match the slice count.
      */
     @Composable
     fun slices(
         baseColor: Color = StyleDefaults.seriesColor,
         alpha: Float = StyleDefaults.seriesAlpha,
+        colors: List<Color> = emptyList(),
     ) = PieChartSlicesStyle(
         alpha = alpha,
         baseColor = baseColor,
+        colors = colors.toImmutableList(),
     )
 
     /**

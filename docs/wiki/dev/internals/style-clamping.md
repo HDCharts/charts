@@ -76,9 +76,8 @@ style composes its blocks' clamps and adds nothing of its own.
   ```
 
 - Each chart calls `clamp()` once, at its entry point, and passes the copy to its drawing code.
-  Drawing code never clamps on its own. Every chart except pie routes its entry through `ChartEntry`
-  in `charts-core`, which remembers `style.clamp(density)` and hands the copy to the content.
-  Pie calls its own `clamp()` at its entry.
+  Drawing code never clamps on its own. Every chart routes its entry through `ChartEntry` in
+  `charts-core`, which remembers `style.clamp(density)` and hands the copy to the content.
 - A chart's spec delegates to the chart style's extension rather than repeating it, so the rules stay
   next to the style they describe. It is the one member of a spec that no chart varies: clamping is
   the same for every chart, and what differs lives inside each block. Entry Seam and Chart Policy

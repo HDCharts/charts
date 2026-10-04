@@ -57,9 +57,9 @@ rule reads the same way in every chart.
 | Rule | Message | Charts |
 | --- | --- | --- |
 | No series | At least one series is required. | Line, radar, stacked bar, stacked area |
-| Wrong series count | Exactly one series is required; got 2. | Bar, histogram |
+| Wrong series count | Exactly one series is required; got 2. | Bar, histogram, pie |
 | Too few values | At least 2 values are required. (3 on radar) | All |
-| Category count | Category count (3) must match value count (4). | Bar, histogram, line, radar, stacked bar, stacked area |
+| Category count | Category count (3) must match value count (4). | Bar, histogram, line, pie, radar, stacked bar, stacked area |
 | Color count | Color count (2) must match series count (3). | All with a color list |
 | Series length | Series 1 is not aligned with the first series. | Line, radar, stacked bar, stacked area |
 | Not finite | Series 0 contains a non-finite value. | Line, radar, stacked bar, stacked area |
@@ -67,8 +67,8 @@ rule reads the same way in every chart.
 | Negative | Series 0 contains a negative value. | Stacked bar, stacked area |
 | Negative | Value at index 2 is negative. | Histogram, pie |
 
-The color message names what the colors are matched to: `value` on bar and histogram, and `series` on
-line, radar, and the stacked charts.
+The color message names what the colors are matched to: `value` on bar, histogram and pie, and
+`series` on line, radar, and the stacked charts.
 
 Charts that draw several series report a problem once per series. Charts with one series report
 it per value, with its index.
@@ -77,14 +77,14 @@ it per value, with its index.
 
 All checks live in `DataValidation.kt` in `charts-core`. A chart writes no check and no message text
 of its own: it declares which checks apply in its `ChartSpec` and lets `ChartEntry` combine them.
-Every chart except pie is on the seam. The declaration and the per-chart table are on Entry Seam and
+Every chart is on the seam. The declaration and the per-chart table are on Entry Seam and
 Chart Policy.
 
 | Function | Checks | Charts |
 | --- | --- | --- |
 | `validateSeries` | No series, too few values, category count, series length, non-finite values, negative values with `allowNegative = false`, and the series color count | Line, radar, stacked bar, stacked area |
-| `validateSingleSeries` | One series, too few values, color count, category count, and each bad value | Bar, histogram |
-| `validateValues` | Each non-finite value, and each negative value with `allowNegative = false` | Pie, and inside `validateSingleSeries` |
+| `validateSingleSeries` | One series, too few values, color count, category count, and each bad value | Bar, histogram, pie |
+| `validateValues` | Each non-finite value, and each negative value with `allowNegative = false` | Inside `validateSingleSeries` |
 | `validateColorCount` | A color list that does not match what it colors. A null expectation skips the check, and so does a style that sets no colors | Inside the two series checks |
 | `validateRange` | Non-finite range bounds | Bar, histogram, line |
 

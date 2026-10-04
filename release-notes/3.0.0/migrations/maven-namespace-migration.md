@@ -21,7 +21,7 @@ Each module now has its own Kotlin package, named after its artifact:
 | Shared models: `io.github.dautovicharis.charts.model.*` | `io.github.hdcharts.core.model.*` |
 | Shared styles: `io.github.dautovicharis.charts.style.*` | `io.github.hdcharts.core.style.*` |
 | `LineChart`, `LiveLineChart`, `LineChartStyle`, `LineChartDefaults` | `io.github.hdcharts.line.*` |
-| `PieChart`, `PieChartStyle`, `PieChartDefaults`, `PieSlice` | `io.github.hdcharts.pie.*` |
+| `PieChart`, `PieChartStyle`, `PieChartDefaults` | `io.github.hdcharts.pie.*` |
 | `BarChart` | `io.github.hdcharts.bar.*` |
 | `HistogramChart` | `io.github.hdcharts.histogram.*` |
 | `StackedBarChart`, `StackedBarChartStyle`, `StackedBarChartDefaults` | `io.github.hdcharts.stackedbar.*` |

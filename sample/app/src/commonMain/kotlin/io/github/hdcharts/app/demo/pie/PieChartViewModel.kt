@@ -2,7 +2,7 @@ package io.github.hdcharts.app.demo.pie
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import io.github.hdcharts.pie.PieSlice
+import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.sampleshared.data.PieSampleUseCase
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -16,7 +16,7 @@ import kotlinx.coroutines.launch
 private const val LIVE_UPDATE_INTERVAL_MS = 2000L
 
 data class PieChartUiState(
-    val slices: List<PieSlice>,
+    val data: ChartData,
     val title: String,
     val isPlaying: Boolean = false,
 )
@@ -26,13 +26,13 @@ class PieChartViewModel(
 ) : ViewModel() {
     private val initialSample = pieSampleUseCase.initialPieSample()
     private val refreshRange = pieSampleUseCase.pieRefreshRange()
-    private val segmentCount = initialSample.slices.size
+    private val segmentCount = initialSample.data.categories.size
     private var liveUpdatesJob: Job? = null
 
     private val _uiState =
         MutableStateFlow(
             PieChartUiState(
-                slices = initialSample.slices,
+                data = initialSample.data,
                 title = initialSample.title,
             ),
         )
@@ -60,7 +60,7 @@ class PieChartViewModel(
             )
         _uiState.update {
             it.copy(
-                slices = sample.slices,
+                data = sample.data,
                 title = sample.title,
             )
         }

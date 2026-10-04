@@ -65,7 +65,7 @@ two stacked charts.
 | Live line | `LiveLineChart` → `LineChartEntry` → `LiveLineChartImpl` → `LineChartFrame` → `LineChartContent` |
 | Bar | `BarChart` → `BarChartEntry` → `BarChartInternalPlot` → `BarChartImpl` → `BarChartContent` |
 | Histogram | `HistogramChart` → `HistogramChartEntry` → `BarChartInternalPlot` → `BarChartImpl` → `BarChartContent` |
-| Pie | `PieChart` → `PieChartFrame` → `PieChartContent` |
+| Pie | `PieChart` → `PieChartEntry` → `PieChartFrame` → `PieChartContent` |
 | Radar | `RadarChart` → `RadarChartEntry` → `RadarChartContent` |
 | Stacked bar | `StackedBarChart` → `StackedBarChartEntry` → `StackedBarChartFrame` → `StackedBarChartImpl` |
 | Stacked area | `StackedAreaChart` → `StackedAreaChartEntry` → `StackedAreaChartFrame` → `StackedAreaChartImpl` |
@@ -77,7 +77,7 @@ The stacked charts are the two that do not follow the rest: their `Frame` wraps 
 it the plot slot, where line and bar put the `Frame` inside the `Impl` and hand it a content slot.
 Neither stacked chart has a `Content`, so its `Impl` draws on the canvas itself.
 
-Every chart except pie has an `Entry`: it names the chart's policy, style values, clamping and
+Every chart has an `Entry`: it names the chart's policy, style values, clamping and
 conversion once, and runs them through the shared `ChartEntry` seam. An entry with one public
 composable calls the content itself; an entry shared by two takes the content as a lambda. Bar and
 histogram each have their own entry, because their policies differ, and then share
@@ -115,8 +115,8 @@ A file with one narrow concern names that concern: `StackedBarDensity.kt`,
 `<Name>ChartHelpers.kt`, which line, bar, pie, and radar all do.
 
 A `Frame` gets its own file when more than one composable calls it, which is why
-`LineChartFrame.kt` exists. A frame with one caller stays in the file that owns it, which is why
-`PieChartFrame` sits inside `PieChart.kt`.
+`LineChartFrame.kt` and `PieChartFrame.kt` exist. A frame with one caller stays in the file that owns
+it.
 
 ### Test files
 

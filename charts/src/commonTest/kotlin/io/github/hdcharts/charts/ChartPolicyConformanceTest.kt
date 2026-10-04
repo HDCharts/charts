@@ -8,6 +8,7 @@ import io.github.hdcharts.core.model.ChartSeries
 import io.github.hdcharts.core.model.chartDataOf
 import io.github.hdcharts.histogram.internal.HistogramChartSpec
 import io.github.hdcharts.line.internal.LineChartSpec
+import io.github.hdcharts.pie.internal.PieChartSpec
 import io.github.hdcharts.radar.internal.RadarChartSpec
 import io.github.hdcharts.stackedarea.internal.StackedAreaChartSpec
 import io.github.hdcharts.stackedbar.internal.StackedBarChartSpec
@@ -16,8 +17,7 @@ import kotlin.test.assertEquals
 
 /**
  * The policy table from `docs/wiki/dev/internals/entry-seam.md`, in test form. Each chart joins as it
- * moves onto the entry seam, one chart per change. Pie skips the seam: it takes `List<PieSlice>` and
- * has no `ChartData` to validate.
+ * moves onto the entry seam, one chart per change.
  *
  * The markdown table is maintained by hand alongside this file.
  */
@@ -56,6 +56,7 @@ class ChartPolicyConformanceTest {
                 "Radar",
                 "Stacked bar",
                 "Stacked area",
+                "Pie",
             )
 
         val DECLARED_BY_CHART =
@@ -66,6 +67,7 @@ class ChartPolicyConformanceTest {
                 "Radar" to RadarChartSpec.policy,
                 "Stacked bar" to StackedBarChartSpec.policy,
                 "Stacked area" to StackedAreaChartSpec.policy,
+                "Pie" to PieChartSpec.policy,
             )
 
         val EXPECTED_BY_CHART =
@@ -123,6 +125,15 @@ class ChartPolicyConformanceTest {
                         hasAxis = true,
                         hasFixedRange = false,
                         colors = "series count",
+                    ),
+                "Pie" to
+                    PolicyRow(
+                        minValues = ValidationErrors.MIN_VALUES,
+                        allowNegative = false,
+                        singleSeries = true,
+                        hasAxis = false,
+                        hasFixedRange = false,
+                        colors = "value count",
                     ),
             )
 

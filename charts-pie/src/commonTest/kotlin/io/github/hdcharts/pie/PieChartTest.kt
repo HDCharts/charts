@@ -25,7 +25,10 @@ import androidx.compose.ui.unit.dp
 import io.github.hdcharts.core.internal.TestTags
 import io.github.hdcharts.core.internal.ValidationErrors
 import io.github.hdcharts.core.model.ChartSelection
+import io.github.hdcharts.core.model.ChartSeries
+import io.github.hdcharts.core.model.chartDataOf
 import io.github.hdcharts.core.model.staticChartSelection
+import io.github.hdcharts.core.model.toChartData
 import io.github.hdcharts.pie.internal.calculatePercentages
 import kotlin.math.PI
 import kotlin.math.cos
@@ -37,22 +40,16 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class PieChartTest {
-    private val pieSlices =
-        listOf(
-            PieSlice(label = "A", value = 10.0),
-            PieSlice(label = "B", value = 20.0),
-            PieSlice(label = "C", value = 30.0),
-            PieSlice(label = "D", value = 40.0),
-        )
-    private val points: List<Double> = pieSlices.map { it.value }
-    private val labels: List<String> = pieSlices.map { it.label }
+    private val points: List<Double> = listOf(10.0, 20.0, 30.0, 40.0)
+    private val pieData = points.toChartData(categories = LABELS)
+    private val labels: List<String> = LABELS
 
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun pieChart_withValidData_displaysChart() =
         runComposeUiTest {
             setContent {
-                PieChart(pieSlices, title = TITLE)
+                PieChart(pieData, title = TITLE)
             }
 
             onNodeWithTag(TestTags.PIE_CHART).assertIsDisplayed()
@@ -65,7 +62,7 @@ class PieChartTest {
         runComposeUiTest {
             setContent {
                 PieChart(
-                    data = pieSlices,
+                    data = pieData,
                     modifier = Modifier.size(width = 280.dp, height = 240.dp).testTag("pie-container"),
                     title = TITLE,
                     animateOnStart = false,
@@ -91,7 +88,7 @@ class PieChartTest {
                             .verticalScroll(rememberScrollState()),
                 ) {
                     PieChart(
-                        data = pieSlices,
+                        data = pieData,
                         title = TITLE,
                         animateOnStart = false,
                     )
@@ -114,7 +111,7 @@ class PieChartTest {
             val percentages = calculatePercentages(points)
 
             setContent {
-                PieChart(pieSlices, title = TITLE)
+                PieChart(pieData, title = TITLE)
             }
 
             onNodeWithTag(TestTags.PIE_CHART).assertIsDisplayed()
@@ -137,11 +134,11 @@ class PieChartTest {
     @Test
     fun pieChart_withInvalidData_displaysError() =
         runComposeUiTest {
-            val invalidSlices = listOf(PieSlice(label = "A", value = 1.0))
+            val invalidData = listOf(1.0).toChartData(categories = listOf("A"))
             val expectedError = ValidationErrors.tooFewValues(min = ValidationErrors.MIN_VALUES)
 
             setContent {
-                PieChart(invalidSlices)
+                PieChart(invalidData)
             }
 
             onNodeWithTag(TestTags.PIE_CHART).assertDoesNotExist()
@@ -153,17 +150,96 @@ class PieChartTest {
     @Test
     fun pieChart_withSliceColors_rendersChart() =
         runComposeUiTest {
-            val slices =
-                pieSlices.mapIndexed { index, slice ->
-                    slice.copy(color = colors[index % colors.size])
-                }
-
             setContent {
-                PieChart(data = slices)
+                PieChart(
+                    data = pieData,
+                    style = PieChartDefaults.style(slices = PieChartDefaults.slices(colors = colors)),
+                )
             }
 
             onNodeWithTag(TestTags.PIE_CHART).assertIsDisplayed()
             onNodeWithTag(TestTags.CHART_ERROR).assertDoesNotExist()
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun pieChart_withColorCountMismatch_displaysError() =
+        runComposeUiTest {
+            val expectedError =
+                ValidationErrors.colorCountMismatch(colors = 3, expected = 4, target = "value")
+
+            setContent {
+                PieChart(
+                    data = pieData,
+                    style =
+                        PieChartDefaults.style(
+                            slices = PieChartDefaults.slices(colors = colors.take(3)),
+                        ),
+                )
+            }
+
+            onNodeWithTag(TestTags.PIE_CHART).assertDoesNotExist()
+            onNodeWithTag(TestTags.CHART_ERROR).assertIsDisplayed()
+            onNodeWithText("${expectedError}\n").assertIsDisplayed()
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun pieChart_withTwoSeries_displaysError() =
+        runComposeUiTest {
+            val expectedError = ValidationErrors.exactlyOneSeries(count = 2)
+
+            setContent {
+                PieChart(
+                    data =
+                        chartDataOf(
+                            categories = labels,
+                            series =
+                                arrayOf(
+                                    ChartSeries(name = "One", values = points),
+                                    ChartSeries(name = "Two", values = points),
+                                ),
+                        ),
+                )
+            }
+
+            onNodeWithTag(TestTags.PIE_CHART).assertDoesNotExist()
+            onNodeWithTag(TestTags.CHART_ERROR).assertIsDisplayed()
+            onNodeWithText("${expectedError}\n").assertIsDisplayed()
+        }
+
+    /**
+     * A pie with no categories has nothing to name its slices with, so it draws the slices and drops
+     * the legend, the way a line chart drops its X-axis labels. It is not an error.
+     */
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun pieChart_withoutCategories_drawsWithoutLegend() =
+        runComposeUiTest {
+            setContent {
+                PieChart(data = points.toChartData(), title = TITLE)
+            }
+
+            onNodeWithTag(TestTags.PIE_CHART).assertIsDisplayed()
+            onNodeWithTag(TestTags.CHART_ERROR).assertDoesNotExist()
+            onNodeWithText(labels.first()).assertDoesNotExist()
+        }
+
+    /** A selected slice with no category falls back to the chart title rather than an empty header. */
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun pieChart_withBlankCategory_fallsBackToTheChartTitle() =
+        runComposeUiTest {
+            setContent {
+                PieChart(
+                    data = points.toChartData(categories = listOf("", "B", "C", "D")),
+                    title = TITLE,
+                    selection = staticChartSelection(0),
+                )
+            }
+
+            onNodeWithTag(TestTags.PIE_CHART).assertIsDisplayed()
+            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(TITLE)
         }
 
     @OptIn(ExperimentalTestApi::class)
@@ -175,7 +251,7 @@ class PieChartTest {
 
             setContent {
                 PieChart(
-                    pieSlices,
+                    pieData,
                     style = PieChartDefaults.style(donut = PieChartDefaults.donut(holePercentage = 0.5f)),
                     title = TITLE,
                 )
@@ -208,7 +284,7 @@ class PieChartTest {
 
             setContent {
                 PieChart(
-                    pieSlices,
+                    pieData,
                     title = TITLE,
                     selection = staticChartSelection(selectedSliceIndex),
                 )
@@ -226,7 +302,7 @@ class PieChartTest {
             val slices = createPieSlices(points)
 
             setContent {
-                PieChart(pieSlices, title = TITLE)
+                PieChart(pieData, title = TITLE)
             }
 
             val selectedLabel = labels[0]
@@ -254,7 +330,7 @@ class PieChartTest {
             // 50% donut — tapping the dead center must not select any slice.
             setContent {
                 PieChart(
-                    pieSlices,
+                    pieData,
                     style = PieChartDefaults.style(donut = PieChartDefaults.donut(holePercentage = 50f)),
                     title = TITLE,
                 )
@@ -275,13 +351,9 @@ class PieChartTest {
     @Test
     fun pieChart_allZeroValues_rendersBlankWithoutNaN() =
         runComposeUiTest {
-            val zeroSlices =
-                listOf(
-                    PieSlice(label = "Empty", value = 0.0),
-                    PieSlice(label = "Nothing", value = 0.0),
-                )
+            val zeroData = listOf(0.0, 0.0).toChartData(categories = listOf("Empty", "Nothing"))
             setContent {
-                PieChart(data = zeroSlices, title = TITLE)
+                PieChart(data = zeroData, title = TITLE)
             }
 
             onNodeWithTag(TestTags.PIE_CHART).assertIsDisplayed()
@@ -296,7 +368,7 @@ class PieChartTest {
             // the error composable must respect caller-supplied layout (asserted here via testTag).
             setContent {
                 PieChart(
-                    data = listOf(PieSlice(label = "A", value = 1.0)),
+                    data = listOf(1.0).toChartData(categories = listOf("A")),
                     modifier = Modifier.testTag(TestTags.CHART_ERROR),
                 )
             }
@@ -311,7 +383,7 @@ class PieChartTest {
         runComposeUiTest {
             val selection = ChartSelection()
             setContent {
-                PieChart(pieSlices, title = TITLE, selection = selection)
+                PieChart(pieData, title = TITLE, selection = selection)
             }
 
             runOnIdle { selection.select(1) }
@@ -329,7 +401,7 @@ class PieChartTest {
         runComposeUiTest {
             val selection = ChartSelection()
             setContent {
-                PieChart(pieSlices, title = TITLE, selection = selection)
+                PieChart(pieData, title = TITLE, selection = selection)
             }
 
             mainClock.autoAdvance = false
@@ -349,14 +421,14 @@ class PieChartTest {
     fun pieChart_invalidReplacementData_clearsSelection() =
         runComposeUiTest {
             val selection = ChartSelection(initialIndex = 2)
-            var data by mutableStateOf(pieSlices)
+            var data by mutableStateOf(pieData)
             setContent {
                 PieChart(data, title = TITLE, selection = selection)
             }
 
             onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(labels[2])
             runOnIdle {
-                data = listOf(PieSlice(label = "Only", value = 1.0))
+                data = listOf(1.0).toChartData(categories = listOf("Only"))
             }
             onNodeWithTag(TestTags.CHART_ERROR).assertIsDisplayed()
             runOnIdle {
@@ -371,7 +443,7 @@ class PieChartTest {
             val notifications = mutableListOf<Int?>()
             val selection = ChartSelection { notifications.add(it) }
             setContent {
-                PieChart(pieSlices, title = TITLE, selection = selection)
+                PieChart(pieData, title = TITLE, selection = selection)
             }
 
             waitForIdle()
@@ -425,7 +497,7 @@ class PieChartTest {
             val newSelection = ChartSelection()
             var selection by mutableStateOf(oldSelection)
             setContent {
-                PieChart(pieSlices, title = TITLE, selection = selection)
+                PieChart(pieData, title = TITLE, selection = selection)
             }
 
             var size = onNodeWithTag(TestTags.PIE_CHART).fetchSemanticsNode().size
@@ -510,6 +582,8 @@ class PieChartTest {
 
     private companion object {
         const val TITLE = "Title"
+
+        val LABELS = listOf("A", "B", "C", "D")
 
         val colors = listOf(Color.Red, Color.Green, Color.Cyan, Color.Black)
     }
