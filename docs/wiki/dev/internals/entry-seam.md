@@ -107,7 +107,7 @@ between the two.
 | `singleSeries` | `validateSingleSeries`, which matches the color count against the value count |
 | `hasAxis` | The X and Y axis label checks |
 | `hasFixedRange` | The range-bound check |
-| `colorsMatch` | How many colors the style must set, or no check at all |
+| `colorsMatch` | How many colors the style must set; null defers to the value count on a `singleSeries` chart, and skips the check otherwise |
 
 A policy cannot read a style, so the style values travel beside it in `ChartValidationInputs`: the
 color count, the range bounds, and both axis label styles. Each chart maps its own style onto them in
@@ -137,12 +137,15 @@ only when the data holds more than one.
 colorsMatch = { data -> data.series.size.takeIf { count -> count > 1 } }
 ```
 
-`null` skips the check. The alternative — reporting `colorCount = 0` — makes "this chart has no
-colors" mean "this chart declines to check", which is a rule hiding in a style value.
+A rule that returns null skips the check for that data. The alternative — reporting `colorCount = 0` —
+makes "this chart has no colors" mean "this chart declines to check", which is a rule hiding in a
+style value.
 
-A `singleSeries` policy always matches its value count and never reads `colorsMatch`. Bar and
-histogram still declare one, so that their rows read the same way as every other chart's and a
-reader does not have to know the rule to compare two rows.
+A `singleSeries` policy always matches its value count, so it declares `colorsMatch = null`: it has
+no rule of its own to state. Bar, histogram and pie write `null` so that their rows read the same way
+as every other chart's, and a reader does not have to know the rule to compare two rows. The null says
+"counted against the value count", not "declined to check", so it cannot be mistaken for a chart that
+skips the color check.
 
 ## The policy table
 
@@ -182,8 +185,8 @@ model.
 
 Pie is one series whose values are the slices, so it declares `singleSeries` and its categories are
 the slice names. It draws no Cartesian axis and formats its readouts from its own helper, so it
-declares `hasAxis` and `hasFixedRange` off. `colorsMatch` is declared and never read, like bar's and
-histogram's, so that every row of the table reads the same way.
+declares `hasAxis` and `hasFixedRange` off. It states no `colorsMatch`, because `singleSeries`
+already counts its colors against the value count, like bar's and histogram's.
 
 Empty categories are not an error for any chart, pie included. A chart with an X axis drops its
 labels and keeps the axis; a pie drops its legend and keeps the slices, and a selected slice with a

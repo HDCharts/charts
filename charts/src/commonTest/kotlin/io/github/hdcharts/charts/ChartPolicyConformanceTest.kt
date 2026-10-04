@@ -152,13 +152,16 @@ class ChartPolicyConformanceTest {
          * says. For every other chart the rule is read off the declaration by asking it about one
          * series and about two.
          */
-        fun ChartPolicy.describeColors(): String =
-            when {
+        fun ChartPolicy.describeColors(): String {
+            val rule = colorsMatch
+            return when {
                 singleSeries -> "value count"
-                colorsMatch(ONE_SERIES) == null && colorsMatch(TWO_SERIES) == null -> "skipped"
-                colorsMatch(ONE_SERIES) != null && colorsMatch(TWO_SERIES) != null -> "series count"
+                rule == null -> "skipped"
+                rule(ONE_SERIES) == null && rule(TWO_SERIES) == null -> "skipped"
+                rule(ONE_SERIES) != null && rule(TWO_SERIES) != null -> "series count"
                 else -> "series count, only with more than one series"
             }
+        }
 
         val ONE_SERIES = chartDataOf(series = arrayOf(ChartSeries(name = "One", values = listOf(1.0, 2.0))))
 
