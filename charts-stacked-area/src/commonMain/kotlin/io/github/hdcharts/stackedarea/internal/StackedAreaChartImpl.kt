@@ -71,7 +71,7 @@ import io.github.hdcharts.core.internal.interaction.selectedIndexForTouchX
 import io.github.hdcharts.core.internal.layout.chartCanvasFits
 import io.github.hdcharts.core.internal.layout.fillMaxSizeChartModifier
 import io.github.hdcharts.core.internal.layout.placedHorizontalScrollPx
-import io.github.hdcharts.core.internal.model.MultiChartData
+import io.github.hdcharts.core.internal.model.ChartRenderData
 import io.github.hdcharts.core.internal.model.normalizeStackedAreaValues
 import io.github.hdcharts.stackedarea.StackedAreaChartStyle
 import kotlinx.collections.immutable.ImmutableList
@@ -94,8 +94,8 @@ private val HEADER_TEST_TAGS =
     )
 
 @Composable
-internal fun StackedAreaChart(
-    data: MultiChartData,
+internal fun StackedAreaChartImpl(
+    data: ChartRenderData,
     title: String,
     style: StackedAreaChartStyle,
     areaColors: ImmutableList<Color>,
@@ -106,12 +106,7 @@ internal fun StackedAreaChart(
 ) {
     val isPreview = LocalInspectionMode.current
     var show by rememberShowState(isPreviewMode = isPreview || !animateOnStart)
-    val sourcePointsCount =
-        data.items
-            .firstOrNull()
-            ?.item
-            ?.points
-            ?.size ?: 0
+    val sourcePointsCount = data.valueCount()
     val isDenseData =
         remember(sourcePointsCount) {
             shouldUseScrollableDensity(sourcePointsCount)
@@ -127,13 +122,8 @@ internal fun StackedAreaChart(
             }
         }
     val renderData = renderDataBundle.data
-    val pointsCount =
-        renderData.items
-            .firstOrNull()
-            ?.item
-            ?.points
-            ?.size ?: 0
-    val seriesCount = renderData.items.size
+    val pointsCount = renderData.valueCount()
+    val seriesCount = renderData.series.size
     val targetNormalized = remember(renderData) { renderData.normalizeStackedAreaValues() }
     val valueAnimationSpec = remember { AnimationSpec.lineChart() }
     val revealProgress by animateFloatAsState(
@@ -314,7 +304,7 @@ internal fun StackedAreaChart(
 
 @Composable
 private fun StackedAreaChartContent(
-    data: MultiChartData,
+    data: ChartRenderData,
     style: StackedAreaChartStyle,
     areaColors: ImmutableList<Color>,
     interactionEnabled: Boolean,

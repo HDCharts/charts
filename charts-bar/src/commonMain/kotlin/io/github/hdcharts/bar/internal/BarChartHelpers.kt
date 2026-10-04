@@ -6,8 +6,9 @@ import io.github.hdcharts.core.internal.density.aggregateLabelsByCenterValue
 import io.github.hdcharts.core.internal.density.bucketSizeForTarget
 import io.github.hdcharts.core.internal.density.buildBucketRanges
 import io.github.hdcharts.core.internal.density.shouldUseScrollableDensity
-import io.github.hdcharts.core.internal.model.ChartData
 import io.github.hdcharts.core.internal.model.resolveOptionalRange
+import io.github.hdcharts.core.model.ChartData
+import io.github.hdcharts.core.model.ChartSeries
 import kotlin.math.abs
 import kotlin.math.max
 
@@ -37,27 +38,43 @@ internal fun shouldUseScrollableDensity(pointsCount: Int): Boolean =
         threshold = BAR_DENSE_THRESHOLD,
     )
 
+/**
+ * The same data with neighbouring bars averaged into [targetPoints] buckets, for compact dense mode.
+ *
+ * Rebuilds the caller's own model, so the compacted chart reads exactly what an uncompacted one does.
+ */
 internal fun aggregateForCompactDensity(
     data: ChartData,
     targetPoints: Int = BAR_DENSE_THRESHOLD,
 ): ChartData {
-    val sourcePointsCount = data.points.size
+    val values = data.barValues
+    val sourcePointsCount = values.size
     if (sourcePointsCount <= targetPoints.coerceAtLeast(1)) return data
 
     val bucketRanges = compactDensityRanges(sourcePointsCount, targetPoints)
     val aggregatedPoints =
         bucketRanges.map { range ->
-            val sum = range.sumOf { data.points[it] }
+            val sum = range.sumOf { values[it] }
             if (sum.isFinite()) {
                 sum / range.count()
             } else {
-                val scale = range.maxOf { abs(data.points[it]) }
-                (range.sumOf { data.points[it] / scale } / range.count()).coerceIn(-1.0, 1.0) * scale
+                val scale = range.maxOf { abs(values[it]) }
+                (range.sumOf { values[it] / scale } / range.count()).coerceIn(-1.0, 1.0) * scale
             }
         }
-    val aggregatedLabels = aggregateLabelsByCenterValue(data.labels, bucketRanges)
-    return ChartData(aggregatedLabels.zip(aggregatedPoints))
+    return ChartData(
+        categories = aggregateLabelsByCenterValue(data.categories, bucketRanges),
+        series = listOf(ChartSeries(name = data.series.single().name, values = aggregatedPoints)),
+    )
 }
+
+/**
+ * The one series bar and histogram draw, as values.
+ *
+ * Both policies declare `singleSeries`, so validation has already checked there is exactly one, and
+ * every read below the seam can take the values without re-checking that.
+ */
+internal val ChartData.barValues: List<Double> get() = series.single().values
 
 internal fun compactDensityRanges(
     sourcePointsCount: Int,
@@ -115,8 +132,9 @@ internal fun ChartData.resolveBarRange(
     minValue: Double?,
     maxValue: Double?,
 ): Pair<Double, Double> {
-    val autoMin = minOf(0.0, points.min())
-    val autoMax = maxOf(0.0, points.max())
+    val values = barValues
+    val autoMin = minOf(0.0, values.min())
+    val autoMax = maxOf(0.0, values.max())
     val fallback = if (autoMin == autoMax) 0.0 to 1.0 else autoMin to autoMax
     return resolveOptionalRange(fallback.first, fallback.second, minValue, maxValue)
 }

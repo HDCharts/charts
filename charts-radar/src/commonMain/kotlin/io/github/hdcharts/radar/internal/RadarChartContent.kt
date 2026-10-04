@@ -38,7 +38,7 @@ import io.github.hdcharts.core.internal.NO_SELECTION
 import io.github.hdcharts.core.internal.TestTags
 import io.github.hdcharts.core.internal.composable.rememberShowState
 import io.github.hdcharts.core.internal.layout.fillMaxSizeChartModifier
-import io.github.hdcharts.core.internal.model.MultiChartData
+import io.github.hdcharts.core.internal.model.ChartRenderData
 import io.github.hdcharts.core.internal.model.minMax
 import io.github.hdcharts.core.internal.model.normalizeByMinMax
 import io.github.hdcharts.core.style.StyleDefaults
@@ -54,8 +54,8 @@ import kotlin.math.sin
 private val SERIES_TOUCH_RADIUS = 24.dp
 
 @Composable
-internal fun RadarChart(
-    data: MultiChartData,
+internal fun RadarChartContent(
+    data: ChartRenderData,
     style: RadarChartStyle,
     colors: ImmutableList<Color>,
     axisLabels: ImmutableList<String> = persistentListOf(),
@@ -73,7 +73,7 @@ internal fun RadarChart(
     val radarAnimationSpec = remember { AnimationSpec.radarChart() }
     val hasInitialized = remember { mutableStateOf(false) }
 
-    val axisCount = remember(data) { data.getFirstPointsSize() }
+    val axisCount = remember(data) { data.valueCount() }
     val forcedSelectedIndex =
         selectedAxisIndex.takeIf { it in 0 until axisCount } ?: NO_SELECTION
     val hasForcedSelection = forcedSelectedIndex != NO_SELECTION
@@ -87,7 +87,7 @@ internal fun RadarChart(
         selectedIndex.intValue = forcedSelectedIndex
     }
 
-    BoxWithConstraints(modifier = fillMaxSizeChartModifier(style.chartContainerStyle)) {
+    BoxWithConstraints(fillMaxSizeChartModifier(style.chartContainerStyle)) {
         val density = LocalDensity.current
         val widthPx = with(density) { maxWidth.toPx() }
         val heightPx = with(density) { maxHeight.toPx() }
@@ -95,12 +95,12 @@ internal fun RadarChart(
         val minMax = remember(data) { data.minMax() }
         val targetNormalized = remember(data, minMax) { data.normalizeByMinMax(minMax, 1f) }
         val initialValues =
-            remember(axisCount, data.items.size, isPreview, animateOnStart) {
+            remember(axisCount, data.series.size, isPreview, animateOnStart) {
                 if (isPreview || !animateOnStart) targetNormalized else null
             }
         val animatedValues =
-            remember(axisCount, data.items.size, isPreview, animateOnStart) {
-                List(data.items.size) { seriesIndex ->
+            remember(axisCount, data.series.size, isPreview, animateOnStart) {
+                List(data.series.size) { seriesIndex ->
                     List(axisCount) { pointIndex ->
                         Animatable(initialValues?.getOrNull(seriesIndex)?.getOrNull(pointIndex) ?: 0f)
                     }
@@ -108,7 +108,7 @@ internal fun RadarChart(
             }
 
         LaunchedEffect(show, targetNormalized) {
-            if (axisCount <= 0 || data.items.isEmpty()) return@LaunchedEffect
+            if (axisCount <= 0 || data.series.isEmpty()) return@LaunchedEffect
             if (!show && !isPreview) {
                 animatedValues.forEach { series ->
                     series.forEach { animatable ->
@@ -196,7 +196,7 @@ internal fun RadarChart(
                     Modifier.pointerInput(targetNormalized, center, radius, touchRadiusPx) {
                         detectTapGestures { offset ->
                             onValueChanged(NO_SELECTION)
-                            if (onFocusedSeriesChanged != null && data.items.size > 1) {
+                            if (onFocusedSeriesChanged != null && data.series.size > 1) {
                                 val polygons =
                                     radarPolygons(
                                         normalizedValues = targetNormalized,
@@ -294,7 +294,7 @@ internal fun RadarChart(
 }
 
 private fun DrawScope.drawRadar(
-    data: MultiChartData,
+    data: ChartRenderData,
     style: RadarChartStyle,
     colors: ImmutableList<Color>,
     axisCount: Int,
@@ -332,7 +332,7 @@ private fun DrawScope.drawRadar(
     }
 
     val seriesValues =
-        data.items.mapIndexed { index, _ ->
+        data.series.mapIndexed { index, _ ->
             val seriesNormalized = normalizedValues.getOrNull(index)
             val scaledValues =
                 List(axisCount) { pointIndex ->

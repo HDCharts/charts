@@ -7,7 +7,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import io.github.hdcharts.core.internal.AnimationSpec
-import io.github.hdcharts.core.internal.model.ChartData
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlin.math.abs
@@ -17,27 +16,27 @@ private const val CASCADE_MAX_POINTS = 200
 
 @Composable
 internal fun rememberBarChartAnimatedValues(
-    chartData: ChartData,
+    values: List<Double>,
     targetNormalized: List<Float>,
     isPreview: Boolean,
     animateOnStart: Boolean,
 ): List<Animatable<Float, AnimationVector1D>> {
-    val dataSize = chartData.points.size
+    val dataSize = values.size
     val valueAnimationSpec = remember { AnimationSpec.barChartSmooth() }
     val initialValues =
-        remember(chartData.points.size, isPreview, animateOnStart) {
+        remember(dataSize, isPreview, animateOnStart) {
             if (isPreview || !animateOnStart) targetNormalized else null
         }
     val animatedValues =
         remember(dataSize, isPreview, animateOnStart) {
-            chartData.points.mapIndexed { index, _ ->
+            values.mapIndexed { index, _ ->
                 Animatable(initialValues?.getOrNull(index) ?: 0f)
             }
         }
     val hasInitialized = remember { mutableStateOf(false) }
 
     LaunchedEffect(targetNormalized, animatedValues, isPreview, animateOnStart) {
-        if (chartData.points.isEmpty()) return@LaunchedEffect
+        if (values.isEmpty()) return@LaunchedEffect
         val shouldAnimate = !isPreview && (animateOnStart || hasInitialized.value)
         val useCascadeAnimation = shouldAnimate && dataSize <= CASCADE_MAX_POINTS
         coroutineScope {

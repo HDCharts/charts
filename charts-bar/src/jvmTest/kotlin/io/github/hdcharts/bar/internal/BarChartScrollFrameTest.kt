@@ -12,7 +12,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Density
 import io.github.hdcharts.core.internal.NO_SELECTION
-import io.github.hdcharts.core.internal.model.ChartData
+import io.github.hdcharts.core.model.ChartData
+import io.github.hdcharts.core.model.ChartSeries
 import io.github.hdcharts.core.style.BarChartDefaults
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.skia.Bitmap
@@ -31,7 +32,11 @@ class BarChartScrollFrameTest {
             ImageComposeScene(width = 1000, height = 400, density = Density(1f)) {
                 val animatedValues = remember { List(BAR_COUNT) { Animatable(1f) } }
                 BarChartContent(
-                    chartData = ChartData(List(BAR_COUNT) { index -> "B$index" to 50.0 }),
+                    chartData =
+                        ChartData(
+                            categories = List(BAR_COUNT) { "B$it" },
+                            series = listOf(ChartSeries(name = "Series", values = List(BAR_COUNT) { 50.0 })),
+                        ),
                     style = BarChartDefaults.style(),
                     interactionEnabled = true,
                     dragSelectionEnabled = false,

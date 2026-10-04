@@ -20,7 +20,7 @@ fun PieChartDemo(viewModel: PieChartViewModel = koinViewModel()) {
         },
     ) {
         PieChart(
-            data = uiState.slices,
+            data = uiState.data,
             title = uiState.title,
             style = PieChartDefaults.style(),
         )

@@ -1,9 +1,9 @@
 package io.github.hdcharts.stackedarea.internal
 
 import io.github.hdcharts.core.internal.NO_SELECTION
-import io.github.hdcharts.core.internal.model.ChartDataItem
-import io.github.hdcharts.core.internal.model.MultiChartData
-import io.github.hdcharts.core.internal.model.toChartData
+import io.github.hdcharts.core.internal.model.ChartRenderData
+import io.github.hdcharts.core.model.ChartData
+import io.github.hdcharts.core.model.ChartSeries
 import io.github.hdcharts.core.internal.density.aggregateLabelsByCenterValue as aggregateLabelsByCenterValueCore
 import io.github.hdcharts.core.internal.density.aggregatePointsByAverage as aggregatePointsByAverageCore
 import io.github.hdcharts.core.internal.density.bucketSizeForTarget as bucketSizeForTargetCore
@@ -13,7 +13,7 @@ import io.github.hdcharts.core.internal.density.shouldUseScrollableDensity as sh
 internal const val STACKED_AREA_DENSE_THRESHOLD = 50
 
 internal data class StackedAreaRenderData(
-    val data: MultiChartData,
+    val data: ChartRenderData,
     val sourcePointsCount: Int,
     val sourceIndexByRenderIndex: List<Int>,
     val bucketRanges: List<IntRange>,
@@ -34,18 +34,13 @@ internal fun shouldUseScrollableDensity(pointsCount: Int): Boolean =
         threshold = STACKED_AREA_DENSE_THRESHOLD,
     )
 
-internal fun resolveStackedAreaTotalsRange(data: MultiChartData): Pair<Double, Double> {
-    val pointsCount =
-        data.items
-            .firstOrNull()
-            ?.item
-            ?.points
-            ?.size ?: 0
+internal fun resolveStackedAreaTotalsRange(data: ChartRenderData): Pair<Double, Double> {
+    val pointsCount = data.valueCount()
     if (pointsCount <= 0) return 0.0 to 1.0
 
     val totalsByPoint =
         (0 until pointsCount).map { pointIndex ->
-            data.items.sumOf { item -> item.item.points[pointIndex] }
+            data.series.sumOf { item -> item.values[pointIndex] }
         }
     val minTotal = totalsByPoint.minOrNull() ?: 0.0
     val maxTotal = totalsByPoint.maxOrNull() ?: 0.0
@@ -59,15 +54,10 @@ internal fun resolveStackedAreaTotalsRange(data: MultiChartData): Pair<Double, D
 }
 
 internal fun aggregateForCompactDensity(
-    data: MultiChartData,
+    data: ChartRenderData,
     targetPoints: Int = STACKED_AREA_DENSE_THRESHOLD,
 ): StackedAreaRenderData {
-    val sourcePointsCount =
-        data.items
-            .firstOrNull()
-            ?.item
-            ?.points
-            ?.size ?: 0
+    val sourcePointsCount = data.valueCount()
     val safeTargetPoints = targetPoints.coerceAtLeast(1)
     if (sourcePointsCount <= safeTargetPoints) {
         return identityRenderData(data)
@@ -76,21 +66,22 @@ internal fun aggregateForCompactDensity(
     val bucketSize = bucketSizeForTargetCore(totalPoints = sourcePointsCount, targetPoints = safeTargetPoints)
     val bucketRanges = buildBucketRangesCore(totalPoints = sourcePointsCount, bucketSize = bucketSize)
     val aggregatedCategories = aggregateLabelsByCenterValueCore(data.categories, bucketRanges)
-    val aggregatedItems =
-        data.items.map { item ->
-            val aggregatedPoints = aggregatePointsByAverageCore(item.item.points, bucketRanges)
-            val aggregatedLabels = aggregateLabelsByCenterValueCore(item.item.labels, bucketRanges)
-            ChartDataItem(
-                label = item.label,
-                item = aggregatedPoints.toChartData(labels = aggregatedLabels),
+    val aggregatedSeries =
+        data.series.map { series ->
+            ChartSeries(
+                name = series.name,
+                values = aggregatePointsByAverageCore(series.values, bucketRanges),
             )
         }
 
     return StackedAreaRenderData(
         data =
-            MultiChartData(
-                items = aggregatedItems,
-                categories = if (data.hasCategories()) aggregatedCategories else emptyList(),
+            ChartRenderData(
+                data =
+                    ChartData(
+                        categories = if (data.hasCategories()) aggregatedCategories else emptyList(),
+                        series = aggregatedSeries,
+                    ),
                 title = data.title,
             ),
         sourcePointsCount = sourcePointsCount,
@@ -99,13 +90,8 @@ internal fun aggregateForCompactDensity(
     )
 }
 
-internal fun identityRenderData(data: MultiChartData): StackedAreaRenderData {
-    val sourcePointsCount =
-        data.items
-            .firstOrNull()
-            ?.item
-            ?.points
-            ?.size ?: 0
+internal fun identityRenderData(data: ChartRenderData): StackedAreaRenderData {
+    val sourcePointsCount = data.valueCount()
     return StackedAreaRenderData(
         data = data,
         sourcePointsCount = sourcePointsCount,

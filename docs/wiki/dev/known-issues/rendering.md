@@ -47,31 +47,18 @@ Options:
 - Find what keeps the chart busy after a swipe, starting from the scroll wiring in
   `StackedAreaChartContent`, and add the scroll-then-tap test back.
 
-### Line charts rebuild every point on every frame
-
-During the reveal, a morph, or a live shift, every frame copies every value of every series,
-builds a new path through every point, and, for bezier lines, allocates an `Offset` per point. The
-expanded view also draws points scrolled off screen. Live line windows and expanded line charts
-are not compacted, so the cost grows with the item count.
-
-Confirmed by the code: `drawChartPath` in `LineChartDrawing.kt`, and the canvas in
-`LineChartContent`, which maps every `Animatable` to a new list per series on each draw.
-
-Options:
-
-- Keep the drawn values in a reused `FloatArray`.
-- Draw only the points in the visible range, plus one on each side.
-
 ### One animation value per point or bar
 
-Line, live line, and stacked area charts keep one `Animatable` per point of every series; bar,
-histogram, and stacked bar charts keep one per bar. A morph launches one coroutine per point, and
-a live shift calls `snapTo` on every point in turn: a two-series window of 100,000 points makes
-200,000 calls per update. A histogram, which never compacts, holds one `Animatable` per bin, so
-1,000,000 bins make 1,000,000 of them and a coroutine for each bin that changes.
+Stacked area charts keep one `Animatable` per point of every series; bar, histogram, and stacked
+bar charts keep one per bar. A morph launches one coroutine per point, so a two-series window of
+100,000 points makes 200,000 calls per update. A histogram, which never compacts, holds one
+`Animatable` per bin, so 1,000,000 bins make 1,000,000 of them and a coroutine for each bin that
+changes.
 
-Confirmed by the code: `animatedValues` in `LineChartContent`, `StackedAreaChart`, and
-`StackedBarChart`, and `rememberBarChartAnimatedValues` in `BarChartAnimation.kt`.
+Confirmed by the code: `animatedValues` in `StackedAreaChart` and `StackedBarChart`, and
+`rememberBarChartAnimatedValues` in `BarChartAnimation.kt`. Line and live line charts no longer
+appear here: `LineChartMorphState` animates one progress value and the draw blends the two value
+sets.
 
 Options:
 

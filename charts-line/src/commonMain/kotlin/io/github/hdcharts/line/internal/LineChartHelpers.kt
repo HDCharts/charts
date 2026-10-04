@@ -5,18 +5,18 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.util.lerp
 import io.github.hdcharts.core.internal.NO_SELECTION
 import io.github.hdcharts.core.internal.bezier.DEFAULT_BEZIER_TENSION
-import io.github.hdcharts.core.internal.bezier.cubicControlPointsForSegment
+import io.github.hdcharts.core.internal.bezier.cubicControlPoints
 import io.github.hdcharts.core.internal.density.aggregateLabelsByCenterValue
 import io.github.hdcharts.core.internal.density.aggregatePointsByAverage
 import io.github.hdcharts.core.internal.density.bucketCenterIndex
 import io.github.hdcharts.core.internal.density.bucketSizeForTarget
 import io.github.hdcharts.core.internal.density.buildBucketRanges
 import io.github.hdcharts.core.internal.density.shouldUseScrollableDensity
-import io.github.hdcharts.core.internal.model.ChartDataItem
-import io.github.hdcharts.core.internal.model.MultiChartData
+import io.github.hdcharts.core.internal.model.ChartRenderData
 import io.github.hdcharts.core.internal.model.minMax
 import io.github.hdcharts.core.internal.model.resolveOptionalRange
-import io.github.hdcharts.core.internal.model.toChartData
+import io.github.hdcharts.core.model.ChartData
+import io.github.hdcharts.core.model.ChartSeries
 
 internal const val LINE_DENSE_THRESHOLD = 50
 
@@ -50,53 +50,38 @@ internal fun sourceIndexForRenderIndex(
         ?: NO_SELECTION
 
 internal fun aggregateForCompactDensity(
-    data: MultiChartData,
+    data: ChartRenderData,
     targetPoints: Int = LINE_DENSE_THRESHOLD,
-): MultiChartData {
+): ChartRenderData {
     if (targetPoints <= 1) return data
-    val sourcePointsCount =
-        data.items
-            .firstOrNull()
-            ?.item
-            ?.points
-            ?.size ?: return data
+    val sourcePointsCount = data.valueCount()
     if (sourcePointsCount <= targetPoints) return data
 
     val bucketRanges = compactDensityRanges(sourcePointsCount, targetPoints)
     val aggregatedCategories = aggregateLabelsByCenterValue(data.categories, bucketRanges)
-    val aggregatedItems =
-        data.items.map { item ->
-            val aggregatedPoints = aggregatePointsByAverage(item.item.points, bucketRanges)
-            val aggregatedLabels = aggregateLabelsByCenterValue(item.item.labels, bucketRanges)
-            ChartDataItem(
-                label = item.label,
-                item = aggregatedPoints.toChartData(labels = aggregatedLabels),
+    val aggregatedSeries =
+        data.series.map { series ->
+            ChartSeries(
+                name = series.name,
+                values = aggregatePointsByAverage(series.values, bucketRanges),
             )
         }
 
-    return MultiChartData(
-        items = aggregatedItems,
-        categories = if (data.hasCategories()) aggregatedCategories else emptyList(),
+    return ChartRenderData(
+        data =
+            ChartData(
+                categories = if (data.hasCategories()) aggregatedCategories else emptyList(),
+                series = aggregatedSeries,
+            ),
         title = data.title,
     )
 }
 
-/** X-axis labels of a line chart: the item labels of a single series, or the shared categories. */
-internal fun resolveLineXAxisLabels(data: MultiChartData): List<String> {
-    val labels =
-        when {
-            data.hasSingleItem() ->
-                data.items
-                    .firstOrNull()
-                    ?.item
-                    ?.labels
-                    ?.toList()
-                    .orEmpty()
-            data.hasCategories() -> data.categories.toList()
-            else -> emptyList()
-        }
-    return labels.takeUnless { it.all(String::isBlank) }.orEmpty()
-}
+/** X-axis labels of a line chart: the shared categories, unless every one of them is blank. */
+internal fun resolveLineXAxisLabels(data: ChartRenderData): List<String> =
+    data.categories
+        .takeUnless { it.all(String::isBlank) }
+        .orEmpty()
 
 /**
  * Resolves the Y-axis domain, applying [minValue] and [maxValue] independently over the
@@ -105,7 +90,7 @@ internal fun resolveLineXAxisLabels(data: MultiChartData): List<String> {
  * bound is overridden and the data-derived opposite bound crosses it, the override still wins and
  * the opposite bound is clamped to it. See [resolveOptionalRange].
  */
-internal fun MultiChartData.resolveLineRange(
+internal fun ChartRenderData.resolveLineRange(
     minValue: Double?,
     maxValue: Double?,
 ): Pair<Double, Double> {
@@ -113,31 +98,48 @@ internal fun MultiChartData.resolveLineRange(
     return resolveOptionalRange(dataMin, dataMax, minValue, maxValue)
 }
 
+/** Reports whether both data sets have the same number of series and the same number of points. */
+internal fun hasSameSeriesStructure(
+    previous: List<List<Double>>,
+    current: List<List<Double>>,
+): Boolean {
+    if (previous.size != current.size) return false
+    return previous.indices.all { index -> previous[index].size == current[index].size }
+}
+
+/**
+ * Returns the point nearest to [touchX] on a line drawn through [scaledValues].
+ *
+ * Reads [scaledValuesCount] values from [scaledValues] instead of taking a list, so a chart that
+ * redraws the drag marker on every touch frame reuses one buffer instead of allocating a list per
+ * series per frame.
+ */
 internal fun findNearestPoint(
     touchX: Float,
-    scaledValues: List<Float>,
+    scaledValues: FloatArray,
+    scaledValuesCount: Int,
     size: Size,
     bezier: Boolean,
     verticalInset: Float = 0f,
     bezierTension: Float = DEFAULT_BEZIER_TENSION,
 ): Offset {
-    if (scaledValues.isEmpty()) {
+    if (scaledValuesCount <= 0) {
         return Offset(0f, 0f)
     }
 
     val clampedX = touchX.coerceIn(0f, size.width)
-    if (scaledValues.size == 1 || size.width == 0f) {
+    if (scaledValuesCount == 1 || size.width == 0f) {
         return Offset(
             clampedX,
             mapScaledValueToCanvasY(
-                scaledValue = scaledValues.first(),
+                scaledValue = scaledValues[0],
                 canvasHeight = size.height,
                 verticalInset = verticalInset,
             ),
         )
     }
 
-    val lastIndex = scaledValues.size - 1
+    val lastIndex = scaledValuesCount - 1
     val step = size.width / lastIndex
     val index =
         (clampedX / step)
@@ -147,7 +149,7 @@ internal fun findNearestPoint(
     if (!bezier || index == lastIndex) {
         val pointBefore = scaledValues[index]
         val pointAfter =
-            when (index + 1 < scaledValues.size) {
+            when (index + 1 < scaledValuesCount) {
                 true -> scaledValues[index + 1]
                 else -> pointBefore
             }
@@ -164,25 +166,27 @@ internal fun findNearestPoint(
         )
     }
 
-    val points =
-        List(scaledValues.size) { pointIndex ->
-            Offset(
-                x = pointIndex * step,
-                y =
-                    mapScaledValueToCanvasY(
-                        scaledValue = scaledValues[pointIndex],
-                        canvasHeight = size.height,
-                        verticalInset = verticalInset,
-                    ),
+    val yAt: (Int) -> Float =
+        { pointIndex ->
+            mapScaledValueToCanvasY(
+                scaledValue = scaledValues[pointIndex],
+                canvasHeight = size.height,
+                verticalInset = verticalInset,
             )
         }
     val segmentStart = index.coerceIn(0, lastIndex - 1)
-    val startPoint = points[segmentStart]
-    val endPoint = points[segmentStart + 1]
+    val startPoint = Offset(segmentStart * step, yAt(segmentStart))
+    val endPoint = Offset((segmentStart + 1) * step, yAt(segmentStart + 1))
     val controls =
-        cubicControlPointsForSegment(
-            points = points,
-            segmentStartIndex = segmentStart,
+        cubicControlPoints(
+            p0 = Offset((segmentStart - 1).coerceAtLeast(0) * step, yAt((segmentStart - 1).coerceAtLeast(0))),
+            p1 = startPoint,
+            p2 = endPoint,
+            p3 =
+                Offset(
+                    x = (segmentStart + 2).coerceAtMost(lastIndex) * step,
+                    y = yAt((segmentStart + 2).coerceAtMost(lastIndex)),
+                ),
             tension = bezierTension,
             minY = verticalInset,
             maxY = size.height - verticalInset,

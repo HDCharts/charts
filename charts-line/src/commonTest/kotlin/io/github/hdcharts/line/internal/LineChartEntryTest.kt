@@ -6,12 +6,13 @@ import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.Density
+import io.github.hdcharts.core.internal.errorsFor
 import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.model.ChartSeries
 import io.github.hdcharts.core.model.toChartData
 import io.github.hdcharts.line.LineChartDefaults
-import io.github.hdcharts.line.MockTest.colors
-import io.github.hdcharts.line.MockTest.multiDataSet
+import io.github.hdcharts.line.LineTestFixtures.colors
+import io.github.hdcharts.line.LineTestFixtures.multiDataSet
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -164,7 +165,14 @@ class LineChartEntryTest {
                             yLabels = LineChartDefaults.yLabels(maxCount = yLabelMaxCount),
                         ),
                 )
-            SideEffect { errors = validateLineInput(data = data, style = style, density = Density(1f)) }
+            SideEffect {
+                errors =
+                    LineChartSpec.policy.errorsFor(
+                        data = data,
+                        inputs = LineChartSpec.validationInputs(style),
+                        density = Density(1f),
+                    )
+            }
         }
         return runOnIdle { checkNotNull(errors) }
     }

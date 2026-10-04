@@ -1,23 +1,15 @@
 package io.github.hdcharts.bar
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalDensity
-import io.github.hdcharts.bar.internal.BarChartInternalPlot
+import io.github.hdcharts.bar.internal.BarChartEntry
 import io.github.hdcharts.bar.internal.rememberBarSelection
-import io.github.hdcharts.core.internal.axis.validateAxisLabels
-import io.github.hdcharts.core.internal.composable.ChartErrors
-import io.github.hdcharts.core.internal.validateRange
-import io.github.hdcharts.core.internal.validateSingleSeries
 import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.model.ChartSelection
 import io.github.hdcharts.core.model.ChartValueFormatter
 import io.github.hdcharts.core.model.rememberChartSelection
 import io.github.hdcharts.core.style.BarChartDefaults
 import io.github.hdcharts.core.style.BarChartStyle
-import io.github.hdcharts.core.style.clamped
-import kotlinx.collections.immutable.toImmutableList
 
 /**
  * Displays one indexed series of finite Double values as vertical bars.
@@ -45,30 +37,17 @@ fun BarChart(
     valueFormatter: ChartValueFormatter = BarChartDefaults.valueFormatter,
     axisValueFormatter: ChartValueFormatter = BarChartDefaults.axisValueFormatter,
 ) {
-    val density = LocalDensity.current
     val selectedIndex = rememberBarSelection(data, selection)
-    val errors =
-        remember(data, style, density) {
-            validateSingleSeries(data = data, colorCount = style.bars.colors.size) +
-                validateRange(min = style.range.min, max = style.range.max) +
-                validateAxisLabels(style.axis.xLabels, style.axis.yLabels, density)
-        }
-    val drawStyle = remember(style, density) { style.clamped(density) }
-    if (errors.isNotEmpty()) {
-        ChartErrors(style.chartContainerStyle, errors.toImmutableList(), modifier)
-    } else {
-        BarChartInternalPlot(
-            data = data,
-            title = title,
-            style = drawStyle,
-            selection = selection,
-            selectedIndex = selectedIndex,
-            interactionEnabled = interactionEnabled,
-            animateOnStart = animateOnStart,
-            aggregate = true,
-            valueFormatter = valueFormatter,
-            axisValueFormatter = axisValueFormatter,
-            modifier = modifier,
-        )
-    }
+    BarChartEntry(
+        data = data,
+        modifier = modifier,
+        style = style,
+        title = title,
+        selection = selection,
+        selectedIndex = selectedIndex,
+        interactionEnabled = interactionEnabled,
+        animateOnStart = animateOnStart,
+        valueFormatter = valueFormatter,
+        axisValueFormatter = axisValueFormatter,
+    )
 }

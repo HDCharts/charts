@@ -114,7 +114,6 @@ android {
                 .toInt()
         versionCode = Config.DEMO_VERSION_CODE
         versionName = Config.DEMO_VERSION_NAME
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     packaging {

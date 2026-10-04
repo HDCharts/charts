@@ -35,9 +35,9 @@ import io.github.hdcharts.core.model.chartDataOf
 import io.github.hdcharts.core.model.staticChartSelection
 import io.github.hdcharts.core.model.toChartData
 import io.github.hdcharts.core.style.ChartContainerDefaults
-import io.github.hdcharts.line.MockTest.TITLE
-import io.github.hdcharts.line.MockTest.dataSet
-import io.github.hdcharts.line.MockTest.multiDataSet
+import io.github.hdcharts.line.LineTestFixtures.TITLE
+import io.github.hdcharts.line.LineTestFixtures.dataSet
+import io.github.hdcharts.line.LineTestFixtures.multiDataSet
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals

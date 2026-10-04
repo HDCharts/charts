@@ -15,9 +15,9 @@ import io.github.hdcharts.core.model.ChartValueFormatter
 import io.github.hdcharts.core.model.ChartValueFormatters
 import io.github.hdcharts.core.model.chartDataOf
 import io.github.hdcharts.core.model.staticChartSelection
-import io.github.hdcharts.line.MockTest.colors
-import io.github.hdcharts.line.MockTest.invalidMultiDataSet
-import io.github.hdcharts.line.MockTest.multiDataSet
+import io.github.hdcharts.line.LineTestFixtures.colors
+import io.github.hdcharts.line.LineTestFixtures.invalidMultiDataSet
+import io.github.hdcharts.line.LineTestFixtures.multiDataSet
 import kotlin.test.Test
 
 class MultiLineChartTest {

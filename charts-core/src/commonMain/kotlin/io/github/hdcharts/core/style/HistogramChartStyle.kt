@@ -52,16 +52,15 @@ object HistogramChartDefaults {
         axis: BarAxisStyle = axis(),
         selection: BarSelectionStyle = selection(),
         zoomControlsVisible: Boolean = true,
-    ): HistogramChartStyle =
-        HistogramChartStyle(
-            chartContainerStyle = chartContainerStyle,
-            bars = bars,
-            range = range,
-            grid = grid,
-            axis = axis,
-            selection = selection,
-            zoomControlsVisible = zoomControlsVisible,
-        )
+    ) = HistogramChartStyle(
+        chartContainerStyle = chartContainerStyle,
+        bars = bars,
+        range = range,
+        grid = grid,
+        axis = axis,
+        selection = selection,
+        zoomControlsVisible = zoomControlsVisible,
+    )
 
     /**
      * Returns a [BarBarsStyle] with adjacent histogram bins by default.

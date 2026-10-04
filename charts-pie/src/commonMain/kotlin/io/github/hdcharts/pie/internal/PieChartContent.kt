@@ -34,7 +34,6 @@ import io.github.hdcharts.core.internal.MAX_SCALE
 import io.github.hdcharts.core.internal.NO_SELECTION
 import io.github.hdcharts.core.internal.TestTags
 import io.github.hdcharts.core.internal.composable.rememberShowState
-import io.github.hdcharts.core.internal.model.ChartData
 import io.github.hdcharts.pie.PieChartStyle
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.coroutineScope
@@ -50,8 +49,8 @@ internal data class SliceGeometry(
 )
 
 @Composable
-internal fun PieChart(
-    chartData: ChartData,
+internal fun PieChartContent(
+    values: List<Double>,
     colors: ImmutableList<Color>,
     style: PieChartStyle,
     interactionEnabled: Boolean,
@@ -62,7 +61,6 @@ internal fun PieChart(
     val isPreview = LocalInspectionMode.current
     val density = LocalDensity.current
     var show by rememberShowState(isPreviewMode = isPreview || !animateOnStart)
-    val values = chartData.points
     val interactionSlices = remember(values) { createPieSlices(values) }
     val animatables =
         remember(interactionSlices.size, isPreview, animateOnStart) {

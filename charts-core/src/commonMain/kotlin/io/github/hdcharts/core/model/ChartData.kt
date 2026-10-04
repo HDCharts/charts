@@ -10,7 +10,6 @@ import kotlinx.collections.immutable.toImmutableList
  * Values at the same index in each series share a category. Categories are labels,
  * not numeric coordinates. Replace data to update a chart rather than mutating input lists.
  * Chart-specific validation determines permitted series counts, lengths, and values.
- * Pie charts use their own slice model instead of this table.
  *
  * @param categories The indexed-dimension labels, such as bar labels or radar axes.
  * Empty means no explicit labels; otherwise the count must match each series' value count.
@@ -74,11 +73,10 @@ data class ChartSeries(
 fun List<Double>.toChartData(
     categories: List<String> = emptyList(),
     seriesName: String? = null,
-): ChartData =
-    ChartData(
-        categories = categories,
-        series = listOf(ChartSeries(name = seriesName, values = this)),
-    )
+) = ChartData(
+    categories = categories,
+    series = listOf(ChartSeries(name = seriesName, values = this)),
+)
 
 /**
  * Builds multi-series [ChartData] from a list of named series.
@@ -102,8 +100,7 @@ fun List<Pair<String, List<Double>>>.toChartData(categories: List<String> = empt
 fun chartDataOf(
     categories: List<String> = emptyList(),
     vararg series: ChartSeries,
-): ChartData =
-    ChartData(
-        categories = categories,
-        series = series.toList(),
-    )
+) = ChartData(
+    categories = categories,
+    series = series.toList(),
+)

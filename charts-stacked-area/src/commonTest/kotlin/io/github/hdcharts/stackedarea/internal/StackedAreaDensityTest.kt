@@ -1,5 +1,6 @@
 package io.github.hdcharts.stackedarea.internal
 
+import io.github.hdcharts.core.internal.model.ChartRenderData
 import io.github.hdcharts.core.model.ChartSeries
 import io.github.hdcharts.core.model.chartDataOf
 import kotlin.test.Test
@@ -8,24 +9,16 @@ import kotlin.test.assertEquals
 class StackedAreaDensityTest {
     @Test
     fun aggregateForCompactDensity_reducesPoints_andPreservesSourceMapping() {
-        val points = 10
-        val data =
-            chartDataOf(
-                categories = List(points) { index -> "P${index + 1}" },
-                ChartSeries(name = "Series A", values = List(points) { index -> (index + 1).toDouble() }),
-                ChartSeries(name = "Series B", values = List(points) { index -> (index + 10).toDouble() }),
-            )
-
-        val render = aggregateForCompactDensity(data = toInternalData(data), targetPoints = 5)
+        val render = aggregateForCompactDensity(data = seriesMajorData(points = 10), targetPoints = 5)
 
         assertEquals(
             expected = 5,
             actual =
-                render.data.items
+                render.data.series
                     .first()
-                    .item.points.size,
+                    .values.size,
         )
-        assertEquals(expected = listOf("P1", "P3", "P5", "P7", "P9"), actual = render.data.categories)
+        assertEquals(expected = listOf("P1", "P3", "P5", "P7", "P9"), actual = render.data.categories.toList())
         assertEquals(expected = listOf(0, 2, 4, 6, 8), actual = render.sourceIndexByRenderIndex)
         assertEquals(expected = 0, actual = render.resolveSourceIndex(0))
         assertEquals(expected = 6, actual = render.resolveSourceIndex(3))
@@ -35,24 +28,16 @@ class StackedAreaDensityTest {
 
     @Test
     fun aggregateForCompactDensity_onePointCapacity_createsOneSourceBucket() {
-        val points = 10
-        val data =
-            chartDataOf(
-                categories = List(points) { index -> "P${index + 1}" },
-                ChartSeries(name = "Series A", values = List(points) { index -> (index + 1).toDouble() }),
-                ChartSeries(name = "Series B", values = List(points) { index -> (index + 10).toDouble() }),
-            )
-
-        val render = aggregateForCompactDensity(data = toInternalData(data), targetPoints = 1)
+        val render = aggregateForCompactDensity(data = seriesMajorData(points = 10), targetPoints = 1)
 
         assertEquals(
             expected = 1,
             actual =
-                render.data.items
+                render.data.series
                     .first()
-                    .item.points.size,
+                    .values.size,
         )
-        assertEquals(expected = listOf("P5"), actual = render.data.categories)
+        assertEquals(expected = listOf("P5"), actual = render.data.categories.toList())
         assertEquals(expected = listOf(4), actual = render.sourceIndexByRenderIndex)
         assertEquals(expected = 4, actual = render.resolveSourceIndex(0))
         assertEquals(expected = 0, actual = render.resolveRenderIndex(9))
@@ -60,15 +45,7 @@ class StackedAreaDensityTest {
 
     @Test
     fun identityRenderData_returnsDirectIndexMapping() {
-        val points = 4
-        val data =
-            chartDataOf(
-                categories = List(points) { index -> "P${index + 1}" },
-                ChartSeries(name = "Series A", values = List(points) { index -> (index + 1).toDouble() }),
-                ChartSeries(name = "Series B", values = List(points) { index -> (index + 10).toDouble() }),
-            )
-
-        val render = identityRenderData(toInternalData(data))
+        val render = identityRenderData(seriesMajorData(points = 4))
 
         assertEquals(expected = 4, actual = render.sourcePointsCount)
         assertEquals(expected = listOf(0, 1, 2, 3), actual = render.sourceIndexByRenderIndex)
@@ -76,21 +53,35 @@ class StackedAreaDensityTest {
         assertEquals(expected = 2, actual = render.resolveRenderIndex(2))
     }
 
-    private fun toInternalData(data: io.github.hdcharts.core.model.ChartData) =
-        io.github.hdcharts.core.internal.model.MultiChartData(
-            items =
-                data.series.map { series ->
-                    io.github.hdcharts.core.internal.model.ChartDataItem(
-                        label = series.name.orEmpty(),
-                        item =
-                            io.github.hdcharts.core.internal.model.ChartData(
-                                series.values.mapIndexed { index, value ->
-                                    data.categories.getOrNull(index).orEmpty() to value
-                                },
-                            ),
-                    )
-                },
-            categories = data.categories,
+    /** Stacked area draws its series as given, so its render model is the caller's own data. */
+    @Test
+    fun withoutCategories_aggregating_leavesThemEmptyRatherThanInventingThem() {
+        val data = seriesMajorData(points = 10, categories = emptyList())
+
+        val render = aggregateForCompactDensity(data = data, targetPoints = 5)
+
+        assertEquals(
+            expected = 5,
+            actual =
+                render.data.series
+                    .first()
+                    .values.size,
+        )
+        assertEquals(expected = emptyList(), actual = render.data.categories.toList())
+    }
+
+    /** The caller's data: one series per band, one category per point. */
+    private fun seriesMajorData(
+        points: Int,
+        categories: List<String> = List(points) { index -> "P${index + 1}" },
+    ): ChartRenderData =
+        ChartRenderData(
+            data =
+                chartDataOf(
+                    categories = categories,
+                    ChartSeries(name = "Series A", values = List(points) { index -> (index + 1).toDouble() }),
+                    ChartSeries(name = "Series B", values = List(points) { index -> (index + 10).toDouble() }),
+                ),
             title = "",
         )
 }

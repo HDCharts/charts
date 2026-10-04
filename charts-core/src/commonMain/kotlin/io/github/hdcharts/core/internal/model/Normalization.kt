@@ -1,62 +1,31 @@
 package io.github.hdcharts.core.internal.model
 
-fun MultiChartData.normalizeByMinMax(
+/**
+ * Normalizes [value] onto 0..1 over a range of [range] starting at [minValue], the form every chart
+ * animation draws from. A zero range has no scale to divide by, so it resolves to
+ * [zeroRangeValue].
+ */
+fun normalizeValue(
+    value: Double,
+    minValue: Double,
+    range: Double,
+    zeroRangeValue: Float = 0f,
+): Float =
+    when (range) {
+        0.0 -> zeroRangeValue
+        else -> ((value - minValue) / range).toFloat().coerceIn(0f, 1f)
+    }
+
+fun ChartRenderData.normalizeByMinMax(
     minMax: Pair<Double, Double>,
     zeroRangeValue: Float,
 ): List<List<Float>> {
     val (minValue, maxValue) = minMax
     val range = maxValue - minValue
-    return items.map { item ->
-        item.item.points.map { value ->
-            when (range) {
-                0.0 -> zeroRangeValue
-                else -> ((value - minValue) / range).toFloat().coerceIn(0f, 1f)
-            }
-        }
+    return series.map { item ->
+        item.values.map { value -> normalizeValue(value, minValue, range, zeroRangeValue) }
     }
 }
-
-fun ChartData.normalizeBarValues(
-    minValue: Double,
-    maxValue: Double,
-    useFixedRange: Boolean,
-): List<Float> {
-    val rangeValue = maxValue - minValue
-    if (rangeValue == 0.0) {
-        return points.map { value ->
-            when {
-                value > 0.0 -> 1f
-                value < 0.0 -> -1f
-                else -> 0f
-            }
-        }
-    }
-    val allPositive = minValue >= 0.0
-    val allNegative = maxValue <= 0.0
-    return points.map { value ->
-        val clamped = value.coerceIn(minValue, maxValue)
-        when {
-            allPositive ->
-                if (useFixedRange) {
-                    ((clamped - minValue) / rangeValue).toFloat()
-                } else {
-                    (clamped / maxValue).toFloat()
-                }
-            allNegative ->
-                if (useFixedRange) {
-                    ((clamped - maxValue) / rangeValue).toFloat()
-                } else {
-                    (clamped / kotlin.math.abs(minValue)).toFloat()
-                }
-            else -> (clamped / rangeValue).toFloat()
-        }
-    }
-}
-
-fun ChartData.resolveBarRange(
-    minValue: Float?,
-    maxValue: Float?,
-): Pair<Double, Double> = resolveOptionalRange(points.min(), points.max(), minValue?.toDouble(), maxValue?.toDouble())
 
 /**
  * Applies optional [minValue]/[maxValue] overrides to a data-derived domain, independently. A
@@ -83,29 +52,27 @@ fun resolveOptionalRange(
     }
 }
 
-fun MultiChartData.normalizeStackedValues(): List<Float> {
-    val dataMax = items.maxOfOrNull { it.item.points.sum() } ?: 0.0
+fun ChartRenderData.normalizeStackedValues(): List<Float> {
+    val dataMax = seriesTotals.maxOrNull() ?: 0.0
     val range = if (dataMax == 0.0) 1.0 else dataMax
-    return items.map { item ->
-        (item.item.points.sum() / range).toFloat().coerceIn(0f, 1f)
-    }
+    return seriesTotals.map { total -> (total / range).toFloat().coerceIn(0f, 1f) }
 }
 
-fun MultiChartData.normalizeStackedAreaValues(): List<List<Float>> {
-    if (items.isEmpty()) return emptyList()
-    val pointsCount = getFirstPointsSize()
-    if (pointsCount == 0) return items.map { emptyList() }
+fun ChartRenderData.normalizeStackedAreaValues(): List<List<Float>> {
+    if (series.isEmpty()) return emptyList()
+    val pointsCount = valueCount()
+    if (pointsCount == 0) return series.map { emptyList() }
 
     val maxStackedTotal =
         (0 until pointsCount)
             .maxOfOrNull { pointIndex ->
-                items.sumOf { it.item.points[pointIndex] }
+                series.sumOf { item -> item.values[pointIndex] }
             } ?: 0.0
     val range = if (maxStackedTotal == 0.0) 1.0 else maxStackedTotal
     val runningTotals = DoubleArray(pointsCount)
 
-    return items.map { item ->
-        item.item.points.mapIndexed { pointIndex, value ->
+    return series.map { item ->
+        item.values.mapIndexed { pointIndex, value ->
             runningTotals[pointIndex] += value
             (runningTotals[pointIndex] / range).toFloat().coerceIn(0f, 1f)
         }

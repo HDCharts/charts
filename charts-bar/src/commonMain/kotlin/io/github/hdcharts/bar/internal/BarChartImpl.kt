@@ -24,7 +24,7 @@ import io.github.hdcharts.core.internal.composable.rememberZoomScaleState
 import io.github.hdcharts.core.internal.composable.zoomInScale
 import io.github.hdcharts.core.internal.composable.zoomOutScale
 import io.github.hdcharts.core.internal.layout.fillMaxSizeChartModifier
-import io.github.hdcharts.core.internal.model.ChartData
+import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.model.ChartValueFormatter
 import io.github.hdcharts.core.style.BarChartStyle
 
@@ -40,7 +40,7 @@ private val HEADER_TEST_TAGS =
     )
 
 @Composable
-internal fun BarChart(
+internal fun BarChartImpl(
     chartData: ChartData,
     title: String,
     style: BarChartStyle,
@@ -58,7 +58,7 @@ internal fun BarChart(
             style.bars.colors.map { color -> color.copy(alpha = style.bars.alpha) }
         }
     val isPreview = LocalInspectionMode.current
-    val sourceDataSize = chartData.points.size
+    val sourceDataSize = chartData.barValues.size
     BoxWithConstraints(modifier = fillMaxSizeChartModifier(style.chartContainerStyle)) {
         val density = LocalDensity.current
         val spacingPx = with(density) { style.bars.space.toPx() }
@@ -128,15 +128,15 @@ internal fun BarChart(
                         }
                 }
             }
-        val dataSize = renderData.points.size
+        val dataSize = renderData.barValues.size
         val targetNormalized =
             remember(renderData, fixedMin, fixedMax) {
                 val baseline = barValueYFraction(0.0, fixedMin, fixedMax)
-                renderData.points.map { (baseline - barValueYFraction(it, fixedMin, fixedMax)).toFloat() }
+                renderData.barValues.map { (baseline - barValueYFraction(it, fixedMin, fixedMax)).toFloat() }
             }
         val animatedValues =
             rememberBarChartAnimatedValues(
-                chartData = renderData,
+                values = renderData.barValues,
                 targetNormalized = targetNormalized,
                 isPreview = isPreview,
                 animateOnStart = animateOnStart,
@@ -160,7 +160,7 @@ internal fun BarChart(
         val resolvedTitle =
             remember(title, chartData, selectedBarIndex, valueFormatter) {
                 when {
-                    selectedBarIndex !in chartData.points.indices -> title
+                    selectedBarIndex !in chartData.barValues.indices -> title
                     else -> resolveSelectedBarTitle(chartData, selectedBarIndex, valueFormatter)
                 }
             }
@@ -246,8 +246,8 @@ private fun resolveSelectedBarTitle(
     index: Int,
     formatter: ChartValueFormatter,
 ): String {
-    val label = chartData.labels.getOrNull(index).orEmpty()
-    val value = chartData.points.getOrNull(index) ?: return label
+    val label = chartData.categories.getOrNull(index).orEmpty()
+    val value = chartData.barValues.getOrNull(index) ?: return label
     val formatted = formatter.format(value)
     return if (label.isBlank()) formatted else "$label: $formatted"
 }

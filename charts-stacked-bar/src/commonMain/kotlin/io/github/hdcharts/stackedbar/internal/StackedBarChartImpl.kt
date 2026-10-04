@@ -57,7 +57,7 @@ import io.github.hdcharts.core.internal.drawing.drawSelectionLine
 import io.github.hdcharts.core.internal.layout.chartCanvasFits
 import io.github.hdcharts.core.internal.layout.fillMaxSizeChartModifier
 import io.github.hdcharts.core.internal.layout.placedHorizontalScrollPx
-import io.github.hdcharts.core.internal.model.MultiChartData
+import io.github.hdcharts.core.internal.model.ChartRenderData
 import io.github.hdcharts.core.internal.model.normalizeStackedValues
 import io.github.hdcharts.stackedbar.StackedBarChartStyle
 import kotlinx.collections.immutable.ImmutableList
@@ -78,8 +78,8 @@ private val HEADER_TEST_TAGS =
     )
 
 @Composable
-internal fun StackedBarChart(
-    data: MultiChartData,
+internal fun StackedBarChartImpl(
+    data: ChartRenderData,
     title: String,
     style: StackedBarChartStyle,
     colors: ImmutableList<Color>,
@@ -90,7 +90,7 @@ internal fun StackedBarChart(
     onValueChanged: (Int) -> Unit = {},
 ) {
     val isPreview = LocalInspectionMode.current
-    val sourceDataSize = data.items.size
+    val sourceDataSize = data.series.size
     BoxWithConstraints(modifier = fillMaxSizeChartModifier(style.chartContainerStyle)) {
         val density = LocalDensity.current
         val spacingPx = with(density) { style.layout.space.toPx() }
@@ -139,7 +139,7 @@ internal fun StackedBarChart(
                 }
             }
         val renderData = renderDataBundle.data
-        val renderDataSize = renderData.items.size
+        val renderDataSize = renderData.series.size
         val targetNormalized =
             remember(renderData) {
                 renderData.normalizeStackedValues()
@@ -150,7 +150,7 @@ internal fun StackedBarChart(
             }
         val animatedValues =
             remember(renderDataSize, isPreview, animateOnStart) {
-                renderData.items.mapIndexed { index, _ ->
+                renderData.series.mapIndexed { index, _ ->
                     Animatable(initialValues?.getOrNull(index) ?: 0f)
                 }
             }
@@ -179,7 +179,7 @@ internal fun StackedBarChart(
             )
 
         LaunchedEffect(targetNormalized) {
-            if (renderData.items.isEmpty()) return@LaunchedEffect
+            if (renderData.series.isEmpty()) return@LaunchedEffect
             coroutineScope {
                 animatedValues.forEachIndexed { index, animatable ->
                     val target = targetNormalized.getOrNull(index) ?: 0f
@@ -295,7 +295,7 @@ internal fun StackedBarChart(
 
 @Composable
 private fun StackedBarChartContent(
-    data: MultiChartData,
+    data: ChartRenderData,
     style: StackedBarChartStyle,
     colors: ImmutableList<Color>,
     showXAxisLabels: Boolean,
@@ -321,8 +321,8 @@ private fun StackedBarChartContent(
 ) {
     val xLabels = style.axis.xLabels
     val yLabels = style.axis.yLabels
-    val dataSize = data.items.size
-    val labels = remember(data) { data.items.map { item -> item.label } }
+    val dataSize = data.series.size
+    val labels = remember(data) { data.series.map { item -> item.name.orEmpty() } }
     val currentToggleSelection by rememberUpdatedState(onToggleSelection)
     val currentSelectIndex by rememberUpdatedState(onSelectIndex)
     val currentClearSelection by rememberUpdatedState(onClearSelection)
@@ -553,7 +553,7 @@ private fun StackedBarChartContent(
 }
 
 private fun DrawScope.drawStackedBars(
-    data: MultiChartData,
+    data: ChartRenderData,
     style: StackedBarChartStyle,
     progress: List<Animatable<Float, AnimationVector1D>>,
     selectedIndex: Int,
@@ -563,21 +563,22 @@ private fun DrawScope.drawStackedBars(
     spacingPx: Float,
     visibleRange: IntRange,
 ) {
-    if (barWidthPx <= 0f || data.items.isEmpty()) return
+    if (barWidthPx <= 0f || data.series.isEmpty()) return
     val indices =
         when {
-            visibleRange.isEmpty() -> 0 until data.items.size
+            visibleRange.isEmpty() -> 0 until data.series.size
             else -> visibleRange
         }
-    val showSelection = style.selection.visible && selectedIndex in data.items.indices
+    val showSelection = style.selection.visible && selectedIndex in data.series.indices
+    val barTotals = data.seriesTotals
     var selectedMark: ClosedFloatingPointRange<Float>? = null
     for (index in indices) {
-        val item = data.items.getOrNull(index) ?: continue
+        val bar = data.series[index]
         val isSelected = showSelection && index == selectedIndex
         var topOffset = size.height
         val left = index * (barWidthPx + spacingPx)
-        val barTotal = item.item.points.sum()
-        item.item.points.forEachIndexed { dataIndex, value ->
+        val barTotal = barTotals[index]
+        bar.values.forEachIndexed { dataIndex, value ->
             val segmentShare =
                 when {
                     barTotal == 0.0 -> 0f

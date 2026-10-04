@@ -55,6 +55,19 @@ data class LineVisualStyle(
             count = seriesCount,
             singleItemUsesBase = true,
         )
+
+    /**
+     * Returns this block with [alpha] and [strokeWidth] clamped. Names every field instead of using
+     * `copy`, so a field added to the constructor fails to compile here until it is dealt with.
+     */
+    internal fun clamp(density: Density) =
+        LineVisualStyle(
+            color = color,
+            alpha = alpha.clampAlpha(),
+            colors = colors,
+            strokeWidth = strokeWidth.clampSize(fallback = StyleDefaults.seriesLineWidth, density = density),
+            bezier = bezier,
+        )
 }
 
 @Immutable
@@ -62,7 +75,18 @@ data class LinePointStyle(
     val color: Color,
     val size: Dp,
     val visible: Boolean,
-)
+) {
+    /**
+     * Returns this block with [size] clamped. Names every field instead of using `copy`, so a field
+     * added to the constructor fails to compile here until it is dealt with.
+     */
+    internal fun clamp(density: Density) =
+        LinePointStyle(
+            color = color,
+            size = size.clampSize(fallback = StyleDefaults.pointSize, density = density),
+            visible = visible,
+        )
+}
 
 /**
  * Selection configuration for line charts.
@@ -83,7 +107,22 @@ data class LineSelectionStyle(
     val markerColor: Color,
     val markerSize: Dp,
     val pointSize: Dp,
-)
+) {
+    /**
+     * Returns this block with [width], [markerSize] and [pointSize] clamped. Names every field instead
+     * of using `copy`, so a field added to the constructor fails to compile here until it is dealt
+     * with.
+     */
+    internal fun clamp(density: Density) =
+        LineSelectionStyle(
+            visible = visible,
+            color = color,
+            width = width.clampSize(fallback = StyleDefaults.lineWidth, density = density),
+            markerColor = markerColor,
+            markerSize = markerSize.clampSize(fallback = StyleDefaults.lineSelectionMarkerSize, density = density),
+            pointSize = pointSize.clampSize(fallback = StyleDefaults.selectedPointSize, density = density),
+        )
+}
 
 @Immutable
 data class LineAxisStyle(
@@ -92,7 +131,23 @@ data class LineAxisStyle(
     val lineWidth: Dp,
     val xLabels: AxisLabelStyle,
     val yLabels: AxisLabelStyle,
-)
+) {
+    /**
+     * Returns this block with [lineWidth] clamped. Names every field instead of using `copy`, so a
+     * field added to the constructor fails to compile here until it is dealt with.
+     *
+     * The label styles pass through: an undrawable label size is a validation error, not something
+     * to clamp.
+     */
+    internal fun clamp(density: Density) =
+        LineAxisStyle(
+            visible = visible,
+            color = color,
+            lineWidth = lineWidth.clampSize(fallback = StyleDefaults.lineWidth, density = density),
+            xLabels = xLabels,
+            yLabels = yLabels,
+        )
+}
 
 /**
  * Optional fixed Y-axis range for line charts.
@@ -135,17 +190,16 @@ object LineChartDefaults {
         range: LineRangeStyle = range(),
         legend: LegendStyle = legend(),
         zoomControlsVisible: Boolean = true,
-    ): LineChartStyle =
-        LineChartStyle(
-            chartContainerStyle = chartContainerStyle,
-            line = line,
-            points = points,
-            selection = selection,
-            axis = axis,
-            range = range,
-            legend = legend,
-            zoomControlsVisible = zoomControlsVisible,
-        )
+    ) = LineChartStyle(
+        chartContainerStyle = chartContainerStyle,
+        line = line,
+        points = points,
+        selection = selection,
+        axis = axis,
+        range = range,
+        legend = legend,
+        zoomControlsVisible = zoomControlsVisible,
+    )
 
     /** Returns a [LineVisualStyle] for the series lines. */
     @Composable
@@ -155,14 +209,13 @@ object LineChartDefaults {
         colors: List<Color> = emptyList(),
         strokeWidth: Dp = StyleDefaults.seriesLineWidth,
         bezier: Boolean = true,
-    ): LineVisualStyle =
-        LineVisualStyle(
-            color = color,
-            alpha = alpha,
-            colors = colors,
-            strokeWidth = strokeWidth,
-            bezier = bezier,
-        )
+    ) = LineVisualStyle(
+        color = color,
+        alpha = alpha,
+        colors = colors,
+        strokeWidth = strokeWidth,
+        bezier = bezier,
+    )
 
     /** Returns a [LinePointStyle] for the data point markers. */
     @Composable
@@ -181,15 +234,14 @@ object LineChartDefaults {
         markerColor: Color = StyleDefaults.pointColor,
         markerSize: Dp = StyleDefaults.lineSelectionMarkerSize,
         pointSize: Dp = StyleDefaults.selectedPointSize,
-    ): LineSelectionStyle =
-        LineSelectionStyle(
-            visible = visible,
-            color = color,
-            width = width,
-            markerColor = markerColor,
-            markerSize = markerSize,
-            pointSize = pointSize,
-        )
+    ) = LineSelectionStyle(
+        visible = visible,
+        color = color,
+        width = width,
+        markerColor = markerColor,
+        markerSize = markerSize,
+        pointSize = pointSize,
+    )
 
     /** Returns a [LineAxisStyle] for axis lines and labels. */
     @Composable
@@ -199,14 +251,13 @@ object LineChartDefaults {
         lineWidth: Dp = StyleDefaults.lineWidth,
         xLabels: AxisLabelStyle = xLabels(),
         yLabels: AxisLabelStyle = yLabels(),
-    ): LineAxisStyle =
-        LineAxisStyle(
-            visible = visible,
-            color = color,
-            lineWidth = lineWidth,
-            xLabels = xLabels,
-            yLabels = yLabels,
-        )
+    ) = LineAxisStyle(
+        visible = visible,
+        color = color,
+        lineWidth = lineWidth,
+        xLabels = xLabels,
+        yLabels = yLabels,
+    )
 
     /**
      * Returns a [LineRangeStyle] for the optional fixed Y-axis range.
@@ -257,24 +308,13 @@ object LineChartDefaults {
 }
 
 /** Returns [this] with alphas and sizes clamped to drawable values. */
-internal fun LineChartStyle.clamped(density: Density): LineChartStyle =
+internal fun LineChartStyle.clamp(density: Density) =
     LineChartStyle(
         chartContainerStyle = chartContainerStyle,
-        line =
-            line.copy(
-                alpha = line.alpha.clampAlpha(),
-                strokeWidth = line.strokeWidth.clampSize(fallback = StyleDefaults.seriesLineWidth, density = density),
-            ),
-        points = points.copy(size = points.size.clampSize(fallback = StyleDefaults.pointSize, density = density)),
-        selection =
-            selection.copy(
-                width = selection.width.clampSize(fallback = StyleDefaults.lineWidth, density = density),
-                markerSize =
-                    selection.markerSize.clampSize(fallback = StyleDefaults.lineSelectionMarkerSize, density = density),
-                pointSize =
-                    selection.pointSize.clampSize(fallback = StyleDefaults.selectedPointSize, density = density),
-            ),
-        axis = axis.copy(lineWidth = axis.lineWidth.clampSize(fallback = StyleDefaults.lineWidth, density = density)),
+        line = line.clamp(density),
+        points = points.clamp(density),
+        selection = selection.clamp(density),
+        axis = axis.clamp(density),
         range = range,
         legend = legend,
         zoomControlsVisible = zoomControlsVisible,

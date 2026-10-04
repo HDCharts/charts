@@ -4,10 +4,11 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import io.github.hdcharts.core.internal.ANIMATION_DURATION_LINE_CHART
 import io.github.hdcharts.core.internal.bezier.cubicControlPointsForSegment
-import io.github.hdcharts.core.internal.model.ChartDataItem
-import io.github.hdcharts.core.internal.model.MultiChartData
-import io.github.hdcharts.core.internal.model.toChartData
+import io.github.hdcharts.core.internal.model.ChartRenderData
+import io.github.hdcharts.core.model.ChartData
+import io.github.hdcharts.core.model.ChartSeries
 import kotlin.test.Test
+import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertSame
@@ -16,6 +17,15 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
 class LineChartHelpersTest {
+    private fun lineData(
+        vararg series: ChartSeries,
+        categories: List<String> = emptyList(),
+        title: String = "Line",
+    ) = ChartRenderData(
+        data = ChartData(categories = categories, series = series.toList()),
+        title = title,
+    )
+
     @Test
     fun toTimelineDurationMillis_boundsValuesToTweenRange() {
         assertEquals(expected = 1, actual = (-1).milliseconds.toTimelineDurationMillis())
@@ -37,26 +47,15 @@ class LineChartHelpersTest {
         val sourcePoints = List(120) { index -> (index + 1).toDouble() }
         val sourceLabels = List(120) { index -> "P${index + 1}" }
         val data =
-            MultiChartData(
-                items =
-                    listOf(
-                        ChartDataItem(
-                            label = "Series",
-                            item = sourcePoints.toChartData(labels = sourceLabels),
-                        ),
-                    ),
+            lineData(
+                ChartSeries(name = "Series", values = sourcePoints),
+                categories = sourceLabels,
                 title = "Dense",
             )
 
         val aggregated = aggregateForCompactDensity(data)
-        val aggregatedPoints =
-            aggregated.items
-                .first()
-                .item.points
-        val aggregatedLabels =
-            aggregated.items
-                .first()
-                .item.labels
+        val aggregatedPoints = aggregated.series.single().values
+        val aggregatedLabels = aggregated.categories
 
         assertTrue(aggregatedPoints.size < sourcePoints.size)
         assertEquals(expected = 40, actual = aggregatedPoints.size)
@@ -68,14 +67,9 @@ class LineChartHelpersTest {
     @Test
     fun aggregateForCompactDensity_belowThreshold_returnsOriginalData() {
         val data =
-            MultiChartData(
-                items =
-                    listOf(
-                        ChartDataItem(
-                            label = "Series",
-                            item = List(20) { index -> index.toDouble() }.toChartData(labels = List(20) { "L$it" }),
-                        ),
-                    ),
+            lineData(
+                ChartSeries(name = "Series", values = List(20) { index -> index.toDouble() }),
+                categories = List(20) { "L$it" },
                 title = "Small",
             )
 
@@ -192,7 +186,8 @@ class LineChartHelpersTest {
             val nearestPoint =
                 findNearestPoint(
                     touchX = entry.key.first,
-                    scaledValues = entry.key.second,
+                    scaledValues = entry.key.second.toFloatArray(),
+                    scaledValuesCount = entry.key.second.size,
                     size = entry.key.third,
                     bezier = false,
                 )
@@ -284,8 +279,13 @@ class LineChartHelpersTest {
         val minMax = allBelowFloor.resolveLineRange(minValue = 0.0, maxValue = null)
 
         assertEquals(0.0 to 0.0, minMax)
-        val normalized = normalizeSeriesByMinMax(series = listOf(allBelowFloor.items[0].item.points), minMax = minMax)
-        assertEquals(listOf(listOf(0f, 0f, 0f)), normalized)
+        val drawValues =
+            timelineShiftValues(
+                previousSeries = listOf(allBelowFloor.series[0].values),
+                currentSeries = listOf(allBelowFloor.series[0].values),
+                minMax = minMax,
+            )
+        assertEquals(listOf(listOf(0f, 0f, 0f, 0f)), drawValues)
     }
 
     @Test
@@ -301,39 +301,11 @@ class LineChartHelpersTest {
     }
 
     @Test
-    fun resolveLineXAxisLabels_singleSeries_returnsItemLabels() {
+    fun resolveLineXAxisLabels_withCategories_returnsThem() {
         val data =
-            MultiChartData(
-                items =
-                    listOf(
-                        ChartDataItem(
-                            label = "Series",
-                            item = listOf(10f, 20f, 30f).toChartData(labels = listOf("A", "B", "C")),
-                        ),
-                    ),
-                title = "Single",
-            )
-
-        val labels = resolveLineXAxisLabels(data)
-
-        assertEquals(listOf("A", "B", "C"), labels)
-    }
-
-    @Test
-    fun resolveLineXAxisLabels_multiSeriesWithCategories_prefersCategories() {
-        val data =
-            MultiChartData(
-                items =
-                    listOf(
-                        ChartDataItem(
-                            label = "Series 1",
-                            item = listOf(1f, 2f, 3f).toChartData(labels = listOf("v1", "v2", "v3")),
-                        ),
-                        ChartDataItem(
-                            label = "Series 2",
-                            item = listOf(4f, 5f, 6f).toChartData(labels = listOf("w1", "w2", "w3")),
-                        ),
-                    ),
+            lineData(
+                ChartSeries(name = "Series 1", values = listOf(1.0, 2.0, 3.0)),
+                ChartSeries(name = "Series 2", values = listOf(4.0, 5.0, 6.0)),
                 categories = listOf("Jan", "Feb", "Mar"),
                 title = "Multi",
             )
@@ -344,26 +316,29 @@ class LineChartHelpersTest {
     }
 
     @Test
-    fun resolveLineXAxisLabels_multiSeriesWithoutCategories_returnsEmpty() {
+    fun resolveLineXAxisLabels_withoutCategories_returnsEmpty() {
         val data =
-            MultiChartData(
-                items =
-                    listOf(
-                        ChartDataItem(
-                            label = "Series 1",
-                            item = listOf(1f, 2f, 3f).toChartData(labels = listOf("v1", "v2", "v3")),
-                        ),
-                        ChartDataItem(
-                            label = "Series 2",
-                            item = listOf(4f, 5f, 6f).toChartData(labels = listOf("w1", "w2", "w3")),
-                        ),
-                    ),
+            lineData(
+                ChartSeries(name = "Series 1", values = listOf(1.0, 2.0, 3.0)),
+                ChartSeries(name = "Series 2", values = listOf(4.0, 5.0, 6.0)),
                 title = "Multi",
             )
 
         val labels = resolveLineXAxisLabels(data)
 
         assertTrue(labels.isEmpty())
+    }
+
+    /** A caller that supplies only blanks gets no axis text rather than a row of empty labels. */
+    @Test
+    fun resolveLineXAxisLabels_withBlankCategories_returnsEmpty() {
+        val data =
+            lineData(
+                ChartSeries(name = "Series", values = listOf(1.0, 2.0)),
+                categories = listOf("", " "),
+            )
+
+        assertTrue(resolveLineXAxisLabels(data).isEmpty())
     }
 
     @Test
@@ -405,21 +380,10 @@ class LineChartHelpersTest {
                 renderMode = LineChartRenderMode.Timeline(shiftDuration = 500.milliseconds),
             )
 
-        val shift = assertIs<LineChartTransitionMode.TimelineShift>(mode)
-        assertEquals(expected = 20.0 to 60.0, actual = shift.transitionData.minMax)
-        assertEquals(expected = previousSeries, actual = shift.transitionData.previousSeries)
-        assertEquals(expected = currentSeries, actual = shift.transitionData.currentSeries)
-    }
-
-    @Test
-    fun normalizeSeriesByMinMax_spreadsSmallValuesOverFullRange() {
-        val normalized =
-            normalizeSeriesByMinMax(
-                series = listOf(listOf(20.0, 40.0, 60.0)),
-                minMax = 20.0 to 60.0,
-            )
-
-        assertEquals(expected = listOf(listOf(0f, 0.5f, 1f)), actual = normalized)
+        val shift = assertIs<LineChartTransitionMode.Timeline>(mode)
+        assertEquals(expected = 20.0 to 60.0, actual = shift.shiftData.minMax)
+        assertEquals(expected = previousSeries, actual = shift.shiftData.previousSeries)
+        assertEquals(expected = currentSeries, actual = shift.shiftData.currentSeries)
     }
 
     @Test
@@ -458,7 +422,42 @@ class LineChartHelpersTest {
                 renderMode = LineChartRenderMode.Timeline(shiftDuration = 500.milliseconds),
             )
 
-        assertIs<LineChartTransitionMode.TimelineShift>(mode)
+        assertIs<LineChartTransitionMode.Timeline>(mode)
+    }
+
+    @Test
+    fun decideLineChartUpdate_whenDrawnWindowIsTwoStepsBehind_morphsInsteadOfShifting() {
+        val mode =
+            decideLineChartUpdate(
+                previousRawSeries = listOf(listOf(10.0, 20.0, 30.0)),
+                currentRawSeries = listOf(listOf(30.0, 40.0, 50.0)),
+                currentMinMax = 30.0 to 50.0,
+                renderMode = LineChartRenderMode.Timeline(shiftDuration = 500.milliseconds),
+            )
+
+        assertEquals(
+            expected = LineChartTransitionMode.Morph,
+            actual = mode,
+            message = "A shift is built from the window the chart drew, so it can only cover one step.",
+        )
+    }
+
+    @Test
+    fun decideLineChartUpdate_windowAlreadyDrawn_morphs() {
+        val window = listOf(listOf(10.0, 20.0, 30.0))
+        val mode =
+            decideLineChartUpdate(
+                previousRawSeries = window,
+                currentRawSeries = window,
+                currentMinMax = 10.0 to 30.0,
+                renderMode = LineChartRenderMode.Timeline(shiftDuration = 500.milliseconds),
+            )
+
+        assertEquals(
+            expected = LineChartTransitionMode.Morph,
+            actual = mode,
+            message = "A range or duration change re-runs the update for a window already drawn.",
+        )
     }
 
     @Test
@@ -509,9 +508,166 @@ class LineChartHelpersTest {
         assertEquals(expected = ANIMATION_DURATION_LINE_CHART, actual = spec.durationMillis)
     }
 
-    private fun singleSeriesData(points: List<Double>): MultiChartData =
-        MultiChartData(
-            items = listOf(ChartDataItem(label = "Series", item = points.toChartData())),
-            title = "Single",
+    @Test
+    fun lineChartRevealWindow_scrollingChart_revealsAcrossTheViewportNotTheCanvas() {
+        val window =
+            lineChartRevealWindow(
+                viewportStartPx = 4_000f,
+                viewportWidthPx = 800f,
+                canvasWidthPx = 6_000f,
+                progress = 0.5f,
+            )
+
+        assertEquals(expected = 4_000f, actual = window.leftPx)
+        assertEquals(
+            expected = 4_400f,
+            actual = window.rightPx,
+            message = "A canvas far wider than the screen must still reveal across the visible plot.",
         )
+    }
+
+    @Test
+    fun lineChartRevealWindow_noProgress_revealsNothingBeyondTheViewportStart() {
+        val window =
+            lineChartRevealWindow(
+                viewportStartPx = 100f,
+                viewportWidthPx = 400f,
+                canvasWidthPx = 500f,
+                progress = 0f,
+            )
+
+        assertEquals(expected = 100f, actual = window.leftPx)
+        assertEquals(expected = 100f, actual = window.rightPx)
+    }
+
+    @Test
+    fun lineChartRevealWindow_fullProgress_coversTheViewport() {
+        val window =
+            lineChartRevealWindow(
+                viewportStartPx = 1_200f,
+                viewportWidthPx = 500f,
+                canvasWidthPx = 5_000f,
+                progress = 1f,
+            )
+
+        assertEquals(expected = 1_200f, actual = window.leftPx)
+        assertEquals(expected = 1_700f, actual = window.rightPx)
+    }
+
+    @Test
+    fun lineChartRevealWindow_viewportWiderThanCanvas_clampsToTheCanvas() {
+        val window =
+            lineChartRevealWindow(
+                viewportStartPx = 0f,
+                viewportWidthPx = 900f,
+                canvasWidthPx = 600f,
+                progress = 1f,
+            )
+
+        assertEquals(expected = 0f, actual = window.leftPx)
+        assertEquals(expected = 600f, actual = window.rightPx)
+    }
+
+    @Test
+    fun blendInto_morphHalfway_halvesTheDistanceFromStartToTarget() {
+        val buffer = FloatArray(4)
+
+        val count =
+            blendInto(
+                into = buffer,
+                from = listOf(0f, 0.5f, 1f),
+                to = listOf(1f, 1f, 0f),
+                progress = 0.5f,
+            )
+
+        assertEquals(expected = 3, actual = count)
+        assertEquals(expected = 0.5f, actual = buffer[0])
+        assertEquals(expected = 0.75f, actual = buffer[1])
+        assertEquals(expected = 0.5f, actual = buffer[2])
+    }
+
+    @Test
+    fun blendInto_atTarget_writesTheTargetValues() {
+        val buffer = FloatArray(3)
+
+        val count =
+            blendInto(
+                into = buffer,
+                from = listOf(0f, 0f, 0f),
+                to = listOf(0.25f, 0.5f, 1f),
+                progress = 1f,
+            )
+
+        assertEquals(expected = 3, actual = count)
+        assertContentEquals(expected = floatArrayOf(0.25f, 0.5f, 1f), actual = buffer)
+    }
+
+    @Test
+    fun blendInto_smallerBuffer_writesOnlyWhatFits() {
+        val buffer = FloatArray(2)
+
+        val count =
+            blendInto(
+                into = buffer,
+                from = emptyList(),
+                to = listOf(1f, 2f, 3f, 4f),
+                progress = 1f,
+            )
+
+        assertEquals(expected = 2, actual = count)
+        assertContentEquals(expected = floatArrayOf(1f, 2f), actual = buffer)
+    }
+
+    @Test
+    fun copyInto_scalesIntoTheBuffer() {
+        val buffer = FloatArray(3)
+
+        val count = copyInto(source = listOf(0.5f, 1f), into = buffer, scaleBy = 200f)
+
+        assertEquals(expected = 2, actual = count)
+        assertContentEquals(expected = floatArrayOf(100f, 200f, 0f), actual = buffer)
+    }
+
+    @Test
+    fun timelineWindowCounter_sameWindowRebuiltByRemember_reportsTheSameStep() {
+        val counter = TimelineWindowCounter()
+        val first = listOf(listOf(1.0, 2.0, 3.0))
+        val second = listOf(listOf(2.0, 3.0, 4.0))
+
+        counter.next(first)
+        val step = counter.next(second)
+
+        assertEquals(expected = 1L, actual = step)
+        // remember rebuilds the window list, so composition running again brings an equal copy.
+        assertEquals(expected = step, actual = counter.next(second.map { it.toList() }))
+    }
+
+    @Test
+    fun timelineWindowCounter_windowReplacedInPlace_resetsTheDroppedCount() {
+        val counter = TimelineWindowCounter()
+
+        counter.next(listOf(listOf(1.0, 2.0, 3.0)))
+        val step = counter.next(listOf(listOf(9.0, 8.0, 7.0)))
+
+        assertEquals(expected = 0L, actual = step)
+    }
+
+    @Test
+    fun timelineWindowCounter_advancingWindow_countsEveryDroppedPoint() {
+        val counter = TimelineWindowCounter()
+        val firstWindow = listOf(listOf(1.0, 2.0, 3.0))
+        var window = firstWindow
+
+        counter.next(firstWindow)
+        val steps =
+            List(3) { index ->
+                window = listOf(window[0].drop(1) + (10.0 + index))
+                counter.next(window)
+            }
+
+        assertEquals(expected = listOf(1L, 2L, 3L), actual = steps)
+    }
+
+    private fun singleSeriesData(points: List<Double>): ChartRenderData =
+        lineData(ChartSeries(name = "Series", values = points), title = "Single")
 }
