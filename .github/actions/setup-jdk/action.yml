@@ -1,0 +1,37 @@
+name: Set up JDK
+description: Set up JDK 17 with the Gradle cache that warm-gradle-cache.yml saves on main.
+
+inputs:
+  gradle-cache:
+    required: false
+    default: 'true'
+    description: Set false to start with no Gradle cache, as release jobs do.
+  kotlin-native:
+    required: false
+    default: 'false'
+    description: Also cache ~/.konan, for the iOS jobs.
+  cache-read-only:
+    required: false
+    default: 'false'
+    description: Restore the cache without saving it; set it in workflows on main, where only warm-gradle-cache.yml saves.
+
+outputs:
+  cache-hit:
+    description: Whether the cache was restored from its primary key.
+    value: ${{ steps.java.outputs.cache-hit }}
+
+runs:
+  using: composite
+  steps:
+    - name: Set up JDK 17
+      id: java
+      uses: actions/setup-java@v6.0.1
+      with:
+        java-version: 17
+        distribution: 'zulu'
+        cache: ${{ inputs.gradle-cache == 'true' && 'gradle' || '' }}
+        # Blank lines are dropped, so without kotlin-native setup-java uses its default paths.
+        cache-path: |
+          ${{ inputs.kotlin-native == 'true' && '~/.gradle/caches' || '' }}
+          ${{ inputs.kotlin-native == 'true' && '~/.konan' || '' }}
+        cache-read-only: ${{ inputs.cache-read-only }}

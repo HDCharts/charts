@@ -39,11 +39,9 @@ jobs:
 
       - name: Set up JDK 17
         if: matrix.language == 'java-kotlin'
-        uses: actions/setup-java@v6.0.1
+        uses: ./.github/actions/setup-jdk
         with:
-          java-version: 17
-          distribution: zulu
-          cache: gradle
+          cache-read-only: true
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v4.38.2

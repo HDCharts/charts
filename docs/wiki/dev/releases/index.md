@@ -37,10 +37,15 @@ sequenceDiagram
 
 ## What validates `main`
 
-The pull-request checks. No workflow triggers on `push`, so a merge is never re-validated after it
-lands. The nightly snapshot publishes `main` when the last 24 hours brought code changes, and it
-runs no test task on the way; `release.yml` runs only when a maintainer starts it.
+The pull-request checks. The nightly snapshot publishes `main` as those checks left it when the
+last 24 hours brought code changes, and a maintainer starts `release.yml` by hand.
 
-That makes the pull-request checks the only place where a commit is tested. See
+That makes the pull-request checks the tests that gate every commit. See
 [Pull Requests](pull-requests.md) for the jobs they run and
 [Validation Matrix](validation-matrix.md) for what each one covers.
+
+`warm-gradle-cache.yml` runs on `main` when build files change and twice a week. It runs lint, the
+JVM tests and the API diff, compiles the other Linux and iOS CI targets, and saves the Gradle caches
+that pull-request jobs restore. Other workflows on `main` restore those caches read-only. The
+playground job keeps its own cache, and release jobs start fresh. Pull requests use the cache from
+its latest passing run.

@@ -34,10 +34,6 @@ jobs:
         with:
           fetch-depth: 1
           ref: ${{ inputs.source-sha }}
-      - uses: actions/setup-java@v6.0.1
-        with:
-          java-version: 17
-          distribution: 'zulu'
-          cache: gradle
+      - uses: ./.github/actions/setup-jdk
       - name: Assemble
         run: ./gradlew ciAssemble
