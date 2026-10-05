@@ -39,6 +39,9 @@ HDCharts
 ## Report issues
 Open an issue: https://github.com/HDCharts/charts/issues
 
+## Technical decisions
+See why things are built the way they are: https://charts.hdcode.dev/dev/decisions
+
 ## Technologies
 | Module | Technologies / Languages |
 | --- | --- |
