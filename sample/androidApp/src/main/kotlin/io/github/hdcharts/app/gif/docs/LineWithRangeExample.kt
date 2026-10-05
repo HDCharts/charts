@@ -16,8 +16,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 private const val TITLE = "Daily Support Tickets"
-private const val AXIS_MIN = 0.0
-private const val AXIS_MAX = 100.0
+private const val AXIS_MIN = 40.0
+private const val AXIS_MAX = 80.0
 
 class LineWithRangeViewModel : ViewModel() {
     val chartData: StateFlow<ChartData> = MutableStateFlow(buildChartData()).asStateFlow()
