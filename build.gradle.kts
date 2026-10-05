@@ -1,3 +1,4 @@
+import me.champeau.gradle.japicmp.JapicmpTask
 import org.gradle.api.Task
 import org.jetbrains.kotlin.gradle.targets.js.testing.karma.KotlinKarma
 
@@ -149,15 +150,12 @@ tasks.register("chartsTestWasm") {
 
 // Library modules with no Android device tests.
 val modulesWithoutDeviceTests = setOf(":charts-core", ":charts")
+val deviceTestModules = ChartsModules.library.filter { it !in modulesWithoutDeviceTests }
 
 tasks.register("chartsTestAndroidInstrumented") {
     group = "verification"
     description = "Runs Android instrumented tests for chart modules"
-    dependsOn(
-        ChartsModules.library
-            .filter { it !in modulesWithoutDeviceTests }
-            .map { "$it:connectedAndroidTest" },
-    )
+    dependsOn(deviceTestModules.map { "$it:connectedAndroidTest" })
 }
 
 tasks.register("updateScreenshots") {
@@ -294,12 +292,11 @@ val androidTestShard1 = listOf(":charts-line", ":charts-bar", ":charts-radar")
 tasks.register("ciTestAndroidInstrumented") {
     group = "CI"
     description = "CI entry point for Android instrumented tests"
-    val modules = ChartsModules.library.filter { it !in modulesWithoutDeviceTests }
     val selected =
         when (val shard = providers.gradleProperty("androidTestShard").orNull) {
-            null -> modules
-            "1" -> modules.filter { it in androidTestShard1 }
-            "2" -> modules.filterNot { it in androidTestShard1 }
+            null -> deviceTestModules
+            "1" -> deviceTestModules.filter { it in androidTestShard1 }
+            "2" -> deviceTestModules.filterNot { it in androidTestShard1 }
             else -> error("androidTestShard must be 1 or 2, was $shard")
         }
     dependsOn(selected.map { "$it:connectedAndroidTest" })
@@ -340,4 +337,62 @@ tasks.register("ciAssemble") {
     dependsOn(ChartsModules.ciAndroidCompile.map { "$it:assembleAndroidMain" })
     dependsOn(":app:wasmJsBrowserDevelopmentExecutableDistribution")
     dependsOn(":smoke-line:assemble")
+}
+
+// Layoutlib and UTP resolve only when screenshot or device tests run; AGP renames fail loudly here.
+val ciTestToolConfigurations =
+    mapOf(
+        ":androidApp" to
+            listOf(
+                "_internal-screenshot-test-task-layoutlib",
+                "_internal-screenshot-test-task-layoutlib-res",
+                "_internal-screenshot-validation-junit-engine",
+            ),
+    ) + deviceTestModules.associateWith { listOf("unified-test-platform-gradle-work-action") }
+
+ciTestToolConfigurations.forEach { (projectPath, configurationNames) ->
+    project(projectPath) {
+        tasks.register("ciResolveTestTools") {
+            group = "CI"
+            description = "Downloads layoutlib or the Unified Test Platform without running any tests"
+            val tools = files(configurationNames.map { configurations.named(it) })
+            doLast { logger.lifecycle("Resolved ${tools.files.size} test tool files") }
+        }
+    }
+}
+
+// Builds `ciWarmCacheLinux` runs besides the API diff; keep in step with the Linux CI and snapshot jobs.
+val ciWarmCacheLinuxBuilds =
+    listOf(
+        "ciCompile",
+        "ciAssemble",
+        "ciTestJvm",
+        "buildSrcKtlintCheck",
+        getTasksByName("ktlintCheck", true),
+        ChartsModules.library.map { "$it:compileTestDevelopmentExecutableKotlinWasmJs" },
+        deviceTestModules.map { "$it:assembleAndroidDeviceTest" },
+        ":androidApp:compileDebugScreenshotTestSources",
+        ciTestToolConfigurations.keys.map { "$it:ciResolveTestTools" },
+        listOf(":androidApp:assembleDebug", ":androidApp:assembleDebugAndroidTest"),
+        listOf(":charts:dokkaGenerate", ":app:wasmJsBrowserDistribution"),
+    )
+
+// Fills the Gradle cache that `warm-gradle-cache.yml` saves on main.
+tasks.register("ciWarmCacheLinux") {
+    group = "CI"
+    description = "Runs lint, JVM tests and the API diff, and builds the other Linux CI and snapshot targets"
+    dependsOn(ciWarmCacheLinuxBuilds)
+    // The diff tasks, not apiCompatibilityCheck, whose gate would fail on unacknowledged breaks.
+    dependsOn(tasks.withType<JapicmpTask>())
+}
+
+// The baseline build starts a second Gradle; running it alongside the rest can exhaust runner memory.
+tasks.named("prepareApiCompatibilityBaselineJars") {
+    mustRunAfter(ciWarmCacheLinuxBuilds)
+}
+
+tasks.register("ciWarmCacheIos") {
+    group = "CI"
+    description = "Links the iOS test binaries the iOS CI job runs, without running them"
+    dependsOn(ChartsModules.library.map { "$it:linkDebugTestIosSimulatorArm64" })
 }

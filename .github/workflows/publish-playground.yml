@@ -66,11 +66,8 @@ jobs:
           ref: ${{ inputs.playground-ref || 'main' }}
           path: playground-repo
           fetch-depth: 1
-      - uses: actions/setup-java@v6.0.1
-        with:
-          java-version: 17
-          distribution: zulu
-          cache: gradle
+      # The playground's build files give this job its own cache key, so it saves its own cache.
+      - uses: ./.github/actions/setup-jdk
       - name: Resolve charts version and source
         id: charts
         shell: bash

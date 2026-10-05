@@ -1,0 +1,65 @@
+# Workflow: save the Gradle caches on main that pull request jobs restore.
+#
+# setup-java keys the cache by a hash of the build files, so it only needs
+# filling when those change. Pull request jobs on main's key skip their own save.
+# Other workflows on main restore it read-only or skip it, so only this one writes it.
+# The twice-weekly run refills a cache GitHub removed after 7 days without use.
+name: Warm Gradle Cache
+on:
+  push:
+    branches: [main]
+    # The files setup-java hashes into its cache key, plus this workflow.
+    paths:
+      - '**/*.gradle*'
+      - '**/gradle.properties'
+      - '**/gradle-wrapper.properties'
+      - 'gradle/*.versions.toml'
+      - '.github/workflows/warm-gradle-cache.yml'
+      - '.github/actions/setup-jdk/action.yml'
+  schedule:
+    # Sundays and Wednesdays at 03:00 UTC.
+    - cron: "0 3 * * 0,3"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: warm-gradle-cache
+  cancel-in-progress: true
+
+jobs:
+  linux:
+    name: Warm Linux Gradle Cache
+    runs-on: ubuntu-26.04
+    steps:
+      # Full history: the API compatibility baseline builds from the latest release tag.
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 17
+        id: java
+        uses: ./.github/actions/setup-jdk
+
+      - name: Build Linux CI targets
+        if: ${{ steps.java.outputs.cache-hit != 'true' }}
+        run: ./gradlew ciWarmCacheLinux --no-daemon
+
+  ios:
+    name: Warm iOS Gradle Cache
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
+
+      - name: Set up JDK 17
+        id: java
+        uses: ./.github/actions/setup-jdk
+        with:
+          kotlin-native: true
+
+      - name: Link iOS test binaries
+        if: ${{ steps.java.outputs.cache-hit != 'true' }}
+        run: ./gradlew ciWarmCacheIos --no-daemon

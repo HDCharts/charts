@@ -28,6 +28,9 @@ updates:
           - "org.jetbrains.kotlin*"
           - "com.google.devtools.ksp"
   - package-ecosystem: "github-actions"
-    directory: "/"
+    # Composite actions pin actions too, such as setup-java in setup-jdk.
+    directories:
+      - "/"
+      - "/.github/actions/*"
     schedule:
       interval: "monthly"

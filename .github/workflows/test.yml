@@ -36,11 +36,7 @@ jobs:
           ref: ${{ inputs.source-sha }}
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v6.0.1
-        with:
-          java-version: 17
-          distribution: 'zulu'
-          cache: gradle
+        uses: ./.github/actions/setup-jdk
 
       - name: Run JVM tests
         run: ./gradlew ciTestJvm --no-daemon
@@ -70,11 +66,7 @@ jobs:
           ref: ${{ inputs.source-sha }}
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v6.0.1
-        with:
-          java-version: 17
-          distribution: 'zulu'
-          cache: gradle
+        uses: ./.github/actions/setup-jdk
 
       - name: Enable KVM for the Android emulator
         run: |
@@ -113,11 +105,7 @@ jobs:
           ref: ${{ inputs.source-sha }}
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v6.0.1
-        with:
-          java-version: 17
-          distribution: 'zulu'
-          cache: gradle
+        uses: ./.github/actions/setup-jdk
 
       - name: Run screenshot tests
         run: ./gradlew ciTestScreenshot --no-daemon
@@ -143,11 +131,7 @@ jobs:
           ref: ${{ inputs.source-sha }}
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v6.0.1
-        with:
-          java-version: 17
-          distribution: 'zulu'
-          cache: gradle
+        uses: ./.github/actions/setup-jdk
 
       - name: Run Wasm tests
         run: ./gradlew ciTestWeb --no-daemon
@@ -173,11 +157,9 @@ jobs:
           ref: ${{ inputs.source-sha }}
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v6.0.1
+        uses: ./.github/actions/setup-jdk
         with:
-          java-version: 17
-          distribution: 'zulu'
-          cache: gradle
+          kotlin-native: true
 
       - name: Run iOS tests
         run: ./gradlew ciTestIos --no-daemon

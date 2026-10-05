@@ -50,11 +50,10 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ inputs.source-ref }}
-      - uses: actions/setup-java@v6.0.1
+      - uses: ./.github/actions/setup-jdk
         with:
-          java-version: 17
-          distribution: zulu
-          cache: gradle
+          gradle-cache: ${{ inputs.mode != 'release' }}
+          cache-read-only: true
       - uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
@@ -97,11 +96,10 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ inputs.source-ref }}
-      - uses: actions/setup-java@v6.0.1
+      - uses: ./.github/actions/setup-jdk
         with:
-          java-version: 17
-          distribution: zulu
-          cache: gradle
+          gradle-cache: ${{ inputs.mode != 'release' }}
+          cache-read-only: true
       - uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
