@@ -90,7 +90,7 @@ jobs:
           arch: x86_64
           profile: Nexus 6
           emulator-options: -no-window -no-audio -no-boot-anim -gpu swiftshader_indirect -no-snapshot
-          script: adb shell wm density 280 && ./gradlew ciTestAndroidInstrumented -PandroidTestShard=${{ matrix.shard }} --no-daemon
+          script: adb shell setprop debug.hwui.drawing_enabled 1 && adb shell wm density 280 &&./gradlew ciTestAndroidInstrumented -PandroidTestShard=${{ matrix.shard }} --no-daemon
 
       - name: Upload Android instrumented test reports
         if: ${{ always() }}
