@@ -86,11 +86,11 @@ jobs:
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 35
-          target: google_apis
+          target: aosp_atd
           arch: x86_64
           profile: Nexus 6
-          emulator-options: -no-window -no-audio -gpu swiftshader_indirect -no-snapshot
-          script: ./gradlew ciTestAndroidInstrumented -PandroidTestShard=${{ matrix.shard }} --no-daemon
+          emulator-options: -no-window -no-audio -no-boot-anim -gpu swiftshader_indirect -no-snapshot
+          script: adb shell wm density 280 && ./gradlew ciTestAndroidInstrumented -PandroidTestShard=${{ matrix.shard }} --no-daemon
 
       - name: Upload Android instrumented test reports
         if: ${{ always() }}
