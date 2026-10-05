@@ -11,8 +11,10 @@ import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.model.ChartSeries
 import kotlin.math.abs
 import kotlin.math.max
+import kotlin.math.round
 
 internal const val BAR_DENSE_THRESHOLD = 50
+private const val MIN_SNAPPED_BAR_WIDTH_PX = 3f
 
 internal fun getSelectedIndex(
     position: Offset,
@@ -111,6 +113,32 @@ internal fun unitWidth(
     barWidthPx: Float,
     spacingPx: Float,
 ): Float = max(Float.MIN_VALUE, barWidthPx + spacingPx)
+
+internal fun barLeftPx(
+    index: Int,
+    barWidthPx: Float,
+    spacingPx: Float,
+): Float {
+    val left = unitWidth(barWidthPx = barWidthPx, spacingPx = spacingPx) * index
+    return if (snapsBarEdges(barWidthPx = barWidthPx, spacingPx = spacingPx)) round(left) else left
+}
+
+internal fun barRightPx(
+    index: Int,
+    barWidthPx: Float,
+    spacingPx: Float,
+): Float =
+    if (snapsBarEdges(barWidthPx = barWidthPx, spacingPx = spacingPx)) {
+        barLeftPx(index = index + 1, barWidthPx = barWidthPx, spacingPx = spacingPx)
+    } else {
+        barLeftPx(index = index, barWidthPx = barWidthPx, spacingPx = spacingPx) + barWidthPx
+    }
+
+// Whole-pixel edges (in canvas pixels) remove seams between touching bars; narrow bars would turn uneven.
+private fun snapsBarEdges(
+    barWidthPx: Float,
+    spacingPx: Float,
+): Boolean = spacingPx == 0f && barWidthPx >= MIN_SNAPPED_BAR_WIDTH_PX
 
 internal fun contentWidth(
     dataSize: Int,

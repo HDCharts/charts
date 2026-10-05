@@ -11,6 +11,7 @@ import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.model.ChartSeries
 import io.github.hdcharts.core.model.ChartValueFormatter
 import io.github.hdcharts.core.style.BarChartDefaults
+import kotlin.math.round
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -101,6 +102,39 @@ class BarChartHelpersTest {
         val unit = unitWidth(barWidthPx = barWidth, spacingPx = spacing)
         val width = contentWidth(dataSize = 5, unitWidthPx = unit, spacingPx = spacing)
         assertEquals(expected = 48f, actual = width)
+    }
+
+    @Test
+    fun barEdges_adjacentFractionalBarsShareWholePixelEdges() {
+        // 7 bins across 300px gives fractional bars; fractional edges leave anti-aliased seams.
+        val barWidth = 300f / 7
+        val lefts = (0 until 7).map { barLeftPx(index = it, barWidthPx = barWidth, spacingPx = 0f) }
+        val rights = (0 until 7).map { barRightPx(index = it, barWidthPx = barWidth, spacingPx = 0f) }
+
+        (lefts + rights).forEach { edge -> assertEquals(expected = round(edge), actual = edge) }
+        assertEquals(expected = lefts.drop(1), actual = rights.dropLast(1))
+        assertEquals(expected = 0f, actual = lefts.first())
+        assertEquals(expected = 300f, actual = rights.last())
+    }
+
+    @Test
+    fun barEdges_narrowTouchingBarsKeepExactEdges() {
+        // Snapping 1.5px bins would make them alternate between 1px and 2px wide.
+        assertEquals(expected = 4.5f, actual = barLeftPx(index = 3, barWidthPx = 1.5f, spacingPx = 0f))
+        assertEquals(expected = 6f, actual = barRightPx(index = 3, barWidthPx = 1.5f, spacingPx = 0f))
+    }
+
+    @Test
+    fun barEdges_subpixelSpacingKeepsExactEdges() {
+        // Snapping half-pixel gaps would make them alternate between 0px and 1px.
+        assertEquals(expected = 13.5f, actual = barLeftPx(index = 3, barWidthPx = 4f, spacingPx = 0.5f))
+        assertEquals(expected = 17.5f, actual = barRightPx(index = 3, barWidthPx = 4f, spacingPx = 0.5f))
+    }
+
+    @Test
+    fun barEdges_spacedBarsKeepExactEdges() {
+        assertEquals(expected = 9f, actual = barLeftPx(index = 3, barWidthPx = 1.5f, spacingPx = 1.5f))
+        assertEquals(expected = 10.5f, actual = barRightPx(index = 3, barWidthPx = 1.5f, spacingPx = 1.5f))
     }
 
     @Test

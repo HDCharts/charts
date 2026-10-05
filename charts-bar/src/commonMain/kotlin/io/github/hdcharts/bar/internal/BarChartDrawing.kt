@@ -71,7 +71,6 @@ internal fun DrawScope.drawBars(
         )
     }
 
-    val unitWidth = unitWidth(barWidthPx, spacingPx)
     val firstVisible = visibleRange.first.coerceIn(0, animatedValues.lastIndex)
     val lastVisible = visibleRange.last.coerceIn(firstVisible, animatedValues.lastIndex)
     val showSelection = style.selection.visible && selectedIndex in firstVisible..lastVisible
@@ -81,7 +80,8 @@ internal fun DrawScope.drawBars(
         val value = animatedValue.value
         val barHeight = abs(value) * size.height
         val top = if (value >= 0f) clampedBaselineY - barHeight else clampedBaselineY
-        val left = unitWidth * index
+        val left = barLeftPx(index = index, barWidthPx = barWidthPx, spacingPx = spacingPx)
+        val right = barRightPx(index = index, barWidthPx = barWidthPx, spacingPx = spacingPx)
         val resolvedBarColor = barColors.getOrNull(index) ?: defaultBarColor
         val isSelected = showSelection && index == selectedIndex
         val barColor =
@@ -97,7 +97,7 @@ internal fun DrawScope.drawBars(
             topLeft = Offset(x = left, y = top),
             size =
                 androidx.compose.ui.geometry.Size(
-                    width = barWidthPx,
+                    width = right - left,
                     height = barHeight,
                 ),
         )
