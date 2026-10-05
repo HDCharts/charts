@@ -79,7 +79,7 @@ fun ShowLineWithRange() {
         data = data,
         title = "Daily Support Tickets",
         style = LineChartDefaults.style(
-            range = LineChartDefaults.range(min = 0.0, max = 100.0),
+            range = LineChartDefaults.range(min = 40.0, max = 80.0),
         ),
     )
 }
