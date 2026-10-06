@@ -90,6 +90,7 @@ Project skills use the `hdc-` prefix. The canonical source is
 | `hdc-concurrency` | Coroutine ownership, Compose effects, animations, live previews, delayed selection, and cancellation. | `.agents/skills/hdc-concurrency/SKILL.md` |
 | `hdc-testing` | Kotlin, Compose interaction, rendering, API, platform, and screenshot testing. | `.agents/skills/hdc-testing/SKILL.md` |
 | `hdc-pr` | The user explicitly asks to create, open, publish, or ship a pull request. | `.agents/skills/hdc-pr/SKILL.md` |
+| `hdc-issue` | The user asks to draft or create a GitHub issue. | `.agents/skills/hdc-issue/SKILL.md` |
 | `hdc-plan` | The user chooses planning for a complex or multi-step feature. | `.agents/skills/hdc-plan/SKILL.md` |
 | `hdc-changeset` | The user directly requests creating or updating a release note. | `.agents/skills/hdc-changeset/SKILL.md` |
 | `hdc-rc` | The user directly requests API compatibility or migration work. | `.agents/skills/hdc-rc/SKILL.md` |

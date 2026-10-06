@@ -10,7 +10,7 @@ coherent public API topic per migration document.
 
 ## Guardrails
 
-Follow [AGENTS.md](../../AGENTS.md). The user invokes this skill directly.
+Follow [AGENTS.md](../../../AGENTS.md). The user invokes this skill directly.
 Inspect every generated report and distinguish API incompatibilities from
 infrastructure failures.
 
