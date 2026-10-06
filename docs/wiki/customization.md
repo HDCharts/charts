@@ -175,8 +175,9 @@ StackedBarChart(
 
 While a point is selected, a chart with several series shows each series' value in its legend item,
 and the title shows the selected category. A chart with one series shows `Category: value` in the
-title instead. Pass `valueFormatter` to format these values. A hidden legend hides the values too;
-read `selectedIndex` from a hoisted selection to show them in your own UI.
+title instead. Pass `valueFormatter` to format these values. A pie shows the selected slice's share
+in percent next to its category, and its legend does not change. A hidden legend hides the values
+too; read `selectedIndex` from a hoisted selection to show them in your own UI.
 
 ## Animation and Interaction
 
