@@ -14,7 +14,7 @@ user to start one first.
 
 ## Guardrails
 
-Follow [AGENTS.md](../../AGENTS.md). CI owns `validateDocsGifBaselines`;
+Follow [AGENTS.md](../../../AGENTS.md). CI owns `validateDocsGifBaselines`;
 never run it locally. Recording is fine to run locally when the user asks.
 
 ## Commands

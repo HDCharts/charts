@@ -7,7 +7,7 @@ description: Prepare or create an HDCharts pull request only after the user expl
 
 ## Guardrails
 
-Follow [AGENTS.md](../../AGENTS.md). Git actions require explicit approval
+Follow [AGENTS.md](../../../AGENTS.md). Git actions require explicit approval
 through the git-actions questionnaire.
 
 ## Branch and Commit Naming
