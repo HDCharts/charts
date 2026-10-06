@@ -67,6 +67,7 @@ object HistogramChartDefaults {
      *
      * @param color The fallback bar color.
      * @param colors Optional explicit per-bin colors; must match bin count or be empty.
+     * @param gradient Optional gradient that paints the bins. Defaults to null, which draws solid bins.
      * @param alpha The bar alpha. Defaults to 1f.
      * @param space The spacing between bins. Defaults to 0.dp.
      * @param minBarWidth The minimum width of each bin. Defaults to 10.dp.
@@ -75,6 +76,7 @@ object HistogramChartDefaults {
     fun bars(
         color: Color = StyleDefaults.seriesColor,
         colors: List<Color> = emptyList(),
+        gradient: ChartGradient? = null,
         alpha: Float = StyleDefaults.seriesAlpha,
         space: Dp = StyleDefaults.histogramBarSpacing,
         minBarWidth: Dp = StyleDefaults.minBarWidth,
@@ -82,6 +84,7 @@ object HistogramChartDefaults {
         BarChartDefaults.bars(
             color = color,
             colors = colors,
+            gradient = gradient,
             alpha = alpha,
             space = space,
             minBarWidth = minBarWidth,

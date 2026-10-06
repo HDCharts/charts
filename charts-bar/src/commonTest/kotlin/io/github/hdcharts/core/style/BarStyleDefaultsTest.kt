@@ -34,6 +34,7 @@ class BarStyleDefaultsTest {
             BarBarsStyle(
                 color = Color.Black,
                 colors = source,
+                gradient = null,
                 alpha = 1f,
                 space = 10.dp,
                 minBarWidth = 10.dp,
@@ -52,6 +53,7 @@ class BarStyleDefaultsTest {
             BarBarsStyle(
                 color = Color.Black,
                 colors = persistentListOf(Color.Red),
+                gradient = null,
                 alpha = 0.5f,
                 space = 10.dp,
                 minBarWidth = 10.dp,

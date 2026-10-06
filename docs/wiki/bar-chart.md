@@ -48,3 +48,8 @@ fun ShowBarWithRange() {
     )
 }
 ```
+
+## Gradients
+
+Bars take a linear gradient through `BarChartDefaults.bars(gradient = ...)`,
+covered in [Gradients](/{{version}}/wiki/gradients).

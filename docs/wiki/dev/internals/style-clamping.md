@@ -5,8 +5,8 @@ order: 5
 
 # Style Clamping
 
-Charts never reject a style value. A value out of range is drawn as the closest value that makes
-sense, so a slider, an animation, or float math that lands on `1.0000001f` never replaces a chart
+Charts never reject a style value they can correct. Range bounds and axis labels are the
+exceptions, described below. A value out of range is drawn as the closest value that makes sense, so a slider, an animation, or float math that lands on `1.0000001f` never replaces a chart
 with an error.
 
 Styles are clamped; data is reported. The two halves of that rule, and why they differ, are on
@@ -18,13 +18,18 @@ Validation Errors.
 | --- | --- | --- |
 | Alpha | Clamped to `0..1` | Drawn as `1f`, so the alpha has no effect |
 | Size (`Dp`) | Clamped to `0.dp` up to 16384 pixels (`MAX_SIZE_PX`) | Falls back to that size's `StyleDefaults` default |
-| Text size (`sp`) | Clamped to a positive size up to 16384 pixels (`MAX_SIZE_PX`) | Falls back to that size's `StyleDefaults` default |
+| Text size (`sp`) | Clamped to at most 16384 pixels (`MAX_SIZE_PX`); zero, negative, or infinite falls back to the default | Falls back to that size's `StyleDefaults` default |
 | Grid steps | Clamped to `0..1000` (`MAX_GRID_STEPS`) | — |
+| Gradient stop offset | Clamped to `0..1`, then the stops are sorted | Stop dropped, as is an infinite offset |
 
 A `NaN` size is usually `Dp.Unspecified`, which Compose uses to mean "use the default", so it falls
 back to the default of that size. No single size fits every element, and `0.dp` would hide it. A
 `NaN` alpha has no such meaning, so `1f` is enough. A text size is not a length, so `clampTextSize`
 also falls back for a non-`sp` unit and for zero, which would draw nothing.
+
+A gradient left with no stops, or with non-finite positions or the same start and end, clamps to
+null, so the shape draws solid. A single stop is drawn as its color at both ends. That rule is
+`ChartGradient.clamp()` in `ChartGradient.kt`.
 
 The 16384 pixel cap keeps a size inside Compose layout limits. It depends on the screen density,
 which is why `clampSize` and `clampTextSize` take a `Density`.
@@ -43,6 +48,7 @@ style composes its blocks' clamps and adds nothing of its own.
   data class BarBarsStyle(
       val color: Color,
       val colors: ImmutableList<Color>,
+      val gradient: ChartGradient?,
       val alpha: Float,
       val space: Dp,
       val minBarWidth: Dp,
@@ -53,6 +59,7 @@ style composes its blocks' clamps and adds nothing of its own.
           BarBarsStyle(
               color = color,
               colors = colors,
+              gradient = gradient?.clamp(),
               alpha = alpha.clampAlpha(),
               space = space.clampSize(fallback = StyleDefaults.barSpacing, density = density),
               minBarWidth = minBarWidth.clampSize(fallback = StyleDefaults.minBarWidth, density = density),
@@ -123,8 +130,10 @@ validation error reported by `validateAxisLabels`, not a value to correct silent
 - `StyleClampingTest` in `charts-core` covers each helper, including `NaN`, `Dp.Unspecified`, and an
   unspelled text unit.
 - `BarStyleBlocksClampTest`, `LineStyleBlocksClampTest`, `PieStyleBlocksClampTest`,
-  `RadarStyleBlocksClampTest`, `StackedBarStyleBlocksClampTest`, and `StackedAreaStyleBlocksClampTest`
-  pin what each block clamps. They build the blocks directly, so no Compose is involved.
+  `RadarStyleBlocksClampTest`, `RingGaugeStyleBlocksClampTest`, `StackedBarStyleBlocksClampTest`,
+  and `StackedAreaStyleBlocksClampTest` pin what each block clamps. They build the blocks directly,
+  so no Compose is involved.
+- `ChartGradientsTest` in `charts-core` covers `ChartGradient.clamp()`.
 - Line, radar, stacked bar, and stacked area each have a
   `*_withInvalidNumericStyleValues_drawsClampedChart` test that draws the chart with out-of-range
   values and checks that no error appears.
