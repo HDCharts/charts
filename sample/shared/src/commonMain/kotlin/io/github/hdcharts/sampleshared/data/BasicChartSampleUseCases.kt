@@ -3,9 +3,8 @@ package io.github.hdcharts.sampleshared.data
 import io.github.hdcharts.core.model.ChartData
 
 // Sample data for the demo app (the chart view models in sample/app) and the screenshot tests
-// (sample/androidApp/src/screenshotTest). Functions starting with `initial`, and
-// PieSampleUseCase.deterministic, return the same data on every call; the others build random data
-// each time the demo refreshes.
+// (sample/androidApp/src/screenshotTest). `deterministic` returns the same data for the same arguments;
+// `random` builds new data each time the demo refreshes.
 
 private const val DEFAULT_PIE_SLICES = 6
 
@@ -18,66 +17,56 @@ interface PieSampleUseCase {
     fun random(slices: Int = DEFAULT_PIE_SLICES): PieSampleData
 }
 
+private const val DEFAULT_LINE_POINTS = 30
+
 /** LineChartScreenshotTest only. The line demo uses [LiveLatencyTimelineUseCase]. */
 interface LineSampleUseCase {
-    fun initialLineDataSet(): ChartData
-
-    fun initialDenseLineDataSet(): ChartData
-
-    /** Values below and above zero. */
-    fun initialSignedLineDataSet(): ChartData
+    /** Daily values with a yearly season, or monthly values crossing zero when [signed]. */
+    fun deterministic(
+        points: Int = DEFAULT_LINE_POINTS,
+        signed: Boolean = false,
+    ): ChartData
 }
+
+private const val DEFAULT_BAR_POINTS = 12
 
 interface BarSampleUseCase {
-    /** BarChartScreenshotTest. */
-    fun initialBarDataSet(): ChartData
-
-    /** BarChartScreenshotTest. */
-    fun initialDenseBarDataSet(): ChartData
-
-    /** Demo: start data and refresh. */
-    fun barDefaultPoints(): Int
+    /** Daily values, crossing zero when [signed]. BarChartScreenshotTest. */
+    fun deterministic(
+        points: Int = DEFAULT_BAR_POINTS,
+        signed: Boolean = false,
+    ): ChartData
 
     /** Demo: start data and refresh. */
-    fun barDefaultRange(): IntRange
-
-    /** Demo: start data and refresh. */
-    fun barDataSet(
+    fun random(
         points: Int,
         range: IntRange,
     ): ChartData
 }
+
+private const val DEFAULT_HISTOGRAM_BINS = 20
 
 interface HistogramSampleUseCase {
-    /** HistogramChartScreenshotTest. */
-    fun initialHistogramDataSet(): ChartData
-
-    /** HistogramChartScreenshotTest. */
-    fun initialDenseHistogramDataSet(): ChartData
+    /** Response times from 0 to 500ms in [bins] equal bins. HistogramChartScreenshotTest. */
+    fun deterministic(bins: Int = DEFAULT_HISTOGRAM_BINS): ChartData
 
     /** Demo: start data and refresh. */
-    fun histogramDefaultPoints(): Int
-
-    /** Demo: start data and refresh. */
-    fun histogramDefaultRange(): IntRange
-
-    /** Demo: start data and refresh. */
-    fun histogramDataSet(
+    fun random(
         points: Int,
         range: IntRange,
     ): ChartData
 }
 
-/** RingGaugeChartScreenshotTest only, until the gauge has a demo. */
+private const val DEFAULT_RINGS = 3
+
+/** RingGaugeChartScreenshotTest only, until the gauge has a demo. Rings are named "Ring 1", "Ring 2", and so on. */
 interface RingGaugeSampleUseCase {
-    fun initialRingGaugeSample(): RingGaugeSampleData
-
-    /** One value, drawn as a single ring. */
-    fun initialSingleRingGaugeSample(): RingGaugeSampleData
-
-    /** Enough rings that they get thinner. */
-    fun initialManyRingsGaugeSample(): RingGaugeSampleData
-
-    /** A range below zero, with one value past its end. */
-    fun initialSignedRangeRingGaugeSample(): RingGaugeSampleData
+    /**
+     * A 0 to 100 range, or a -20 to 40 range when [signed]: the first ring past its end and the third
+     * below zero.
+     */
+    fun deterministic(
+        rings: Int = DEFAULT_RINGS,
+        signed: Boolean = false,
+    ): RingGaugeSampleData
 }

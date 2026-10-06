@@ -20,10 +20,10 @@ private const val RADAR_SELECTED_AXIS_INDEX = 3
 @Composable
 fun RadarChartDefaultPreview() {
     ScreenshotChartSurface {
-        val data = SCREENSHOT_RADAR_SAMPLE_USE_CASE.initialSingleSeriesRadarData()
+        val sample = SCREENSHOT_RADAR_SAMPLE_USE_CASE.deterministic(series = 1)
         RadarChart(
-            data = data,
-            title = data.series.single().name,
+            data = sample.data,
+            title = sample.title,
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
         )
     }
@@ -34,7 +34,7 @@ fun RadarChartDefaultPreview() {
 @Composable
 fun RadarChartSelectedAxisPreview() {
     ScreenshotChartSurface {
-        val data = SCREENSHOT_RADAR_SAMPLE_USE_CASE.initialSingleSeriesRadarData()
+        val data = SCREENSHOT_RADAR_SAMPLE_USE_CASE.deterministic(series = 1).data
         RadarChart(
             data = data,
             title = data.categories[RADAR_SELECTED_AXIS_INDEX],

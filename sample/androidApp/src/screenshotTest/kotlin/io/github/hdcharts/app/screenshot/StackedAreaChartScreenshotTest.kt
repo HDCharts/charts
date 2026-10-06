@@ -22,6 +22,9 @@ private const val STACKED_AREA_SELECTION_LABEL = "Sep '25"
 
 private const val DENSE_SELECTION_LABEL = "Jan '25"
 
+// Six years of months.
+private const val DENSE_POINTS = 72
+
 // Whole subscribers with a thousands separator, such as `4,213`.
 private val SUBSCRIBERS = ChartValueFormatter { value -> String.format(Locale.US, "%,d", value.roundToInt()) }
 
@@ -30,7 +33,7 @@ private val SUBSCRIBERS = ChartValueFormatter { value -> String.format(Locale.US
 @Composable
 fun StackedAreaChartDefaultPreview() {
     ScreenshotChartSurface {
-        val sample = SCREENSHOT_STACKED_AREA_SAMPLE_USE_CASE.initialStackedAreaSample()
+        val sample = SCREENSHOT_STACKED_AREA_SAMPLE_USE_CASE.deterministic()
         StackedAreaChart(
             data = sample.data,
             title = sample.title,
@@ -44,7 +47,7 @@ fun StackedAreaChartDefaultPreview() {
 @Composable
 fun StackedAreaChartSelectedPointPreview() {
     ScreenshotChartSurface {
-        val sample = SCREENSHOT_STACKED_AREA_SAMPLE_USE_CASE.initialStackedAreaSample()
+        val sample = SCREENSHOT_STACKED_AREA_SAMPLE_USE_CASE.deterministic()
         StackedAreaChart(
             data = sample.data,
             title = STACKED_AREA_SELECTION_LABEL,
@@ -62,7 +65,7 @@ fun StackedAreaChartSelectedPointPreview() {
 @Composable
 fun StackedAreaChartSingleSeriesSelectedPointPreview() {
     ScreenshotChartSurface {
-        val sample = SCREENSHOT_STACKED_AREA_SAMPLE_USE_CASE.initialStackedAreaSample()
+        val sample = SCREENSHOT_STACKED_AREA_SAMPLE_USE_CASE.deterministic()
         val data =
             ChartData(
                 categories = sample.data.categories,
@@ -84,7 +87,7 @@ fun StackedAreaChartSingleSeriesSelectedPointPreview() {
 @Composable
 fun StackedAreaChartHiddenLegendPreview() {
     ScreenshotChartSurface {
-        val sample = SCREENSHOT_STACKED_AREA_SAMPLE_USE_CASE.initialStackedAreaSample()
+        val sample = SCREENSHOT_STACKED_AREA_SAMPLE_USE_CASE.deterministic()
         StackedAreaChart(
             data = sample.data,
             title = sample.title,
@@ -99,9 +102,9 @@ fun StackedAreaChartHiddenLegendPreview() {
 @Composable
 fun StackedAreaChartNoCategoriesPreview() {
     ScreenshotChartSurface {
-        val sample = SCREENSHOT_STACKED_AREA_SAMPLE_USE_CASE.initialStackedAreaNoCategoriesData()
+        val sample = SCREENSHOT_STACKED_AREA_SAMPLE_USE_CASE.deterministic()
         StackedAreaChart(
-            data = sample.data,
+            data = ChartData(categories = emptyList(), series = sample.data.series),
             title = sample.title,
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
         )
@@ -113,7 +116,7 @@ fun StackedAreaChartNoCategoriesPreview() {
 @Composable
 fun StackedAreaChartDensePreview() {
     ScreenshotChartSurface {
-        val sample = SCREENSHOT_STACKED_AREA_SAMPLE_USE_CASE.initialDenseStackedAreaSample()
+        val sample = SCREENSHOT_STACKED_AREA_SAMPLE_USE_CASE.deterministic(points = DENSE_POINTS)
         StackedAreaChart(
             data = sample.data,
             title = sample.title,
@@ -131,7 +134,7 @@ fun StackedAreaChartDensePreview() {
 @Composable
 fun StackedAreaChartDenseSelectedPointPreview() {
     ScreenshotChartSurface {
-        val sample = SCREENSHOT_STACKED_AREA_SAMPLE_USE_CASE.initialDenseStackedAreaSample()
+        val sample = SCREENSHOT_STACKED_AREA_SAMPLE_USE_CASE.deterministic(points = DENSE_POINTS)
         StackedAreaChart(
             data = sample.data,
             title = DENSE_SELECTION_LABEL,
@@ -146,7 +149,7 @@ fun StackedAreaChartDenseSelectedPointPreview() {
 @Composable
 fun StackedAreaChartSeriesColorsPreview() {
     ScreenshotChartSurface {
-        val sample = SCREENSHOT_STACKED_AREA_SAMPLE_USE_CASE.initialStackedAreaSample()
+        val sample = SCREENSHOT_STACKED_AREA_SAMPLE_USE_CASE.deterministic()
         val colors = LocalChartColors.current.seriesColors(sample.seriesKeys.size)
         StackedAreaChart(
             data = sample.data,

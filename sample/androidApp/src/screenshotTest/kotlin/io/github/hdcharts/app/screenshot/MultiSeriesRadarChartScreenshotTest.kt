@@ -25,7 +25,7 @@ private val SCORE = ChartValueFormatter { value -> "${value.roundToInt()}/100" }
 @Composable
 fun MultiSeriesRadarChartDefaultPreview() {
     ScreenshotChartSurface {
-        val sample = SCREENSHOT_RADAR_SAMPLE_USE_CASE.initialRadarSample()
+        val sample = SCREENSHOT_RADAR_SAMPLE_USE_CASE.deterministic()
         RadarChart(
             data = sample.data,
             title = sample.title,
@@ -40,7 +40,7 @@ fun MultiSeriesRadarChartDefaultPreview() {
 @Composable
 fun MultiSeriesRadarChartSelectedAxisPreview() {
     ScreenshotChartSurface {
-        val sample = SCREENSHOT_RADAR_SAMPLE_USE_CASE.initialRadarSample()
+        val sample = SCREENSHOT_RADAR_SAMPLE_USE_CASE.deterministic()
         RadarChart(
             data = sample.data,
             title = sample.title,
@@ -58,7 +58,7 @@ fun MultiSeriesRadarChartSelectedAxisPreview() {
 @Composable
 fun MultiSeriesRadarChartBlankCategorySelectedAxisPreview() {
     ScreenshotChartSurface {
-        val sample = SCREENSHOT_RADAR_SAMPLE_USE_CASE.initialRadarSample()
+        val sample = SCREENSHOT_RADAR_SAMPLE_USE_CASE.deterministic()
         val data =
             ChartData(
                 categories =
@@ -82,9 +82,9 @@ fun MultiSeriesRadarChartBlankCategorySelectedAxisPreview() {
 @Composable
 fun MultiSeriesRadarChartNoCategoriesPreview() {
     ScreenshotChartSurface {
-        val sample = SCREENSHOT_RADAR_SAMPLE_USE_CASE.initialRadarNoCategoriesSample()
+        val sample = SCREENSHOT_RADAR_SAMPLE_USE_CASE.deterministic()
         RadarChart(
-            data = sample.data,
+            data = ChartData(categories = emptyList(), series = sample.data.series),
             title = sample.title,
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
         )
@@ -96,7 +96,7 @@ fun MultiSeriesRadarChartNoCategoriesPreview() {
 @Composable
 fun MultiSeriesRadarChartHiddenLegendPreview() {
     ScreenshotChartSurface {
-        val sample = SCREENSHOT_RADAR_SAMPLE_USE_CASE.initialRadarSample()
+        val sample = SCREENSHOT_RADAR_SAMPLE_USE_CASE.deterministic()
         RadarChart(
             data = sample.data,
             title = sample.title,
@@ -111,7 +111,7 @@ fun MultiSeriesRadarChartHiddenLegendPreview() {
 @Composable
 fun MultiSeriesRadarChartHiddenFillPreview() {
     ScreenshotChartSurface {
-        val sample = SCREENSHOT_RADAR_SAMPLE_USE_CASE.initialRadarSample()
+        val sample = SCREENSHOT_RADAR_SAMPLE_USE_CASE.deterministic()
         RadarChart(
             data = sample.data,
             title = sample.title,
@@ -126,7 +126,7 @@ fun MultiSeriesRadarChartHiddenFillPreview() {
 @Composable
 fun MultiSeriesRadarChartSeriesColorsPreview() {
     ScreenshotChartSurface {
-        val sample = SCREENSHOT_RADAR_SAMPLE_USE_CASE.initialRadarSample()
+        val sample = SCREENSHOT_RADAR_SAMPLE_USE_CASE.deterministic()
         RadarChart(
             data = sample.data,
             title = sample.title,

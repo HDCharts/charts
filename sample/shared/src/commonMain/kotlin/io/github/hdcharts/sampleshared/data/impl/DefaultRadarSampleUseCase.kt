@@ -1,63 +1,36 @@
 package io.github.hdcharts.sampleshared.data.impl
 
-import io.github.hdcharts.core.model.ChartData
-import io.github.hdcharts.core.model.ChartSeries
-import io.github.hdcharts.core.model.chartDataOf
 import io.github.hdcharts.core.model.toChartData
 import io.github.hdcharts.sampleshared.data.RadarSampleData
 import io.github.hdcharts.sampleshared.data.RadarSampleUseCase
 
 internal class DefaultRadarSampleUseCase : RadarSampleUseCase {
     companion object {
-        private const val TITLE = "Platform Readiness Score"
-        private val REFRESH_RANGE = 30..100
+        private const val TITLE = "Score by Axis"
+        private const val AXES = 6
+        private val RANDOM_RANGE = 30..100
     }
 
-    private val radarCategories =
-        listOf(
-            "Performance",
-            "Reliability",
-            "Usability",
-            "Security",
-            "Scalability",
-            "Observability",
-        )
+    // The radar scales from the lowest to the highest value, so the scores spread from 40 to 100.
+    override fun deterministic(series: Int): RadarSampleData =
+        buildRadarSample(series = series) { seriesIndex, axis -> 40.0 + (axis * 3 + seriesIndex * 5) % 7 * 10 }
 
-    // Scores out of 100. The radar scales from the lowest to the highest value in the data,
-    // so the scores spread wide enough for low and high to read at a glance.
-    private val radarSingleSeriesValues = listOf(92.0, 64.0, 78.0, 97.0, 48.0, 71.0)
-    private val radarItems =
-        listOf(
-            "Android App" to listOf(91.0, 72.0, 68.0, 85.0, 88.0, 54.0),
-            "iOS App" to listOf(84.0, 93.0, 90.0, 94.0, 61.0, 48.0),
-            "Web App" to listOf(62.0, 70.0, 86.0, 73.0, 95.0, 90.0),
-        )
+    override fun random(series: Int): RadarSampleData =
+        buildRadarSample(series = series) { _, _ -> RANDOM_RANGE.random().toDouble() }
 
-    override fun initialRadarSample(): RadarSampleData = radarSample(radarItems, radarCategories)
-
-    override fun initialRadarNoCategoriesSample(): RadarSampleData = radarSample(radarItems, emptyList())
-
-    override fun initialSingleSeriesRadarData(): ChartData =
-        chartDataOf(
-            categories = radarCategories,
-            ChartSeries(name = TITLE, values = radarSingleSeriesValues),
-        )
-
-    override fun radarRefreshRange(): IntRange = REFRESH_RANGE
-
-    override fun radarSample(range: IntRange): RadarSampleData =
-        radarSample(
-            items = radarItems.map { (name, values) -> name to values.map { range.random().toDouble() } },
-            categories = radarCategories,
-        )
-
-    private fun radarSample(
-        items: List<Pair<String, List<Double>>>,
-        categories: List<String>,
-    ): RadarSampleData =
-        RadarSampleData(
-            data = items.toChartData(categories = categories),
+    private fun buildRadarSample(
+        series: Int,
+        score: (seriesIndex: Int, axis: Int) -> Double,
+    ): RadarSampleData {
+        val items =
+            List(series) { seriesIndex ->
+                "Series ${seriesIndex + 1}" to
+                    List(AXES) { axis -> score(seriesIndex, axis) }
+            }
+        return RadarSampleData(
+            data = items.toChartData(categories = List(AXES) { axis -> "Axis ${axis + 1}" }),
             seriesKeys = items.map { it.first },
             title = TITLE,
         )
+    }
 }

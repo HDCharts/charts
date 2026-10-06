@@ -8,9 +8,7 @@ import kotlin.random.Random
 internal class DefaultMultiLineSampleUseCase : MultiLineSampleUseCase {
     companion object {
         private const val TITLE = "Revenue by Channel"
-        private const val DAYS = 365
         private const val MONTHS = 12
-        private const val DAYS_PER_MONTH = DAYS / MONTHS.toDouble()
 
         // January 1, 2025 is a Wednesday; index 0 is Monday.
         private const val FIRST_WEEKDAY = 2
@@ -38,29 +36,35 @@ internal class DefaultMultiLineSampleUseCase : MultiLineSampleUseCase {
     // Weekend share of a weekday's revenue per channel: stores gain on weekends, partners drop.
     private val weekendFactors = listOf(0.85, 1.12, 1.3, 0.6)
 
-    override fun initialMultiLineSample(): MultiLineSampleData =
-        multiLineSample(multiLineItems, SampleLabels.months(MONTHS))
+    override fun deterministic(points: Int): MultiLineSampleData =
+        if (points <= MONTHS) {
+            multiLineSample(
+                items = multiLineItems.map { (name, monthly) -> name to monthly.take(points) },
+                categories = SampleLabels.months(points),
+            )
+        } else {
+            dailySample(days = points)
+        }
 
-    override fun initialMultiLineNoCategoriesSample(): MultiLineSampleData =
-        multiLineSample(multiLineItems, emptyList())
+    override fun hero(): MultiLineSampleData = multiLineSample(items = heroItems, categories = heroCategories)
 
-    override fun initialHeroSample(): MultiLineSampleData = multiLineSample(heroItems, heroCategories)
-
-    /** The monthly story spread over each day of 2025, with a weekly cycle per channel. */
-    override fun initialDenseMultiLineSample(): MultiLineSampleData {
+    /** The monthly story spread over [days] days from January 1, 2025, with a weekly cycle per channel. */
+    private fun dailySample(days: Int): MultiLineSampleData {
+        val daysPerMonth = days / MONTHS.toDouble()
         val random = Random(67)
         val series =
             multiLineItems.zip(weekendFactors) { (name, monthly), weekendFactor ->
                 val values =
-                    List(DAYS) { day ->
+                    List(days) { day ->
                         val weekday = (day + FIRST_WEEKDAY) % 7
                         val weekFactor = if (weekday >= 5) weekendFactor else 1.0
                         val jitter = 1.0 + random.nextDouble(-DAILY_NOISE, DAILY_NOISE)
-                        monthlyValueAt(monthly, day) / DAYS_PER_MONTH * weekFactor * jitter
+                        monthlyValueAt(monthly = monthly, day = day, daysPerMonth = daysPerMonth) / daysPerMonth *
+                            weekFactor * jitter
                     }
                 name to SampleSignals.rounded(values, decimals = 1)
             }
-        return multiLineSample(series, SampleLabels.days(DAYS))
+        return multiLineSample(items = series, categories = SampleLabels.days(days))
     }
 
     private fun multiLineSample(
@@ -77,8 +81,9 @@ internal class DefaultMultiLineSampleUseCase : MultiLineSampleUseCase {
     private fun monthlyValueAt(
         monthly: List<Double>,
         day: Int,
+        daysPerMonth: Double,
     ): Double {
-        val position = ((day + 0.5) / DAYS_PER_MONTH - 0.5).coerceIn(0.0, MONTHS - 1.0)
+        val position = ((day + 0.5) / daysPerMonth - 0.5).coerceIn(0.0, MONTHS - 1.0)
         val lower = position.toInt()
         val upper = (lower + 1).coerceAtMost(MONTHS - 1)
         val fraction = position - lower

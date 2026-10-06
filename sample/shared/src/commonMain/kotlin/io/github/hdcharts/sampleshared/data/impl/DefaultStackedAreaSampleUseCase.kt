@@ -8,14 +8,9 @@ import kotlin.random.Random
 internal class DefaultStackedAreaSampleUseCase : StackedAreaSampleUseCase {
     companion object {
         private const val TITLE = "Active Subscribers by Plan"
-        private const val DEFAULT_MONTHS = 24
-        private const val NO_CATEGORIES_POINTS = 12
-        private const val NO_CATEGORIES_PLANS = 3
-        private const val DENSE_MONTHS = 72
-        private const val DENSE_START_YEAR = 2020
-        private const val START_YEAR = 2024
-        private const val MONTHS_PER_YEAR = 12.0
-        private val REFRESH_RANGE = 100..1000
+        private const val RANDOM_START_YEAR = 2024
+        private const val YEAR_AFTER_LAST = 2026
+        private const val MONTHS_PER_YEAR = 12
     }
 
     private class PlanShape(
@@ -36,23 +31,18 @@ internal class DefaultStackedAreaSampleUseCase : StackedAreaSampleUseCase {
             PlanShape("Enterprise", start = 90.0, end = 640.0, curve = 1.4, cycleAmplitude = 0.0, noise = 18.0),
         )
 
-    override fun initialStackedAreaSample(): StackedAreaSampleData =
-        planSample(seed = 47, months = DEFAULT_MONTHS, startYear = START_YEAR)
-
-    override fun initialDenseStackedAreaSample(): StackedAreaSampleData =
-        planSample(seed = 59, months = DENSE_MONTHS, startYear = DENSE_START_YEAR)
-
-    override fun initialStackedAreaNoCategoriesData(): StackedAreaSampleData =
-        planSample(
-            seed = 53,
-            months = NO_CATEGORIES_POINTS,
-            startYear = null,
-            planCount = NO_CATEGORIES_PLANS,
+    override fun deterministic(points: Int): StackedAreaSampleData {
+        val random = Random(47)
+        val series = plans.map { plan -> plan.name to planValues(plan = plan, count = points, random = random) }
+        val startYear = YEAR_AFTER_LAST - (points + MONTHS_PER_YEAR - 1) / MONTHS_PER_YEAR
+        return StackedAreaSampleData(
+            data = series.toChartData(categories = SampleLabels.monthsWithYear(points, startYear)),
+            seriesKeys = series.map { it.first },
+            title = TITLE,
         )
+    }
 
-    override fun stackedAreaRefreshRange(): IntRange = REFRESH_RANGE
-
-    override fun stackedAreaSample(
+    override fun random(
         points: Int,
         range: IntRange,
     ): StackedAreaSampleData {
@@ -65,24 +55,7 @@ internal class DefaultStackedAreaSampleUseCase : StackedAreaSampleUseCase {
                 plan.name to List(safePoints) { safeRange.random().toDouble() }
             }
         return StackedAreaSampleData(
-            data = series.toChartData(categories = SampleLabels.monthsWithYear(safePoints, START_YEAR)),
-            seriesKeys = series.map { it.first },
-            title = TITLE,
-        )
-    }
-
-    // A null startYear leaves the points without time labels.
-    private fun planSample(
-        seed: Int,
-        months: Int,
-        startYear: Int?,
-        planCount: Int = plans.size,
-    ): StackedAreaSampleData {
-        val random = Random(seed)
-        val series = plans.take(planCount).map { plan -> plan.name to planValues(plan, months, random) }
-        val categories = startYear?.let { SampleLabels.monthsWithYear(months, it) }.orEmpty()
-        return StackedAreaSampleData(
-            data = series.toChartData(categories = categories),
+            data = series.toChartData(categories = SampleLabels.monthsWithYear(safePoints, RANDOM_START_YEAR)),
             seriesKeys = series.map { it.first },
             title = TITLE,
         )
@@ -101,8 +74,8 @@ internal class DefaultStackedAreaSampleUseCase : StackedAreaSampleUseCase {
                 random = random,
                 curve = plan.curve,
                 cycleAmplitude = plan.cycleAmplitude,
-                cyclePeriod = MONTHS_PER_YEAR,
-                cyclePhase = MONTHS_PER_YEAR / 4,
+                cyclePeriod = MONTHS_PER_YEAR.toDouble(),
+                cyclePhase = MONTHS_PER_YEAR / 4.0,
                 noise = plan.noise,
             ),
         )

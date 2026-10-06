@@ -16,8 +16,11 @@ import io.github.hdcharts.sampleshared.theme.seriesColor
 // The peak of the distribution.
 private const val HISTOGRAM_SELECTION_LABEL = "100ms"
 
-// The peak of the distribution in the 4ms bins.
-private const val DENSE_SELECTION_LABEL = "100ms"
+// The peak of the distribution in the 150 bins.
+private const val DENSE_SELECTION_LABEL = "106ms"
+
+// More bins than fit at the minimum bar width, even on a tablet.
+private const val DENSE_BINS = 150
 private const val BAR_COLOR_INDEX = 1
 
 @PreviewTest
@@ -25,7 +28,7 @@ private const val BAR_COLOR_INDEX = 1
 @Composable
 fun HistogramChartDefaultPreview() {
     ScreenshotChartSurface {
-        val data = SCREENSHOT_HISTOGRAM_SAMPLE_USE_CASE.initialHistogramDataSet()
+        val data = SCREENSHOT_HISTOGRAM_SAMPLE_USE_CASE.deterministic()
         HistogramChart(
             data = data,
             title = data.series.single().name,
@@ -39,7 +42,7 @@ fun HistogramChartDefaultPreview() {
 @Composable
 fun HistogramChartSelectedBarPreview() {
     ScreenshotChartSurface {
-        val data = SCREENSHOT_HISTOGRAM_SAMPLE_USE_CASE.initialHistogramDataSet()
+        val data = SCREENSHOT_HISTOGRAM_SAMPLE_USE_CASE.deterministic()
         HistogramChart(
             data = data,
             title = data.series.single().name,
@@ -55,7 +58,7 @@ fun HistogramChartSelectedBarPreview() {
 @Composable
 fun HistogramChartDensePreview() {
     ScreenshotChartSurface {
-        val data = SCREENSHOT_HISTOGRAM_SAMPLE_USE_CASE.initialDenseHistogramDataSet()
+        val data = SCREENSHOT_HISTOGRAM_SAMPLE_USE_CASE.deterministic(bins = DENSE_BINS)
         HistogramChart(
             data = data,
             title = data.series.single().name,
@@ -73,7 +76,7 @@ fun HistogramChartDensePreview() {
 @Composable
 fun HistogramChartDenseSelectedBarPreview() {
     ScreenshotChartSurface {
-        val data = SCREENSHOT_HISTOGRAM_SAMPLE_USE_CASE.initialDenseHistogramDataSet()
+        val data = SCREENSHOT_HISTOGRAM_SAMPLE_USE_CASE.deterministic(bins = DENSE_BINS)
         HistogramChart(
             data = data,
             title = data.series.single().name,
@@ -88,7 +91,7 @@ fun HistogramChartDenseSelectedBarPreview() {
 @Composable
 fun HistogramChartBarColorPreview() {
     ScreenshotChartSurface {
-        val data = SCREENSHOT_HISTOGRAM_SAMPLE_USE_CASE.initialHistogramDataSet()
+        val data = SCREENSHOT_HISTOGRAM_SAMPLE_USE_CASE.deterministic()
         HistogramChart(
             data = data,
             title = data.series.single().name,
