@@ -17,6 +17,7 @@ import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTouchInput
@@ -26,6 +27,7 @@ import androidx.compose.ui.unit.em
 import io.github.hdcharts.core.internal.TestTags
 import io.github.hdcharts.core.model.ChartSelection
 import io.github.hdcharts.core.model.ChartSeries
+import io.github.hdcharts.core.model.ChartValueFormatter
 import io.github.hdcharts.core.model.chartDataOf
 import io.github.hdcharts.core.model.staticChartSelection
 import kotlin.test.Test
@@ -501,6 +503,38 @@ class StackedAreaChartTest {
             ChartSeries(name = "Series B", values = List(points) { index -> 25.0 + (index % 6) }),
             ChartSeries(name = "Series C", values = List(points) { index -> 15.0 + (index % 5) }),
         )
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun stackedAreaChart_valueFormatter_formatsSelectedLegendValues() =
+        runComposeUiTest {
+            setContent {
+                StackedAreaChart(
+                    data = multiDataSet,
+                    selection = staticChartSelection(0),
+                    interactionEnabled = false,
+                    animateOnStart = false,
+                    valueFormatter = ChartValueFormatter { value -> "#${value.toInt()}" },
+                )
+            }
+
+            onNodeWithText("Item 3 - #4000").assertIsDisplayed()
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun stackedAreaChart_hiddenLegend_hidesSeriesNames() =
+        runComposeUiTest {
+            setContent {
+                StackedAreaChart(
+                    data = multiDataSet,
+                    style = StackedAreaChartDefaults.style(legend = StackedAreaChartDefaults.legend(visible = false)),
+                    animateOnStart = false,
+                )
+            }
+
+            onAllNodesWithText("Item 3").assertCountEquals(0)
+        }
 
     private companion object {
         val multiDataSet =
