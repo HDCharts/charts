@@ -1,6 +1,6 @@
 ---
 title: Rendering and Animation Issues
-order: 3
+order: 6
 ---
 
 # Rendering and Animation Issues

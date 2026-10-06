@@ -1,6 +1,6 @@
 ---
 title: Pipeline and Stage Ownership
-order: 9
+order: 1
 ---
 
 # Pipeline and Stage Ownership

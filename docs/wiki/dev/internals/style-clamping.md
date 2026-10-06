@@ -1,6 +1,6 @@
 ---
 title: Style Clamping
-order: 5
+order: 4
 ---
 
 # Style Clamping

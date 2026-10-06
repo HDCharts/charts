@@ -1,6 +1,6 @@
 ---
 title: Rendering and Animation
-order: 3
+order: 6
 ---
 
 # Rendering and Animation

@@ -1,6 +1,6 @@
 ---
 title: Style Defaults
-order: 4
+order: 5
 ---
 
 # Style Defaults

@@ -1,6 +1,6 @@
 ---
 title: Validation Errors
-order: 6
+order: 3
 ---
 
 # Validation Errors

@@ -1,6 +1,6 @@
 ---
 title: Y-Axis Label Issues
-order: 2
+order: 8
 ---
 
 # Y-Axis Label Issues
