@@ -161,6 +161,7 @@ written by hand and change in the same commit.
 | Stacked bar | 2 | no | no | yes | no | series count |
 | Stacked area | 2 | no | no | yes | no | series count |
 | Pie | 2 | no | yes | no | no | value count |
+| Ring gauge | 1 | yes | yes | no | yes | value count |
 
 Every chart is on the seam. Bar and histogram draw the same plot, so they share
 `BarChartInternalPlot`. Their specs differ in the policy — histogram forbids negative bin heights —

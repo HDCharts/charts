@@ -20,6 +20,7 @@ import io.github.hdcharts.app.gif.docs.ShowMorphingLine
 import io.github.hdcharts.app.gif.docs.ShowMultiLine
 import io.github.hdcharts.app.gif.docs.ShowPie
 import io.github.hdcharts.app.gif.docs.ShowRadar
+import io.github.hdcharts.app.gif.docs.ShowRingGauge
 import io.github.hdcharts.app.gif.docs.ShowStackedArea
 import io.github.hdcharts.app.gif.docs.ShowStackedBar
 import io.github.hdcharts.sampleshared.theme.AppTheme
@@ -216,6 +217,22 @@ fun StackedAreaDefaultGifScenario() {
 @Composable
 fun RadarDefaultGifScenario() {
     DocsGifScene { ShowRadar() }
+}
+
+// Taps each ring, outer to inner, 30 degrees up from the left end, inside every ring's fill. The
+// fractions assume the 960x672 dp capture (1920x1344 px at xhdpi) and the default ring sizes.
+@RecordGif(
+    name = "ring_gauge_default",
+    interactionNodeTag = "RingGaugeChart",
+    gestures = [
+        GifGestureStep(type = GifGestureType.TAP, xFraction = 0.116f, yFraction = 0.484f, framesAfter = 14),
+        GifGestureStep(type = GifGestureType.TAP, xFraction = 0.142f, yFraction = 0.516f, framesAfter = 14),
+        GifGestureStep(type = GifGestureType.TAP, xFraction = 0.168f, yFraction = 0.547f, framesAfter = 14),
+    ],
+)
+@Composable
+fun RingGaugeDefaultGifScenario() {
+    DocsGifScene { ShowRingGauge() }
 }
 
 @Composable

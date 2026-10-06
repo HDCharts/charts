@@ -20,6 +20,7 @@ dependencies {
         api("${Config.GROUP_ID}:${Config.ARTIFACT_STACKED_BAR_ID}:${project.version}")
         api("${Config.GROUP_ID}:${Config.ARTIFACT_STACKED_AREA_ID}:${project.version}")
         api("${Config.GROUP_ID}:${Config.ARTIFACT_RADAR_ID}:${project.version}")
+        api("${Config.GROUP_ID}:${Config.ARTIFACT_GAUGE_ID}:${project.version}")
         api("${Config.GROUP_ID}:${Config.ARTIFACT_ID}:${project.version}")
     }
 }

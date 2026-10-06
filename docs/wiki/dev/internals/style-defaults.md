@@ -41,13 +41,14 @@ theme in light and dark mode. Do not lower the alpha of a theme color, and do no
 | --- | --- | --- |
 | Series (bars, lines, fills, slices) | `primary`, or a palette from it | All |
 | Points | `tertiary` | Line, radar (with `colorSameAsLine = false`) |
-| Axis labels | `onSurfaceVariant` | Bar, histogram, line, stacked bar, stacked area, radar |
+| Axis labels | `onSurfaceVariant` | Bar, histogram, line, stacked bar, stacked area, radar, ring gauge (range labels) |
 | Title | `onSurface` | All |
 | Grid lines | `outlineVariant` | Bar, histogram, radar (rings and spokes) |
 | Axis lines | `outline` | Bar, histogram, line |
 | Selection line | `onSurface` | Bar, histogram, line, stacked bar, stacked area |
 | Selection marker | `tertiary` | Line |
 | Slice border | `surface` | Pie |
+| Gauge track | `surfaceVariant` | Ring gauge |
 
 Selection indicators draw on top of series marks. A selection default must never use the series
 role (`primary` or its palette), or it disappears over the selected mark.
@@ -65,8 +66,10 @@ Sizes are `Dp`, so they scale with screen density. Point and marker sizes are ra
 | Points | `4.dp` | Line, radar (data points) |
 | Selected point | `5.dp` (`selection.pointSize`) | Line, radar |
 | Touch marker on the line | `3.dp` (`selection.markerSize`) | Line |
-| Gap between an axis and its labels | `10.dp` | Bar, histogram, line, stacked bar, stacked area, radar |
+| Gap between an axis and its labels | `10.dp` | Bar, histogram, line, stacked bar, stacked area, radar, ring gauge (range labels) |
 | Radar label clamp margin | `6.dp`, only for a label that does not fit | Radar |
+| Ring width | `24.dp`, thinner when that many rings would not fit | Ring gauge |
+| Ring spacing | `4.dp` | Ring gauge |
 | Bar spacing | `10.dp`, `0.dp` on histogram | Bar, histogram, stacked bar |
 | Minimum bar width | `10.dp` | Bar, histogram, stacked bar |
 | Container padding | `15.dp` | All |
@@ -76,7 +79,7 @@ Sizes are `Dp`, so they scale with screen density. Point and marker sizes are ra
 | Element | Default | Charts |
 | --- | --- | --- |
 | Title | `20.sp`, `ExtraBold` | All |
-| Axis labels | `11.sp` | Bar, histogram, line, stacked bar, stacked area, radar |
+| Axis labels | `11.sp` | Bar, histogram, line, stacked bar, stacked area, radar, ring gauge (range labels) |
 
 ## Alpha
 
@@ -85,9 +88,9 @@ who want a softer look pass `alpha` themselves.
 
 | Setting | Default | Charts |
 | --- | --- | --- |
-| Series `alpha` | `1f` | Bar, histogram, line, pie, stacked bar, stacked area |
+| Series `alpha` | `1f` | Bar, histogram, line, pie, ring gauge, stacked bar, stacked area |
 | Polygon `fillAlpha` | `0.25f` | Radar |
-| Selection `unselectedAlpha` | `0.7f` | Bar, histogram, stacked bar, stacked area, radar |
+| Selection `unselectedAlpha` | `0.7f` | Bar, histogram, stacked bar, stacked area, radar, ring gauge (not configurable) |
 | Selection `unfocusedSeriesAlpha` | `0.35f` | Radar |
 
 Radar is the one exception to full-opacity fills. Radar polygons overlap each other and the grid,
@@ -106,6 +109,8 @@ removed stacked-area boundary line. At full opacity it cannot be seen.
 | --- | --- | --- |
 | Grid steps | `4` | Bar, histogram, radar |
 | Range | Fitted to the data, minimum `0.0` on histogram | Bar, histogram, line |
+| Gauge range | `0.0..100.0` | Ring gauge |
+| Gauge track and range labels visible | `true` | Ring gauge |
 | Axis label `maxCount` | `null` (as many as fit) | Bar, histogram, line, stacked bar, stacked area |
 | Curved lines (`bezier`) | `true` on line, `false` on stacked area | Line, stacked area |
 | Points visible | `false`; the selected point is still drawn | Line, radar |
@@ -113,7 +118,7 @@ removed stacked-area boundary line. At full opacity it cannot be seen.
 | Radar points use line color | `true` | Radar |
 | Donut hole | `0f` (full pie) | Pie |
 | Zoom controls visible | `true` | Bar, histogram, line, stacked bar, stacked area |
-| Legend visible | `true`; see Legend and Selection for when it shows | Line, pie, radar, stacked bar, stacked area |
+| Legend visible | `true`; see Legend and Selection for when it shows | Line, pie, radar, ring gauge, stacked bar, stacked area |
 
 ## Invalid values
 
@@ -133,3 +138,6 @@ Radar has no selection line. Dragging selects an axis, and its per-axis marks ar
 data points and labels of the other axes dim to `unselectedAlpha`. Polygons stay whole, because
 their shape is what a radar chart shows. Tapping a series outline focuses the
 series and fades the others to `unfocusedSeriesAlpha`.
+
+Ring gauge has no selection line either. The selected ring keeps full color and the other rings dim
+to `unselectedAlpha`; the tracks behind them stay as they are.

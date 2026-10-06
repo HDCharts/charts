@@ -20,6 +20,7 @@ HDCharts
 │   │   ├── :charts-pie
 │   │   ├── :charts-bar
 │   │   ├── :charts-radar
+│   │   ├── :charts-gauge
 │   │   ├── :charts-stacked-bar
 │   │   └── :charts-stacked-area
 │   ├── BOM

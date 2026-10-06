@@ -64,6 +64,7 @@ kotlin {
             api(projects.chartsStackedBar)
             api(projects.chartsStackedArea)
             api(projects.chartsRadar)
+            api(projects.chartsGauge)
         }
 
         commonTest.dependencies {
@@ -95,6 +96,7 @@ private val apiSourceRoots =
         project.rootDir.resolve("charts-stacked-bar/src/commonMain/kotlin/io/github/hdcharts/stackedbar"),
         project.rootDir.resolve("charts-stacked-area/src/commonMain/kotlin/io/github/hdcharts/stackedarea"),
         project.rootDir.resolve("charts-radar/src/commonMain/kotlin/io/github/hdcharts/radar"),
+        project.rootDir.resolve("charts-gauge/src/commonMain/kotlin/io/github/hdcharts/gauge"),
     )
 
 dokka {

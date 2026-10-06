@@ -74,23 +74,23 @@ again.
 
 ## Which chart runs which stage
 
-| Stage | Line | Bar | Histogram | Stacked bar | Stacked area | Radar | Pie |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 Selection lifecycle | yes | yes | shared | yes | yes | yes, twice | yes |
-| 2 Validation | yes | yes | shared | yes | yes | yes | own path |
-| 3 Clamping | yes | yes | shared | yes | yes | yes | yes |
-| 4 Conversion | pass-through | pass-through | pass-through | transposes | pass-through | pass-through | none |
-| 5 Density decision | yes | yes | shared | yes | yes | — | — |
-| 6 Aggregation | yes | yes | disabled | yes | yes | — | — |
-| 7 Palette | frame | own colour | shared | entry | entry | entry | own file |
-| 8 Chrome layout | `LineChartFrame` | `BarChartContent` | shared | `StackedBarChartFrame` | `StackedAreaChartFrame` | inline | `PieChartFrame` |
-| 9 Axis planning | yes | yes | shared | yes | yes | labels only | — |
-| 10 Canvas guard | yes | yes | shared | yes | yes | — | — |
-| 11 Domain | `resolveLineRange` | `resolveBarRange` | shared | totals | totals | `minMax` | share-based |
-| 12 Normalization | list | scalar per bar | shared | list | list | list | share-based |
-| 13 Animation | yes | yes | shared | yes | yes | yes | yes |
-| 14 Gesture | yes | yes | shared | yes | yes | yes | yes |
-| 15 Draw | yes | yes | shared | yes | yes | yes | yes |
+| Stage | Line | Bar | Histogram | Stacked bar | Stacked area | Radar | Pie | Ring gauge |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 Selection lifecycle | yes | yes | shared | yes | yes | yes, twice | yes | yes |
+| 2 Validation | yes | yes | shared | yes | yes | yes | own path | yes |
+| 3 Clamping | yes | yes | shared | yes | yes | yes | yes | yes |
+| 4 Conversion | pass-through | pass-through | pass-through | transposes | pass-through | pass-through | none | pass-through |
+| 5 Density decision | yes | yes | shared | yes | yes | — | — | — |
+| 6 Aggregation | yes | yes | disabled | yes | yes | — | — | — |
+| 7 Palette | frame | own colour | shared | entry | entry | entry | own file | entry |
+| 8 Chrome layout | `LineChartFrame` | `BarChartContent` | shared | `StackedBarChartFrame` | `StackedAreaChartFrame` | inline | `PieChartFrame` | inline |
+| 9 Axis planning | yes | yes | shared | yes | yes | labels only | — | range labels only |
+| 10 Canvas guard | yes | yes | shared | yes | yes | — | — | — |
+| 11 Domain | `resolveLineRange` | `resolveBarRange` | shared | totals | totals | `minMax` | share-based | `style.range` |
+| 12 Normalization | list | scalar per bar | shared | list | list | list | share-based | `gaugeFraction` per ring |
+| 13 Animation | yes | yes | shared | yes | yes | yes | yes | yes |
+| 14 Gesture | yes | yes | shared | yes | yes | yes | yes | yes |
+| 15 Draw | yes | yes | shared | yes | yes | yes | yes | yes |
 
 Bar and histogram share one plot, so they share every stage but aggregation: stages 1 to 5 and
 7 to 15. Their specs differ in the policy — histogram forbids negative bin heights — and only
@@ -100,9 +100,10 @@ histogram passes `aggregate = false`, so histogram runs the density decision but
 
 Each of these is a decision, written down so the next change reads it.
 
-**Two pipeline shapes.** Radar and pie run stages 1 to 4, 7, 8 and 11 to 15. Neither compacts, so
-they skip the density decision and aggregation, and neither runs the Cartesian canvas guard. Radar
-labels its own axes in place of stage 9; pie has no axis and skips it. Every other chart runs all
+**Two pipeline shapes.** Radar, pie and ring gauge run stages 1 to 4, 7, 8 and 11 to 15. None of
+them compacts, so they skip the density decision and aggregation, and none runs the Cartesian canvas
+guard. Radar labels its own axes in place of stage 9, and ring gauge draws its two range labels; pie
+has no axis and skips it. Every other chart runs all
 fifteen. A Cartesian chart with a compact mode and a polar or share-based chart are presented as one
 pipeline, and this is the shape the library has. Pie runs the same stages 1 to 4 as every other
 chart, through `PieChartEntry`.
@@ -111,7 +112,8 @@ chart, through `PieChartEntry`.
 the domain, so an all-positive series starts at the axis. Line and radar take the data's own range.
 Line, bar and histogram accept a caller's fixed range through `style.range`. Stacked area's domain
 is a line inside its normalizer, so finding it means opening the normalizer. Pie's axis is the caller's
-own share, not a data range, which is why its matrix row reads share-based. A domain is a pair of
+own share, not a data range, which is why its matrix row reads share-based. Ring gauge reads only
+`style.range` and never the data's range, so a value outside it stops at the nearest end of the arc. A domain is a pair of
 doubles and reads no constraint, so by the test above it could sit in the seam; whether it should is
 open.
 
@@ -126,14 +128,16 @@ them. Bar's is a per-bar scalar computed at draw time. Each is the shape its cha
 
 `resolvePaletteColors` is pure in the clamped style and an item count, so by the test above it belongs
 at the seam. Each style exposes a thin wrapper over it — `resolveColors` in line, stacked bar and
-stacked area, `resolveLineColors` in radar — and pie's wrapper takes a slice count instead of a series
-count. Stacked bar (`StackedBarChartEntry`), stacked area (`StackedAreaChartEntry`), radar
-(`RadarChartEntry`) and pie (`PieChartEntry`) resolve inside their entry. Line resolves it in
+stacked area, `resolveLineColors` in radar — and the pie and ring gauge wrappers take a slice or ring
+count instead of a series count. Stacked bar (`StackedBarChartEntry`), stacked area
+(`StackedAreaChartEntry`), radar (`RadarChartEntry`), pie (`PieChartEntry`) and ring gauge
+(`RingGaugeChartEntry`) resolve inside their entry. Line resolves it in
 `rememberLineColors`, which is declared in `LineChartFrame` and called from `LineChartImpl` and
 `LiveLineChartImpl`, one frame above where it is declared.
 
-`singleItemUsesBase` is a boolean literal at each of the five call sites. A single-series chart draws
-its base colour on line, stacked area and radar, and a generated shade on pie and stacked bar.
+`singleItemUsesBase` is a boolean literal at each of the six call sites. A single-series chart draws
+its base colour on line, stacked area and radar, and a generated shade on pie, stacked bar and ring
+gauge.
 
 Bar does not use the palette helper. It repeats one colour across its bars and keeps two values: the
 caller's `colors` when they set any, and `bars.color` as the fallback for every bar when they set
@@ -154,8 +158,9 @@ charts use and has no production caller — `BarStyleBlocksTest` is its only one
 
 ## Adding a stage or a chart
 
-A new chart runs all fifteen stages in this order. A chart that skips one says so here; radar and pie
-skip stages 5, 6 and 10, and stage 9 is radar's own label layout and absent from pie.
+A new chart runs all fifteen stages in this order. A chart that skips one says so here; radar, pie and
+ring gauge skip stages 5, 6 and 10, and stage 9 is radar's own label layout, ring gauge's range
+labels, and absent from pie.
 
 A new stage goes where the test puts it, and a stage whose behaviour differs between charts is
 declared in the chart's `ChartSpec`, not branched inside a content composable. A policy field

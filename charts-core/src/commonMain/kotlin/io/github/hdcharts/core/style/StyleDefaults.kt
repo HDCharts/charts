@@ -125,4 +125,22 @@ object StyleDefaults {
      * web: such a label moves inside the canvas instead, so only a too small chart pays for it.
      */
     val radarLabelEdgePadding: Dp = 6.dp
+
+    // ===========================================================================
+    // Gauge
+    // ===========================================================================
+
+    /** Gauges most often show a percentage, so the default range is `0..100`. */
+    val gaugeRangeMin: Double = 0.0
+    val gaugeRangeMax: Double = 100.0
+
+    /** Widest a ring is drawn; rings get thinner when this many would not fit. */
+    val ringGaugeWidth: Dp = 24.dp
+
+    /** Gap between neighbouring rings. */
+    val ringGaugeSpacing: Dp = 4.dp
+
+    val gaugeTrackColor: Color
+        @Composable @ReadOnlyComposable
+        get() = MaterialTheme.colorScheme.surfaceVariant
 }

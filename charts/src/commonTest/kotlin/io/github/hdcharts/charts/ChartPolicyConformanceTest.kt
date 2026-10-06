@@ -6,6 +6,7 @@ import io.github.hdcharts.core.internal.InternalChartsApi
 import io.github.hdcharts.core.internal.ValidationErrors
 import io.github.hdcharts.core.model.ChartSeries
 import io.github.hdcharts.core.model.chartDataOf
+import io.github.hdcharts.gauge.internal.RingGaugeChartSpec
 import io.github.hdcharts.histogram.internal.HistogramChartSpec
 import io.github.hdcharts.line.internal.LineChartSpec
 import io.github.hdcharts.pie.internal.PieChartSpec
@@ -57,6 +58,7 @@ class ChartPolicyConformanceTest {
                 "Stacked bar",
                 "Stacked area",
                 "Pie",
+                "Ring gauge",
             )
 
         val DECLARED_BY_CHART =
@@ -68,6 +70,7 @@ class ChartPolicyConformanceTest {
                 "Stacked bar" to StackedBarChartSpec.policy,
                 "Stacked area" to StackedAreaChartSpec.policy,
                 "Pie" to PieChartSpec.policy,
+                "Ring gauge" to RingGaugeChartSpec.policy,
             )
 
         val EXPECTED_BY_CHART =
@@ -133,6 +136,15 @@ class ChartPolicyConformanceTest {
                         singleSeries = true,
                         hasAxis = false,
                         hasFixedRange = false,
+                        colors = "value count",
+                    ),
+                "Ring gauge" to
+                    PolicyRow(
+                        minValues = ValidationErrors.MIN_RING_GAUGE_VALUES,
+                        allowNegative = true,
+                        singleSeries = true,
+                        hasAxis = false,
+                        hasFixedRange = true,
                         colors = "value count",
                     ),
             )

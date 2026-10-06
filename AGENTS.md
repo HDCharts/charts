@@ -14,7 +14,7 @@ the plan under `docs/plans/`.
 ## Repository Structure
 
 - `charts-core`: shared chart models, selection, formatting, validation, and rendering foundations.
-- `charts-line`, `charts-pie`, `charts-bar`, `charts-histogram`, `charts-radar`, `charts-stacked-bar`, and `charts-stacked-area`: published chart modules.
+- `charts-line`, `charts-pie`, `charts-bar`, `charts-histogram`, `charts-radar`, `charts-gauge`, `charts-stacked-bar`, and `charts-stacked-area`: published chart modules.
 - `charts`: the umbrella artifact exposing the library's combined API.
 - `charts-bom`: the published Bill of Materials.
 - `sample`: Compose Multiplatform demos, previews, screenshot tests, and platform applications.

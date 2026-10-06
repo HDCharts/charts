@@ -1,0 +1,104 @@
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
+plugins {
+    alias(libs.plugins.kotlinMultiplatform)
+    alias(libs.plugins.androidKotlinMultiplatformLibrary)
+    alias(libs.plugins.jetbrainsCompose)
+    `maven-publish`
+    signing
+    alias(libs.plugins.mavenPublish)
+    alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.ktlint)
+}
+
+kotlin {
+    jvmToolchain(
+        libs.versions.java
+            .get()
+            .toInt(),
+    )
+
+    android {
+        namespace = Config.CHARTS_GAUGE_NAMESPACE
+        compileSdk =
+            libs.versions.compile.sdk
+                .get()
+                .toInt()
+        minSdk =
+            libs.versions.min.sdk
+                .get()
+                .toInt()
+        androidResources.enable = true
+        compilerOptions {
+            jvmTarget.set(
+                JvmTarget
+                    .fromTarget(libs.versions.java.get()),
+            )
+        }
+        withDeviceTestBuilder {
+            sourceSetTreeName = "test"
+        }
+    }
+
+    iosArm64()
+    iosSimulatorArm64()
+
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmJs {
+        browser()
+        binaries.executable()
+    }
+
+    jvm()
+
+    sourceSets {
+        all {
+            languageSettings.optIn("io.github.hdcharts.core.internal.InternalChartsApi")
+        }
+
+        commonMain.dependencies {
+            api(projects.chartsCore)
+        }
+
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+            implementation(kotlin("test-common"))
+            implementation(kotlin("test-annotations-common"))
+            implementation(libs.compose.mpp.ui.test)
+        }
+
+        androidMain.dependencies {
+            implementation(libs.compose.ui.tooling.preview)
+            implementation(libs.compose.ui.tooling)
+        }
+
+        jvmMain.dependencies {
+            implementation(compose.desktop.currentOs)
+        }
+
+        jvmTest.dependencies {
+            implementation(kotlin("test-junit"))
+        }
+
+        getByName("androidDeviceTest").dependencies {
+            implementation(kotlin("test-junit"))
+        }
+    }
+}
+
+mavenPublishing {
+    coordinates(
+        groupId = Config.GROUP_ID,
+        artifactId = Config.ARTIFACT_GAUGE_ID,
+        version = project.version.toString(),
+    )
+
+    pom {
+        ChartsPublishing.configurePom(
+            pom = this,
+            moduleName = "Gauge Chart",
+            moduleDescription = "Gauge chart module for HDCharts.",
+        )
+    }
+}

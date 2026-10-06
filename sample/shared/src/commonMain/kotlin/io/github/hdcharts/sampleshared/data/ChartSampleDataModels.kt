@@ -7,6 +7,14 @@ data class PieSampleData(
     val title: String,
 )
 
+/** [rangeMin] and [rangeMax] are the gauge range the values are read against. */
+data class RingGaugeSampleData(
+    val data: ChartData,
+    val title: String,
+    val rangeMin: Double,
+    val rangeMax: Double,
+)
+
 data class MultiLineSampleData(
     val dataSet: ChartData,
     val seriesKeys: List<String>,

@@ -25,6 +25,7 @@ One public composable per file. The file is named after it and holds nothing els
 | `HistogramChart.kt` | `HistogramChart` | `charts-histogram` |
 | `PieChart.kt` | `PieChart` | `charts-pie` |
 | `RadarChart.kt` | `RadarChart` | `charts-radar` |
+| `RingGaugeChart.kt` | `RingGaugeChart` | `charts-gauge` |
 | `StackedBarChart.kt` | `StackedBarChart` | `charts-stacked-bar` |
 | `StackedAreaChart.kt` | `StackedAreaChart` | `charts-stacked-area` |
 
@@ -67,11 +68,13 @@ two stacked charts.
 | Histogram | `HistogramChart` → `HistogramChartEntry` → `BarChartInternalPlot` → `BarChartImpl` → `BarChartContent` |
 | Pie | `PieChart` → `PieChartEntry` → `PieChartFrame` → `PieChartContent` |
 | Radar | `RadarChart` → `RadarChartEntry` → `RadarChartContent` |
+| Ring gauge | `RingGaugeChart` → `RingGaugeChartEntry` → `RingGaugeChartContent` |
 | Stacked bar | `StackedBarChart` → `StackedBarChartEntry` → `StackedBarChartFrame` → `StackedBarChartImpl` |
 | Stacked area | `StackedAreaChart` → `StackedAreaChartEntry` → `StackedAreaChartFrame` → `StackedAreaChartImpl` |
 
 Radar and pie lay their plot out with `ChartSquarePlotLayout` from `charts-core`, which supplies
-the square plot, the header, and the legend.
+the square plot, the header, and the legend. Ring gauge draws a half circle, so it uses
+`ChartPlotLayout` with a plot twice as wide as it is tall; the square layout is that with `1f`.
 
 The stacked charts are the two that do not follow the rest: their `Frame` wraps the `Impl` and hands
 it the plot slot, where line and bar put the `Frame` inside the `Impl` and hand it a content slot.

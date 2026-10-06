@@ -34,6 +34,7 @@ class StyleDefaultsTest {
                             StyleDefaults.selectionColor,
                             StyleDefaults.titleColor,
                             StyleDefaults.pieBorderColor,
+                            StyleDefaults.gaugeTrackColor,
                         )
                     SideEffect {
                         scheme = themeScheme
@@ -54,6 +55,7 @@ class StyleDefaultsTest {
                             scheme.onSurface,
                             scheme.onSurface,
                             scheme.surface,
+                            scheme.surfaceVariant,
                         ),
                     actual = colors,
                 )
@@ -80,6 +82,10 @@ class StyleDefaultsTest {
                 assertEquals(expected = 0.35f, actual = StyleDefaults.radarUnfocusedSeriesAlpha)
                 assertEquals(expected = true, actual = StyleDefaults.radarAxisLabelsVisible)
                 assertEquals(expected = 6.dp, actual = StyleDefaults.radarLabelEdgePadding)
+                assertEquals(expected = 0.0, actual = StyleDefaults.gaugeRangeMin)
+                assertEquals(expected = 100.0, actual = StyleDefaults.gaugeRangeMax)
+                assertEquals(expected = 24.dp, actual = StyleDefaults.ringGaugeWidth)
+                assertEquals(expected = 4.dp, actual = StyleDefaults.ringGaugeSpacing)
             }
         }
 }

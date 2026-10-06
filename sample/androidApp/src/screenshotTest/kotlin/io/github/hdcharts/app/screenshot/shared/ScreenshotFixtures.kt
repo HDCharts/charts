@@ -25,6 +25,7 @@ import io.github.hdcharts.sampleshared.data.liveLatencyTimelineUseCase
 import io.github.hdcharts.sampleshared.data.multiLineSampleUseCase
 import io.github.hdcharts.sampleshared.data.pieSampleUseCase
 import io.github.hdcharts.sampleshared.data.radarSampleUseCase
+import io.github.hdcharts.sampleshared.data.ringGaugeSampleUseCase
 import io.github.hdcharts.sampleshared.data.stackedAreaSampleUseCase
 import io.github.hdcharts.sampleshared.data.stackedBarSampleUseCase
 import io.github.hdcharts.sampleshared.theme.AppTheme
@@ -41,6 +42,7 @@ internal val SCREENSHOT_HISTOGRAM_SAMPLE_USE_CASE = histogramSampleUseCase()
 internal val SCREENSHOT_STACKED_BAR_SAMPLE_USE_CASE = stackedBarSampleUseCase()
 internal val SCREENSHOT_STACKED_AREA_SAMPLE_USE_CASE = stackedAreaSampleUseCase()
 internal val SCREENSHOT_RADAR_SAMPLE_USE_CASE = radarSampleUseCase()
+internal val SCREENSHOT_RING_GAUGE_SAMPLE_USE_CASE = ringGaugeSampleUseCase()
 
 private const val LIVE_LINE_WINDOW_SIZE = 60
 private const val LIVE_LINE_SEED = 7
