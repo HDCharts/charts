@@ -288,14 +288,14 @@ object LineChartDefaults {
     /**
      * Returns a [LegendStyle] with the provided visibility.
      *
-     * The chart renders the legend only when the data has more than one series
-     * and [visible] is true. Pass `visible = false` to suppress the legend for
-     * multi-series data.
+     * The chart renders the legend only when the data has more than one series,
+     * at least one series has a name, and [visible] is true. Pass `visible = false`
+     * to suppress the legend for multi-series data.
      *
      * @param visible Whether the legend is visible. Defaults to true.
      */
     @Composable
-    fun legend(visible: Boolean = true): LegendStyle = LegendDefaults.style(visible = visible)
+    fun legend(visible: Boolean = StyleDefaults.legendVisible): LegendStyle = LegendDefaults.style(visible = visible)
 
     /** Default formatter for chart value readouts. */
     val valueFormatter: ChartValueFormatter = ChartValueFormatters.Default

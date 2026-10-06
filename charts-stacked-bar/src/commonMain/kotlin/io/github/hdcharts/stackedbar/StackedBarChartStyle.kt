@@ -9,9 +9,13 @@ import androidx.compose.ui.unit.TextUnit
 import io.github.hdcharts.core.internal.clampAlpha
 import io.github.hdcharts.core.internal.clampSize
 import io.github.hdcharts.core.internal.palette.resolvePaletteColors
+import io.github.hdcharts.core.model.ChartValueFormatter
+import io.github.hdcharts.core.model.ChartValueFormatters
 import io.github.hdcharts.core.style.AxisLabelStyle
 import io.github.hdcharts.core.style.ChartContainerDefaults
 import io.github.hdcharts.core.style.ChartContainerStyle
+import io.github.hdcharts.core.style.LegendDefaults
+import io.github.hdcharts.core.style.LegendStyle
 import io.github.hdcharts.core.style.StyleDefaults
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
@@ -113,6 +117,7 @@ class StackedBarChartStyle(
     val layout: StackedBarLayoutStyle,
     val axis: StackedBarAxisStyle,
     val selection: StackedBarSelectionStyle,
+    val legend: LegendStyle,
     val zoomControlsVisible: Boolean,
 )
 
@@ -125,6 +130,7 @@ object StackedBarChartDefaults {
         layout: StackedBarLayoutStyle = layout(),
         axis: StackedBarAxisStyle = axis(),
         selection: StackedBarSelectionStyle = selection(),
+        legend: LegendStyle = legend(),
         zoomControlsVisible: Boolean = true,
     ) = StackedBarChartStyle(
         chartContainerStyle = chartContainerStyle,
@@ -132,6 +138,7 @@ object StackedBarChartDefaults {
         layout = layout,
         axis = axis,
         selection = selection,
+        legend = legend,
         zoomControlsVisible = zoomControlsVisible,
     )
 
@@ -188,6 +195,20 @@ object StackedBarChartDefaults {
         width = width,
         unselectedAlpha = unselectedAlpha,
     )
+
+    /**
+     * Returns a [LegendStyle] with the provided visibility.
+     *
+     * The chart renders the legend only when the data has more than one segment,
+     * at least one segment has a name, and [visible] is true.
+     *
+     * @param visible Whether the legend is visible. Defaults to true.
+     */
+    @Composable
+    fun legend(visible: Boolean = StyleDefaults.legendVisible): LegendStyle = LegendDefaults.style(visible = visible)
+
+    /** Default formatter for selected values. */
+    val valueFormatter: ChartValueFormatter = ChartValueFormatters.Default
 }
 
 /** Returns [this] with alphas and sizes clamped to drawable values. */
@@ -198,5 +219,6 @@ internal fun StackedBarChartStyle.clamp(density: Density) =
         layout = layout.clamp(density),
         axis = axis,
         selection = selection.clamp(density),
+        legend = legend,
         zoomControlsVisible = zoomControlsVisible,
     )

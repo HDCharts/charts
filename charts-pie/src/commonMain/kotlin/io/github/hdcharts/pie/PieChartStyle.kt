@@ -209,7 +209,7 @@ object PieChartDefaults {
      * @param visible Whether the legend is visible. Defaults to true.
      */
     @Composable
-    fun legend(visible: Boolean = true): LegendStyle = LegendDefaults.style(visible = visible)
+    fun legend(visible: Boolean = StyleDefaults.legendVisible): LegendStyle = LegendDefaults.style(visible = visible)
 }
 
 /** Returns [this] with alpha, donut hole, and sizes clamped to drawable values. */

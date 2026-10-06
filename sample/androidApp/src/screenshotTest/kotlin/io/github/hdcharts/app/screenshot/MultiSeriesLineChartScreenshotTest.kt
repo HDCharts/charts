@@ -8,6 +8,7 @@ import io.github.hdcharts.app.screenshot.shared.SCREENSHOT_THOUSANDS_OF_DOLLARS
 import io.github.hdcharts.app.screenshot.shared.ScreenshotChartSurface
 import io.github.hdcharts.app.screenshot.shared.ScreenshotPreview
 import io.github.hdcharts.app.screenshot.shared.categoryIndex
+import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.model.staticChartSelection
 import io.github.hdcharts.line.LineChart
 import io.github.hdcharts.line.LineChartDefaults
@@ -18,6 +19,9 @@ import io.github.hdcharts.sampleshared.theme.seriesColors
 private const val SELECTION_LABEL = "Oct"
 
 private const val DENSE_SELECTION_LABEL = "Oct 15"
+
+// Without categories, a selection is an index; this one is October.
+private const val NO_CATEGORIES_SELECTION_INDEX = 9
 
 @PreviewTest
 @ScreenshotPreview
@@ -93,7 +97,7 @@ fun MultiSeriesLineChartDenseSelectedPointPreview() {
 @PreviewTest
 @ScreenshotPreview
 @Composable
-fun MultiSeriesLineChartNoCategoriesPreview() {
+fun MultiSeriesLineChartNoCategoriesSelectedPointPreview() {
     ScreenshotChartSurface {
         val sample = SCREENSHOT_MULTI_LINE_SAMPLE_USE_CASE.initialMultiLineNoCategoriesSample()
         LineChart(
@@ -101,7 +105,58 @@ fun MultiSeriesLineChartNoCategoriesPreview() {
             title = sample.title,
             valueFormatter = SCREENSHOT_THOUSANDS_OF_DOLLARS,
             axisValueFormatter = SCREENSHOT_THOUSANDS_OF_DOLLARS,
+            interactionEnabled = false,
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
+            selection = staticChartSelection(NO_CATEGORIES_SELECTION_INDEX),
+        )
+    }
+}
+
+/** With no series named, the legend has nothing to name, so it is hidden. */
+@PreviewTest
+@ScreenshotPreview
+@Composable
+fun MultiSeriesLineChartUnnamedSeriesSelectedPointPreview() {
+    ScreenshotChartSurface {
+        val sample = SCREENSHOT_MULTI_LINE_SAMPLE_USE_CASE.initialMultiLineSample()
+        val data =
+            ChartData(
+                categories = sample.dataSet.categories,
+                series = sample.dataSet.series.map { it.copy(name = null) },
+            )
+        LineChart(
+            data = data,
+            title = sample.title,
+            valueFormatter = SCREENSHOT_THOUSANDS_OF_DOLLARS,
+            axisValueFormatter = SCREENSHOT_THOUSANDS_OF_DOLLARS,
+            interactionEnabled = false,
+            animateOnStart = SCREENSHOT_ANIMATE_ON_START,
+            selection = staticChartSelection(data.categoryIndex(SELECTION_LABEL)),
+        )
+    }
+}
+
+/** A series without a name shows only its value in the legend. */
+@PreviewTest
+@ScreenshotPreview
+@Composable
+fun MultiSeriesLineChartPartlyNamedSeriesSelectedPointPreview() {
+    ScreenshotChartSurface {
+        val sample = SCREENSHOT_MULTI_LINE_SAMPLE_USE_CASE.initialMultiLineSample()
+        val series = sample.dataSet.series
+        val data =
+            ChartData(
+                categories = sample.dataSet.categories,
+                series = series.dropLast(1) + series.last().copy(name = null),
+            )
+        LineChart(
+            data = data,
+            title = sample.title,
+            valueFormatter = SCREENSHOT_THOUSANDS_OF_DOLLARS,
+            axisValueFormatter = SCREENSHOT_THOUSANDS_OF_DOLLARS,
+            interactionEnabled = false,
+            animateOnStart = SCREENSHOT_ANIMATE_ON_START,
+            selection = staticChartSelection(data.categoryIndex(SELECTION_LABEL)),
         )
     }
 }

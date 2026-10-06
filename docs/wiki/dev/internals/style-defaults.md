@@ -113,7 +113,7 @@ removed stacked-area boundary line. At full opacity it cannot be seen.
 | Radar points use line color | `true` | Radar |
 | Donut hole | `0f` (full pie) | Pie |
 | Zoom controls visible | `true` | Bar, histogram, line, stacked bar, stacked area |
-| Legend visible | `true` | Line, pie; radar only with more than one series |
+| Legend visible | `true`; see Legend and Selection for when it shows | Line, pie, radar, stacked bar, stacked area |
 
 ## Invalid values
 

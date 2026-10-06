@@ -33,6 +33,9 @@ object StyleDefaults {
     /** Points are hidden at rest; the selected point is drawn even when they are hidden. */
     val pointsVisible: Boolean = false
 
+    /** The legend shows by default; it still hides itself without two items and a name. */
+    val legendVisible: Boolean = true
+
     /** Radius of a point on the selected position, drawn larger than [pointSize] so it stands out. */
     val selectedPointSize: Dp = 5.dp
 

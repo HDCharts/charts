@@ -5,11 +5,15 @@ import androidx.compose.ui.Modifier
 import io.github.hdcharts.core.internal.NO_SELECTION
 import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.model.ChartSelection
+import io.github.hdcharts.core.model.ChartValueFormatter
 import io.github.hdcharts.core.model.rememberChartSelection
 import io.github.hdcharts.core.model.rememberSelectionLifecycle
 import io.github.hdcharts.stackedarea.internal.StackedAreaChartEntry
 
-/** Displays absolute stacked areas from one or more aligned series sharing common X categories. */
+/**
+ * Displays absolute stacked areas from one or more aligned series sharing common X categories.
+ * [valueFormatter] formats the selected values.
+ */
 @Composable
 fun StackedAreaChart(
     data: ChartData,
@@ -19,6 +23,7 @@ fun StackedAreaChart(
     selection: ChartSelection = rememberChartSelection(),
     interactionEnabled: Boolean = true,
     animateOnStart: Boolean = true,
+    valueFormatter: ChartValueFormatter = StackedAreaChartDefaults.valueFormatter,
 ) {
     val pointCount =
         data.series
@@ -39,6 +44,7 @@ fun StackedAreaChart(
         selectedIndex = selectedIndex,
         interactionEnabled = interactionEnabled,
         animateOnStart = animateOnStart,
+        valueFormatter = valueFormatter,
         onValueChanged = { index ->
             if (index == NO_SELECTION) selection.clear() else selection.select(index)
         },

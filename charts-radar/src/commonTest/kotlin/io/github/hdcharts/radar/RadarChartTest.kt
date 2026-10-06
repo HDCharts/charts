@@ -8,10 +8,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.isDisplayed
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTouchInput
@@ -21,6 +23,7 @@ import io.github.hdcharts.core.internal.TestTags
 import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.model.ChartSelection
 import io.github.hdcharts.core.model.ChartSeries
+import io.github.hdcharts.core.model.ChartValueFormatter
 import io.github.hdcharts.core.model.chartDataOf
 import io.github.hdcharts.core.model.staticChartSelection
 import kotlin.test.Test
@@ -280,6 +283,38 @@ class RadarChartTest {
             }
 
             onNodeWithTag(TestTags.RADAR_CHART).isDisplayed()
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun radarChart_valueFormatter_formatsSelectedLegendValues() =
+        runComposeUiTest {
+            setContent {
+                RadarChart(
+                    data = multiSeriesData,
+                    selection = staticChartSelection(0),
+                    interactionEnabled = false,
+                    animateOnStart = false,
+                    valueFormatter = ChartValueFormatter { value -> "#${value.toInt()}" },
+                )
+            }
+
+            onNodeWithText("Alpha - #10").assertIsDisplayed()
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun radarChart_hiddenLegend_hidesSeriesNames() =
+        runComposeUiTest {
+            setContent {
+                RadarChart(
+                    data = multiSeriesData,
+                    style = RadarChartDefaults.style(legend = RadarChartDefaults.legend(visible = false)),
+                    animateOnStart = false,
+                )
+            }
+
+            onAllNodesWithText("Alpha").assertCountEquals(0)
         }
 
     private companion object {

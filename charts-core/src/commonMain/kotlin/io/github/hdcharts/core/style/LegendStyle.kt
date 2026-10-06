@@ -18,5 +18,5 @@ data class LegendStyle(
  */
 object LegendDefaults {
     @Composable
-    fun style(visible: Boolean = true): LegendStyle = LegendStyle(visible = visible)
+    fun style(visible: Boolean = StyleDefaults.legendVisible): LegendStyle = LegendStyle(visible = visible)
 }

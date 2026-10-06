@@ -98,15 +98,13 @@ internal fun PieChartFrame(
             }
         },
         legend = {
-            // The legend names the slices, so it has nothing to list without categories. This is the
-            // same rule the stacked charts use: no categories, no legend.
-            if (style.legend.visible && labels.isNotEmpty()) {
-                Legend(
-                    chartContainerStyle = style.chartContainerStyle,
-                    legend = labels,
-                    colors = colors,
-                )
-            }
+            // The legend names the slices.
+            Legend(
+                chartContainerStyle = style.chartContainerStyle,
+                style = style.legend,
+                legend = labels,
+                colors = colors,
+            )
         },
         plot = {
             PieChartContent(

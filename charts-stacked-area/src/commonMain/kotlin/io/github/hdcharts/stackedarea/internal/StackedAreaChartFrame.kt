@@ -18,7 +18,6 @@ internal fun StackedAreaChartFrame(
     colors: ImmutableList<Color>,
     seriesNames: ImmutableList<String>,
     selectedLabels: ImmutableList<String>,
-    showLegend: Boolean,
     modifier: Modifier,
     plot: @Composable () -> Unit,
 ) {
@@ -29,14 +28,13 @@ internal fun StackedAreaChartFrame(
             Box(modifier = plotModifier) {
                 plot()
             }
-            if (showLegend) {
-                Legend(
-                    chartContainerStyle = style.chartContainerStyle,
-                    colors = colors,
-                    legend = seriesNames,
-                    labels = selectedLabels,
-                )
-            }
+            Legend(
+                chartContainerStyle = style.chartContainerStyle,
+                style = style.legend,
+                colors = colors,
+                legend = seriesNames,
+                labels = selectedLabels,
+            )
         }
     }
 }

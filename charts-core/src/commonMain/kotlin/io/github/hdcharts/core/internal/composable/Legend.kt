@@ -21,16 +21,20 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.hdcharts.core.internal.layout.modifierLegend
 import io.github.hdcharts.core.style.ChartContainerStyle
+import io.github.hdcharts.core.style.LegendStyle
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
 @Composable
 fun Legend(
     chartContainerStyle: ChartContainerStyle,
+    style: LegendStyle,
     legend: ImmutableList<String>,
     colors: ImmutableList<Color>,
     labels: ImmutableList<String> = persistentListOf(),
 ) {
+    // A key needs two items and a name to tell them apart.
+    if (!style.visible || legend.size < 2 || legend.all { it.isBlank() }) return
     LegendItems(
         items = legend,
         colors = colors,
@@ -91,6 +95,6 @@ private fun legendLabel(
     labels: ImmutableList<String>,
     index: Int,
 ): String {
-    if (labels.isEmpty()) return legendItem
-    return labels.getOrNull(index)?.let { "$legendItem - $it" } ?: legendItem
+    val value = labels.getOrNull(index) ?: return legendItem
+    return if (legendItem.isBlank()) value else "$legendItem - $value"
 }

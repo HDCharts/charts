@@ -18,7 +18,6 @@ internal fun StackedBarChartFrame(
     colors: ImmutableList<Color>,
     segmentNames: ImmutableList<String>,
     selectedLabels: ImmutableList<String>,
-    showLegend: Boolean,
     modifier: Modifier,
     plot: @Composable () -> Unit,
 ) {
@@ -29,14 +28,13 @@ internal fun StackedBarChartFrame(
             Box(modifier = plotModifier) {
                 plot()
             }
-            if (showLegend) {
-                Legend(
-                    chartContainerStyle = style.chartContainerStyle,
-                    colors = colors,
-                    legend = segmentNames,
-                    labels = selectedLabels,
-                )
-            }
+            Legend(
+                chartContainerStyle = style.chartContainerStyle,
+                style = style.legend,
+                colors = colors,
+                legend = segmentNames,
+                labels = selectedLabels,
+            )
         }
     }
 }

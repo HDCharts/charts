@@ -7,16 +7,23 @@ import io.github.hdcharts.app.screenshot.shared.SCREENSHOT_STACKED_AREA_SAMPLE_U
 import io.github.hdcharts.app.screenshot.shared.ScreenshotChartSurface
 import io.github.hdcharts.app.screenshot.shared.ScreenshotPreview
 import io.github.hdcharts.app.screenshot.shared.categoryIndex
+import io.github.hdcharts.core.model.ChartData
+import io.github.hdcharts.core.model.ChartValueFormatter
 import io.github.hdcharts.core.model.staticChartSelection
 import io.github.hdcharts.sampleshared.theme.LocalChartColors
 import io.github.hdcharts.sampleshared.theme.seriesColors
 import io.github.hdcharts.stackedarea.StackedAreaChart
 import io.github.hdcharts.stackedarea.StackedAreaChartDefaults
+import java.util.Locale
+import kotlin.math.roundToInt
 
 // As Pro closes in on Starter.
 private const val STACKED_AREA_SELECTION_LABEL = "Sep '25"
 
 private const val DENSE_SELECTION_LABEL = "Jan '25"
+
+// Whole subscribers with a thousands separator, such as `4,213`.
+private val SUBSCRIBERS = ChartValueFormatter { value -> String.format(Locale.US, "%,d", value.roundToInt()) }
 
 @PreviewTest
 @ScreenshotPreview
@@ -44,6 +51,45 @@ fun StackedAreaChartSelectedPointPreview() {
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
             interactionEnabled = false,
             selection = staticChartSelection(sample.data.categoryIndex(STACKED_AREA_SELECTION_LABEL)),
+            valueFormatter = SUBSCRIBERS,
+        )
+    }
+}
+
+/** One series needs no legend, so the title shows the selected value. */
+@PreviewTest
+@ScreenshotPreview
+@Composable
+fun StackedAreaChartSingleSeriesSelectedPointPreview() {
+    ScreenshotChartSurface {
+        val sample = SCREENSHOT_STACKED_AREA_SAMPLE_USE_CASE.initialStackedAreaSample()
+        val data =
+            ChartData(
+                categories = sample.data.categories,
+                series = sample.data.series.take(1),
+            )
+        StackedAreaChart(
+            data = data,
+            title = sample.title,
+            animateOnStart = SCREENSHOT_ANIMATE_ON_START,
+            interactionEnabled = false,
+            selection = staticChartSelection(data.categoryIndex(STACKED_AREA_SELECTION_LABEL)),
+            valueFormatter = SUBSCRIBERS,
+        )
+    }
+}
+
+@PreviewTest
+@ScreenshotPreview
+@Composable
+fun StackedAreaChartHiddenLegendPreview() {
+    ScreenshotChartSurface {
+        val sample = SCREENSHOT_STACKED_AREA_SAMPLE_USE_CASE.initialStackedAreaSample()
+        StackedAreaChart(
+            data = sample.data,
+            title = sample.title,
+            style = StackedAreaChartDefaults.style(legend = StackedAreaChartDefaults.legend(visible = false)),
+            animateOnStart = SCREENSHOT_ANIMATE_ON_START,
         )
     }
 }

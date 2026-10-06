@@ -71,6 +71,7 @@ style composes its blocks' clamps and adds nothing of its own.
           fill = fill.clamp(),
           axis = axis,
           selection = selection.clamp(density),
+          legend = legend,
           zoomControlsVisible = zoomControlsVisible,
       )
   ```

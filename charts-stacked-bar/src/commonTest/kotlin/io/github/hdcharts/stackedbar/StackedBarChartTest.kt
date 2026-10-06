@@ -13,6 +13,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTouchInput
@@ -23,6 +24,7 @@ import androidx.compose.ui.unit.em
 import io.github.hdcharts.core.internal.TestTags
 import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.model.ChartSeries
+import io.github.hdcharts.core.model.ChartValueFormatter
 import io.github.hdcharts.core.model.chartDataOf
 import io.github.hdcharts.core.model.staticChartSelection
 import kotlin.test.Test
@@ -294,6 +296,7 @@ class StackedBarChartTest {
                 chartDataOf(
                     categories = listOf("Bar 1", "   ", "Bar 3"),
                     ChartSeries(name = "S1", values = listOf(10.0, 20.0, 30.0)),
+                    ChartSeries(name = "S2", values = listOf(5.0, 15.0, 25.0)),
                 )
             val expectedTitle = "Totals"
 
@@ -509,6 +512,38 @@ class StackedBarChartTest {
             onNodeWithTag(TestTags.STACKED_BAR_CHART_DENSE_EXPAND).performTouchInput { click() }
             onAllNodesWithTag(TestTags.STACKED_BAR_CHART_ZOOM_OUT).assertCountEquals(0)
             onAllNodesWithTag(TestTags.STACKED_BAR_CHART_ZOOM_IN).assertCountEquals(0)
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun stackedBarChart_valueFormatter_formatsSelectedLegendValues() =
+        runComposeUiTest {
+            setContent {
+                StackedBarChart(
+                    data = validData(),
+                    selection = staticChartSelection(0),
+                    interactionEnabled = false,
+                    animateOnStart = false,
+                    valueFormatter = ChartValueFormatter { value -> "#${value.toInt()}" },
+                )
+            }
+
+            onNodeWithText("S1 - #10").assertIsDisplayed()
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun stackedBarChart_hiddenLegend_hidesSeriesNames() =
+        runComposeUiTest {
+            setContent {
+                StackedBarChart(
+                    data = validData(),
+                    style = StackedBarChartDefaults.style(legend = StackedBarChartDefaults.legend(visible = false)),
+                    animateOnStart = false,
+                )
+            }
+
+            onAllNodesWithText("S1").assertCountEquals(0)
         }
 
     private fun validData() =
