@@ -93,3 +93,7 @@ Write in the `hdc-docs` voice: plain, direct, concrete. Lead with what the
 user notices; keep code references to a short pointer. Every sentence must
 make sense to a reader who never saw this session. Leave out AI attribution
 and "Generated with" footers.
+
+Write every repository file path, of any kind, as a full link to `main`, so it
+is clickable: `[<path>](https://github.com/HDCharts/charts/blob/main/<path>)`.
+Code symbols such as `PieChart` stay in backticks.
