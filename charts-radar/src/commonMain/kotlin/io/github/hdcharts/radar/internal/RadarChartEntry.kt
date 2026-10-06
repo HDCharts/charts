@@ -17,13 +17,14 @@ import io.github.hdcharts.core.internal.ValidationErrors
 import io.github.hdcharts.core.internal.composable.ChartSquarePlotLayout
 import io.github.hdcharts.core.internal.composable.Legend
 import io.github.hdcharts.core.internal.layout.modifierTopTitle
+import io.github.hdcharts.core.internal.selectedLegendValues
+import io.github.hdcharts.core.internal.selectedTitle
 import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.model.ChartSelection
-import io.github.hdcharts.core.model.ChartValueFormatters
+import io.github.hdcharts.core.model.ChartValueFormatter
 import io.github.hdcharts.radar.RadarChartStyle
 import io.github.hdcharts.radar.clamp
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 
 /**
@@ -77,6 +78,7 @@ internal fun RadarChartEntry(
     seriesSelection: ChartSelection,
     interactionEnabled: Boolean,
     animateOnStart: Boolean,
+    valueFormatter: ChartValueFormatter,
 ) {
     ChartEntry(
         spec = RadarChartSpec,
@@ -91,31 +93,13 @@ internal fun RadarChartEntry(
                 }
             val categories: ImmutableList<String> = data.categories.toImmutableList()
             val seriesNames = data.series.map { it.name.orEmpty() }.toImmutableList()
-            val singleSeries = data.series.singleOrNull()
-            // A single series has no legend to carry its value, so the title takes it, like a bar or a
-            // line. Several series put their values in the legend, so the title only names the axis.
-            val selectedTitle =
-                when {
-                    selectedIndex == NO_SELECTION -> null
-                    singleSeries != null ->
-                        resolveSelectedAxisTitle(
-                            category = data.categories.getOrNull(selectedIndex),
-                            value = singleSeries.values.getOrNull(selectedIndex),
-                        )
-                    else -> data.categories.getOrNull(selectedIndex)
-                }
-            val effectiveTitle = selectedTitle ?: title.orEmpty()
-            val selectedLabels =
-                when {
-                    selectedIndex == NO_SELECTION || data.series.isEmpty() -> persistentListOf()
-                    else ->
-                        data.series
-                            .map { series -> ChartValueFormatters.Default.format(series.values[selectedIndex]) }
-                            .toImmutableList()
-                }
-            // The legend names the series and shows each value while an axis is selected. Categories
-            // are named by the axis labels, and a single series needs no legend.
-            val legendSeries = if (data.series.size > 1) seriesNames else persistentListOf()
+            val effectiveTitle =
+                selectedTitle(
+                    data = data,
+                    selectedIndex = selectedIndex,
+                    title = title,
+                    valueFormatter = valueFormatter,
+                )
 
             ChartSquarePlotLayout(
                 modifier = modifier,
@@ -131,14 +115,19 @@ internal fun RadarChartEntry(
                     }
                 },
                 legend = {
-                    if (legendSeries.isNotEmpty()) {
-                        Legend(
-                            chartContainerStyle = drawStyle.chartContainerStyle,
-                            legend = legendSeries,
-                            colors = lineColors,
-                            labels = selectedLabels,
-                        )
-                    }
+                    // The legend names the series and shows each value while an axis is selected.
+                    Legend(
+                        chartContainerStyle = drawStyle.chartContainerStyle,
+                        style = drawStyle.legend,
+                        legend = seriesNames,
+                        colors = lineColors,
+                        labels =
+                            selectedLegendValues(
+                                data = data,
+                                selectedIndex = selectedIndex,
+                                valueFormatter = valueFormatter,
+                            ),
+                    )
                 },
                 plot = {
                     RadarChartContent(
@@ -162,15 +151,4 @@ internal fun RadarChartEntry(
         },
         modifier = modifier,
     )
-}
-
-/** The title for a selected axis: `Category: value`, or just the value when the category is blank. */
-private fun resolveSelectedAxisTitle(
-    category: String?,
-    value: Double?,
-): String? {
-    if (value == null) return category
-    val formatted = ChartValueFormatters.Default.format(value)
-    val label = category.orEmpty()
-    return if (label.isBlank()) formatted else "$label: $formatted"
 }

@@ -9,16 +9,15 @@ import io.github.hdcharts.core.internal.ChartPolicy
 import io.github.hdcharts.core.internal.ChartSpec
 import io.github.hdcharts.core.internal.ChartValidationInputs
 import io.github.hdcharts.core.internal.InternalChartsApi
-import io.github.hdcharts.core.internal.NO_SELECTION
 import io.github.hdcharts.core.internal.ValidationErrors
 import io.github.hdcharts.core.internal.model.ChartRenderData
 import io.github.hdcharts.core.internal.model.transposeForStacking
-import io.github.hdcharts.core.internal.selectedCategoryTitle
+import io.github.hdcharts.core.internal.selectedLegendValues
+import io.github.hdcharts.core.internal.selectedTitle
 import io.github.hdcharts.core.model.ChartData
-import io.github.hdcharts.core.model.ChartValueFormatters
+import io.github.hdcharts.core.model.ChartValueFormatter
 import io.github.hdcharts.stackedbar.StackedBarChartStyle
 import io.github.hdcharts.stackedbar.clamp
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 
 /**
@@ -76,6 +75,7 @@ internal fun StackedBarChartEntry(
     selectedIndex: Int,
     interactionEnabled: Boolean,
     animateOnStart: Boolean,
+    valueFormatter: ChartValueFormatter,
     onValueChanged: (Int) -> Unit,
 ) {
     ChartEntry(
@@ -93,27 +93,24 @@ internal fun StackedBarChartEntry(
                         .toImmutableList()
                 }
             val segmentNames = data.series.map { it.name.orEmpty() }.toImmutableList()
-            // A selected category names the chart while it is selected; otherwise the caller's title does.
             val effectiveTitle =
-                selectedCategoryTitle(
-                    categories = data.categories,
+                selectedTitle(
+                    data = data,
                     selectedIndex = selectedIndex,
                     title = title,
+                    valueFormatter = valueFormatter,
                 )
             val selectedLabels =
-                if (selectedIndex == NO_SELECTION) {
-                    persistentListOf()
-                } else {
-                    data.series
-                        .map { ChartValueFormatters.Default.format(it.values[selectedIndex]) }
-                        .toImmutableList()
-                }
+                selectedLegendValues(
+                    data = data,
+                    selectedIndex = selectedIndex,
+                    valueFormatter = valueFormatter,
+                )
             StackedBarChartFrame(
                 style = drawStyle,
                 colors = colors,
                 segmentNames = segmentNames,
                 selectedLabels = selectedLabels,
-                showLegend = data.categories.isNotEmpty() && segmentNames.any { it.isNotBlank() },
                 modifier = modifier,
             ) {
                 StackedBarChartImpl(

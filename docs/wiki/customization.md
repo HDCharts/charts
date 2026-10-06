@@ -158,6 +158,26 @@ val selected = values.getOrNull(selection.selectedIndex ?: 0)
 Text("Selected: $selected")
 ```
 
+## Legend
+
+Line, live line, radar, stacked bar, and stacked area charts list their series in a legend, and a pie
+lists its categories. The legend shows when there are at least two items and at least one has a name.
+Hide it with the chart's `legend` style:
+
+```kotlin
+StackedBarChart(
+    data = data,
+    style = StackedBarChartDefaults.style(
+        legend = StackedBarChartDefaults.legend(visible = false),
+    ),
+)
+```
+
+While a point is selected, a chart with several series shows each series' value in its legend item,
+and the title shows the selected category. A chart with one series shows `Category: value` in the
+title instead. Pass `valueFormatter` to format these values. A hidden legend hides the values too;
+read `selectedIndex` from a hoisted selection to show them in your own UI.
+
 ## Animation and Interaction
 
 `animateOnStart` controls the initial reveal animation; `interactionEnabled` disables gestures, selection, and zoom controls together. Disable interaction to embed a chart inside a tappable card without conflicts.

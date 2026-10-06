@@ -2,7 +2,10 @@ package io.github.hdcharts.line
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import io.github.hdcharts.core.internal.InternalChartsApi
 import io.github.hdcharts.core.internal.NO_SELECTION
+import io.github.hdcharts.core.internal.selectedLegendValues
+import io.github.hdcharts.core.internal.selectedTitle
 import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.model.ChartSelection
 import io.github.hdcharts.core.model.ChartValueFormatter
@@ -10,8 +13,6 @@ import io.github.hdcharts.core.model.rememberChartSelection
 import io.github.hdcharts.core.model.rememberSelectionLifecycle
 import io.github.hdcharts.line.internal.LineChartEntry
 import io.github.hdcharts.line.internal.LineChartImpl
-import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toImmutableList
 
 /**
  * Displays one or more aligned indexed series. A single public entry point handles both
@@ -26,6 +27,7 @@ import kotlinx.collections.immutable.toImmutableList
  * [interactionEnabled] disables all user controls and returns dense data to the fit view, but
  * programmatic selection still renders.
  */
+@OptIn(InternalChartsApi::class)
 @Composable
 fun LineChart(
     data: ChartData,
@@ -44,7 +46,6 @@ fun LineChart(
             ?.values
             ?.size ?: 0
     val selectedIndex = selection.selectedIndex?.takeIf { it in 0 until pointCount } ?: NO_SELECTION
-    val selectedCategory = data.categories.getOrNull(selectedIndex)?.takeIf(String::isNotBlank)
     rememberSelectionLifecycle(
         selection = selection,
         data = data,
@@ -68,20 +69,18 @@ fun LineChart(
             },
             axisValueFormatter = axisValueFormatter,
             legendLabels =
-                if (selectedIndex != NO_SELECTION && data.series.size > 1 && data.categories.isNotEmpty()) {
-                    data.series.map { valueFormatter.format(it.values[selectedIndex]) }.toImmutableList()
-                } else {
-                    persistentListOf()
-                },
+                selectedLegendValues(
+                    data = data,
+                    selectedIndex = selectedIndex,
+                    valueFormatter = valueFormatter,
+                ),
             selectedTitle =
-                if (selectedIndex == NO_SELECTION) {
-                    null
-                } else if (data.series.size == 1) {
-                    val value = valueFormatter.format(data.series.single().values[selectedIndex])
-                    selectedCategory?.let { "$it: $value" } ?: value
-                } else {
-                    selectedCategory
-                },
+                selectedTitle(
+                    data = data,
+                    selectedIndex = selectedIndex,
+                    title = title,
+                    valueFormatter = valueFormatter,
+                ),
         )
     }
 }

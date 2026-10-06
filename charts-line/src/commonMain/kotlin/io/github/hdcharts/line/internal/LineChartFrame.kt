@@ -39,14 +39,13 @@ internal fun LineChartFrame(
                 plot()
             }
 
-            if (style.legend.visible && data.series.size > 1) {
-                Legend(
-                    chartContainerStyle = style.chartContainerStyle,
-                    legend = data.series.map { it.name.orEmpty() }.toImmutableList(),
-                    colors = colors,
-                    labels = legendLabels,
-                )
-            }
+            Legend(
+                chartContainerStyle = style.chartContainerStyle,
+                style = style.legend,
+                legend = data.series.map { it.name.orEmpty() }.toImmutableList(),
+                colors = colors,
+                labels = legendLabels,
+            )
         }
     }
 }

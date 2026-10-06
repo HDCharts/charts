@@ -294,6 +294,7 @@ class StackedBarChartTest {
                 chartDataOf(
                     categories = listOf("Bar 1", "   ", "Bar 3"),
                     ChartSeries(name = "S1", values = listOf(10.0, 20.0, 30.0)),
+                    ChartSeries(name = "S2", values = listOf(5.0, 15.0, 25.0)),
                 )
             val expectedTitle = "Totals"
 

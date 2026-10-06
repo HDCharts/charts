@@ -11,8 +11,12 @@ import io.github.hdcharts.core.internal.clampGridSteps
 import io.github.hdcharts.core.internal.clampSize
 import io.github.hdcharts.core.internal.clampTextSize
 import io.github.hdcharts.core.internal.palette.resolvePaletteColors
+import io.github.hdcharts.core.model.ChartValueFormatter
+import io.github.hdcharts.core.model.ChartValueFormatters
 import io.github.hdcharts.core.style.ChartContainerDefaults
 import io.github.hdcharts.core.style.ChartContainerStyle
+import io.github.hdcharts.core.style.LegendDefaults
+import io.github.hdcharts.core.style.LegendStyle
 import io.github.hdcharts.core.style.StyleDefaults
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
@@ -177,6 +181,7 @@ class RadarChartStyle(
     val polygon: RadarPolygonStyle,
     val points: RadarPointStyle,
     val selection: RadarSelectionStyle,
+    val legend: LegendStyle,
 )
 
 object RadarChartDefaults {
@@ -189,6 +194,7 @@ object RadarChartDefaults {
         polygon: RadarPolygonStyle = polygon(),
         points: RadarPointStyle = points(),
         selection: RadarSelectionStyle = selection(),
+        legend: LegendStyle = legend(),
     ) = RadarChartStyle(
         chartContainerStyle = chartContainerStyle,
         grid = grid,
@@ -196,6 +202,7 @@ object RadarChartDefaults {
         polygon = polygon,
         points = points,
         selection = selection,
+        legend = legend,
     )
 
     /** Returns a [RadarGridStyle] for the grid rings. */
@@ -270,6 +277,20 @@ object RadarChartDefaults {
         unselectedAlpha = unselectedAlpha,
         unfocusedSeriesAlpha = unfocusedSeriesAlpha,
     )
+
+    /**
+     * Returns a [LegendStyle] with the provided visibility.
+     *
+     * The chart renders the legend only when the data has more than one series,
+     * at least one series has a name, and [visible] is true.
+     *
+     * @param visible Whether the legend is visible. Defaults to true.
+     */
+    @Composable
+    fun legend(visible: Boolean = StyleDefaults.legendVisible): LegendStyle = LegendDefaults.style(visible = visible)
+
+    /** Default formatter for selected values. */
+    val valueFormatter: ChartValueFormatter = ChartValueFormatters.Default
 }
 
 /** Returns [this] with alphas, sizes, and grid steps clamped to drawable values. */
@@ -281,4 +302,5 @@ internal fun RadarChartStyle.clamp(density: Density) =
         polygon = polygon.clamp(density),
         points = points.clamp(density),
         selection = selection.clamp(density),
+        legend = legend,
     )
