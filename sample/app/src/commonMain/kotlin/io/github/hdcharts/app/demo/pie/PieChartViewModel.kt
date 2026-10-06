@@ -24,9 +24,7 @@ data class PieChartUiState(
 class PieChartViewModel(
     private val pieSampleUseCase: PieSampleUseCase,
 ) : ViewModel() {
-    private val initialSample = pieSampleUseCase.initialPieSample()
-    private val refreshRange = pieSampleUseCase.pieRefreshRange()
-    private val segmentCount = initialSample.data.categories.size
+    private val initialSample = pieSampleUseCase.deterministic()
     private var liveUpdatesJob: Job? = null
 
     private val _uiState =
@@ -53,11 +51,7 @@ class PieChartViewModel(
     }
 
     private fun regenerateDataSet() {
-        val sample =
-            pieSampleUseCase.pieSample(
-                range = refreshRange,
-                numOfPoints = segmentCount..segmentCount,
-            )
+        val sample = pieSampleUseCase.random()
         _uiState.update {
             it.copy(
                 data = sample.data,
