@@ -19,6 +19,7 @@ import io.github.hdcharts.sampleshared.theme.seriesColors
 private const val SELECTION_LABEL = "Oct"
 
 private const val DENSE_SELECTION_LABEL = "Oct 15"
+private const val DENSE_POINTS = 365
 
 // Without categories, a selection is an index; this one is October.
 private const val NO_CATEGORIES_SELECTION_INDEX = 9
@@ -28,7 +29,7 @@ private const val NO_CATEGORIES_SELECTION_INDEX = 9
 @Composable
 fun MultiSeriesLineChartDefaultPreview() {
     ScreenshotChartSurface {
-        val sample = SCREENSHOT_MULTI_LINE_SAMPLE_USE_CASE.initialMultiLineSample()
+        val sample = SCREENSHOT_MULTI_LINE_SAMPLE_USE_CASE.deterministic()
         LineChart(
             data = sample.dataSet,
             title = sample.title,
@@ -44,7 +45,7 @@ fun MultiSeriesLineChartDefaultPreview() {
 @Composable
 fun MultiSeriesLineChartSelectedPointPreview() {
     ScreenshotChartSurface {
-        val sample = SCREENSHOT_MULTI_LINE_SAMPLE_USE_CASE.initialMultiLineSample()
+        val sample = SCREENSHOT_MULTI_LINE_SAMPLE_USE_CASE.deterministic()
         LineChart(
             data = sample.dataSet,
             title = sample.title,
@@ -62,7 +63,7 @@ fun MultiSeriesLineChartSelectedPointPreview() {
 @Composable
 fun MultiSeriesLineChartDensePreview() {
     ScreenshotChartSurface {
-        val sample = SCREENSHOT_MULTI_LINE_SAMPLE_USE_CASE.initialDenseMultiLineSample()
+        val sample = SCREENSHOT_MULTI_LINE_SAMPLE_USE_CASE.deterministic(points = DENSE_POINTS)
         LineChart(
             data = sample.dataSet,
             title = sample.title,
@@ -82,7 +83,7 @@ fun MultiSeriesLineChartDensePreview() {
 @Composable
 fun MultiSeriesLineChartDenseSelectedPointPreview() {
     ScreenshotChartSurface {
-        val sample = SCREENSHOT_MULTI_LINE_SAMPLE_USE_CASE.initialDenseMultiLineSample()
+        val sample = SCREENSHOT_MULTI_LINE_SAMPLE_USE_CASE.deterministic(points = DENSE_POINTS)
         LineChart(
             data = sample.dataSet,
             title = sample.title,
@@ -99,9 +100,9 @@ fun MultiSeriesLineChartDenseSelectedPointPreview() {
 @Composable
 fun MultiSeriesLineChartNoCategoriesSelectedPointPreview() {
     ScreenshotChartSurface {
-        val sample = SCREENSHOT_MULTI_LINE_SAMPLE_USE_CASE.initialMultiLineNoCategoriesSample()
+        val sample = SCREENSHOT_MULTI_LINE_SAMPLE_USE_CASE.deterministic()
         LineChart(
-            data = sample.dataSet,
+            data = ChartData(categories = emptyList(), series = sample.dataSet.series),
             title = sample.title,
             valueFormatter = SCREENSHOT_THOUSANDS_OF_DOLLARS,
             axisValueFormatter = SCREENSHOT_THOUSANDS_OF_DOLLARS,
@@ -118,7 +119,7 @@ fun MultiSeriesLineChartNoCategoriesSelectedPointPreview() {
 @Composable
 fun MultiSeriesLineChartUnnamedSeriesSelectedPointPreview() {
     ScreenshotChartSurface {
-        val sample = SCREENSHOT_MULTI_LINE_SAMPLE_USE_CASE.initialMultiLineSample()
+        val sample = SCREENSHOT_MULTI_LINE_SAMPLE_USE_CASE.deterministic()
         val data =
             ChartData(
                 categories = sample.dataSet.categories,
@@ -142,7 +143,7 @@ fun MultiSeriesLineChartUnnamedSeriesSelectedPointPreview() {
 @Composable
 fun MultiSeriesLineChartPartlyNamedSeriesSelectedPointPreview() {
     ScreenshotChartSurface {
-        val sample = SCREENSHOT_MULTI_LINE_SAMPLE_USE_CASE.initialMultiLineSample()
+        val sample = SCREENSHOT_MULTI_LINE_SAMPLE_USE_CASE.deterministic()
         val series = sample.dataSet.series
         val data =
             ChartData(
@@ -166,7 +167,7 @@ fun MultiSeriesLineChartPartlyNamedSeriesSelectedPointPreview() {
 @Composable
 fun MultiSeriesLineChartHiddenLegendPreview() {
     ScreenshotChartSurface {
-        val sample = SCREENSHOT_MULTI_LINE_SAMPLE_USE_CASE.initialMultiLineSample()
+        val sample = SCREENSHOT_MULTI_LINE_SAMPLE_USE_CASE.deterministic()
         LineChart(
             data = sample.dataSet,
             title = sample.title,
@@ -183,7 +184,7 @@ fun MultiSeriesLineChartHiddenLegendPreview() {
 @Composable
 fun MultiSeriesLineChartSeriesColorsPreview() {
     ScreenshotChartSurface {
-        val sample = SCREENSHOT_MULTI_LINE_SAMPLE_USE_CASE.initialMultiLineSample()
+        val sample = SCREENSHOT_MULTI_LINE_SAMPLE_USE_CASE.deterministic()
         LineChart(
             data = sample.dataSet,
             title = sample.title,

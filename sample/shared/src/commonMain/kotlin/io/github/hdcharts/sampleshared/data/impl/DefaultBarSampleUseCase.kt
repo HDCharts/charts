@@ -8,38 +8,28 @@ import kotlin.random.Random
 internal class DefaultBarSampleUseCase : BarSampleUseCase {
     companion object {
         private const val TITLE = "Net Cash Flow (\$K)"
-        private const val DENSE_DAYS = 90
         private const val MARCH = 2
-        private const val DEFAULT_POINTS = 120
-        private val DEFAULT_RANGE = -100..100
     }
 
-    override fun initialBarDataSet(): ChartData =
-        listOf(42.0, -18.0, 27.0, 61.0, 35.0, -9.0, -26.0, 14.0, 48.0, 72.0, 55.0, 96.0).toChartData(
-            categories = SampleLabels.months(12),
-            seriesName = TITLE,
-        )
-
-    override fun initialDenseBarDataSet(): ChartData {
+    override fun deterministic(
+        points: Int,
+        signed: Boolean,
+    ): ChartData {
         val values =
             SampleSignals.trend(
-                count = DENSE_DAYS,
-                start = 180.0,
-                end = 310.0,
+                count = points,
+                start = if (signed) -40.0 else 180.0,
+                end = if (signed) 90.0 else 310.0,
                 random = Random(31),
                 cycleAmplitude = 38.0,
                 noise = 22.0,
             )
         return SampleSignals
             .rounded(values)
-            .toChartData(categories = SampleLabels.days(DENSE_DAYS, startMonth = MARCH), seriesName = TITLE)
+            .toChartData(categories = SampleLabels.days(points, startMonth = MARCH), seriesName = TITLE)
     }
 
-    override fun barDefaultPoints(): Int = DEFAULT_POINTS
-
-    override fun barDefaultRange(): IntRange = DEFAULT_RANGE
-
-    override fun barDataSet(
+    override fun random(
         points: Int,
         range: IntRange,
     ): ChartData {

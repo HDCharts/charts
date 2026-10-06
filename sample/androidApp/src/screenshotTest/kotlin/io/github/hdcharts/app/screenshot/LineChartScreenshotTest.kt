@@ -11,21 +11,23 @@ import io.github.hdcharts.core.model.staticChartSelection
 import io.github.hdcharts.line.LineChart
 import io.github.hdcharts.line.LineChartDefaults
 
-private const val LINE_SELECTION_LABEL = "Jun 18"
+private const val LINE_SELECTION_LABEL = "Jan 18"
 
 // Near the seasonal peak.
 private const val DENSE_SELECTION_LABEL = "Dec 16"
+private const val DENSE_POINTS = 365
+private const val SIGNED_POINTS = 24
 
-// Wider than the data (about 10,600 to 19,300) on both sides.
-private const val FIXED_RANGE_MIN = 5_000.0
-private const val FIXED_RANGE_MAX = 25_000.0
+// Wider than the data (about 930 to 1,500) on both sides.
+private const val FIXED_RANGE_MIN = 500.0
+private const val FIXED_RANGE_MAX = 2_000.0
 
 @PreviewTest
 @ScreenshotPreview
 @Composable
 fun LineChartDefaultPreview() {
     ScreenshotChartSurface {
-        val data = SCREENSHOT_LINE_SAMPLE_USE_CASE.initialLineDataSet()
+        val data = SCREENSHOT_LINE_SAMPLE_USE_CASE.deterministic()
         LineChart(
             data = data,
             title = data.series.single().name,
@@ -39,7 +41,7 @@ fun LineChartDefaultPreview() {
 @Composable
 fun LineChartSelectedPointPreview() {
     ScreenshotChartSurface {
-        val data = SCREENSHOT_LINE_SAMPLE_USE_CASE.initialLineDataSet()
+        val data = SCREENSHOT_LINE_SAMPLE_USE_CASE.deterministic()
         LineChart(
             data = data,
             title = data.series.single().name,
@@ -55,7 +57,7 @@ fun LineChartSelectedPointPreview() {
 @Composable
 fun LineChartDensePreview() {
     ScreenshotChartSurface {
-        val data = SCREENSHOT_LINE_SAMPLE_USE_CASE.initialDenseLineDataSet()
+        val data = SCREENSHOT_LINE_SAMPLE_USE_CASE.deterministic(points = DENSE_POINTS)
         LineChart(
             data = data,
             title = data.series.single().name,
@@ -73,7 +75,7 @@ fun LineChartDensePreview() {
 @Composable
 fun LineChartDenseSelectedPointPreview() {
     ScreenshotChartSurface {
-        val data = SCREENSHOT_LINE_SAMPLE_USE_CASE.initialDenseLineDataSet()
+        val data = SCREENSHOT_LINE_SAMPLE_USE_CASE.deterministic(points = DENSE_POINTS)
         LineChart(
             data = data,
             title = data.series.single().name,
@@ -88,7 +90,7 @@ fun LineChartDenseSelectedPointPreview() {
 @Composable
 fun LineChartNegativeValuesPreview() {
     ScreenshotChartSurface {
-        val data = SCREENSHOT_LINE_SAMPLE_USE_CASE.initialSignedLineDataSet()
+        val data = SCREENSHOT_LINE_SAMPLE_USE_CASE.deterministic(points = SIGNED_POINTS, signed = true)
         LineChart(
             data = data,
             title = data.series.single().name,
@@ -102,7 +104,7 @@ fun LineChartNegativeValuesPreview() {
 @Composable
 fun LineChartFixedRangePreview() {
     ScreenshotChartSurface {
-        val data = SCREENSHOT_LINE_SAMPLE_USE_CASE.initialLineDataSet()
+        val data = SCREENSHOT_LINE_SAMPLE_USE_CASE.deterministic()
         LineChart(
             data = data,
             title = data.series.single().name,
@@ -120,7 +122,7 @@ fun LineChartFixedRangePreview() {
 @Composable
 fun LineChartPointsPreview() {
     ScreenshotChartSurface {
-        val data = SCREENSHOT_LINE_SAMPLE_USE_CASE.initialLineDataSet()
+        val data = SCREENSHOT_LINE_SAMPLE_USE_CASE.deterministic()
         LineChart(
             data = data,
             title = data.series.single().name,
@@ -135,7 +137,7 @@ fun LineChartPointsPreview() {
 @Composable
 fun LineChartStraightLinesPreview() {
     ScreenshotChartSurface {
-        val data = SCREENSHOT_LINE_SAMPLE_USE_CASE.initialLineDataSet()
+        val data = SCREENSHOT_LINE_SAMPLE_USE_CASE.deterministic()
         LineChart(
             data = data,
             title = data.series.single().name,
@@ -151,7 +153,7 @@ fun LineChartStraightLinesPreview() {
 @Composable
 fun LineChartHiddenAxisPreview() {
     ScreenshotChartSurface {
-        val data = SCREENSHOT_LINE_SAMPLE_USE_CASE.initialLineDataSet()
+        val data = SCREENSHOT_LINE_SAMPLE_USE_CASE.deterministic()
         LineChart(
             data = data,
             title = data.series.single().name,

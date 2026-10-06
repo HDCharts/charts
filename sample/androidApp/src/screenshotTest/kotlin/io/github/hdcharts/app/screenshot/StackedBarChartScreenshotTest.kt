@@ -20,12 +20,15 @@ private const val STACKED_BAR_SELECTION_LABEL = "Q4 '25"
 
 private const val DENSE_SELECTION_LABEL = "Q4 '24"
 
+// 16 years of quarters.
+private const val DENSE_POINTS = 64
+
 @PreviewTest
 @ScreenshotPreview
 @Composable
 fun StackedBarChartDefaultPreview() {
     ScreenshotChartSurface {
-        val sample = SCREENSHOT_STACKED_BAR_SAMPLE_USE_CASE.initialStackedBarSample()
+        val sample = SCREENSHOT_STACKED_BAR_SAMPLE_USE_CASE.deterministic()
         StackedBarChart(
             data = sample.dataSet,
             title = sample.title,
@@ -39,7 +42,7 @@ fun StackedBarChartDefaultPreview() {
 @Composable
 fun StackedBarChartSelectedBarPreview() {
     ScreenshotChartSurface {
-        val sample = SCREENSHOT_STACKED_BAR_SAMPLE_USE_CASE.initialStackedBarSample()
+        val sample = SCREENSHOT_STACKED_BAR_SAMPLE_USE_CASE.deterministic()
         StackedBarChart(
             data = sample.dataSet,
             title = STACKED_BAR_SELECTION_LABEL,
@@ -57,7 +60,7 @@ fun StackedBarChartSelectedBarPreview() {
 @Composable
 fun StackedBarChartSingleSegmentSelectedBarPreview() {
     ScreenshotChartSurface {
-        val sample = SCREENSHOT_STACKED_BAR_SAMPLE_USE_CASE.initialStackedBarSample()
+        val sample = SCREENSHOT_STACKED_BAR_SAMPLE_USE_CASE.deterministic()
         val data =
             ChartData(
                 categories = sample.dataSet.categories,
@@ -79,7 +82,7 @@ fun StackedBarChartSingleSegmentSelectedBarPreview() {
 @Composable
 fun StackedBarChartHiddenLegendPreview() {
     ScreenshotChartSurface {
-        val sample = SCREENSHOT_STACKED_BAR_SAMPLE_USE_CASE.initialStackedBarSample()
+        val sample = SCREENSHOT_STACKED_BAR_SAMPLE_USE_CASE.deterministic()
         StackedBarChart(
             data = sample.dataSet,
             title = sample.title,
@@ -94,9 +97,9 @@ fun StackedBarChartHiddenLegendPreview() {
 @Composable
 fun StackedBarChartNoCategoriesPreview() {
     ScreenshotChartSurface {
-        val sample = SCREENSHOT_STACKED_BAR_SAMPLE_USE_CASE.initialStackedBarNoCategoriesDataSet()
+        val sample = SCREENSHOT_STACKED_BAR_SAMPLE_USE_CASE.deterministic()
         StackedBarChart(
-            data = sample.dataSet,
+            data = ChartData(categories = emptyList(), series = sample.dataSet.series),
             title = sample.title,
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
         )
@@ -108,7 +111,7 @@ fun StackedBarChartNoCategoriesPreview() {
 @Composable
 fun StackedBarChartDensePreview() {
     ScreenshotChartSurface {
-        val sample = SCREENSHOT_STACKED_BAR_SAMPLE_USE_CASE.initialDenseStackedBarSample()
+        val sample = SCREENSHOT_STACKED_BAR_SAMPLE_USE_CASE.deterministic(points = DENSE_POINTS)
         StackedBarChart(
             data = sample.dataSet,
             title = sample.title,
@@ -126,7 +129,7 @@ fun StackedBarChartDensePreview() {
 @Composable
 fun StackedBarChartDenseSelectedBarPreview() {
     ScreenshotChartSurface {
-        val sample = SCREENSHOT_STACKED_BAR_SAMPLE_USE_CASE.initialDenseStackedBarSample()
+        val sample = SCREENSHOT_STACKED_BAR_SAMPLE_USE_CASE.deterministic(points = DENSE_POINTS)
         StackedBarChart(
             data = sample.dataSet,
             title = DENSE_SELECTION_LABEL,
@@ -141,7 +144,7 @@ fun StackedBarChartDenseSelectedBarPreview() {
 @Composable
 fun StackedBarChartSegmentColorsPreview() {
     ScreenshotChartSurface {
-        val sample = SCREENSHOT_STACKED_BAR_SAMPLE_USE_CASE.initialStackedBarSample()
+        val sample = SCREENSHOT_STACKED_BAR_SAMPLE_USE_CASE.deterministic()
         StackedBarChart(
             data = sample.dataSet,
             title = sample.title,

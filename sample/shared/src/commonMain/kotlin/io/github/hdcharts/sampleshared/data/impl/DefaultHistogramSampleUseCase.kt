@@ -8,41 +8,30 @@ import kotlin.random.Random
 internal class DefaultHistogramSampleUseCase : HistogramSampleUseCase {
     companion object {
         private const val TITLE = "API Response Time"
-        private const val INITIAL_BINS = 20
-        private const val INITIAL_BIN_WIDTH_MS = 25
+        private const val SPAN_MS = 500
 
-        // More bins than fit at the minimum bar width, even on a tablet.
-        private const val DENSE_BINS = 150
-        private const val DENSE_BIN_WIDTH_MS = 4
-        private const val DEFAULT_POINTS = 60
-        private val DEFAULT_RANGE = 0..120
+        // At 20 bins: the peak in bin 4 holds 1,840 requests.
+        private const val PEAK_SHARE = 0.2
+        private const val PEAK_TOTAL = 1_840.0 * 20
     }
 
-    override fun initialHistogramDataSet(): ChartData =
-        latencyHistogram(
-            bins = INITIAL_BINS,
-            binWidthMs = INITIAL_BIN_WIDTH_MS,
-            peakBin = 4.0,
-            peak = 1_840.0,
-            seed = 17,
-            noise = 0.05,
+    override fun deterministic(bins: Int): ChartData {
+        val counts =
+            SampleSignals.longTailCounts(
+                count = bins,
+                peakBin = bins * PEAK_SHARE,
+                peak = PEAK_TOTAL / bins,
+                spread = 0.62,
+                random = Random(17),
+                noise = 0.05,
+            )
+        return SampleSignals.rounded(counts).toChartData(
+            categories = List(bins) { bin -> "${bin * SPAN_MS / bins}ms" },
+            seriesName = TITLE,
         )
+    }
 
-    override fun initialDenseHistogramDataSet(): ChartData =
-        latencyHistogram(
-            bins = DENSE_BINS,
-            binWidthMs = DENSE_BIN_WIDTH_MS,
-            peakBin = 25.0,
-            peak = 310.0,
-            seed = 19,
-            noise = 0.08,
-        )
-
-    override fun histogramDefaultPoints(): Int = DEFAULT_POINTS
-
-    override fun histogramDefaultRange(): IntRange = DEFAULT_RANGE
-
-    override fun histogramDataSet(
+    override fun random(
         points: Int,
         range: IntRange,
     ): ChartData {
@@ -53,29 +42,6 @@ internal class DefaultHistogramSampleUseCase : HistogramSampleUseCase {
         val labels = List(safePoints) { index -> "B${index + 1}" }
         return values.toChartData(
             categories = labels,
-            seriesName = TITLE,
-        )
-    }
-
-    private fun latencyHistogram(
-        bins: Int,
-        binWidthMs: Int,
-        peakBin: Double,
-        peak: Double,
-        seed: Int,
-        noise: Double,
-    ): ChartData {
-        val counts =
-            SampleSignals.longTailCounts(
-                count = bins,
-                peakBin = peakBin,
-                peak = peak,
-                spread = 0.62,
-                random = Random(seed),
-                noise = noise,
-            )
-        return SampleSignals.rounded(counts).toChartData(
-            categories = List(bins) { bin -> "${bin * binWidthMs}ms" },
             seriesName = TITLE,
         )
     }

@@ -8,35 +8,19 @@ import kotlin.random.Random
 internal class DefaultLineSampleUseCase : LineSampleUseCase {
     companion object {
         private const val TITLE = "Net Revenue (\$K)"
-        private const val DEFAULT_DAYS = 30
-        private const val DENSE_DAYS = 365
-        private const val SIGNED_MONTHS = 24
-        private const val JUNE = 5
-
-        // June 1 is a Monday; weekends dip.
-        private val weekdayFactors = listOf(1.0, 1.03, 1.05, 1.04, 0.97, 0.8, 0.76)
+        private const val DAYS_PER_YEAR = 365
     }
 
-    override fun initialLineDataSet(): ChartData {
-        val baseline =
-            SampleSignals.trend(
-                count = DEFAULT_DAYS,
-                start = 12_400.0,
-                end = 18_600.0,
-                random = Random(11),
-                noise = 380.0,
-            )
-        val values = baseline.mapIndexed { day, value -> value * weekdayFactors[day % weekdayFactors.size] }
-        return SampleSignals
-            .rounded(values)
-            .toChartData(categories = SampleLabels.days(DEFAULT_DAYS, startMonth = JUNE), seriesName = TITLE)
-    }
+    override fun deterministic(
+        points: Int,
+        signed: Boolean,
+    ): ChartData = if (signed) signedMonths(points) else seasonalDays(points)
 
-    override fun initialDenseLineDataSet(): ChartData {
+    private fun seasonalDays(points: Int): ChartData {
         val random = Random(23)
         val weekly =
             SampleSignals.trend(
-                count = DENSE_DAYS,
+                count = points,
                 start = 0.0,
                 end = 0.0,
                 random = random,
@@ -45,25 +29,25 @@ internal class DefaultLineSampleUseCase : LineSampleUseCase {
         val values =
             SampleSignals
                 .trend(
-                    count = DENSE_DAYS,
+                    count = points,
                     start = 820.0,
                     end = 1_340.0,
                     random = random,
                     cycleAmplitude = 150.0,
-                    cyclePeriod = DENSE_DAYS.toDouble(),
+                    cyclePeriod = DAYS_PER_YEAR.toDouble(),
                     // Peaks in mid-December, lowest in mid-June.
-                    cyclePhase = DENSE_DAYS * 0.3,
+                    cyclePhase = DAYS_PER_YEAR * 0.3,
                     noise = 55.0,
                 ).zip(weekly) { trend, cycle -> trend + cycle }
         return SampleSignals
             .rounded(values)
-            .toChartData(categories = SampleLabels.days(DENSE_DAYS), seriesName = TITLE)
+            .toChartData(categories = SampleLabels.days(points), seriesName = TITLE)
     }
 
-    override fun initialSignedLineDataSet(): ChartData {
+    private fun signedMonths(points: Int): ChartData {
         val values =
             SampleSignals.trend(
-                count = SIGNED_MONTHS,
+                count = points,
                 start = -9.5,
                 end = 13.8,
                 random = Random(5),
@@ -74,7 +58,7 @@ internal class DefaultLineSampleUseCase : LineSampleUseCase {
         return SampleSignals
             .rounded(values, decimals = 1)
             .toChartData(
-                categories = SampleLabels.monthsWithYear(SIGNED_MONTHS, startYear = 2024),
+                categories = SampleLabels.monthsWithYear(points, startYear = 2024),
                 seriesName = TITLE,
             )
     }

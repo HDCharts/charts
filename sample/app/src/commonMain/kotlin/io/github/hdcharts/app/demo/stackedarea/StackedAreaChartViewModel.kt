@@ -40,30 +40,18 @@ class StackedAreaChartViewModel(
         const val MAX_SUPPORTED_POINTS = 500
         const val MIN_SUPPORTED_VALUE = 0
         const val MAX_SUPPORTED_VALUE = 2000
+        private const val DEFAULT_POINTS = 24
+        private const val DEFAULT_MIN_VALUE = 100
+        private const val DEFAULT_MAX_VALUE = 1000
     }
 
-    private val refreshRange = stackedAreaSampleUseCase.stackedAreaRefreshRange()
-    private val initialSample = stackedAreaSampleUseCase.initialStackedAreaSample()
-    private val defaultPoints =
-        initialSample
-            .data
-            .series
-            .firstOrNull()
-            ?.values
-            ?.size
-            ?.coerceIn(MIN_SUPPORTED_POINTS, MAX_SUPPORTED_POINTS) ?: MIN_SUPPORTED_POINTS
-    private val defaultRange =
-        refreshRange.let { range ->
-            val safeStart = range.first.coerceIn(MIN_SUPPORTED_VALUE, MAX_SUPPORTED_VALUE)
-            val safeEnd = range.last.coerceIn(safeStart, MAX_SUPPORTED_VALUE)
-            safeStart..safeEnd
-        }
+    private val initialSample = stackedAreaSampleUseCase.deterministic(points = DEFAULT_POINTS)
 
     private val initialControlsState =
         StackedAreaChartControlsState(
-            points = defaultPoints,
-            minValue = defaultRange.first,
-            maxValue = defaultRange.last,
+            points = DEFAULT_POINTS,
+            minValue = DEFAULT_MIN_VALUE,
+            maxValue = DEFAULT_MAX_VALUE,
         )
 
     private val _uiState =
@@ -151,7 +139,7 @@ class StackedAreaChartViewModel(
         val safeRangeStart = range.first.coerceIn(MIN_SUPPORTED_VALUE, MAX_SUPPORTED_VALUE)
         val safeRangeEnd = range.last.coerceIn(safeRangeStart, MAX_SUPPORTED_VALUE)
         val sample =
-            stackedAreaSampleUseCase.stackedAreaSample(
+            stackedAreaSampleUseCase.random(
                 points = safePoints,
                 range = safeRangeStart..safeRangeEnd,
             )

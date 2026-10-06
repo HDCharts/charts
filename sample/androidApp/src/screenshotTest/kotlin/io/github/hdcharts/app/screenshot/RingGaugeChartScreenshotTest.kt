@@ -15,6 +15,9 @@ import io.github.hdcharts.sampleshared.theme.LocalChartColors
 import io.github.hdcharts.sampleshared.theme.seriesColors
 
 private const val RING_GAUGE_SELECTION_INDEX = 1
+
+// Enough rings that they get thinner.
+private const val MANY_RINGS = 8
 private val PERCENT_FORMATTER = ChartValueFormatters.suffix("%")
 private val CELSIUS_FORMATTER = ChartValueFormatters.suffix("°C")
 
@@ -22,7 +25,7 @@ private val CELSIUS_FORMATTER = ChartValueFormatters.suffix("°C")
 @ScreenshotPreview
 @Composable
 fun RingGaugeChartDefaultPreview() {
-    val sample = SCREENSHOT_RING_GAUGE_SAMPLE_USE_CASE.initialRingGaugeSample()
+    val sample = SCREENSHOT_RING_GAUGE_SAMPLE_USE_CASE.deterministic()
     ScreenshotChartSurface {
         RingGaugeChart(
             data = sample.data,
@@ -38,7 +41,7 @@ fun RingGaugeChartDefaultPreview() {
 @ScreenshotPreview
 @Composable
 fun RingGaugeChartSelectedRingPreview() {
-    val sample = SCREENSHOT_RING_GAUGE_SAMPLE_USE_CASE.initialRingGaugeSample()
+    val sample = SCREENSHOT_RING_GAUGE_SAMPLE_USE_CASE.deterministic()
     ScreenshotChartSurface {
         RingGaugeChart(
             data = sample.data,
@@ -56,7 +59,7 @@ fun RingGaugeChartSelectedRingPreview() {
 @ScreenshotPreview
 @Composable
 fun RingGaugeChartSingleRingPreview() {
-    val sample = SCREENSHOT_RING_GAUGE_SAMPLE_USE_CASE.initialSingleRingGaugeSample()
+    val sample = SCREENSHOT_RING_GAUGE_SAMPLE_USE_CASE.deterministic(rings = 1)
     ScreenshotChartSurface {
         RingGaugeChart(
             data = sample.data,
@@ -72,7 +75,7 @@ fun RingGaugeChartSingleRingPreview() {
 @ScreenshotPreview
 @Composable
 fun RingGaugeChartManyRingsPreview() {
-    val sample = SCREENSHOT_RING_GAUGE_SAMPLE_USE_CASE.initialManyRingsGaugeSample()
+    val sample = SCREENSHOT_RING_GAUGE_SAMPLE_USE_CASE.deterministic(rings = MANY_RINGS)
     ScreenshotChartSurface {
         RingGaugeChart(
             data = sample.data,
@@ -88,7 +91,7 @@ fun RingGaugeChartManyRingsPreview() {
 @ScreenshotPreview
 @Composable
 fun RingGaugeChartSignedRangePreview() {
-    val sample = SCREENSHOT_RING_GAUGE_SAMPLE_USE_CASE.initialSignedRangeRingGaugeSample()
+    val sample = SCREENSHOT_RING_GAUGE_SAMPLE_USE_CASE.deterministic(signed = true)
     ScreenshotChartSurface {
         RingGaugeChart(
             data = sample.data,
@@ -105,7 +108,7 @@ fun RingGaugeChartSignedRangePreview() {
 @ScreenshotPreview
 @Composable
 fun RingGaugeChartColorsWithoutTrackPreview() {
-    val sample = SCREENSHOT_RING_GAUGE_SAMPLE_USE_CASE.initialRingGaugeSample()
+    val sample = SCREENSHOT_RING_GAUGE_SAMPLE_USE_CASE.deterministic()
     ScreenshotChartSurface {
         val colors = LocalChartColors.current.seriesColors(sample.data.categories.size)
         RingGaugeChart(

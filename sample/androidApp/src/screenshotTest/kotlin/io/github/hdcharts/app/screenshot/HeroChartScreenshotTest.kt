@@ -32,7 +32,7 @@ import io.github.hdcharts.line.LineChartDefaults
 fun HeroChartPreview() {
     Box(modifier = Modifier.size(width = 720.dp, height = 390.dp)) {
         ScreenshotSurface {
-            val sample = SCREENSHOT_MULTI_LINE_SAMPLE_USE_CASE.initialHeroSample()
+            val sample = SCREENSHOT_MULTI_LINE_SAMPLE_USE_CASE.hero()
             LineChart(
                 data = sample.dataSet,
                 modifier = Modifier.fillMaxSize(),

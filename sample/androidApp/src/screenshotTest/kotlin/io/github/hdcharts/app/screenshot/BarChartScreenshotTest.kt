@@ -13,15 +13,16 @@ import io.github.hdcharts.core.style.BarChartDefaults
 import io.github.hdcharts.sampleshared.theme.LocalChartColors
 import io.github.hdcharts.sampleshared.theme.seriesColor
 
-// A negative month.
-private const val BAR_SELECTION_LABEL = "Jul"
+// A negative day.
+private const val BAR_SELECTION_LABEL = "Mar 6"
 
 // In the middle of the 90 days.
 private const val DENSE_SELECTION_LABEL = "Apr 15"
+private const val DENSE_POINTS = 90
 
-// Wider than the data (-26 to 96) on both sides, with zero as a tick.
-private const val FIXED_RANGE_MIN = -40.0
-private const val FIXED_RANGE_MAX = 120.0
+// Wider than the data (-43 to 124) on both sides, with zero as a tick.
+private const val FIXED_RANGE_MIN = -60.0
+private const val FIXED_RANGE_MAX = 150.0
 private const val POSITIVE_COLOR_INDEX = 6
 private const val NEGATIVE_COLOR_INDEX = 3
 
@@ -30,7 +31,7 @@ private const val NEGATIVE_COLOR_INDEX = 3
 @Composable
 fun BarChartDefaultPreview() {
     ScreenshotChartSurface {
-        val data = SCREENSHOT_BAR_SAMPLE_USE_CASE.initialBarDataSet()
+        val data = SCREENSHOT_BAR_SAMPLE_USE_CASE.deterministic(signed = true)
         BarChart(
             data = data,
             title = data.series.single().name,
@@ -44,7 +45,7 @@ fun BarChartDefaultPreview() {
 @Composable
 fun BarChartSelectedBarPreview() {
     ScreenshotChartSurface {
-        val data = SCREENSHOT_BAR_SAMPLE_USE_CASE.initialBarDataSet()
+        val data = SCREENSHOT_BAR_SAMPLE_USE_CASE.deterministic(signed = true)
         BarChart(
             data = data,
             title = data.series.single().name,
@@ -60,7 +61,7 @@ fun BarChartSelectedBarPreview() {
 @Composable
 fun BarChartDensePreview() {
     ScreenshotChartSurface {
-        val data = SCREENSHOT_BAR_SAMPLE_USE_CASE.initialDenseBarDataSet()
+        val data = SCREENSHOT_BAR_SAMPLE_USE_CASE.deterministic(points = DENSE_POINTS)
         BarChart(
             data = data,
             title = data.series.single().name,
@@ -78,7 +79,7 @@ fun BarChartDensePreview() {
 @Composable
 fun BarChartDenseSelectedBarPreview() {
     ScreenshotChartSurface {
-        val data = SCREENSHOT_BAR_SAMPLE_USE_CASE.initialDenseBarDataSet()
+        val data = SCREENSHOT_BAR_SAMPLE_USE_CASE.deterministic(points = DENSE_POINTS)
         BarChart(
             data = data,
             title = data.series.single().name,
@@ -93,7 +94,7 @@ fun BarChartDenseSelectedBarPreview() {
 @Composable
 fun BarChartFixedRangePreview() {
     ScreenshotChartSurface {
-        val data = SCREENSHOT_BAR_SAMPLE_USE_CASE.initialBarDataSet()
+        val data = SCREENSHOT_BAR_SAMPLE_USE_CASE.deterministic(signed = true)
         BarChart(
             data = data,
             title = data.series.single().name,
@@ -111,7 +112,7 @@ fun BarChartFixedRangePreview() {
 @Composable
 fun BarChartHiddenGridPreview() {
     ScreenshotChartSurface {
-        val data = SCREENSHOT_BAR_SAMPLE_USE_CASE.initialBarDataSet()
+        val data = SCREENSHOT_BAR_SAMPLE_USE_CASE.deterministic(signed = true)
         BarChart(
             data = data,
             title = data.series.single().name,
@@ -121,13 +122,13 @@ fun BarChartHiddenGridPreview() {
     }
 }
 
-/** One color per bar: positive months in one color, negative months in another. */
+/** One color per bar: positive days in one color, negative days in another. */
 @PreviewTest
 @ScreenshotPreview
 @Composable
 fun BarChartBarColorsPreview() {
     ScreenshotChartSurface {
-        val data = SCREENSHOT_BAR_SAMPLE_USE_CASE.initialBarDataSet()
+        val data = SCREENSHOT_BAR_SAMPLE_USE_CASE.deterministic(signed = true)
         val chartColors = LocalChartColors.current
         val positive = chartColors.seriesColor(POSITIVE_COLOR_INDEX)
         val negative = chartColors.seriesColor(NEGATIVE_COLOR_INDEX)

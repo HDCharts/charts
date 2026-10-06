@@ -40,28 +40,18 @@ class StackedBarChartViewModel(
         const val MAX_SUPPORTED_POINTS = 500
         const val MIN_SUPPORTED_VALUE = 0
         const val MAX_SUPPORTED_VALUE = 2000
+        private const val DEFAULT_POINTS = 8
+        private const val DEFAULT_MIN_VALUE = 100
+        private const val DEFAULT_MAX_VALUE = 1000
     }
 
-    private val refreshRange = stackedBarSampleUseCase.stackedBarRefreshRange()
-    private val initialSample = stackedBarSampleUseCase.initialStackedBarSample()
-    private val defaultPoints =
-        initialSample
-            .dataSet
-            .categories
-            .size
-            .coerceIn(MIN_SUPPORTED_POINTS, MAX_SUPPORTED_POINTS)
-    private val defaultRange =
-        refreshRange.let { range ->
-            val safeStart = range.first.coerceIn(MIN_SUPPORTED_VALUE, MAX_SUPPORTED_VALUE)
-            val safeEnd = range.last.coerceIn(safeStart, MAX_SUPPORTED_VALUE)
-            safeStart..safeEnd
-        }
+    private val initialSample = stackedBarSampleUseCase.deterministic(points = DEFAULT_POINTS)
 
     private val initialControlsState =
         StackedBarChartControlsState(
-            points = defaultPoints,
-            minValue = defaultRange.first,
-            maxValue = defaultRange.last,
+            points = DEFAULT_POINTS,
+            minValue = DEFAULT_MIN_VALUE,
+            maxValue = DEFAULT_MAX_VALUE,
         )
 
     private val _uiState =
@@ -149,7 +139,7 @@ class StackedBarChartViewModel(
         val safeRangeStart = range.first.coerceIn(MIN_SUPPORTED_VALUE, MAX_SUPPORTED_VALUE)
         val safeRangeEnd = range.last.coerceIn(safeRangeStart, MAX_SUPPORTED_VALUE)
         val sample =
-            stackedBarSampleUseCase.stackedBarSample(
+            stackedBarSampleUseCase.random(
                 points = safePoints,
                 range = safeRangeStart..safeRangeEnd,
             )

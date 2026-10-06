@@ -34,35 +34,25 @@ class BarChartViewModel(
         const val MIN_SUPPORTED_VALUE = -500
         const val MAX_SUPPORTED_VALUE = 500
         private const val LIVE_UPDATE_INTERVAL_MS = 2000L
+        private const val DEFAULT_POINTS = 120
+        private const val DEFAULT_MIN_VALUE = -100
+        private const val DEFAULT_MAX_VALUE = 100
     }
-
-    private val defaultPoints =
-        barSampleUseCase
-            .barDefaultPoints()
-            .coerceIn(MIN_SUPPORTED_POINTS, MAX_SUPPORTED_POINTS)
-    private val defaultRange =
-        barSampleUseCase
-            .barDefaultRange()
-            .let { range ->
-                val safeStart = range.first.coerceIn(MIN_SUPPORTED_VALUE, MAX_SUPPORTED_VALUE)
-                val safeEnd = range.last.coerceIn(safeStart, MAX_SUPPORTED_VALUE)
-                safeStart..safeEnd
-            }
 
     private val initialControlsState =
         BarChartControlsState(
-            points = defaultPoints,
-            minValue = defaultRange.first,
-            maxValue = defaultRange.last,
+            points = DEFAULT_POINTS,
+            minValue = DEFAULT_MIN_VALUE,
+            maxValue = DEFAULT_MAX_VALUE,
         )
 
     private val _uiState =
         MutableStateFlow(
             BarChartUiState(
                 dataSet =
-                    barSampleUseCase.barDataSet(
+                    barSampleUseCase.random(
                         points = initialControlsState.points,
-                        range = defaultRange,
+                        range = initialControlsState.minValue..initialControlsState.maxValue,
                     ),
                 controlsState = initialControlsState,
             ),
@@ -141,7 +131,7 @@ class BarChartViewModel(
         val safeRangeStart = range.first.coerceIn(MIN_SUPPORTED_VALUE, MAX_SUPPORTED_VALUE)
         val safeRangeEnd = range.last.coerceIn(safeRangeStart, MAX_SUPPORTED_VALUE)
         val dataSet =
-            barSampleUseCase.barDataSet(
+            barSampleUseCase.random(
                 points = safePoints,
                 range = safeRangeStart..safeRangeEnd,
             )

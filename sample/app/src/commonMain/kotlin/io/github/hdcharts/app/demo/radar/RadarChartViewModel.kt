@@ -29,8 +29,7 @@ data class RadarChartUiState(
 class RadarChartViewModel(
     private val radarSampleUseCase: RadarSampleUseCase,
 ) : ViewModel() {
-    private val initialSample = radarSampleUseCase.initialRadarSample()
-    private val refreshRange = radarSampleUseCase.radarRefreshRange()
+    private val initialSample = radarSampleUseCase.deterministic()
     private var liveUpdatesJob: Job? = null
 
     private val _uiState =
@@ -47,7 +46,7 @@ class RadarChartViewModel(
     }
 
     fun refresh() {
-        val sample = radarSampleUseCase.radarSample(range = refreshRange)
+        val sample = radarSampleUseCase.random()
         _uiState.update { it.copy(chart = sample.toChartState()) }
     }
 
