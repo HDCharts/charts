@@ -43,6 +43,7 @@ class MainViewModel : ViewModel() {
                     ChartDestination.HistogramChartScreen,
                     ChartDestination.StackedBarChartScreen,
                     ChartDestination.RadarChartScreen,
+                    ChartDestination.RingGaugeChartScreen,
                 ),
             ),
         )

@@ -37,6 +37,7 @@ class DefaultChartPreviewUseCase : ChartPreviewUseCase {
         listOf(
             "Release 2.3" to listOf(86.0, 82.0, 78.0, 89.0, 84.0, 77.0),
         )
+    private val previewRingGaugeValues = listOf(72.0, 54.0, 36.0)
 
     override fun previewSeed(): ChartGalleryPreview =
         ChartGalleryPreview(
@@ -48,6 +49,7 @@ class DefaultChartPreviewUseCase : ChartPreviewUseCase {
             histogramValues = previewHistogramValues,
             stackedSeries = previewStackedSeries,
             radarSeries = previewRadarSeries,
+            ringGaugeValues = previewRingGaugeValues,
         )
 
     override fun nextPiePreview(values: List<Double>): List<Double> =
@@ -87,6 +89,11 @@ class DefaultChartPreviewUseCase : ChartPreviewUseCase {
                 values.map { value ->
                     jitter(value, from = -18, until = 18, min = 30.0, max = 100.0)
                 }
+        }
+
+    override fun nextRingGaugePreview(values: List<Double>): List<Double> =
+        values.map { value ->
+            jitter(value, from = -10, until = 11, min = 10.0, max = 95.0)
         }
 
     private fun jitter(

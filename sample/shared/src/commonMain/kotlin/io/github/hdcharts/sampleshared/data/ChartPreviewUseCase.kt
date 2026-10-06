@@ -14,4 +14,6 @@ interface ChartPreviewUseCase {
     fun nextStackedPreview(): List<Pair<String, List<Double>>>
 
     fun nextRadarPreview(): List<Pair<String, List<Double>>>
+
+    fun nextRingGaugePreview(values: List<Double>): List<Double>
 }

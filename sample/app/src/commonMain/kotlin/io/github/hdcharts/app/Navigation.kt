@@ -21,6 +21,7 @@ import hdcharts.app.generated.resources.line_chart
 import hdcharts.app.generated.resources.multi_line_chart
 import hdcharts.app.generated.resources.pie_chart
 import hdcharts.app.generated.resources.radar_chart
+import hdcharts.app.generated.resources.ring_gauge_chart
 import hdcharts.app.generated.resources.stacked_area_chart
 import hdcharts.sample_shared.generated.resources.ic_bar_chart
 import hdcharts.sample_shared.generated.resources.ic_histogram_chart
@@ -28,9 +29,11 @@ import hdcharts.sample_shared.generated.resources.ic_line_chart
 import hdcharts.sample_shared.generated.resources.ic_multi_line_chart
 import hdcharts.sample_shared.generated.resources.ic_pie_chart
 import hdcharts.sample_shared.generated.resources.ic_radar_chart
+import hdcharts.sample_shared.generated.resources.ic_ring_gauge_chart
 import hdcharts.sample_shared.generated.resources.ic_stacked_bar_chart
 import io.github.hdcharts.app.demo.bar.BarChartDemo
 import io.github.hdcharts.app.demo.debug.DebugChartsScreen
+import io.github.hdcharts.app.demo.gauge.RingGaugeChartDemo
 import io.github.hdcharts.app.demo.histogram.HistogramChartDemo
 import io.github.hdcharts.app.demo.line.LineChartDemo
 import io.github.hdcharts.app.demo.line.LineScaleDropDemo
@@ -144,6 +147,14 @@ sealed class ChartDestination(
             icon = SharedRes.drawable.ic_radar_chart,
             title = Res.string.radar_chart,
             examples = listOf(defaultsExample { RadarChartDemo() }),
+        )
+
+    data object RingGaugeChartScreen :
+        ChartDestination(
+            route = "ringGaugeChart",
+            icon = SharedRes.drawable.ic_ring_gauge_chart,
+            title = Res.string.ring_gauge_chart,
+            examples = listOf(defaultsExample { RingGaugeChartDemo() }),
         )
 }
 

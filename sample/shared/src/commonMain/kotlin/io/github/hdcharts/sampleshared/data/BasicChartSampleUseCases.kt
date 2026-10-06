@@ -59,14 +59,17 @@ interface HistogramSampleUseCase {
 
 private const val DEFAULT_RINGS = 3
 
-/** RingGaugeChartScreenshotTest only, until the gauge has a demo. Rings are named "Ring 1", "Ring 2", and so on. */
+/** Rings are named "Ring 1", "Ring 2", and so on. */
 interface RingGaugeSampleUseCase {
     /**
      * A 0 to 100 range, or a -20 to 40 range when [signed]: the first ring past its end and the third
-     * below zero.
+     * below zero. Demo start data and RingGaugeChartScreenshotTest.
      */
     fun deterministic(
         rings: Int = DEFAULT_RINGS,
         signed: Boolean = false,
     ): RingGaugeSampleData
+
+    /** Demo refresh: the rings of [deterministic] with random values in the 0 to 100 range. */
+    fun random(rings: Int = DEFAULT_RINGS): RingGaugeSampleData
 }

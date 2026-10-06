@@ -48,4 +48,5 @@ data class ChartGalleryPreview(
     val histogramValues: List<Double>,
     val stackedSeries: List<Pair<String, List<Double>>>,
     val radarSeries: List<Pair<String, List<Double>>>,
+    val ringGaugeValues: List<Double>,
 )
