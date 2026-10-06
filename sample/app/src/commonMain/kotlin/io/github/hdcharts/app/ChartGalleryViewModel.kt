@@ -111,6 +111,17 @@ class ChartGalleryViewModel(
                         },
                     )
                 }
+                launch {
+                    previewLoop(
+                        baseIntervalMs = LIVE_PREVIEW_INTERVAL_MS + 700L,
+                        jitterMs = 500L,
+                        update = { previews ->
+                            previews.copy(
+                                ringGaugeValues = previewUseCase.nextRingGaugePreview(previews.ringGaugeValues),
+                            )
+                        },
+                    )
+                }
             }
         } finally {
             isLoopRunning = false
@@ -140,6 +151,7 @@ class ChartGalleryViewModel(
             is ChartDestination.HistogramChartScreen -> "Distribution across bins."
             is ChartDestination.StackedBarChartScreen -> "Segment composition by category."
             is ChartDestination.RadarChartScreen -> "Live radial signals."
+            is ChartDestination.RingGaugeChartScreen -> "Progress toward a target."
         }
 
     private companion object {

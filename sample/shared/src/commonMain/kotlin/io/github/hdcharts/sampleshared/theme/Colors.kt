@@ -49,7 +49,7 @@ private object UiNeutrals {
     val darkOnBackground = Color(0xFFF2F2FA)
     val darkSurface = Color(0xFF0D0D14)
     val darkOnSurface = darkOnBackground
-    val darkSurfaceVariant = Color(0xFF191922)
+    val darkSurfaceVariant = Color(0xFF34343F)
 
     // Error colors (Material-ish, consistent across themes)
     val lightError = Color(0xFFBA1A1A)

@@ -3,6 +3,7 @@ package io.github.hdcharts.app.di
 import io.github.hdcharts.app.ChartGalleryViewModel
 import io.github.hdcharts.app.MainViewModel
 import io.github.hdcharts.app.demo.bar.BarChartViewModel
+import io.github.hdcharts.app.demo.gauge.RingGaugeChartViewModel
 import io.github.hdcharts.app.demo.histogram.HistogramChartViewModel
 import io.github.hdcharts.app.demo.line.LineChartViewModel
 import io.github.hdcharts.app.demo.line.LineScaleDropViewModel
@@ -19,6 +20,7 @@ import io.github.hdcharts.sampleshared.data.HistogramSampleUseCase
 import io.github.hdcharts.sampleshared.data.LiveLatencyTimelineUseCase
 import io.github.hdcharts.sampleshared.data.PieSampleUseCase
 import io.github.hdcharts.sampleshared.data.RadarSampleUseCase
+import io.github.hdcharts.sampleshared.data.RingGaugeSampleUseCase
 import io.github.hdcharts.sampleshared.data.StackedAreaSampleUseCase
 import io.github.hdcharts.sampleshared.data.StackedBarSampleUseCase
 import io.github.hdcharts.sampleshared.data.barSampleUseCase
@@ -27,6 +29,7 @@ import io.github.hdcharts.sampleshared.data.histogramSampleUseCase
 import io.github.hdcharts.sampleshared.data.liveLatencyTimelineUseCase
 import io.github.hdcharts.sampleshared.data.pieSampleUseCase
 import io.github.hdcharts.sampleshared.data.radarSampleUseCase
+import io.github.hdcharts.sampleshared.data.ringGaugeSampleUseCase
 import io.github.hdcharts.sampleshared.data.stackedAreaSampleUseCase
 import io.github.hdcharts.sampleshared.data.stackedBarSampleUseCase
 import org.koin.core.module.dsl.viewModel
@@ -42,6 +45,7 @@ val appModule =
         single<StackedBarSampleUseCase> { stackedBarSampleUseCase() }
         single<StackedAreaSampleUseCase> { stackedAreaSampleUseCase() }
         single<RadarSampleUseCase> { radarSampleUseCase() }
+        single<RingGaugeSampleUseCase> { ringGaugeSampleUseCase() }
         viewModel { PieChartViewModel(get()) }
         viewModel { ChartGalleryViewModel(get()) }
         viewModel { MainViewModel() }
@@ -55,4 +59,5 @@ val appModule =
         viewModel { StackedBarChartViewModel(get()) }
         viewModel { StackedAreaChartViewModel(get()) }
         viewModel { RadarChartViewModel(get()) }
+        viewModel { RingGaugeChartViewModel(get()) }
     }

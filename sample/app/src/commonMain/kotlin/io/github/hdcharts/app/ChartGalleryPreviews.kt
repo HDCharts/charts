@@ -23,6 +23,8 @@ import io.github.hdcharts.core.style.BarChartDefaults
 import io.github.hdcharts.core.style.ChartContainerDefaults
 import io.github.hdcharts.core.style.ChartContainerStyle
 import io.github.hdcharts.core.style.HistogramChartDefaults
+import io.github.hdcharts.gauge.RingGaugeChart
+import io.github.hdcharts.gauge.RingGaugeChartDefaults
 import io.github.hdcharts.histogram.HistogramChart
 import io.github.hdcharts.line.LineChart
 import io.github.hdcharts.line.LineChartDefaults
@@ -39,6 +41,9 @@ import io.github.hdcharts.stackedbar.StackedBarChartDefaults
 
 private val PreviewShape = RoundedCornerShape(18.dp)
 private val PreviewChartSize = 140.dp
+
+// A half circle is twice as wide as it is tall.
+private val PreviewGaugeHeight = PreviewChartSize / 2
 
 @Composable
 internal fun ChartPreviewFrame(
@@ -90,6 +95,7 @@ internal fun ChartPreview(
         is ChartDestination.HistogramChartScreen -> HistogramChartPreview(previews.histogramValues)
         is ChartDestination.StackedBarChartScreen -> StackedBarChartPreview(previews.stackedSeries)
         is ChartDestination.RadarChartScreen -> RadarChartPreview(previews.radarSeries)
+        is ChartDestination.RingGaugeChartScreen -> RingGaugeChartPreview(previews.ringGaugeValues)
     }
 }
 
@@ -271,6 +277,25 @@ private fun RadarChartPreview(series: List<Pair<String, List<Double>>>) {
         style =
             RadarChartDefaults.style(
                 chartContainerStyle = previewChartContainerStyle(),
+            ),
+        interactionEnabled = false,
+        animateOnStart = false,
+    )
+}
+
+@Composable
+private fun RingGaugeChartPreview(values: List<Double>) {
+    val data =
+        remember(values) { values.toChartData() }
+
+    RingGaugeChart(
+        data = data,
+        modifier = Modifier.size(width = PreviewChartSize, height = PreviewGaugeHeight),
+        style =
+            RingGaugeChartDefaults.style(
+                chartContainerStyle = previewChartContainerStyle(),
+                labels = RingGaugeChartDefaults.labels(visible = false),
+                legend = RingGaugeChartDefaults.legend(visible = false),
             ),
         interactionEnabled = false,
         animateOnStart = false,

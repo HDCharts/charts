@@ -35,4 +35,16 @@ class RingGaugeSampleUseCaseTest {
         )
         assertTrue(actual = values.any { it < 0 })
     }
+
+    @Test
+    fun random_withRings_staysInsideTheRange() {
+        val sample = useCase.random(rings = RINGS)
+        val values =
+            sample.data.series
+                .single()
+                .values
+
+        assertEquals(expected = RINGS, actual = values.size)
+        assertTrue(actual = values.all { it in sample.rangeMin..sample.rangeMax })
+    }
 }
