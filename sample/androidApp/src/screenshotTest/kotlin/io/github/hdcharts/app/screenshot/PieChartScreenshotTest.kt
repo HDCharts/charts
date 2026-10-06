@@ -18,12 +18,13 @@ import io.github.hdcharts.sampleshared.theme.seriesColors
 private const val PIE_SELECTION_INDEX = 1
 private const val DONUT_HOLE_PERCENTAGE = 55f
 private const val BASE_COLOR_INDEX = 1
+private const val MANY_SLICES = 15
 
 @PreviewTest
 @ScreenshotPreview
 @Composable
 fun PieChartDefaultPreview() {
-    val sample = SCREENSHOT_PIE_SAMPLE_USE_CASE.initialPieSample()
+    val sample = SCREENSHOT_PIE_SAMPLE_USE_CASE.deterministic()
     ScreenshotChartSurface {
         PieChart(
             data = sample.data,
@@ -37,7 +38,7 @@ fun PieChartDefaultPreview() {
 @ScreenshotPreview
 @Composable
 fun PieChartSelectedSlicePreview() {
-    val sample = SCREENSHOT_PIE_SAMPLE_USE_CASE.initialPieSample()
+    val sample = SCREENSHOT_PIE_SAMPLE_USE_CASE.deterministic()
     ScreenshotChartSurface {
         PieChart(
             data = sample.data,
@@ -53,7 +54,7 @@ fun PieChartSelectedSlicePreview() {
 @ScreenshotPreview
 @Composable
 fun PieChartManySlicesPreview() {
-    val sample = SCREENSHOT_PIE_SAMPLE_USE_CASE.initialManySlicesPieSample()
+    val sample = SCREENSHOT_PIE_SAMPLE_USE_CASE.deterministic(slices = MANY_SLICES)
     ScreenshotChartSurface {
         PieChart(
             data = sample.data,
@@ -67,7 +68,7 @@ fun PieChartManySlicesPreview() {
 @ScreenshotPreview
 @Composable
 fun PieChartDonutPreview() {
-    val sample = SCREENSHOT_PIE_SAMPLE_USE_CASE.initialPieSample()
+    val sample = SCREENSHOT_PIE_SAMPLE_USE_CASE.deterministic()
     ScreenshotChartSurface {
         PieChart(
             data = sample.data,
@@ -83,7 +84,7 @@ fun PieChartDonutPreview() {
 @ScreenshotPreview
 @Composable
 fun PieChartHiddenLegendPreview() {
-    val sample = SCREENSHOT_PIE_SAMPLE_USE_CASE.initialPieSample()
+    val sample = SCREENSHOT_PIE_SAMPLE_USE_CASE.deterministic()
     ScreenshotChartSurface {
         PieChart(
             data = sample.data,
@@ -100,7 +101,7 @@ fun PieChartHiddenLegendPreview() {
 @ScreenshotPreview
 @Composable
 fun PieChartBaseColorPreview() {
-    val sample = SCREENSHOT_PIE_SAMPLE_USE_CASE.initialPieSample()
+    val sample = SCREENSHOT_PIE_SAMPLE_USE_CASE.deterministic()
     ScreenshotChartSurface {
         val baseColor = LocalChartColors.current.seriesColor(BASE_COLOR_INDEX)
         PieChart(
@@ -117,7 +118,7 @@ fun PieChartBaseColorPreview() {
 @ScreenshotPreview
 @Composable
 fun PieChartSliceColorsPreview() {
-    val sample = SCREENSHOT_PIE_SAMPLE_USE_CASE.initialPieSample()
+    val sample = SCREENSHOT_PIE_SAMPLE_USE_CASE.deterministic()
     ScreenshotChartSurface {
         val colors = LocalChartColors.current.seriesColors(sample.data.categories.size)
         PieChart(

@@ -3,24 +3,19 @@ package io.github.hdcharts.sampleshared.data
 import io.github.hdcharts.core.model.ChartData
 
 // Sample data for the demo app (the chart view models in sample/app) and the screenshot tests
-// (sample/androidApp/src/screenshotTest). Functions starting with `initial` return the same data on
-// every call; the others build random data each time the demo refreshes.
+// (sample/androidApp/src/screenshotTest). Functions starting with `initial`, and
+// PieSampleUseCase.deterministic, return the same data on every call; the others build random data
+// each time the demo refreshes.
 
+private const val DEFAULT_PIE_SLICES = 6
+
+/** Slices are named "Segment 1", "Segment 2", and so on. */
 interface PieSampleUseCase {
-    /** Demo start data and PieChartScreenshotTest. */
-    fun initialPieSample(): PieSampleData
+    /** Values n, n-1, ..., 1 for n [slices]. Demo start data and PieChartScreenshotTest. */
+    fun deterministic(slices: Int = DEFAULT_PIE_SLICES): PieSampleData
 
-    /** PieChartScreenshotTest only: a long tail of small slices. */
-    fun initialManySlicesPieSample(): PieSampleData
-
-    /** Demo refresh. */
-    fun pieRefreshRange(): IntRange
-
-    /** Demo refresh. */
-    fun pieSample(
-        range: IntRange,
-        numOfPoints: IntRange,
-    ): PieSampleData
+    /** Demo refresh: the slices of [deterministic] with random values. */
+    fun random(slices: Int = DEFAULT_PIE_SLICES): PieSampleData
 }
 
 /** LineChartScreenshotTest only. The line demo uses [LiveLatencyTimelineUseCase]. */
