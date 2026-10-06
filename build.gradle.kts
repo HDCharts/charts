@@ -374,7 +374,7 @@ val ciWarmCacheLinuxBuilds =
         ":androidApp:compileDebugScreenshotTestSources",
         ciTestToolConfigurations.keys.map { "$it:ciResolveTestTools" },
         listOf(":androidApp:assembleDebug", ":androidApp:assembleDebugAndroidTest"),
-        listOf(":charts:dokkaGenerate", ":app:wasmJsBrowserDistribution"),
+        listOf(":charts:dokkaGenerate", ":app:compileProductionExecutableKotlinWasmJs"),
     )
 
 // Fills the Gradle cache that `warm-gradle-cache.yml` saves on main.

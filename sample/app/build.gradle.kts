@@ -93,6 +93,10 @@ kotlin {
             implementation(libs.kotlinx.coroutines.swing)
         }
 
+        jvmTest.dependencies {
+            implementation(kotlin("test-junit"))
+        }
+
         androidMain.dependencies {
             implementation(libs.compose.ui.tooling.preview)
         }

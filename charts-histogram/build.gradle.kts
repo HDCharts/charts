@@ -77,6 +77,14 @@ kotlin {
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
         }
+
+        jvmTest.dependencies {
+            implementation(kotlin("test-junit"))
+        }
+
+        getByName("androidDeviceTest").dependencies {
+            implementation(kotlin("test-junit"))
+        }
     }
 }
 
