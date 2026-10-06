@@ -173,6 +173,7 @@ private fun StackedAreaChartPreview(series: List<Pair<String, List<Double>>>) {
         style =
             StackedAreaChartDefaults.style(
                 chartContainerStyle = previewChartContainerStyle(),
+                legend = StackedAreaChartDefaults.legend(visible = false),
                 axis =
                     StackedAreaChartDefaults.axis(
                         xLabels = StackedAreaChartDefaults.xLabels(visible = false),
@@ -247,6 +248,7 @@ private fun StackedBarChartPreview(series: List<Pair<String, List<Double>>>) {
         style =
             StackedBarChartDefaults.style(
                 chartContainerStyle = previewChartContainerStyle(),
+                legend = StackedBarChartDefaults.legend(visible = false),
                 axis =
                     StackedBarChartDefaults.axis(
                         xLabels = StackedBarChartDefaults.xLabels(visible = false),
