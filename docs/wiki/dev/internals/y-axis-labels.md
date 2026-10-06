@@ -1,6 +1,6 @@
 ---
 title: Y-Axis Labels
-order: 2
+order: 8
 ---
 
 # Y-Axis Labels

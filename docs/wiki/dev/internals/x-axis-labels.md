@@ -1,6 +1,6 @@
 ---
 title: X-Axis Labels
-order: 1
+order: 7
 ---
 
 # X-Axis Labels

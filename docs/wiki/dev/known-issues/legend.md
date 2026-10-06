@@ -1,6 +1,6 @@
 ---
 title: Legend and Selection Issues
-order: 10
+order: 9
 ---
 
 # Legend and Selection Issues

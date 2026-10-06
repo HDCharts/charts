@@ -1,6 +1,6 @@
 ---
 title: Naming and File Structure
-order: 7
+order: 10
 ---
 
 # Naming and File Structure

@@ -5,9 +5,8 @@ order: 0
 
 # Known Issues
 
-Known issues and limits of the pages in the Chart Internals section. Each internals page has
-an issue page here with the same file name, and names it in its Known Issues section. Add the
-issue page with the internals page, even while it has no known issues.
+Known issues and limits of the pages in the Chart Internals section. An issue page has the same
+file name as its internals page, which names it in its Known Issues section.
 
 Each issue page lists its issues in two sections:
 

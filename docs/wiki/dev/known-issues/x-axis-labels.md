@@ -1,6 +1,6 @@
 ---
 title: X-Axis Label Issues
-order: 1
+order: 7
 ---
 
 # X-Axis Label Issues

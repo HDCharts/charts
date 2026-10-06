@@ -1,6 +1,6 @@
 ---
 title: Entry Seam and Chart Policy
-order: 8
+order: 2
 ---
 
 # Entry Seam and Chart Policy
