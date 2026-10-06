@@ -68,7 +68,7 @@ fun HistogramChartDensePreview() {
 }
 
 /**
- * In dense data, the histogram keeps every bin at a narrower width, and the selection marks one bin.
+ * In dense data, the histogram merges neighboring bins, and the selection marks the merged bar holding the bin.
  * Interaction stays on so the expand toggle shows next to the selection.
  */
 @PreviewTest

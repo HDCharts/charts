@@ -24,6 +24,7 @@ import io.github.hdcharts.core.model.ChartSelection
 import io.github.hdcharts.core.model.ChartValueFormatter
 import io.github.hdcharts.core.model.rememberChartSelection
 import io.github.hdcharts.core.model.toChartData
+import io.github.hdcharts.core.style.ChartContainerDefaults
 import io.github.hdcharts.core.style.HistogramChartDefaults
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -179,7 +180,7 @@ class HistogramChartInteractionTest {
         }
 
     @Test
-    fun histogramChart_denseFit_presetsAndTapsUseExactBinsIncludingFinalOpenLabel() =
+    fun histogramChart_denseCompact_presetsKeepExactBinsAndTapsSelectMergedCenterBins() =
         runComposeUiTest {
             val events = mutableListOf<Int?>()
             val selection = ChartSelection(initialIndex = 59, onSelectionChanged = { events.add(it) })
@@ -189,6 +190,15 @@ class HistogramChartInteractionTest {
                     data = denseData,
                     title = "Latency",
                     modifier = Modifier.size(width = chartWidth.value, height = 300.dp),
+                    style =
+                        HistogramChartDefaults.style(
+                            chartContainerStyle = ChartContainerDefaults.style(contentPadding = 0.dp),
+                            bars = HistogramChartDefaults.bars(minBarWidth = 100.dp),
+                            axis =
+                                HistogramChartDefaults.axis(
+                                    yLabels = HistogramChartDefaults.yLabels(visible = false),
+                                ),
+                        ),
                     selection = selection,
                     valueFormatter = ChartValueFormatter { it.toString() },
                     animateOnStart = false,
@@ -206,13 +216,16 @@ class HistogramChartInteractionTest {
             onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("170-180ms: 17.125").assertIsDisplayed()
             runOnIdle { selection.clear() }
             onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("Latency").assertIsDisplayed()
-            tapFitBin(index = 17, binCount = 60)
-            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("170-180ms: 17.125").assertIsDisplayed()
-            tapFitBin(index = 17, binCount = 60)
+            // Three merged bars cover bins 0..19, 20..39, and 40..59; a tap selects the lower-middle bin.
+            tapFitBin(index = 0, binCount = 3)
+            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("90-100ms: 9.125").assertIsDisplayed()
+            tapFitBin(index = 0, binCount = 3)
             onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("Latency").assertIsDisplayed()
-            tapFitBin(index = 59, binCount = 60)
+            tapFitBin(index = 2, binCount = 3)
+            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("490-500ms: 49.125").assertIsDisplayed()
+            runOnIdle { selection.select(59) }
             onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("590ms+: 59.123456789").assertIsDisplayed()
-            runOnIdle { assertEquals(listOf(0, 17, null, 17, null, 59), events) }
+            runOnIdle { assertEquals(listOf(0, 17, null, 9, null, 49, 59), events) }
 
             onNodeWithTag(TestTags.BAR_CHART_DENSE_EXPAND).performTouchInput { click() }
             onNodeWithTag(TestTags.BAR_CHART_ZOOM_IN).assertIsDisplayed()
@@ -237,7 +250,7 @@ class HistogramChartInteractionTest {
             onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("590ms+: 59.123456789").assertIsDisplayed()
             runOnIdle {
                 assertEquals(59, selection.selectedIndex)
-                assertEquals(listOf(0, 17, null, 17, null, 59), events)
+                assertEquals(listOf(0, 17, null, 9, null, 49, 59), events)
             }
         }
 

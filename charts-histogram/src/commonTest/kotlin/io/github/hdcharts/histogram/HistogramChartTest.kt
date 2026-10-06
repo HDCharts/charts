@@ -292,9 +292,9 @@ class HistogramChartTest {
 
     @OptIn(ExperimentalTestApi::class)
     @Test
-    fun histogramChart_denseCustomBarColors_keepEveryBinAdjacentWithoutAggregation() =
+    fun histogramChart_denseCompact_mergesBinsLikeBarWithCenterBinColors() =
         runComposeUiTest {
-            val colors = List(60) { if (it % 2 == 0) Color.Red else Color.Blue }
+            val colors = List(12) { Color(red = it * 20, green = 0, blue = 255 - it * 20) }
             lateinit var captureLayer: GraphicsLayer
             lateinit var captureScope: CoroutineScope
             val capturedPixels = mutableStateOf<PixelMap?>(null)
@@ -302,11 +302,11 @@ class HistogramChartTest {
                 captureLayer = rememberGraphicsLayer()
                 captureScope = rememberCoroutineScope()
                 HistogramChart(
-                    data = List(60) { 0.75 }.toChartData(),
+                    data = List(12) { 0.75 }.toChartData(),
                     modifier =
                         Modifier
                             .testTag("histogram-capture")
-                            .size(240.dp)
+                            .size(300.dp)
                             .drawWithContent {
                                 captureLayer.record { this@drawWithContent.drawContent() }
                                 drawLayer(captureLayer)
@@ -315,7 +315,7 @@ class HistogramChartTest {
                     style =
                         HistogramChartDefaults.style(
                             chartContainerStyle = ChartContainerDefaults.style(contentPadding = 0.dp),
-                            bars = HistogramChartDefaults.bars(colors = colors, alpha = 1f),
+                            bars = HistogramChartDefaults.bars(colors = colors, alpha = 1f, minBarWidth = 100.dp),
                             range = HistogramChartDefaults.range(min = 0.0, max = 1.0),
                             grid = HistogramChartDefaults.grid(visible = false),
                             axis =
@@ -335,11 +335,14 @@ class HistogramChartTest {
             val plotBounds = onNodeWithTag(TestTags.BAR_CHART_PLOT).fetchSemanticsNode().boundsInRoot
             val captureBounds = onNodeWithTag("histogram-capture").fetchSemanticsNode().boundsInRoot
             val y = (plotBounds.center.y - captureBounds.top).toInt()
-            colors.forEachIndexed { index, color ->
-                val centerX = (pixels.width * (index + 0.5) / colors.size).toInt()
-                assertEquals(color, pixels[centerX, y], "Source bin $index must retain its own color in fit mode")
+            // Three merged bars cover bins 0..3, 4..7, and 8..11 and take their lower-middle bin's color.
+            listOf(1, 5, 9).forEachIndexed { bucket, centerBin ->
+                val centerX = (pixels.width * (bucket + 0.5) / 3).toInt()
+                assertEquals(
+                    expected = colors[centerBin],
+                    actual = pixels[centerX, y],
+                    message = "Merged bar $bucket must use bin $centerBin's color",
+                )
             }
-            assertEquals(Color.Blue, pixels[pixels.width / 2 - 1, y])
-            assertEquals(Color.Red, pixels[pixels.width / 2 + 1, y])
         }
 }

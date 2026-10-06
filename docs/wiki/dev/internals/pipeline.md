@@ -81,7 +81,7 @@ again.
 | 3 Clamping | yes | yes | shared | yes | yes | yes | yes | yes |
 | 4 Conversion | pass-through | pass-through | pass-through | transposes | pass-through | pass-through | none | pass-through |
 | 5 Density decision | yes | yes | shared | yes | yes | — | — | — |
-| 6 Aggregation | yes | yes | disabled | yes | yes | — | — | — |
+| 6 Aggregation | yes | yes | shared | yes | yes | — | — | — |
 | 7 Palette | frame | own colour | shared | entry | entry | entry | own file | entry |
 | 8 Chrome layout | `LineChartFrame` | `BarChartContent` | shared | `StackedBarChartFrame` | `StackedAreaChartFrame` | inline | `PieChartFrame` | inline |
 | 9 Axis planning | yes | yes | shared | yes | yes | labels only | — | range labels only |
@@ -92,9 +92,8 @@ again.
 | 14 Gesture | yes | yes | shared | yes | yes | yes | yes | yes |
 | 15 Draw | yes | yes | shared | yes | yes | yes | yes | yes |
 
-Bar and histogram share one plot, so they share every stage but aggregation: stages 1 to 5 and
-7 to 15. Their specs differ in the policy — histogram forbids negative bin heights — and only
-histogram passes `aggregate = false`, so histogram runs the density decision but never compacts.
+Bar and histogram share one plot, so they share every stage, compact aggregation included. Their
+specs differ only in the policy: histogram forbids negative bin heights.
 
 ## Recorded divergences
 

@@ -165,8 +165,7 @@ written by hand and change in the same commit.
 
 Every chart is on the seam. Bar and histogram draw the same plot, so they share
 `BarChartInternalPlot`. Their specs differ in the policy — histogram forbids negative bin heights —
-and their entries differ in what they pass the shared plot: `aggregate = false`, because compact
-histogram bins are already the aggregation, and a histogram test tag.
+and their entries pass the shared plot the same arguments apart from a histogram test tag.
 
 `convert` has a default implementation that passes the data through, so a chart whose render model
 is the caller's own data does not write one. **Stacked bar is the only chart that overrides it**,

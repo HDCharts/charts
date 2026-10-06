@@ -82,7 +82,6 @@ internal fun BarChartEntry(
                 selectedIndex = selectedIndex,
                 interactionEnabled = interactionEnabled,
                 animateOnStart = animateOnStart,
-                aggregate = true,
                 valueFormatter = valueFormatter,
                 axisValueFormatter = axisValueFormatter,
                 modifier = modifier,

@@ -15,11 +15,10 @@ module; the shared helpers are in `charts-core`.
 | Chart | Dense when | Compact view | Expanded view |
 | --- | --- | --- | --- |
 | Line, stacked area | 50 points or more | Up to 50 points, each merging a bucket of neighbors | Every point, at least 12 px apart times the zoom, scrolling |
-| Bar, stacked bar | More bars than fit at the minimum bar width | As many bars as fit, each merging a bucket of neighbors | Every bar at the minimum width times the zoom, scrolling |
-| Histogram | More bins than fit at the minimum bar width | None: every bin is squeezed into the plot | Every bin, scrolling, as for bar charts |
+| Bar, stacked bar, histogram | More bars than fit at the minimum bar width | As many bars as fit, each merging a bucket of neighbors | Every bar at the minimum width times the zoom, scrolling |
 | Live line | Never | None: the whole window is drawn | None |
 
-Line and bar charts average each bucket. A chart without interaction cannot be expanded, so it
+Line, bar, and histogram charts average each bucket. A chart without interaction cannot be expanded, so it
 stays in the compact view.
 
 ## Canvas

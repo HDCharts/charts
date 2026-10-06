@@ -27,7 +27,7 @@ fun ShowHistogram() {
 }
 ```
 
-`HistogramChartDefaults.bars(...)` keeps zero spacing and a `10.dp` minimum width for expanded scrolling. Fit mode preserves every bin, even at subpixel widths, without aggregation.
+`HistogramChartDefaults.bars(...)` keeps zero spacing and a `10.dp` minimum width. When the bins do not fit at that width, compact mode merges neighboring bins into wider bars, as `BarChart` does. Each merged bar shows the average height of its bins, and tapping it selects its middle bin. Expanding the chart scrolls through every bin.
 
 ## Gradients
 
