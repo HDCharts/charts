@@ -25,10 +25,18 @@ runs:
   steps:
     # Runs before JDK 17 so JAVA_HOME stays 17; Gradle finds this daemon JDK locally and skips foojay.
     - name: Set up JetBrains JDK 21
+      id: daemon-jdk
       uses: actions/setup-java@v6.0.1
       with:
         java-version: 21
         distribution: 'jetbrains'
+
+    # The daemon JVM lookup ignores ~/.m2/toolchains.xml, so name the JDK path explicitly.
+    - name: Point Gradle at the daemon JDK
+      shell: bash
+      run: |
+        mkdir -p ~/.gradle
+        echo "org.gradle.java.installations.paths=${{ steps.daemon-jdk.outputs.path }}" >> ~/.gradle/gradle.properties
 
     - name: Set up JDK 17
       id: java
