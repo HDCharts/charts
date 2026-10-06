@@ -116,7 +116,7 @@ internal fun BarChartContent(
         val viewportWidthPx =
             (constraints.maxWidth.toFloat() - yAxisLayout.widthPx - yAxisLayout.gapPx).coerceAtLeast(1f)
 
-        // Preserve subpixel bins in fit mode, and reduce excessive spacing in narrow parents.
+        // Reduce excessive spacing in narrow parents.
         val effectiveSpacingPx =
             if (isScrollable) {
                 spacingPx

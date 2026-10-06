@@ -48,7 +48,6 @@ internal fun BarChartImpl(
     animateOnStart: Boolean,
     selectedBarIndex: Int = NO_SELECTION,
     onValueChanged: (Int) -> Unit = {},
-    aggregate: Boolean,
     valueFormatter: ChartValueFormatter,
     axisValueFormatter: ChartValueFormatter,
 ) {
@@ -94,7 +93,7 @@ internal fun BarChartImpl(
                 sourceDataSize > maxFitBars
             }
         var denseExpanded by rememberDenseExpandedState(isDenseModeAvailable = isDenseData)
-        val compactDenseMode = aggregate && isDenseData && !denseExpanded
+        val compactDenseMode = isDenseData && !denseExpanded
         val sourceRanges =
             remember(sourceDataSize, compactDenseMode, maxFitBars) {
                 if (compactDenseMode) {

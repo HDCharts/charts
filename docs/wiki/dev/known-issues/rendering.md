@@ -13,7 +13,7 @@ Known issues and limits of the Rendering and Animation page in Chart Internals.
 
 The issues under Confirmed follow from the code, but none of them has been timed on a device.
 Before choosing which to fix first, measure frame times for an expanded line chart, a live line
-window, an expanded stacked area chart, and a collapsed histogram at 10,000, 100,000, and
+window, an expanded stacked area chart, and an expanded histogram at 10,000, 100,000, and
 1,000,000 items.
 
 ## Confirmed
@@ -51,9 +51,9 @@ Options:
 
 Stacked area charts keep one `Animatable` per point of every series; bar, histogram, and stacked
 bar charts keep one per bar. A morph launches one coroutine per point, so a two-series window of
-100,000 points makes 200,000 calls per update. A histogram, which never compacts, holds one
-`Animatable` per bin, so 1,000,000 bins make 1,000,000 of them and a coroutine for each bin that
-changes.
+100,000 points makes 200,000 calls per update. Bar and histogram compact dense data, but expanding
+brings back one `Animatable` per source bar, so 1,000,000 bins make 1,000,000 of them and a
+coroutine for each bin that changes.
 
 Confirmed by the code: `animatedValues` in `StackedAreaChart` and `StackedBarChart`, and
 `rememberBarChartAnimatedValues` in `BarChartAnimation.kt`. Line and live line charts no longer

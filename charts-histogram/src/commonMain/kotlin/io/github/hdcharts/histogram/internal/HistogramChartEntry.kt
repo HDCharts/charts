@@ -19,8 +19,8 @@ import io.github.hdcharts.core.style.clamp
 
 /**
  * Everything [io.github.hdcharts.histogram.HistogramChart] declares about its input. It draws the
- * same plot as bar from the same render model and differs in two ways: a bin height cannot be
- * negative, and compact mode does not aggregate, because the bins are already the aggregation.
+ * same plot as bar from the same render model, including compact mode, and differs only in that a
+ * bin height cannot be negative.
  */
 @InternalChartsApi
 object HistogramChartSpec : ChartSpec<BarChartStyle> {
@@ -81,7 +81,6 @@ internal fun HistogramChartEntry(
                 selectedIndex = selectedIndex,
                 interactionEnabled = interactionEnabled,
                 animateOnStart = animateOnStart,
-                aggregate = false,
                 valueFormatter = valueFormatter,
                 axisValueFormatter = axisValueFormatter,
                 modifier = modifier,
