@@ -52,10 +52,11 @@ internal fun BarChartImpl(
     valueFormatter: ChartValueFormatter,
     axisValueFormatter: ChartValueFormatter,
 ) {
-    val baseBarColor = style.bars.color.copy(alpha = style.bars.alpha)
+    // Opaque, because drawBars applies bars.alpha to solid and gradient bars alike.
+    val baseBarColor = style.bars.color.copy(alpha = 1f)
     val sourceBarColors =
-        remember(style.bars.colors, style.bars.alpha) {
-            style.bars.colors.map { color -> color.copy(alpha = style.bars.alpha) }
+        remember(style.bars.colors) {
+            style.bars.colors.map { color -> color.copy(alpha = 1f) }
         }
     val isPreview = LocalInspectionMode.current
     val sourceDataSize = chartData.barValues.size

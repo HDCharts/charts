@@ -23,7 +23,10 @@ import kotlinx.collections.immutable.toImmutableList
  * @property color The fallback bar color when [colors] is empty.
  * @property colors Optional explicit per-bar colors. Empty means every bar uses [color];
  * non-empty must match the source bar count.
- * @property alpha The alpha value applied to rendered bars. Replaces the source color alpha.
+ * @property gradient Optional gradient that paints the bars. Its span picks one gradient per bar or
+ * one across the plot. Null draws solid bars.
+ * @property alpha The alpha value applied to rendered bars. Replaces the source color alpha, and
+ * multiplies a gradient's own alphas.
  * @property space The spacing between bars.
  * @property minBarWidth The minimum width of each bar.
  */
@@ -31,6 +34,7 @@ import kotlinx.collections.immutable.toImmutableList
 data class BarBarsStyle(
     val color: Color,
     val colors: ImmutableList<Color>,
+    val gradient: ChartGradient?,
     val alpha: Float,
     val space: Dp,
     val minBarWidth: Dp,
@@ -41,12 +45,14 @@ data class BarBarsStyle(
     constructor(
         color: Color,
         colors: List<Color>,
+        gradient: ChartGradient?,
         alpha: Float,
         space: Dp,
         minBarWidth: Dp,
     ) : this(
         color = color,
         colors = colors.toImmutableList(),
+        gradient = gradient,
         alpha = alpha,
         space = space,
         minBarWidth = minBarWidth,
@@ -64,7 +70,7 @@ data class BarBarsStyle(
         }
 
     /**
-     * Returns this block with [alpha], [space] and [minBarWidth] clamped.
+     * Returns this block with [alpha], gradient alphas, [space] and [minBarWidth] clamped.
      *
      * Names every field instead of using `copy`, so a field added to the constructor fails to compile
      * here until it is dealt with.
@@ -73,6 +79,7 @@ data class BarBarsStyle(
         BarBarsStyle(
             color = color,
             colors = colors,
+            gradient = gradient?.clamp(),
             alpha = alpha.clampAlpha(),
             space = space.clampSize(fallback = StyleDefaults.barSpacing, density = density),
             minBarWidth = minBarWidth.clampSize(fallback = StyleDefaults.minBarWidth, density = density),
@@ -253,6 +260,7 @@ object BarChartDefaults {
      *
      * @param color The fallback bar color.
      * @param colors Optional explicit per-bar colors; must match bar count or be empty.
+     * @param gradient Optional gradient that paints the bars. Defaults to null, which draws solid bars.
      * @param alpha The bar alpha. Defaults to 1f.
      * @param space The spacing between bars. Defaults to 10.dp.
      * @param minBarWidth The minimum width of each bar. Defaults to 10.dp.
@@ -261,12 +269,14 @@ object BarChartDefaults {
     fun bars(
         color: Color = StyleDefaults.seriesColor,
         colors: List<Color> = emptyList(),
+        gradient: ChartGradient? = null,
         alpha: Float = StyleDefaults.seriesAlpha,
         space: Dp = StyleDefaults.barSpacing,
         minBarWidth: Dp = StyleDefaults.minBarWidth,
     ) = BarBarsStyle(
         color = color,
         colors = colors,
+        gradient = gradient,
         alpha = alpha,
         space = space,
         minBarWidth = minBarWidth,

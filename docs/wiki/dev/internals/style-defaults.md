@@ -24,7 +24,8 @@ BarChartDefaults.style(
 ```
 
 - **Nesting stops at three levels:** `style`, then a block, then axis labels. Axis labels are the
-  only third level, and all Cartesian charts share them as `AxisLabelStyle`.
+  only third level, and all Cartesian charts share them as `AxisLabelStyle`. Values passed into a
+  block, such as `Color`, `TextStyle` and `ChartGradient`, are not levels.
 - **Every block gets a factory on the chart's own object**, even when the block type is shared.
   `HistogramChartDefaults` forwards `grid`, `axis`, `xLabels`, `yLabels` and `selection` to
   `BarChartDefaults`, and its `range` keeps a zero minimum.

@@ -26,5 +26,5 @@ class BarStyleBlocksTest {
     }
 
     private fun barsStyle(colors: List<Color>): BarBarsStyle =
-        BarBarsStyle(color = base, colors = colors, alpha = 0.4f, space = 10.dp, minBarWidth = 10.dp)
+        BarBarsStyle(color = base, colors = colors, gradient = null, alpha = 0.4f, space = 10.dp, minBarWidth = 10.dp)
 }

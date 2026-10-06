@@ -25,6 +25,8 @@ import io.github.hdcharts.core.model.ChartValueFormatters
 import io.github.hdcharts.core.model.staticChartSelection
 import io.github.hdcharts.core.model.toChartData
 import io.github.hdcharts.core.style.BarChartDefaults
+import io.github.hdcharts.core.style.ChartGradients
+import io.github.hdcharts.core.style.GradientSpan
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -223,6 +225,45 @@ class BarChartTest {
 
             onNodeWithTag(TestTags.CHART_ERROR).assertIsDisplayed()
             onNodeWithText("${expectedError}\n").assertIsDisplayed()
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun barChart_withOneStopGradient_drawsTheChart() =
+        runComposeUiTest {
+            val gradient = ChartGradients.vertical(colors = listOf(Color.Red))
+            setContent {
+                val bars = BarChartDefaults.bars(gradient = gradient)
+                BarChart(
+                    data = data,
+                    title = TITLE,
+                    style = BarChartDefaults.style(bars = bars),
+                )
+            }
+
+            onNodeWithTag(TestTags.CHART_ERROR).assertDoesNotExist()
+            onNodeWithTag(TestTags.BAR_CHART_PLOT).assertIsDisplayed()
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun barChart_withGradient_drawsTheChart() =
+        runComposeUiTest {
+            val gradient =
+                ChartGradients.horizontal(
+                    colors = listOf(Color.Red, Color.Blue),
+                    span = GradientSpan.Plot,
+                )
+            setContent {
+                val bars = BarChartDefaults.bars(gradient = gradient)
+                BarChart(
+                    data = data,
+                    title = TITLE,
+                    style = BarChartDefaults.style(bars = bars),
+                )
+            }
+
+            onNodeWithTag(TestTags.BAR_CHART_PLOT).assertIsDisplayed()
         }
 
     @OptIn(ExperimentalTestApi::class)

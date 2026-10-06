@@ -28,3 +28,8 @@ fun ShowHistogram() {
 ```
 
 `HistogramChartDefaults.bars(...)` keeps zero spacing and a `10.dp` minimum width for expanded scrolling. Fit mode preserves every bin, even at subpixel widths, without aggregation.
+
+## Gradients
+
+Bars take a linear gradient through `HistogramChartDefaults.bars(gradient = ...)`,
+covered in [Gradients](/{{version}}/wiki/gradients).

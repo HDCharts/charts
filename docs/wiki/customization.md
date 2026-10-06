@@ -17,12 +17,7 @@ import androidx.compose.ui.unit.sp
 import io.github.hdcharts.bar.BarChart
 import io.github.hdcharts.core.model.ChartValueFormatters
 import io.github.hdcharts.core.model.toChartData
-import io.github.hdcharts.core.style.AxisLabelStyle
-import io.github.hdcharts.core.style.BarAxisStyle
-import io.github.hdcharts.core.style.BarBarsStyle
 import io.github.hdcharts.core.style.BarChartDefaults
-import io.github.hdcharts.core.style.BarGridStyle
-import io.github.hdcharts.core.style.BarSelectionStyle
 
 @Composable
 private fun ShowStyledBar() {
@@ -31,35 +26,27 @@ private fun ShowStyledBar() {
         seriesName = "Net cash flow",
     )
 
-    val style = BarChartDefaults.style(
-        bars = BarBarsStyle(
-            color = Color(0xFF0F766E),
-            colors = emptyList(),
-            alpha = 0.78f,
-            space = 14.dp,
-            minBarWidth = 10.dp,
-        ),
-        grid = BarGridStyle(visible = true, steps = 5, color = Color(0xFF94A3B8), lineWidth = 1.dp),
-        selection = BarSelectionStyle(
-            visible = true,
-            color = Color(0xFFEA580C),
-            width = 1.dp,
-            unselectedAlpha = 0.7f,
-        ),
-        axis = BarAxisStyle(
-            visible = true,
-            color = Color.Gray,
-            lineWidth = 1.dp,
-            yLabels = AxisLabelStyle(visible = true, color = Color.Gray, size = 11.sp, maxCount = 6),
-            xLabels = AxisLabelStyle(visible = true, color = Color.Gray, size = 11.sp, maxCount = 6),
-        ),
+    val bars = BarChartDefaults.bars(
+        color = Color(0xFF0F766E),
+        alpha = 0.78f,
+        space = 14.dp,
+        minBarWidth = 10.dp,
     )
+    val grid = BarChartDefaults.grid(steps = 5, color = Color(0xFF94A3B8), lineWidth = 1.dp)
+    val selection = BarChartDefaults.selection(
+        color = Color(0xFFEA580C),
+        width = 1.dp,
+        unselectedAlpha = 0.7f,
+    )
+    val xLabels = BarChartDefaults.xLabels(color = Color.Gray, size = 11.sp, maxCount = 6)
+    val yLabels = BarChartDefaults.yLabels(color = Color.Gray, size = 11.sp, maxCount = 6)
+    val axis = BarChartDefaults.axis(color = Color.Gray, lineWidth = 1.dp, xLabels = xLabels, yLabels = yLabels)
 
     BarChart(
         data = data,
         modifier = Modifier.background(Color(0xFFF8FAFC), RoundedCornerShape(18.dp)).padding(20.dp),
         title = "Daily Net Cash Flow",
-        style = style,
+        style = BarChartDefaults.style(bars = bars, grid = grid, axis = axis, selection = selection),
         valueFormatter = ChartValueFormatters.prefix("$"),
     )
 }
@@ -68,6 +55,8 @@ private fun ShowStyledBar() {
 Chart chrome (background, shape, shadow, and outer padding) lives on the caller-supplied `modifier`; sizing is fully modifier-driven. The `chartContainerStyle` block only carries `contentPadding` and the title text style.
 
 Here `valueFormatter` adds currency to selected raw values only; Y ticks keep the independent `axisValueFormatter` default. Titles do not generate labels: omitting `categories` hides X labels and leaves only the formatted value in selected readouts.
+
+Bar and histogram bars can also take a gradient, covered in [Gradients](/{{version}}/wiki/gradients).
 
 ## Axis Labels
 

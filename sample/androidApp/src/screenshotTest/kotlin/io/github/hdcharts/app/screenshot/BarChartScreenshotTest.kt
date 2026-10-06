@@ -1,6 +1,7 @@
 package io.github.hdcharts.app.screenshot
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import com.android.tools.screenshot.PreviewTest
 import io.github.hdcharts.app.screenshot.shared.SCREENSHOT_ANIMATE_ON_START
 import io.github.hdcharts.app.screenshot.shared.SCREENSHOT_BAR_SAMPLE_USE_CASE
@@ -8,8 +9,12 @@ import io.github.hdcharts.app.screenshot.shared.ScreenshotChartSurface
 import io.github.hdcharts.app.screenshot.shared.ScreenshotPreview
 import io.github.hdcharts.app.screenshot.shared.categoryIndex
 import io.github.hdcharts.bar.BarChart
+import io.github.hdcharts.core.model.rememberChartSelection
 import io.github.hdcharts.core.model.staticChartSelection
 import io.github.hdcharts.core.style.BarChartDefaults
+import io.github.hdcharts.core.style.ChartGradient
+import io.github.hdcharts.core.style.ChartGradients
+import io.github.hdcharts.core.style.GradientSpan
 import io.github.hdcharts.sampleshared.theme.LocalChartColors
 import io.github.hdcharts.sampleshared.theme.seriesColor
 
@@ -25,6 +30,9 @@ private const val FIXED_RANGE_MIN = -60.0
 private const val FIXED_RANGE_MAX = 150.0
 private const val POSITIVE_COLOR_INDEX = 6
 private const val NEGATIVE_COLOR_INDEX = 3
+private const val GRADIENT_START_COLOR_INDEX = 0
+private const val GRADIENT_END_COLOR_INDEX = 4
+private const val FADE_END_ALPHA = 0.15f
 
 @PreviewTest
 @ScreenshotPreview
@@ -142,6 +150,79 @@ fun BarChartBarColorsPreview() {
             title = data.series.single().name,
             style = BarChartDefaults.style(bars = BarChartDefaults.bars(colors = barColors)),
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
+        )
+    }
+}
+
+/** The same gradient on every bar; bars below zero mirror it, so each runs from its end to the baseline. */
+@PreviewTest
+@ScreenshotPreview
+@Composable
+fun BarChartGradientShapePreview() {
+    GradientBarChart(gradient = { colors -> ChartGradients.vertical(colors = colors, span = GradientSpan.Shape) })
+}
+
+/** One gradient across the plot: the first bar takes the start color and the last bar the end color. */
+@PreviewTest
+@ScreenshotPreview
+@Composable
+fun BarChartGradientPlotHorizontalPreview() {
+    GradientBarChart(gradient = { colors -> ChartGradients.horizontal(colors = colors, span = GradientSpan.Plot) })
+}
+
+/** One gradient down the plot: taller bars reach further into the start color. */
+@PreviewTest
+@ScreenshotPreview
+@Composable
+fun BarChartGradientPlotVerticalPreview() {
+    GradientBarChart(gradient = { colors -> ChartGradients.vertical(colors = colors, span = GradientSpan.Plot) })
+}
+
+/** Each bar fades from its own color toward the baseline. */
+@PreviewTest
+@ScreenshotPreview
+@Composable
+fun BarChartGradientFadePreview() {
+    GradientBarChart(gradient = { ChartGradients.fade(endAlpha = FADE_END_ALPHA) })
+}
+
+/** Selection dims the other bars over their gradient. */
+@PreviewTest
+@ScreenshotPreview
+@Composable
+fun BarChartGradientSelectedBarPreview() {
+    GradientBarChart(
+        gradient = { colors -> ChartGradients.vertical(colors = colors, span = GradientSpan.Shape) },
+        selectionLabel = BAR_SELECTION_LABEL,
+    )
+}
+
+/** Builds [gradient] from two theme colors inside the surface, where the chart colors are provided. */
+@Composable
+private fun GradientBarChart(
+    gradient: (colors: List<Color>) -> ChartGradient,
+    selectionLabel: String? = null,
+) {
+    ScreenshotChartSurface {
+        val data = SCREENSHOT_BAR_SAMPLE_USE_CASE.deterministic(signed = true)
+        val chartColors = LocalChartColors.current
+        val colors =
+            listOf(
+                chartColors.seriesColor(index = GRADIENT_START_COLOR_INDEX),
+                chartColors.seriesColor(index = GRADIENT_END_COLOR_INDEX),
+            )
+        BarChart(
+            data = data,
+            title = data.series.single().name,
+            style = BarChartDefaults.style(bars = BarChartDefaults.bars(gradient = gradient(colors))),
+            animateOnStart = SCREENSHOT_ANIMATE_ON_START,
+            interactionEnabled = selectionLabel == null,
+            selection =
+                if (selectionLabel == null) {
+                    rememberChartSelection()
+                } else {
+                    staticChartSelection(index = data.categoryIndex(label = selectionLabel))
+                },
         )
     }
 }

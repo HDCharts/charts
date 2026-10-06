@@ -24,12 +24,14 @@ class BarStyleBlocksClampTest {
             BarBarsStyle(
                 color = Color.Red,
                 colors = persistentListOf(),
+                gradient = ChartGradients.fade(endAlpha = 2f),
                 alpha = Float.NaN,
                 space = Dp.Infinity,
                 minBarWidth = (-1f).dp,
             ).clamp(density)
 
         assertEquals(expected = 1f, actual = clamped.alpha)
+        assertEquals(expected = ChartGradients.fade(endAlpha = 1f), actual = clamped.gradient)
         assertEquals(expected = with(density) { MAX_SIZE_PX.toDp() }, actual = clamped.space)
         assertEquals(expected = 0.dp, actual = clamped.minBarWidth)
     }
