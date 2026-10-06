@@ -8,12 +8,14 @@ import io.github.hdcharts.app.gif.docs.LineViewModel
 import io.github.hdcharts.app.gif.docs.MultiLineViewModel
 import io.github.hdcharts.app.gif.docs.PieViewModel
 import io.github.hdcharts.app.gif.docs.RadarViewModel
+import io.github.hdcharts.app.gif.docs.RingGaugeViewModel
 import io.github.hdcharts.app.gif.docs.StackedAreaViewModel
 import io.github.hdcharts.app.gif.docs.StackedBarViewModel
 import io.github.hdcharts.app.screenshot.shared.DocsGifLandscapePreview
 import io.github.hdcharts.app.screenshot.shared.ScreenshotSurface
 import io.github.hdcharts.bar.BarChart
 import io.github.hdcharts.core.model.ChartValueFormatters
+import io.github.hdcharts.gauge.RingGaugeChart
 import io.github.hdcharts.histogram.HistogramChart
 import io.github.hdcharts.line.LineChart
 import io.github.hdcharts.pie.PieChart
@@ -111,6 +113,20 @@ fun RadarDocsGifScenarioPreview() {
         RadarChart(
             data = data,
             title = data.series.single().name,
+        )
+    }
+}
+
+@PreviewTest
+@DocsGifLandscapePreview
+@Composable
+fun RingGaugeDocsGifScenarioPreview() {
+    ScreenshotSurface {
+        val viewModel = RingGaugeViewModel()
+        RingGaugeChart(
+            data = viewModel.data.value,
+            title = viewModel.title,
+            valueFormatter = viewModel.valueFormatter,
         )
     }
 }

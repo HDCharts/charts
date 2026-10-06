@@ -57,17 +57,17 @@ rule reads the same way in every chart.
 | Rule | Message | Charts |
 | --- | --- | --- |
 | No series | At least one series is required. | Line, radar, stacked bar, stacked area |
-| Wrong series count | Exactly one series is required; got 2. | Bar, histogram, pie |
-| Too few values | At least 2 values are required. (3 on radar) | All |
-| Category count | Category count (3) must match value count (4). | Bar, histogram, line, pie, radar, stacked bar, stacked area |
+| Wrong series count | Exactly one series is required; got 2. | Bar, histogram, pie, ring gauge |
+| Too few values | At least 2 values are required. (3 on radar, 1 on ring gauge) | All |
+| Category count | Category count (3) must match value count (4). | Bar, histogram, line, pie, radar, ring gauge, stacked bar, stacked area |
 | Color count | Color count (2) must match series count (3). | All with a color list |
 | Series length | Series 1 is not aligned with the first series. | Line, radar, stacked bar, stacked area |
 | Not finite | Series 0 contains a non-finite value. | Line, radar, stacked bar, stacked area |
-| Not finite | Value at index 2 is not finite. | Bar, histogram, pie |
+| Not finite | Value at index 2 is not finite. | Bar, histogram, pie, ring gauge |
 | Negative | Series 0 contains a negative value. | Stacked bar, stacked area |
 | Negative | Value at index 2 is negative. | Histogram, pie |
 
-The color message names what the colors are matched to: `value` on bar, histogram and pie, and
+The color message names what the colors are matched to: `value` on bar, histogram, pie and ring gauge, and
 `series` on line, radar, and the stacked charts.
 
 Charts that draw several series report a problem once per series. Charts with one series report
@@ -95,7 +95,8 @@ charts with the same policy report the same problems in the same sequence. `Char
 the only caller of the four functions above, and Entry Seam and Chart Policy has which checks each
 chart enables.
 
-The minimums are `ValidationErrors.MIN_VALUES` (2) and `ValidationErrors.MIN_RADAR_VALUES` (3).
+The minimums are `ValidationErrors.MIN_VALUES` (2), `ValidationErrors.MIN_RADAR_VALUES` (3), and
+`ValidationErrors.MIN_RING_GAUGE_VALUES` (1).
 With no series, `validateSeries` reports only that error, and `validateSingleSeries` stops at the
 first shape problem.
 

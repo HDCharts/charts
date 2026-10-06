@@ -11,11 +11,15 @@ object ValidationErrors {
     /** Fewest values a radar chart needs to draw a polygon. */
     const val MIN_RADAR_VALUES: Int = 3
 
+    /** Fewest values a ring gauge needs: one ring is a valid gauge. */
+    const val MIN_RING_GAUGE_VALUES: Int = 1
+
     fun noSeries(): String = "At least one series is required."
 
     fun exactlyOneSeries(count: Int): String = "Exactly one series is required; got $count."
 
-    fun tooFewValues(min: Int): String = "At least $min values are required."
+    fun tooFewValues(min: Int): String =
+        if (min == 1) "At least one value is required." else "At least $min values are required."
 
     fun categoryCountMismatch(
         categories: Int,

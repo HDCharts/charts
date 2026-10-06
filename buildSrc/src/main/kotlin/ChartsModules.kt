@@ -11,6 +11,7 @@ object ChartsModules {
             ":charts-stacked-bar",
             ":charts-stacked-area",
             ":charts-radar",
+            ":charts-gauge",
             ":charts",
         )
 

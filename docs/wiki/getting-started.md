@@ -36,6 +36,7 @@ commonMain.dependencies {
     implementation("io.github.hdcharts:stacked-bar:<version>")
     implementation("io.github.hdcharts:stacked-area:<version>")
     implementation("io.github.hdcharts:radar:<version>")
+    implementation("io.github.hdcharts:gauge:<version>")
 }
 ```
 
@@ -53,6 +54,7 @@ dependencies {
     implementation("io.github.hdcharts:stacked-bar")
     implementation("io.github.hdcharts:stacked-area")
     implementation("io.github.hdcharts:radar")
+    implementation("io.github.hdcharts:gauge")
 }
 ```
 

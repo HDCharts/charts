@@ -16,8 +16,8 @@ selected title and legend values come from `selectedTitle` and `selectedLegendVa
 ## Rules
 
 1. **The legend lists what color tells apart.** That is the series for line, live line, radar,
-   stacked bar and stacked area, and the categories for pie. Bar and histogram use one color, so they
-   have no legend.
+   stacked bar and stacked area, and the categories for pie and ring gauge. Bar and histogram use one
+   color, so they have no legend.
 2. **A legend needs two or more items and at least one name.** One item needs no key, and a list of
    blank names tells the reader nothing.
 3. **`legend.visible = false` always hides it.** Every chart with a legend has a `legend` style
@@ -46,6 +46,7 @@ selected title and legend values come from `selectedTitle` and `selectedLegendVa
 | Radar | Series names | 2+ series, a non-blank name, and `legend.visible` | Same as line | Several series: `Name - value` |
 | Stacked bar | Segment names | 2+ segments, a non-blank name, and `legend.visible` | Same as line | Several segments: `Name - value` |
 | Stacked area | Series names | 2+ series, a non-blank name, and `legend.visible` | Same as line | Several series: `Name - value` |
+| Ring gauge | Categories | 2+ categories, a non-blank name, and `legend.visible` | `Category: value`, or the value without a category | No change |
 
 ## Known Issues
 

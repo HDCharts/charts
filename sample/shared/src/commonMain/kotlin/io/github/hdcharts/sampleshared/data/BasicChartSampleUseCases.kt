@@ -72,3 +72,17 @@ interface HistogramSampleUseCase {
         range: IntRange,
     ): ChartData
 }
+
+/** RingGaugeChartScreenshotTest only, until the gauge has a demo. */
+interface RingGaugeSampleUseCase {
+    fun initialRingGaugeSample(): RingGaugeSampleData
+
+    /** One value, drawn as a single ring. */
+    fun initialSingleRingGaugeSample(): RingGaugeSampleData
+
+    /** Enough rings that they get thinner. */
+    fun initialManyRingsGaugeSample(): RingGaugeSampleData
+
+    /** A range below zero, with one value past its end. */
+    fun initialSignedRangeRingGaugeSample(): RingGaugeSampleData
+}

@@ -11,6 +11,7 @@ object Config {
     const val ARTIFACT_STACKED_BAR_ID = "stacked-bar"
     const val ARTIFACT_STACKED_AREA_ID = "stacked-area"
     const val ARTIFACT_RADAR_ID = "radar"
+    const val ARTIFACT_GAUGE_ID = "gauge"
     const val ARTIFACT_BOM_ID = "bom"
     const val INCEPTION_YEAR = "2024"
     const val PROJECT_URL = "https://github.com/HDCharts/charts"
@@ -38,5 +39,6 @@ object Config {
     const val CHARTS_STACKED_BAR_NAMESPACE = "$GROUP_ID.charts.stackedbar"
     const val CHARTS_STACKED_AREA_NAMESPACE = "$GROUP_ID.charts.stackedarea"
     const val CHARTS_RADAR_NAMESPACE = "$GROUP_ID.charts.radar"
+    const val CHARTS_GAUGE_NAMESPACE = "$GROUP_ID.charts.gauge"
     const val SAMPLE_SHARED_NAMESPACE = "io.github.hdcharts.sampleshared"
 }
