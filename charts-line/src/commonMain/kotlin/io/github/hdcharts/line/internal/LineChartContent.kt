@@ -472,7 +472,8 @@ internal fun LineChartContent(
                                 }
                             }.then(
                                 if (isDenseMode) {
-                                    Modifier.horizontalScroll(state = scrollState, enabled = interactionEnabled)
+                                    // Touch scrolling comes from the gesture area above; a second handler here fights it.
+                                    Modifier.horizontalScroll(state = scrollState, enabled = false)
                                 } else {
                                     Modifier
                                 },
