@@ -38,6 +38,7 @@ object RadarChartSpec : ChartSpec<RadarChartStyle> {
         ChartPolicy(
             minValues = ValidationErrors.MIN_RADAR_VALUES,
             allowNegative = true,
+            stacksValues = false,
             singleSeries = false,
             hasAxis = false,
             hasFixedRange = false,

@@ -12,6 +12,8 @@ import io.github.hdcharts.core.style.AxisLabelStyle
  *
  * @property minValues Fewest values a point needs. Passed to whichever series check runs.
  * @property allowNegative Whether a negative value is an error.
+ * @property stacksValues Whether the chart sums the series at each index, so a sum that overflows is
+ *   an error. Checked by [validateSeries] only.
  * @property singleSeries Whether the chart needs exactly one series. Checked by
  *   [validateSingleSeries], which also matches the color count against the value count, so a policy
  *   with this set declares no [colorsMatch].
@@ -28,6 +30,7 @@ import io.github.hdcharts.core.style.AxisLabelStyle
 data class ChartPolicy(
     val minValues: Int,
     val allowNegative: Boolean,
+    val stacksValues: Boolean,
     val singleSeries: Boolean,
     val hasAxis: Boolean,
     val hasFixedRange: Boolean,
@@ -81,6 +84,7 @@ fun ChartPolicy.errorsFor(
                 data = data,
                 minValues = minValues,
                 allowNegative = allowNegative,
+                stacksValues = stacksValues,
                 colorCount = inputs.colorCount,
                 expectedColors = colorsMatch?.invoke(data),
             )

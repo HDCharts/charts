@@ -117,6 +117,7 @@ class ChartEntryTest {
             ChartPolicy(
                 minValues = ValidationErrors.MIN_VALUES,
                 allowNegative = true,
+                stacksValues = false,
                 singleSeries = false,
                 hasAxis = false,
                 hasFixedRange = false,

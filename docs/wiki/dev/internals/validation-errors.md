@@ -40,8 +40,8 @@ Three consequences worth stating, because each has been got wrong:
 
 ## What is an error
 
-- **Data problems:** too few values, series of different lengths, values that are not finite, and
-  negative values in charts that need positive ones.
+- **Data problems:** too few values, series of different lengths, values that are not finite,
+  negative values in charts that need positive ones, and stacked totals that overflow.
 - **Counts that must match:** categories that do not match the value count, and colors that do not
   match what they color.
 - **Settings with no fallback:** non-finite range bounds and invalid axis label settings.
@@ -66,6 +66,7 @@ rule reads the same way in every chart.
 | Not finite | Value at index 2 is not finite. | Bar, histogram, pie, ring gauge |
 | Negative | Series 0 contains a negative value. | Stacked bar, stacked area |
 | Negative | Value at index 2 is negative. | Histogram, pie |
+| Stacked total | Stacked total at index 2 is not finite. | Stacked bar, stacked area |
 
 The color message names what the colors are matched to: `value` on bar, histogram, pie and ring gauge, and
 `series` on line, radar, and the stacked charts.
@@ -82,7 +83,7 @@ Chart Policy.
 
 | Function | Checks | Charts |
 | --- | --- | --- |
-| `validateSeries` | No series, too few values, category count, series length, non-finite values, negative values with `allowNegative = false`, and the series color count | Line, radar, stacked bar, stacked area |
+| `validateSeries` | No series, too few values, category count, series length, non-finite values, negative values with `allowNegative = false`, totals that overflow with `stacksValues = true`, and the series color count | Line, radar, stacked bar, stacked area |
 | `validateSingleSeries` | One series, too few values, color count, category count, and each bad value | Bar, histogram, pie |
 | `validateValues` | Each non-finite value, and each negative value with `allowNegative = false` | Inside `validateSingleSeries` |
 | `validateColorCount` | A color list that does not match what it colors. A null expectation skips the check, and so does a style that sets no colors | Inside the two series checks |

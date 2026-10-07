@@ -417,6 +417,25 @@ class StackedAreaChartTest {
 
     @OptIn(ExperimentalTestApi::class)
     @Test
+    fun stackedAreaChart_withOverflowingTotal_displaysError() =
+        runComposeUiTest {
+            val data =
+                chartDataOf(
+                    categories = listOf("Q1", "Q2"),
+                    ChartSeries(name = "Series A", values = listOf(1.0, Double.MAX_VALUE)),
+                    ChartSeries(name = "Series B", values = listOf(2.0, Double.MAX_VALUE)),
+                )
+
+            setContent {
+                StackedAreaChart(data = data)
+            }
+
+            onNodeWithTag(TestTags.CHART_ERROR).assertIsDisplayed()
+            onNodeWithText("Stacked total at index 1 is not finite.\n").assertIsDisplayed()
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
     fun stackedAreaChart_withNegativeData_displaysError() =
         runComposeUiTest {
             val data =

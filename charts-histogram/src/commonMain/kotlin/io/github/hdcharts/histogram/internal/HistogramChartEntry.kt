@@ -28,6 +28,7 @@ object HistogramChartSpec : ChartSpec<BarChartStyle> {
         ChartPolicy(
             minValues = ValidationErrors.MIN_VALUES,
             allowNegative = false,
+            stacksValues = false,
             singleSeries = true,
             hasAxis = true,
             hasFixedRange = true,

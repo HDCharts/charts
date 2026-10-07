@@ -23,19 +23,6 @@ Options:
 
 ## Confirmed
 
-### Overflowing stacked totals print Infinity and NaN
-
-Stacked totals of finite values can overflow to infinity. The Y labels then read `Infinity`, and
-the bottom label reads `NaN`, because infinity × 0 is NaN.
-
-Confirmed by `buildNumericYAxisTicks` for `0.0..Double.POSITIVE_INFINITY`: the first four of five
-ticks are infinity and the last is NaN. Validation checks each stacked value, not the totals.
-
-Options:
-
-- Return `max` and `min` directly for the first and last tick, so the bottom label reads the
-  minimum.
-
 ### Line charts cannot show ranges wider than Double.MAX_VALUE
 
 For a range such as `-1e308..1e308`, `normalizeByMinMax` and `baselineYForRange` compute

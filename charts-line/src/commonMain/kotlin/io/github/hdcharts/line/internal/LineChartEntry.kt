@@ -24,6 +24,7 @@ object LineChartSpec : ChartSpec<LineChartStyle> {
         ChartPolicy(
             minValues = ValidationErrors.MIN_VALUES,
             allowNegative = true,
+            stacksValues = false,
             singleSeries = false,
             hasAxis = true,
             hasFixedRange = true,

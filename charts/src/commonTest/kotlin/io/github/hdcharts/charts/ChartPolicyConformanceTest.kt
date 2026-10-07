@@ -41,6 +41,7 @@ class ChartPolicyConformanceTest {
     private data class PolicyRow(
         val minValues: Int,
         val allowNegative: Boolean,
+        val stacksValues: Boolean,
         val singleSeries: Boolean,
         val hasAxis: Boolean,
         val hasFixedRange: Boolean,
@@ -79,6 +80,7 @@ class ChartPolicyConformanceTest {
                     PolicyRow(
                         minValues = ValidationErrors.MIN_VALUES,
                         allowNegative = true,
+                        stacksValues = false,
                         singleSeries = false,
                         hasAxis = true,
                         hasFixedRange = true,
@@ -88,6 +90,7 @@ class ChartPolicyConformanceTest {
                     PolicyRow(
                         minValues = ValidationErrors.MIN_VALUES,
                         allowNegative = true,
+                        stacksValues = false,
                         singleSeries = true,
                         hasAxis = true,
                         hasFixedRange = true,
@@ -97,6 +100,7 @@ class ChartPolicyConformanceTest {
                     PolicyRow(
                         minValues = ValidationErrors.MIN_VALUES,
                         allowNegative = false,
+                        stacksValues = false,
                         singleSeries = true,
                         hasAxis = true,
                         hasFixedRange = true,
@@ -106,6 +110,7 @@ class ChartPolicyConformanceTest {
                     PolicyRow(
                         minValues = ValidationErrors.MIN_RADAR_VALUES,
                         allowNegative = true,
+                        stacksValues = false,
                         singleSeries = false,
                         hasAxis = false,
                         hasFixedRange = false,
@@ -115,6 +120,7 @@ class ChartPolicyConformanceTest {
                     PolicyRow(
                         minValues = ValidationErrors.MIN_VALUES,
                         allowNegative = false,
+                        stacksValues = true,
                         singleSeries = false,
                         hasAxis = true,
                         hasFixedRange = false,
@@ -124,6 +130,7 @@ class ChartPolicyConformanceTest {
                     PolicyRow(
                         minValues = ValidationErrors.MIN_VALUES,
                         allowNegative = false,
+                        stacksValues = true,
                         singleSeries = false,
                         hasAxis = true,
                         hasFixedRange = false,
@@ -133,6 +140,7 @@ class ChartPolicyConformanceTest {
                     PolicyRow(
                         minValues = ValidationErrors.MIN_VALUES,
                         allowNegative = false,
+                        stacksValues = false,
                         singleSeries = true,
                         hasAxis = false,
                         hasFixedRange = false,
@@ -142,6 +150,7 @@ class ChartPolicyConformanceTest {
                     PolicyRow(
                         minValues = ValidationErrors.MIN_RING_GAUGE_VALUES,
                         allowNegative = true,
+                        stacksValues = false,
                         singleSeries = true,
                         hasAxis = false,
                         hasFixedRange = true,
@@ -153,6 +162,7 @@ class ChartPolicyConformanceTest {
             PolicyRow(
                 minValues = minValues,
                 allowNegative = allowNegative,
+                stacksValues = stacksValues,
                 singleSeries = singleSeries,
                 hasAxis = hasAxis,
                 hasFixedRange = hasFixedRange,

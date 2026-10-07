@@ -43,6 +43,8 @@ object ValidationErrors {
 
     fun negativeValue(index: Int): String = "Value at index $index is negative."
 
+    fun nonFiniteStackedTotal(index: Int): String = "Stacked total at index $index is not finite."
+
     fun missingAxisLabels(): String = "Axis label styles are missing."
 
     fun nonFiniteRange(): String = "Range bounds must be finite."
@@ -52,7 +54,7 @@ object ValidationErrors {
  * Returns the errors of charts that draw aligned series: no series, fewer than [minValues] values, a
  * category count that does not match, misaligned series, non-finite values, and [colorCount] colors
  * that do not match [expectedColors]. With [allowNegative] set to `false`, negative values are
- * errors.
+ * errors. With [stacksValues] set, the first index whose sum across the series overflows is an error.
  *
  * [expectedColors] is null when the chart's policy skips the color check, which is how a chart whose
  * color count depends on the data says so.
@@ -62,6 +64,7 @@ fun validateSeries(
     data: ChartData,
     minValues: Int,
     allowNegative: Boolean,
+    stacksValues: Boolean,
     colorCount: Int,
     expectedColors: Int?,
 ): List<String> {
@@ -75,12 +78,26 @@ fun validateSeries(
     if (data.categories.isNotEmpty() && data.categories.size != valueCount) {
         errors += ValidationErrors.categoryCountMismatch(categories = data.categories.size, values = valueCount)
     }
+    var summable = true
     data.series.forEachIndexed { index, series ->
-        if (series.values.size != valueCount) errors += ValidationErrors.seriesNotAligned(series = index)
-        if (series.values.any { !it.isFinite() }) errors += ValidationErrors.nonFiniteSeriesValue(series = index)
+        if (series.values.size != valueCount) {
+            errors += ValidationErrors.seriesNotAligned(series = index)
+            summable = false
+        }
+        if (series.values.any { !it.isFinite() }) {
+            errors += ValidationErrors.nonFiniteSeriesValue(series = index)
+            summable = false
+        }
         if (!allowNegative && series.values.any { it < 0.0 }) {
             errors += ValidationErrors.negativeSeriesValue(series = index)
         }
+    }
+    if (stacksValues && summable) {
+        val overflowIndex =
+            (0 until valueCount).firstOrNull { index ->
+                !data.series.sumOf { series -> series.values[index] }.isFinite()
+            }
+        if (overflowIndex != null) errors += ValidationErrors.nonFiniteStackedTotal(index = overflowIndex)
     }
     errors += validateColorCount(colors = colorCount, expected = expectedColors, target = "series")
     return errors

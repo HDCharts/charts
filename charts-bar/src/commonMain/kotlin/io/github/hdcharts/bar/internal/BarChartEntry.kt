@@ -29,6 +29,7 @@ object BarChartSpec : ChartSpec<BarChartStyle> {
         ChartPolicy(
             minValues = ValidationErrors.MIN_VALUES,
             allowNegative = true,
+            stacksValues = false,
             singleSeries = true,
             hasAxis = true,
             hasFixedRange = true,
