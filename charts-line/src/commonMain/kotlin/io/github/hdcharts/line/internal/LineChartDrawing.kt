@@ -10,6 +10,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipRect
 import io.github.hdcharts.core.internal.ANIMATION_TARGET
 import io.github.hdcharts.core.internal.NO_SELECTION
+import io.github.hdcharts.core.internal.animation.blendInto
 import io.github.hdcharts.core.internal.axis.visibleIndexRange
 import io.github.hdcharts.core.internal.bezier.CUBIC_CONTROL_POINT_COUNT
 import io.github.hdcharts.core.internal.bezier.cubicControlPointsInto

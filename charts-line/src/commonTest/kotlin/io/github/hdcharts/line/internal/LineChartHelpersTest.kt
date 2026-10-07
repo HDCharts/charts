@@ -569,56 +569,6 @@ class LineChartHelpersTest {
     }
 
     @Test
-    fun blendInto_morphHalfway_halvesTheDistanceFromStartToTarget() {
-        val buffer = FloatArray(4)
-
-        val count =
-            blendInto(
-                into = buffer,
-                from = listOf(0f, 0.5f, 1f),
-                to = listOf(1f, 1f, 0f),
-                progress = 0.5f,
-            )
-
-        assertEquals(expected = 3, actual = count)
-        assertEquals(expected = 0.5f, actual = buffer[0])
-        assertEquals(expected = 0.75f, actual = buffer[1])
-        assertEquals(expected = 0.5f, actual = buffer[2])
-    }
-
-    @Test
-    fun blendInto_atTarget_writesTheTargetValues() {
-        val buffer = FloatArray(3)
-
-        val count =
-            blendInto(
-                into = buffer,
-                from = listOf(0f, 0f, 0f),
-                to = listOf(0.25f, 0.5f, 1f),
-                progress = 1f,
-            )
-
-        assertEquals(expected = 3, actual = count)
-        assertContentEquals(expected = floatArrayOf(0.25f, 0.5f, 1f), actual = buffer)
-    }
-
-    @Test
-    fun blendInto_smallerBuffer_writesOnlyWhatFits() {
-        val buffer = FloatArray(2)
-
-        val count =
-            blendInto(
-                into = buffer,
-                from = emptyList(),
-                to = listOf(1f, 2f, 3f, 4f),
-                progress = 1f,
-            )
-
-        assertEquals(expected = 2, actual = count)
-        assertContentEquals(expected = floatArrayOf(1f, 2f), actual = buffer)
-    }
-
-    @Test
     fun copyInto_scalesIntoTheBuffer() {
         val buffer = FloatArray(3)
 

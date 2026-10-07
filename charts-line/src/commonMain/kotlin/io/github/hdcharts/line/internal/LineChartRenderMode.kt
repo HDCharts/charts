@@ -3,6 +3,7 @@ package io.github.hdcharts.line.internal
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.TweenSpec
 import io.github.hdcharts.core.internal.AnimationSpec
+import io.github.hdcharts.core.internal.animation.ChartMorphState
 import kotlin.time.Duration
 
 internal const val MIN_TIMELINE_DURATION_MS = 1
@@ -14,7 +15,7 @@ internal const val MIN_TIMELINE_DURATION_MS = 1
  * update moves between two data sets, and how long each move takes.
  *
  * The animations themselves live in their own files, one per kind of movement: [LineChartRevealWindow]
- * for the reveal on first display, [LineChartMorphState] for values moving between two data sets, and
+ * for the reveal on first display, [ChartMorphState] for values moving between two data sets, and
  * [LineChartTimelineShiftData] for a live window sliding.
  */
 internal sealed interface LineChartRenderMode {

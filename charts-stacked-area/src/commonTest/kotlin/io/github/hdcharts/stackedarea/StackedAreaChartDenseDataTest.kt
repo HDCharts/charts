@@ -9,7 +9,9 @@ import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeLeft
 import androidx.compose.ui.test.v2.runComposeUiTest
+import io.github.hdcharts.core.internal.ANIMATION_DURATION_LINE_CHART
 import io.github.hdcharts.core.internal.TestTags
 import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.model.ChartSelection
@@ -17,6 +19,8 @@ import io.github.hdcharts.core.model.ChartSeries
 import io.github.hdcharts.core.model.chartDataOf
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalTestApi::class)
 class StackedAreaChartDenseDataTest {
@@ -42,6 +46,45 @@ class StackedAreaChartDenseDataTest {
             waitUntil(timeoutMillis = 3_000L) { selection.selectedIndex != null }
 
             assertEquals(expected = selectedIndex, actual = selection.selectedIndex)
+        }
+
+    @Test
+    fun stackedAreaChart_scrollThenTap_changesSelectionAtSameViewportX() =
+        runComposeUiTest {
+            val selection = ChartSelection()
+            setContent {
+                StackedAreaChart(data = denseStackedAreaData(), selection = selection, animateOnStart = false)
+            }
+
+            onNodeWithTag(TestTags.STACKED_AREA_CHART_DENSE_EXPAND).performTouchInput { click() }
+            tapChartAt(x = 24f)
+            waitUntil(timeoutMillis = 3_000L) { selection.selectedIndex != null }
+            val beforeScrollIndex = selection.selectedIndex
+
+            onNodeWithTag(TestTags.STACKED_AREA_CHART).performTouchInput {
+                swipeLeft()
+                swipeLeft()
+            }
+            waitForIdle()
+            tapChartAt(x = 24f)
+            waitUntil(timeoutMillis = 3_000L) { selection.selectedIndex.let { it != null && it != beforeScrollIndex } }
+
+            assertNotEquals(illegal = beforeScrollIndex, actual = selection.selectedIndex)
+        }
+
+    @Test
+    fun stackedAreaChart_expand_doesNotReplayValueAnimation() =
+        runComposeUiTest {
+            setContent {
+                StackedAreaChart(data = denseStackedAreaData())
+            }
+            waitForIdle()
+
+            val expandStartMillis = mainClock.currentTime
+            onNodeWithTag(TestTags.STACKED_AREA_CHART_DENSE_EXPAND).performTouchInput { click() }
+            waitForIdle()
+
+            assertTrue(mainClock.currentTime - expandStartMillis < ANIMATION_DURATION_LINE_CHART)
         }
 
     @Test
