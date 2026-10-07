@@ -121,9 +121,13 @@ jobs:
             sample/androidApp/build/test-results/validateDebugScreenshotTest/**
 
   web-tests:
-    name: Wasm Tests
+    name: Wasm Tests ${{ matrix.shard }}/2
     if: ${{ inputs.should-run }}
     runs-on: ubuntu-26.04
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2]
     steps:
       - uses: actions/checkout@v7
         with:
@@ -134,13 +138,13 @@ jobs:
         uses: ./.github/actions/setup-jdk
 
       - name: Run Wasm tests
-        run: ./gradlew ciTestWeb --no-daemon
+        run: ./gradlew ciTestWeb -PwasmTestShard=${{ matrix.shard }} --no-daemon
 
       - name: Upload Wasm test reports
         if: ${{ always() }}
         uses: actions/upload-artifact@v7
         with:
-          name: wasm-test-reports
+          name: wasm-test-reports-${{ matrix.shard }}
           if-no-files-found: warn
           path: |
             **/build/reports/tests/**

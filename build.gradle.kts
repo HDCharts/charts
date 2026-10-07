@@ -310,10 +310,19 @@ tasks.register("ciTestScreenshot") {
     dependsOn(":androidApp:validateDebugScreenshotTest")
 }
 
+// CI splits Wasm tests across two jobs with -PwasmTestShard=1|2.
+// Shard 2 takes the rest, so new modules need no edit here.
+val wasmTestShard1 = listOf(":charts-core", ":charts-line", ":charts-pie", ":charts-radar", ":charts-gauge")
+
 tasks.register("ciTestWeb") {
     group = "CI"
     description = "CI entry point for Wasm browser tests"
-    dependsOn("chartsTestWasm")
+    when (val shard = providers.gradleProperty("wasmTestShard").orNull) {
+        null -> dependsOn("chartsTestWasm")
+        "1" -> dependsOn(ChartsModules.library.filter { it in wasmTestShard1 }.map { "$it:wasmJsTest" })
+        "2" -> dependsOn(ChartsModules.library.filterNot { it in wasmTestShard1 }.map { "$it:wasmJsTest" })
+        else -> error("wasmTestShard must be 1 or 2, was $shard")
+    }
 }
 
 tasks.register("ciTestIos") {
