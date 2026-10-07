@@ -1,7 +1,5 @@
 package io.github.hdcharts.bar.internal
 
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.horizontalScroll
@@ -27,6 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import io.github.hdcharts.core.internal.TestTags
+import io.github.hdcharts.core.internal.animation.ChartMorphState
 import io.github.hdcharts.core.internal.axis.AxisXItems
 import io.github.hdcharts.core.internal.axis.AxisXLabelsLayout
 import io.github.hdcharts.core.internal.axis.AxisYLabelsLayout
@@ -49,7 +48,7 @@ internal fun BarChartContent(
     style: BarChartStyle,
     interactionEnabled: Boolean,
     dragSelectionEnabled: Boolean,
-    animatedValues: List<Animatable<Float, AnimationVector1D>>,
+    morph: ChartMorphState,
     barColors: List<Color>,
     defaultBarColor: Color,
     fixedMin: Double,
@@ -279,7 +278,7 @@ internal fun BarChartContent(
                             // Drawn over the scrolling bars so the Y axis line stays at the plot start.
                             .drawWithContent {
                                 drawContent()
-                                if (style.axis.visible && animatedValues.isNotEmpty() && !visibleRange.isEmpty()) {
+                                if (style.axis.visible && dataSize > 0 && !visibleRange.isEmpty()) {
                                     drawLine(
                                         color = style.axis.color,
                                         start = Offset(0f, 0f),
@@ -297,7 +296,7 @@ internal fun BarChartContent(
                         onDraw = {
                             drawBars(
                                 style = style,
-                                animatedValues = animatedValues,
+                                morph = morph,
                                 visibleRange = visibleRange,
                                 selectedIndex = selectedIndex,
                                 barColors = barColors,

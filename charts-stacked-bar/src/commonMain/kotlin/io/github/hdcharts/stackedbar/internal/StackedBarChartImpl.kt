@@ -1,7 +1,5 @@
 package io.github.hdcharts.stackedbar.internal
 
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.horizontalScroll
@@ -35,9 +33,11 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
+import io.github.hdcharts.core.internal.ANIMATION_TARGET
 import io.github.hdcharts.core.internal.AnimationSpec
 import io.github.hdcharts.core.internal.NO_SELECTION
 import io.github.hdcharts.core.internal.TestTags
+import io.github.hdcharts.core.internal.animation.ChartMorphState
 import io.github.hdcharts.core.internal.axis.AxisXItems
 import io.github.hdcharts.core.internal.axis.AxisXLabelsLayout
 import io.github.hdcharts.core.internal.axis.AxisYLabelsLayout
@@ -62,8 +62,6 @@ import io.github.hdcharts.core.model.ChartValueFormatter
 import io.github.hdcharts.stackedbar.StackedBarChartStyle
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 private const val ZOOM_MIN = 1f
@@ -145,17 +143,13 @@ internal fun StackedBarChartImpl(
             remember(renderData) {
                 renderData.normalizeStackedValues()
             }
-        val initialValues =
-            remember(renderDataSize, isPreview, animateOnStart) {
-                if (isPreview || !animateOnStart) targetNormalized else null
-            }
-        val animatedValues =
-            remember(renderDataSize, isPreview, animateOnStart) {
-                renderData.series.mapIndexed { index, _ ->
-                    Animatable(initialValues?.getOrNull(index) ?: 0f)
-                }
-            }
         val hasInitialized = remember { mutableStateOf(false) }
+        // Only the first bars grow from zero; a new bar count, such as on expand, draws straight away.
+        val morph =
+            remember(renderDataSize) {
+                val growFromZero = animateOnStart && !isPreview && !hasInitialized.value
+                ChartMorphState(listOf(if (growFromZero) List(renderDataSize) { 0f } else targetNormalized))
+            }
         val forcedSelectedSourceIndex =
             selectedBarIndex.takeIf { it in 0 until sourceDataSize } ?: NO_SELECTION
         var selectedSourceIndexFromInteraction by
@@ -181,23 +175,13 @@ internal fun StackedBarChartImpl(
 
         LaunchedEffect(targetNormalized) {
             if (renderData.series.isEmpty()) return@LaunchedEffect
-            coroutineScope {
-                animatedValues.forEachIndexed { index, animatable ->
-                    val target = targetNormalized.getOrNull(index) ?: 0f
-                    launch {
-                        val shouldAnimate = !isPreview && (animateOnStart || hasInitialized.value)
-                        if (!shouldAnimate) {
-                            animatable.snapTo(target)
-                        } else {
-                            animatable.animateTo(
-                                targetValue = target,
-                                animationSpec = AnimationSpec.stackedBar(0),
-                            )
-                        }
-                    }
-                }
-            }
+            val targets = listOf(targetNormalized)
             hasInitialized.value = true
+            if (isPreview) {
+                morph.snapTo(targets)
+            } else if (morph.to != targets || morph.progress.value != ANIMATION_TARGET) {
+                morph.animateTo(targets = targets, animationSpec = AnimationSpec.stackedBar(0))
+            }
         }
 
         val effectiveSelectedSourceIndex =
@@ -267,7 +251,7 @@ internal fun StackedBarChartImpl(
                 interactionEnabled = interactionEnabled,
                 axisValueFormatter = axisValueFormatter,
                 dragSelectionEnabled = !isScrollable,
-                animatedValues = animatedValues,
+                morph = morph,
                 fixedMinTotal = sourceMinTotal,
                 fixedMaxTotal = sourceMaxTotal,
                 isScrollable = isScrollable,
@@ -304,7 +288,7 @@ private fun StackedBarChartContent(
     showXAxisLabels: Boolean,
     interactionEnabled: Boolean,
     dragSelectionEnabled: Boolean,
-    animatedValues: List<Animatable<Float, AnimationVector1D>>,
+    morph: ChartMorphState,
     fixedMinTotal: Double,
     fixedMaxTotal: Double,
     isScrollable: Boolean,
@@ -524,7 +508,7 @@ private fun StackedBarChartContent(
                             drawStackedBars(
                                 data = data,
                                 style = style,
-                                progress = animatedValues,
+                                morph = morph,
                                 selectedIndex = selectedIndex,
                                 selectedCenterX = selectedCenterXContent,
                                 colors = colors,
@@ -558,7 +542,7 @@ private fun StackedBarChartContent(
 private fun DrawScope.drawStackedBars(
     data: ChartRenderData,
     style: StackedBarChartStyle,
-    progress: List<Animatable<Float, AnimationVector1D>>,
+    morph: ChartMorphState,
     selectedIndex: Int,
     selectedCenterX: Float,
     colors: ImmutableList<Color>,
@@ -575,12 +559,14 @@ private fun DrawScope.drawStackedBars(
     val showSelection = style.selection.visible && selectedIndex in data.series.indices
     val barTotals = data.seriesTotals
     var selectedMark: ClosedFloatingPointRange<Float>? = null
+    val morphProgress = morph.progress.value
     for (index in indices) {
         val bar = data.series[index]
         val isSelected = showSelection && index == selectedIndex
         var topOffset = size.height
         val left = index * (barWidthPx + spacingPx)
         val barTotal = barTotals[index]
+        val barProgress = morph.drawnValueAt(seriesIndex = 0, pointIndex = index, progress = morphProgress)
         bar.values.forEachIndexed { dataIndex, value ->
             val segmentShare =
                 when {
@@ -591,7 +577,7 @@ private fun DrawScope.drawStackedBars(
                 stackedSegmentHeight(
                     segmentShare = segmentShare,
                     chartHeight = size.height,
-                    progress = progress.getOrNull(index)?.value ?: 0f,
+                    progress = barProgress,
                 )
             topOffset -= height
             val segmentColor = colors.getOrElse(dataIndex) { colors.lastOrNull() ?: Color.Transparent }

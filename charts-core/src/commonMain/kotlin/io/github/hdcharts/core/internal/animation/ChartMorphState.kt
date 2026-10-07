@@ -8,6 +8,15 @@ import androidx.compose.runtime.setValue
 import io.github.hdcharts.core.internal.ANIMATION_TARGET
 import io.github.hdcharts.core.internal.InternalChartsApi
 
+/** Maps a morph's progress to the progress of one point; a `fun interface`, so calls do not box. */
+@InternalChartsApi
+fun interface ChartPointProgress {
+    fun progressAt(
+        pointIndex: Int,
+        progress: Float,
+    ): Float
+}
+
 /**
  * The morph between two data sets, driven by one animated scalar.
  *
@@ -15,10 +24,14 @@ import io.github.hdcharts.core.internal.InternalChartsApi
  * drawn value of a point is the linear blend of the two at [progress]. One animated value keeps the
  * animation's cost independent of how many points the chart draws, and [blendInto] writes a frame
  * into a reused buffer so it allocates nothing per point.
+ *
+ * [pointProgress] maps [progress] to the progress of one point, so points can be delayed or eased
+ * on their own, as cascaded bars are. [blendInto] does not apply it.
  */
 @InternalChartsApi
 class ChartMorphState(
     initialValues: List<List<Float>>,
+    private val pointProgress: ChartPointProgress = ChartPointProgress { _, progress -> progress },
 ) {
     var from: List<List<Float>> by mutableStateOf(initialValues)
         private set
@@ -33,7 +46,7 @@ class ChartMorphState(
         targets: List<List<Float>>,
         animationSpec: TweenSpec<Float>,
     ) {
-        from = blendSeries(from = from, to = to, progress = progress.value)
+        from = blendSeries(from = from, to = to, progress = progress.value, pointProgress = pointProgress)
         to = targets
         progress.snapTo(0f)
         progress.animateTo(targetValue = ANIMATION_TARGET, animationSpec = animationSpec)
@@ -53,7 +66,7 @@ class ChartMorphState(
     ): Float {
         val target = to.getOrNull(seriesIndex)?.getOrNull(pointIndex) ?: return 0f
         val start = from.getOrNull(seriesIndex)?.getOrNull(pointIndex) ?: target
-        return blendPoint(start = start, target = target, progress = progress)
+        return blendPoint(start = start, target = target, progress = pointProgress.progressAt(pointIndex, progress))
     }
 }
 
@@ -72,6 +85,7 @@ private fun blendSeries(
     from: List<List<Float>>,
     to: List<List<Float>>,
     progress: Float,
+    pointProgress: ChartPointProgress,
 ): List<List<Float>> =
     to.mapIndexed { seriesIndex, targets ->
         val start = from.getOrNull(seriesIndex).orEmpty()
@@ -79,7 +93,7 @@ private fun blendSeries(
             blendPoint(
                 start = start.getOrElse(pointIndex) { target },
                 target = target,
-                progress = progress,
+                progress = pointProgress.progressAt(pointIndex, progress),
             )
         }
     }

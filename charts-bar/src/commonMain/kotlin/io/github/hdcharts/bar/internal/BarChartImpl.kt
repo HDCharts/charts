@@ -134,9 +134,8 @@ internal fun BarChartImpl(
                 val baseline = barValueYFraction(0.0, fixedMin, fixedMax)
                 renderData.barValues.map { (baseline - barValueYFraction(it, fixedMin, fixedMax)).toFloat() }
             }
-        val animatedValues =
-            rememberBarChartAnimatedValues(
-                values = renderData.barValues,
+        val morph =
+            rememberBarChartMorph(
                 targetNormalized = targetNormalized,
                 isPreview = isPreview,
                 animateOnStart = animateOnStart,
@@ -210,7 +209,7 @@ internal fun BarChartImpl(
                 style = style,
                 interactionEnabled = interactionEnabled,
                 dragSelectionEnabled = !isScrollable,
-                animatedValues = animatedValues,
+                morph = morph,
                 barColors = renderBarColors,
                 defaultBarColor = baseBarColor,
                 fixedMin = fixedMin,

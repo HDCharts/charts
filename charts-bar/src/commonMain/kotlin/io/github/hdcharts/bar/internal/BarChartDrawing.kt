@@ -1,12 +1,11 @@
 package io.github.hdcharts.bar.internal
 
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import io.github.hdcharts.core.internal.animation.ChartMorphState
 import io.github.hdcharts.core.internal.drawing.drawSelectionLine
 import io.github.hdcharts.core.internal.drawing.gradientBrush
 import io.github.hdcharts.core.style.BarChartStyle
@@ -28,7 +27,7 @@ import kotlin.math.abs
  */
 internal fun DrawScope.drawBars(
     style: BarChartStyle,
-    animatedValues: List<Animatable<Float, AnimationVector1D>>,
+    morph: ChartMorphState,
     visibleRange: IntRange,
     selectedIndex: Int,
     barColors: List<Color>,
@@ -39,7 +38,8 @@ internal fun DrawScope.drawBars(
     spacingPx: Float,
     selectedCenterX: Float,
 ) {
-    if (animatedValues.isEmpty() || visibleRange.isEmpty()) return
+    val barCount = morph.to.firstOrNull()?.size ?: 0
+    if (barCount == 0 || visibleRange.isEmpty()) return
 
     val clampedBaselineY =
         baselineYForRange(
@@ -71,15 +71,16 @@ internal fun DrawScope.drawBars(
         )
     }
 
-    val firstVisible = visibleRange.first.coerceIn(0, animatedValues.lastIndex)
-    val lastVisible = visibleRange.last.coerceIn(firstVisible, animatedValues.lastIndex)
+    val lastBarIndex = barCount - 1
+    val firstVisible = visibleRange.first.coerceIn(0, lastBarIndex)
+    val lastVisible = visibleRange.last.coerceIn(firstVisible, lastBarIndex)
     val showSelection = style.selection.visible && selectedIndex in firstVisible..lastVisible
     var selectedMark: ClosedFloatingPointRange<Float>? = null
     val gradient = style.bars.gradient
     val plotBounds = Rect(offset = Offset.Zero, size = size)
+    val morphProgress = morph.progress.value
     for (index in firstVisible..lastVisible) {
-        val animatedValue = animatedValues[index]
-        val value = animatedValue.value
+        val value = morph.drawnValueAt(seriesIndex = 0, pointIndex = index, progress = morphProgress)
         val barHeight = abs(value) * size.height
         val top = if (value >= 0f) clampedBaselineY - barHeight else clampedBaselineY
         val left = barLeftPx(index = index, barWidthPx = barWidthPx, spacingPx = spacingPx)
