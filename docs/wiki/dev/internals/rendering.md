@@ -40,10 +40,10 @@ are on screen.
 
 | Chart | State | On a data change |
 | --- | --- | --- |
-| Bar, histogram | One `Animatable` per drawn bar, from `rememberBarChartAnimatedValues` | One coroutine per bar whose value changed; charts of up to 200 bars animate in a cascade |
-| Stacked bar | One `Animatable` per drawn bar | One coroutine per bar |
-| Line, live line | One `Animatable` progress for the whole chart, from `LineChartMorphState`, plus one slide progress | A morph tweens the single progress and the draw blends the two value sets. A live shift animates the slide progress over one full step |
-| Stacked area | One `Animatable` per point of every series | One coroutine per point |
+| Bar, histogram | One `Animatable` progress for the whole chart, from `ChartMorphState` in `rememberBarChartMorph` | A morph tweens the single progress and the draw blends the two value sets. Charts of up to 200 bars cascade: `BarChartCascade` gives each bar its own delayed, eased share of the progress |
+| Stacked bar | One `Animatable` progress for the whole chart, from `ChartMorphState` | A morph tweens the single progress and the draw blends the two value sets |
+| Line, live line | One `Animatable` progress for the whole chart, from `ChartMorphState`, plus one slide progress | A morph tweens the single progress and the draw blends the two value sets. A live shift animates the slide progress over one full step |
+| Stacked area | One `Animatable` progress for the whole chart, from `ChartMorphState` | A morph tweens the single progress and the draw blends the two value sets |
 
 ## Drawing
 

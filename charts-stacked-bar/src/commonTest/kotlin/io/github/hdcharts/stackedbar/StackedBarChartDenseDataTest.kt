@@ -11,11 +11,13 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeLeft
 import androidx.compose.ui.test.v2.runComposeUiTest
+import io.github.hdcharts.core.internal.ANIMATION_DURATION_BAR
 import io.github.hdcharts.core.internal.TestTags
 import io.github.hdcharts.core.model.ChartSelection
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalTestApi::class)
 class StackedBarChartDenseDataTest {
@@ -72,6 +74,21 @@ class StackedBarChartDenseDataTest {
             waitUntil(timeoutMillis = 3_000L) { selection.selectedIndex != null }
 
             assertEquals(expected = selectedIndex, actual = selection.selectedIndex)
+        }
+
+    @Test
+    fun stackedBarChart_expand_doesNotReplayValueAnimation() =
+        runComposeUiTest {
+            setContent {
+                StackedBarChart(data = denseStackedBarDataSet())
+            }
+            waitForIdle()
+
+            val expandStartMillis = mainClock.currentTime
+            onNodeWithTag(TestTags.STACKED_BAR_CHART_DENSE_EXPAND).performTouchInput { click() }
+            waitForIdle()
+
+            assertTrue(mainClock.currentTime - expandStartMillis < ANIMATION_DURATION_BAR)
         }
 
     @Test

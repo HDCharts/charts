@@ -31,6 +31,7 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeLeft
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
+import io.github.hdcharts.core.internal.ANIMATION_DURATION_BAR
 import io.github.hdcharts.core.internal.TestTags
 import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.model.ChartSelection
@@ -159,6 +160,22 @@ class BarChartDenseDataTest {
             onNodeWithTag(TestTags.BAR_CHART_DENSE_COLLAPSE).assertIsDisplayed()
             onNodeWithTag(TestTags.BAR_CHART_ZOOM_OUT).assertIsDisplayed()
             onNodeWithTag(TestTags.BAR_CHART_ZOOM_IN).assertIsDisplayed()
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun barChart_expand_doesNotReplayValueAnimation() =
+        runComposeUiTest {
+            setContent {
+                BarChart(data = largeDataSet(), title = DEFAULT_TITLE)
+            }
+            waitForIdle()
+
+            val expandStartMillis = mainClock.currentTime
+            onNodeWithTag(TestTags.BAR_CHART_DENSE_EXPAND).performTouchInput { click() }
+            waitForIdle()
+
+            assertTrue(mainClock.currentTime - expandStartMillis < ANIMATION_DURATION_BAR)
         }
 
     @OptIn(ExperimentalTestApi::class)

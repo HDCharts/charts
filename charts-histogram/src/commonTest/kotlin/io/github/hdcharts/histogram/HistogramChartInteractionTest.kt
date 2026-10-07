@@ -19,6 +19,7 @@ import androidx.compose.ui.test.swipeLeft
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
+import io.github.hdcharts.core.internal.ANIMATION_DURATION_BAR
 import io.github.hdcharts.core.internal.TestTags
 import io.github.hdcharts.core.model.ChartSelection
 import io.github.hdcharts.core.model.ChartValueFormatter
@@ -57,6 +58,25 @@ class HistogramChartInteractionTest {
             onNodeWithTag(TestTags.BAR_CHART_DENSE_COLLAPSE).performTouchInput { click() }
             onNodeWithTag(TestTags.CHART_ERROR).assertDoesNotExist()
             onNodeWithTag(TestTags.BAR_CHART_PLOT).assertIsDisplayed()
+        }
+
+    @Test
+    fun histogramChart_expand_doesNotReplayValueAnimation() =
+        runComposeUiTest {
+            setContent {
+                HistogramChart(
+                    data = List(120) { (it % 12) + 1.0 }.toChartData(),
+                    title = "Bins",
+                    modifier = Modifier.size(300.dp),
+                )
+            }
+            waitForIdle()
+
+            val expandStartMillis = mainClock.currentTime
+            onNodeWithTag(TestTags.BAR_CHART_DENSE_EXPAND).performTouchInput { click() }
+            waitForIdle()
+
+            assertTrue(mainClock.currentTime - expandStartMillis < ANIMATION_DURATION_BAR)
         }
 
     private val data =

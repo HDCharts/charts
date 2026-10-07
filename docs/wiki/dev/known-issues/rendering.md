@@ -18,28 +18,16 @@ window, an expanded stacked area chart, and an expanded histogram at 10,000, 100
 
 ## Confirmed
 
-### One animation value per bar
-
-Bar, histogram, and stacked bar charts keep one `Animatable` per bar, and a morph launches one
-coroutine per bar. Bar and histogram compact dense data, but expanding brings back one `Animatable`
-per source bar, so 1,000,000 bins make 1,000,000 of them and a coroutine for each bin that changes.
-
-Confirmed by the code: `animatedValues` in `StackedBarChart`, and `rememberBarChartAnimatedValues`
-in `BarChartAnimation.kt`. Line, live line, and stacked area charts no longer appear here:
-`ChartMorphState` animates one progress value and the draw blends the two value sets.
-
-Options:
-
-- Animate one progress value per chart, and blend the old and new values in the draw.
-
 ### Data with a new point count draws without animation
 
-Line and stacked area charts animate an update only when the number of series and points stays the
-same. Data that goes from 5 points to 6, or adds a series, draws straight away. Live line charts
-keep the point count fixed and slide the window, so new points still animate there.
+Line, stacked area, stacked bar, bar, and histogram charts animate an update only when the number
+of series and points stays the same. Data that goes from 5 points to 6, or adds a series, draws
+straight away. Live line charts keep the point count fixed and slide the window, so new points still
+animate there.
 
-Confirmed by the code: `LineChartTransitionState.update` snaps on a changed series structure, and
-`StackedAreaChartImpl` keys its `ChartMorphState` on the series and point counts.
+Confirmed by the code: `LineChartTransitionState.update` snaps on a changed series structure,
+`StackedAreaChartImpl` keys its `ChartMorphState` on the series and point counts, and
+`StackedBarChartImpl` and `rememberBarChartMorph` key theirs on the bar count.
 
 Options:
 

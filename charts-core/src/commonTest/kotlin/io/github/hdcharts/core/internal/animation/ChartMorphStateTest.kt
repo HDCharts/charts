@@ -53,6 +53,43 @@ class ChartMorphStateTest {
         }
 
     @Test
+    fun morphWithPointProgress_interrupted_freezesTheDrawnValues() =
+        runComposeUiTest {
+            // The second point lags behind the first, as a cascaded bar does.
+            val state =
+                ChartMorphState(
+                    initialValues = listOf(listOf(0f, 0f)),
+                    pointProgress = ChartPointProgress(::squaredPastFirstPoint),
+                )
+            val target = mutableStateOf(listOf(listOf(0f, 0f)))
+            mainClock.autoAdvance = false
+
+            setContent {
+                LaunchedEffect(target.value) {
+                    state.animateTo(
+                        targets = target.value,
+                        animationSpec = TweenSpec(durationMillis = 1_000, easing = LinearEasing),
+                    )
+                }
+            }
+
+            target.value = listOf(listOf(1f, 1f))
+            mainClock.advanceTimeBy(milliseconds = 500L)
+            val drawnHalfway = state.drawnValueAt(seriesIndex = 0, pointIndex = 1, progress = state.progress.value)
+            assertTrue(drawnHalfway in 0.15f..0.35f, "The lagging point has to be part-way through: $drawnHalfway")
+
+            target.value = listOf(listOf(0f, 0f))
+            mainClock.advanceTimeByFrame()
+
+            assertEquals(
+                expected = drawnHalfway,
+                actual = state.drawnValueAt(seriesIndex = 0, pointIndex = 1, progress = state.progress.value),
+                absoluteTolerance = 0.05f,
+                message = "The new morph must freeze each point at its own progress, or the point jumps.",
+            )
+        }
+
+    @Test
     fun drawnValueAt_matchesTheValueBlendIntoWritesMidMorph() =
         runComposeUiTest {
             val state = ChartMorphState(initialValues = listOf(listOf(0.25f, 0.75f)))
@@ -140,4 +177,9 @@ class ChartMorphStateTest {
         assertEquals(expected = 2, actual = count)
         assertContentEquals(expected = floatArrayOf(1f, 2f), actual = buffer)
     }
+
+    private fun squaredPastFirstPoint(
+        pointIndex: Int,
+        progress: Float,
+    ): Float = if (pointIndex == 0) progress else progress * progress
 }
