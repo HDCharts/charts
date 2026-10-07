@@ -212,19 +212,19 @@ class PieChartHelpersTest {
     }
 
     @Test
-    fun calculatePercentages_returnsCorrectPercentages() {
+    fun calculateShares_returnsEachValuesShareInPercent() {
         // Arrange
         val testData =
             hashMapOf(
-                listOf(10.0, 20.0, 30.0) to listOf("16.67", "33.33", "50.0"),
-                listOf(1.0, 1.0, 1.0) to listOf("33.33", "33.33", "33.33"),
-                listOf(0.0, 0.0, 0.0) to listOf("0", "0", "0"),
-                listOf(100.0, 0.0, 0.0) to listOf("100.0", "0.0", "0.0"),
+                listOf(10.0, 20.0, 70.0) to listOf(10.0, 20.0, 70.0),
+                listOf(1.0, 1.0, 2.0) to listOf(25.0, 25.0, 50.0),
+                listOf(0.0, 0.0, 0.0) to listOf(0.0, 0.0, 0.0),
+                listOf(100.0, 0.0, 0.0) to listOf(100.0, 0.0, 0.0),
             )
 
         // Act & Assert
         testData.forEach { entry ->
-            val result = calculatePercentages(entry.key)
+            val result = calculateShares(entry.key)
             assertEquals(entry.value, result)
         }
     }

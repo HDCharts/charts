@@ -21,6 +21,7 @@ import io.github.hdcharts.core.internal.composable.Legend
 import io.github.hdcharts.core.internal.layout.modifierTopTitle
 import io.github.hdcharts.core.internal.selectedCategoryTitle
 import io.github.hdcharts.core.model.ChartSelection
+import io.github.hdcharts.core.model.ChartValueFormatter
 import io.github.hdcharts.pie.PieChartStyle
 import kotlinx.collections.immutable.ImmutableList
 
@@ -36,6 +37,7 @@ internal const val SELECTED_TITLE_PERCENTAGE_SIZE_FACTOR = 0.72f
 internal fun PieChartFrame(
     modifier: Modifier,
     title: String?,
+    selectedValueFormatter: ChartValueFormatter,
     labels: ImmutableList<String>,
     points: ImmutableList<Double>,
     colors: ImmutableList<Color>,
@@ -45,9 +47,9 @@ internal fun PieChartFrame(
     animateOnStart: Boolean,
     onSelectionInteraction: () -> Unit,
 ) {
-    val piePercentages =
+    val shares =
         remember(points) {
-            calculatePercentages(points)
+            calculateShares(points)
         }
     val forcedSelectedIndex =
         selection.selectedIndex?.takeIf { it in points.indices } ?: NO_SELECTION
@@ -81,7 +83,7 @@ internal fun PieChartFrame(
                             overflow = TextOverflow.Ellipsis,
                         )
                         Text(
-                            text = "${piePercentages[forcedSelectedIndex]}%",
+                            text = selectedValueFormatter.format(shares[forcedSelectedIndex]),
                             style = selectedPercentageStyle(style.chartContainerStyle.styleTitle),
                             maxLines = 1,
                         )

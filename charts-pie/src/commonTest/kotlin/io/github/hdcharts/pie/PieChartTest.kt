@@ -26,10 +26,10 @@ import io.github.hdcharts.core.internal.TestTags
 import io.github.hdcharts.core.internal.ValidationErrors
 import io.github.hdcharts.core.model.ChartSelection
 import io.github.hdcharts.core.model.ChartSeries
+import io.github.hdcharts.core.model.ChartValueFormatter
 import io.github.hdcharts.core.model.chartDataOf
 import io.github.hdcharts.core.model.staticChartSelection
 import io.github.hdcharts.core.model.toChartData
-import io.github.hdcharts.pie.internal.calculatePercentages
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.round
@@ -294,6 +294,32 @@ class PieChartTest {
             onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(expectedTitle)
             onNodeWithText(expectedPercentage).assertIsDisplayed()
         }
+
+    /** The selected share goes through the caller's formatter, in percent from 0 to 100. */
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun pieChart_withSelectedValueFormatter_formatsTheSelectedShare() =
+        runComposeUiTest {
+            setContent {
+                PieChart(
+                    data = pieData,
+                    title = TITLE,
+                    selectedValueFormatter = ChartValueFormatter { value -> "share=$value" },
+                    selection = staticChartSelection(1),
+                    interactionEnabled = false,
+                )
+            }
+
+            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(labels[1])
+            onNodeWithText("share=20.0").assertIsDisplayed()
+        }
+
+    /** The default keeps the share at two decimals with a `%` suffix. */
+    @Test
+    fun pieChartDefaults_selectedValueFormatter_formatsTheShareAsAPercentage() {
+        assertEquals(expected = "33.33%", actual = PieChartDefaults.selectedValueFormatter.format(100.0 / 3))
+        assertEquals(expected = "50.0%", actual = PieChartDefaults.selectedValueFormatter.format(50.0))
+    }
 
     @OptIn(ExperimentalTestApi::class)
     @Test
