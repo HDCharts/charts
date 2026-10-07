@@ -26,6 +26,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -457,7 +458,18 @@ internal fun LineChartContent(
                             .fillMaxSize()
                             .padding(end = plotEndPadding)
                             .testTag(TestTags.LINE_CHART_PLOT)
-                            .then(
+                            // Drawn over the scrolling series so the Y axis line stays at the plot start.
+                            .drawWithContent {
+                                drawContent()
+                                if (show && showAxisLines) {
+                                    drawLine(
+                                        color = style.axis.color,
+                                        start = Offset(0f, 0f),
+                                        end = Offset(0f, size.height),
+                                        strokeWidth = style.axis.lineWidth.toPx(),
+                                    )
+                                }
+                            }.then(
                                 if (isDenseMode) {
                                     Modifier.horizontalScroll(state = scrollState, enabled = interactionEnabled)
                                 } else {
@@ -483,12 +495,6 @@ internal fun LineChartContent(
                                             heightPx = drawableHeight,
                                         )
 
-                                drawLine(
-                                    color = style.axis.color,
-                                    start = Offset(0f, 0f),
-                                    end = Offset(0f, size.height),
-                                    strokeWidth = style.axis.lineWidth.toPx(),
-                                )
                                 drawLine(
                                     color = style.axis.color,
                                     start = Offset(0f, baselineY),

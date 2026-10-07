@@ -21,6 +21,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
@@ -274,7 +276,18 @@ internal fun BarChartContent(
                             .fillMaxSize()
                             .testTag(TestTags.BAR_CHART_PLOT)
                             .then(interactionModifier)
-                            .horizontalScroll(state = scrollState, enabled = isScrollable && interactionEnabled),
+                            // Drawn over the scrolling bars so the Y axis line stays at the plot start.
+                            .drawWithContent {
+                                drawContent()
+                                if (style.axis.visible && animatedValues.isNotEmpty() && !visibleRange.isEmpty()) {
+                                    drawLine(
+                                        color = style.axis.color,
+                                        start = Offset(0f, 0f),
+                                        end = Offset(0f, size.height),
+                                        strokeWidth = style.axis.lineWidth.toPx(),
+                                    )
+                                }
+                            }.horizontalScroll(state = scrollState, enabled = isScrollable && interactionEnabled),
                 ) {
                     Canvas(
                         modifier =

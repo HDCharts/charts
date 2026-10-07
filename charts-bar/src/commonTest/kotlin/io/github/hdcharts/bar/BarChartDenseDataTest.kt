@@ -18,6 +18,8 @@ import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
@@ -520,6 +522,58 @@ class BarChartDenseDataTest {
                 selection.select(1)
             }
             onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("B1: 2.0").assertIsDisplayed()
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun barChart_expandedAndScrolled_keepsYAxisLineAtPlotStart() =
+        runComposeUiTest {
+            val capturePixels =
+                setCapturedContent { captureModifier ->
+                    BarChart(
+                        data = List(120) { 95.0 }.toChartData(categories = List(120) { "B$it" }),
+                        title = DEFAULT_TITLE,
+                        modifier = captureModifier.testTag("bar-capture").size(300.dp),
+                        animateOnStart = false,
+                        style =
+                            BarChartDefaults.style(
+                                chartContainerStyle = ChartContainerDefaults.style(contentPadding = 0.dp),
+                                bars = BarChartDefaults.bars(color = Color.Blue, alpha = 1f, space = 0.dp),
+                                range = BarChartDefaults.range(min = 0.0, max = 100.0),
+                                grid = BarChartDefaults.grid(color = Color.Green),
+                                axis =
+                                    BarChartDefaults.axis(
+                                        color = Color.Red,
+                                        lineWidth = 4.dp,
+                                        xLabels = BarChartDefaults.xLabels(visible = false),
+                                        yLabels = BarChartDefaults.yLabels(visible = false),
+                                    ),
+                            ),
+                    )
+                }
+
+            onNodeWithTag(TestTags.BAR_CHART_DENSE_EXPAND).performTouchInput { click() }
+            onNodeWithTag(TestTags.BAR_CHART_DENSE_COLLAPSE).assertIsDisplayed()
+            onNodeWithTag(TestTags.BAR_CHART_PLOT).performTouchInput {
+                swipeLeft()
+                swipeLeft()
+            }
+            onNodeWithTag(TestTags.BAR_CHART_PLOT).assert(isScrolledHorizontally())
+
+            val plotBounds = onNodeWithTag(TestTags.BAR_CHART_PLOT).fetchSemanticsNode().boundsInRoot
+            val captureBounds = onNodeWithTag("bar-capture").fetchSemanticsNode().boundsInRoot
+            val axisX = (plotBounds.left - captureBounds.left).toInt() + 1
+            val plotTop = (plotBounds.top - captureBounds.top).toInt()
+            val pixels = capturePixels()
+            val coveredRows =
+                (1 until plotBounds.height.toInt() - 1).count { row -> pixels[axisX, plotTop + row] != Color.Red }
+
+            assertEquals(0, coveredRows, "Rows where the Y axis line is covered at the plot start")
+        }
+
+    private fun isScrolledHorizontally() =
+        SemanticsMatcher("is scrolled horizontally") { node ->
+            node.config[SemanticsProperties.HorizontalScrollAxisRange].value() > 0f
         }
 
     @OptIn(ExperimentalTestApi::class)

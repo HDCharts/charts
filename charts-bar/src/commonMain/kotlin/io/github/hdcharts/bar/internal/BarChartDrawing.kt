@@ -65,12 +65,6 @@ internal fun DrawScope.drawBars(
     if (style.axis.visible) {
         drawLine(
             color = style.axis.color,
-            start = Offset(0f, 0f),
-            end = Offset(0f, size.height),
-            strokeWidth = style.axis.lineWidth.toPx(),
-        )
-        drawLine(
-            color = style.axis.color,
             start = Offset(0f, clampedBaselineY),
             end = Offset(size.width, clampedBaselineY),
             strokeWidth = style.axis.lineWidth.toPx(),
