@@ -312,6 +312,7 @@ class ChartPolicyTest {
             ChartPolicy(
                 minValues = ValidationErrors.MIN_VALUES,
                 allowNegative = true,
+                stacksValues = false,
                 singleSeries = false,
                 hasAxis = true,
                 hasFixedRange = true,
@@ -323,6 +324,7 @@ class ChartPolicyTest {
             ChartPolicy(
                 minValues = ValidationErrors.MIN_VALUES,
                 allowNegative = true,
+                stacksValues = false,
                 singleSeries = true,
                 hasAxis = true,
                 hasFixedRange = true,
@@ -334,6 +336,7 @@ class ChartPolicyTest {
             ChartPolicy(
                 minValues = ValidationErrors.MIN_VALUES,
                 allowNegative = false,
+                stacksValues = true,
                 singleSeries = false,
                 hasAxis = true,
                 hasFixedRange = false,
@@ -345,6 +348,7 @@ class ChartPolicyTest {
             ChartPolicy(
                 minValues = ValidationErrors.MIN_RADAR_VALUES,
                 allowNegative = true,
+                stacksValues = false,
                 singleSeries = false,
                 hasAxis = false,
                 hasFixedRange = false,

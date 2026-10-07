@@ -42,6 +42,7 @@ object RingGaugeChartSpec : ChartSpec<RingGaugeChartStyle> {
         ChartPolicy(
             minValues = ValidationErrors.MIN_RING_GAUGE_VALUES,
             allowNegative = true,
+            stacksValues = false,
             singleSeries = true,
             hasAxis = false,
             hasFixedRange = true,

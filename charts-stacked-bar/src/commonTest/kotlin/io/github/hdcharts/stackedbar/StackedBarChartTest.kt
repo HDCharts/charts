@@ -234,6 +234,25 @@ class StackedBarChartTest {
 
     @OptIn(ExperimentalTestApi::class)
     @Test
+    fun stackedBarChart_withOverflowingTotal_displaysError() =
+        runComposeUiTest {
+            val data =
+                chartDataOf(
+                    categories = listOf("Bar 1", "Bar 2"),
+                    ChartSeries(name = "S1", values = listOf(Double.MAX_VALUE, 1.0)),
+                    ChartSeries(name = "S2", values = listOf(Double.MAX_VALUE, 2.0)),
+                )
+
+            setContent {
+                StackedBarChart(data = data)
+            }
+
+            onNodeWithTag(TestTags.CHART_ERROR).assertIsDisplayed()
+            onNodeWithText("Stacked total at index 0 is not finite.\n").assertIsDisplayed()
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
     fun stackedBarChart_withNegativeData_displaysError() =
         runComposeUiTest {
             val data =

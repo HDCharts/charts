@@ -31,6 +31,7 @@ object PieChartSpec : ChartSpec<PieChartStyle> {
         ChartPolicy(
             minValues = ValidationErrors.MIN_VALUES,
             allowNegative = false,
+            stacksValues = false,
             singleSeries = true,
             hasAxis = false,
             hasFixedRange = false,

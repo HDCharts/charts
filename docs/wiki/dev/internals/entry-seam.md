@@ -53,6 +53,7 @@ object LineChartSpec : ChartSpec<LineChartStyle> {
     override val policy = ChartPolicy(
         minValues = ValidationErrors.MIN_VALUES,
         allowNegative = true,
+        stacksValues = false,
         singleSeries = false,
         hasAxis = true,
         hasFixedRange = true,
@@ -104,6 +105,7 @@ between the two.
 | --- | --- |
 | `minValues` | The fewest values a point needs |
 | `allowNegative` | Negative values reported as errors |
+| `stacksValues` | Sums across the series at an index that overflow reported as errors |
 | `singleSeries` | `validateSingleSeries`, which matches the color count against the value count |
 | `hasAxis` | The X and Y axis label checks |
 | `hasFixedRange` | The range-bound check |
@@ -152,16 +154,16 @@ skips the color check.
 Each chart has a row here and a row in `ChartPolicyConformanceTest`, in the `charts` module. Both are
 written by hand and change in the same commit.
 
-| Chart | `minValues` | `allowNegative` | `singleSeries` | `hasAxis` | `hasFixedRange` | `colorsMatch` |
-| --- | --- | --- | --- | --- | --- | --- |
-| Line | 2 | yes | no | yes | yes | series count |
-| Bar | 2 | yes | yes | yes | yes | value count |
-| Histogram | 2 | no | yes | yes | yes | value count |
-| Radar | 3 | yes | no | no | no | series count, only with more than one series |
-| Stacked bar | 2 | no | no | yes | no | series count |
-| Stacked area | 2 | no | no | yes | no | series count |
-| Pie | 2 | no | yes | no | no | value count |
-| Ring gauge | 1 | yes | yes | no | yes | value count |
+| Chart | `minValues` | `allowNegative` | `stacksValues` | `singleSeries` | `hasAxis` | `hasFixedRange` | `colorsMatch` |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Line | 2 | yes | no | no | yes | yes | series count |
+| Bar | 2 | yes | no | yes | yes | yes | value count |
+| Histogram | 2 | no | no | yes | yes | yes | value count |
+| Radar | 3 | yes | no | no | no | no | series count, only with more than one series |
+| Stacked bar | 2 | no | yes | no | yes | no | series count |
+| Stacked area | 2 | no | yes | no | yes | no | series count |
+| Pie | 2 | no | no | yes | no | no | value count |
+| Ring gauge | 1 | yes | no | yes | no | yes | value count |
 
 Every chart is on the seam. Bar and histogram draw the same plot, so they share
 `BarChartInternalPlot`. Their specs differ in the policy — histogram forbids negative bin heights —

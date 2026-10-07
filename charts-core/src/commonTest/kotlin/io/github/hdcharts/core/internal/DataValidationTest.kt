@@ -23,6 +23,7 @@ class DataValidationTest {
                 data = data,
                 minValues = ValidationErrors.MIN_VALUES,
                 allowNegative = true,
+                stacksValues = false,
                 colorCount = 0,
                 expectedColors = null,
             ).isEmpty(),
@@ -40,6 +41,7 @@ class DataValidationTest {
                     data = data,
                     minValues = ValidationErrors.MIN_VALUES,
                     allowNegative = true,
+                    stacksValues = false,
                     colorCount = 0,
                     expectedColors = null,
                 ),
@@ -69,9 +71,58 @@ class DataValidationTest {
                     data = data,
                     minValues = ValidationErrors.MIN_VALUES,
                     allowNegative = false,
+                    stacksValues = false,
                     colorCount = 0,
                     expectedColors = null,
                 ),
+        )
+    }
+
+    @Test
+    fun validateSeries_stackedTotalsThatOverflow_reportsTheFirstIndexWithOtherErrors() {
+        val data =
+            chartDataOf(
+                categories = listOf("A"),
+                ChartSeries(name = "One", values = listOf(Double.MAX_VALUE, 1.0, Double.MAX_VALUE)),
+                ChartSeries(name = "Two", values = listOf(Double.MAX_VALUE, 2.0, Double.MAX_VALUE)),
+            )
+
+        assertEquals(
+            expected =
+                listOf(
+                    "Category count (1) must match value count (3).",
+                    "Stacked total at index 0 is not finite.",
+                ),
+            actual =
+                validateSeries(
+                    data = data,
+                    minValues = ValidationErrors.MIN_VALUES,
+                    allowNegative = false,
+                    stacksValues = true,
+                    colorCount = 0,
+                    expectedColors = null,
+                ),
+        )
+    }
+
+    @Test
+    fun validateSeries_overflowingTotalsWithoutStacking_returnsNoErrors() {
+        val data =
+            chartDataOf(
+                categories = emptyList(),
+                ChartSeries(name = "One", values = listOf(Double.MAX_VALUE, 1.0)),
+                ChartSeries(name = "Two", values = listOf(Double.MAX_VALUE, 2.0)),
+            )
+
+        assertTrue(
+            validateSeries(
+                data = data,
+                minValues = ValidationErrors.MIN_VALUES,
+                allowNegative = false,
+                stacksValues = false,
+                colorCount = 0,
+                expectedColors = null,
+            ).isEmpty(),
         )
     }
 
@@ -84,6 +135,7 @@ class DataValidationTest {
                 data = data,
                 minValues = ValidationErrors.MIN_VALUES,
                 allowNegative = true,
+                stacksValues = false,
                 colorCount = 0,
                 expectedColors = null,
             ).isEmpty(),
@@ -117,6 +169,7 @@ class DataValidationTest {
                     data = data,
                     minValues = ValidationErrors.MIN_VALUES,
                     allowNegative = true,
+                    stacksValues = false,
                     colorCount = 3,
                     expectedColors = 2,
                 ),
@@ -138,6 +191,7 @@ class DataValidationTest {
                 data = data,
                 minValues = ValidationErrors.MIN_VALUES,
                 allowNegative = true,
+                stacksValues = false,
                 colorCount = 7,
                 expectedColors = null,
             ).isEmpty(),

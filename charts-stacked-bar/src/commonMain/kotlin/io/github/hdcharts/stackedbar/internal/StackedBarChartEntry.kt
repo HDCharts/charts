@@ -30,6 +30,7 @@ object StackedBarChartSpec : ChartSpec<StackedBarChartStyle> {
         ChartPolicy(
             minValues = ValidationErrors.MIN_VALUES,
             allowNegative = false,
+            stacksValues = true,
             singleSeries = false,
             hasAxis = true,
             hasFixedRange = false,
