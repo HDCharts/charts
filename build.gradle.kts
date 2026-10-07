@@ -23,6 +23,8 @@ val versionCatalog =
         .named("libs")
 
 scmVersion {
+    // Jobs that need the real version clone the full history; the rest stay shallow and skip the fetch.
+    unshallowRepoOnCI.set(false)
     tag {
         prefix.set("")
     }

@@ -70,15 +70,19 @@ sequenceDiagram
 
 ## Checkout depth
 
-`Assemble`, `Compile`, and `Test` clone the single merge commit they check. Three jobs need the full
-history instead; `Lint` clones it without needing it.
+`Assemble`, `Compile`, `Lint`, and `Test` clone the single merge commit they check. Two jobs need the
+full history instead.
 
 | Job | `fetch-depth` | Reason |
 | --- | --- | --- |
 | `Prepare PR`, both workflows | `0` | `scripts/ci-has-code-changes.sh` diffs the base and head SHAs, so both have to exist locally. |
 | `Compare Public API Against Baseline` | `0` | The check lists `git tag` for the baseline release and adds a worktree at the baseline commit; see [API Compatibility](api-compatibility.md). |
-| `Lint` | `0` | Nothing in the lint path reads git history, so the clone is deeper than the job needs. |
-| `Assemble`, `Compile`, `Test` | `1` | Each runs one Gradle task against `source-sha` and reads no history. |
+| `Assemble`, `Compile`, `Lint`, `Test` | `1` | Each runs one Gradle task against `source-sha` and doesn't need the project version. |
+
+Axion sets the project version from the release tags, and it reads only the tags in the clone; the
+build turns off its `unshallowRepoOnCI` fetch. A shallow clone has no tags, so these jobs build as
+`0.1.0-SNAPSHOT`. Jobs that publish, generate the docs or the web demo, or check the API clone the
+full history and get the real version.
 
 ## Merge gates
 
