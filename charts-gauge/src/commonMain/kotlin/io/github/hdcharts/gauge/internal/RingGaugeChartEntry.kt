@@ -75,7 +75,8 @@ internal fun RingGaugeChartEntry(
     modifier: Modifier,
     style: RingGaugeChartStyle,
     title: String?,
-    valueFormatter: ChartValueFormatter,
+    selectedValueFormatter: ChartValueFormatter,
+    axisValueFormatter: ChartValueFormatter,
     selectedIndex: Int,
     selection: ChartSelection,
     interactionEnabled: Boolean,
@@ -100,7 +101,7 @@ internal fun RingGaugeChartEntry(
                     data = renderData.data,
                     selectedIndex = selectedIndex,
                     title = title,
-                    valueFormatter = valueFormatter,
+                    selectedValueFormatter = selectedValueFormatter,
                 )
 
             ChartPlotLayout(
@@ -131,8 +132,8 @@ internal fun RingGaugeChartEntry(
                         values = values,
                         colors = colors,
                         style = drawStyle,
-                        minLabel = valueFormatter.format(drawStyle.range.min),
-                        maxLabel = valueFormatter.format(drawStyle.range.max),
+                        minLabel = axisValueFormatter.format(drawStyle.range.min),
+                        maxLabel = axisValueFormatter.format(drawStyle.range.max),
                         interactionEnabled = interactionEnabled,
                         animateOnStart = animateOnStart,
                         selectedIndex = selectedIndex,

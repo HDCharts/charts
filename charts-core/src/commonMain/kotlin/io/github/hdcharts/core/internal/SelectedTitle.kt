@@ -27,7 +27,7 @@ fun selectedTitle(
     data: ChartData,
     selectedIndex: Int,
     title: String?,
-    valueFormatter: ChartValueFormatter,
+    selectedValueFormatter: ChartValueFormatter,
 ): String {
     val singleSeries = data.series.singleOrNull()
     if (singleSeries == null || selectedIndex == NO_SELECTION) {
@@ -35,7 +35,7 @@ fun selectedTitle(
     }
     return selectedValueTitle(
         category = data.categories.getOrNull(selectedIndex),
-        value = valueFormatter.format(singleSeries.values[selectedIndex]),
+        value = selectedValueFormatter.format(singleSeries.values[selectedIndex]),
     )
 }
 
@@ -44,12 +44,12 @@ fun selectedTitle(
 fun selectedLegendValues(
     data: ChartData,
     selectedIndex: Int,
-    valueFormatter: ChartValueFormatter,
+    selectedValueFormatter: ChartValueFormatter,
 ): ImmutableList<String> =
     if (selectedIndex == NO_SELECTION) {
         persistentListOf()
     } else {
-        data.series.map { valueFormatter.format(it.values[selectedIndex]) }.toImmutableList()
+        data.series.map { selectedValueFormatter.format(it.values[selectedIndex]) }.toImmutableList()
     }
 
 /** `Category: value`, or the value without a category. */

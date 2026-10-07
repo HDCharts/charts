@@ -45,7 +45,7 @@ fun MultiLineChartDemo(viewModel: MultiLineChartViewModel = koinViewModel()) {
             data = uiState.dataSet.dataSet,
             modifier = Modifier.fillMaxWidth(),
             title = uiState.dataSet.title,
-            valueFormatter = ChartValueFormatters.suffix(" ms"),
+            selectedValueFormatter = ChartValueFormatters.suffix(" ms"),
             style = LineChartDefaults.style(chartContainerStyle = chartContainerStyle),
         )
     }

@@ -64,8 +64,9 @@ keep every bar solid.
 The selection line width is `Dp` and scales with screen density. The default is
 `1.dp`; in 2.x widths were pixels.
 
-The old dataset `prefix` is not a parameter on the v3 stacked-bar API; selected
-values use the chart's default formatting.
+Replace the old dataset `prefix` with `selectedValueFormatter`, such as
+`ChartValueFormatters.prefix("$")`. `axisValueFormatter` formats the Y-axis
+labels.
 
 ## Behavior
 

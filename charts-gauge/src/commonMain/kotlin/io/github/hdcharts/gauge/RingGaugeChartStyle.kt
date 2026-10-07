@@ -15,7 +15,6 @@ import io.github.hdcharts.core.internal.clampTextSize
 import io.github.hdcharts.core.internal.layout.fillMaxSizeChartModifier
 import io.github.hdcharts.core.internal.palette.resolvePaletteColors
 import io.github.hdcharts.core.model.ChartValueFormatter
-import io.github.hdcharts.core.model.ChartValueFormatters
 import io.github.hdcharts.core.style.ChartContainerDefaults
 import io.github.hdcharts.core.style.ChartContainerStyle
 import io.github.hdcharts.core.style.LegendDefaults
@@ -155,8 +154,11 @@ data class GaugeLabelsStyle(
  * An object that provides default styles for a Ring Gauge Chart.
  */
 object RingGaugeChartDefaults {
-    /** Formats the value in the selected title and the range labels. */
-    val valueFormatter: ChartValueFormatter = ChartValueFormatters.Default
+    /** Default formatter for the selected value in the title. */
+    val selectedValueFormatter: ChartValueFormatter = StyleDefaults.selectedValueFormatter
+
+    /** Default formatter for the range labels, omitting only the terminal `.0` on whole values. */
+    val axisValueFormatter: ChartValueFormatter = StyleDefaults.axisValueFormatter
 
     /**
      * Returns a [RingGaugeChartStyle] with the provided parameters or their default values.

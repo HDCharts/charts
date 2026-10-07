@@ -10,6 +10,8 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.hdcharts.core.internal.InternalChartsApi
+import io.github.hdcharts.core.model.ChartValueFormatter
+import io.github.hdcharts.core.model.ChartValueFormatters
 
 /** Every chart style default in one place, so the same element looks the same in every chart.
  *
@@ -79,6 +81,21 @@ object StyleDefaults {
     val titleColor: Color
         @Composable @ReadOnlyComposable
         get() = MaterialTheme.colorScheme.onSurface
+
+    // ===========================================================================
+    // Formatters
+    // ===========================================================================
+
+    /**
+     * Selected values in the title and legend: two decimals with trailing zeros trimmed, keeping `.0`
+     * on whole values. For example: `3.0`, `41.7`, and `0.0`.
+     */
+    val selectedValueFormatter: ChartValueFormatter =
+        ChartValueFormatter { value -> ChartValueFormatters.formatSelectedValue(value = value) }
+
+    /** Axis labels: [selectedValueFormatter] without the `.0` on whole values. */
+    val axisValueFormatter: ChartValueFormatter =
+        ChartValueFormatter { value -> selectedValueFormatter.format(value).removeSuffix(".0") }
 
     // ===========================================================================
     // Histogram

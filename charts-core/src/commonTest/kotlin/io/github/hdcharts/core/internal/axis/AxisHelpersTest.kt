@@ -2,6 +2,7 @@ package io.github.hdcharts.core.internal.axis
 
 import androidx.compose.ui.unit.IntOffset
 import io.github.hdcharts.core.model.ChartValueFormatter
+import io.github.hdcharts.core.style.StyleDefaults
 import kotlin.math.PI
 import kotlin.math.ceil
 import kotlin.math.cos
@@ -79,7 +80,7 @@ class AxisHelpersTest {
                 labelCount = 5,
                 plotHeightPx = 200f,
                 verticalInsetPx = 10f,
-                formatter = defaultAxisValueFormatter,
+                formatter = StyleDefaults.axisValueFormatter,
             )
 
         assertEquals(expected = 5, actual = ticks.size)
@@ -98,7 +99,7 @@ class AxisHelpersTest {
                 labelCount = 5,
                 plotHeightPx = 200f,
                 verticalInsetPx = 0f,
-                formatter = defaultAxisValueFormatter,
+                formatter = StyleDefaults.axisValueFormatter,
             )
 
         assertEquals(expected = 5, actual = ticks.size)
@@ -117,7 +118,7 @@ class AxisHelpersTest {
                 labelCount = 3,
                 plotHeightPx = 0f,
                 verticalInsetPx = 0f,
-                formatter = defaultAxisValueFormatter,
+                formatter = StyleDefaults.axisValueFormatter,
             )
         val negativeHeight =
             buildNumericYAxisTicks(
@@ -126,7 +127,7 @@ class AxisHelpersTest {
                 labelCount = 3,
                 plotHeightPx = -1f,
                 verticalInsetPx = 0f,
-                formatter = defaultAxisValueFormatter,
+                formatter = StyleDefaults.axisValueFormatter,
             )
 
         assertTrue(zeroHeight.isEmpty())
@@ -540,26 +541,6 @@ class AxisHelpersTest {
     }
 
     @Test
-    fun defaultAxisValueFormatter_roundsToTwoDecimalsWithoutTrailingZero() {
-        assertEquals(expected = "5", actual = defaultAxisValueFormatter.format(5.0))
-        assertEquals(expected = "-10", actual = defaultAxisValueFormatter.format(-10.0))
-        assertEquals(expected = "2.5", actual = defaultAxisValueFormatter.format(2.5))
-        assertEquals(expected = "1.23", actual = defaultAxisValueFormatter.format(1.234))
-        assertEquals(expected = "0", actual = defaultAxisValueFormatter.format(-0.001))
-        assertEquals(expected = "NaN", actual = defaultAxisValueFormatter.format(Double.NaN))
-        assertEquals(expected = "Infinity", actual = defaultAxisValueFormatter.format(Double.POSITIVE_INFINITY))
-    }
-
-    @Test
-    fun defaultAxisValueFormatter_largeValues_printPlainDigits() {
-        // Double.toString switches to scientific notation from 10^7 on the JVM.
-        assertEquals(expected = "9000000", actual = defaultAxisValueFormatter.format(9_000_000.0))
-        assertEquals(expected = "10000000", actual = defaultAxisValueFormatter.format(1e7))
-        assertEquals(expected = "12500000", actual = defaultAxisValueFormatter.format(12_500_000.0))
-        assertEquals(expected = "-22500000.5", actual = defaultAxisValueFormatter.format(-22_500_000.5))
-    }
-
-    @Test
     fun visibleIndexRange_viewportOnItemBoundaries_includesItemStartingAtFarEdge() {
         // 10 px items and a viewport over 100..150 px. Item 15 starts on the far edge, where a
         // line chart point is still on screen.
@@ -682,7 +663,7 @@ class AxisHelpersTest {
         maxValue: Double,
         labelCount: Int,
         verticalInsetPx: Float = 0f,
-        formatter: ChartValueFormatter = defaultAxisValueFormatter,
+        formatter: ChartValueFormatter = StyleDefaults.axisValueFormatter,
     ) = buildNumericYAxisTicks(
         minValue = minValue,
         maxValue = maxValue,

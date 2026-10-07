@@ -27,7 +27,7 @@ class SelectedTitleTest {
     fun selectedTitle_oneSeries_showsCategoryAndValue() {
         assertEquals(
             "Jan: #1",
-            selectedTitle(data = oneSeries, selectedIndex = 0, title = TITLE, valueFormatter = FORMATTER),
+            selectedTitle(data = oneSeries, selectedIndex = 0, title = TITLE, selectedValueFormatter = FORMATTER),
         )
     }
 
@@ -35,7 +35,7 @@ class SelectedTitleTest {
     fun selectedTitle_oneSeriesBlankCategory_showsValue() {
         assertEquals(
             "#2",
-            selectedTitle(data = oneSeries, selectedIndex = 1, title = TITLE, valueFormatter = FORMATTER),
+            selectedTitle(data = oneSeries, selectedIndex = 1, title = TITLE, selectedValueFormatter = FORMATTER),
         )
     }
 
@@ -43,7 +43,7 @@ class SelectedTitleTest {
     fun selectedTitle_severalSeries_showsCategory() {
         assertEquals(
             "Jan",
-            selectedTitle(data = twoSeries, selectedIndex = 0, title = TITLE, valueFormatter = FORMATTER),
+            selectedTitle(data = twoSeries, selectedIndex = 0, title = TITLE, selectedValueFormatter = FORMATTER),
         )
     }
 
@@ -51,7 +51,7 @@ class SelectedTitleTest {
     fun selectedTitle_severalSeriesBlankCategory_showsCallerTitle() {
         assertEquals(
             TITLE,
-            selectedTitle(data = twoSeries, selectedIndex = 1, title = TITLE, valueFormatter = FORMATTER),
+            selectedTitle(data = twoSeries, selectedIndex = 1, title = TITLE, selectedValueFormatter = FORMATTER),
         )
     }
 
@@ -59,7 +59,12 @@ class SelectedTitleTest {
     fun selectedTitle_noSelection_showsCallerTitle() {
         assertEquals(
             TITLE,
-            selectedTitle(data = oneSeries, selectedIndex = NO_SELECTION, title = TITLE, valueFormatter = FORMATTER),
+            selectedTitle(
+                data = oneSeries,
+                selectedIndex = NO_SELECTION,
+                title = TITLE,
+                selectedValueFormatter = FORMATTER,
+            ),
         )
     }
 
@@ -67,7 +72,7 @@ class SelectedTitleTest {
     fun selectedLegendValues_selection_formatsEachSeries() {
         assertEquals(
             listOf("#2", "#20"),
-            selectedLegendValues(data = twoSeries, selectedIndex = 1, valueFormatter = FORMATTER),
+            selectedLegendValues(data = twoSeries, selectedIndex = 1, selectedValueFormatter = FORMATTER),
         )
     }
 
@@ -75,7 +80,7 @@ class SelectedTitleTest {
     fun selectedLegendValues_noSelection_isEmpty() {
         assertEquals(
             emptyList(),
-            selectedLegendValues(data = twoSeries, selectedIndex = NO_SELECTION, valueFormatter = FORMATTER),
+            selectedLegendValues(data = twoSeries, selectedIndex = NO_SELECTION, selectedValueFormatter = FORMATTER),
         )
     }
 }

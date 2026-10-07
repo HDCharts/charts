@@ -10,7 +10,6 @@ import io.github.hdcharts.core.internal.clampAlpha
 import io.github.hdcharts.core.internal.clampSize
 import io.github.hdcharts.core.internal.palette.resolvePaletteColors
 import io.github.hdcharts.core.model.ChartValueFormatter
-import io.github.hdcharts.core.model.ChartValueFormatters
 import io.github.hdcharts.core.style.AxisLabelStyle
 import io.github.hdcharts.core.style.ChartContainerDefaults
 import io.github.hdcharts.core.style.ChartContainerStyle
@@ -207,8 +206,11 @@ object StackedBarChartDefaults {
     @Composable
     fun legend(visible: Boolean = StyleDefaults.legendVisible): LegendStyle = LegendDefaults.style(visible = visible)
 
-    /** Default formatter for selected values. */
-    val valueFormatter: ChartValueFormatter = ChartValueFormatters.Default
+    /** Default formatter for selected values in the title and legend. */
+    val selectedValueFormatter: ChartValueFormatter = StyleDefaults.selectedValueFormatter
+
+    /** Default axis formatter, omitting only the terminal `.0` on whole values. */
+    val axisValueFormatter: ChartValueFormatter = StyleDefaults.axisValueFormatter
 }
 
 /** Returns [this] with alphas and sizes clamped to drawable values. */

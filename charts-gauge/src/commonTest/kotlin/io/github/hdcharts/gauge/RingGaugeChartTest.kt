@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import io.github.hdcharts.core.internal.TestTags
 import io.github.hdcharts.core.internal.ValidationErrors
 import io.github.hdcharts.core.model.ChartSeries
+import io.github.hdcharts.core.model.ChartValueFormatter
 import io.github.hdcharts.core.model.ChartValueFormatters
 import io.github.hdcharts.core.model.chartDataOf
 import io.github.hdcharts.core.model.staticChartSelection
@@ -32,6 +33,7 @@ import io.github.hdcharts.gauge.internal.RING_GAUGE_CHART_TAG
 import io.github.hdcharts.gauge.internal.RingGaugeLayout
 import io.github.hdcharts.gauge.internal.ringGaugeLayout
 import kotlin.test.Test
+import kotlin.test.assertEquals
 
 @OptIn(ExperimentalTestApi::class)
 class RingGaugeChartTest {
@@ -56,7 +58,7 @@ class RingGaugeChartTest {
             setContent {
                 RingGaugeChart(
                     data = gaugeData,
-                    valueFormatter = ChartValueFormatters.suffix("%"),
+                    selectedValueFormatter = ChartValueFormatters.suffix("%"),
                     selection = staticChartSelection(1),
                     interactionEnabled = false,
                 )
@@ -183,7 +185,7 @@ class RingGaugeChartTest {
                 RingGaugeChart(
                     data = gaugeData,
                     title = TITLE,
-                    valueFormatter = ChartValueFormatters.suffix("%"),
+                    selectedValueFormatter = ChartValueFormatters.suffix("%"),
                     selection = staticChartSelection(1),
                     interactionEnabled = false,
                 )
@@ -191,6 +193,36 @@ class RingGaugeChartTest {
 
             onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("${LABELS[1]}: 39.0%")
         }
+
+    /** The title uses the selected-value formatter and the range labels use the axis formatter. */
+    @Test
+    fun ringGaugeChart_formatters_formatTheTitleAndTheRangeLabelsSeparately() =
+        runComposeUiTest {
+            val axisValues = mutableListOf<Double>()
+            setContent {
+                RingGaugeChart(
+                    data = gaugeData,
+                    selectedValueFormatter = ChartValueFormatter { value -> "selected=$value" },
+                    axisValueFormatter =
+                        ChartValueFormatter { value ->
+                            axisValues += value
+                            "axis=$value"
+                        },
+                    selection = staticChartSelection(1),
+                    interactionEnabled = false,
+                )
+            }
+
+            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("${LABELS[1]}: selected=39.0")
+            runOnIdle { assertEquals(setOf(0.0, 100.0), axisValues.toSet()) }
+        }
+
+    /** The default range labels read `0` and `100`, not the selected-value format's `0.0` and `100.0`. */
+    @Test
+    fun ringGaugeChartDefaults_axisValueFormatter_dropsTheTrailingZero() {
+        assertEquals(expected = "0", actual = RingGaugeChartDefaults.axisValueFormatter.format(0.0))
+        assertEquals(expected = "100", actual = RingGaugeChartDefaults.axisValueFormatter.format(100.0))
+    }
 
     /** Without categories the title shows the value alone. */
     @Test
@@ -200,7 +232,7 @@ class RingGaugeChartTest {
                 RingGaugeChart(
                     data = values.toChartData(),
                     title = TITLE,
-                    valueFormatter = ChartValueFormatters.suffix("%"),
+                    selectedValueFormatter = ChartValueFormatters.suffix("%"),
                     selection = staticChartSelection(1),
                     interactionEnabled = false,
                 )

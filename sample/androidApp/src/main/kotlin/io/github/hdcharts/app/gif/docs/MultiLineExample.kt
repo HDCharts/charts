@@ -73,6 +73,6 @@ fun ShowMultiLine(viewModel: MultiLineViewModel = viewModel()) {
     LineChart(
         data = chartData,
         title = TITLE,
-        valueFormatter = ChartValueFormatters.prefix("$"),
+        selectedValueFormatter = ChartValueFormatters.prefix("$"),
     )
 }

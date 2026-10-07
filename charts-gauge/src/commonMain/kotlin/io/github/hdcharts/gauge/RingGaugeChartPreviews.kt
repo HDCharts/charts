@@ -3,12 +3,15 @@ package io.github.hdcharts.gauge
 import androidx.compose.runtime.Composable
 import io.github.hdcharts.core.ChartsPreviewLightDark
 import io.github.hdcharts.core.ChartsPreviewTheme
+import io.github.hdcharts.core.model.ChartValueFormatter
 import io.github.hdcharts.core.model.ChartValueFormatters
 import io.github.hdcharts.core.model.toChartData
 
 private const val RING_GAUGE_CHART_TITLE = "Ring Gauge Chart"
 private val RING_GAUGE_VALUES = listOf(25.0, 39.0)
 private val RING_GAUGE_LABELS = listOf("Last year", "This year")
+private val PERCENT_AXIS_FORMATTER =
+    ChartValueFormatter { value -> "${RingGaugeChartDefaults.axisValueFormatter.format(value)}%" }
 
 @ChartsPreviewLightDark
 @Composable
@@ -17,7 +20,8 @@ private fun RingGaugeChartPreview() {
         RingGaugeChart(
             data = RING_GAUGE_VALUES.toChartData(categories = RING_GAUGE_LABELS),
             title = RING_GAUGE_CHART_TITLE,
-            valueFormatter = ChartValueFormatters.suffix("%"),
+            selectedValueFormatter = ChartValueFormatters.suffix("%"),
+            axisValueFormatter = PERCENT_AXIS_FORMATTER,
         )
     }
 }

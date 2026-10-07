@@ -42,7 +42,7 @@ LineChart(
     ),
     title = "Weekly Revenue by Channel",
     selection = selection,
-    valueFormatter = ChartValueFormatters.prefix("$"),
+    selectedValueFormatter = ChartValueFormatters.prefix("$"),
 )
 ```
 
@@ -91,5 +91,5 @@ zoom, and scrolling of dense data, while programmatic selection remains
 visible. Dense data shows the fit view.
 
 Categories are explicit labels. An empty list hides X-axis labels, and supplied
-categories must match every series. `valueFormatter` and `axisValueFormatter`
+categories must match every series. `selectedValueFormatter` and `axisValueFormatter`
 are independent and both receive `Double` values.

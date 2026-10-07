@@ -15,7 +15,7 @@ import io.github.hdcharts.radar.internal.RadarChartEntry
  * Displays one or more radar polygons sharing common axes.
  *
  * [selection] holds the axis selected by dragging, and a tap clears it. [seriesSelection] holds the
- * series focused by tapping its outline. [valueFormatter] formats the selected values.
+ * series focused by tapping its outline. [selectedValueFormatter] formats the selected values.
  */
 @OptIn(InternalChartsApi::class)
 @Composable
@@ -28,7 +28,7 @@ fun RadarChart(
     seriesSelection: ChartSelection = rememberChartSelection(),
     interactionEnabled: Boolean = true,
     animateOnStart: Boolean = true,
-    valueFormatter: ChartValueFormatter = RadarChartDefaults.valueFormatter,
+    selectedValueFormatter: ChartValueFormatter = RadarChartDefaults.selectedValueFormatter,
 ) {
     val axisCount =
         data.series
@@ -60,6 +60,6 @@ fun RadarChart(
         seriesSelection = seriesSelection,
         interactionEnabled = interactionEnabled,
         animateOnStart = animateOnStart,
-        valueFormatter = valueFormatter,
+        selectedValueFormatter = selectedValueFormatter,
     )
 }

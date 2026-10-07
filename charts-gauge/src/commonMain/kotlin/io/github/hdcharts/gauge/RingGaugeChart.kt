@@ -30,7 +30,8 @@ import io.github.hdcharts.gauge.internal.RingGaugeChartEntry
  * the data fails validation.
  * @param style The style to be applied to the chart. If not provided, the default style will be used.
  * @param title Optional chart title displayed when no ring is selected.
- * @param valueFormatter Formats the value in the selected title and the range labels.
+ * @param selectedValueFormatter Formats the selected value in the title.
+ * @param axisValueFormatter Formats the range labels under the ends of the arc.
  * @param selection The hoisted selection state. Use [rememberChartSelection] for interactive charts or
  * [io.github.hdcharts.core.model.staticChartSelection] for deterministic preset selections.
  * @param interactionEnabled When `false`, disables tap-to-select.
@@ -44,7 +45,8 @@ fun RingGaugeChart(
     modifier: Modifier = Modifier,
     style: RingGaugeChartStyle = RingGaugeChartDefaults.style(),
     title: String? = null,
-    valueFormatter: ChartValueFormatter = RingGaugeChartDefaults.valueFormatter,
+    selectedValueFormatter: ChartValueFormatter = RingGaugeChartDefaults.selectedValueFormatter,
+    axisValueFormatter: ChartValueFormatter = RingGaugeChartDefaults.axisValueFormatter,
     selection: ChartSelection = rememberChartSelection(),
     interactionEnabled: Boolean = true,
     animateOnStart: Boolean = true,
@@ -66,7 +68,8 @@ fun RingGaugeChart(
         modifier = modifier,
         style = style,
         title = title,
-        valueFormatter = valueFormatter,
+        selectedValueFormatter = selectedValueFormatter,
+        axisValueFormatter = axisValueFormatter,
         selectedIndex = selectedIndex,
         selection = selection,
         interactionEnabled = interactionEnabled,

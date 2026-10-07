@@ -516,7 +516,7 @@ class StackedBarChartTest {
 
     @OptIn(ExperimentalTestApi::class)
     @Test
-    fun stackedBarChart_valueFormatter_formatsSelectedLegendValues() =
+    fun stackedBarChart_formatters_formatSelectedLegendValuesAndYAxisLabels() =
         runComposeUiTest {
             setContent {
                 StackedBarChart(
@@ -524,11 +524,13 @@ class StackedBarChartTest {
                     selection = staticChartSelection(0),
                     interactionEnabled = false,
                     animateOnStart = false,
-                    valueFormatter = ChartValueFormatter { value -> "#${value.toInt()}" },
+                    selectedValueFormatter = ChartValueFormatter { value -> "#${value.toInt()}" },
+                    axisValueFormatter = ChartValueFormatter { value -> "y=${value.toInt()}" },
                 )
             }
 
             onNodeWithText("S1 - #10").assertIsDisplayed()
+            onNodeWithText("y=0").assertIsDisplayed()
         }
 
     @OptIn(ExperimentalTestApi::class)

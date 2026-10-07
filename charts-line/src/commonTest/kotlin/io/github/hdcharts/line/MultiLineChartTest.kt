@@ -80,7 +80,7 @@ class MultiLineChartTest {
                 LineChart(
                     data = multiDataSet,
                     title = "Title",
-                    valueFormatter = ChartValueFormatters.prefix("$"),
+                    selectedValueFormatter = ChartValueFormatters.prefix("$"),
                     interactionEnabled = false,
                     animateOnStart = false,
                     selection = staticChartSelection(selectedIndex),
@@ -102,7 +102,7 @@ class MultiLineChartTest {
             setContent {
                 LineChart(
                     data = multiDataSet,
-                    valueFormatter = ChartValueFormatters.prefix("$"),
+                    selectedValueFormatter = ChartValueFormatters.prefix("$"),
                     animateOnStart = false,
                     selection = staticChartSelection(2),
                 )
@@ -174,7 +174,7 @@ class MultiLineChartTest {
                 LineChart(
                     data = dataSet,
                     title = "Blank Categories",
-                    valueFormatter = ChartValueFormatter { value -> "v${value.toInt()}" },
+                    selectedValueFormatter = ChartValueFormatter { value -> "v${value.toInt()}" },
                     selection = staticChartSelection(index = 1),
                     interactionEnabled = false,
                     animateOnStart = false,

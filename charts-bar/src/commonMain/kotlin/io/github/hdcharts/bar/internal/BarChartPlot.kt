@@ -29,7 +29,7 @@ fun BarChartInternalPlot(
     selectedIndex: Int,
     interactionEnabled: Boolean,
     animateOnStart: Boolean,
-    valueFormatter: ChartValueFormatter,
+    selectedValueFormatter: ChartValueFormatter,
     axisValueFormatter: ChartValueFormatter,
     modifier: Modifier = Modifier,
     chartTag: String? = null,
@@ -46,7 +46,7 @@ fun BarChartInternalPlot(
                 onValueChanged = { index ->
                     if (index == NO_SELECTION) selection.clear() else selection.select(index)
                 },
-                valueFormatter = valueFormatter,
+                selectedValueFormatter = selectedValueFormatter,
                 axisValueFormatter = axisValueFormatter,
             )
         }

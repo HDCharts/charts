@@ -295,7 +295,7 @@ class RadarChartTest {
                     selection = staticChartSelection(0),
                     interactionEnabled = false,
                     animateOnStart = false,
-                    valueFormatter = ChartValueFormatter { value -> "#${value.toInt()}" },
+                    selectedValueFormatter = ChartValueFormatter { value -> "#${value.toInt()}" },
                 )
             }
 

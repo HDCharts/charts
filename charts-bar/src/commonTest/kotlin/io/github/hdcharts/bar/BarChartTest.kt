@@ -99,7 +99,7 @@ class BarChartTest {
             // Arrange
             val selectedBarIndex = 1
             val values = data.series.single().values
-            val expectedTitle = ChartValueFormatters.Default.format(values[selectedBarIndex])
+            val expectedTitle = BarChartDefaults.selectedValueFormatter.format(values[selectedBarIndex])
 
             // Act
             setContent {
@@ -377,13 +377,13 @@ class BarChartTest {
         runComposeUiTest {
             val preciseData = listOf(0.123456789, 1.0).toChartData(categories = listOf("First", "Last"))
             val selection = ChartSelection(initialIndex = 0)
-            val valueFormatter = mutableStateOf(ChartValueFormatters.Default)
-            val axisFormatter = mutableStateOf(ChartValueFormatters.Default)
+            val selectedValueFormatter = mutableStateOf(BarChartDefaults.selectedValueFormatter)
+            val axisFormatter = mutableStateOf(BarChartDefaults.selectedValueFormatter)
             setContent {
                 BarChart(
                     data = preciseData,
                     selection = selection,
-                    valueFormatter = valueFormatter.value,
+                    selectedValueFormatter = selectedValueFormatter.value,
                     axisValueFormatter = axisFormatter.value,
                     style = BarChartDefaults.style(range = BarChartDefaults.range(min = 0.0, max = 1.0)),
                     animateOnStart = false,
@@ -392,14 +392,14 @@ class BarChartTest {
 
             onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("First: 0.12").assertIsDisplayed()
             onNodeWithText("1.0").assertIsDisplayed()
-            runOnIdle { valueFormatter.value = ChartValueFormatter { value -> "raw=$value" } }
+            runOnIdle { selectedValueFormatter.value = ChartValueFormatter { value -> "raw=$value" } }
             onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("First: raw=0.123456789").assertIsDisplayed()
             onNodeWithText("1.0").assertIsDisplayed()
             runOnIdle { axisFormatter.value = ChartValueFormatter { value -> "axis=$value" } }
             onNodeWithText("axis=1.0").assertIsDisplayed()
             onNodeWithText("axis=0.0").assertIsDisplayed()
             onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("First: raw=0.123456789").assertIsDisplayed()
-            runOnIdle { valueFormatter.value = ChartValueFormatters.suffix(" units") }
+            runOnIdle { selectedValueFormatter.value = ChartValueFormatters.suffix(" units") }
             onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("First: 0.12 units").assertIsDisplayed()
             onNodeWithText("axis=1.0").assertIsDisplayed()
         }

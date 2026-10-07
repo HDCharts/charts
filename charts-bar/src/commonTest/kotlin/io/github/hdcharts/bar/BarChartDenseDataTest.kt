@@ -388,7 +388,7 @@ class BarChartDenseDataTest {
                                 drawLayer(captureLayer)
                             },
                     selection = selection,
-                    valueFormatter = ChartValueFormatter { it.toString() },
+                    selectedValueFormatter = ChartValueFormatter { it.toString() },
                     animateOnStart = false,
                     style =
                         BarChartDefaults.style(

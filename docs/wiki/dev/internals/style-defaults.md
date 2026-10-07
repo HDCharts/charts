@@ -82,6 +82,13 @@ Sizes are `Dp`, so they scale with screen density. Point and marker sizes are ra
 | Title | `20.sp`, `ExtraBold` | All |
 | Axis labels | `11.sp` | Bar, histogram, line, stacked bar, stacked area, radar, ring gauge (range labels) |
 
+## Formatters
+
+| Formatter | Default | Charts |
+| --- | --- | --- |
+| `selectedValueFormatter` | Two decimals, trailing zeros trimmed, `.0` kept: `3.0`, `41.7` | Bar, histogram, line, stacked bar, stacked area, radar, ring gauge |
+| `axisValueFormatter` | The same without the `.0` on whole values: `3`, `41.7` | Bar, histogram, line, live line, stacked bar, stacked area, ring gauge (range labels) |
+
 ## Alpha
 
 Chart color `alpha` defaults to `1f`, so the colors a user passes are drawn exactly as given. Users

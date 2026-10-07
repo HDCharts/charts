@@ -26,3 +26,19 @@ fun ShowStackedBar() {
     StackedBarChart(data = data, title = "Quarterly Revenue by Channel")
 }
 ```
+
+## Formatting
+
+```kotlin
+StackedBarChart(
+    data = data,
+    title = "Quarterly Revenue by Channel",
+    selectedValueFormatter = ChartValueFormatters.prefix("$"),
+    axisValueFormatter = ChartValueFormatter { value ->
+        "$" + StackedBarChartDefaults.axisValueFormatter.format(value)
+    },
+)
+```
+
+`selectedValueFormatter` formats the selected values, and `axisValueFormatter` formats the Y-axis labels.
+`StackedAreaChart` takes the same two formatters.

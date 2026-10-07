@@ -65,7 +65,7 @@ internal fun BarChartEntry(
     selectedIndex: Int,
     interactionEnabled: Boolean,
     animateOnStart: Boolean,
-    valueFormatter: ChartValueFormatter,
+    selectedValueFormatter: ChartValueFormatter,
     axisValueFormatter: ChartValueFormatter,
 ) {
     ChartEntry(
@@ -82,7 +82,7 @@ internal fun BarChartEntry(
                 selectedIndex = selectedIndex,
                 interactionEnabled = interactionEnabled,
                 animateOnStart = animateOnStart,
-                valueFormatter = valueFormatter,
+                selectedValueFormatter = selectedValueFormatter,
                 axisValueFormatter = axisValueFormatter,
                 modifier = modifier,
             )

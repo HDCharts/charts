@@ -15,7 +15,6 @@ the bottom, each label is centered on its tick, and every label stays inside its
 | --- | --- | --- |
 | Tick values and positions | `buildNumericYAxisTicks` | `NumericYAxisTicks.kt` |
 | Tick count | `yAxisTickCount`, `yAxisLabelMinSpacingPx` | `NumericYAxisTicks.kt`, `AxisHelpers.kt` |
-| Stacked chart labels | `defaultAxisValueFormatter` | `NumericYAxisTicks.kt` |
 | Ticks, column width, and gap in one call | `rememberNumericYAxisLayout` | `AxisLabelLayouts.kt` |
 | Column width | `yAxisLabelColumnWidthPx`, `estimateYAxisLabelWidthPx` | `AxisLabelLayouts.kt`, `AxisHelpers.kt` |
 | Drawing | `AxisYLabelsLayout`, `placeYAxisLabel` | `AxisLabelLayouts.kt`, `AxisHelpers.kt` |
@@ -56,12 +55,11 @@ flat line at 0.375 with 11 labels would then show 0.37 among its 0.38 labels.
 
 ## Formatting
 
-Bar, histogram, line, and live line charts format ticks with their `axisValueFormatter`. Stacked
-bar and stacked area charts have no public formatter yet (see "Stacked charts have no public
-formatters" in Y-Axis Label Issues) and use `defaultAxisValueFormatter`, which matches the bar and line defaults:
+All six charts format ticks with their `axisValueFormatter`. Every chart's default points to
+`StyleDefaults.axisValueFormatter`:
 
-- It rounds to two decimals with `ChartValueFormatters.Default` and drops a trailing `.0`: 12.345
-  prints `12.35` and 12.0 prints `12`.
+- It rounds to two decimals with `StyleDefaults.selectedValueFormatter` and drops a trailing
+  `.0`: 12.345 prints `12.35` and 12.0 prints `12`.
 - It prints plain digits on every platform, so 12,500,000 prints `12500000`, never `1.25E7`.
 - It prints values that round to zero as `0`, and `NaN`, `Infinity`, and `-Infinity` as they are.
 

@@ -50,7 +50,7 @@ fun ShowMultiLine() {
     LineChart(
         data = data,
         title = "Weekly Revenue by Channel",
-        valueFormatter = ChartValueFormatters.prefix("$"),
+        selectedValueFormatter = ChartValueFormatters.prefix("$"),
     )
 }
 ```

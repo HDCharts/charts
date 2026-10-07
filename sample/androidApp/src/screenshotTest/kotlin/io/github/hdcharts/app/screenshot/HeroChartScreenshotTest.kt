@@ -38,7 +38,7 @@ fun HeroChartPreview() {
                 modifier = Modifier.fillMaxSize(),
                 title = sample.title,
                 animateOnStart = SCREENSHOT_ANIMATE_ON_START,
-                valueFormatter = ChartValueFormatters.prefix("$"),
+                selectedValueFormatter = ChartValueFormatters.prefix("$"),
                 axisValueFormatter = { value -> "$" + LineChartDefaults.axisValueFormatter.format(value) },
             )
         }

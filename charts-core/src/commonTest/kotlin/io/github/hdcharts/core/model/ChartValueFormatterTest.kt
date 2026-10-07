@@ -1,55 +1,11 @@
 package io.github.hdcharts.core.model
 
+import io.github.hdcharts.core.style.StyleDefaults
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
 class ChartValueFormatterTest {
-    @Test
-    fun default_roundsToTwoDecimals() {
-        // Act
-        val formatter = ChartValueFormatters.Default
-
-        // Assert
-        assertEquals(expected = "41.7", actual = formatter.format(41.7))
-        assertEquals(expected = "-41.7", actual = formatter.format(-41.7))
-        assertEquals(expected = "1.5", actual = formatter.format(1.5))
-        assertEquals(expected = "3.0", actual = formatter.format(3.0))
-        assertEquals(expected = "3.0", actual = formatter.format(2.999))
-        assertEquals(expected = "1.23", actual = formatter.format(1.234))
-        assertEquals(expected = "-1.24", actual = formatter.format(-1.236))
-        assertEquals(expected = "10.0", actual = formatter.format(9.999))
-    }
-
-    @Test
-    fun default_normalizesNearZeroToZero() {
-        // Act
-        val formatter = ChartValueFormatters.Default
-
-        // Assert
-        for (value in listOf(0.0, -0.0, 0.004, -0.004, Double.MIN_VALUE, -Double.MIN_VALUE)) {
-            assertEquals(expected = "0.0", actual = formatter.format(value), message = "value=$value")
-        }
-        assertEquals(expected = "0.01", actual = formatter.format(0.01))
-        assertEquals(expected = "0.01", actual = formatter.format(0.005))
-        assertEquals(expected = "-0.01", actual = formatter.format(-0.005))
-    }
-
-    @Test
-    fun default_roundsDecimalTiesAwayFromZero() {
-        assertEquals(expected = "0.13", actual = ChartValueFormatters.Default.format(0.125))
-        assertEquals(expected = "-0.13", actual = ChartValueFormatters.Default.format(-0.125))
-        assertEquals(expected = "1.01", actual = ChartValueFormatters.Default.format(1.005))
-        assertEquals(expected = "-1.01", actual = ChartValueFormatters.Default.format(-1.005))
-    }
-
-    @Test
-    fun default_doesNotSaturateLargeValues() {
-        assertEquals(expected = "21474836.48", actual = ChartValueFormatters.Default.format(21_474_836.48))
-        assertEquals(expected = "-21474836.48", actual = ChartValueFormatters.Default.format(-21_474_836.48))
-        assertEquals(expected = "100000000000000000000.0", actual = ChartValueFormatters.Default.format(1.0e20))
-    }
-
     @Test
     fun prefix_prependsBeforeDefaultFormat() {
         // Act
@@ -156,7 +112,7 @@ class ChartValueFormatterTest {
 
     @Test
     fun formatters_preserveDoublePrecision() {
-        assertEquals(expected = "16777217.13", actual = ChartValueFormatters.Default.format(16_777_217.125))
+        assertEquals(expected = "16777217.13", actual = StyleDefaults.selectedValueFormatter.format(16_777_217.125))
         assertEquals(expected = "16777217.125", actual = ChartValueFormatters.fixed(3).format(16_777_217.125))
         assertEquals(
             expected = "9007199254740991",
@@ -173,8 +129,8 @@ class ChartValueFormatterTest {
     fun formatters_expandMaximumDoubleWithoutOverflow() {
         // The decimal source is 1.7976931348623157E308, not the exact binary integer.
         val integer = "17976931348623157" + "0".repeat(292)
-        assertEquals(expected = "$integer.0", actual = ChartValueFormatters.Default.format(Double.MAX_VALUE))
-        assertEquals(expected = "-$integer.0", actual = ChartValueFormatters.Default.format(-Double.MAX_VALUE))
+        assertEquals(expected = "$integer.0", actual = StyleDefaults.selectedValueFormatter.format(Double.MAX_VALUE))
+        assertEquals(expected = "-$integer.0", actual = StyleDefaults.selectedValueFormatter.format(-Double.MAX_VALUE))
         for (precision in listOf(0, 2, 15)) {
             val expected = if (precision == 0) integer else "$integer." + "0".repeat(precision)
             val formatter = ChartValueFormatters.fixed(precision)
@@ -195,7 +151,7 @@ class ChartValueFormatterTest {
     fun formatters_useExplicitNonfiniteStrings() {
         val formatters =
             listOf(
-                ChartValueFormatters.Default,
+                StyleDefaults.selectedValueFormatter,
                 ChartValueFormatters.fixed(0),
                 ChartValueFormatters.fixed(2),
                 ChartValueFormatters.fixed(15),

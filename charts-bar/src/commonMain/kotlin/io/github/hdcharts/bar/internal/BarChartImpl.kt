@@ -48,7 +48,7 @@ internal fun BarChartImpl(
     animateOnStart: Boolean,
     selectedBarIndex: Int = NO_SELECTION,
     onValueChanged: (Int) -> Unit = {},
-    valueFormatter: ChartValueFormatter,
+    selectedValueFormatter: ChartValueFormatter,
     axisValueFormatter: ChartValueFormatter,
 ) {
     // Opaque, because drawBars applies bars.alpha to solid and gradient bars alike.
@@ -158,10 +158,10 @@ internal fun BarChartImpl(
             sourceRanges.indexOfFirst { selectedBarIndex in it }
 
         val resolvedTitle =
-            remember(title, chartData, selectedBarIndex, valueFormatter) {
+            remember(title, chartData, selectedBarIndex, selectedValueFormatter) {
                 when {
                     selectedBarIndex !in chartData.barValues.indices -> title
-                    else -> resolveSelectedBarTitle(chartData, selectedBarIndex, valueFormatter)
+                    else -> resolveSelectedBarTitle(chartData, selectedBarIndex, selectedValueFormatter)
                 }
             }
 

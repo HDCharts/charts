@@ -11,8 +11,8 @@ import io.github.hdcharts.core.model.rememberSelectionLifecycle
 import io.github.hdcharts.stackedbar.internal.StackedBarChartEntry
 
 /**
- * Displays nonnegative absolute stacks from one aligned series per segment. [valueFormatter] formats
- * the selected values.
+ * Displays nonnegative absolute stacks from one aligned series per segment.
+ * [selectedValueFormatter] formats the selected values; [axisValueFormatter] formats Y ticks.
  */
 @Composable
 fun StackedBarChart(
@@ -23,7 +23,8 @@ fun StackedBarChart(
     selection: ChartSelection = rememberChartSelection(),
     interactionEnabled: Boolean = true,
     animateOnStart: Boolean = true,
-    valueFormatter: ChartValueFormatter = StackedBarChartDefaults.valueFormatter,
+    selectedValueFormatter: ChartValueFormatter = StackedBarChartDefaults.selectedValueFormatter,
+    axisValueFormatter: ChartValueFormatter = StackedBarChartDefaults.axisValueFormatter,
 ) {
     val pointCount =
         data.series
@@ -44,7 +45,8 @@ fun StackedBarChart(
         selectedIndex = selectedIndex,
         interactionEnabled = interactionEnabled,
         animateOnStart = animateOnStart,
-        valueFormatter = valueFormatter,
+        selectedValueFormatter = selectedValueFormatter,
+        axisValueFormatter = axisValueFormatter,
         onValueChanged = { index ->
             if (index == NO_SELECTION) selection.clear() else selection.select(index)
         },

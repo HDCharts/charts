@@ -15,7 +15,6 @@ import io.github.hdcharts.core.internal.MAX_GRID_STEPS
 import io.github.hdcharts.core.internal.MAX_SIZE_PX
 import io.github.hdcharts.core.internal.axis.validateAxisLabels
 import io.github.hdcharts.core.internal.validateRange
-import io.github.hdcharts.core.model.ChartValueFormatters
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlin.test.Test
@@ -241,8 +240,8 @@ class BarStyleDefaultsTest {
 
     @Test
     fun formatters_preserveReadoutsAndTrimOnlyTerminalPointZeroFromTicks() {
-        assertSame(expected = ChartValueFormatters.Default, actual = BarChartDefaults.valueFormatter)
-        assertEquals(expected = "3.0", actual = BarChartDefaults.valueFormatter.format(3.0))
+        assertSame(expected = StyleDefaults.selectedValueFormatter, actual = BarChartDefaults.selectedValueFormatter)
+        assertEquals(expected = "3.0", actual = BarChartDefaults.selectedValueFormatter.format(3.0))
         assertEquals(expected = "3", actual = BarChartDefaults.axisValueFormatter.format(3.0))
         assertEquals(expected = "0", actual = BarChartDefaults.axisValueFormatter.format(0.0))
         assertEquals(expected = "-3", actual = BarChartDefaults.axisValueFormatter.format(-3.0))
