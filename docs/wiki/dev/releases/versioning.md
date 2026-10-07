@@ -9,6 +9,10 @@ Axion resolves the version from Git tags (`scmVersion` in `build.gradle.kts`). T
 `chartsVersionIncrementer` property in `gradle.properties` picks how the next version grows:
 `incrementMajor`, `incrementMinor`, or `incrementPatch`.
 
+Axion reads only the tags already in the clone. The build turns off its `unshallowRepoOnCI` fetch,
+so a CI job that needs the version checks out with `fetch-depth: 0`. A shallow clone has no tags and
+builds as `0.1.0-SNAPSHOT`.
+
 After a release tag `X.Y.Z`, the next development version is:
 
 | Incrementer | Next version |
