@@ -43,3 +43,16 @@ PieChart(
 ```
 
 A palette whose count does not match the slice count is reported as an error rather than drawn.
+
+## Selected Share
+
+A selected slice shows its share of the total next to its category, such as `42.5%`.
+`selectedValueFormatter` formats that share, given in percent from 0 to 100. This one shows whole
+percents:
+
+```kotlin
+PieChart(
+    data = data,
+    selectedValueFormatter = ChartValueFormatter { share -> "${share.roundToInt()}%" },
+)
+```

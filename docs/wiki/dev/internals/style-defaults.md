@@ -87,6 +87,7 @@ Sizes are `Dp`, so they scale with screen density. Point and marker sizes are ra
 | Formatter | Default | Charts |
 | --- | --- | --- |
 | `selectedValueFormatter` | Two decimals, trailing zeros trimmed, `.0` kept: `3.0`, `41.7` | Bar, histogram, line, stacked bar, stacked area, radar, ring gauge |
+| Pie `selectedValueFormatter` | The same with a `%` suffix, for the slice's share: `42.5%` | Pie |
 | `axisValueFormatter` | The same without the `.0` on whole values: `3`, `41.7` | Bar, histogram, line, live line, stacked bar, stacked area, ring gauge (range labels) |
 
 ## Alpha

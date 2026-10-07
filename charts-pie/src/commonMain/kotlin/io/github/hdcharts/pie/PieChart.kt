@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import io.github.hdcharts.core.internal.InternalChartsApi
 import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.model.ChartSelection
+import io.github.hdcharts.core.model.ChartValueFormatter
 import io.github.hdcharts.core.model.SelectionLifetime
 import io.github.hdcharts.core.model.rememberChartSelection
 import io.github.hdcharts.core.model.rememberSelectionLifecycle
@@ -35,6 +36,7 @@ internal const val PIE_SELECTION_AUTO_DESELECT_TIMEOUT_MS = 3000L
  * branch when the data fails validation.
  * @param style The style to be applied to the chart. If not provided, the default style will be used.
  * @param title Optional chart title displayed when no slice is selected.
+ * @param selectedValueFormatter Formats the selected slice's share, in percent from 0 to 100.
  * @param selection The hoisted selection state. Use [rememberChartSelection] for interactive
  *   charts or [io.github.hdcharts.core.model.staticChartSelection] for deterministic
  *   preset selections.
@@ -49,6 +51,7 @@ fun PieChart(
     modifier: Modifier = Modifier,
     style: PieChartStyle = PieChartDefaults.style(),
     title: String? = null,
+    selectedValueFormatter: ChartValueFormatter = PieChartDefaults.selectedValueFormatter,
     selection: ChartSelection = rememberChartSelection(),
     interactionEnabled: Boolean = true,
     animateOnStart: Boolean = true,
@@ -77,6 +80,7 @@ fun PieChart(
         modifier = modifier,
         style = style,
         title = title,
+        selectedValueFormatter = selectedValueFormatter,
         selection = selection,
         interactionEnabled = interactionEnabled,
         animateOnStart = animateOnStart,

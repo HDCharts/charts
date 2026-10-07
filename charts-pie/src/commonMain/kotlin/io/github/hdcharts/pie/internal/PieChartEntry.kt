@@ -13,6 +13,7 @@ import io.github.hdcharts.core.internal.InternalChartsApi
 import io.github.hdcharts.core.internal.ValidationErrors
 import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.model.ChartSelection
+import io.github.hdcharts.core.model.ChartValueFormatter
 import io.github.hdcharts.pie.PieChartSlicesStyle
 import io.github.hdcharts.pie.PieChartStyle
 import io.github.hdcharts.pie.clamp
@@ -64,6 +65,7 @@ internal fun PieChartEntry(
     modifier: Modifier,
     style: PieChartStyle,
     title: String?,
+    selectedValueFormatter: ChartValueFormatter,
     selection: ChartSelection,
     interactionEnabled: Boolean,
     animateOnStart: Boolean,
@@ -84,6 +86,7 @@ internal fun PieChartEntry(
             PieChartFrame(
                 modifier = modifier,
                 title = title,
+                selectedValueFormatter = selectedValueFormatter,
                 labels = renderData.categories,
                 points = values,
                 colors = colors,

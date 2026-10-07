@@ -9,7 +9,6 @@ import kotlin.math.abs
 import kotlin.math.atan
 import kotlin.math.cos
 import kotlin.math.min
-import kotlin.math.round
 import kotlin.math.sin
 import kotlin.math.sqrt
 
@@ -181,19 +180,15 @@ internal fun getCoordinatesForSlice(
 }
 
 /**
- * Calculates the percentage string for each value.
+ * Each value's share of the total, in percent from 0 to 100.
  *
- * Returns `"0"` for every slice when the total is zero or non-positive so callers never
- * see `NaN%` for the all-zero case. Already-rounded to two decimals.
+ * Returns `0.0` for every slice when the total is zero or not finite, so the all-zero case never
+ * shows `NaN`.
  */
-internal fun calculatePercentages(values: List<Double>): List<String> {
+internal fun calculateShares(values: List<Double>): List<Double> {
     val total = values.sum()
     if (total == 0.0 || !total.isFinite()) {
-        return List(values.size) { "0" }
+        return List(values.size) { 0.0 }
     }
-    return values.map { value ->
-        val percentage = (value / total) * 100
-        val rounded = round(percentage * 100) / 100
-        "$rounded"
-    }
+    return values.map { value -> (value / total) * 100 }
 }
