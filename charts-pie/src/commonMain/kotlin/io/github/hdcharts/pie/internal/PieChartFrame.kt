@@ -65,16 +65,17 @@ internal fun PieChartFrame(
                     selectedIndex = forcedSelectedIndex,
                     title = title,
                 )
-            if (displayedTitle.isNotBlank()) {
-                if (hasSelection) {
-                    Row(
-                        modifier =
-                            style.chartContainerStyle.modifierTopTitle
-                                .padding(end = style.chartContainerStyle.contentPadding),
-                        horizontalArrangement =
-                            Arrangement.spacedBy(style.chartContainerStyle.contentPadding),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
+            if (hasSelection) {
+                Row(
+                    modifier =
+                        style.chartContainerStyle.modifierTopTitle
+                            .padding(end = style.chartContainerStyle.contentPadding),
+                    horizontalArrangement =
+                        Arrangement.spacedBy(style.chartContainerStyle.contentPadding),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    // With no category and no title, the share stands alone.
+                    if (displayedTitle.isNotBlank()) {
                         Text(
                             modifier = Modifier.testTag(TestTags.CHART_TITLE),
                             text = displayedTitle,
@@ -82,21 +83,21 @@ internal fun PieChartFrame(
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                         )
-                        Text(
-                            text = selectedValueFormatter.format(shares[forcedSelectedIndex]),
-                            style = selectedPercentageStyle(style.chartContainerStyle.styleTitle),
-                            maxLines = 1,
-                        )
                     }
-                } else {
                     Text(
-                        modifier =
-                            style.chartContainerStyle.modifierTopTitle
-                                .testTag(TestTags.CHART_TITLE),
-                        text = displayedTitle,
-                        style = style.chartContainerStyle.styleTitle,
+                        text = selectedValueFormatter.format(shares[forcedSelectedIndex]),
+                        style = selectedPercentageStyle(style.chartContainerStyle.styleTitle),
+                        maxLines = 1,
                     )
                 }
+            } else if (displayedTitle.isNotBlank()) {
+                Text(
+                    modifier =
+                        style.chartContainerStyle.modifierTopTitle
+                            .testTag(TestTags.CHART_TITLE),
+                    text = displayedTitle,
+                    style = style.chartContainerStyle.styleTitle,
+                )
             }
         },
         legend = {

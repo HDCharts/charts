@@ -242,6 +242,38 @@ class PieChartTest {
             onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(TITLE)
         }
 
+    /** A selected slice with no category and no title still shows its share. */
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun pieChart_withBlankCategoryAndNoTitle_showsTheShareAlone() =
+        runComposeUiTest {
+            setContent {
+                PieChart(
+                    data = points.toChartData(categories = listOf("", "B", "C", "D")),
+                    selection = staticChartSelection(0),
+                )
+            }
+
+            onNodeWithTag(TestTags.CHART_TITLE).assertDoesNotExist()
+            onNodeWithText("${calculatePercentages(points)[0]}%").assertIsDisplayed()
+        }
+
+    /** A selected slice with no categories and no title still shows its share. */
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun pieChart_withNoCategoriesAndNoTitle_showsTheShareAlone() =
+        runComposeUiTest {
+            setContent {
+                PieChart(
+                    data = points.toChartData(),
+                    selection = staticChartSelection(0),
+                )
+            }
+
+            onNodeWithTag(TestTags.CHART_TITLE).assertDoesNotExist()
+            onNodeWithText("${calculatePercentages(points)[0]}%").assertIsDisplayed()
+        }
+
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun pieChart_withDonutStyle_displaysCorrectly() =

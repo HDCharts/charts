@@ -32,7 +32,8 @@ selected title and legend values come from `selectedTitle` and `selectedLegendVa
 7. **Selected values use the chart's `selectedValueFormatter`.** Pie's formats the slice's share,
    in percent from 0 to 100.
 8. **Pie shows the slice's share in the title**, such as `Mobile 42.5%`, next to its category, or
-   the caller's title when the category is blank. Its legend does not change.
+   the caller's title when the category is blank, or alone when both are blank. Its legend does not
+   change.
 
 ## By Chart
 
