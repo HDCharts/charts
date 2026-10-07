@@ -27,6 +27,7 @@ import io.github.hdcharts.core.model.ChartSelection
 import io.github.hdcharts.core.model.toChartData
 import io.github.hdcharts.core.style.ChartContainerDefaults
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
@@ -269,6 +270,56 @@ class LineChartDenseDataTest {
                 plotHeight = plotHeight,
                 edge = "right",
             )
+        }
+
+    @Test
+    fun lineChart_expandedAndScrolled_keepsYAxisLineAtPlotStart() =
+        runComposeUiTest {
+            val capturePixels =
+                setCapturedContent { captureModifier ->
+                    LineChart(
+                        data = largeDataSet(title = "Dense Line Chart"),
+                        modifier =
+                            captureModifier
+                                .testTag("dense-capture")
+                                .size(width = 240.dp, height = 200.dp),
+                        animateOnStart = false,
+                        style =
+                            LineChartDefaults.style(
+                                chartContainerStyle = ChartContainerDefaults.style(contentPadding = 0.dp),
+                                line = LineChartDefaults.line(color = Color.Blue, alpha = 1f, strokeWidth = 8.dp),
+                                points = LineChartDefaults.points(visible = false),
+                                axis =
+                                    LineChartDefaults.axis(
+                                        color = Color.Red,
+                                        lineWidth = 4.dp,
+                                        xLabels = LineChartDefaults.xLabels(visible = false),
+                                    ),
+                            ),
+                    )
+                }
+
+            onNodeWithTag(TestTags.LINE_CHART_DENSE_EXPAND).performTouchInput { click() }
+            onNodeWithTag(TestTags.LINE_CHART_DENSE_COLLAPSE).assertIsDisplayed()
+            onNodeWithTag(TestTags.LINE_CHART).performTouchInput {
+                swipeLeft()
+                swipeLeft()
+            }
+            onNodeWithTag(TestTags.LINE_CHART_PLOT).assert(
+                SemanticsMatcher("is scrolled horizontally") { node ->
+                    node.config[SemanticsProperties.HorizontalScrollAxisRange].value() > 0f
+                },
+            )
+
+            val plotBounds = onNodeWithTag(TestTags.LINE_CHART_PLOT).fetchSemanticsNode().boundsInRoot
+            val captureBounds = onNodeWithTag("dense-capture").fetchSemanticsNode().boundsInRoot
+            val axisX = (plotBounds.left - captureBounds.left).toInt() + 1
+            val plotTop = (plotBounds.top - captureBounds.top).toInt()
+            val pixels = capturePixels()
+            val coveredRows =
+                (1 until plotBounds.height.toInt() - 1).count { row -> pixels[axisX, plotTop + row] != Color.Red }
+
+            assertEquals(0, coveredRows, "Rows where the Y axis line is covered at the plot start")
         }
 
     /**
