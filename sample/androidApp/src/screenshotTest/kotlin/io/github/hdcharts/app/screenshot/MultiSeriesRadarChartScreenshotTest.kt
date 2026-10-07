@@ -47,7 +47,7 @@ fun MultiSeriesRadarChartSelectedAxisPreview() {
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
             interactionEnabled = false,
             selection = staticChartSelection(SELECTED_AXIS_INDEX),
-            valueFormatter = SCORE,
+            selectedValueFormatter = SCORE,
         )
     }
 }

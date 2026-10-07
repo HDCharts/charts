@@ -33,7 +33,7 @@ fun MultiSeriesLineChartDefaultPreview() {
         LineChart(
             data = sample.dataSet,
             title = sample.title,
-            valueFormatter = SCREENSHOT_THOUSANDS_OF_DOLLARS,
+            selectedValueFormatter = SCREENSHOT_THOUSANDS_OF_DOLLARS,
             axisValueFormatter = SCREENSHOT_THOUSANDS_OF_DOLLARS,
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
         )
@@ -49,7 +49,7 @@ fun MultiSeriesLineChartSelectedPointPreview() {
         LineChart(
             data = sample.dataSet,
             title = sample.title,
-            valueFormatter = SCREENSHOT_THOUSANDS_OF_DOLLARS,
+            selectedValueFormatter = SCREENSHOT_THOUSANDS_OF_DOLLARS,
             axisValueFormatter = SCREENSHOT_THOUSANDS_OF_DOLLARS,
             interactionEnabled = false,
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
@@ -67,7 +67,7 @@ fun MultiSeriesLineChartDensePreview() {
         LineChart(
             data = sample.dataSet,
             title = sample.title,
-            valueFormatter = SCREENSHOT_THOUSANDS_OF_DOLLARS,
+            selectedValueFormatter = SCREENSHOT_THOUSANDS_OF_DOLLARS,
             axisValueFormatter = SCREENSHOT_THOUSANDS_OF_DOLLARS,
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
         )
@@ -87,7 +87,7 @@ fun MultiSeriesLineChartDenseSelectedPointPreview() {
         LineChart(
             data = sample.dataSet,
             title = sample.title,
-            valueFormatter = SCREENSHOT_THOUSANDS_OF_DOLLARS,
+            selectedValueFormatter = SCREENSHOT_THOUSANDS_OF_DOLLARS,
             axisValueFormatter = SCREENSHOT_THOUSANDS_OF_DOLLARS,
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
             selection = staticChartSelection(sample.dataSet.categoryIndex(DENSE_SELECTION_LABEL)),
@@ -104,7 +104,7 @@ fun MultiSeriesLineChartNoCategoriesSelectedPointPreview() {
         LineChart(
             data = ChartData(categories = emptyList(), series = sample.dataSet.series),
             title = sample.title,
-            valueFormatter = SCREENSHOT_THOUSANDS_OF_DOLLARS,
+            selectedValueFormatter = SCREENSHOT_THOUSANDS_OF_DOLLARS,
             axisValueFormatter = SCREENSHOT_THOUSANDS_OF_DOLLARS,
             interactionEnabled = false,
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
@@ -128,7 +128,7 @@ fun MultiSeriesLineChartUnnamedSeriesSelectedPointPreview() {
         LineChart(
             data = data,
             title = sample.title,
-            valueFormatter = SCREENSHOT_THOUSANDS_OF_DOLLARS,
+            selectedValueFormatter = SCREENSHOT_THOUSANDS_OF_DOLLARS,
             axisValueFormatter = SCREENSHOT_THOUSANDS_OF_DOLLARS,
             interactionEnabled = false,
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
@@ -153,7 +153,7 @@ fun MultiSeriesLineChartPartlyNamedSeriesSelectedPointPreview() {
         LineChart(
             data = data,
             title = sample.title,
-            valueFormatter = SCREENSHOT_THOUSANDS_OF_DOLLARS,
+            selectedValueFormatter = SCREENSHOT_THOUSANDS_OF_DOLLARS,
             axisValueFormatter = SCREENSHOT_THOUSANDS_OF_DOLLARS,
             interactionEnabled = false,
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
@@ -171,7 +171,7 @@ fun MultiSeriesLineChartHiddenLegendPreview() {
         LineChart(
             data = sample.dataSet,
             title = sample.title,
-            valueFormatter = SCREENSHOT_THOUSANDS_OF_DOLLARS,
+            selectedValueFormatter = SCREENSHOT_THOUSANDS_OF_DOLLARS,
             axisValueFormatter = SCREENSHOT_THOUSANDS_OF_DOLLARS,
             style = LineChartDefaults.style(legend = LineChartDefaults.legend(visible = false)),
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
@@ -188,7 +188,7 @@ fun MultiSeriesLineChartSeriesColorsPreview() {
         LineChart(
             data = sample.dataSet,
             title = sample.title,
-            valueFormatter = SCREENSHOT_THOUSANDS_OF_DOLLARS,
+            selectedValueFormatter = SCREENSHOT_THOUSANDS_OF_DOLLARS,
             axisValueFormatter = SCREENSHOT_THOUSANDS_OF_DOLLARS,
             style =
                 LineChartDefaults.style(

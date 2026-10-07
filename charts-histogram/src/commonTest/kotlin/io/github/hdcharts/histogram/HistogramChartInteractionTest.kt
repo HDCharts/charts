@@ -200,7 +200,7 @@ class HistogramChartInteractionTest {
                                 ),
                         ),
                     selection = selection,
-                    valueFormatter = ChartValueFormatter { it.toString() },
+                    selectedValueFormatter = ChartValueFormatter { it.toString() },
                     animateOnStart = false,
                 )
             }

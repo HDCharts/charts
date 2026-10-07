@@ -37,7 +37,7 @@ fun LineChart(
     selection: ChartSelection = rememberChartSelection(),
     interactionEnabled: Boolean = true,
     animateOnStart: Boolean = true,
-    valueFormatter: ChartValueFormatter = LineChartDefaults.valueFormatter,
+    selectedValueFormatter: ChartValueFormatter = LineChartDefaults.selectedValueFormatter,
     axisValueFormatter: ChartValueFormatter = LineChartDefaults.axisValueFormatter,
 ) {
     val pointCount =
@@ -72,14 +72,14 @@ fun LineChart(
                 selectedLegendValues(
                     data = data,
                     selectedIndex = selectedIndex,
-                    valueFormatter = valueFormatter,
+                    selectedValueFormatter = selectedValueFormatter,
                 ),
             selectedTitle =
                 selectedTitle(
                     data = data,
                     selectedIndex = selectedIndex,
                     title = title,
-                    valueFormatter = valueFormatter,
+                    selectedValueFormatter = selectedValueFormatter,
                 ),
         )
     }

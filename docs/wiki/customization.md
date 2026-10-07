@@ -47,14 +47,14 @@ private fun ShowStyledBar() {
         modifier = Modifier.background(Color(0xFFF8FAFC), RoundedCornerShape(18.dp)).padding(20.dp),
         title = "Daily Net Cash Flow",
         style = BarChartDefaults.style(bars = bars, grid = grid, axis = axis, selection = selection),
-        valueFormatter = ChartValueFormatters.prefix("$"),
+        selectedValueFormatter = ChartValueFormatters.prefix("$"),
     )
 }
 ```
 
 Chart chrome (background, shape, shadow, and outer padding) lives on the caller-supplied `modifier`; sizing is fully modifier-driven. The `chartContainerStyle` block only carries `contentPadding` and the title text style.
 
-Here `valueFormatter` adds currency to selected raw values only; Y ticks keep the independent `axisValueFormatter` default. Titles do not generate labels: omitting `categories` hides X labels and leaves only the formatted value in selected readouts.
+Here `selectedValueFormatter` adds currency to selected raw values only; Y ticks keep the independent `axisValueFormatter` default. Titles do not generate labels: omitting `categories` hides X labels and leaves only the formatted value in selected readouts.
 
 Bar and histogram bars can also take a gradient, covered in [Gradients](/{{version}}/wiki/gradients).
 
@@ -164,7 +164,7 @@ StackedBarChart(
 
 While a point is selected, a chart with several series shows each series' value in its legend item,
 and the title shows the selected category. A chart with one series shows `Category: value` in the
-title instead. Pass `valueFormatter` to format these values. A pie shows the selected slice's share
+title instead. Pass `selectedValueFormatter` to format these values. A pie shows the selected slice's share
 in percent next to its category, and its legend does not change. A ring gauge is one series, so it
 shows `Category: value` in the title, and its legend does not change either. A hidden legend hides the values
 too; read `selectedIndex` from a hoisted selection to show them in your own UI.

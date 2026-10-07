@@ -12,7 +12,6 @@ import io.github.hdcharts.core.internal.clampSize
 import io.github.hdcharts.core.internal.clampTextSize
 import io.github.hdcharts.core.internal.palette.resolvePaletteColors
 import io.github.hdcharts.core.model.ChartValueFormatter
-import io.github.hdcharts.core.model.ChartValueFormatters
 import io.github.hdcharts.core.style.ChartContainerDefaults
 import io.github.hdcharts.core.style.ChartContainerStyle
 import io.github.hdcharts.core.style.LegendDefaults
@@ -289,8 +288,8 @@ object RadarChartDefaults {
     @Composable
     fun legend(visible: Boolean = StyleDefaults.legendVisible): LegendStyle = LegendDefaults.style(visible = visible)
 
-    /** Default formatter for selected values. */
-    val valueFormatter: ChartValueFormatter = ChartValueFormatters.Default
+    /** Default formatter for selected values in the title and legend. */
+    val selectedValueFormatter: ChartValueFormatter = StyleDefaults.selectedValueFormatter
 }
 
 /** Returns [this] with alphas, sizes, and grid steps clamped to drawable values. */

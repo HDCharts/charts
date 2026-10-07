@@ -64,7 +64,7 @@ internal fun HistogramChartEntry(
     selectedIndex: Int,
     interactionEnabled: Boolean,
     animateOnStart: Boolean,
-    valueFormatter: ChartValueFormatter,
+    selectedValueFormatter: ChartValueFormatter,
     axisValueFormatter: ChartValueFormatter,
 ) {
     ChartEntry(
@@ -81,7 +81,7 @@ internal fun HistogramChartEntry(
                 selectedIndex = selectedIndex,
                 interactionEnabled = interactionEnabled,
                 animateOnStart = animateOnStart,
-                valueFormatter = valueFormatter,
+                selectedValueFormatter = selectedValueFormatter,
                 axisValueFormatter = axisValueFormatter,
                 modifier = modifier,
                 chartTag = TestTags.HISTOGRAM_CHART,

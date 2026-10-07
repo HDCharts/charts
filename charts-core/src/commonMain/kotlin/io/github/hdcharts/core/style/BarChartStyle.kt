@@ -12,7 +12,6 @@ import io.github.hdcharts.core.internal.clampAlpha
 import io.github.hdcharts.core.internal.clampGridSteps
 import io.github.hdcharts.core.internal.clampSize
 import io.github.hdcharts.core.model.ChartValueFormatter
-import io.github.hdcharts.core.model.ChartValueFormatters
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -226,12 +225,11 @@ class BarChartStyle(
  * Defaults factory for [BarChartStyle]. All parameters have theme-aware defaults.
  */
 object BarChartDefaults {
-    /** Default formatter for chart value readouts. */
-    val valueFormatter: ChartValueFormatter = ChartValueFormatters.Default
+    /** Default formatter for selected values in the title and legend. */
+    val selectedValueFormatter: ChartValueFormatter = StyleDefaults.selectedValueFormatter
 
     /** Default axis formatter, omitting only the terminal `.0` on whole values. */
-    val axisValueFormatter: ChartValueFormatter =
-        ChartValueFormatter { ChartValueFormatters.Default.format(it).removeSuffix(".0") }
+    val axisValueFormatter: ChartValueFormatter = StyleDefaults.axisValueFormatter
 
     /**
      * Returns a [BarChartStyle] with the provided parameters or their default values.

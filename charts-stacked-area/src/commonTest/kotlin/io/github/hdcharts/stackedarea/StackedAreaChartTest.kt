@@ -506,7 +506,7 @@ class StackedAreaChartTest {
 
     @OptIn(ExperimentalTestApi::class)
     @Test
-    fun stackedAreaChart_valueFormatter_formatsSelectedLegendValues() =
+    fun stackedAreaChart_formatters_formatSelectedLegendValuesAndYAxisLabels() =
         runComposeUiTest {
             setContent {
                 StackedAreaChart(
@@ -514,11 +514,13 @@ class StackedAreaChartTest {
                     selection = staticChartSelection(0),
                     interactionEnabled = false,
                     animateOnStart = false,
-                    valueFormatter = ChartValueFormatter { value -> "#${value.toInt()}" },
+                    selectedValueFormatter = ChartValueFormatter { value -> "#${value.toInt()}" },
+                    axisValueFormatter = ChartValueFormatter { value -> "y=${value.toInt()}" },
                 )
             }
 
             onNodeWithText("Item 3 - #4000").assertIsDisplayed()
+            onNodeWithText("y=0").assertIsDisplayed()
         }
 
     @OptIn(ExperimentalTestApi::class)

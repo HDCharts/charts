@@ -6,6 +6,7 @@ import io.github.hdcharts.app.screenshot.shared.SCREENSHOT_ANIMATE_ON_START
 import io.github.hdcharts.app.screenshot.shared.SCREENSHOT_RING_GAUGE_SAMPLE_USE_CASE
 import io.github.hdcharts.app.screenshot.shared.ScreenshotChartSurface
 import io.github.hdcharts.app.screenshot.shared.ScreenshotPreview
+import io.github.hdcharts.core.model.ChartValueFormatter
 import io.github.hdcharts.core.model.ChartValueFormatters
 import io.github.hdcharts.core.model.staticChartSelection
 import io.github.hdcharts.gauge.RingGaugeChart
@@ -19,7 +20,11 @@ private const val RING_GAUGE_SELECTION_INDEX = 1
 // Enough rings that they get thinner.
 private const val MANY_RINGS = 8
 private val PERCENT_FORMATTER = ChartValueFormatters.suffix("%")
+private val PERCENT_AXIS_FORMATTER =
+    ChartValueFormatter { value -> "${RingGaugeChartDefaults.axisValueFormatter.format(value)}%" }
 private val CELSIUS_FORMATTER = ChartValueFormatters.suffix("°C")
+private val CELSIUS_AXIS_FORMATTER =
+    ChartValueFormatter { value -> "${RingGaugeChartDefaults.axisValueFormatter.format(value)}°C" }
 
 @PreviewTest
 @ScreenshotPreview
@@ -30,7 +35,8 @@ fun RingGaugeChartDefaultPreview() {
         RingGaugeChart(
             data = sample.data,
             title = sample.title,
-            valueFormatter = PERCENT_FORMATTER,
+            selectedValueFormatter = PERCENT_FORMATTER,
+            axisValueFormatter = PERCENT_AXIS_FORMATTER,
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
         )
     }
@@ -46,7 +52,8 @@ fun RingGaugeChartSelectedRingPreview() {
         RingGaugeChart(
             data = sample.data,
             title = sample.title,
-            valueFormatter = PERCENT_FORMATTER,
+            selectedValueFormatter = PERCENT_FORMATTER,
+            axisValueFormatter = PERCENT_AXIS_FORMATTER,
             selection = staticChartSelection(RING_GAUGE_SELECTION_INDEX),
             interactionEnabled = false,
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
@@ -64,7 +71,8 @@ fun RingGaugeChartSingleRingPreview() {
         RingGaugeChart(
             data = sample.data,
             title = sample.title,
-            valueFormatter = PERCENT_FORMATTER,
+            selectedValueFormatter = PERCENT_FORMATTER,
+            axisValueFormatter = PERCENT_AXIS_FORMATTER,
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
         )
     }
@@ -80,7 +88,8 @@ fun RingGaugeChartManyRingsPreview() {
         RingGaugeChart(
             data = sample.data,
             title = sample.title,
-            valueFormatter = PERCENT_FORMATTER,
+            selectedValueFormatter = PERCENT_FORMATTER,
+            axisValueFormatter = PERCENT_AXIS_FORMATTER,
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
         )
     }
@@ -97,7 +106,8 @@ fun RingGaugeChartSignedRangePreview() {
             data = sample.data,
             title = sample.title,
             style = RingGaugeChartDefaults.style(range = sample.range()),
-            valueFormatter = CELSIUS_FORMATTER,
+            selectedValueFormatter = CELSIUS_FORMATTER,
+            axisValueFormatter = CELSIUS_AXIS_FORMATTER,
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
         )
     }
@@ -120,7 +130,8 @@ fun RingGaugeChartColorsWithoutTrackPreview() {
                     track = RingGaugeChartDefaults.track(visible = false),
                     labels = RingGaugeChartDefaults.labels(visible = false),
                 ),
-            valueFormatter = PERCENT_FORMATTER,
+            selectedValueFormatter = PERCENT_FORMATTER,
+            axisValueFormatter = PERCENT_AXIS_FORMATTER,
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
         )
     }

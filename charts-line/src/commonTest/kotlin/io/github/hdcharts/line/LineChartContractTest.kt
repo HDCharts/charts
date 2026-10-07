@@ -76,21 +76,21 @@ class LineChartContractTest {
     fun formattersUpdateSelectedReadoutAndAxisIndependently() =
         runComposeUiTest {
             val selection = ChartSelection(initialIndex = 0)
-            val valueFormatter = mutableStateOf(ChartValueFormatters.Default)
-            val axisFormatter = mutableStateOf(ChartValueFormatters.Default)
+            val selectedValueFormatter = mutableStateOf(LineChartDefaults.selectedValueFormatter)
+            val axisFormatter = mutableStateOf(LineChartDefaults.selectedValueFormatter)
             val preciseData = listOf(0.123456789, 1.0).toChartData(categories = listOf("First", "Last"))
             setContent {
                 LineChart(
                     data = preciseData,
                     selection = selection,
-                    valueFormatter = valueFormatter.value,
+                    selectedValueFormatter = selectedValueFormatter.value,
                     axisValueFormatter = axisFormatter.value,
                     animateOnStart = false,
                 )
             }
 
             onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("First: 0.12").assertIsDisplayed()
-            runOnIdle { valueFormatter.value = ChartValueFormatters.suffix(" units") }
+            runOnIdle { selectedValueFormatter.value = ChartValueFormatters.suffix(" units") }
             onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("First: 0.12 units").assertIsDisplayed()
             runOnIdle { axisFormatter.value = { value -> "axis=$value" } }
             onNodeWithText("axis=1.0").assertIsDisplayed()

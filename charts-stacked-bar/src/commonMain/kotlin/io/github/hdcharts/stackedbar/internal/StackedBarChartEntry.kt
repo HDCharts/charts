@@ -75,7 +75,8 @@ internal fun StackedBarChartEntry(
     selectedIndex: Int,
     interactionEnabled: Boolean,
     animateOnStart: Boolean,
-    valueFormatter: ChartValueFormatter,
+    selectedValueFormatter: ChartValueFormatter,
+    axisValueFormatter: ChartValueFormatter,
     onValueChanged: (Int) -> Unit,
 ) {
     ChartEntry(
@@ -98,13 +99,13 @@ internal fun StackedBarChartEntry(
                     data = data,
                     selectedIndex = selectedIndex,
                     title = title,
-                    valueFormatter = valueFormatter,
+                    selectedValueFormatter = selectedValueFormatter,
                 )
             val selectedLabels =
                 selectedLegendValues(
                     data = data,
                     selectedIndex = selectedIndex,
-                    valueFormatter = valueFormatter,
+                    selectedValueFormatter = selectedValueFormatter,
                 )
             StackedBarChartFrame(
                 style = drawStyle,
@@ -121,6 +122,7 @@ internal fun StackedBarChartEntry(
                     showXAxisLabels = drawStyle.axis.xLabels.visible && data.categories.any { it.isNotBlank() },
                     interactionEnabled = interactionEnabled,
                     animateOnStart = animateOnStart,
+                    axisValueFormatter = axisValueFormatter,
                     selectedBarIndex = selectedIndex,
                     onValueChanged = onValueChanged,
                 )

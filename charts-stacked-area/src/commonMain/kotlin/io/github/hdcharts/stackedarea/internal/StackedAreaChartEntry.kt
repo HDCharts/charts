@@ -63,7 +63,8 @@ internal fun StackedAreaChartEntry(
     selectedIndex: Int,
     interactionEnabled: Boolean,
     animateOnStart: Boolean,
-    valueFormatter: ChartValueFormatter,
+    selectedValueFormatter: ChartValueFormatter,
+    axisValueFormatter: ChartValueFormatter,
     onValueChanged: (Int) -> Unit,
 ) {
     ChartEntry(
@@ -86,13 +87,13 @@ internal fun StackedAreaChartEntry(
                     data = data,
                     selectedIndex = selectedIndex,
                     title = title,
-                    valueFormatter = valueFormatter,
+                    selectedValueFormatter = selectedValueFormatter,
                 )
             val selectedLabels =
                 selectedLegendValues(
                     data = data,
                     selectedIndex = selectedIndex,
-                    valueFormatter = valueFormatter,
+                    selectedValueFormatter = selectedValueFormatter,
                 )
             StackedAreaChartFrame(
                 style = drawStyle,
@@ -108,6 +109,7 @@ internal fun StackedAreaChartEntry(
                     areaColors = colors,
                     interactionEnabled = interactionEnabled,
                     animateOnStart = animateOnStart,
+                    axisValueFormatter = axisValueFormatter,
                     selectedPointIndex = selectedIndex,
                     onValueChanged = onValueChanged,
                 )

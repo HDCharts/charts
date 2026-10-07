@@ -59,7 +59,7 @@ fun MultiLineDocsGifScenarioPreview() {
         LineChart(
             data = viewModel.chartData.value,
             title = viewModel.title,
-            valueFormatter = ChartValueFormatters.prefix("$"),
+            selectedValueFormatter = ChartValueFormatters.prefix("$"),
         )
     }
 }
@@ -126,7 +126,8 @@ fun RingGaugeDocsGifScenarioPreview() {
         RingGaugeChart(
             data = viewModel.data.value,
             title = viewModel.title,
-            valueFormatter = viewModel.valueFormatter,
+            selectedValueFormatter = viewModel.selectedValueFormatter,
+            axisValueFormatter = viewModel.axisValueFormatter,
         )
     }
 }

@@ -78,7 +78,7 @@ internal fun RadarChartEntry(
     seriesSelection: ChartSelection,
     interactionEnabled: Boolean,
     animateOnStart: Boolean,
-    valueFormatter: ChartValueFormatter,
+    selectedValueFormatter: ChartValueFormatter,
 ) {
     ChartEntry(
         spec = RadarChartSpec,
@@ -98,7 +98,7 @@ internal fun RadarChartEntry(
                     data = data,
                     selectedIndex = selectedIndex,
                     title = title,
-                    valueFormatter = valueFormatter,
+                    selectedValueFormatter = selectedValueFormatter,
                 )
 
             ChartSquarePlotLayout(
@@ -125,7 +125,7 @@ internal fun RadarChartEntry(
                             selectedLegendValues(
                                 data = data,
                                 selectedIndex = selectedIndex,
-                                valueFormatter = valueFormatter,
+                                selectedValueFormatter = selectedValueFormatter,
                             ),
                     )
                 },

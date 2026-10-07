@@ -30,6 +30,7 @@ import io.github.hdcharts.core.model.ChartValueFormatter
 import io.github.hdcharts.core.model.ChartValueFormatters
 import io.github.hdcharts.core.model.staticChartSelection
 import io.github.hdcharts.core.model.toChartData
+import io.github.hdcharts.core.style.BarChartDefaults
 import io.github.hdcharts.core.style.ChartContainerDefaults
 import io.github.hdcharts.core.style.HistogramChartDefaults
 import kotlinx.coroutines.CoroutineScope
@@ -91,7 +92,7 @@ class HistogramChartTest {
             val categories = data.categories
             val values = data.series.single().values
             val expectedLabel = categories[selectedBarIndex]
-            val expectedValue = ChartValueFormatters.Default.format(values[selectedBarIndex])
+            val expectedValue = BarChartDefaults.selectedValueFormatter.format(values[selectedBarIndex])
             val expectedTitle = "$expectedLabel: $expectedValue"
 
             setContent {
@@ -263,13 +264,13 @@ class HistogramChartTest {
         runComposeUiTest {
             val preciseData = listOf(0.123456789, 1.0).toChartData(categories = listOf("0-10", "10+"))
             val selection = ChartSelection(initialIndex = 0)
-            val valueFormatter = mutableStateOf(ChartValueFormatters.Default)
-            val axisFormatter = mutableStateOf(ChartValueFormatters.Default)
+            val selectedValueFormatter = mutableStateOf(BarChartDefaults.selectedValueFormatter)
+            val axisFormatter = mutableStateOf(BarChartDefaults.selectedValueFormatter)
             setContent {
                 HistogramChart(
                     data = preciseData,
                     selection = selection,
-                    valueFormatter = valueFormatter.value,
+                    selectedValueFormatter = selectedValueFormatter.value,
                     axisValueFormatter = axisFormatter.value,
                     style = HistogramChartDefaults.style(range = HistogramChartDefaults.range(min = 0.0, max = 1.0)),
                     animateOnStart = false,
@@ -278,14 +279,14 @@ class HistogramChartTest {
 
             onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("0-10: 0.12").assertIsDisplayed()
             onNodeWithText("1.0").assertIsDisplayed()
-            runOnIdle { valueFormatter.value = ChartValueFormatter { value -> "raw=$value" } }
+            runOnIdle { selectedValueFormatter.value = ChartValueFormatter { value -> "raw=$value" } }
             onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("0-10: raw=0.123456789").assertIsDisplayed()
             onNodeWithText("1.0").assertIsDisplayed()
             runOnIdle { axisFormatter.value = ChartValueFormatter { value -> "axis=$value" } }
             onNodeWithText("axis=1.0").assertIsDisplayed()
             onNodeWithText("axis=0.0").assertIsDisplayed()
             onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("0-10: raw=0.123456789").assertIsDisplayed()
-            runOnIdle { valueFormatter.value = ChartValueFormatters.suffix(" counts") }
+            runOnIdle { selectedValueFormatter.value = ChartValueFormatters.suffix(" counts") }
             onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("0-10: 0.12 counts").assertIsDisplayed()
             onNodeWithText("axis=1.0").assertIsDisplayed()
         }

@@ -470,7 +470,7 @@ class LineChartTest {
             setContent {
                 LineChart(
                     data = dataSet,
-                    valueFormatter = ChartValueFormatter { value -> "v${value.toInt()}" },
+                    selectedValueFormatter = ChartValueFormatter { value -> "v${value.toInt()}" },
                     selection = staticChartSelection(index = 1),
                     interactionEnabled = false,
                     animateOnStart = false,

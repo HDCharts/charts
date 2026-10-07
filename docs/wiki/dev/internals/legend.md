@@ -29,8 +29,8 @@ selected title and legend values come from `selectedTitle` and `selectedLegendVa
    rule 8.
 6. **Several series put their values in the legend,** as `Name - value` on each item. An item with
    a blank name shows only its value. The title then shows only the category.
-7. **Selected values use the chart's `valueFormatter`.** Pie has none: its share is a percentage
-   rounded to two decimals.
+7. **Selected values use the chart's `selectedValueFormatter`.** Pie has none: its share is a
+   percentage rounded to two decimals.
 8. **Pie shows the slice's share in the title**, such as `Mobile 42.5%`, next to its category, or
    the caller's title when the category is blank. Its legend does not change.
 

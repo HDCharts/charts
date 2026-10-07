@@ -2,7 +2,6 @@ package io.github.hdcharts.core.internal.axis
 
 import io.github.hdcharts.core.internal.InternalChartsApi
 import io.github.hdcharts.core.model.ChartValueFormatter
-import io.github.hdcharts.core.model.ChartValueFormatters
 
 // Most ticks when the style leaves the label count unset.
 private const val DEFAULT_Y_AXIS_MAX_TICK_COUNT = 5
@@ -31,14 +30,6 @@ fun yAxisTickCount(
         }
     return (maxCount ?: DEFAULT_Y_AXIS_MAX_TICK_COUNT).coerceAtMost(fittingCount).coerceAtLeast(MIN_Y_AXIS_TICK_COUNT)
 }
-
-/**
- * Y-axis tick formatter for charts without a public `axisValueFormatter`, matching the bar and line
- * defaults: [ChartValueFormatters.Default] without the trailing `.0` on whole values.
- */
-@InternalChartsApi
-val defaultAxisValueFormatter: ChartValueFormatter =
-    ChartValueFormatter { value -> ChartValueFormatters.Default.format(value).removeSuffix(".0") }
 
 /**
  * Builds [labelCount] evenly spaced Y ticks from [maxValue] at the top to [minValue] at the bottom,

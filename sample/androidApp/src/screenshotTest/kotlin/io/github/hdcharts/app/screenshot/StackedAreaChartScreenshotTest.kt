@@ -54,7 +54,7 @@ fun StackedAreaChartSelectedPointPreview() {
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
             interactionEnabled = false,
             selection = staticChartSelection(sample.data.categoryIndex(STACKED_AREA_SELECTION_LABEL)),
-            valueFormatter = SUBSCRIBERS,
+            selectedValueFormatter = SUBSCRIBERS,
         )
     }
 }
@@ -77,7 +77,7 @@ fun StackedAreaChartSingleSeriesSelectedPointPreview() {
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
             interactionEnabled = false,
             selection = staticChartSelection(data.categoryIndex(STACKED_AREA_SELECTION_LABEL)),
-            valueFormatter = SUBSCRIBERS,
+            selectedValueFormatter = SUBSCRIBERS,
         )
     }
 }

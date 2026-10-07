@@ -45,7 +45,6 @@ import io.github.hdcharts.core.internal.TestTags
 import io.github.hdcharts.core.internal.axis.AxisXItems
 import io.github.hdcharts.core.internal.axis.AxisXLabelsLayout
 import io.github.hdcharts.core.internal.axis.AxisYLabelsLayout
-import io.github.hdcharts.core.internal.axis.defaultAxisValueFormatter
 import io.github.hdcharts.core.internal.axis.estimateXAxisLabelExtent
 import io.github.hdcharts.core.internal.axis.rememberNumericYAxisLayout
 import io.github.hdcharts.core.internal.axis.rememberXAxisLabelPlan
@@ -73,6 +72,7 @@ import io.github.hdcharts.core.internal.layout.fillMaxSizeChartModifier
 import io.github.hdcharts.core.internal.layout.placedHorizontalScrollPx
 import io.github.hdcharts.core.internal.model.ChartRenderData
 import io.github.hdcharts.core.internal.model.normalizeStackedAreaValues
+import io.github.hdcharts.core.model.ChartValueFormatter
 import io.github.hdcharts.stackedarea.StackedAreaChartStyle
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -101,6 +101,7 @@ internal fun StackedAreaChartImpl(
     areaColors: ImmutableList<Color>,
     interactionEnabled: Boolean,
     animateOnStart: Boolean,
+    axisValueFormatter: ChartValueFormatter,
     selectedPointIndex: Int = NO_SELECTION,
     onValueChanged: (Int) -> Unit = {},
 ) {
@@ -277,6 +278,7 @@ internal fun StackedAreaChartImpl(
             style = style,
             areaColors = areaColors,
             interactionEnabled = interactionEnabled,
+            axisValueFormatter = axisValueFormatter,
             isScrollable = isScrollable,
             animatedValues = animatedValues,
             revealProgress = revealProgress,
@@ -306,6 +308,7 @@ internal fun StackedAreaChartImpl(
 private fun StackedAreaChartContent(
     data: ChartRenderData,
     style: StackedAreaChartStyle,
+    axisValueFormatter: ChartValueFormatter,
     areaColors: ImmutableList<Color>,
     interactionEnabled: Boolean,
     isScrollable: Boolean,
@@ -374,7 +377,7 @@ private fun StackedAreaChartContent(
                 maxValue = maxTotal,
                 chartHeightPx = chartHeightPx,
                 verticalInsetPx = 0f,
-                formatter = defaultAxisValueFormatter,
+                formatter = axisValueFormatter,
                 availableWidthPx = constraints.maxWidth,
             )
         val yAxisWidthPx = yAxisLayout.widthPx

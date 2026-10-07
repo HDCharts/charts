@@ -23,7 +23,7 @@ import io.github.hdcharts.core.style.BarChartStyle
  * Replacing [data] clears selection; resizing or changing density does not. Disabling
  * [interactionEnabled] disables all user controls, but programmatic selection still renders.
  * [animateOnStart] controls initial reveal, not subsequent update animations.
- * [valueFormatter] formats selected raw values; [axisValueFormatter] formats Y ticks.
+ * [selectedValueFormatter] formats selected raw values; [axisValueFormatter] formats Y ticks.
  */
 @Composable
 fun BarChart(
@@ -34,7 +34,7 @@ fun BarChart(
     selection: ChartSelection = rememberChartSelection(),
     interactionEnabled: Boolean = true,
     animateOnStart: Boolean = true,
-    valueFormatter: ChartValueFormatter = BarChartDefaults.valueFormatter,
+    selectedValueFormatter: ChartValueFormatter = BarChartDefaults.selectedValueFormatter,
     axisValueFormatter: ChartValueFormatter = BarChartDefaults.axisValueFormatter,
 ) {
     val selectedIndex = rememberBarSelection(data, selection)
@@ -47,7 +47,7 @@ fun BarChart(
         selectedIndex = selectedIndex,
         interactionEnabled = interactionEnabled,
         animateOnStart = animateOnStart,
-        valueFormatter = valueFormatter,
+        selectedValueFormatter = selectedValueFormatter,
         axisValueFormatter = axisValueFormatter,
     )
 }

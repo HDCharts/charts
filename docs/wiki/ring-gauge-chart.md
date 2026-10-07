@@ -32,7 +32,10 @@ fun ShowRingGauge() {
     RingGaugeChart(
         data = data,
         title = "Quarterly Targets",
-        valueFormatter = ChartValueFormatters.suffix("%"),
+        selectedValueFormatter = ChartValueFormatters.suffix("%"),
+        axisValueFormatter = ChartValueFormatter { value ->
+            RingGaugeChartDefaults.axisValueFormatter.format(value) + "%"
+        },
     )
 }
 ```
@@ -48,12 +51,18 @@ RingGaugeChart(
     style = RingGaugeChartDefaults.style(
         range = RingGaugeChartDefaults.range(min = -20.0, max = 40.0),
     ),
-    valueFormatter = ChartValueFormatters.suffix("°C"),
+    selectedValueFormatter = ChartValueFormatters.suffix("°C"),
+    axisValueFormatter = ChartValueFormatter { value ->
+        RingGaugeChartDefaults.axisValueFormatter.format(value) + "°C"
+    },
 )
 ```
 
 A value outside the range stops at the nearest end of the arc, and a selected ring still shows its
-real value in the title. The range labels under the ends of the arc use the same `valueFormatter`.
+real value in the title.
+
+`selectedValueFormatter` formats the selected value in the title, and `axisValueFormatter` formats
+the range labels under the ends of the arc.
 
 ## Rings
 

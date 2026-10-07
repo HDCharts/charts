@@ -75,7 +75,7 @@ pixel, so they now look heavier on high-density screens.
 - `title` is separate from `seriesName` and category labels.
 - An empty category list hides X-axis labels; supplied categories must match the
   value count.
-- `valueFormatter` formats selected values and `axisValueFormatter` formats
+- `selectedValueFormatter` formats selected values and `axisValueFormatter` formats
   Y-axis ticks independently.
 - Selection identifies a source bar or bin. Replacing the data clears it;
   resizing and density changes preserve it.

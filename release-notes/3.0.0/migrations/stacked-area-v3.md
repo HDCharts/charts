@@ -58,6 +58,9 @@ Selecting a point keeps a column around it at full color and dims the rest of
 the stack to 70% opacity. The selection line is drawn only above the stack.
 Pass `selection(unselectedAlpha = 1f)` to keep the whole stack at full color.
 
+`selectedValueFormatter` formats the selected values, and `axisValueFormatter`
+formats the Y-axis labels.
+
 Use `staticChartSelection(index)` for a preset preview or screenshot. Replacing
 data clears selection; resizing and density changes preserve it.
 

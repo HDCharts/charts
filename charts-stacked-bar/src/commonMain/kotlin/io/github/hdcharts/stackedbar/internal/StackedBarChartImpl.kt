@@ -41,7 +41,6 @@ import io.github.hdcharts.core.internal.TestTags
 import io.github.hdcharts.core.internal.axis.AxisXItems
 import io.github.hdcharts.core.internal.axis.AxisXLabelsLayout
 import io.github.hdcharts.core.internal.axis.AxisYLabelsLayout
-import io.github.hdcharts.core.internal.axis.defaultAxisValueFormatter
 import io.github.hdcharts.core.internal.axis.estimateXAxisLabelExtent
 import io.github.hdcharts.core.internal.axis.rememberNumericYAxisLayout
 import io.github.hdcharts.core.internal.axis.rememberXAxisLabelPlan
@@ -59,6 +58,7 @@ import io.github.hdcharts.core.internal.layout.fillMaxSizeChartModifier
 import io.github.hdcharts.core.internal.layout.placedHorizontalScrollPx
 import io.github.hdcharts.core.internal.model.ChartRenderData
 import io.github.hdcharts.core.internal.model.normalizeStackedValues
+import io.github.hdcharts.core.model.ChartValueFormatter
 import io.github.hdcharts.stackedbar.StackedBarChartStyle
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -86,6 +86,7 @@ internal fun StackedBarChartImpl(
     showXAxisLabels: Boolean,
     interactionEnabled: Boolean,
     animateOnStart: Boolean,
+    axisValueFormatter: ChartValueFormatter,
     selectedBarIndex: Int = NO_SELECTION,
     onValueChanged: (Int) -> Unit = {},
 ) {
@@ -108,7 +109,7 @@ internal fun StackedBarChartImpl(
                 // The plot height is not known yet. A short plot can show fewer ticks than this estimate.
                 chartHeightPx = constraints.maxHeight.toFloat(),
                 verticalInsetPx = 0f,
-                formatter = defaultAxisValueFormatter,
+                formatter = axisValueFormatter,
                 availableWidthPx = constraints.maxWidth,
             )
         val viewportWidthPx =
@@ -264,6 +265,7 @@ internal fun StackedBarChartImpl(
                 colors = colors,
                 showXAxisLabels = showXAxisLabels,
                 interactionEnabled = interactionEnabled,
+                axisValueFormatter = axisValueFormatter,
                 dragSelectionEnabled = !isScrollable,
                 animatedValues = animatedValues,
                 fixedMinTotal = sourceMinTotal,
@@ -297,6 +299,7 @@ internal fun StackedBarChartImpl(
 private fun StackedBarChartContent(
     data: ChartRenderData,
     style: StackedBarChartStyle,
+    axisValueFormatter: ChartValueFormatter,
     colors: ImmutableList<Color>,
     showXAxisLabels: Boolean,
     interactionEnabled: Boolean,
@@ -358,7 +361,7 @@ private fun StackedBarChartContent(
                 maxValue = fixedMaxTotal,
                 chartHeightPx = chartHeightPx,
                 verticalInsetPx = 0f,
-                formatter = defaultAxisValueFormatter,
+                formatter = axisValueFormatter,
                 availableWidthPx = constraints.maxWidth,
             )
         val yAxisWidth = with(density) { yAxisLayout.widthPx.toDp() }

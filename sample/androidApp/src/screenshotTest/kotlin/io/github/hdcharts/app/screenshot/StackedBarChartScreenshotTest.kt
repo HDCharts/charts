@@ -49,7 +49,7 @@ fun StackedBarChartSelectedBarPreview() {
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
             interactionEnabled = false,
             selection = staticChartSelection(sample.dataSet.categoryIndex(STACKED_BAR_SELECTION_LABEL)),
-            valueFormatter = SCREENSHOT_THOUSANDS_OF_DOLLARS,
+            selectedValueFormatter = SCREENSHOT_THOUSANDS_OF_DOLLARS,
         )
     }
 }
@@ -72,7 +72,7 @@ fun StackedBarChartSingleSegmentSelectedBarPreview() {
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
             interactionEnabled = false,
             selection = staticChartSelection(data.categoryIndex(STACKED_BAR_SELECTION_LABEL)),
-            valueFormatter = SCREENSHOT_THOUSANDS_OF_DOLLARS,
+            selectedValueFormatter = SCREENSHOT_THOUSANDS_OF_DOLLARS,
         )
     }
 }

@@ -26,20 +26,18 @@ fun interface ChartValueFormatter {
  */
 object ChartValueFormatters {
     /**
-     * Rounds to two decimal places, then trims trailing zeros while keeping `.0`
-     * for integers, including zero. For example: `3.0`, `41.7`, and `0.0`.
+     * Formats a value in the default selected-value format with the given [prefix] prepended,
+     * e.g. `prefix("$")` formats 3.0 as `$3.0`.
      */
-    val Default: ChartValueFormatter = ChartValueFormatter(::formatDefaultValue)
+    fun prefix(prefix: String): ChartValueFormatter =
+        ChartValueFormatter { value -> "$prefix${formatSelectedValue(value)}" }
 
     /**
-     * Formats a value with the given [prefix] prepended, e.g. `prefix("?")`.
+     * Formats a value in the default selected-value format with the given [suffix] appended,
+     * e.g. `suffix("%")` formats 41.7 as `41.7%`.
      */
-    fun prefix(prefix: String): ChartValueFormatter = ChartValueFormatter { value -> "$prefix${Default.format(value)}" }
-
-    /**
-     * Formats a value with the given [suffix] appended, e.g. `suffix("%")`.
-     */
-    fun suffix(suffix: String): ChartValueFormatter = ChartValueFormatter { value -> "${Default.format(value)}$suffix" }
+    fun suffix(suffix: String): ChartValueFormatter =
+        ChartValueFormatter { value -> "${formatSelectedValue(value)}$suffix" }
 
     /**
      * Rounds and pads finite values to exactly [precision] decimal places, with no
@@ -47,13 +45,14 @@ object ChartValueFormatters {
      *
      * @throws IllegalArgumentException if [precision] is outside `0..15`.
      */
-    fun fixed(precision: Int): ChartValueFormatter {
+    internal fun fixed(precision: Int): ChartValueFormatter {
         require(precision in 0..15) { "precision must be in 0..15, was $precision" }
         return ChartValueFormatter { value -> formatFixedValue(value, precision) }
     }
 
-    private fun formatDefaultValue(value: Double): String {
-        val trimmed = formatFixedValue(value, 2).trimEnd('0')
+    /** Two decimals with trailing zeros trimmed, keeping `.0` on whole values. */
+    internal fun formatSelectedValue(value: Double): String {
+        val trimmed = formatFixedValue(value = value, precision = 2).trimEnd('0')
         return if (trimmed.endsWith('.')) "${trimmed}0" else trimmed
     }
 

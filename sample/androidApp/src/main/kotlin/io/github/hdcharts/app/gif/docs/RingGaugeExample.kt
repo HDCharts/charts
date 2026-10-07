@@ -10,6 +10,7 @@ import io.github.hdcharts.core.model.ChartValueFormatter
 import io.github.hdcharts.core.model.ChartValueFormatters
 import io.github.hdcharts.core.model.toChartData
 import io.github.hdcharts.gauge.RingGaugeChart
+import io.github.hdcharts.gauge.RingGaugeChartDefaults
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,7 +20,10 @@ private const val TITLE = "Quarterly Targets"
 class RingGaugeViewModel : ViewModel() {
     val title: String = TITLE
 
-    val valueFormatter: ChartValueFormatter = ChartValueFormatters.suffix("%")
+    val selectedValueFormatter: ChartValueFormatter = ChartValueFormatters.suffix("%")
+
+    val axisValueFormatter: ChartValueFormatter =
+        ChartValueFormatter { value -> "${RingGaugeChartDefaults.axisValueFormatter.format(value)}%" }
 
     val data: StateFlow<ChartData> = MutableStateFlow(buildData()).asStateFlow()
 
@@ -36,6 +40,7 @@ fun ShowRingGauge(viewModel: RingGaugeViewModel = viewModel()) {
     RingGaugeChart(
         data = data,
         title = TITLE,
-        valueFormatter = viewModel.valueFormatter,
+        selectedValueFormatter = viewModel.selectedValueFormatter,
+        axisValueFormatter = viewModel.axisValueFormatter,
     )
 }

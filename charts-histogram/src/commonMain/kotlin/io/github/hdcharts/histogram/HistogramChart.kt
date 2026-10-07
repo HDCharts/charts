@@ -25,8 +25,7 @@ import io.github.hdcharts.histogram.internal.HistogramChartEntry
  * Replacing [data] clears selection; resizing or changing density does not. Disabling
  * [interactionEnabled] disables all user controls, but programmatic selection still renders.
  * [animateOnStart] controls initial reveal, not subsequent update animations.
- * [valueFormatter] formats selected raw values, [axisValueFormatter] formats Y ticks
- * independently of [valueFormatter] for Y ticks.
+ * [selectedValueFormatter] formats selected raw values; [axisValueFormatter] formats Y ticks.
  */
 @Composable
 fun HistogramChart(
@@ -37,7 +36,7 @@ fun HistogramChart(
     selection: ChartSelection = rememberChartSelection(),
     interactionEnabled: Boolean = true,
     animateOnStart: Boolean = true,
-    valueFormatter: ChartValueFormatter = BarChartDefaults.valueFormatter,
+    selectedValueFormatter: ChartValueFormatter = BarChartDefaults.selectedValueFormatter,
     axisValueFormatter: ChartValueFormatter = BarChartDefaults.axisValueFormatter,
 ) {
     val barStyle =
@@ -62,7 +61,7 @@ fun HistogramChart(
         selectedIndex = selectedIndex,
         interactionEnabled = interactionEnabled,
         animateOnStart = animateOnStart,
-        valueFormatter = valueFormatter,
+        selectedValueFormatter = selectedValueFormatter,
         axisValueFormatter = axisValueFormatter,
     )
 }

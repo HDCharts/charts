@@ -23,33 +23,6 @@ Options:
 
 ## Confirmed
 
-### Stacked charts have no public formatters
-
-`BarChart`, `HistogramChart`, `LineChart`, and `LiveLineChart` take an `axisValueFormatter` for Y
-labels, and all but `LiveLineChart` take a `valueFormatter` for the selected-value readout.
-`StackedBarChart` and `StackedAreaChart` take neither: their Y labels always use
-`defaultAxisValueFormatter`, and their readout always uses `ChartValueFormatters.Default`. Apps
-cannot add a currency prefix or change the precision on a stacked chart.
-
-The bar and line defaults and `defaultAxisValueFormatter` are also three copies of one formatter,
-so a change to one must be made to all three.
-
-Confirmed by the public signatures of `StackedBarChart` and `StackedAreaChart`.
-
-Plan, before 3.0 ships:
-
-- Add `valueFormatter` and `axisValueFormatter` to `StackedBarChart` and `StackedAreaChart`, with
-  defaults on `StackedBarChartDefaults` and `StackedAreaChartDefaults` that mirror bar and line.
-- Delete `defaultAxisValueFormatter`.
-- Add a line to the stacked bar and stacked area migration notes, a release note, and a docs
-  example.
-- Test that a custom formatter reaches both the Y labels and the readout.
-
-After 3.0 ships, adding parameters to a public composable changes its JVM signature. Compiled
-callers then keep working only through a hidden, deprecated overload with the old signature, so
-landing this before the release is cheaper. Pie and radar charts have no value axis; whether they
-take a readout-only `valueFormatter` can be decided later.
-
 ### Overflowing stacked totals print Infinity and NaN
 
 Stacked totals of finite values can overflow to infinity. The Y labels then read `Infinity`, and
