@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import io.github.hdcharts.core.internal.ANIMATION_TARGET
+import io.github.hdcharts.core.internal.animation.ChartMorphState
 
 /**
  * Everything a data update moves: the values a morph blends, the live window shift, and the window
@@ -20,7 +21,7 @@ internal class LineChartTransitionState(
     initialMorphValues: List<List<Float>>,
 ) {
     /** The values an update that does not slide blends between. */
-    val morph = LineChartMorphState(initialMorphValues)
+    val morph = ChartMorphState(initialMorphValues)
 
     private val shiftData = mutableStateOf<LineChartTimelineShiftData?>(null)
     private val shiftProgressValue = Animatable(ANIMATION_TARGET)

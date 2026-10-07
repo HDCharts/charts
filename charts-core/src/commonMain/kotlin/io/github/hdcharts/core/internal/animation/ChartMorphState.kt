@@ -1,4 +1,4 @@
-package io.github.hdcharts.line.internal
+package io.github.hdcharts.core.internal.animation
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.TweenSpec
@@ -6,19 +6,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import io.github.hdcharts.core.internal.ANIMATION_TARGET
+import io.github.hdcharts.core.internal.InternalChartsApi
 
 /**
  * The morph between two data sets, driven by one animated scalar.
- *
- * Runs on every update that is not a live window slide: each point eases from where it was drawn to
- * where the new data puts it.
  *
  * [from] and [to] hold the normalized values the morph started from and is heading to, and the
  * drawn value of a point is the linear blend of the two at [progress]. One animated value keeps the
  * animation's cost independent of how many points the chart draws, and [blendInto] writes a frame
  * into a reused buffer so it allocates nothing per point.
  */
-internal class LineChartMorphState(
+@InternalChartsApi
+class ChartMorphState(
     initialValues: List<List<Float>>,
 ) {
     var from: List<List<Float>> by mutableStateOf(initialValues)
@@ -89,7 +88,8 @@ private fun blendSeries(
  * Blends [from] towards [to] at [progress] into [into], scaled by [scaleBy], and reports how many
  * values it wrote. Points past the end of [into] are dropped.
  */
-internal fun blendInto(
+@InternalChartsApi
+fun blendInto(
     into: FloatArray,
     from: List<Float>,
     to: List<Float>,

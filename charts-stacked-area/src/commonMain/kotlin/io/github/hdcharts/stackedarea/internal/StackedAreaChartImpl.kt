@@ -1,6 +1,5 @@
 package io.github.hdcharts.stackedarea.internal
 
-import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ScrollState
@@ -42,6 +41,7 @@ import io.github.hdcharts.core.internal.ANIMATION_TARGET
 import io.github.hdcharts.core.internal.AnimationSpec
 import io.github.hdcharts.core.internal.NO_SELECTION
 import io.github.hdcharts.core.internal.TestTags
+import io.github.hdcharts.core.internal.animation.ChartMorphState
 import io.github.hdcharts.core.internal.axis.AxisXItems
 import io.github.hdcharts.core.internal.axis.AxisXLabelsLayout
 import io.github.hdcharts.core.internal.axis.AxisYLabelsLayout
@@ -76,8 +76,6 @@ import io.github.hdcharts.core.model.ChartValueFormatter
 import io.github.hdcharts.stackedarea.StackedAreaChartStyle
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
 import kotlin.math.max
 import kotlin.math.roundToInt
 
@@ -132,21 +130,9 @@ internal fun StackedAreaChartImpl(
         animationSpec = AnimationSpec.lineChart(),
         label = "stackedAreaReveal",
     )
-    val animatedValues =
-        remember(seriesCount, pointsCount, isPreview, animateOnStart) {
-            List(seriesCount) { seriesIndex ->
-                List(pointsCount) { pointIndex ->
-                    val initialValue =
-                        when {
-                            isPreview || !animateOnStart ->
-                                targetNormalized.getOrNull(seriesIndex)?.getOrNull(pointIndex) ?: 0f
-                            else -> 0f
-                        }
-                    Animatable(initialValue)
-                }
-            }
-        }
     val hasInitialized = remember { mutableStateOf(false) }
+    // As in the line chart, a new series or point count draws straight away: there is no earlier state to move from.
+    val morph = remember(seriesCount, pointsCount) { ChartMorphState(targetNormalized) }
     val forcedSelectedSourceIndex =
         selectedPointIndex.takeIf { it in 0 until sourcePointsCount } ?: NO_SELECTION
     var selectedSourceIndexFromInteraction by
@@ -169,45 +155,18 @@ internal fun StackedAreaChartImpl(
     LaunchedEffect(show, targetNormalized) {
         if (pointsCount <= 0 || seriesCount == 0) return@LaunchedEffect
         if (!show && !isPreview) {
-            animatedValues.forEach { series ->
-                series.forEach { animatable -> animatable.snapTo(0f) }
-            }
             hasInitialized.value = false
             return@LaunchedEffect
         }
 
         if (isPreview || !hasInitialized.value) {
-            animatedValues.forEachIndexed { seriesIndex, series ->
-                val targetSeries = targetNormalized.getOrNull(seriesIndex).orEmpty()
-                series.forEachIndexed { pointIndex, animatable ->
-                    val target = targetSeries.getOrNull(pointIndex) ?: 0f
-                    animatable.snapTo(target)
-                }
-            }
+            morph.snapTo(targetNormalized)
             hasInitialized.value = true
             return@LaunchedEffect
         }
 
-        coroutineScope {
-            animatedValues.forEachIndexed { seriesIndex, series ->
-                val targetSeries = targetNormalized.getOrNull(seriesIndex).orEmpty()
-                series.forEachIndexed { pointIndex, animatable ->
-                    val target = targetSeries.getOrNull(pointIndex) ?: 0f
-                    launch {
-                        val shouldAnimate = !isPreview && (animateOnStart || hasInitialized.value)
-                        if (!shouldAnimate) {
-                            animatable.snapTo(target)
-                        } else {
-                            animatable.animateTo(
-                                targetValue = target,
-                                animationSpec = valueAnimationSpec,
-                            )
-                        }
-                    }
-                }
-            }
-        }
-        hasInitialized.value = true
+        if (morph.to == targetNormalized && morph.progress.value == ANIMATION_TARGET) return@LaunchedEffect
+        morph.animateTo(targets = targetNormalized, animationSpec = valueAnimationSpec)
     }
 
     val effectiveSelectedSourceIndex =
@@ -280,7 +239,7 @@ internal fun StackedAreaChartImpl(
             interactionEnabled = interactionEnabled,
             axisValueFormatter = axisValueFormatter,
             isScrollable = isScrollable,
-            animatedValues = animatedValues,
+            morph = morph,
             revealProgress = revealProgress,
             pointsCount = pointsCount,
             scrollState = scrollState,
@@ -312,7 +271,7 @@ private fun StackedAreaChartContent(
     areaColors: ImmutableList<Color>,
     interactionEnabled: Boolean,
     isScrollable: Boolean,
-    animatedValues: List<List<Animatable<Float, *>>>,
+    morph: ChartMorphState,
     revealProgress: Float,
     pointsCount: Int,
     scrollState: ScrollState,
@@ -565,7 +524,8 @@ private fun StackedAreaChartContent(
                             .testTag(TestTags.STACKED_AREA_CHART_PLOT)
                             .then(
                                 if (isScrollable) {
-                                    Modifier.horizontalScroll(state = scrollState, enabled = true)
+                                    // Touch scrolling comes from the gesture area above; a second handler here fights it.
+                                    Modifier.horizontalScroll(state = scrollState, enabled = false)
                                 } else {
                                     Modifier
                                 },
@@ -577,9 +537,16 @@ private fun StackedAreaChartContent(
                                 .fillMaxHeight()
                                 .requiredWidth(plotContentWidth),
                     ) {
+                        val morphProgress = morph.progress.value
                         val stackedUpperBounds =
-                            animatedValues.map { series ->
-                                series.map { value -> value.value * size.height }
+                            List(morph.to.size) { seriesIndex ->
+                                List(pointsCount) { pointIndex ->
+                                    morph.drawnValueAt(
+                                        seriesIndex = seriesIndex,
+                                        pointIndex = pointIndex,
+                                        progress = morphProgress,
+                                    ) * size.height
+                                }
                             }
                         val emptyLower = List(pointsCount) { 0f }
 

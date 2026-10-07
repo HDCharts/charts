@@ -18,44 +18,40 @@ window, an expanded stacked area chart, and an expanded histogram at 10,000, 100
 
 ## Confirmed
 
-### Stacked area charts stay busy after a swipe on Android and iOS
+### One animation value per bar
 
-After a swipe on an expanded stacked area chart, Compose never goes idle on Android and iOS. A test
-that waits for idle after the swipe hangs until its timeout, and a tap after the swipe does not
-select a new point in time. Line charts settle within about a second. JVM tests settle, so the
-cause is likely the platform fling or overscroll.
+Bar, histogram, and stacked bar charts keep one `Animatable` per bar, and a morph launches one
+coroutine per bar. Bar and histogram compact dense data, but expanding brings back one `Animatable`
+per source bar, so 1,000,000 bins make 1,000,000 of them and a coroutine for each bin that changes.
 
-Confirmed by `stackedAreaChart_scrollThenTap_changesSelectedLabelAtSameViewportX`, which timed out
-on the iOS simulator, and a rewrite that waited for idle and hung on an API 35 Nexus 6 emulator.
-The test was removed until this is fixed.
-
-Options:
-
-- Find what keeps the chart busy after a swipe, starting from the scroll wiring in
-  `StackedAreaChartContent`, and add the scroll-then-tap test back.
-
-### One animation value per point or bar
-
-Stacked area charts keep one `Animatable` per point of every series; bar, histogram, and stacked
-bar charts keep one per bar. A morph launches one coroutine per point, so a two-series window of
-100,000 points makes 200,000 calls per update. Bar and histogram compact dense data, but expanding
-brings back one `Animatable` per source bar, so 1,000,000 bins make 1,000,000 of them and a
-coroutine for each bin that changes.
-
-Confirmed by the code: `animatedValues` in `StackedAreaChart` and `StackedBarChart`, and
-`rememberBarChartAnimatedValues` in `BarChartAnimation.kt`. Line and live line charts no longer
-appear here: `LineChartMorphState` animates one progress value and the draw blends the two value
-sets.
+Confirmed by the code: `animatedValues` in `StackedBarChart`, and `rememberBarChartAnimatedValues`
+in `BarChartAnimation.kt`. Line, live line, and stacked area charts no longer appear here:
+`ChartMorphState` animates one progress value and the draw blends the two value sets.
 
 Options:
 
 - Animate one progress value per chart, and blend the old and new values in the draw.
 
+### Data with a new point count draws without animation
+
+Line and stacked area charts animate an update only when the number of series and points stays the
+same. Data that goes from 5 points to 6, or adds a series, draws straight away. Live line charts
+keep the point count fixed and slide the window, so new points still animate there.
+
+Confirmed by the code: `LineChartTransitionState.update` snaps on a changed series structure, and
+`StackedAreaChartImpl` keys its `ChartMorphState` on the series and point counts.
+
+Options:
+
+- Morph between the two counts: `ChartMorphState` already blends lists of different lengths, and
+  new points could start from the last drawn value.
+
 ### Stacked area builds every point before culling
 
-Each draw copies every `Animatable` of every series, allocates a zero baseline as long as the
-data, and builds an `Offset` for every point in `buildSeriesPoints`, then keeps only the visible
-range with `subList`. Culling saves path segments, not the work over every point of every series.
+Each draw blends every point of every series from `ChartMorphState`, allocates a zero baseline as
+long as the data, and builds an `Offset` for every point in `buildSeriesPoints`, then keeps only the
+visible range with `subList`. Culling saves path segments, not the work over every point of every
+series.
 
 Confirmed by the code: the canvas in `StackedAreaChart` and `buildSeriesPoints`.
 

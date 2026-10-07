@@ -40,6 +40,7 @@ import io.github.hdcharts.core.internal.ANIMATION_TARGET
 import io.github.hdcharts.core.internal.AnimationSpec
 import io.github.hdcharts.core.internal.NO_SELECTION
 import io.github.hdcharts.core.internal.TestTags
+import io.github.hdcharts.core.internal.animation.blendInto
 import io.github.hdcharts.core.internal.axis.AxisXItems
 import io.github.hdcharts.core.internal.axis.AxisXLabelsLayout
 import io.github.hdcharts.core.internal.axis.AxisYLabelsLayout
