@@ -35,6 +35,12 @@ Run selected tasks and list the exact commands in the PR body. CI owns
 `validateDocsGifBaselines` and instrumented Android tests unless the user asks
 to run them locally.
 
+When the diff clearly changes rendered output, offer `./gradlew updateScreenshots`
+in the questionnaire and name the affected screenshot tests. Examples: a changed
+default label format, color, size, or layout, or a changed sample scenario.
+Include the regenerated baselines in the same pull request. If the user declines,
+state in the PR body which baselines are expected to change.
+
 Run `./gradlew apiCompatibilityCheck` locally for public API or library-module
 changes. If it reports an unacknowledged incompatible API change, ask whether
 the change is intentional. If it is intentional, run
