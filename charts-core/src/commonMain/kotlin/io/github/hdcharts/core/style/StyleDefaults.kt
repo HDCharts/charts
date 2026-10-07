@@ -97,6 +97,9 @@ object StyleDefaults {
     val axisValueFormatter: ChartValueFormatter =
         ChartValueFormatter { value -> selectedValueFormatter.format(value).removeSuffix(".0") }
 
+    /** Pie's selected slice share: [selectedValueFormatter] with a `%` suffix, e.g. `42.5%`. */
+    val pieSelectedValueFormatter: ChartValueFormatter = ChartValueFormatters.suffix("%")
+
     // ===========================================================================
     // Histogram
     // ===========================================================================

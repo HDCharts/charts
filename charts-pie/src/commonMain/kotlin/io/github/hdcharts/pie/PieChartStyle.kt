@@ -15,7 +15,6 @@ import io.github.hdcharts.core.internal.clampSize
 import io.github.hdcharts.core.internal.layout.fillMaxSizeChartModifier
 import io.github.hdcharts.core.internal.palette.resolvePaletteColors
 import io.github.hdcharts.core.model.ChartValueFormatter
-import io.github.hdcharts.core.model.ChartValueFormatters
 import io.github.hdcharts.core.style.ChartContainerDefaults
 import io.github.hdcharts.core.style.ChartContainerStyle
 import io.github.hdcharts.core.style.LegendDefaults
@@ -134,7 +133,7 @@ data class PieChartBorderStyle(
  */
 object PieChartDefaults {
     /** Default formatter for the selected slice's share: two decimals and a `%`, e.g. `42.5%`. */
-    val selectedValueFormatter: ChartValueFormatter = ChartValueFormatters.suffix("%")
+    val selectedValueFormatter: ChartValueFormatter = StyleDefaults.pieSelectedValueFormatter
 
     /**
      * Returns a [PieChartStyle] with the provided parameters or their default values.

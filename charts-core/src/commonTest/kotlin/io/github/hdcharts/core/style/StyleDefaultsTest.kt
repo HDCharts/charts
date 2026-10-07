@@ -138,6 +138,12 @@ class StyleDefaultsTest {
     }
 
     @Test
+    fun pieSelectedValueFormatter_addsAPercentSuffix() {
+        assertEquals(expected = "33.33%", actual = StyleDefaults.pieSelectedValueFormatter.format(100.0 / 3))
+        assertEquals(expected = "50.0%", actual = StyleDefaults.pieSelectedValueFormatter.format(50.0))
+    }
+
+    @Test
     fun axisValueFormatter_roundsToTwoDecimalsWithoutTrailingZero() {
         assertEquals(expected = "5", actual = StyleDefaults.axisValueFormatter.format(5.0))
         assertEquals(expected = "-10", actual = StyleDefaults.axisValueFormatter.format(-10.0))
