@@ -1,29 +1,39 @@
 package io.github.hdcharts.core.internal.model
 
+import kotlin.math.abs
+
 /**
- * Normalizes [value] onto 0..1 over a range of [range] starting at [minValue], the form every chart
+ * Normalizes [value] onto 0..1 from [minValue] to [maxValue], the form every chart
  * animation draws from. A zero range has no scale to divide by, so it resolves to
  * [zeroRangeValue].
  */
 fun normalizeValue(
     value: Double,
     minValue: Double,
-    range: Double,
+    maxValue: Double,
     zeroRangeValue: Float = 0f,
-): Float =
-    when (range) {
-        0.0 -> zeroRangeValue
-        else -> ((value - minValue) / range).toFloat().coerceIn(0f, 1f)
-    }
+): Float {
+    if (minValue == maxValue) return zeroRangeValue
+    val clamped = value.coerceIn(minValue, maxValue)
+    val range = maxValue - minValue
+    val normalized =
+        if (range.isFinite()) {
+            (clamped - minValue) / range
+        } else {
+            // Finite bounds can have an infinite span. Scaling first keeps both differences finite.
+            val scale = maxOf(abs(minValue), abs(maxValue))
+            (clamped / scale - minValue / scale) / (maxValue / scale - minValue / scale)
+        }
+    return normalized.toFloat().coerceIn(0f, 1f)
+}
 
 fun ChartRenderData.normalizeByMinMax(
     minMax: Pair<Double, Double>,
     zeroRangeValue: Float,
 ): List<List<Float>> {
     val (minValue, maxValue) = minMax
-    val range = maxValue - minValue
     return series.map { item ->
-        item.values.map { value -> normalizeValue(value, minValue, range, zeroRangeValue) }
+        item.values.map { value -> normalizeValue(value, minValue, maxValue, zeroRangeValue) }
     }
 }
 

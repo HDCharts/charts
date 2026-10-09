@@ -75,6 +75,43 @@ class ChartRenderDataTest {
     }
 
     @Test
+    fun normalizeByMinMax_overflowingRange_keepsEndpointsAndInteriorValues() {
+        for (max in listOf(1e308, Double.MAX_VALUE)) {
+            val data = model(ChartSeries(values = listOf(-max, -max / 2, 0.0, max / 2, max)))
+
+            assertContentEquals(
+                listOf(0f, 0.25f, 0.5f, 0.75f, 1f),
+                data.normalizeByMinMax(data.minMax(), zeroRangeValue = 0f).single(),
+            )
+        }
+    }
+
+    @Test
+    fun normalizeByMinMax_asymmetricOverflowingRange_clampsValuesOutsideFixedBounds() {
+        val max = Double.MAX_VALUE
+        val data = model(ChartSeries(values = listOf(-max, -max / 2, 0.0, max / 2, max)))
+
+        assertContentEquals(
+            listOf(0f, 0f, 1f / 3f, 2f / 3f, 1f),
+            data.normalizeByMinMax(-max / 2 to max, zeroRangeValue = 0f).single(),
+        )
+        assertContentEquals(
+            listOf(0f, 1f / 3f, 2f / 3f, 1f, 1f),
+            data.normalizeByMinMax(-max to max / 2, zeroRangeValue = 0f).single(),
+        )
+    }
+
+    @Test
+    fun normalizeByMinMax_subnormalRange_preservesEndpoints() {
+        val data = model(ChartSeries(values = listOf(0.0, Double.MIN_VALUE)))
+
+        assertContentEquals(
+            listOf(0f, 1f),
+            data.normalizeByMinMax(data.minMax(), zeroRangeValue = 0f).single(),
+        )
+    }
+
+    @Test
     fun valueCount_returnsTheFirstSeriesCount() {
         val data =
             model(

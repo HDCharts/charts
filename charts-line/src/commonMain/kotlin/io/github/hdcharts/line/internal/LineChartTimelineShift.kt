@@ -100,7 +100,6 @@ internal fun timelineShiftValues(
     minMax: Pair<Double, Double>,
 ): List<List<Float>> {
     val (minValue, maxValue) = minMax
-    val range = maxValue - minValue
 
     return previousSeries.mapIndexed { index, previousValues ->
         // Only the newest point of the current window is drawn, so only that one is normalized.
@@ -108,13 +107,13 @@ internal fun timelineShiftValues(
             currentSeries
                 .getOrNull(index)
                 ?.lastOrNull()
-                ?.let { value -> normalizeValue(value, minValue, range) }
+                ?.let { value -> normalizeValue(value, minValue, maxValue) }
         when {
             previousValues.isEmpty() || newestValue == null -> emptyList()
             else ->
                 List(previousValues.size + 1) { position ->
                     when {
-                        position < previousValues.size -> normalizeValue(previousValues[position], minValue, range)
+                        position < previousValues.size -> normalizeValue(previousValues[position], minValue, maxValue)
                         else -> newestValue
                     }
                 }

@@ -473,6 +473,18 @@ class LineChartHelpersTest {
     }
 
     @Test
+    fun timelineShiftValues_overflowingRange_keepsPreviousWindowAndNewestPointOnScale() {
+        val values =
+            timelineShiftValues(
+                previousSeries = listOf(listOf(-1e308, -5e307, 0.0, 5e307)),
+                currentSeries = listOf(listOf(-5e307, 0.0, 5e307, 1e308)),
+                minMax = -1e308 to 1e308,
+            )
+
+        assertEquals(expected = listOf(listOf(0f, 0.25f, 0.5f, 0.75f, 1f)), actual = values)
+    }
+
+    @Test
     fun lineChartValueAnimationSpec_inTimelineMode_usesTheRequestedDuration() {
         val spec =
             lineChartValueAnimationSpec(

@@ -240,6 +240,22 @@ class AxisHelpersTest {
     }
 
     @Test
+    fun baselineYForRange_overflowingRange_putsZeroInside() {
+        assertEquals(expected = 100f, actual = baselineYForRange(-1e308, 1e308, 200f))
+        assertEquals(expected = 100f, actual = baselineYForRange(-Double.MAX_VALUE, Double.MAX_VALUE, 200f))
+        assertEquals(
+            expected = 200f / 3f,
+            actual = baselineYForRange(-Double.MAX_VALUE, Double.MAX_VALUE / 2, 200f),
+            absoluteTolerance = 0.001f,
+        )
+        assertEquals(
+            expected = 400f / 3f,
+            actual = baselineYForRange(-Double.MAX_VALUE / 2, Double.MAX_VALUE, 200f),
+            absoluteTolerance = 0.001f,
+        )
+    }
+
+    @Test
     fun baselineYForRange_emptyRange_putsZeroAtBottomUnlessNegative() {
         assertEquals(expected = 200f, actual = baselineYForRange(minValue = 5.0, maxValue = 5.0, heightPx = 200f))
         assertEquals(expected = 200f, actual = baselineYForRange(minValue = 0.0, maxValue = 0.0, heightPx = 200f))
