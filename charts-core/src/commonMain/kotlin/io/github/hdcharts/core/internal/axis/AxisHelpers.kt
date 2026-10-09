@@ -2,6 +2,7 @@ package io.github.hdcharts.core.internal.axis
 
 import androidx.compose.ui.unit.IntOffset
 import io.github.hdcharts.core.internal.InternalChartsApi
+import io.github.hdcharts.core.internal.model.normalizeValue
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.roundToInt
@@ -206,12 +207,11 @@ fun baselineYForRange(
     heightPx: Float,
 ): Float {
     if (heightPx <= 0f) return 0f
-    val rangeValue = maxValue - minValue
-    if (rangeValue == 0.0) {
+    if (minValue == maxValue) {
         return if (maxValue < 0.0) 0f else heightPx
     }
 
-    val normalizedZero = ((0.0 - minValue) / rangeValue).toFloat()
+    val normalizedZero = normalizeValue(0.0, minValue, maxValue)
     val baseline = heightPx * (1f - normalizedZero)
     return baseline.coerceIn(0f, heightPx)
 }
