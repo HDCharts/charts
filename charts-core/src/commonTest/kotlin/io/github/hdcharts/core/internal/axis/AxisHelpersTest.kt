@@ -175,6 +175,38 @@ class AxisHelpersTest {
     }
 
     @Test
+    fun buildNumericYAxisTicks_adjacentBounds_keepEveryValueInsideRange() {
+        val ranges =
+            listOf(
+                0.025 to 0.025000000000000005,
+                0.029 to 0.029000000000000005,
+                -63.75500000000001 to -63.755,
+            )
+        for ((min, max) in ranges) {
+            for (labelCount in 2..12) {
+                val values = mutableListOf<Double>()
+                numericTicks(
+                    minValue = min,
+                    maxValue = max,
+                    labelCount = labelCount,
+                    formatter = recordingFormatter(values),
+                )
+
+                assertTrue(values.all { it in min..max }, "range $min..$max, count $labelCount: $values")
+                assertEquals(expected = max, actual = values.first())
+                assertEquals(expected = min, actual = values.last())
+            }
+        }
+    }
+
+    @Test
+    fun buildNumericYAxisTicks_adjacentBoundsAtRoundingTie_keepLabelsInsideRange() {
+        val ticks = numericTicks(minValue = -63.75500000000001, maxValue = -63.755, labelCount = 8)
+
+        assertEquals(expected = List(8) { "-63.76" }, actual = ticks.map { it.label })
+    }
+
+    @Test
     fun buildNumericYAxisTicks_extremeSignedRange_staysFinite() {
         val values = mutableListOf<Double>()
         numericTicks(
