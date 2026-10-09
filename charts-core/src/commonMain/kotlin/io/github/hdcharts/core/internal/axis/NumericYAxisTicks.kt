@@ -51,9 +51,14 @@ fun buildNumericYAxisTicks(
 
     return (0..steps).map { step ->
         val progress = step.toDouble() / steps
-        // A convex combination avoids overflowing (max - min) for extreme signed data. On a flat range its
-        // rounding can miss the value by one double and flip a label, so the value is used as is.
-        val value = if (minValue == maxValue) maxValue else maxValue * (1.0 - progress) + minValue * progress
+        // A convex combination avoids overflowing (max - min) for extreme signed data.
+        // Clamp rounding drift to the range so it cannot flip a label past either bound.
+        val value =
+            if (minValue == maxValue) {
+                maxValue
+            } else {
+                (maxValue * (1.0 - progress) + minValue * progress).coerceIn(minValue, maxValue)
+            }
         AxisYLayoutTick(
             label = formatter.format(value),
             centerY = safeInset + drawableHeight * progress.toFloat(),
