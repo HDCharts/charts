@@ -26,3 +26,20 @@ fun ShowStackedArea() {
     StackedAreaChart(data = data, title = "Monthly Active Subscribers by Plan")
 }
 ```
+
+## Gradients
+
+Pass a shared `ChartGradient` to `StackedAreaChartDefaults.fill(gradient = ...)` to use it for every
+area layer. A non-empty `seriesGradients` list takes precedence and customizes layers in data order.
+Missing entries and `null` values use that series' solid fill color. `ChartGradients.fade()` follows
+each layer's series color. See [Gradients](/{{version}}/wiki/gradients) for details.
+
+```kotlin
+StackedAreaChartDefaults.fill(
+    seriesGradients = listOf(
+        ChartGradients.fade(endAlpha = 0.1f),
+        ChartGradients.fade(endAlpha = 0.3f),
+        ChartGradients.fade(endAlpha = 0.5f),
+    ),
+)
+```

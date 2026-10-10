@@ -13,9 +13,11 @@ import io.github.hdcharts.core.model.ChartValueFormatter
 import io.github.hdcharts.core.style.AxisLabelStyle
 import io.github.hdcharts.core.style.ChartContainerDefaults
 import io.github.hdcharts.core.style.ChartContainerStyle
+import io.github.hdcharts.core.style.ChartGradient
 import io.github.hdcharts.core.style.LegendDefaults
 import io.github.hdcharts.core.style.LegendStyle
 import io.github.hdcharts.core.style.StyleDefaults
+import io.github.hdcharts.core.style.clamp
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 
@@ -24,6 +26,11 @@ import kotlinx.collections.immutable.toImmutableList
  *
  * @property bezier Draws each layer's edges as smooth curves when `true`, or as straight
  * segments between points when `false`.
+ * @property gradient Shared gradient that paints every layer when [seriesGradients] is empty.
+ * `null` draws solid fills.
+ * @property seriesGradients Optional gradients for individual series, in data order. A non-empty
+ * list takes precedence over [gradient]. Missing entries and `null` values draw that series with its
+ * solid fill color.
  */
 @Immutable
 data class StackedAreaFillStyle(
@@ -31,17 +38,23 @@ data class StackedAreaFillStyle(
     val colors: ImmutableList<Color>,
     val alpha: Float,
     val bezier: Boolean,
+    val gradient: ChartGradient?,
+    val seriesGradients: ImmutableList<ChartGradient?>,
 ) {
     constructor(
         color: Color,
         colors: List<Color>,
         alpha: Float,
         bezier: Boolean,
+        gradient: ChartGradient?,
+        seriesGradients: List<ChartGradient?>,
     ) : this(
         color = color,
         colors = colors.toImmutableList(),
         alpha = alpha,
         bezier = bezier,
+        gradient = gradient,
+        seriesGradients = seriesGradients.toImmutableList(),
     )
 
     /**
@@ -58,9 +71,14 @@ data class StackedAreaFillStyle(
             singleItemUsesBase = true,
         )
 
+    /** Returns the gradient for [seriesIndex], using the shared [gradient] when no overrides exist. */
+    internal fun gradientForSeries(seriesIndex: Int): ChartGradient? =
+        if (seriesGradients.isEmpty()) gradient else seriesGradients.getOrNull(seriesIndex)
+
     /**
-     * Returns this block with [alpha] clamped. Names every field instead of using `copy`, so a field
-     * added to the constructor fails to compile here until it is dealt with.
+     * Returns this block with [alpha], [gradient], and [seriesGradients] clamped.
+     * Names every field instead of using `copy`, so a field added to the constructor fails to compile
+     * here until it is dealt with.
      */
     internal fun clamp() =
         StackedAreaFillStyle(
@@ -68,6 +86,8 @@ data class StackedAreaFillStyle(
             colors = colors,
             alpha = alpha.clampAlpha(),
             bezier = bezier,
+            gradient = gradient?.clamp(),
+            seriesGradients = seriesGradients.map { it?.clamp() }.toImmutableList(),
         )
 }
 
@@ -145,11 +165,15 @@ object StackedAreaChartDefaults {
         colors: List<Color> = emptyList(),
         alpha: Float = StyleDefaults.seriesAlpha,
         bezier: Boolean = false,
+        gradient: ChartGradient? = null,
+        seriesGradients: List<ChartGradient?> = emptyList(),
     ) = StackedAreaFillStyle(
         color = color,
         colors = colors,
         alpha = alpha,
         bezier = bezier,
+        gradient = gradient,
+        seriesGradients = seriesGradients,
     )
 
     /** Returns a [StackedAreaAxisStyle] for axis labels. */
