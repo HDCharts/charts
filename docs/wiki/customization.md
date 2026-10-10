@@ -56,7 +56,8 @@ Chart chrome (background, shape, shadow, and outer padding) lives on the caller-
 
 Here `selectedValueFormatter` adds currency to selected raw values only; Y ticks keep the independent `axisValueFormatter` default. Titles do not generate labels: omitting `categories` hides X labels and leaves only the formatted value in selected readouts.
 
-Bar and histogram bars can also take a gradient, covered in [Gradients](/{{version}}/wiki/gradients).
+Bar and histogram bars, and stacked area layers, can take a gradient, covered in
+[Gradients](/{{version}}/wiki/gradients).
 
 ## Axis Labels
 

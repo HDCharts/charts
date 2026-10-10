@@ -5,8 +5,9 @@ title: Gradients
 # Gradients
 
 Bar and histogram charts paint their bars with a gradient through the `gradient` parameter
-of their `bars()` style. A gradient runs along a line through any number of colors, and draws
-either per bar or across the whole plot.
+of their `bars()` style. Stacked area charts use the same `ChartGradient` model for their layers.
+A gradient runs along a line through any number of colors, and draws either per shape or across
+the whole plot.
 
 ## Supported Charts
 
@@ -14,8 +15,9 @@ either per bar or across the whole plot.
 |---|---|
 | Bar | `BarChartDefaults.bars(gradient = ...)` |
 | Histogram | `HistogramChartDefaults.bars(gradient = ...)` |
+| Stacked Area | `StackedAreaChartDefaults.fill(gradient = ...)` or `seriesGradients = ...` |
 
-Line, pie, radar, ring gauge, stacked bar, and stacked area charts draw solid colors.
+Line, pie, radar, ring gauge, and stacked bar charts draw solid colors.
 
 ## Use
 
@@ -53,8 +55,8 @@ A gradient draws in one of two ways, set by its `span`:
 
 | `span` | Drawing |
 |---|---|
-| `GradientSpan.Shape` | Per bar: every bar shows the whole gradient. This is the default. |
-| `GradientSpan.Plot` | Across the plot: one gradient covers the whole plot, and each bar shows the part it sits on. |
+| `GradientSpan.Shape` | Per shape: every bar or area layer shows the whole gradient. This is the default. |
+| `GradientSpan.Plot` | Across the plot: one gradient covers the whole plot, and each shape shows the part it sits on. |
 
 ### Per Bar
 
@@ -101,16 +103,34 @@ BarChartDefaults.bars(
 When dense data is expanded to scroll, the plot gradient covers every bar and scrolls with
 them.
 
+## Stacked Area Layers
+
+Pass a shared gradient to `StackedAreaChartDefaults.fill(gradient = ...)` to apply it to every layer.
+A non-empty `seriesGradients` list takes precedence and provides gradients in series order. Missing
+entries and `null` values use the series' solid fill color. `ChartGradients.fade()` keeps each layer
+tied to its series color while adding a vertical alpha fade. `GradientSpan.Shape` covers each layer's
+full bounds, including while the chart scrolls.
+
+```kotlin
+StackedAreaChartDefaults.fill(
+    seriesGradients = listOf(
+        ChartGradients.fade(endAlpha = 0.1f),
+        ChartGradients.fade(endAlpha = 0.3f),
+        ChartGradients.fade(endAlpha = 0.5f),
+    ),
+)
+```
+
 ## Ready-Made Gradients
 
 `ChartGradients` spaces the colors evenly along the gradient.
 
 | Function | Gradient |
 |---|---|
-| `vertical(colors, span)` | Top to bottom. With `GradientSpan.Shape`, from each bar's end to the baseline. |
+| `vertical(colors, span)` | Top to bottom. With `GradientSpan.Shape`, through each shape's bounds. |
 | `horizontal(colors, span)` | Left to right. |
 | `linear(angleDegrees, colors, span)` | At an angle, clockwise from left to right. `45` runs from the top-left corner to the bottom-right corner whatever the bounds' shape. At other angles on non-square bounds, the end colors hold near the corners. |
-| `fade(endAlpha, span)` | Top to bottom, from each bar's own color to that color at `endAlpha`. |
+| `fade(endAlpha, span)` | Top to bottom, from each bar or area layer's color to that color at `endAlpha`. |
 
 ## Custom Gradients
 
@@ -139,10 +159,10 @@ val highlight = ChartGradient.Linear(
 A stop is one of two kinds:
 
 - `GradientStop.Fixed(offset, color)` draws that color as given.
-- `GradientStop.Series(offset, alpha)` draws the bar's own color at `alpha`. The bar's color comes
-  from `color` or `colors` in `bars()`, so one gradient follows per-bar colors.
+- `GradientStop.Series(offset, alpha)` draws the shape's own color at `alpha`. For bars, the color
+  comes from `bars()`; for area layers, it comes from `fill()`.
 
-`ChartGradients.fade()` uses series colors, so each bar fades from its own color:
+`ChartGradients.fade()` uses series colors, so each bar or area layer fades from its own color:
 
 ```kotlin
 BarChartDefaults.bars(
@@ -153,8 +173,8 @@ BarChartDefaults.bars(
 
 ## Alpha and Selection
 
-The `alpha` of `bars()` multiplies the whole gradient. While a bar is selected, the other bars
-draw their gradient at `selection.unselectedAlpha`, as solid bars do.
+The `alpha` of `bars()` or `fill()` multiplies the whole gradient. Selection dims unselected bars
+or area layers with `selection.unselectedAlpha`, as it does for solid fills.
 
 ## Clamping
 
@@ -164,6 +184,6 @@ A gradient never replaces the chart with an error. The chart draws the closest g
   offsets make a hard edge between two colors.
 - A stop with a non-finite offset is dropped.
 - A single stop paints its color solid.
-- With no stops, non-finite positions, or the same start and end, the bars draw solid, without a
-  gradient.
+- With no stops, non-finite positions, or the same start and end, bars and area layers draw solid,
+  without a gradient.
 - A `GradientStop.Series` alpha outside `0..1` is clamped to that range.
