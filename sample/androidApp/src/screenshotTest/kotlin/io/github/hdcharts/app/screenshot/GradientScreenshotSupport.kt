@@ -17,12 +17,22 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import io.github.hdcharts.app.screenshot.shared.ScreenshotSurface
+import io.github.hdcharts.sampleshared.theme.LocalChartColors
+import io.github.hdcharts.sampleshared.theme.seriesColor
 
 internal const val GRADIENT_GALLERY_END_ALPHA = 0.35f
 
 private val GalleryCardShape = RoundedCornerShape(12.dp)
+
+/** The three palette colors the gradient examples blend through. */
+@Composable
+internal fun galleryGradientColors(): List<Color> {
+    val chartColors = LocalChartColors.current
+    return listOf(chartColors.seriesColor(0), chartColors.seriesColor(2), chartColors.seriesColor(4))
+}
 
 @Composable
 internal fun GradientGallerySurface(

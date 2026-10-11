@@ -13,8 +13,6 @@ import io.github.hdcharts.core.style.BarChartDefaults
 import io.github.hdcharts.core.style.BarChartStyle
 import io.github.hdcharts.core.style.ChartGradients
 import io.github.hdcharts.core.style.GradientSpan
-import io.github.hdcharts.sampleshared.theme.LocalChartColors
-import io.github.hdcharts.sampleshared.theme.seriesColor
 
 /** A 2x2 landscape grid of labeled gradient examples for the bar chart. */
 @PreviewTest
@@ -24,13 +22,7 @@ fun BarChartGradientPreview() {
     val data = SCREENSHOT_BAR_SAMPLE_USE_CASE.deterministic()
     val signedData = SCREENSHOT_BAR_SAMPLE_USE_CASE.deterministic(signed = true)
     GradientGallerySurface(title = "Bar chart gradients") {
-        val chartColors = LocalChartColors.current
-        val gradientColors =
-            listOf(
-                chartColors.seriesColor(0),
-                chartColors.seriesColor(2),
-                chartColors.seriesColor(4),
-            )
+        val gradientColors = galleryGradientColors()
         GradientGalleryRow {
             BarGalleryExample(
                 title = "Three-stop shape",

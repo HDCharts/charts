@@ -13,8 +13,6 @@ import io.github.hdcharts.core.style.GradientSpan
 import io.github.hdcharts.line.LineChart
 import io.github.hdcharts.line.LineChartDefaults
 import io.github.hdcharts.line.LineChartStyle
-import io.github.hdcharts.sampleshared.theme.LocalChartColors
-import io.github.hdcharts.sampleshared.theme.seriesColor
 
 /** A single-series line colored by value. */
 @PreviewTest
@@ -23,8 +21,7 @@ import io.github.hdcharts.sampleshared.theme.seriesColor
 fun LineChartGradientPreview() {
     val data = SCREENSHOT_LINE_SAMPLE_USE_CASE.deterministic()
     GradientGallerySurface(title = "Line chart gradients") {
-        val chartColors = LocalChartColors.current
-        val gradientColors = listOf(chartColors.seriesColor(0), chartColors.seriesColor(2), chartColors.seriesColor(4))
+        val gradientColors = galleryGradientColors()
         val byValue = ChartGradients.vertical(colors = gradientColors, span = GradientSpan.Plot)
         val byValueStyle = LineChartDefaults.style(line = LineChartDefaults.line(gradient = byValue))
 

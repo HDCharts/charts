@@ -30,7 +30,17 @@
 </p>
 
 <p align="center">
-  <img width="893" alt="demo-light" src="https://github.com/user-attachments/assets/9bd7fc79-93c2-434a-a70c-d3a3a6dc9db4" />
+  <picture>
+    <source
+      media="(prefers-color-scheme: dark)"
+      srcset="sample/androidApp/src/screenshotTestDebug/reference/io/github/hdcharts/app/screenshot/ReadmeScreenshotTestKt/ReadmeShowcasePreview_README%20dark_278d6fe8_0.png"
+    />
+    <img
+      width="893"
+      alt="HDCharts histogram, stacked area, bar, donut, multi-line, and radar charts"
+      src="sample/androidApp/src/screenshotTestDebug/reference/io/github/hdcharts/app/screenshot/ReadmeScreenshotTestKt/ReadmeShowcasePreview_README%20light_9696eabb_0.png"
+    />
+  </picture>
 </p>
 
 ---
