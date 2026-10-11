@@ -13,10 +13,10 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 /**
- * A gradient that paints a chart shape, such as a bar or stacked area layer.
+ * A gradient that paints a chart shape, such as a bar.
  *
  * Positions are fractions of the gradient's bounds, which [span] picks, so a gradient reads the same
- * on every shape size and screen. A chart clamps a gradient it cannot draw as given, as [stops]
+ * on every bar size and screen. A chart clamps a gradient it cannot draw as given, as [stops]
  * describes. One with non-finite positions, or the same start and end, draws the shape without it.
  */
 @Immutable
@@ -99,8 +99,8 @@ data class GradientPoint(
 /** The bounds a [ChartGradient]'s positions are fractions of. */
 enum class GradientSpan {
     /**
-     * Each shape's own bounds, so every bar or area layer shows the whole gradient. A bar below the
-     * baseline mirrors it vertically, so the gradient still runs from the bar's value edge to the baseline.
+     * Each shape's own bounds, so every bar shows the whole gradient. A bar below the baseline
+     * mirrors it vertically, so the gradient still runs from the bar's value edge to the baseline.
      */
     Shape,
 
@@ -112,7 +112,7 @@ enum class GradientSpan {
 object ChartGradients {
     /**
      * Returns a top-to-bottom gradient through [colors]. With [GradientSpan.Shape], that is from each
-     * shape's top edge to its bottom edge.
+     * bar's value edge to the baseline.
      */
     fun vertical(
         colors: List<Color>,

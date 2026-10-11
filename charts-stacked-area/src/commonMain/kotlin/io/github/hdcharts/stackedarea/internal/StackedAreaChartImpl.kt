@@ -26,7 +26,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.ClipOp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
@@ -62,7 +61,6 @@ import io.github.hdcharts.core.internal.composable.zoomInScale
 import io.github.hdcharts.core.internal.composable.zoomOutScale
 import io.github.hdcharts.core.internal.density.denseStepForViewport
 import io.github.hdcharts.core.internal.drawing.drawSelectionLine
-import io.github.hdcharts.core.internal.drawing.gradientBrush
 import io.github.hdcharts.core.internal.interaction.buildHorizontalDragGestureModifier
 import io.github.hdcharts.core.internal.interaction.buildPinchZoomModifier
 import io.github.hdcharts.core.internal.interaction.buildTapGestureModifier
@@ -75,7 +73,6 @@ import io.github.hdcharts.core.internal.layout.placedHorizontalScrollPx
 import io.github.hdcharts.core.internal.model.ChartRenderData
 import io.github.hdcharts.core.internal.model.normalizeStackedAreaValues
 import io.github.hdcharts.core.model.ChartValueFormatter
-import io.github.hdcharts.core.style.ChartGradient
 import io.github.hdcharts.stackedarea.StackedAreaChartStyle
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -574,12 +571,10 @@ private fun StackedAreaChartContent(
                                     upperSeries = upperSeries,
                                     lowerSeries = lowerSeries,
                                     fillColor =
-                                        areaColors.getOrElse(index) {
-                                            areaColors.lastOrNull() ?: Color.Transparent
-                                        },
-                                    alpha = style.fill.alpha * alphaFactor,
+                                        areaColors
+                                            .getOrElse(index) { areaColors.lastOrNull() ?: Color.Transparent }
+                                            .copy(alpha = style.fill.alpha * alphaFactor),
                                     bezier = style.fill.bezier,
-                                    gradient = style.fill.gradientForSeries(index),
                                     revealProgress = revealProgress,
                                     visibleStart = rangeStart,
                                     visibleEnd = rangeEnd,
@@ -647,9 +642,7 @@ private fun DrawScope.drawStackedAreaSeries(
     upperSeries: List<Float>,
     lowerSeries: List<Float>,
     fillColor: Color,
-    alpha: Float,
     bezier: Boolean,
-    gradient: ChartGradient?,
     revealProgress: Float,
     visibleStart: Int,
     visibleEnd: Int,
@@ -677,57 +670,18 @@ private fun DrawScope.drawStackedAreaSeries(
         }
 
     val revealX = (size.width * revealProgress).coerceIn(0f, size.width)
-    val drawArea = {
-        drawAreaPath(
-            path = areaPath,
-            fillColor = fillColor,
-            alpha = alpha,
-            gradient = gradient,
-            upperSeries = upperSeries,
-            lowerSeries = lowerSeries,
-        )
-    }
     if (revealProgress >= ANIMATION_TARGET) {
-        drawArea()
+        drawPath(
+            path = areaPath,
+            color = fillColor,
+        )
     } else {
         clipRect(left = 0f, top = 0f, right = revealX, bottom = size.height) {
-            drawArea()
-        }
-    }
-}
-
-private fun DrawScope.drawAreaPath(
-    path: Path,
-    fillColor: Color,
-    alpha: Float,
-    gradient: ChartGradient?,
-    upperSeries: List<Float>,
-    lowerSeries: List<Float>,
-) {
-    if (gradient == null) {
-        drawPath(path = path, color = fillColor.copy(alpha = alpha))
-    } else {
-        // Keep shape-span gradients anchored to the full layer while the renderer draws a visible subpath.
-        val shapeBounds =
-            Rect(
-                left = 0f,
-                top = size.height - (upperSeries.maxOrNull() ?: 0f),
-                right = size.width,
-                bottom = size.height - (lowerSeries.minOrNull() ?: 0f),
+            drawPath(
+                path = areaPath,
+                color = fillColor,
             )
-        val plotBounds = Rect(offset = Offset.Zero, size = size)
-        drawPath(
-            path = path,
-            brush =
-                gradientBrush(
-                    color = fillColor,
-                    gradient = gradient,
-                    shapeBounds = shapeBounds,
-                    plotBounds = plotBounds,
-                    mirrored = false,
-                ),
-            alpha = alpha,
-        )
+        }
     }
 }
 
