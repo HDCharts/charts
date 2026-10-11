@@ -6,6 +6,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.v2.runComposeUiTest
 import io.github.hdcharts.core.internal.palette.generateColorShades
+import io.github.hdcharts.core.style.ChartGradients
 import io.github.hdcharts.core.style.StyleDefaults
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -24,6 +25,14 @@ class StackedBarChartStyleTest {
             generateColorShades(base, 4),
             StackedBarSegmentStyle(color = base, colors = emptyList(), alpha = 0.4f).resolveColors(4),
         )
+    }
+
+    @Test
+    fun stackedBar_segments_keepSharedGradient() {
+        val gradient = ChartGradients.fade(endAlpha = 0.4f)
+        val segments = StackedBarSegmentStyle(color = base, colors = emptyList(), alpha = 1f, gradient = gradient)
+
+        assertEquals(gradient, segments.gradient)
     }
 
     @Test

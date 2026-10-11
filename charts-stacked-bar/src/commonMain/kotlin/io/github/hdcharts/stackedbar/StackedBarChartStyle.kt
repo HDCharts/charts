@@ -13,9 +13,11 @@ import io.github.hdcharts.core.model.ChartValueFormatter
 import io.github.hdcharts.core.style.AxisLabelStyle
 import io.github.hdcharts.core.style.ChartContainerDefaults
 import io.github.hdcharts.core.style.ChartContainerStyle
+import io.github.hdcharts.core.style.ChartGradient
 import io.github.hdcharts.core.style.LegendDefaults
 import io.github.hdcharts.core.style.LegendStyle
 import io.github.hdcharts.core.style.StyleDefaults
+import io.github.hdcharts.core.style.clamp
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 
@@ -24,11 +26,18 @@ data class StackedBarSegmentStyle(
     val color: Color,
     val colors: ImmutableList<Color>,
     val alpha: Float,
+    val gradient: ChartGradient?,
 ) {
-    constructor(color: Color, colors: List<Color>, alpha: Float) : this(
+    constructor(
+        color: Color,
+        colors: List<Color>,
+        alpha: Float,
+        gradient: ChartGradient? = null,
+    ) : this(
         color = color,
         colors = colors.toImmutableList(),
         alpha = alpha,
+        gradient = gradient,
     )
 
     /**
@@ -52,6 +61,7 @@ data class StackedBarSegmentStyle(
             color = color,
             colors = colors,
             alpha = alpha.clampAlpha(),
+            gradient = gradient?.clamp(),
         )
 }
 
@@ -147,7 +157,14 @@ object StackedBarChartDefaults {
         color: Color = StyleDefaults.seriesColor,
         colors: List<Color> = emptyList(),
         alpha: Float = StyleDefaults.seriesAlpha,
-    ): StackedBarSegmentStyle = StackedBarSegmentStyle(color = color, colors = colors, alpha = alpha)
+        gradient: ChartGradient? = null,
+    ): StackedBarSegmentStyle =
+        StackedBarSegmentStyle(
+            color = color,
+            colors = colors,
+            alpha = alpha,
+            gradient = gradient,
+        )
 
     /** Returns a [StackedBarLayoutStyle] for bar spacing and width. */
     @Composable

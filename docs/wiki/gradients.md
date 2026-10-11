@@ -15,9 +15,15 @@ the whole plot.
 |---|---|
 | Bar | `BarChartDefaults.bars(gradient = ...)` |
 | Histogram | `HistogramChartDefaults.bars(gradient = ...)` |
+| Stacked Bar | `StackedBarChartDefaults.segments(gradient = ...)` |
 | Stacked Area | `StackedAreaChartDefaults.fill(gradient = ...)` or `seriesGradients = ...` |
 
-Line, pie, radar, ring gauge, and stacked bar charts draw solid colors.
+Line, pie, radar, and ring gauge charts draw solid colors.
+
+For stacked bar and stacked area charts, we currently recommend only fade gradients.
+`ChartGradients.fade()` preserves each series' color, so readers can match segments and layers
+to the legend. Gradients through multiple colors within a series can make adjacent series hard
+to distinguish.
 
 ## Use
 
@@ -103,13 +109,27 @@ BarChartDefaults.bars(
 When dense data is expanded to scroll, the plot gradient covers every bar and scrolls with
 them.
 
+## Stacked Bar Segments
+
+Pass a shared gradient to `StackedBarChartDefaults.segments(gradient = ...)` to apply it to every
+segment. Each segment still keeps its resolved series color when the gradient uses
+`GradientStop.Series`, such as `ChartGradients.fade()`. Stacked bars do not support separate
+gradients per series.
+
+```kotlin
+StackedBarChartDefaults.segments(
+    gradient = ChartGradients.fade(endAlpha = 0.35f),
+)
+```
+
 ## Stacked Area Layers
 
 Pass a shared gradient to `StackedAreaChartDefaults.fill(gradient = ...)` to apply it to every layer.
 A non-empty `seriesGradients` list takes precedence and provides gradients in series order. Missing
 entries and `null` values use the series' solid fill color. `ChartGradients.fade()` keeps each layer
 tied to its series color while adding a vertical alpha fade. `GradientSpan.Shape` covers each layer's
-full bounds, including while the chart scrolls.
+full bounds. With `seriesGradients`, each layer can keep its own color stops. `GradientSpan.Plot`
+aligns those gradients to the full scrolling plot bounds.
 
 ```kotlin
 StackedAreaChartDefaults.fill(
@@ -130,7 +150,7 @@ StackedAreaChartDefaults.fill(
 | `vertical(colors, span)` | Top to bottom. With `GradientSpan.Shape`, through each shape's bounds. |
 | `horizontal(colors, span)` | Left to right. |
 | `linear(angleDegrees, colors, span)` | At an angle, clockwise from left to right. `45` runs from the top-left corner to the bottom-right corner whatever the bounds' shape. At other angles on non-square bounds, the end colors hold near the corners. |
-| `fade(endAlpha, span)` | Top to bottom, from each bar or area layer's color to that color at `endAlpha`. |
+| `fade(endAlpha, span)` | Top to bottom, from each bar, histogram bin, stacked-bar segment, or area layer's color to that color at `endAlpha`. |
 
 ## Custom Gradients
 
@@ -159,10 +179,12 @@ val highlight = ChartGradient.Linear(
 A stop is one of two kinds:
 
 - `GradientStop.Fixed(offset, color)` draws that color as given.
-- `GradientStop.Series(offset, alpha)` draws the shape's own color at `alpha`. For bars, the color
-  comes from `bars()`; for area layers, it comes from `fill()`.
+- `GradientStop.Series(offset, alpha)` draws the shape's own color at `alpha`. For bars and
+  histogram bins, the color comes from `bars()`; for stacked-bar segments, it comes from
+  `segments()`; for area layers, it comes from `fill()`.
 
-`ChartGradients.fade()` uses series colors, so each bar or area layer fades from its own color:
+`ChartGradients.fade()` uses series colors, so each bar, histogram bin, stacked-bar segment, or area
+layer fades from its own color:
 
 ```kotlin
 BarChartDefaults.bars(
@@ -173,8 +195,9 @@ BarChartDefaults.bars(
 
 ## Alpha and Selection
 
-The `alpha` of `bars()` or `fill()` multiplies the whole gradient. Selection dims unselected bars
-or area layers with `selection.unselectedAlpha`, as it does for solid fills.
+The `alpha` of `bars()`, `segments()`, or `fill()` multiplies the whole gradient. Selection dims
+unselected bars, stacked-bar segments, or area layers with `selection.unselectedAlpha`, as it does
+for solid fills.
 
 ## Clamping
 
@@ -184,6 +207,6 @@ A gradient never replaces the chart with an error. The chart draws the closest g
   offsets make a hard edge between two colors.
 - A stop with a non-finite offset is dropped.
 - A single stop paints its color solid.
-- With no stops, non-finite positions, or the same start and end, bars and area layers draw solid,
-  without a gradient.
+- With no stops, non-finite positions, or the same start and end, bars, histogram bins, stacked-bar
+  segments, and area layers draw solid, without a gradient.
 - A `GradientStop.Series` alpha outside `0..1` is clamped to that range.

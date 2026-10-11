@@ -42,3 +42,18 @@ StackedBarChart(
 
 `selectedValueFormatter` formats the selected values, and `axisValueFormatter` formats the Y-axis labels.
 `StackedAreaChart` takes the same two formatters.
+
+## Gradients
+
+Pass a shared `ChartGradient` to `StackedBarChartDefaults.segments(gradient = ...)` to use it for
+every segment. Stacked bars do not support separate gradients per series. See
+[Gradients](/{{version}}/wiki/gradients) for details.
+
+We currently recommend only fade gradients for stacked bar charts. Fades preserve each series'
+color. Gradients through multiple colors within a segment can make series hard to distinguish.
+
+```kotlin
+StackedBarChartDefaults.segments(
+    gradient = ChartGradients.fade(endAlpha = 0.35f),
+)
+```
