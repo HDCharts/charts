@@ -43,6 +43,8 @@
     <string name="drawer_section_links">Links</string>
     <string name="drawer_title_github">GitHub</string>
     <string name="drawer_github_subtitle">Star the project or file an issue</string>
+    <string name="drawer_title_snapshot_demo">Snapshot demo</string>
+    <string name="drawer_snapshot_demo_subtitle">Nightly build from main</string>
 
     <!-- Settings -->
     <string name="dark_mode_system">System</string>
@@ -81,5 +83,6 @@
     <string name="gradient_fade">Fade</string>
 
     <string translatable="false" name="github_url">https://github.com/HDCharts/charts</string>
+    <string translatable="false" name="snapshot_demo_url">https://charts.hdcode.dev/demo/snapshot/</string>
 
 </resources>
