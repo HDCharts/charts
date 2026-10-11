@@ -13,8 +13,6 @@ import io.github.hdcharts.core.style.GradientSpan
 import io.github.hdcharts.core.style.HistogramChartDefaults
 import io.github.hdcharts.core.style.HistogramChartStyle
 import io.github.hdcharts.histogram.HistogramChart
-import io.github.hdcharts.sampleshared.theme.LocalChartColors
-import io.github.hdcharts.sampleshared.theme.seriesColor
 
 /** A 2x2 landscape grid of labeled gradient examples for the histogram. */
 @PreviewTest
@@ -23,13 +21,7 @@ import io.github.hdcharts.sampleshared.theme.seriesColor
 fun HistogramChartGradientPreview() {
     val data = SCREENSHOT_HISTOGRAM_SAMPLE_USE_CASE.deterministic()
     GradientGallerySurface(title = "Histogram gradients") {
-        val chartColors = LocalChartColors.current
-        val gradientColors =
-            listOf(
-                chartColors.seriesColor(0),
-                chartColors.seriesColor(2),
-                chartColors.seriesColor(4),
-            )
+        val gradientColors = galleryGradientColors()
         GradientGalleryRow {
             HistogramGalleryExample(
                 title = "Three-stop shape",
