@@ -36,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -93,8 +94,8 @@ fun SettingsDrawerContent(
 
     ModalDrawerSheet(
         drawerContainerColor = MaterialTheme.colorScheme.surface,
-        drawerShape = RoundedCornerShape(topEnd = 28.dp, bottomEnd = 28.dp),
-        modifier = Modifier.width(320.dp),
+        drawerShape = RectangleShape,
+        modifier = Modifier.width(Dimens.sideRailWidth),
     ) {
         DrawerHeader(
             onClose = onClose,

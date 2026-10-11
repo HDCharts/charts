@@ -20,4 +20,6 @@ object Dimens {
     val galleryPadding: Dp = 18.dp
     val drawerPadding: Dp = 20.dp
     val xl: Dp = 24.dp
+    val sideRailWidth: Dp = 320.dp
+    val sideRailElevation: Dp = 4.dp
 }
