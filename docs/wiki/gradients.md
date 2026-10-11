@@ -30,10 +30,13 @@ to distinguish.
 Pass a `ChartGradient` to `bars()`. `ChartGradients` builds the common ones from a list of
 colors.
 
-```kotlin
-import io.github.hdcharts.core.style.ChartGradients
-import io.github.hdcharts.core.style.GradientSpan
+![Bar Shape Gradient](/content/{{version}}/wiki/assets/bar_gradient_shape.gif)
 
+The example below is minimal and runs as written. The GIF above uses a longer generated
+series; its full source is in
+[`BarGradientExample.kt`](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/BarGradientExample.kt).
+
+```kotlin
 @Composable
 fun ShowGradientBar() {
     val data = listOf(45.0, -12.0, 38.0, 27.0, -19.0, 42.0, 31.0).toChartData(
@@ -41,7 +44,7 @@ fun ShowGradientBar() {
         seriesName = "Net cash flow",
     )
     val gradient = ChartGradients.vertical(
-        colors = listOf(Color(0xFF1E89E6), Color(0xFFEA7A2E)),
+        colors = listOf(Color(0xFF1E89E6), Color(0xFF9B4EDD), Color(0xFFEA7A2E)),
     )
     val bars = BarChartDefaults.bars(gradient = gradient)
 
@@ -70,14 +73,19 @@ Each bar draws the whole gradient within its own bounds, so every bar looks the 
 from its height. A vertical gradient runs from the bar's end to the baseline. A bar below
 zero mirrors it, so it still runs from its end, at the bottom, up to the baseline.
 
+![Histogram Shape Gradient](/content/{{version}}/wiki/assets/histogram_gradient_shape.gif)
+
+The GIF above draws the same gradient on a histogram; its full source is in
+[`HistogramGradientExample.kt`](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/HistogramGradientExample.kt).
+
 ```kotlin
-// Every bar goes from blue at its end to orange at the baseline.
-BarChartDefaults.bars(
-    gradient = ChartGradients.vertical(
-        colors = listOf(Color(0xFF1E89E6), Color(0xFFEA7A2E)),
-        span = GradientSpan.Shape,
-    ),
+// Every bar and bin goes from blue at its end, through purple, to orange at the baseline.
+val gradient = ChartGradients.vertical(
+    colors = listOf(Color(0xFF1E89E6), Color(0xFF9B4EDD), Color(0xFFEA7A2E)),
+    span = GradientSpan.Shape,
 )
+BarChartDefaults.bars(gradient = gradient)
+HistogramChartDefaults.bars(gradient = gradient)
 ```
 
 ### Across the Plot
@@ -86,24 +94,36 @@ One gradient covers the whole plot, and each bar shows the part of it the bar si
 horizontal gradient moves from the first bar's color to the last bar's color. A vertical one
 gives taller bars more of the top color, so the color follows the value.
 
-```kotlin
-// The first bar is blue, the last bar is orange, and the bars between blend from one to the other.
-BarChartDefaults.bars(
-    gradient = ChartGradients.horizontal(
-        colors = listOf(Color(0xFF1E89E6), Color(0xFFEA7A2E)),
-        span = GradientSpan.Plot,
-    ),
-)
-```
+![Bar Plot Horizontal Gradient](/content/{{version}}/wiki/assets/bar_gradient_plot_horizontal.gif)
+
+![Histogram Plot Horizontal Gradient](/content/{{version}}/wiki/assets/histogram_gradient_plot_horizontal.gif)
+
+The GIFs in this section use longer generated series; their full source is in
+[`BarGradientExample.kt`](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/BarGradientExample.kt) and
+[`HistogramGradientExample.kt`](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/HistogramGradientExample.kt).
 
 ```kotlin
-// Tall bars reach into red; short bars stay green.
-BarChartDefaults.bars(
-    gradient = ChartGradients.vertical(
-        colors = listOf(Color(0xFFE5484D), Color(0xFFF5D90A), Color(0xFF30A46C)),
-        span = GradientSpan.Plot,
-    ),
+// The first bar is blue, the last bar is orange, and the bars between blend through purple.
+val gradient = ChartGradients.horizontal(
+    colors = listOf(Color(0xFF1E89E6), Color(0xFF9B4EDD), Color(0xFFEA7A2E)),
+    span = GradientSpan.Plot,
 )
+BarChartDefaults.bars(gradient = gradient)
+HistogramChartDefaults.bars(gradient = gradient)
+```
+
+![Bar Plot Vertical Gradient](/content/{{version}}/wiki/assets/bar_gradient_plot_vertical.gif)
+
+![Histogram Plot Vertical Gradient](/content/{{version}}/wiki/assets/histogram_gradient_plot_vertical.gif)
+
+```kotlin
+// Tall bars reach into blue; short bars stay orange.
+val gradient = ChartGradients.vertical(
+    colors = listOf(Color(0xFF1E89E6), Color(0xFF9B4EDD), Color(0xFFEA7A2E)),
+    span = GradientSpan.Plot,
+)
+BarChartDefaults.bars(gradient = gradient)
+HistogramChartDefaults.bars(gradient = gradient)
 ```
 
 When dense data is expanded to scroll, the plot gradient covers every bar and scrolls with
@@ -116,8 +136,14 @@ segment. Each segment still keeps its resolved series color when the gradient us
 `GradientStop.Series`, such as `ChartGradients.fade()`. Stacked bars do not support separate
 gradients per series.
 
+![Stacked Bar Fade Gradient](/content/{{version}}/wiki/assets/stacked_bar_gradient.gif)
+
+The GIF above uses a longer generated series per channel; its full source is in
+[`StackedBarGradientExample.kt`](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/StackedBarGradientExample.kt).
+
 ```kotlin
 StackedBarChartDefaults.segments(
+    colors = listOf(Color(0xFF1E89E6), Color(0xFF5C4EE5), Color(0xFF9B4EDD)),
     gradient = ChartGradients.fade(endAlpha = 0.35f),
 )
 ```
@@ -129,8 +155,14 @@ Pass a shared gradient to `StackedAreaChartDefaults.fill(gradient = ...)` to app
 `GradientSpan.Shape` covers each layer's full bounds. `GradientSpan.Plot` aligns the gradient to the
 full scrolling plot bounds.
 
+![Stacked Area Fade Gradient](/content/{{version}}/wiki/assets/stacked_area_gradient.gif)
+
+The GIF above uses a longer generated series per plan; its full source is in
+[`StackedAreaGradientExample.kt`](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/StackedAreaGradientExample.kt).
+
 ```kotlin
 StackedAreaChartDefaults.fill(
+    colors = listOf(Color(0xFF1E89E6), Color(0xFF5C4EE5), Color(0xFF9B4EDD)),
     gradient = ChartGradients.fade(endAlpha = 0.35f),
 )
 ```
@@ -178,7 +210,23 @@ A stop is one of two kinds:
   `segments()`; for area layers, it comes from `fill()`.
 
 `ChartGradients.fade()` uses series colors, so each bar, histogram bin, stacked-bar segment, or area
-layer fades from its own color:
+layer fades from its own color. Bars below zero fade toward the baseline too.
+
+![Bar Fade Gradient](/content/{{version}}/wiki/assets/bar_gradient_fade.gif)
+
+![Histogram Fade Gradient](/content/{{version}}/wiki/assets/histogram_gradient_fade.gif)
+
+The GIFs above use the default bar color and longer generated series; their full source is in
+[`BarGradientExample.kt`](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/BarGradientExample.kt) and
+[`HistogramGradientExample.kt`](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/HistogramGradientExample.kt).
+
+```kotlin
+val fade = ChartGradients.fade(endAlpha = 0.35f)
+BarChartDefaults.bars(gradient = fade)
+HistogramChartDefaults.bars(gradient = fade)
+```
+
+The `color` of `bars()` sets the color the fade starts from:
 
 ```kotlin
 BarChartDefaults.bars(

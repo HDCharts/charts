@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-private const val TITLE = "Daily Net Cash Flow"
+internal const val BAR_TITLE = "Daily Net Cash Flow"
 
 class BarViewModel : ViewModel() {
     val chartData: StateFlow<ChartData> = MutableStateFlow(buildChartData()).asStateFlow()
@@ -31,7 +31,7 @@ class BarViewModel : ViewModel() {
             )
         return values.toChartData(
             categories = DocsGifScenariosData.monthLabels(count = POINTS),
-            seriesName = TITLE,
+            seriesName = BAR_TITLE,
         )
     }
 }
@@ -42,6 +42,6 @@ fun ShowBar(viewModel: BarViewModel = viewModel()) {
 
     BarChart(
         data = chartData,
-        title = TITLE,
+        title = BAR_TITLE,
     )
 }
