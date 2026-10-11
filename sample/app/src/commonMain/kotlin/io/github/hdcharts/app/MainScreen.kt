@@ -46,6 +46,7 @@ import androidx.navigation.compose.rememberNavController
 import hdcharts.app.generated.resources.Res
 import hdcharts.app.generated.resources.cd_navigate_back
 import hdcharts.app.generated.resources.cd_open_settings
+import hdcharts.app.generated.resources.github_url
 import io.github.hdcharts.app.library.BuildConfig
 import io.github.hdcharts.app.ui.composable.InteractiveSurfaceCallbacks
 import io.github.hdcharts.app.ui.composable.LocalChartDemoSidePanel
@@ -325,6 +326,7 @@ fun MainScreenContent(
     menuState: MenuState,
     onChartSelected: (selected: ChartDestination) -> Unit,
 ) {
+    val githubUrl = stringResource(Res.string.github_url)
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background,
@@ -335,10 +337,11 @@ fun MainScreenContent(
             versionLabel =
                 listOf(
                     "HDCharts: ${BuildConfig.CHARTS_VERSION}",
-                    BuildConfig.CHARTS_COMMIT,
+                    BuildConfig.CHARTS_COMMIT.take(7),
                     BuildConfig.CHARTS_COMMIT_DATE,
                 ).filter(String::isNotEmpty)
                     .joinToString(separator = " · "),
+            versionUrl = BuildConfig.CHARTS_COMMIT.takeIf(String::isNotEmpty)?.let { "$githubUrl/commit/$it" },
             modifier =
                 Modifier
                     .fillMaxWidth()
