@@ -8,16 +8,23 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import hdcharts.app.generated.resources.Res
+import hdcharts.app.generated.resources.gradient_per_bin
 import hdcharts.app.generated.resources.histogram_data_points
 import hdcharts.app.generated.resources.histogram_data_points_range
 import io.github.hdcharts.app.ui.composable.ChartDemo
+import io.github.hdcharts.app.ui.composable.DemoBarGradient
+import io.github.hdcharts.app.ui.composable.DemoBarGradientPicker
 import io.github.hdcharts.app.ui.composable.DemoRangeSlider
 import io.github.hdcharts.app.ui.composable.DemoSlider
 import io.github.hdcharts.app.ui.composable.PlayPauseButton
 import io.github.hdcharts.core.style.ChartContainerDefaults
+import io.github.hdcharts.core.style.ChartGradient
 import io.github.hdcharts.core.style.HistogramChartDefaults
 import io.github.hdcharts.histogram.HistogramChart
 import io.github.hdcharts.sampleshared.theme.Dimens
@@ -26,6 +33,32 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun HistogramChartDemo(viewModel: HistogramChartViewModel = koinViewModel()) {
+    HistogramChartDemoContent(viewModel = viewModel, gradient = null)
+}
+
+@Composable
+fun HistogramGradientDemo(viewModel: HistogramChartViewModel = koinViewModel()) {
+    var gradient by rememberSaveable { mutableStateOf(DemoBarGradient.PerBar) }
+
+    HistogramChartDemoContent(
+        viewModel = viewModel,
+        gradient = gradient.gradient,
+        gradientControls = {
+            DemoBarGradientPicker(
+                selected = gradient,
+                onSelected = { gradient = it },
+                perShapeLabel = Res.string.gradient_per_bin,
+            )
+        },
+    )
+}
+
+@Composable
+private fun HistogramChartDemoContent(
+    viewModel: HistogramChartViewModel,
+    gradient: ChartGradient?,
+    gradientControls: @Composable () -> Unit = {},
+) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val chartContainerStyle = ChartContainerDefaults.style()
 
@@ -35,6 +68,7 @@ fun HistogramChartDemo(viewModel: HistogramChartViewModel = koinViewModel()) {
             PlayPauseButton(isPlaying = uiState.isPlaying, onToggle = viewModel::togglePlaying)
         },
         controlsContent = {
+            gradientControls()
             HistogramDataPointsControls(
                 points = uiState.controlsState.points,
                 minValue = uiState.controlsState.minValue,
@@ -51,7 +85,11 @@ fun HistogramChartDemo(viewModel: HistogramChartViewModel = koinViewModel()) {
                 uiState.dataSet.series
                     .single()
                     .name,
-            style = HistogramChartDefaults.style(chartContainerStyle = chartContainerStyle),
+            style =
+                HistogramChartDefaults.style(
+                    chartContainerStyle = chartContainerStyle,
+                    bars = HistogramChartDefaults.bars(gradient = gradient),
+                ),
         )
     }
 }

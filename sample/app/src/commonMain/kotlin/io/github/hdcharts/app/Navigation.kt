@@ -10,12 +10,16 @@ import hdcharts.app.generated.resources.bar_chart
 import hdcharts.app.generated.resources.bar_stacked_chart
 import hdcharts.app.generated.resources.example_backlog_drain_summary
 import hdcharts.app.generated.resources.example_backlog_drain_title
+import hdcharts.app.generated.resources.example_bar_gradients_summary
 import hdcharts.app.generated.resources.example_defaults_summary
 import hdcharts.app.generated.resources.example_defaults_title
+import hdcharts.app.generated.resources.example_gradients_title
+import hdcharts.app.generated.resources.example_histogram_gradients_summary
 import hdcharts.app.generated.resources.example_live_latency_summary
 import hdcharts.app.generated.resources.example_live_latency_title
 import hdcharts.app.generated.resources.example_live_percentiles_summary
 import hdcharts.app.generated.resources.example_live_percentiles_title
+import hdcharts.app.generated.resources.example_stacked_gradients_summary
 import hdcharts.app.generated.resources.histogram_chart
 import hdcharts.app.generated.resources.line_chart
 import hdcharts.app.generated.resources.multi_line_chart
@@ -32,9 +36,11 @@ import hdcharts.sample_shared.generated.resources.ic_radar_chart
 import hdcharts.sample_shared.generated.resources.ic_ring_gauge_chart
 import hdcharts.sample_shared.generated.resources.ic_stacked_bar_chart
 import io.github.hdcharts.app.demo.bar.BarChartDemo
+import io.github.hdcharts.app.demo.bar.BarGradientDemo
 import io.github.hdcharts.app.demo.debug.DebugChartsScreen
 import io.github.hdcharts.app.demo.gauge.RingGaugeChartDemo
 import io.github.hdcharts.app.demo.histogram.HistogramChartDemo
+import io.github.hdcharts.app.demo.histogram.HistogramGradientDemo
 import io.github.hdcharts.app.demo.line.LineChartDemo
 import io.github.hdcharts.app.demo.line.LineScaleDropDemo
 import io.github.hdcharts.app.demo.line.LiveLineChartDemo
@@ -43,7 +49,9 @@ import io.github.hdcharts.app.demo.multiline.MultiLineChartDemo
 import io.github.hdcharts.app.demo.pie.PieChartDemo
 import io.github.hdcharts.app.demo.radar.RadarChartDemo
 import io.github.hdcharts.app.demo.stackedarea.StackedAreaChartDemo
+import io.github.hdcharts.app.demo.stackedarea.StackedAreaGradientDemo
 import io.github.hdcharts.app.demo.stackedbar.StackedBarChartDemo
+import io.github.hdcharts.app.demo.stackedbar.StackedBarGradientDemo
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import hdcharts.sample_shared.generated.resources.Res as SharedRes
@@ -114,7 +122,13 @@ sealed class ChartDestination(
             route = "stackedAreaChart",
             icon = SharedRes.drawable.ic_stacked_bar_chart,
             title = Res.string.stacked_area_chart,
-            examples = listOf(defaultsExample { StackedAreaChartDemo() }),
+            examples =
+                listOf(
+                    defaultsExample { StackedAreaChartDemo() },
+                    gradientsExample(
+                        summary = Res.string.example_stacked_gradients_summary,
+                    ) { StackedAreaGradientDemo() },
+                ),
         )
 
     data object BarChartScreen :
@@ -122,7 +136,11 @@ sealed class ChartDestination(
             route = "barChart",
             icon = SharedRes.drawable.ic_bar_chart,
             title = Res.string.bar_chart,
-            examples = listOf(defaultsExample { BarChartDemo() }),
+            examples =
+                listOf(
+                    defaultsExample { BarChartDemo() },
+                    gradientsExample(summary = Res.string.example_bar_gradients_summary) { BarGradientDemo() },
+                ),
         )
 
     data object StackedBarChartScreen :
@@ -130,7 +148,13 @@ sealed class ChartDestination(
             route = "stackedBarChart",
             icon = SharedRes.drawable.ic_stacked_bar_chart,
             title = Res.string.bar_stacked_chart,
-            examples = listOf(defaultsExample { StackedBarChartDemo() }),
+            examples =
+                listOf(
+                    defaultsExample { StackedBarChartDemo() },
+                    gradientsExample(
+                        summary = Res.string.example_stacked_gradients_summary,
+                    ) { StackedBarGradientDemo() },
+                ),
         )
 
     data object HistogramChartScreen :
@@ -138,7 +162,13 @@ sealed class ChartDestination(
             route = "histogramChart",
             icon = SharedRes.drawable.ic_histogram_chart,
             title = Res.string.histogram_chart,
-            examples = listOf(defaultsExample { HistogramChartDemo() }),
+            examples =
+                listOf(
+                    defaultsExample { HistogramChartDemo() },
+                    gradientsExample(
+                        summary = Res.string.example_histogram_gradients_summary,
+                    ) { HistogramGradientDemo() },
+                ),
         )
 
     data object RadarChartScreen :
@@ -213,5 +243,16 @@ private fun defaultsExample(content: @Composable () -> Unit): ChartExample =
         id = "defaults",
         title = Res.string.example_defaults_title,
         summary = Res.string.example_defaults_summary,
+        content = content,
+    )
+
+private fun gradientsExample(
+    summary: StringResource,
+    content: @Composable () -> Unit,
+): ChartExample =
+    ChartExample(
+        id = "gradients",
+        title = Res.string.example_gradients_title,
+        summary = summary,
         content = content,
     )

@@ -18,6 +18,8 @@ import io.github.hdcharts.app.ui.composable.DemoRangeSlider
 import io.github.hdcharts.app.ui.composable.DemoSlider
 import io.github.hdcharts.app.ui.composable.PlayPauseButton
 import io.github.hdcharts.core.style.ChartContainerDefaults
+import io.github.hdcharts.core.style.ChartGradient
+import io.github.hdcharts.core.style.ChartGradients
 import io.github.hdcharts.sampleshared.theme.Dimens
 import io.github.hdcharts.stackedarea.StackedAreaChart
 import io.github.hdcharts.stackedarea.StackedAreaChartDefaults
@@ -26,6 +28,19 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun StackedAreaChartDemo(viewModel: StackedAreaChartViewModel = koinViewModel()) {
+    StackedAreaChartDemoContent(viewModel = viewModel, gradient = null)
+}
+
+@Composable
+fun StackedAreaGradientDemo(viewModel: StackedAreaChartViewModel = koinViewModel()) {
+    StackedAreaChartDemoContent(viewModel = viewModel, gradient = ChartGradients.fade(endAlpha = 0.35f))
+}
+
+@Composable
+private fun StackedAreaChartDemoContent(
+    viewModel: StackedAreaChartViewModel,
+    gradient: ChartGradient?,
+) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val chartContainerStyle = ChartContainerDefaults.style()
 
@@ -48,7 +63,11 @@ fun StackedAreaChartDemo(viewModel: StackedAreaChartViewModel = koinViewModel())
             data = uiState.chart.data,
             modifier = Modifier.fillMaxWidth(),
             title = uiState.chart.title,
-            style = StackedAreaChartDefaults.style(chartContainerStyle = chartContainerStyle),
+            style =
+                StackedAreaChartDefaults.style(
+                    chartContainerStyle = chartContainerStyle,
+                    fill = StackedAreaChartDefaults.fill(gradient = gradient),
+                ),
         )
     }
 }

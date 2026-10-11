@@ -8,24 +8,50 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import hdcharts.app.generated.resources.Res
 import hdcharts.app.generated.resources.bar_data_points
 import hdcharts.app.generated.resources.bar_data_points_range
 import io.github.hdcharts.app.ui.composable.ChartDemo
+import io.github.hdcharts.app.ui.composable.DemoBarGradient
+import io.github.hdcharts.app.ui.composable.DemoBarGradientPicker
 import io.github.hdcharts.app.ui.composable.DemoRangeSlider
 import io.github.hdcharts.app.ui.composable.DemoSlider
 import io.github.hdcharts.app.ui.composable.PlayPauseButton
 import io.github.hdcharts.bar.BarChart
 import io.github.hdcharts.core.style.BarChartDefaults
 import io.github.hdcharts.core.style.ChartContainerDefaults
+import io.github.hdcharts.core.style.ChartGradient
 import io.github.hdcharts.sampleshared.theme.Dimens
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun BarChartDemo(viewModel: BarChartViewModel = koinViewModel()) {
+    BarChartDemoContent(viewModel = viewModel, gradient = null)
+}
+
+@Composable
+fun BarGradientDemo(viewModel: BarChartViewModel = koinViewModel()) {
+    var gradient by rememberSaveable { mutableStateOf(DemoBarGradient.PerBar) }
+
+    BarChartDemoContent(
+        viewModel = viewModel,
+        gradient = gradient.gradient,
+        gradientControls = { DemoBarGradientPicker(selected = gradient, onSelected = { gradient = it }) },
+    )
+}
+
+@Composable
+private fun BarChartDemoContent(
+    viewModel: BarChartViewModel,
+    gradient: ChartGradient?,
+    gradientControls: @Composable () -> Unit = {},
+) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val chartContainerStyle = ChartContainerDefaults.style()
 
@@ -35,6 +61,7 @@ fun BarChartDemo(viewModel: BarChartViewModel = koinViewModel()) {
             PlayPauseButton(isPlaying = uiState.isPlaying, onToggle = viewModel::togglePlaying)
         },
         controlsContent = {
+            gradientControls()
             BarDataPointsControls(
                 points = uiState.controlsState.points,
                 minValue = uiState.controlsState.minValue,
@@ -51,7 +78,11 @@ fun BarChartDemo(viewModel: BarChartViewModel = koinViewModel()) {
                 uiState.dataSet.series
                     .single()
                     .name,
-            style = BarChartDefaults.style(chartContainerStyle = chartContainerStyle),
+            style =
+                BarChartDefaults.style(
+                    chartContainerStyle = chartContainerStyle,
+                    bars = BarChartDefaults.bars(gradient = gradient),
+                ),
         )
     }
 }
