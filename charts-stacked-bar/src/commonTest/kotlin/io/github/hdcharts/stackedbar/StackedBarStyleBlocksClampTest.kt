@@ -5,6 +5,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.hdcharts.core.internal.MAX_SIZE_PX
+import io.github.hdcharts.core.style.ChartGradients
 import io.github.hdcharts.core.style.StyleDefaults
 import kotlinx.collections.immutable.persistentListOf
 import kotlin.test.Test
@@ -18,15 +19,17 @@ class StackedBarStyleBlocksClampTest {
     private val density = Density(2f)
 
     @Test
-    fun segments_clampsAlpha() {
+    fun segments_clampsAlphaAndGradient() {
         val clamped =
             StackedBarSegmentStyle(
                 color = Color.Blue,
                 colors = persistentListOf(),
                 alpha = -1f,
+                gradient = ChartGradients.fade(endAlpha = 2f),
             ).clamp()
 
         assertEquals(expected = 0f, actual = clamped.alpha)
+        assertEquals(expected = ChartGradients.fade(endAlpha = 1f), actual = clamped.gradient)
     }
 
     @Test

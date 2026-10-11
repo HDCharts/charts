@@ -34,6 +34,9 @@ area layer. A non-empty `seriesGradients` list takes precedence and customizes l
 Missing entries and `null` values use that series' solid fill color. `ChartGradients.fade()` follows
 each layer's series color. See [Gradients](/{{version}}/wiki/gradients) for details.
 
+We currently recommend only fade gradients for stacked area charts. Fades preserve each series'
+color. Gradients through multiple colors within a layer can make series hard to distinguish.
+
 ```kotlin
 StackedAreaChartDefaults.fill(
     seriesGradients = listOf(

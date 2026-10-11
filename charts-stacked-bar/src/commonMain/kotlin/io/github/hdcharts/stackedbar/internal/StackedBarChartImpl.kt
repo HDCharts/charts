@@ -25,6 +25,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
@@ -53,6 +54,7 @@ import io.github.hdcharts.core.internal.composable.rememberZoomScaleState
 import io.github.hdcharts.core.internal.composable.zoomInScale
 import io.github.hdcharts.core.internal.composable.zoomOutScale
 import io.github.hdcharts.core.internal.drawing.drawSelectionLine
+import io.github.hdcharts.core.internal.drawing.gradientBrush
 import io.github.hdcharts.core.internal.layout.chartCanvasFits
 import io.github.hdcharts.core.internal.layout.fillMaxSizeChartModifier
 import io.github.hdcharts.core.internal.layout.placedHorizontalScrollPx
@@ -558,6 +560,7 @@ private fun DrawScope.drawStackedBars(
         }
     val showSelection = style.selection.visible && selectedIndex in data.series.indices
     val barTotals = data.seriesTotals
+    val plotBounds = Rect(offset = Offset.Zero, size = size)
     var selectedMark: ClosedFloatingPointRange<Float>? = null
     val morphProgress = morph.progress.value
     for (index in indices) {
@@ -581,23 +584,39 @@ private fun DrawScope.drawStackedBars(
                 )
             topOffset -= height
             val segmentColor = colors.getOrElse(dataIndex) { colors.lastOrNull() ?: Color.Transparent }
+            val segmentSize = Size(width = barWidthPx, height = height)
+            val segmentTopLeft = Offset(x = left, y = topOffset)
+            val selectionAlpha =
+                if (showSelection && !isSelected) {
+                    style.selection.unselectedAlpha
+                } else {
+                    1f
+                }
+            val segmentAlpha = style.segments.alpha * selectionAlpha
+            val gradient = style.segments.gradient
 
-            drawRect(
-                color =
-                    if (showSelection && !isSelected) {
-                        segmentColor.copy(alpha = segmentColor.alpha * style.selection.unselectedAlpha)
-                    } else {
-                        segmentColor
-                    },
-                topLeft =
-                    androidx.compose.ui.geometry
-                        .Offset(x = left, y = topOffset),
-                size =
-                    Size(
-                        width = barWidthPx,
-                        height = height,
-                    ),
-            )
+            if (gradient == null) {
+                drawRect(
+                    color = segmentColor,
+                    topLeft = segmentTopLeft,
+                    size = segmentSize,
+                    alpha = segmentAlpha,
+                )
+            } else {
+                drawRect(
+                    brush =
+                        gradientBrush(
+                            color = segmentColor,
+                            gradient = gradient,
+                            shapeBounds = Rect(offset = segmentTopLeft, size = segmentSize),
+                            plotBounds = plotBounds,
+                            mirrored = false,
+                        ),
+                    topLeft = segmentTopLeft,
+                    size = segmentSize,
+                    alpha = segmentAlpha,
+                )
+            }
         }
         if (isSelected) selectedMark = topOffset..size.height
     }

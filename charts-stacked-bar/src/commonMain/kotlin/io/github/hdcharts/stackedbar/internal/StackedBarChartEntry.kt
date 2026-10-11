@@ -91,7 +91,7 @@ internal fun StackedBarChartEntry(
                 remember(drawStyle.segments, data.series.size) {
                     drawStyle.segments
                         .resolveColors(data.series.size)
-                        .map { it.copy(alpha = drawStyle.segments.alpha) }
+                        .map { it.copy(alpha = 1f) }
                         .toImmutableList()
                 }
             val segmentNames = data.series.map { it.name.orEmpty() }.toImmutableList()

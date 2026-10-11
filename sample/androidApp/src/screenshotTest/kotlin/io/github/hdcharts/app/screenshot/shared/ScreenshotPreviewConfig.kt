@@ -44,3 +44,16 @@ internal annotation class ScreenshotPreview
     device = PREVIEW_DEVICE_TABLET_LANDSCAPE,
 )
 internal annotation class DocsGifLandscapePreview
+
+/** Landscape-only previews for the gradient gallery. Light and dark themes show the same chart. */
+@Preview(
+    name = "Light Tablet Landscape",
+    uiMode = Configuration.UI_MODE_NIGHT_NO,
+    device = PREVIEW_DEVICE_TABLET_LANDSCAPE,
+)
+@Preview(
+    name = "Dark Tablet Landscape",
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    device = PREVIEW_DEVICE_TABLET_LANDSCAPE,
+)
+internal annotation class GradientGalleryPreview
