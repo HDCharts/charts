@@ -21,6 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.Science
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.FilledIconToggleButton
 import androidx.compose.material3.Icon
@@ -57,11 +58,14 @@ import hdcharts.app.generated.resources.drawer_header_title
 import hdcharts.app.generated.resources.drawer_section_appearance
 import hdcharts.app.generated.resources.drawer_section_links
 import hdcharts.app.generated.resources.drawer_section_themes
+import hdcharts.app.generated.resources.drawer_snapshot_demo_subtitle
 import hdcharts.app.generated.resources.drawer_title_dark_mode
 import hdcharts.app.generated.resources.drawer_title_dynamic_colors
 import hdcharts.app.generated.resources.drawer_title_github
+import hdcharts.app.generated.resources.drawer_title_snapshot_demo
 import hdcharts.app.generated.resources.github_url
 import hdcharts.app.generated.resources.github_url_content_description
+import hdcharts.app.generated.resources.snapshot_demo_url
 import hdcharts.sample_shared.generated.resources.ic_github
 import io.github.hdcharts.app.library.BuildConfig
 import io.github.hdcharts.sampleshared.theme.Dimens
@@ -83,6 +87,7 @@ fun SettingsDrawerContent(
 ) {
     val hasDynamicColors = LocalHasDynamicColorFeature.current
     val githubUrl = stringResource(Res.string.github_url)
+    val snapshotDemoUrl = stringResource(Res.string.snapshot_demo_url)
     val uriHandler = LocalUriHandler.current
     val darkModeLabel =
         stringResource(
@@ -157,6 +162,21 @@ fun SettingsDrawerContent(
             },
             onClick = { uriHandler.openUri(githubUrl) },
         )
+        // Snapshot builds are the snapshot demo, so the link would open the same page.
+        if (!BuildConfig.CHARTS_VERSION.endsWith("-SNAPSHOT")) {
+            DrawerSettingCard(
+                title = stringResource(Res.string.drawer_title_snapshot_demo),
+                subtitle = stringResource(Res.string.drawer_snapshot_demo_subtitle),
+                leading = {
+                    Icon(
+                        imageVector = Icons.Filled.Science,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                    )
+                },
+                onClick = { uriHandler.openUri(snapshotDemoUrl) },
+            )
+        }
         if (BuildConfig.SHOW_DEBUG_CHARTS) {
             DrawerSettingCard(
                 title = "Debug charts",

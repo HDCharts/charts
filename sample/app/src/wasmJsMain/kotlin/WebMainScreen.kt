@@ -14,10 +14,13 @@ import hdcharts.app.generated.resources.drawer_header_title
 import hdcharts.app.generated.resources.drawer_section_appearance
 import hdcharts.app.generated.resources.drawer_section_links
 import hdcharts.app.generated.resources.drawer_section_themes
+import hdcharts.app.generated.resources.drawer_snapshot_demo_subtitle
 import hdcharts.app.generated.resources.drawer_title_dark_mode
 import hdcharts.app.generated.resources.drawer_title_dynamic_colors
 import hdcharts.app.generated.resources.drawer_title_github
+import hdcharts.app.generated.resources.drawer_title_snapshot_demo
 import hdcharts.app.generated.resources.github_url
+import hdcharts.app.generated.resources.snapshot_demo_url
 import hdcharts.sample_shared.generated.resources.ic_github
 import io.github.hdcharts.app.ChartDestination
 import io.github.hdcharts.app.LocalChartGalleryColumns
@@ -85,6 +88,9 @@ private fun rememberWebDemoStartupResources(): StartupResources {
                 AppRes.string.drawer_section_links,
                 AppRes.string.drawer_title_github,
                 AppRes.string.drawer_github_subtitle,
+                AppRes.string.snapshot_demo_url,
+                AppRes.string.drawer_title_snapshot_demo,
+                AppRes.string.drawer_snapshot_demo_subtitle,
             )
         }
 
