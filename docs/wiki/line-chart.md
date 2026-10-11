@@ -85,6 +85,50 @@ fun ShowLineWithRange() {
 }
 ```
 
+## Gradients
+
+Pass a `ChartGradient` to `LineChartDefaults.line(gradient = ...)` to paint the lines with it.
+A vertical gradient across the plot colors the line by its value. See
+[Gradients](/{{version}}/wiki/gradients) for details.
+
+![Line Gradient](/content/{{version}}/wiki/assets/line_gradient.gif)
+
+The example below is minimal and runs as written. The GIF above uses a longer generated
+series; its full source is in
+[`LineGradientExample.kt`](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/LineGradientExample.kt).
+
+```kotlin
+@Composable
+fun ShowGradientLine() {
+    val data = listOf(18.0, 24.0, 31.0, 36.0, 29.0, 22.0, 15.0).toChartData(
+        categories = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"),
+        seriesName = "Daily High",
+    )
+    // Warm colors at the top of the plot, cool ones at the bottom.
+    val gradient = ChartGradients.vertical(
+        colors = listOf(Color(0xFFE5484D), Color(0xFFF5A524), Color(0xFF1E89E6)),
+        span = GradientSpan.Plot,
+    )
+    val line = LineChartDefaults.line(gradient = gradient)
+
+    LineChart(
+        data = data,
+        title = "Daily High (°C)",
+        style = LineChartDefaults.style(line = line),
+    )
+}
+```
+
+We currently recommend gradients for single-series line charts. A multi-series chart shows a
+legend, and a gradient can make its lines hard to match to it. Points and selection markers keep
+their own colors. `LiveLineChart` takes the same style. Below, a horizontal gradient colors the
+line from its oldest points to its newest as it slides.
+
+![Live Line Gradient](/content/{{version}}/wiki/assets/line_timeline_gradient.gif)
+
+Its full source is in
+[`LiveLineGradientExample.kt`](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/LiveLineGradientExample.kt).
+
 ## Morphing Updates
 
 When `data` changes, `LineChart` animates the line from its old shape to the new one.

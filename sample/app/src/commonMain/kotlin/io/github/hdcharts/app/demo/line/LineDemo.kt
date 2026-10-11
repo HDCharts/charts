@@ -8,15 +8,21 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import hdcharts.app.generated.resources.Res
 import hdcharts.app.generated.resources.line_data_points
 import hdcharts.app.generated.resources.line_data_points_range
 import io.github.hdcharts.app.ui.composable.ChartDemo
+import io.github.hdcharts.app.ui.composable.DemoGradient
+import io.github.hdcharts.app.ui.composable.DemoGradientPicker
 import io.github.hdcharts.app.ui.composable.DemoRangeSlider
 import io.github.hdcharts.app.ui.composable.DemoSlider
 import io.github.hdcharts.core.style.ChartContainerDefaults
+import io.github.hdcharts.core.style.ChartGradient
 import io.github.hdcharts.line.LineChart
 import io.github.hdcharts.line.LineChartDefaults
 import io.github.hdcharts.sampleshared.theme.Dimens
@@ -24,13 +30,36 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun LineChartDemo(viewModel: LineChartViewModel = koinViewModel()) {
+fun LineGradientDemo(viewModel: LineChartViewModel = koinViewModel()) {
+    var gradient by rememberSaveable { mutableStateOf(DemoGradient.PlotVertical) }
+
+    LineChartDemo(
+        viewModel = viewModel,
+        gradient = gradient.gradient,
+        gradientControls = {
+            DemoGradientPicker(
+                options = DemoGradient.lineOptions,
+                selected = gradient,
+                onSelected = { gradient = it },
+            )
+        },
+    )
+}
+
+@Composable
+fun LineChartDemo(
+    viewModel: LineChartViewModel = koinViewModel(),
+    gradient: ChartGradient? = null,
+    gradientControls: @Composable () -> Unit = {},
+) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val chartContainerStyle = ChartContainerDefaults.style()
+    val line = LineChartDefaults.line(gradient = gradient)
 
     ChartDemo(
         onRefresh = viewModel::refresh,
         controlsContent = {
+            gradientControls()
             LineDataPointsControls(
                 points = uiState.dataControlsState.points,
                 minValue = uiState.dataControlsState.minValue,
@@ -48,7 +77,7 @@ fun LineChartDemo(viewModel: LineChartViewModel = koinViewModel()) {
                     .firstOrNull()
                     ?.name
                     .orEmpty(),
-            style = LineChartDefaults.style(chartContainerStyle = chartContainerStyle),
+            style = LineChartDefaults.style(chartContainerStyle = chartContainerStyle, line = line),
         )
     }
 }

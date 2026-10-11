@@ -13,12 +13,21 @@ import io.github.hdcharts.core.model.ChartValueFormatter
 import io.github.hdcharts.core.style.AxisLabelStyle
 import io.github.hdcharts.core.style.ChartContainerDefaults
 import io.github.hdcharts.core.style.ChartContainerStyle
+import io.github.hdcharts.core.style.ChartGradient
 import io.github.hdcharts.core.style.LegendDefaults
 import io.github.hdcharts.core.style.LegendStyle
 import io.github.hdcharts.core.style.StyleDefaults
+import io.github.hdcharts.core.style.clamp
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 
+/**
+ * Style of the series lines.
+ *
+ * @property alpha The line alpha. Replaces the line colors' alpha, and multiplies a gradient's own alphas.
+ * @property gradient Shared gradient that paints every line. Its span picks one gradient per line or
+ * one across the plot. `null` draws solid lines.
+ */
 @Immutable
 data class LineVisualStyle(
     val color: Color,
@@ -26,6 +35,7 @@ data class LineVisualStyle(
     val colors: ImmutableList<Color>,
     val strokeWidth: Dp,
     val bezier: Boolean,
+    val gradient: ChartGradient?,
 ) {
     constructor(
         color: Color,
@@ -33,12 +43,14 @@ data class LineVisualStyle(
         colors: List<Color>,
         strokeWidth: Dp,
         bezier: Boolean,
+        gradient: ChartGradient? = null,
     ) : this(
         color = color,
         alpha = alpha,
         colors = colors.toImmutableList(),
         strokeWidth = strokeWidth,
         bezier = bezier,
+        gradient = gradient,
     )
 
     /**
@@ -56,8 +68,8 @@ data class LineVisualStyle(
         )
 
     /**
-     * Returns this block with [alpha] and [strokeWidth] clamped. Names every field instead of using
-     * `copy`, so a field added to the constructor fails to compile here until it is dealt with.
+     * Returns this block with [alpha], [strokeWidth], and [gradient] clamped. Names every field instead of
+     * using `copy`, so a field added to the constructor fails to compile here until it is dealt with.
      */
     internal fun clamp(density: Density) =
         LineVisualStyle(
@@ -66,6 +78,7 @@ data class LineVisualStyle(
             colors = colors,
             strokeWidth = strokeWidth.clampSize(fallback = StyleDefaults.seriesLineWidth, density = density),
             bezier = bezier,
+            gradient = gradient?.clamp(),
         )
 }
 
@@ -208,12 +221,14 @@ object LineChartDefaults {
         colors: List<Color> = emptyList(),
         strokeWidth: Dp = StyleDefaults.seriesLineWidth,
         bezier: Boolean = true,
+        gradient: ChartGradient? = null,
     ) = LineVisualStyle(
         color = color,
         alpha = alpha,
         colors = colors,
         strokeWidth = strokeWidth,
         bezier = bezier,
+        gradient = gradient,
     )
 
     /** Returns a [LinePointStyle] for the data point markers. */

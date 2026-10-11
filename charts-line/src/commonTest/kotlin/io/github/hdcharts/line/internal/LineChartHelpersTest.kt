@@ -1,6 +1,7 @@
 package io.github.hdcharts.line.internal
 
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import io.github.hdcharts.core.internal.ANIMATION_DURATION_LINE_CHART
 import io.github.hdcharts.core.internal.bezier.cubicControlPointsForSegment
@@ -217,6 +218,29 @@ class LineChartHelpersTest {
             // Assert
             assertTrue { scaledValues == entry.value }
         }
+    }
+
+    @Test
+    fun lineShapeBounds_flatLine_isOneStrokeHigh() {
+        val bounds = shapeBounds(values = floatArrayOf(100f, 100f, 100f))
+
+        assertEquals(expected = 4f, actual = bounds.height, absoluteTolerance = 0.001f)
+    }
+
+    @Test
+    fun lineShapeBounds_liveShiftStart_matchesTheLeavingWindowAtRest() {
+        assertEquals(
+            expected = shapeBounds(values = SHIFT_VALUES.copyOfRange(0, 5)),
+            actual = shapeBounds(values = SHIFT_VALUES, horizontalOffsetPx = 0f, isShifting = true),
+        )
+    }
+
+    @Test
+    fun lineShapeBounds_liveShiftEnd_matchesTheArrivingWindowAtRest() {
+        assertEquals(
+            expected = shapeBounds(values = SHIFT_VALUES.copyOfRange(1, 6)),
+            actual = shapeBounds(values = SHIFT_VALUES, horizontalOffsetPx = -SHAPE_STEP_X, isShifting = true),
+        )
     }
 
     @Test
@@ -632,4 +656,27 @@ class LineChartHelpersTest {
 
     private fun singleSeriesData(points: List<Double>): ChartRenderData =
         lineData(ChartSeries(name = "Series", values = points), title = "Single")
+
+    private fun shapeBounds(
+        values: FloatArray,
+        horizontalOffsetPx: Float = 0f,
+        isShifting: Boolean = false,
+    ): Rect =
+        lineShapeBounds(
+            canvasSize = Size(width = 400f, height = 200f),
+            values = values,
+            valuesCount = values.size,
+            stepX = SHAPE_STEP_X,
+            horizontalOffsetPx = horizontalOffsetPx,
+            isShifting = isShifting,
+            verticalInset = 6f,
+            halfStrokePx = 2f,
+        )
+
+    private companion object {
+        const val SHAPE_STEP_X = 100f
+
+        // A shift's values: the leaving point is the old low and the arriving point a new high.
+        val SHIFT_VALUES = floatArrayOf(20f, 80f, 60f, 100f, 70f, 180f)
+    }
 }

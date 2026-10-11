@@ -4,8 +4,8 @@ title: Gradients
 
 # Gradients
 
-Bar and histogram charts paint their bars with a gradient through the `gradient` parameter
-of their `bars()` style. Stacked area charts use the same `ChartGradient` model for their layers.
+The charts below paint their shapes, such as bars, area layers, or lines, with a
+`ChartGradient` passed to the `gradient` parameter of their style.
 A gradient runs along a line through any number of colors, and draws either per shape or across
 the whole plot.
 
@@ -17,13 +17,13 @@ the whole plot.
 | Histogram | `HistogramChartDefaults.bars(gradient = ...)` |
 | Stacked Bar | `StackedBarChartDefaults.segments(gradient = ...)` |
 | Stacked Area | `StackedAreaChartDefaults.fill(gradient = ...)` |
+| Line | `LineChartDefaults.line(gradient = ...)` |
 
-Line, pie, radar, and ring gauge charts draw solid colors.
+Other charts draw solid colors.
 
-For stacked bar and stacked area charts, we currently recommend only fade gradients.
-`ChartGradients.fade()` preserves each series' color, so readers can match segments and layers
-to the legend. Gradients through multiple colors within a series can make adjacent series hard
-to distinguish.
+When a chart shows a legend, we currently recommend only gradients built from series colors, such
+as `ChartGradients.fade()`. They keep each series' color, so readers can match shapes to the
+legend. A gradient through fixed colors paints every series alike.
 
 ## Use
 
@@ -64,7 +64,7 @@ A gradient draws in one of two ways, set by its `span`:
 
 | `span` | Drawing |
 |---|---|
-| `GradientSpan.Shape` | Per shape: every bar or area layer shows the whole gradient. This is the default. |
+| `GradientSpan.Shape` | Per shape: every shape shows the whole gradient. This is the default. |
 | `GradientSpan.Plot` | Across the plot: one gradient covers the whole plot, and each shape shows the part it sits on. |
 
 ### Per Bar
@@ -167,6 +167,34 @@ StackedAreaChartDefaults.fill(
 )
 ```
 
+## Lines
+
+Pass a gradient to `LineChartDefaults.line(gradient = ...)` to paint the line with it. The
+gradient paints the stroke. Points and selection markers keep their own colors.
+
+- `GradientSpan.Plot` covers the whole plot. A vertical gradient colors each part of the line by
+  its value. When dense data is expanded to scroll, the gradient covers every point and scrolls
+  with them.
+- `GradientSpan.Shape` covers the line's own bounds, from its first point to its last and from
+  its lowest value to its highest. In `LiveLineChart`, the bounds stay at the plot edges while the
+  line slides, and move smoothly to the new window's lowest and highest values.
+
+![Line Gradient](/content/{{version}}/wiki/assets/line_gradient.gif)
+
+The GIF above uses a longer generated series; its full source is in
+[`LineGradientExample.kt`](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/LineGradientExample.kt).
+
+```kotlin
+// High values are red, low values blue.
+val gradient = ChartGradients.vertical(
+    colors = listOf(Color(0xFFE5484D), Color(0xFFF5A524), Color(0xFF1E89E6)),
+    span = GradientSpan.Plot,
+)
+LineChartDefaults.line(gradient = gradient)
+```
+
+`ChartGradients.fade()` fades from top to bottom, so the low parts of a line fade too.
+
 ## Ready-Made Gradients
 
 `ChartGradients` spaces the colors evenly along the gradient.
@@ -176,7 +204,7 @@ StackedAreaChartDefaults.fill(
 | `vertical(colors, span)` | Top to bottom. With `GradientSpan.Shape`, through each shape's bounds. |
 | `horizontal(colors, span)` | Left to right. |
 | `linear(angleDegrees, colors, span)` | At an angle, clockwise from left to right. `45` runs from the top-left corner to the bottom-right corner whatever the bounds' shape. At other angles on non-square bounds, the end colors hold near the corners. |
-| `fade(endAlpha, span)` | Top to bottom, from each bar, histogram bin, stacked-bar segment, or area layer's color to that color at `endAlpha`. |
+| `fade(endAlpha, span)` | Top to bottom, from each shape's color to that color at `endAlpha`. |
 
 ## Custom Gradients
 
@@ -205,12 +233,11 @@ val highlight = ChartGradient.Linear(
 A stop is one of two kinds:
 
 - `GradientStop.Fixed(offset, color)` draws that color as given.
-- `GradientStop.Series(offset, alpha)` draws the shape's own color at `alpha`. For bars and
-  histogram bins, the color comes from `bars()`; for stacked-bar segments, it comes from
-  `segments()`; for area layers, it comes from `fill()`.
+- `GradientStop.Series(offset, alpha)` draws the shape's own color at `alpha`, as set by the
+  style that takes the gradient.
 
-`ChartGradients.fade()` uses series colors, so each bar, histogram bin, stacked-bar segment, or area
-layer fades from its own color. Bars below zero fade toward the baseline too.
+`ChartGradients.fade()` uses series colors, so each shape fades from its own color. Bars below
+zero fade toward the baseline too.
 
 ![Bar Fade Gradient](/content/{{version}}/wiki/assets/bar_gradient_fade.gif)
 
@@ -237,9 +264,8 @@ BarChartDefaults.bars(
 
 ## Alpha and Selection
 
-The `alpha` of `bars()`, `segments()`, or `fill()` multiplies the whole gradient. Selection dims
-unselected bars, stacked-bar segments, or area layers with `selection.unselectedAlpha`, as it does
-for solid fills.
+The `alpha` of the style that takes the gradient multiplies the whole gradient. Charts that dim
+unselected shapes dim gradients the same way they dim solid colors.
 
 ## Clamping
 
@@ -249,6 +275,6 @@ A gradient never replaces the chart with an error. The chart draws the closest g
   offsets make a hard edge between two colors.
 - A stop with a non-finite offset is dropped.
 - A single stop paints its color solid.
-- With no stops, non-finite positions, or the same start and end, bars, histogram bins, stacked-bar
-  segments, and area layers draw solid, without a gradient.
+- With no stops, non-finite positions, or the same start and end, shapes draw solid, without a
+  gradient.
 - A `GradientStop.Series` alpha outside `0..1` is clamped to that range.

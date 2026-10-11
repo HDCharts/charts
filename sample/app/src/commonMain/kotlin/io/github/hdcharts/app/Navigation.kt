@@ -15,6 +15,9 @@ import hdcharts.app.generated.resources.example_defaults_summary
 import hdcharts.app.generated.resources.example_defaults_title
 import hdcharts.app.generated.resources.example_gradients_title
 import hdcharts.app.generated.resources.example_histogram_gradients_summary
+import hdcharts.app.generated.resources.example_line_gradients_summary
+import hdcharts.app.generated.resources.example_live_gradients_summary
+import hdcharts.app.generated.resources.example_live_gradients_title
 import hdcharts.app.generated.resources.example_live_latency_summary
 import hdcharts.app.generated.resources.example_live_latency_title
 import hdcharts.app.generated.resources.example_live_percentiles_summary
@@ -42,8 +45,10 @@ import io.github.hdcharts.app.demo.gauge.RingGaugeChartDemo
 import io.github.hdcharts.app.demo.histogram.HistogramChartDemo
 import io.github.hdcharts.app.demo.histogram.HistogramGradientDemo
 import io.github.hdcharts.app.demo.line.LineChartDemo
+import io.github.hdcharts.app.demo.line.LineGradientDemo
 import io.github.hdcharts.app.demo.line.LineScaleDropDemo
 import io.github.hdcharts.app.demo.line.LiveLineChartDemo
+import io.github.hdcharts.app.demo.line.LiveLineGradientDemo
 import io.github.hdcharts.app.demo.multiline.LiveMultiLineChartDemo
 import io.github.hdcharts.app.demo.multiline.MultiLineChartDemo
 import io.github.hdcharts.app.demo.pie.PieChartDemo
@@ -89,11 +94,17 @@ sealed class ChartDestination(
             examples =
                 listOf(
                     defaultsExample { LineChartDemo() },
+                    gradientsExample(summary = Res.string.example_line_gradients_summary) { LineGradientDemo() },
                     ChartExample(
                         id = "live-latency",
                         title = Res.string.example_live_latency_title,
                         summary = Res.string.example_live_latency_summary,
                     ) { LiveLineChartDemo() },
+                    ChartExample(
+                        id = "live-gradients",
+                        title = Res.string.example_live_gradients_title,
+                        summary = Res.string.example_live_gradients_summary,
+                    ) { LiveLineGradientDemo() },
                     ChartExample(
                         id = "backlog-drain",
                         title = Res.string.example_backlog_drain_title,
