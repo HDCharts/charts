@@ -119,6 +119,11 @@ compose.desktop {
 buildConfig {
     packageName(Config.DEMO_LIBRARY_NAMESPACE)
     buildConfigField("CHARTS_VERSION", project.version.toString())
+    // Hidden in all CI builds, including releases.
+    buildConfigField(
+        "SHOW_DEBUG_CHARTS",
+        providers.environmentVariable("CI").map { it != "true" }.orElse(true),
+    )
     useKotlinOutput()
 }
 

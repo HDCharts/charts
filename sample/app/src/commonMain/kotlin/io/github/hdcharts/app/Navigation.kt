@@ -52,6 +52,7 @@ import io.github.hdcharts.app.demo.stackedarea.StackedAreaChartDemo
 import io.github.hdcharts.app.demo.stackedarea.StackedAreaGradientDemo
 import io.github.hdcharts.app.demo.stackedbar.StackedBarChartDemo
 import io.github.hdcharts.app.demo.stackedbar.StackedBarGradientDemo
+import io.github.hdcharts.app.library.BuildConfig
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import hdcharts.sample_shared.generated.resources.Res as SharedRes
@@ -232,8 +233,10 @@ fun Navigation(
             }
         }
 
-        composable(ChartDestination.DebugChartsScreen.ROUTE) {
-            DebugChartsScreen()
+        if (BuildConfig.SHOW_DEBUG_CHARTS) {
+            composable(ChartDestination.DebugChartsScreen.ROUTE) {
+                DebugChartsScreen()
+            }
         }
     }
 }

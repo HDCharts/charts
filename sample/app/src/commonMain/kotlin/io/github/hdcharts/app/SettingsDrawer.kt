@@ -63,6 +63,7 @@ import hdcharts.app.generated.resources.drawer_title_github
 import hdcharts.app.generated.resources.github_url
 import hdcharts.app.generated.resources.github_url_content_description
 import hdcharts.sample_shared.generated.resources.ic_github
+import io.github.hdcharts.app.library.BuildConfig
 import io.github.hdcharts.sampleshared.theme.Dimens
 import io.github.hdcharts.sampleshared.theme.LocalHasDynamicColorFeature
 import io.github.hdcharts.sampleshared.theme.Theme
@@ -156,18 +157,20 @@ fun SettingsDrawerContent(
             },
             onClick = { uriHandler.openUri(githubUrl) },
         )
-        DrawerSettingCard(
-            title = "Debug charts",
-            subtitle = "Chart edge cases for manual checks",
-            leading = {
-                Icon(
-                    imageVector = Icons.Filled.BugReport,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                )
-            },
-            onClick = onDebugChartsClick,
-        )
+        if (BuildConfig.SHOW_DEBUG_CHARTS) {
+            DrawerSettingCard(
+                title = "Debug charts",
+                subtitle = "Chart edge cases for manual checks",
+                leading = {
+                    Icon(
+                        imageVector = Icons.Filled.BugReport,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                    )
+                },
+                onClick = onDebugChartsClick,
+            )
+        }
         Spacer(modifier = Modifier.height(Dimens.drawerPadding))
     }
 }
