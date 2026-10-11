@@ -1,6 +1,5 @@
 package io.github.hdcharts.app
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
@@ -36,9 +35,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -47,6 +48,7 @@ import hdcharts.app.generated.resources.cd_navigate_back
 import hdcharts.app.generated.resources.cd_open_settings
 import io.github.hdcharts.app.library.BuildConfig
 import io.github.hdcharts.app.ui.composable.InteractiveSurfaceCallbacks
+import io.github.hdcharts.app.ui.composable.LocalChartDemoSidePanel
 import io.github.hdcharts.app.ui.composable.LocalInteractiveSurfaceCallbacks
 import io.github.hdcharts.sampleshared.theme.AppTheme
 import io.github.hdcharts.sampleshared.theme.Dimens
@@ -56,7 +58,6 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 private val WideLayoutBreakpoint = 980.dp
-private val SettingsRailWidth = 320.dp
 private val SettingsEdgeOpenZoneWidth = Dimens.drawerPadding
 private val SettingsEdgeOpenDragThreshold = 28.dp
 
@@ -113,11 +114,14 @@ fun MainScreen(viewModel: MainViewModel = koinViewModel()) {
 
                     if (useWideLayout) {
                         Row(modifier = Modifier.fillMaxSize()) {
+                            // zIndex keeps the shadow above the content drawn after the rail.
                             Box(
                                 modifier =
                                     Modifier
-                                        .width(SettingsRailWidth)
-                                        .fillMaxHeight(),
+                                        .width(Dimens.sideRailWidth)
+                                        .fillMaxHeight()
+                                        .zIndex(1f)
+                                        .shadow(Dimens.sideRailElevation),
                             ) {
                                 SettingsDrawerContent(
                                     themeState = themeState,
@@ -132,30 +136,24 @@ fun MainScreen(viewModel: MainViewModel = koinViewModel()) {
                                 )
                             }
 
-                            Box(
-                                modifier =
-                                    Modifier
-                                        .width(1.dp)
-                                        .fillMaxHeight()
-                                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)),
-                            )
-
-                            MainScaffold(
-                                canNavigateBack = canNavigateBack,
-                                topBarTitle = topBarTitle,
-                                showSettingsButton = false,
-                                onNavigateBack = { navController.popBackStack() },
-                                onOpenSettings = {},
-                                content = { innerPadding ->
-                                    Navigation(
-                                        navController = navController,
-                                        menuState = menuState,
-                                        onChartSelected = viewModel::onChartSelected,
-                                        modifier = Modifier.padding(innerPadding),
-                                    )
-                                },
-                                modifier = Modifier.weight(1f),
-                            )
+                            CompositionLocalProvider(LocalChartDemoSidePanel provides true) {
+                                MainScaffold(
+                                    canNavigateBack = canNavigateBack,
+                                    topBarTitle = topBarTitle,
+                                    showSettingsButton = false,
+                                    onNavigateBack = { navController.popBackStack() },
+                                    onOpenSettings = {},
+                                    content = { innerPadding ->
+                                        Navigation(
+                                            navController = navController,
+                                            menuState = menuState,
+                                            onChartSelected = viewModel::onChartSelected,
+                                            modifier = Modifier.padding(innerPadding),
+                                        )
+                                    },
+                                    modifier = Modifier.weight(1f),
+                                )
+                            }
                         }
                     } else {
                         val canOpenFromEdge =
