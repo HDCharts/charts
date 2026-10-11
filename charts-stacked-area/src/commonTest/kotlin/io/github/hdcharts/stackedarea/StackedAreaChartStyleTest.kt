@@ -6,9 +6,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.v2.runComposeUiTest
 import io.github.hdcharts.core.internal.palette.generateColorShades
-import io.github.hdcharts.core.style.ChartGradients
 import io.github.hdcharts.core.style.StyleDefaults
-import kotlinx.collections.immutable.persistentListOf
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
@@ -28,24 +26,6 @@ class StackedAreaChartStyleTest {
         assertEquals(listOf(base), fill.resolveColors(1))
         assertEquals(explicit, explicitFill.resolveColors(3))
         assertEquals(listOf(base), explicitFill.resolveColors(1))
-    }
-
-    @Test
-    fun stackedArea_fill_resolvesPerSeriesGradientsAndSolidFallbacks() {
-        val shared = ChartGradients.fade(endAlpha = 0.2f)
-        val first = ChartGradients.fade(endAlpha = 0.4f)
-        val third = ChartGradients.fade(endAlpha = 0.6f)
-        val fill =
-            fillStyle().copy(
-                gradient = shared,
-                seriesGradients = persistentListOf(first, null, third),
-            )
-
-        assertEquals(first, fill.gradientForSeries(0))
-        assertNull(fill.gradientForSeries(1))
-        assertEquals(third, fill.gradientForSeries(2))
-        assertNull(fill.gradientForSeries(3))
-        assertEquals(shared, fill.copy(seriesGradients = persistentListOf()).gradientForSeries(0))
     }
 
     @Test
@@ -83,7 +63,6 @@ class StackedAreaChartStyleTest {
                 assertEquals(expected = StyleDefaults.unselectedAlpha, actual = selection.unselectedAlpha)
                 assertNotEquals(illegal = fill.color, actual = selection.color)
                 assertNull(fill.gradient)
-                assertEquals(emptyList(), fill.seriesGradients)
             }
         }
 
@@ -94,6 +73,5 @@ class StackedAreaChartStyleTest {
             alpha = 1f,
             bezier = false,
             gradient = null,
-            seriesGradients = emptyList(),
         )
 }

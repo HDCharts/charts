@@ -16,7 +16,7 @@ the whole plot.
 | Bar | `BarChartDefaults.bars(gradient = ...)` |
 | Histogram | `HistogramChartDefaults.bars(gradient = ...)` |
 | Stacked Bar | `StackedBarChartDefaults.segments(gradient = ...)` |
-| Stacked Area | `StackedAreaChartDefaults.fill(gradient = ...)` or `seriesGradients = ...` |
+| Stacked Area | `StackedAreaChartDefaults.fill(gradient = ...)` |
 
 Line, pie, radar, and ring gauge charts draw solid colors.
 
@@ -125,19 +125,13 @@ StackedBarChartDefaults.segments(
 ## Stacked Area Layers
 
 Pass a shared gradient to `StackedAreaChartDefaults.fill(gradient = ...)` to apply it to every layer.
-A non-empty `seriesGradients` list takes precedence and provides gradients in series order. Missing
-entries and `null` values use the series' solid fill color. `ChartGradients.fade()` keeps each layer
-tied to its series color while adding a vertical alpha fade. `GradientSpan.Shape` covers each layer's
-full bounds. With `seriesGradients`, each layer can keep its own color stops. `GradientSpan.Plot`
-aligns those gradients to the full scrolling plot bounds.
+`ChartGradients.fade()` keeps each layer tied to its series color while adding a vertical alpha fade.
+`GradientSpan.Shape` covers each layer's full bounds. `GradientSpan.Plot` aligns the gradient to the
+full scrolling plot bounds.
 
 ```kotlin
 StackedAreaChartDefaults.fill(
-    seriesGradients = listOf(
-        ChartGradients.fade(endAlpha = 0.1f),
-        ChartGradients.fade(endAlpha = 0.3f),
-        ChartGradients.fade(endAlpha = 0.5f),
-    ),
+    gradient = ChartGradients.fade(endAlpha = 0.35f),
 )
 ```
 
