@@ -26,11 +26,7 @@ import kotlinx.collections.immutable.toImmutableList
  *
  * @property bezier Draws each layer's edges as smooth curves when `true`, or as straight
  * segments between points when `false`.
- * @property gradient Shared gradient that paints every layer when [seriesGradients] is empty.
- * `null` draws solid fills.
- * @property seriesGradients Optional gradients for individual series, in data order. A non-empty
- * list takes precedence over [gradient]. Missing entries and `null` values draw that series with its
- * solid fill color.
+ * @property gradient Shared gradient that paints every layer. `null` draws solid fills.
  */
 @Immutable
 data class StackedAreaFillStyle(
@@ -39,7 +35,6 @@ data class StackedAreaFillStyle(
     val alpha: Float,
     val bezier: Boolean,
     val gradient: ChartGradient?,
-    val seriesGradients: ImmutableList<ChartGradient?>,
 ) {
     constructor(
         color: Color,
@@ -47,14 +42,12 @@ data class StackedAreaFillStyle(
         alpha: Float,
         bezier: Boolean,
         gradient: ChartGradient?,
-        seriesGradients: List<ChartGradient?>,
     ) : this(
         color = color,
         colors = colors.toImmutableList(),
         alpha = alpha,
         bezier = bezier,
         gradient = gradient,
-        seriesGradients = seriesGradients.toImmutableList(),
     )
 
     /**
@@ -71,12 +64,8 @@ data class StackedAreaFillStyle(
             singleItemUsesBase = true,
         )
 
-    /** Returns the gradient for [seriesIndex], using the shared [gradient] when no overrides exist. */
-    internal fun gradientForSeries(seriesIndex: Int): ChartGradient? =
-        if (seriesGradients.isEmpty()) gradient else seriesGradients.getOrNull(seriesIndex)
-
     /**
-     * Returns this block with [alpha], [gradient], and [seriesGradients] clamped.
+     * Returns this block with [alpha] and [gradient] clamped.
      * Names every field instead of using `copy`, so a field added to the constructor fails to compile
      * here until it is dealt with.
      */
@@ -87,7 +76,6 @@ data class StackedAreaFillStyle(
             alpha = alpha.clampAlpha(),
             bezier = bezier,
             gradient = gradient?.clamp(),
-            seriesGradients = seriesGradients.map { it?.clamp() }.toImmutableList(),
         )
 }
 
@@ -166,14 +154,12 @@ object StackedAreaChartDefaults {
         alpha: Float = StyleDefaults.seriesAlpha,
         bezier: Boolean = false,
         gradient: ChartGradient? = null,
-        seriesGradients: List<ChartGradient?> = emptyList(),
     ) = StackedAreaFillStyle(
         color = color,
         colors = colors,
         alpha = alpha,
         bezier = bezier,
         gradient = gradient,
-        seriesGradients = seriesGradients,
     )
 
     /** Returns a [StackedAreaAxisStyle] for axis labels. */

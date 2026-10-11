@@ -579,7 +579,7 @@ private fun StackedAreaChartContent(
                                         },
                                     alpha = style.fill.alpha * alphaFactor,
                                     bezier = style.fill.bezier,
-                                    gradient = style.fill.gradientForSeries(index),
+                                    gradient = style.fill.gradient,
                                     revealProgress = revealProgress,
                                     visibleStart = rangeStart,
                                     visibleEnd = rangeEnd,

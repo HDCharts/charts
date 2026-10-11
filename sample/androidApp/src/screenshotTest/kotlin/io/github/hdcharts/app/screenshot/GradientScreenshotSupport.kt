@@ -17,11 +17,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import io.github.hdcharts.app.screenshot.shared.ScreenshotSurface
-import io.github.hdcharts.core.style.ChartGradients
-import io.github.hdcharts.core.style.GradientSpan
 
 internal const val GRADIENT_GALLERY_END_ALPHA = 0.35f
 
@@ -75,9 +72,3 @@ internal fun GradientGalleryExample(
         }
     }
 }
-
-internal fun seriesPlotGradient(color: Color) =
-    ChartGradients.horizontal(
-        colors = listOf(color, color.copy(alpha = GRADIENT_GALLERY_END_ALPHA)),
-        span = GradientSpan.Plot,
-    )

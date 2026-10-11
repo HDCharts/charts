@@ -30,19 +30,14 @@ fun ShowStackedArea() {
 ## Gradients
 
 Pass a shared `ChartGradient` to `StackedAreaChartDefaults.fill(gradient = ...)` to use it for every
-area layer. A non-empty `seriesGradients` list takes precedence and customizes layers in data order.
-Missing entries and `null` values use that series' solid fill color. `ChartGradients.fade()` follows
-each layer's series color. See [Gradients](/{{version}}/wiki/gradients) for details.
+area layer. `ChartGradients.fade()` follows each layer's series color. See
+[Gradients](/{{version}}/wiki/gradients) for details.
 
 We currently recommend only fade gradients for stacked area charts. Fades preserve each series'
 color. Gradients through multiple colors within a layer can make series hard to distinguish.
 
 ```kotlin
 StackedAreaChartDefaults.fill(
-    seriesGradients = listOf(
-        ChartGradients.fade(endAlpha = 0.1f),
-        ChartGradients.fade(endAlpha = 0.3f),
-        ChartGradients.fade(endAlpha = 0.5f),
-    ),
+    gradient = ChartGradients.fade(endAlpha = 0.35f),
 )
 ```

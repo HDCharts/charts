@@ -32,7 +32,11 @@ fun StackedAreaChartGradientPreview() {
                 start = GradientPoint(x = 0f, y = 0.5f),
                 end = GradientPoint(x = 1f, y = 0.5f),
             )
-        val freeLayerFade = seriesPlotGradient(colors.first())
+        val recentValuesFade =
+            horizontalPlotFade.copy(
+                start = GradientPoint(x = 1f, y = 0.5f),
+                end = GradientPoint(x = 0.55f, y = 0.5f),
+            )
         GradientGalleryRow {
             StackedAreaGalleryExample(
                 title = "Vertical fade in each layer",
@@ -76,19 +80,15 @@ fun StackedAreaChartGradientPreview() {
                     ),
             )
             StackedAreaGalleryExample(
-                title = "One layer fades",
-                description = "Only the Free layer fades across the plot; the other layers stay solid.",
+                title = "Emphasize recent values",
+                description = "Older dates stay muted while the latest dates keep their full series colors.",
                 data = sample.data,
                 style =
                     StackedAreaChartDefaults.style(
                         fill =
                             StackedAreaChartDefaults.fill(
                                 colors = colors,
-                                seriesGradients =
-                                    listOf(
-                                        freeLayerFade,
-                                        null,
-                                    ),
+                                gradient = recentValuesFade,
                             ),
                     ),
             )

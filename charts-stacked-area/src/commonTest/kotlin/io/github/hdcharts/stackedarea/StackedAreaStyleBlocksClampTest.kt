@@ -3,7 +3,6 @@ package io.github.hdcharts.stackedarea
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
-import io.github.hdcharts.core.style.ChartGradient
 import io.github.hdcharts.core.style.ChartGradients
 import kotlinx.collections.immutable.persistentListOf
 import kotlin.test.Test
@@ -23,7 +22,6 @@ class StackedAreaStyleBlocksClampTest {
             alpha = 1f,
             bezier = false,
             gradient = null,
-            seriesGradients = persistentListOf(),
         )
 
     @Test
@@ -41,34 +39,10 @@ class StackedAreaStyleBlocksClampTest {
     }
 
     @Test
-    fun fill_clampsSeriesGradientsAndPreservesSolidFallbackIndices() {
-        val shared = ChartGradients.fade(endAlpha = 0.2f)
-        val clamped =
-            fill
-                .copy(
-                    gradient = shared,
-                    seriesGradients =
-                        persistentListOf(
-                            ChartGradients.fade(endAlpha = 2f),
-                            null,
-                            ChartGradients.vertical(colors = emptyList()),
-                            ChartGradients.fade(endAlpha = -1f),
-                        ),
-                ).clamp()
-
-        assertEquals<List<ChartGradient?>>(
-            expected = listOf(ChartGradients.fade(endAlpha = 1f), null, null, ChartGradients.fade(endAlpha = 0f)),
-            actual = clamped.seriesGradients,
-        )
-        assertEquals(shared, clamped.gradient)
-    }
-
-    @Test
     fun fill_invalidSharedGradientUsesSolidFallback() {
         val clamped = fill.copy(gradient = ChartGradients.vertical(colors = emptyList())).clamp()
 
         assertNull(clamped.gradient)
-        assertNull(clamped.gradientForSeries(0))
     }
 
     @Test
