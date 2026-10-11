@@ -9,9 +9,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
+import io.github.hdcharts.app.gif.docs.BarViewModel
 import io.github.hdcharts.app.gif.docs.LiveSensorReadingViewModel
 import io.github.hdcharts.app.gif.docs.MorphingLineViewModel
 import io.github.hdcharts.app.gif.docs.ShowBar
+import io.github.hdcharts.app.gif.docs.ShowGradientBar
+import io.github.hdcharts.app.gif.docs.ShowGradientHistogram
+import io.github.hdcharts.app.gif.docs.ShowGradientStackedArea
+import io.github.hdcharts.app.gif.docs.ShowGradientStackedBar
 import io.github.hdcharts.app.gif.docs.ShowHistogram
 import io.github.hdcharts.app.gif.docs.ShowLine
 import io.github.hdcharts.app.gif.docs.ShowLineWithRange
@@ -23,6 +29,15 @@ import io.github.hdcharts.app.gif.docs.ShowRadar
 import io.github.hdcharts.app.gif.docs.ShowRingGauge
 import io.github.hdcharts.app.gif.docs.ShowStackedArea
 import io.github.hdcharts.app.gif.docs.ShowStackedBar
+import io.github.hdcharts.app.gif.docs.SignedBarViewModel
+import io.github.hdcharts.app.gif.docs.barFadeGradientStyle
+import io.github.hdcharts.app.gif.docs.barPlotHorizontalGradientStyle
+import io.github.hdcharts.app.gif.docs.barPlotVerticalGradientStyle
+import io.github.hdcharts.app.gif.docs.barShapeGradientStyle
+import io.github.hdcharts.app.gif.docs.histogramFadeGradientStyle
+import io.github.hdcharts.app.gif.docs.histogramPlotHorizontalGradientStyle
+import io.github.hdcharts.app.gif.docs.histogramPlotVerticalGradientStyle
+import io.github.hdcharts.app.gif.docs.histogramShapeGradientStyle
 import io.github.hdcharts.sampleshared.theme.AppTheme
 import io.github.hdcharts.sampleshared.theme.docsSlate
 import io.github.hdcodedev.composegif.annotations.GifFractionPoint
@@ -193,6 +208,164 @@ fun StackedBarDefaultGifScenario() {
 @Composable
 fun StackedAreaDefaultGifScenario() {
     DocsGifScene { ShowStackedArea() }
+}
+
+@RecordGif(
+    name = "bar_gradient_shape",
+    interactionNodeTag = "BarChartPlot",
+    interactions = [
+        GifInteraction(type = GifInteractionType.TAP, target = GifInteractionTarget.LEFT, framesAfter = 14),
+        GifInteraction(type = GifInteractionType.TAP, target = GifInteractionTarget.TOP, framesAfter = 14),
+        GifInteraction(type = GifInteractionType.TAP, target = GifInteractionTarget.RIGHT, framesAfter = 14),
+    ],
+)
+@Composable
+fun BarGradientShapeGifScenario() {
+    DocsGifScene { ShowGradientBar(style = barShapeGradientStyle(), chartData = viewModel<BarViewModel>().chartData) }
+}
+
+@RecordGif(
+    name = "bar_gradient_plot_horizontal",
+    interactionNodeTag = "BarChartPlot",
+    interactions = [
+        GifInteraction(type = GifInteractionType.TAP, target = GifInteractionTarget.LEFT, framesAfter = 14),
+        GifInteraction(type = GifInteractionType.TAP, target = GifInteractionTarget.TOP, framesAfter = 14),
+        GifInteraction(type = GifInteractionType.TAP, target = GifInteractionTarget.RIGHT, framesAfter = 14),
+    ],
+)
+@Composable
+fun BarGradientPlotHorizontalGifScenario() {
+    DocsGifScene {
+        ShowGradientBar(style = barPlotHorizontalGradientStyle(), chartData = viewModel<BarViewModel>().chartData)
+    }
+}
+
+@RecordGif(
+    name = "bar_gradient_plot_vertical",
+    interactionNodeTag = "BarChartPlot",
+    interactions = [
+        GifInteraction(type = GifInteractionType.TAP, target = GifInteractionTarget.LEFT, framesAfter = 14),
+        GifInteraction(type = GifInteractionType.TAP, target = GifInteractionTarget.TOP, framesAfter = 14),
+        GifInteraction(type = GifInteractionType.TAP, target = GifInteractionTarget.RIGHT, framesAfter = 14),
+    ],
+)
+@Composable
+fun BarGradientPlotVerticalGifScenario() {
+    DocsGifScene {
+        ShowGradientBar(style = barPlotVerticalGradientStyle(), chartData = viewModel<BarViewModel>().chartData)
+    }
+}
+
+@RecordGif(
+    name = "bar_gradient_fade",
+    interactionNodeTag = "BarChartPlot",
+    interactions = [
+        GifInteraction(type = GifInteractionType.TAP, target = GifInteractionTarget.LEFT, framesAfter = 14),
+        GifInteraction(type = GifInteractionType.TAP, target = GifInteractionTarget.TOP, framesAfter = 14),
+        GifInteraction(type = GifInteractionType.TAP, target = GifInteractionTarget.RIGHT, framesAfter = 14),
+    ],
+)
+@Composable
+fun BarGradientFadeGifScenario() {
+    DocsGifScene {
+        ShowGradientBar(
+            style = barFadeGradientStyle(),
+            chartData = viewModel<SignedBarViewModel>().chartData,
+        )
+    }
+}
+
+@RecordGif(
+    name = "histogram_gradient_shape",
+    interactionNodeTag = "HistogramChart",
+    interactions = [
+        GifInteraction(type = GifInteractionType.TAP, target = GifInteractionTarget.LEFT, framesAfter = 14),
+        GifInteraction(type = GifInteractionType.TAP, target = GifInteractionTarget.TOP, framesAfter = 14),
+        GifInteraction(type = GifInteractionType.TAP, target = GifInteractionTarget.RIGHT, framesAfter = 14),
+    ],
+)
+@Composable
+fun HistogramGradientShapeGifScenario() {
+    DocsGifScene { ShowGradientHistogram(style = histogramShapeGradientStyle()) }
+}
+
+@RecordGif(
+    name = "histogram_gradient_plot_horizontal",
+    interactionNodeTag = "HistogramChart",
+    interactions = [
+        GifInteraction(type = GifInteractionType.TAP, target = GifInteractionTarget.LEFT, framesAfter = 14),
+        GifInteraction(type = GifInteractionType.TAP, target = GifInteractionTarget.TOP, framesAfter = 14),
+        GifInteraction(type = GifInteractionType.TAP, target = GifInteractionTarget.RIGHT, framesAfter = 14),
+    ],
+)
+@Composable
+fun HistogramGradientPlotHorizontalGifScenario() {
+    DocsGifScene { ShowGradientHistogram(style = histogramPlotHorizontalGradientStyle()) }
+}
+
+@RecordGif(
+    name = "histogram_gradient_plot_vertical",
+    interactionNodeTag = "HistogramChart",
+    interactions = [
+        GifInteraction(type = GifInteractionType.TAP, target = GifInteractionTarget.LEFT, framesAfter = 14),
+        GifInteraction(type = GifInteractionType.TAP, target = GifInteractionTarget.TOP, framesAfter = 14),
+        GifInteraction(type = GifInteractionType.TAP, target = GifInteractionTarget.RIGHT, framesAfter = 14),
+    ],
+)
+@Composable
+fun HistogramGradientPlotVerticalGifScenario() {
+    DocsGifScene { ShowGradientHistogram(style = histogramPlotVerticalGradientStyle()) }
+}
+
+@RecordGif(
+    name = "histogram_gradient_fade",
+    interactionNodeTag = "HistogramChart",
+    interactions = [
+        GifInteraction(type = GifInteractionType.TAP, target = GifInteractionTarget.LEFT, framesAfter = 14),
+        GifInteraction(type = GifInteractionType.TAP, target = GifInteractionTarget.TOP, framesAfter = 14),
+        GifInteraction(type = GifInteractionType.TAP, target = GifInteractionTarget.RIGHT, framesAfter = 14),
+    ],
+)
+@Composable
+fun HistogramGradientFadeGifScenario() {
+    DocsGifScene { ShowGradientHistogram(style = histogramFadeGradientStyle()) }
+}
+
+@RecordGif(
+    name = "stacked_bar_gradient",
+    interactionNodeTag = "StackedBarChartPlot",
+    interactions = [
+        GifInteraction(
+            type = GifInteractionType.SWIPE,
+            direction = GifSwipeDirection.LEFT_TO_RIGHT,
+            distance = GifSwipeDistance.LONG,
+            speed = GifSwipeSpeed.SLOW,
+        ),
+    ],
+)
+@Composable
+fun StackedBarGradientGifScenario() {
+    DocsGifScene { ShowGradientStackedBar() }
+}
+
+@RecordGif(
+    name = "stacked_area_gradient",
+    interactionNodeTag = "StackedAreaChartPlot",
+    interactions = [
+        GifInteraction(
+            type = GifInteractionType.SWIPE,
+            direction = GifSwipeDirection.LEFT_TO_RIGHT,
+            distance = GifSwipeDistance.LONG,
+            speed = GifSwipeSpeed.SLOW,
+        ),
+        GifInteraction(type = GifInteractionType.TAP, target = GifInteractionTarget.LEFT, framesAfter = 24),
+        GifInteraction(type = GifInteractionType.TAP, target = GifInteractionTarget.CENTER, framesAfter = 24),
+        GifInteraction(type = GifInteractionType.TAP, target = GifInteractionTarget.RIGHT, framesAfter = 36),
+    ],
+)
+@Composable
+fun StackedAreaGradientGifScenario() {
+    DocsGifScene { ShowGradientStackedArea() }
 }
 
 @RecordGif(

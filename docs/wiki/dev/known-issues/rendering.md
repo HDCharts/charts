@@ -64,3 +64,22 @@ Options:
   longer grows with the item count. Positions then need to count from the first visible item:
   past about 8.4 million px, a `Float` position can no longer hold fractions of a pixel, and past
   about 16.8 million px it skips every other pixel.
+
+### Gradients show steps in docs GIFs
+
+The `*_gradient*.gif` docs GIFs show visible steps (banding) in bar, histogram, and stacked
+gradients. The charts draw the gradients smoothly: screenshot tests of the same charts show no
+steps. A GIF holds at most 256 colors, and a gradient through several colors across the plot needs
+more shades than that, next to the text, grid, and background colors in the same palette.
+
+Confirmed by measuring one column of the tallest bar in `bar_gradient_plot_vertical.gif` at each
+recorder step: the emulator frame has 557 shades with flat runs of at most 6 px, and after the
+256-color palette it has 80 shades with flat runs of up to 56 px. `gifsicleLossy` does not change
+the result.
+
+Options:
+
+- Set `gifDither` to `floyd_steinberg`: the steps disappear, but GIFs grow about 47% and the
+  setting re-records every docs GIF.
+- Add a per-scenario dither option to `compose-gif-recorder`, so only the gradient GIFs use
+  `floyd_steinberg`.

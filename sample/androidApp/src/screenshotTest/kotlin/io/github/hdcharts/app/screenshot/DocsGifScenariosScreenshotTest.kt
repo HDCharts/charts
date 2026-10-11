@@ -9,8 +9,19 @@ import io.github.hdcharts.app.gif.docs.MultiLineViewModel
 import io.github.hdcharts.app.gif.docs.PieViewModel
 import io.github.hdcharts.app.gif.docs.RadarViewModel
 import io.github.hdcharts.app.gif.docs.RingGaugeViewModel
+import io.github.hdcharts.app.gif.docs.SignedBarViewModel
 import io.github.hdcharts.app.gif.docs.StackedAreaViewModel
 import io.github.hdcharts.app.gif.docs.StackedBarViewModel
+import io.github.hdcharts.app.gif.docs.barFadeGradientStyle
+import io.github.hdcharts.app.gif.docs.barPlotHorizontalGradientStyle
+import io.github.hdcharts.app.gif.docs.barPlotVerticalGradientStyle
+import io.github.hdcharts.app.gif.docs.barShapeGradientStyle
+import io.github.hdcharts.app.gif.docs.histogramFadeGradientStyle
+import io.github.hdcharts.app.gif.docs.histogramPlotHorizontalGradientStyle
+import io.github.hdcharts.app.gif.docs.histogramPlotVerticalGradientStyle
+import io.github.hdcharts.app.gif.docs.histogramShapeGradientStyle
+import io.github.hdcharts.app.gif.docs.stackedAreaFadeGradientStyle
+import io.github.hdcharts.app.gif.docs.stackedBarFadeGradientStyle
 import io.github.hdcharts.app.screenshot.shared.DocsGifLandscapePreview
 import io.github.hdcharts.app.screenshot.shared.ScreenshotSurface
 import io.github.hdcharts.bar.BarChart
@@ -101,6 +112,114 @@ fun StackedAreaDocsGifScenarioPreview() {
     ScreenshotSurface {
         val viewModel = StackedAreaViewModel()
         StackedAreaChart(data = viewModel.chartData.value, title = viewModel.title)
+    }
+}
+
+@PreviewTest
+@DocsGifLandscapePreview
+@Composable
+fun BarGradientShapeDocsGifScenarioPreview() {
+    ScreenshotSurface {
+        val data = BarViewModel().chartData.value
+        BarChart(data = data, title = data.series.single().name, style = barShapeGradientStyle())
+    }
+}
+
+@PreviewTest
+@DocsGifLandscapePreview
+@Composable
+fun BarGradientPlotHorizontalDocsGifScenarioPreview() {
+    ScreenshotSurface {
+        val data = BarViewModel().chartData.value
+        BarChart(data = data, title = data.series.single().name, style = barPlotHorizontalGradientStyle())
+    }
+}
+
+@PreviewTest
+@DocsGifLandscapePreview
+@Composable
+fun BarGradientPlotVerticalDocsGifScenarioPreview() {
+    ScreenshotSurface {
+        val data = BarViewModel().chartData.value
+        BarChart(data = data, title = data.series.single().name, style = barPlotVerticalGradientStyle())
+    }
+}
+
+@PreviewTest
+@DocsGifLandscapePreview
+@Composable
+fun BarGradientFadeDocsGifScenarioPreview() {
+    ScreenshotSurface {
+        val data = SignedBarViewModel().chartData.value
+        BarChart(data = data, title = data.series.single().name, style = barFadeGradientStyle())
+    }
+}
+
+@PreviewTest
+@DocsGifLandscapePreview
+@Composable
+fun HistogramGradientShapeDocsGifScenarioPreview() {
+    ScreenshotSurface {
+        val data = HistogramViewModel().chartData.value
+        HistogramChart(data = data, title = data.series.single().name, style = histogramShapeGradientStyle())
+    }
+}
+
+@PreviewTest
+@DocsGifLandscapePreview
+@Composable
+fun HistogramGradientPlotHorizontalDocsGifScenarioPreview() {
+    ScreenshotSurface {
+        val data = HistogramViewModel().chartData.value
+        HistogramChart(data = data, title = data.series.single().name, style = histogramPlotHorizontalGradientStyle())
+    }
+}
+
+@PreviewTest
+@DocsGifLandscapePreview
+@Composable
+fun HistogramGradientPlotVerticalDocsGifScenarioPreview() {
+    ScreenshotSurface {
+        val data = HistogramViewModel().chartData.value
+        HistogramChart(data = data, title = data.series.single().name, style = histogramPlotVerticalGradientStyle())
+    }
+}
+
+@PreviewTest
+@DocsGifLandscapePreview
+@Composable
+fun HistogramGradientFadeDocsGifScenarioPreview() {
+    ScreenshotSurface {
+        val data = HistogramViewModel().chartData.value
+        HistogramChart(data = data, title = data.series.single().name, style = histogramFadeGradientStyle())
+    }
+}
+
+@PreviewTest
+@DocsGifLandscapePreview
+@Composable
+fun StackedBarGradientDocsGifScenarioPreview() {
+    ScreenshotSurface {
+        val viewModel = StackedBarViewModel()
+        StackedBarChart(
+            data = viewModel.chartData.value,
+            title = viewModel.title,
+            style = stackedBarFadeGradientStyle(),
+        )
+    }
+}
+
+@PreviewTest
+@DocsGifLandscapePreview
+@Composable
+fun StackedAreaGradientDocsGifScenarioPreview() {
+    ScreenshotSurface {
+        val viewModel = StackedAreaViewModel()
+        StackedAreaChart(
+            data = viewModel.chartData.value,
+            title = viewModel.title,
+            style = stackedAreaFadeGradientStyle(),
+        )
     }
 }
 
