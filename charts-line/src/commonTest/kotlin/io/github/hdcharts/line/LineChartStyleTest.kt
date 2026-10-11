@@ -7,6 +7,7 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import io.github.hdcharts.core.internal.palette.generateColorShades
+import io.github.hdcharts.core.style.ChartGradients
 import io.github.hdcharts.core.style.StyleDefaults
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -39,6 +40,22 @@ class LineChartStyleTest {
         val resolved = lineStyle(colors = emptyList()).resolveColors(3)
 
         assertTrue(resolved.all { it.alpha == 1f })
+    }
+
+    @Test
+    fun line_keepsSharedGradient() {
+        val gradient = ChartGradients.fade(endAlpha = 0.4f)
+        val line =
+            LineVisualStyle(
+                color = base,
+                alpha = 1f,
+                colors = emptyList(),
+                strokeWidth = 5.dp,
+                bezier = true,
+                gradient = gradient,
+            )
+
+        assertEquals(gradient, line.gradient)
     }
 
     @Test

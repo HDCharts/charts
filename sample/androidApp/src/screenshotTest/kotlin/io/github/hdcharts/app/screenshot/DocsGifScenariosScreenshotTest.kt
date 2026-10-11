@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import com.android.tools.screenshot.PreviewTest
 import io.github.hdcharts.app.gif.docs.BarViewModel
 import io.github.hdcharts.app.gif.docs.HistogramViewModel
+import io.github.hdcharts.app.gif.docs.LineValueColors
 import io.github.hdcharts.app.gif.docs.LineViewModel
 import io.github.hdcharts.app.gif.docs.MultiLineViewModel
 import io.github.hdcharts.app.gif.docs.PieViewModel
@@ -26,9 +27,12 @@ import io.github.hdcharts.app.screenshot.shared.DocsGifLandscapePreview
 import io.github.hdcharts.app.screenshot.shared.ScreenshotSurface
 import io.github.hdcharts.bar.BarChart
 import io.github.hdcharts.core.model.ChartValueFormatters
+import io.github.hdcharts.core.style.ChartGradients
+import io.github.hdcharts.core.style.GradientSpan
 import io.github.hdcharts.gauge.RingGaugeChart
 import io.github.hdcharts.histogram.HistogramChart
 import io.github.hdcharts.line.LineChart
+import io.github.hdcharts.line.LineChartDefaults
 import io.github.hdcharts.pie.PieChart
 import io.github.hdcharts.radar.RadarChart
 import io.github.hdcharts.stackedarea.StackedAreaChart
@@ -112,6 +116,18 @@ fun StackedAreaDocsGifScenarioPreview() {
     ScreenshotSurface {
         val viewModel = StackedAreaViewModel()
         StackedAreaChart(data = viewModel.chartData.value, title = viewModel.title)
+    }
+}
+
+@PreviewTest
+@DocsGifLandscapePreview
+@Composable
+fun LineGradientDocsGifScenarioPreview() {
+    ScreenshotSurface {
+        val data = LineViewModel().chartData.value
+        val gradient = ChartGradients.vertical(colors = LineValueColors, span = GradientSpan.Plot)
+        val line = LineChartDefaults.line(gradient = gradient)
+        LineChart(data = data, title = data.series.single().name, style = LineChartDefaults.style(line = line))
     }
 }
 

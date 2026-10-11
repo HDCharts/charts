@@ -20,6 +20,8 @@ import io.github.hdcharts.core.internal.ANIMATION_TARGET
 import io.github.hdcharts.core.internal.bezier.DEFAULT_BEZIER_TENSION
 import io.github.hdcharts.core.style.AxisLabelStyle
 import io.github.hdcharts.core.style.ChartContainerStyle
+import io.github.hdcharts.core.style.ChartGradient
+import io.github.hdcharts.core.style.ChartGradients
 import io.github.hdcharts.core.style.LegendStyle
 import io.github.hdcharts.line.LineAxisStyle
 import io.github.hdcharts.line.LineChartStyle
@@ -137,7 +139,17 @@ class LineChartVisiblePointsTest {
 
     @Test
     fun culledChart_drawsTheViewportToTheSamePixelsAsTheWholeSeries() {
-        val style = style(bezier = true, pointsVisible = true)
+        assertCulledPixelsMatchFullSeries(style = style(bezier = true, pointsVisible = true))
+    }
+
+    @Test
+    fun culledChart_withShapeGradient_spansTheWholeSeries() {
+        val gradient = ChartGradients.horizontal(colors = listOf(Color.Red, Color.Blue))
+
+        assertCulledPixelsMatchFullSeries(style = style(bezier = true, pointsVisible = false, gradient = gradient))
+    }
+
+    private fun assertCulledPixelsMatchFullSeries(style: LineChartStyle) {
         val values = scaledValues()
         val full = render(values = values, drawRange = 0 until VALUES_COUNT, style = style)
         val culled =
@@ -316,6 +328,7 @@ class LineChartVisiblePointsTest {
         fun style(
             bezier: Boolean,
             pointsVisible: Boolean,
+            gradient: ChartGradient? = null,
         ): LineChartStyle =
             LineChartStyle(
                 chartContainerStyle =
@@ -330,6 +343,7 @@ class LineChartVisiblePointsTest {
                         colors = persistentListOf(LINE_COLOR),
                         strokeWidth = STROKE_WIDTH_PX.dp,
                         bezier = bezier,
+                        gradient = gradient,
                     ),
                 points =
                     LinePointStyle(

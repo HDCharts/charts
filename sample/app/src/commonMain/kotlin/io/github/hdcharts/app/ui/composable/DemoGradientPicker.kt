@@ -14,11 +14,13 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import hdcharts.app.generated.resources.Res
 import hdcharts.app.generated.resources.gradient_fade
+import hdcharts.app.generated.resources.gradient_fade_older
 import hdcharts.app.generated.resources.gradient_per_bar
 import hdcharts.app.generated.resources.gradient_plot_horizontal
 import hdcharts.app.generated.resources.gradient_plot_vertical
 import io.github.hdcharts.core.style.ChartGradient
 import io.github.hdcharts.core.style.ChartGradients
+import io.github.hdcharts.core.style.GradientPoint
 import io.github.hdcharts.core.style.GradientSpan
 import io.github.hdcharts.sampleshared.theme.Dimens
 import org.jetbrains.compose.resources.StringResource
@@ -26,7 +28,7 @@ import org.jetbrains.compose.resources.stringResource
 
 private val DemoGradientColors = listOf(Color(0xFF1E89E6), Color(0xFF9B4EDD), Color(0xFFEA7A2E))
 
-enum class DemoBarGradient(
+enum class DemoGradient(
     val label: StringResource,
     val gradient: ChartGradient,
 ) {
@@ -46,12 +48,29 @@ enum class DemoBarGradient(
         label = Res.string.gradient_fade,
         gradient = ChartGradients.fade(endAlpha = 0.35f),
     ),
+    FadeOlder(
+        label = Res.string.gradient_fade_older,
+        // Fades from the line's color at the last point to 35% at the first.
+        gradient =
+            ChartGradients.fade(endAlpha = 0.35f, span = GradientSpan.Plot).copy(
+                start = GradientPoint(x = 1f, y = 0.5f),
+                end = GradientPoint(x = 0f, y = 0.5f),
+            ),
+    ),
+    ;
+
+    companion object {
+        val barOptions = listOf(PerBar, PlotHorizontal, PlotVertical, Fade)
+        val lineOptions = listOf(PlotVertical, PlotHorizontal, FadeOlder)
+        val liveLineOptions = lineOptions + Fade
+    }
 }
 
 @Composable
-fun DemoBarGradientPicker(
-    selected: DemoBarGradient,
-    onSelected: (DemoBarGradient) -> Unit,
+fun DemoGradientPicker(
+    options: List<DemoGradient>,
+    selected: DemoGradient,
+    onSelected: (DemoGradient) -> Unit,
     modifier: Modifier = Modifier,
     perShapeLabel: StringResource = Res.string.gradient_per_bar,
 ) {
@@ -59,12 +78,12 @@ fun DemoBarGradientPicker(
         modifier = modifier.fillMaxWidth().selectableGroup(),
         horizontalArrangement = Arrangement.spacedBy(Dimens.sm),
     ) {
-        DemoBarGradient.entries.forEach { option ->
+        options.forEach { option ->
             FilterChip(
                 selected = option == selected,
                 onClick = { onSelected(option) },
                 label = {
-                    val label = if (option == DemoBarGradient.PerBar) perShapeLabel else option.label
+                    val label = if (option == DemoGradient.PerBar) perShapeLabel else option.label
                     Text(stringResource(label))
                 },
                 modifier = Modifier.semantics { role = Role.RadioButton },

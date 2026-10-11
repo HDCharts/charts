@@ -16,6 +16,8 @@ import io.github.hdcharts.app.gif.docs.MorphingLineViewModel
 import io.github.hdcharts.app.gif.docs.ShowBar
 import io.github.hdcharts.app.gif.docs.ShowGradientBar
 import io.github.hdcharts.app.gif.docs.ShowGradientHistogram
+import io.github.hdcharts.app.gif.docs.ShowGradientLine
+import io.github.hdcharts.app.gif.docs.ShowGradientLiveLine
 import io.github.hdcharts.app.gif.docs.ShowGradientStackedArea
 import io.github.hdcharts.app.gif.docs.ShowGradientStackedBar
 import io.github.hdcharts.app.gif.docs.ShowHistogram
@@ -103,6 +105,23 @@ fun MultiLineDefaultGifScenario() {
 }
 
 @RecordGif(
+    name = "line_gradient",
+    interactionNodeTag = "LineChartPlot",
+    interactions = [
+        GifInteraction(
+            type = GifInteractionType.SWIPE,
+            direction = GifSwipeDirection.LEFT_TO_RIGHT,
+            distance = GifSwipeDistance.LONG,
+            speed = GifSwipeSpeed.SLOW,
+        ),
+    ],
+)
+@Composable
+fun LineGradientGifScenario() {
+    DocsGifScene { ShowGradientLine() }
+}
+
+@RecordGif(
     name = "line_range",
     interactionNodeTag = "LineChartPlot",
     interactions = [
@@ -142,6 +161,20 @@ fun LineTimelineGifScenario() {
         val scope = rememberCoroutineScope()
         val viewModel = remember { LiveSensorReadingViewModel(tickerScope = scope) }
         ShowLiveLine(viewModel = viewModel)
+    }
+}
+
+@RecordGif(
+    name = "line_timeline_gradient",
+    durationMs = 1500,
+    fps = 25,
+)
+@Composable
+fun LineTimelineGradientGifScenario() {
+    DocsGifScene {
+        val scope = rememberCoroutineScope()
+        val viewModel = remember { LiveSensorReadingViewModel(tickerScope = scope) }
+        ShowGradientLiveLine(viewModel = viewModel)
     }
 }
 

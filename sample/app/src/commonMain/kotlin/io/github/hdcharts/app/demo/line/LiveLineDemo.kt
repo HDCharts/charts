@@ -3,24 +3,52 @@ package io.github.hdcharts.app.demo.line
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.hdcharts.app.demo.timeline.LiveTimelineControls
 import io.github.hdcharts.app.demo.timeline.timelineAnimationDurationMillis
 import io.github.hdcharts.app.ui.composable.ChartDemo
+import io.github.hdcharts.app.ui.composable.DemoGradient
+import io.github.hdcharts.app.ui.composable.DemoGradientPicker
 import io.github.hdcharts.app.ui.composable.PlayPauseButton
 import io.github.hdcharts.core.style.ChartContainerDefaults
+import io.github.hdcharts.core.style.ChartGradient
 import io.github.hdcharts.line.LineChartDefaults
 import io.github.hdcharts.line.LiveLineChart
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
-fun LiveLineChartDemo(viewModel: LiveLineChartViewModel = koinViewModel()) {
+fun LiveLineGradientDemo(viewModel: LiveLineChartViewModel = koinViewModel()) {
+    var gradient by rememberSaveable { mutableStateOf(DemoGradient.PlotVertical) }
+
+    LiveLineChartDemo(
+        viewModel = viewModel,
+        gradient = gradient.gradient,
+        gradientControls = {
+            DemoGradientPicker(
+                options = DemoGradient.liveLineOptions,
+                selected = gradient,
+                onSelected = { gradient = it },
+            )
+        },
+    )
+}
+
+@Composable
+fun LiveLineChartDemo(
+    viewModel: LiveLineChartViewModel = koinViewModel(),
+    gradient: ChartGradient? = null,
+    gradientControls: @Composable () -> Unit = {},
+) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val animationDuration = timelineAnimationDurationMillis(uiState.controlsState.updateIntervalMs)
     val chartContainerStyle = ChartContainerDefaults.style()
+    val line = LineChartDefaults.line(gradient = gradient)
 
     LifecycleStartEffect(viewModel) {
         viewModel.onEnterDemo()
@@ -34,6 +62,7 @@ fun LiveLineChartDemo(viewModel: LiveLineChartViewModel = koinViewModel()) {
             PlayPauseButton(isPlaying = uiState.isPlaying, onToggle = viewModel::togglePlaying)
         },
         controlsContent = {
+            gradientControls()
             LiveTimelineControls(
                 controlsState = uiState.controlsState,
                 onUpdateIntervalChange = viewModel::updateInterval,
@@ -49,7 +78,7 @@ fun LiveLineChartDemo(viewModel: LiveLineChartViewModel = koinViewModel()) {
                     .firstOrNull()
                     ?.name
                     .orEmpty(),
-            style = LineChartDefaults.style(chartContainerStyle = chartContainerStyle),
+            style = LineChartDefaults.style(chartContainerStyle = chartContainerStyle, line = line),
             shiftDuration = animationDuration.milliseconds,
         )
     }

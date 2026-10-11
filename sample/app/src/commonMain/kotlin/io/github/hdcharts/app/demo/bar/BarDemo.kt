@@ -17,8 +17,8 @@ import hdcharts.app.generated.resources.Res
 import hdcharts.app.generated.resources.bar_data_points
 import hdcharts.app.generated.resources.bar_data_points_range
 import io.github.hdcharts.app.ui.composable.ChartDemo
-import io.github.hdcharts.app.ui.composable.DemoBarGradient
-import io.github.hdcharts.app.ui.composable.DemoBarGradientPicker
+import io.github.hdcharts.app.ui.composable.DemoGradient
+import io.github.hdcharts.app.ui.composable.DemoGradientPicker
 import io.github.hdcharts.app.ui.composable.DemoRangeSlider
 import io.github.hdcharts.app.ui.composable.DemoSlider
 import io.github.hdcharts.app.ui.composable.PlayPauseButton
@@ -37,12 +37,18 @@ fun BarChartDemo(viewModel: BarChartViewModel = koinViewModel()) {
 
 @Composable
 fun BarGradientDemo(viewModel: BarChartViewModel = koinViewModel()) {
-    var gradient by rememberSaveable { mutableStateOf(DemoBarGradient.PerBar) }
+    var gradient by rememberSaveable { mutableStateOf(DemoGradient.PerBar) }
 
     BarChartDemoContent(
         viewModel = viewModel,
         gradient = gradient.gradient,
-        gradientControls = { DemoBarGradientPicker(selected = gradient, onSelected = { gradient = it }) },
+        gradientControls = {
+            DemoGradientPicker(
+                options = DemoGradient.barOptions,
+                selected = gradient,
+                onSelected = { gradient = it },
+            )
+        },
     )
 }
 

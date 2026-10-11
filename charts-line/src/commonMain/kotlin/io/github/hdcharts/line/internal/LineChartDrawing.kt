@@ -1,6 +1,8 @@
 package io.github.hdcharts.line.internal
 
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
@@ -15,7 +17,9 @@ import io.github.hdcharts.core.internal.axis.visibleIndexRange
 import io.github.hdcharts.core.internal.bezier.CUBIC_CONTROL_POINT_COUNT
 import io.github.hdcharts.core.internal.bezier.cubicControlPointsInto
 import io.github.hdcharts.core.internal.drawing.drawSelectionLine
+import io.github.hdcharts.core.internal.drawing.gradientBrush
 import io.github.hdcharts.core.internal.interaction.selectedIndexForTouchX
+import io.github.hdcharts.core.style.GradientSpan
 import io.github.hdcharts.line.LineChartStyle
 import kotlinx.collections.immutable.ImmutableList
 import kotlin.math.ceil
@@ -197,6 +201,31 @@ internal fun DrawScope.drawChartPath(
         }
     }
 
+    val lineBrush =
+        style.line.gradient?.let { gradient ->
+            gradientBrush(
+                color = lineColor,
+                gradient = gradient,
+                shapeBounds =
+                    if (gradient.span == GradientSpan.Shape) {
+                        lineShapeBounds(
+                            canvasSize = size,
+                            values = values,
+                            valuesCount = valuesCount,
+                            stepX = stepX,
+                            horizontalOffsetPx = horizontalOffsetPx,
+                            isShifting = timelineWindowPoints != null,
+                            verticalInset = verticalInset,
+                            halfStrokePx = lineStroke.width / 2f,
+                        )
+                    } else {
+                        Rect.Zero
+                    },
+                plotBounds = Rect(offset = Offset.Zero, size = size),
+                mirrored = false,
+            )
+        }
+
     if (timelineWindowPoints != null) {
         clipRect(left = 0f, top = 0f, right = canvasWidth, bottom = canvasHeight) {
             drawChartLineAndMarkers(
@@ -206,6 +235,7 @@ internal fun DrawScope.drawChartPath(
                 style = style,
                 lineStroke = lineStroke,
                 lineColor = lineColor,
+                lineBrush = lineBrush,
                 lineAnimationProgress = lineAnimationProgress,
                 markerRevealProgress = markerRevealProgress,
                 stepX = stepX,
@@ -222,6 +252,7 @@ internal fun DrawScope.drawChartPath(
             style = style,
             lineStroke = lineStroke,
             lineColor = lineColor,
+            lineBrush = lineBrush,
             lineAnimationProgress = lineAnimationProgress,
             markerRevealProgress = markerRevealProgress,
             stepX = stepX,
@@ -240,6 +271,7 @@ private fun DrawScope.drawChartLineAndMarkers(
     style: LineChartStyle,
     lineStroke: Stroke,
     lineColor: Color,
+    lineBrush: Brush?,
     lineAnimationProgress: Float,
     markerRevealProgress: Float,
     stepX: Float,
@@ -249,11 +281,7 @@ private fun DrawScope.drawChartLineAndMarkers(
 ) {
     val canvasHeight = size.height
     if (lineAnimationProgress >= ANIMATION_TARGET) {
-        drawPath(
-            path = path,
-            color = lineColor,
-            style = lineStroke,
-        )
+        drawLinePath(path = path, color = lineColor, brush = lineBrush, alpha = style.line.alpha, stroke = lineStroke)
     } else {
         val reveal =
             lineChartRevealWindow(
@@ -269,10 +297,12 @@ private fun DrawScope.drawChartLineAndMarkers(
             right = reveal.rightPx + style.line.strokeWidth.toPx(),
             bottom = canvasHeight,
         ) {
-            drawPath(
+            drawLinePath(
                 path = path,
                 color = lineColor,
-                style = lineStroke,
+                brush = lineBrush,
+                alpha = style.line.alpha,
+                stroke = lineStroke,
             )
         }
     }
@@ -285,6 +315,21 @@ private fun DrawScope.drawChartLineAndMarkers(
         stepX = stepX,
         horizontalOffsetPx = horizontalOffsetPx,
     )
+}
+
+/** Draws [path] with [brush] at [alpha], or in [color] when there is no brush; [color] already carries the alpha. */
+private fun DrawScope.drawLinePath(
+    path: Path,
+    color: Color,
+    brush: Brush?,
+    alpha: Float,
+    stroke: Stroke,
+) {
+    if (brush == null) {
+        drawPath(path = path, color = color, style = stroke)
+    } else {
+        drawPath(path = path, brush = brush, alpha = alpha, style = stroke)
+    }
 }
 
 private fun DrawScope.tryDrawPathPoints(

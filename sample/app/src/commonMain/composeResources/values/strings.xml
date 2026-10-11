@@ -67,6 +67,8 @@
     <string name="example_defaults_summary">Every style option left at its default.</string>
     <string name="example_live_latency_title">Live API latency</string>
     <string name="example_live_latency_summary">Streams a new reading each tick and slides the time window.</string>
+    <string name="example_live_gradients_title">Live gradients</string>
+    <string name="example_live_gradients_summary">Streams a gradient line, colored by the plot or faded by the line's own range.</string>
     <string name="example_backlog_drain_title">Queue backlog drain</string>
     <string name="example_backlog_drain_summary">Values swing from millions to tens, so the axis rescales while it streams.</string>
     <string name="example_live_percentiles_title">Live P50 and P95 latency</string>
@@ -75,12 +77,14 @@
     <string name="example_bar_gradients_summary">Switch between per-bar, plot-wide, and fade gradients.</string>
     <string name="example_histogram_gradients_summary">Switch between per-bin, plot-wide, and fade gradients.</string>
     <string name="example_stacked_gradients_summary">Each series color fades from top to bottom.</string>
+    <string name="example_line_gradients_summary">Color the line by value or along time, or fade older points.</string>
 
     <string name="gradient_per_bar">Per bar</string>
     <string name="gradient_per_bin">Per bin</string>
     <string name="gradient_plot_horizontal">Plot, left to right</string>
     <string name="gradient_plot_vertical">Plot, top to bottom</string>
     <string name="gradient_fade">Fade</string>
+    <string name="gradient_fade_older">Fade older points</string>
 
     <string translatable="false" name="github_url">https://github.com/HDCharts/charts</string>
     <string translatable="false" name="snapshot_demo_url">https://charts.hdcode.dev/demo/snapshot/</string>

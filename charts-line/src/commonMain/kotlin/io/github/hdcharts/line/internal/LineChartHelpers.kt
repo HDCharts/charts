@@ -1,6 +1,7 @@
 package io.github.hdcharts.line.internal
 
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.util.lerp
 import io.github.hdcharts.core.internal.NO_SELECTION
@@ -221,6 +222,55 @@ internal fun mapScaledValueToCanvasY(
     val drawableHeight = (canvasHeight - (safeInset * 2f)).coerceAtLeast(0f)
     val normalized = (scaledValue / canvasHeight).coerceIn(0f, 1f)
     return safeInset + ((1f - normalized) * drawableHeight)
+}
+
+/** Bounds of the series' stroke, so a shape gradient holds still on scroll and through a live shift, and a flat line has height. */
+internal fun lineShapeBounds(
+    canvasSize: Size,
+    values: FloatArray,
+    valuesCount: Int,
+    stepX: Float,
+    horizontalOffsetPx: Float,
+    isShifting: Boolean,
+    verticalInset: Float,
+    halfStrokePx: Float,
+): Rect {
+    val lastIndex = valuesCount - 1
+    // The points both windows of a live shift share; the whole series when the line is at rest.
+    val sharedIndices = if (isShifting) 1 until lastIndex else 0..lastIndex
+    var sharedMin = Float.POSITIVE_INFINITY
+    var sharedMax = Float.NEGATIVE_INFINITY
+    for (index in sharedIndices) {
+        sharedMin = minOf(sharedMin, values[index])
+        sharedMax = maxOf(sharedMax, values[index])
+    }
+    val minValue: Float
+    val maxValue: Float
+    val left: Float
+    val right: Float
+    if (isShifting) {
+        // Blends from the leaving window to the arriving one, so the bounds match the resting window at both ends.
+        val progress = (-horizontalOffsetPx / stepX).coerceIn(0f, 1f)
+        minValue = lerp(minOf(sharedMin, values[0]), minOf(sharedMin, values[lastIndex]), progress)
+        maxValue = lerp(maxOf(sharedMax, values[0]), maxOf(sharedMax, values[lastIndex]), progress)
+        left = 0f
+        right = canvasSize.width
+    } else {
+        minValue = sharedMin
+        maxValue = sharedMax
+        left = horizontalOffsetPx
+        right = horizontalOffsetPx + lastIndex * stepX
+    }
+    val topY =
+        mapScaledValueToCanvasY(scaledValue = maxValue, canvasHeight = canvasSize.height, verticalInset = verticalInset)
+    val bottomY =
+        mapScaledValueToCanvasY(scaledValue = minValue, canvasHeight = canvasSize.height, verticalInset = verticalInset)
+    return Rect(
+        left = left - halfStrokePx,
+        top = topY - halfStrokePx,
+        right = right + halfStrokePx,
+        bottom = bottomY + halfStrokePx,
+    )
 }
 
 private fun solveBezierTForX(

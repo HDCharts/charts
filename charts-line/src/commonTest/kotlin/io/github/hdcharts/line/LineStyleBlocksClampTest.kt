@@ -6,6 +6,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.hdcharts.core.internal.MAX_SIZE_PX
 import io.github.hdcharts.core.style.AxisLabelStyle
+import io.github.hdcharts.core.style.ChartGradients
 import io.github.hdcharts.core.style.StyleDefaults
 import kotlinx.collections.immutable.persistentListOf
 import kotlin.test.Test
@@ -19,7 +20,7 @@ class LineStyleBlocksClampTest {
     private val density = Density(2f)
 
     @Test
-    fun line_clampsAlphaAndStrokeWidth() {
+    fun line_clampsAlphaStrokeWidthAndGradient() {
         val clamped =
             LineVisualStyle(
                 color = Color.Blue,
@@ -27,10 +28,12 @@ class LineStyleBlocksClampTest {
                 colors = persistentListOf(),
                 strokeWidth = Dp.Infinity,
                 bezier = true,
+                gradient = ChartGradients.fade(endAlpha = 2f),
             ).clamp(density)
 
         assertEquals(expected = 1f, actual = clamped.alpha)
         assertEquals(expected = with(density) { MAX_SIZE_PX.toDp() }, actual = clamped.strokeWidth)
+        assertEquals(expected = ChartGradients.fade(endAlpha = 1f), actual = clamped.gradient)
     }
 
     @Test
