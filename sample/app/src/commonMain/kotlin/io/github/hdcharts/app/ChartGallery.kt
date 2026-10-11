@@ -1,6 +1,7 @@
 package io.github.hdcharts.app
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -27,6 +28,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -45,6 +49,7 @@ fun ChartGallery(
     menuState: MenuState,
     onChartSelected: (ChartDestination) -> Unit,
     versionLabel: String,
+    versionUrl: String?,
     modifier: Modifier = Modifier,
     viewModel: ChartGalleryViewModel = koinViewModel(),
 ) {
@@ -120,10 +125,15 @@ fun ChartGallery(
                     .padding(top = Dimens.xs, bottom = Dimens.md),
             contentAlignment = Alignment.Center,
         ) {
+            val uriHandler = LocalUriHandler.current
             Text(
                 text = versionLabel,
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier =
+                    versionUrl?.let {
+                        Modifier.pointerHoverIcon(PointerIcon.Hand).clickable { uriHandler.openUri(it) }
+                    } ?: Modifier,
             )
         }
     }

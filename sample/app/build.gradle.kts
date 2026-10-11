@@ -119,6 +119,9 @@ compose.desktop {
 buildConfig {
     packageName(Config.DEMO_LIBRARY_NAMESPACE)
     buildConfigField("CHARTS_VERSION", project.version.toString())
+    // Set only by the web demo publish.
+    buildConfigField("CHARTS_COMMIT", providers.gradleProperty("chartsCommit").orElse(""))
+    buildConfigField("CHARTS_COMMIT_DATE", providers.gradleProperty("chartsCommitDate").orElse(""))
     // Hidden in all CI builds, including releases.
     buildConfigField(
         "SHOW_DEBUG_CHARTS",
