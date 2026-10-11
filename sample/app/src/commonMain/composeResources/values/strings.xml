@@ -69,6 +69,16 @@
     <string name="example_backlog_drain_summary">Values swing from millions to tens, so the axis rescales while it streams.</string>
     <string name="example_live_percentiles_title">Live P50 and P95 latency</string>
     <string name="example_live_percentiles_summary">Streams two series together and slides the time window.</string>
+    <string name="example_gradients_title">Gradients</string>
+    <string name="example_bar_gradients_summary">Switch between per-bar, plot-wide, and fade gradients.</string>
+    <string name="example_histogram_gradients_summary">Switch between per-bin, plot-wide, and fade gradients.</string>
+    <string name="example_stacked_gradients_summary">Each series color fades from top to bottom.</string>
+
+    <string name="gradient_per_bar">Per bar</string>
+    <string name="gradient_per_bin">Per bin</string>
+    <string name="gradient_plot_horizontal">Plot, left to right</string>
+    <string name="gradient_plot_vertical">Plot, top to bottom</string>
+    <string name="gradient_fade">Fade</string>
 
     <string translatable="false" name="github_url">https://github.com/HDCharts/charts</string>
 
