@@ -332,7 +332,13 @@ fun MainScreenContent(
         ChartGallery(
             menuState = menuState,
             onChartSelected = onChartSelected,
-            versionLabel = "HDCharts: ${BuildConfig.CHARTS_VERSION}",
+            versionLabel =
+                listOf(
+                    "HDCharts: ${BuildConfig.CHARTS_VERSION}",
+                    BuildConfig.CHARTS_COMMIT,
+                    BuildConfig.CHARTS_COMMIT_DATE,
+                ).filter(String::isNotEmpty)
+                    .joinToString(separator = " · "),
             modifier =
                 Modifier
                     .fillMaxWidth()

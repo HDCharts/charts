@@ -108,7 +108,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          ./gradlew generateWebDemo -PchartsReleaseVersion="${{ inputs.charts-version }}" --no-daemon --stacktrace --build-cache
+          commit="$(git rev-parse --short=7 "${{ inputs.source-sha }}")"
+          commit_date="$(LC_ALL=C git log -1 --format=%cd --date=format:'%-d %b %Y' "${{ inputs.source-sha }}")"
+          ./gradlew generateWebDemo -PchartsReleaseVersion="${{ inputs.charts-version }}" \
+            -PchartsCommit="${commit}" -PchartsCommitDate="${commit_date}" \
+            --no-daemon --stacktrace --build-cache
       - name: Validate demo
         shell: bash
         run: |
