@@ -6,11 +6,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.v2.runComposeUiTest
 import io.github.hdcharts.core.internal.palette.generateColorShades
+import io.github.hdcharts.core.style.AxesStyle
 import io.github.hdcharts.core.style.StyleDefaults
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalTestApi::class)
 class StackedAreaChartStyleTest {
@@ -63,6 +65,30 @@ class StackedAreaChartStyleTest {
                 assertEquals(expected = StyleDefaults.unselectedAlpha, actual = selection.unselectedAlpha)
                 assertNotEquals(illegal = fill.color, actual = selection.color)
                 assertNull(fill.gradient)
+            }
+        }
+
+    @Test
+    fun axisDefault_drawsLinesInAxisColor() =
+        runComposeUiTest {
+            lateinit var axis: AxesStyle
+            var axisColor = Color.Unspecified
+
+            setContent {
+                MaterialTheme {
+                    val styleAxis = StackedAreaChartDefaults.style().axes
+                    val themeAxisColor = StyleDefaults.axisColor
+                    SideEffect {
+                        axis = styleAxis
+                        axisColor = themeAxisColor
+                    }
+                }
+            }
+
+            runOnIdle {
+                assertTrue(axis.visible)
+                assertEquals(expected = axisColor, actual = axis.lines.color)
+                assertEquals(expected = StyleDefaults.lineWidth, actual = axis.lines.lineWidth)
             }
         }
 

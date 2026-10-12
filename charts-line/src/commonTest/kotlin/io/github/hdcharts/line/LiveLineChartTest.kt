@@ -26,6 +26,7 @@ import io.github.hdcharts.core.internal.TestTags
 import io.github.hdcharts.core.model.ChartSeries
 import io.github.hdcharts.core.model.chartDataOf
 import io.github.hdcharts.core.model.toChartData
+import io.github.hdcharts.core.style.AxesDefaults
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -43,10 +44,8 @@ class LiveLineChartTest {
                     data = listOf(10.0, 20.0, 30.0).toChartData(),
                     style =
                         LineChartDefaults.style(
-                            axis =
-                                LineChartDefaults.axis(
-                                    yLabels = LineChartDefaults.yLabels(size = TextUnit.Unspecified),
-                                ),
+                            axes =
+                                AxesDefaults.style(yLabels = LineChartDefaults.yLabels(size = TextUnit.Unspecified)),
                         ),
                     animateOnStart = false,
                 )

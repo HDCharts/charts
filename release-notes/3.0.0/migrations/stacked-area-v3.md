@@ -48,7 +48,7 @@ The old `MultiChartDataSet` and `selectedPointIndex` inputs are removed. Use
 ## Styles and selection
 
 Move customizations to the grouped `StackedAreaChartStyle` sections such as
-`fill`, `axis`, and `selection`. Series colors correspond to
+`fill`, `axes`, and `selection`. Series colors correspond to
 contribution series.
 
 Stacked areas no longer draw boundary lines. Set the curve with

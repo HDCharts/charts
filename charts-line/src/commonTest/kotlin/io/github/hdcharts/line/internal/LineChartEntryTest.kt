@@ -10,6 +10,7 @@ import io.github.hdcharts.core.internal.errorsFor
 import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.model.ChartSeries
 import io.github.hdcharts.core.model.toChartData
+import io.github.hdcharts.core.style.AxesDefaults
 import io.github.hdcharts.line.LineChartDefaults
 import io.github.hdcharts.line.LineTestFixtures.colors
 import io.github.hdcharts.line.LineTestFixtures.multiDataSet
@@ -159,8 +160,8 @@ class LineChartEntryTest {
             val style =
                 LineChartDefaults.style(
                     line = LineChartDefaults.line(colors = lineColors),
-                    axis =
-                        LineChartDefaults.axis(
+                    axes =
+                        AxesDefaults.style(
                             xLabels = LineChartDefaults.xLabels(maxCount = xLabelMaxCount),
                             yLabels = LineChartDefaults.yLabels(maxCount = yLabelMaxCount),
                         ),

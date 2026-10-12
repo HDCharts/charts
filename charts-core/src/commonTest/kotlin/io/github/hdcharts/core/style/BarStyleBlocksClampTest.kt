@@ -39,7 +39,7 @@ class BarStyleBlocksClampTest {
     @Test
     fun grid_clampsStepsAndLineWidth() {
         val clamped =
-            BarGridStyle(
+            GridStyle(
                 visible = true,
                 steps = Int.MAX_VALUE,
                 color = Color.Gray,
@@ -48,24 +48,6 @@ class BarStyleBlocksClampTest {
 
         assertEquals(expected = MAX_GRID_STEPS, actual = clamped.steps)
         assertEquals(expected = StyleDefaults.lineWidth, actual = clamped.lineWidth)
-    }
-
-    @Test
-    fun axis_clampsLineWidthAndPassesLabelsThrough() {
-        val labels =
-            AxisLabelStyle(visible = true, color = Color.Black, size = StyleDefaults.axisLabelSize, maxCount = null)
-        val clamped =
-            BarAxisStyle(
-                visible = true,
-                color = Color.Black,
-                lineWidth = Float.NaN.dp,
-                xLabels = labels,
-                yLabels = labels,
-            ).clamp(density)
-
-        assertEquals(expected = StyleDefaults.lineWidth, actual = clamped.lineWidth)
-        assertEquals(expected = labels, actual = clamped.xLabels)
-        assertEquals(expected = labels, actual = clamped.yLabels)
     }
 
     @Test

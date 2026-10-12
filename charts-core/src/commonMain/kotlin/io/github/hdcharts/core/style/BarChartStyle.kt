@@ -9,7 +9,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import io.github.hdcharts.core.internal.InternalChartsApi
 import io.github.hdcharts.core.internal.clampAlpha
-import io.github.hdcharts.core.internal.clampGridSteps
 import io.github.hdcharts.core.internal.clampSize
 import io.github.hdcharts.core.model.ChartValueFormatter
 import kotlinx.collections.immutable.ImmutableList
@@ -102,68 +101,6 @@ data class BarRangeStyle(
 )
 
 /**
- * Horizontal grid configuration for vertical bar and histogram charts.
- *
- * @property visible Whether the grid is visible.
- * @property steps Number of horizontal grid intervals.
- * @property color The grid line color.
- * @property lineWidth The grid line stroke width in density-independent pixels.
- */
-@Immutable
-data class BarGridStyle(
-    val visible: Boolean,
-    val steps: Int,
-    val color: Color,
-    val lineWidth: Dp,
-) {
-    /**
-     * Returns this block with [steps] and [lineWidth] clamped. Names every field instead of using
-     * `copy`, so a field added to the constructor fails to compile here until it is dealt with.
-     */
-    internal fun clamp(density: Density) =
-        BarGridStyle(
-            visible = visible,
-            steps = steps.clampGridSteps(),
-            color = color,
-            lineWidth = lineWidth.clampSize(fallback = StyleDefaults.lineWidth, density = density),
-        )
-}
-
-/**
- * Axis configuration for vertical bar and histogram charts.
- *
- * @property visible Whether the left Y-axis line and baseline are visible.
- * @property color The axis line color.
- * @property lineWidth The axis line stroke width in density-independent pixels.
- * @property xLabels X-axis label configuration.
- * @property yLabels Y-axis label configuration.
- */
-@Immutable
-data class BarAxisStyle(
-    val visible: Boolean,
-    val color: Color,
-    val lineWidth: Dp,
-    val xLabels: AxisLabelStyle,
-    val yLabels: AxisLabelStyle,
-) {
-    /**
-     * Returns this block with [lineWidth] clamped. Names every field instead of using `copy`, so a
-     * field added to the constructor fails to compile here until it is dealt with.
-     *
-     * The label styles pass through: an undrawable label size is a validation error, not something
-     * to clamp.
-     */
-    internal fun clamp(density: Density) =
-        BarAxisStyle(
-            visible = visible,
-            color = color,
-            lineWidth = lineWidth.clampSize(fallback = StyleDefaults.lineWidth, density = density),
-            xLabels = xLabels,
-            yLabels = yLabels,
-        )
-}
-
-/**
  * Selection indicator configuration for vertical bar and histogram charts.
  *
  * While a bar is selected, the other bars are drawn at [unselectedAlpha] so the selected bar
@@ -205,8 +142,7 @@ data class BarSelectionStyle(
  * @property chartContainerStyle The shared container presentation.
  * @property bars Bar visual block (colors, spacing, minimum width).
  * @property range Optional fixed Y-axis range.
- * @property grid Horizontal grid configuration.
- * @property axis Axis lines and X/Y label configuration.
+ * @property axes Axis lines, grid, X/Y labels, and their shared visibility.
  * @property selection Selection indicator configuration.
  * @property zoomControlsVisible Whether zoom controls appear in the chart header.
  */
@@ -215,8 +151,7 @@ class BarChartStyle(
     val chartContainerStyle: ChartContainerStyle,
     val bars: BarBarsStyle,
     val range: BarRangeStyle,
-    val grid: BarGridStyle,
-    val axis: BarAxisStyle,
+    val axes: AxesStyle,
     val selection: BarSelectionStyle,
     val zoomControlsVisible: Boolean,
 )
@@ -239,16 +174,14 @@ object BarChartDefaults {
         chartContainerStyle: ChartContainerStyle = ChartContainerDefaults.style(),
         bars: BarBarsStyle = bars(),
         range: BarRangeStyle = range(),
-        grid: BarGridStyle = grid(),
-        axis: BarAxisStyle = axis(),
+        axes: AxesStyle = AxesDefaults.style(),
         selection: BarSelectionStyle = selection(),
         zoomControlsVisible: Boolean = true,
     ) = BarChartStyle(
         chartContainerStyle = chartContainerStyle,
         bars = bars,
         range = range,
-        grid = grid,
-        axis = axis,
+        axes = axes,
         selection = selection,
         zoomControlsVisible = zoomControlsVisible,
     )
@@ -289,45 +222,11 @@ object BarChartDefaults {
     ): BarRangeStyle = BarRangeStyle(min = min, max = max)
 
     /**
-     * Returns a [BarGridStyle] for horizontal grid configuration.
-     */
-    @Composable
-    fun grid(
-        visible: Boolean = true,
-        steps: Int = StyleDefaults.gridSteps,
-        color: Color = StyleDefaults.gridColor,
-        lineWidth: Dp = StyleDefaults.lineWidth,
-    ) = BarGridStyle(
-        visible = visible,
-        steps = steps,
-        color = color,
-        lineWidth = lineWidth,
-    )
-
-    /**
-     * Returns a [BarAxisStyle] for axis and label configuration.
-     */
-    @Composable
-    fun axis(
-        visible: Boolean = true,
-        color: Color = StyleDefaults.axisColor,
-        lineWidth: Dp = StyleDefaults.lineWidth,
-        xLabels: AxisLabelStyle = xLabels(),
-        yLabels: AxisLabelStyle = yLabels(),
-    ) = BarAxisStyle(
-        visible = visible,
-        color = color,
-        lineWidth = lineWidth,
-        xLabels = xLabels,
-        yLabels = yLabels,
-    )
-
-    /**
      * Returns an [AxisLabelStyle] for X-axis labels.
      */
     @Composable
     fun xLabels(
-        visible: Boolean = true,
+        visible: Boolean = StyleDefaults.axisLabelsVisible,
         color: Color = StyleDefaults.axisLabelColor,
         size: TextUnit = StyleDefaults.axisLabelSize,
         maxCount: Int? = null,
@@ -343,7 +242,7 @@ object BarChartDefaults {
      */
     @Composable
     fun yLabels(
-        visible: Boolean = true,
+        visible: Boolean = StyleDefaults.axisLabelsVisible,
         color: Color = StyleDefaults.axisLabelColor,
         size: TextUnit = StyleDefaults.axisLabelSize,
         maxCount: Int? = null,
@@ -378,8 +277,7 @@ fun BarChartStyle.clamp(density: Density) =
         chartContainerStyle = chartContainerStyle,
         bars = bars.clamp(density),
         range = range,
-        grid = grid.clamp(density),
-        axis = axis.clamp(density),
+        axes = axes.clamp(density),
         selection = selection.clamp(density),
         zoomControlsVisible = zoomControlsVisible,
     )

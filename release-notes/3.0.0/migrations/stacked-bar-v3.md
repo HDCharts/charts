@@ -50,7 +50,7 @@ label, and each new series contains one segment column.
 ## Styles and selection
 
 Move customizations to the grouped `StackedBarChartStyle` sections such as
-`segments`, `layout`, `axis`, and `selection`. Segment colors correspond to
+`segments`, `layout`, `axes`, and `selection`. Segment colors correspond to
 series, not bars.
 
 Use `selection` instead of `selectedBarIndex`. Selection applies to a whole bar,

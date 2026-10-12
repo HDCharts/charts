@@ -76,7 +76,7 @@ style composes its blocks' clamps and adds nothing of its own.
       StackedAreaChartStyle(
           chartContainerStyle = chartContainerStyle,
           fill = fill.clamp(),
-          axis = axis,
+          axes = axes.clamp(density),
           selection = selection.clamp(density),
           legend = legend,
           zoomControlsVisible = zoomControlsVisible,

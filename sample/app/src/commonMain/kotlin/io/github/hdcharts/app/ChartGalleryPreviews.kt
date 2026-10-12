@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import io.github.hdcharts.bar.BarChart
 import io.github.hdcharts.core.model.toChartData
+import io.github.hdcharts.core.style.AxesDefaults
 import io.github.hdcharts.core.style.BarChartDefaults
 import io.github.hdcharts.core.style.ChartContainerDefaults
 import io.github.hdcharts.core.style.ChartContainerStyle
@@ -132,8 +133,8 @@ private fun LineChartPreview(values: List<Double>) {
         style =
             LineChartDefaults.style(
                 chartContainerStyle = previewChartContainerStyle(),
-                axis =
-                    LineChartDefaults.axis(
+                axes =
+                    AxesDefaults.style(
                         xLabels = LineChartDefaults.xLabels(visible = false),
                         yLabels = LineChartDefaults.yLabels(visible = false),
                     ),
@@ -156,8 +157,8 @@ private fun MultiLineChartPreview(series: List<Pair<String, List<Double>>>) {
             LineChartDefaults.style(
                 chartContainerStyle = previewChartContainerStyle(),
                 legend = LineChartDefaults.legend(visible = false),
-                axis =
-                    LineChartDefaults.axis(
+                axes =
+                    AxesDefaults.style(
                         xLabels = LineChartDefaults.xLabels(visible = false),
                         yLabels = LineChartDefaults.yLabels(visible = false),
                     ),
@@ -180,8 +181,8 @@ private fun StackedAreaChartPreview(series: List<Pair<String, List<Double>>>) {
             StackedAreaChartDefaults.style(
                 chartContainerStyle = previewChartContainerStyle(),
                 legend = StackedAreaChartDefaults.legend(visible = false),
-                axis =
-                    StackedAreaChartDefaults.axis(
+                axes =
+                    AxesDefaults.style(
                         xLabels = StackedAreaChartDefaults.xLabels(visible = false),
                         yLabels = StackedAreaChartDefaults.yLabels(visible = false),
                     ),
@@ -207,8 +208,8 @@ private fun BarChartPreview(values: List<Double>) {
                         min = 0.0,
                         max = 100.0,
                     ),
-                axis =
-                    BarChartDefaults.axis(
+                axes =
+                    AxesDefaults.style(
                         xLabels = BarChartDefaults.xLabels(visible = false),
                         yLabels = BarChartDefaults.yLabels(visible = false),
                     ),
@@ -230,8 +231,8 @@ private fun HistogramChartPreview(values: List<Double>) {
         modifier = Modifier.size(PreviewChartSize),
         style =
             HistogramChartDefaults.style(
-                axis =
-                    HistogramChartDefaults.axis(
+                axes =
+                    AxesDefaults.style(
                         xLabels = HistogramChartDefaults.xLabels(visible = false),
                         yLabels = HistogramChartDefaults.yLabels(visible = false),
                     ),
@@ -255,8 +256,8 @@ private fun StackedBarChartPreview(series: List<Pair<String, List<Double>>>) {
             StackedBarChartDefaults.style(
                 chartContainerStyle = previewChartContainerStyle(),
                 legend = StackedBarChartDefaults.legend(visible = false),
-                axis =
-                    StackedBarChartDefaults.axis(
+                axes =
+                    AxesDefaults.style(
                         xLabels = StackedBarChartDefaults.xLabels(visible = false),
                         yLabels = StackedBarChartDefaults.yLabels(visible = false),
                     ),

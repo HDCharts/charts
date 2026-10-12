@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.test.ExperimentalTestApi
@@ -27,11 +28,44 @@ import io.github.hdcharts.core.model.ChartSeries
 import io.github.hdcharts.core.model.ChartValueFormatter
 import io.github.hdcharts.core.model.chartDataOf
 import io.github.hdcharts.core.model.staticChartSelection
+import io.github.hdcharts.core.model.toChartData
+import io.github.hdcharts.core.style.AxesDefaults
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class StackedBarChartTest {
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun axesVisibilityToggle_removesLabelSpaceAndRestoresLabels() =
+        runComposeUiTest {
+            val axesVisible = mutableStateOf(true)
+            setContent {
+                StackedBarChart(
+                    data = listOf(10.0, 20.0, 30.0).toChartData(categories = listOf("A", "B", "C")),
+                    modifier = Modifier.size(width = 400.dp, height = 300.dp),
+                    style = StackedBarChartDefaults.style(axes = AxesDefaults.style(visible = axesVisible.value)),
+                    animateOnStart = false,
+                )
+            }
+
+            onNodeWithTag(TestTags.STACKED_BAR_CHART_X_AXIS_LABELS).assertIsDisplayed()
+            onNodeWithTag(TestTags.STACKED_BAR_CHART_Y_AXIS_LABELS).assertIsDisplayed()
+            val labeledPlot = onNodeWithTag(TestTags.STACKED_BAR_CHART_PLOT).fetchSemanticsNode().boundsInRoot
+
+            runOnIdle { axesVisible.value = false }
+            onAllNodesWithTag(TestTags.STACKED_BAR_CHART_X_AXIS_LABELS).assertCountEquals(0)
+            onAllNodesWithTag(TestTags.STACKED_BAR_CHART_Y_AXIS_LABELS).assertCountEquals(0)
+            val hiddenPlot = onNodeWithTag(TestTags.STACKED_BAR_CHART_PLOT).fetchSemanticsNode().boundsInRoot
+            assertTrue(hiddenPlot.width > labeledPlot.width)
+            assertTrue(hiddenPlot.height > labeledPlot.height)
+
+            runOnIdle { axesVisible.value = true }
+            onNodeWithTag(TestTags.STACKED_BAR_CHART_X_AXIS_LABELS).assertIsDisplayed()
+            onNodeWithTag(TestTags.STACKED_BAR_CHART_Y_AXIS_LABELS).assertIsDisplayed()
+            assertEquals(labeledPlot, onNodeWithTag(TestTags.STACKED_BAR_CHART_PLOT).fetchSemanticsNode().boundsInRoot)
+        }
+
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun stackedBarChart_expandedPastLayoutLimits_displaysErrorInsteadOfCrashing() =
@@ -76,7 +110,7 @@ class StackedBarChartTest {
                     data = data,
                     style =
                         StackedBarChartDefaults.style(
-                            axis = StackedBarChartDefaults.axis(xLabels = StackedBarChartDefaults.xLabels(size = 1.em)),
+                            axes = AxesDefaults.style(xLabels = StackedBarChartDefaults.xLabels(size = 1.em)),
                         ),
                 )
             }
@@ -345,10 +379,8 @@ class StackedBarChartTest {
                     data = validData(),
                     style =
                         StackedBarChartDefaults.style(
-                            axis =
-                                StackedBarChartDefaults.axis(
-                                    xLabels = StackedBarChartDefaults.xLabels(visible = false),
-                                ),
+                            axes =
+                                AxesDefaults.style(xLabels = StackedBarChartDefaults.xLabels(visible = false)),
                         ),
                 )
             }
@@ -388,10 +420,8 @@ class StackedBarChartTest {
                     data = validData(),
                     style =
                         StackedBarChartDefaults.style(
-                            axis =
-                                StackedBarChartDefaults.axis(
-                                    yLabels = StackedBarChartDefaults.yLabels(visible = false),
-                                ),
+                            axes =
+                                AxesDefaults.style(yLabels = StackedBarChartDefaults.yLabels(visible = false)),
                         ),
                 )
             }

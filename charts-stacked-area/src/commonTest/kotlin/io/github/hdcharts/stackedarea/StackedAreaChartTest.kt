@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.testTag
@@ -30,11 +31,44 @@ import io.github.hdcharts.core.model.ChartSeries
 import io.github.hdcharts.core.model.ChartValueFormatter
 import io.github.hdcharts.core.model.chartDataOf
 import io.github.hdcharts.core.model.staticChartSelection
+import io.github.hdcharts.core.model.toChartData
+import io.github.hdcharts.core.style.AxesDefaults
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class StackedAreaChartTest {
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun axesVisibilityToggle_removesLabelSpaceAndRestoresLabels() =
+        runComposeUiTest {
+            val axesVisible = mutableStateOf(true)
+            setContent {
+                StackedAreaChart(
+                    data = listOf(10.0, 20.0, 30.0).toChartData(categories = listOf("A", "B", "C")),
+                    modifier = Modifier.size(width = 400.dp, height = 300.dp),
+                    style = StackedAreaChartDefaults.style(axes = AxesDefaults.style(visible = axesVisible.value)),
+                    animateOnStart = false,
+                )
+            }
+
+            onNodeWithTag(TestTags.STACKED_AREA_CHART_X_AXIS_LABELS).assertIsDisplayed()
+            onNodeWithTag(TestTags.STACKED_AREA_CHART_Y_AXIS_LABELS).assertIsDisplayed()
+            val labeledPlot = onNodeWithTag(TestTags.STACKED_AREA_CHART_PLOT).fetchSemanticsNode().boundsInRoot
+
+            runOnIdle { axesVisible.value = false }
+            onAllNodesWithTag(TestTags.STACKED_AREA_CHART_X_AXIS_LABELS).assertCountEquals(0)
+            onAllNodesWithTag(TestTags.STACKED_AREA_CHART_Y_AXIS_LABELS).assertCountEquals(0)
+            val hiddenPlot = onNodeWithTag(TestTags.STACKED_AREA_CHART_PLOT).fetchSemanticsNode().boundsInRoot
+            assertTrue(hiddenPlot.width > labeledPlot.width)
+            assertTrue(hiddenPlot.height > labeledPlot.height)
+
+            runOnIdle { axesVisible.value = true }
+            onNodeWithTag(TestTags.STACKED_AREA_CHART_X_AXIS_LABELS).assertIsDisplayed()
+            onNodeWithTag(TestTags.STACKED_AREA_CHART_Y_AXIS_LABELS).assertIsDisplayed()
+            assertEquals(labeledPlot, onNodeWithTag(TestTags.STACKED_AREA_CHART_PLOT).fetchSemanticsNode().boundsInRoot)
+        }
+
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun stackedAreaChart_longEdgeXAxisLabels_stayInsideChartBounds() =
@@ -116,10 +150,8 @@ class StackedAreaChartTest {
                     data = multiDataSet,
                     style =
                         StackedAreaChartDefaults.style(
-                            axis =
-                                StackedAreaChartDefaults.axis(
-                                    yLabels = StackedAreaChartDefaults.yLabels(size = 1.em),
-                                ),
+                            axes =
+                                AxesDefaults.style(yLabels = StackedAreaChartDefaults.yLabels(size = 1.em)),
                         ),
                 )
             }
@@ -227,10 +259,8 @@ class StackedAreaChartTest {
                     data = multiDataSet,
                     style =
                         StackedAreaChartDefaults.style(
-                            axis =
-                                StackedAreaChartDefaults.axis(
-                                    xLabels = StackedAreaChartDefaults.xLabels(visible = false),
-                                ),
+                            axes =
+                                AxesDefaults.style(xLabels = StackedAreaChartDefaults.xLabels(visible = false)),
                         ),
                 )
             }
@@ -248,10 +278,8 @@ class StackedAreaChartTest {
                     data = multiDataSet,
                     style =
                         StackedAreaChartDefaults.style(
-                            axis =
-                                StackedAreaChartDefaults.axis(
-                                    yLabels = StackedAreaChartDefaults.yLabels(visible = false),
-                                ),
+                            axes =
+                                AxesDefaults.style(yLabels = StackedAreaChartDefaults.yLabels(visible = false)),
                         ),
                 )
             }

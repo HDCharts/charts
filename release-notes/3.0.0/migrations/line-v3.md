@@ -73,7 +73,7 @@ from its calls.
 ## Styles and selection
 
 Move customizations to the grouped `LineChartStyle` sections such as `line`,
-`points`, `selection`, and `axis`. Use `selection` instead of
+`points`, `selection`, and `axes`. Use `selection` instead of
 `selectedPointIndex`; it identifies one source X index shared by all series.
 Use `staticChartSelection(index)` for a preset preview or screenshot.
 

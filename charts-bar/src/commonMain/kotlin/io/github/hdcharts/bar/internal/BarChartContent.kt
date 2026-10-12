@@ -69,8 +69,8 @@ internal fun BarChartContent(
     onZoomScaleChange: (Float) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val xLabels = style.axis.xLabels
-    val yLabels = style.axis.yLabels
+    val xLabels = style.axes.xLabels.copy(visible = style.axes.visible && style.axes.xLabels.visible)
+    val yLabels = style.axes.yLabels.copy(visible = style.axes.visible && style.axes.yLabels.visible)
     val dataSize = chartData.barValues.size
     val showXLabels = xLabels.visible && chartData.categories.any { it.isNotBlank() }
     val currentToggleSelection by rememberUpdatedState(onToggleSelection)
@@ -278,12 +278,18 @@ internal fun BarChartContent(
                             // Drawn over the scrolling bars so the Y axis line stays at the plot start.
                             .drawWithContent {
                                 drawContent()
-                                if (style.axis.visible && dataSize > 0 && !visibleRange.isEmpty()) {
+                                if (style.axes.visible &&
+                                    style.axes.lines.visible &&
+                                    dataSize > 0 &&
+                                    !visibleRange.isEmpty()
+                                ) {
                                     drawLine(
-                                        color = style.axis.color,
+                                        color = style.axes.lines.color,
                                         start = Offset(0f, 0f),
                                         end = Offset(0f, size.height),
-                                        strokeWidth = style.axis.lineWidth.toPx(),
+                                        strokeWidth =
+                                            style.axes.lines.lineWidth
+                                                .toPx(),
                                     )
                                 }
                             }.horizontalScroll(state = scrollState, enabled = isScrollable && interactionEnabled),
@@ -306,6 +312,7 @@ internal fun BarChartContent(
                                 barWidthPx = barWidthPx,
                                 spacingPx = effectiveSpacingPx,
                                 selectedCenterX = selectedCenterXContent,
+                                yLabelTicks = yAxisLayout.ticks,
                             )
                         },
                     )

@@ -25,6 +25,7 @@ import io.github.hdcharts.core.model.ChartSelection
 import io.github.hdcharts.core.model.ChartValueFormatter
 import io.github.hdcharts.core.model.rememberChartSelection
 import io.github.hdcharts.core.model.toChartData
+import io.github.hdcharts.core.style.AxesDefaults
 import io.github.hdcharts.core.style.ChartContainerDefaults
 import io.github.hdcharts.core.style.HistogramChartDefaults
 import kotlin.test.Test
@@ -45,9 +46,7 @@ class HistogramChartInteractionTest {
                         title = "Bins",
                         modifier = Modifier.size(300.dp),
                         style =
-                            HistogramChartDefaults.style(
-                                bars = HistogramChartDefaults.bars(minBarWidth = 16_384.dp),
-                            ),
+                            HistogramChartDefaults.style(bars = HistogramChartDefaults.bars(minBarWidth = 16_384.dp)),
                         animateOnStart = false,
                     )
                 }
@@ -214,10 +213,8 @@ class HistogramChartInteractionTest {
                         HistogramChartDefaults.style(
                             chartContainerStyle = ChartContainerDefaults.style(contentPadding = 0.dp),
                             bars = HistogramChartDefaults.bars(minBarWidth = 100.dp),
-                            axis =
-                                HistogramChartDefaults.axis(
-                                    yLabels = HistogramChartDefaults.yLabels(visible = false),
-                                ),
+                            axes =
+                                AxesDefaults.style(yLabels = HistogramChartDefaults.yLabels(visible = false)),
                         ),
                     selection = selection,
                     selectedValueFormatter = ChartValueFormatter { it.toString() },

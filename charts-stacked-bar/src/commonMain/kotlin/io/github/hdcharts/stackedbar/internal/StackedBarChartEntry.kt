@@ -42,8 +42,8 @@ object StackedBarChartSpec : ChartSpec<StackedBarChartStyle> {
             colorCount = style.segments.colors.size,
             rangeMin = null,
             rangeMax = null,
-            xLabels = style.axis.xLabels,
-            yLabels = style.axis.yLabels,
+            xLabels = style.axes.xLabels,
+            yLabels = style.axes.yLabels,
         )
 
     override fun clamp(
@@ -120,7 +120,10 @@ internal fun StackedBarChartEntry(
                     title = effectiveTitle,
                     style = drawStyle,
                     colors = colors,
-                    showXAxisLabels = drawStyle.axis.xLabels.visible && data.categories.any { it.isNotBlank() },
+                    showXAxisLabels =
+                        drawStyle.axes.visible &&
+                            drawStyle.axes.xLabels.visible &&
+                            data.categories.any { it.isNotBlank() },
                     interactionEnabled = interactionEnabled,
                     animateOnStart = animateOnStart,
                     axisValueFormatter = axisValueFormatter,

@@ -58,8 +58,8 @@ top-level `selection` parameter instead.
 ## Styles
 
 Styles are grouped. Migrate customizations to the corresponding blocks on
-`BarChartStyle` or `HistogramChartStyle`, such as `bars`, `range`, `grid`,
-`axis`, and `selection`. Create bar styles with `BarChartDefaults` and
+`BarChartStyle` or `HistogramChartStyle`, such as `bars`, `range`,
+`axes`, and `selection`. Create bar styles with `BarChartDefaults` and
 histogram styles with `HistogramChartDefaults`, rather than the removed flat
 style parameters.
 

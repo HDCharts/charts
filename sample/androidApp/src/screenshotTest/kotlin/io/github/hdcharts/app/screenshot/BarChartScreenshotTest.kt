@@ -9,7 +9,9 @@ import io.github.hdcharts.app.screenshot.shared.ScreenshotPreview
 import io.github.hdcharts.app.screenshot.shared.categoryIndex
 import io.github.hdcharts.bar.BarChart
 import io.github.hdcharts.core.model.staticChartSelection
+import io.github.hdcharts.core.style.AxesDefaults
 import io.github.hdcharts.core.style.BarChartDefaults
+import io.github.hdcharts.core.style.GridDefaults
 import io.github.hdcharts.sampleshared.theme.LocalChartColors
 import io.github.hdcharts.sampleshared.theme.seriesColor
 
@@ -99,9 +101,7 @@ fun BarChartFixedRangePreview() {
             data = data,
             title = data.series.single().name,
             style =
-                BarChartDefaults.style(
-                    range = BarChartDefaults.range(min = FIXED_RANGE_MIN, max = FIXED_RANGE_MAX),
-                ),
+                BarChartDefaults.style(range = BarChartDefaults.range(min = FIXED_RANGE_MIN, max = FIXED_RANGE_MAX)),
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
         )
     }
@@ -116,7 +116,7 @@ fun BarChartHiddenGridPreview() {
         BarChart(
             data = data,
             title = data.series.single().name,
-            style = BarChartDefaults.style(grid = BarChartDefaults.grid(visible = false)),
+            style = BarChartDefaults.style(axes = AxesDefaults.style(grid = GridDefaults.style(visible = false))),
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
         )
     }

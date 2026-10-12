@@ -226,10 +226,8 @@ LineChart(
             bezier = true,
         ),
         points = LinePointStyle(color = Color(0xFF1E88E5), size = 4.dp, visible = true),
-        axis = LineAxisStyle(
-            visible = true,
-            color = Color.Gray,
-            lineWidth = 1.dp,
+        axes = AxesDefaults.style(
+            lines = AxisLinesDefaults.style(color = Color.Gray, lineWidth = 1.dp),
             yLabels = AxisLabelStyle(visible = true, color = Color.Gray, size = 12.sp, maxCount = 5),
             xLabels = AxisLabelStyle(visible = true, color = Color.Gray, size = 12.sp, maxCount = 7),
         ),

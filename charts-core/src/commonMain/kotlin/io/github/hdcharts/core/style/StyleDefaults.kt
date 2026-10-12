@@ -44,11 +44,18 @@ object StyleDefaults {
     val barSpacing: Dp = 10.dp
     val minBarWidth: Dp = 10.dp
     val axisLabelSize: TextUnit = 11.sp
+    val axesVisible: Boolean = true
+    val axisLinesVisible: Boolean = true
+    val axisLabelsVisible: Boolean = true
+
+    /** Maximum numeric Y-axis labels when the label count is unset; short plots show fewer. */
+    val yAxisMaxLabelCount: Int = 5
 
     /** Gap between an axis and its labels. */
     val axisLabelPadding: Dp = 10.dp
     val seriesAlpha: Float = 1f
     val unselectedAlpha: Float = 0.7f
+    val gridVisible: Boolean = true
     val gridSteps: Int = 4
     val containerPadding: Dp = 15.dp
     val titleSize: TextUnit = 20.sp

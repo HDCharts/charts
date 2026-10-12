@@ -10,6 +10,8 @@ import io.github.hdcharts.core.internal.clampAlpha
 import io.github.hdcharts.core.internal.clampSize
 import io.github.hdcharts.core.internal.palette.resolvePaletteColors
 import io.github.hdcharts.core.model.ChartValueFormatter
+import io.github.hdcharts.core.style.AxesDefaults
+import io.github.hdcharts.core.style.AxesStyle
 import io.github.hdcharts.core.style.AxisLabelStyle
 import io.github.hdcharts.core.style.ChartContainerDefaults
 import io.github.hdcharts.core.style.ChartContainerStyle
@@ -136,31 +138,6 @@ data class LineSelectionStyle(
         )
 }
 
-@Immutable
-data class LineAxisStyle(
-    val visible: Boolean,
-    val color: Color,
-    val lineWidth: Dp,
-    val xLabels: AxisLabelStyle,
-    val yLabels: AxisLabelStyle,
-) {
-    /**
-     * Returns this block with [lineWidth] clamped. Names every field instead of using `copy`, so a
-     * field added to the constructor fails to compile here until it is dealt with.
-     *
-     * The label styles pass through: an undrawable label size is a validation error, not something
-     * to clamp.
-     */
-    internal fun clamp(density: Density) =
-        LineAxisStyle(
-            visible = visible,
-            color = color,
-            lineWidth = lineWidth.clampSize(fallback = StyleDefaults.lineWidth, density = density),
-            xLabels = xLabels,
-            yLabels = yLabels,
-        )
-}
-
 /**
  * Optional fixed Y-axis range for line charts.
  *
@@ -184,7 +161,7 @@ class LineChartStyle(
     val line: LineVisualStyle,
     val points: LinePointStyle,
     val selection: LineSelectionStyle,
-    val axis: LineAxisStyle,
+    val axes: AxesStyle,
     val range: LineRangeStyle,
     val legend: LegendStyle,
     val zoomControlsVisible: Boolean,
@@ -198,7 +175,7 @@ object LineChartDefaults {
         line: LineVisualStyle = line(),
         points: LinePointStyle = points(),
         selection: LineSelectionStyle = selection(),
-        axis: LineAxisStyle = axis(),
+        axes: AxesStyle = AxesDefaults.style(),
         range: LineRangeStyle = range(),
         legend: LegendStyle = legend(),
         zoomControlsVisible: Boolean = true,
@@ -207,7 +184,7 @@ object LineChartDefaults {
         line = line,
         points = points,
         selection = selection,
-        axis = axis,
+        axes = axes,
         range = range,
         legend = legend,
         zoomControlsVisible = zoomControlsVisible,
@@ -257,22 +234,6 @@ object LineChartDefaults {
         pointSize = pointSize,
     )
 
-    /** Returns a [LineAxisStyle] for axis lines and labels. */
-    @Composable
-    fun axis(
-        visible: Boolean = true,
-        color: Color = StyleDefaults.axisColor,
-        lineWidth: Dp = StyleDefaults.lineWidth,
-        xLabels: AxisLabelStyle = xLabels(),
-        yLabels: AxisLabelStyle = yLabels(),
-    ) = LineAxisStyle(
-        visible = visible,
-        color = color,
-        lineWidth = lineWidth,
-        xLabels = xLabels,
-        yLabels = yLabels,
-    )
-
     /**
      * Returns a [LineRangeStyle] for the optional fixed Y-axis range.
      */
@@ -284,7 +245,7 @@ object LineChartDefaults {
     /** Returns an [AxisLabelStyle] for X-axis labels. */
     @Composable
     fun xLabels(
-        visible: Boolean = true,
+        visible: Boolean = StyleDefaults.axisLabelsVisible,
         color: Color = StyleDefaults.axisLabelColor,
         size: TextUnit = StyleDefaults.axisLabelSize,
         maxCount: Int? = null,
@@ -293,7 +254,7 @@ object LineChartDefaults {
     /** Returns an [AxisLabelStyle] for Y-axis labels. */
     @Composable
     fun yLabels(
-        visible: Boolean = true,
+        visible: Boolean = StyleDefaults.axisLabelsVisible,
         color: Color = StyleDefaults.axisLabelColor,
         size: TextUnit = StyleDefaults.axisLabelSize,
         maxCount: Int? = null,
@@ -325,7 +286,7 @@ internal fun LineChartStyle.clamp(density: Density) =
         line = line.clamp(density),
         points = points.clamp(density),
         selection = selection.clamp(density),
-        axis = axis.clamp(density),
+        axes = axes.clamp(density),
         range = range,
         legend = legend,
         zoomControlsVisible = zoomControlsVisible,

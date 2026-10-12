@@ -10,6 +10,8 @@ import io.github.hdcharts.core.internal.clampAlpha
 import io.github.hdcharts.core.internal.clampSize
 import io.github.hdcharts.core.internal.palette.resolvePaletteColors
 import io.github.hdcharts.core.model.ChartValueFormatter
+import io.github.hdcharts.core.style.AxesDefaults
+import io.github.hdcharts.core.style.AxesStyle
 import io.github.hdcharts.core.style.AxisLabelStyle
 import io.github.hdcharts.core.style.ChartContainerDefaults
 import io.github.hdcharts.core.style.ChartContainerStyle
@@ -79,12 +81,6 @@ data class StackedAreaFillStyle(
         )
 }
 
-@Immutable
-data class StackedAreaAxisStyle(
-    val xLabels: AxisLabelStyle,
-    val yLabels: AxisLabelStyle,
-)
-
 /**
  * Selection indicator configuration for stacked area charts.
  *
@@ -121,7 +117,7 @@ data class StackedAreaSelectionStyle(
 class StackedAreaChartStyle(
     val chartContainerStyle: ChartContainerStyle,
     val fill: StackedAreaFillStyle,
-    val axis: StackedAreaAxisStyle,
+    val axes: AxesStyle,
     val selection: StackedAreaSelectionStyle,
     val legend: LegendStyle,
     val zoomControlsVisible: Boolean,
@@ -133,14 +129,14 @@ object StackedAreaChartDefaults {
     fun style(
         chartContainerStyle: ChartContainerStyle = ChartContainerDefaults.style(),
         fill: StackedAreaFillStyle = fill(),
-        axis: StackedAreaAxisStyle = axis(),
+        axes: AxesStyle = AxesDefaults.style(),
         selection: StackedAreaSelectionStyle = selection(),
         legend: LegendStyle = legend(),
         zoomControlsVisible: Boolean = true,
     ) = StackedAreaChartStyle(
         chartContainerStyle = chartContainerStyle,
         fill = fill,
-        axis = axis,
+        axes = axes,
         selection = selection,
         legend = legend,
         zoomControlsVisible = zoomControlsVisible,
@@ -162,17 +158,10 @@ object StackedAreaChartDefaults {
         gradient = gradient,
     )
 
-    /** Returns a [StackedAreaAxisStyle] for axis labels. */
-    @Composable
-    fun axis(
-        xLabels: AxisLabelStyle = xLabels(),
-        yLabels: AxisLabelStyle = yLabels(),
-    ): StackedAreaAxisStyle = StackedAreaAxisStyle(xLabels = xLabels, yLabels = yLabels)
-
     /** Returns an [AxisLabelStyle] for X-axis labels. */
     @Composable
     fun xLabels(
-        visible: Boolean = true,
+        visible: Boolean = StyleDefaults.axisLabelsVisible,
         color: Color = StyleDefaults.axisLabelColor,
         size: TextUnit = StyleDefaults.axisLabelSize,
         maxCount: Int? = null,
@@ -181,7 +170,7 @@ object StackedAreaChartDefaults {
     /** Returns an [AxisLabelStyle] for Y-axis labels. */
     @Composable
     fun yLabels(
-        visible: Boolean = true,
+        visible: Boolean = StyleDefaults.axisLabelsVisible,
         color: Color = StyleDefaults.axisLabelColor,
         size: TextUnit = StyleDefaults.axisLabelSize,
         maxCount: Int? = null,
@@ -224,7 +213,7 @@ internal fun StackedAreaChartStyle.clamp(density: Density) =
     StackedAreaChartStyle(
         chartContainerStyle = chartContainerStyle,
         fill = fill.clamp(),
-        axis = axis,
+        axes = axes.clamp(density),
         selection = selection.clamp(density),
         legend = legend,
         zoomControlsVisible = zoomControlsVisible,

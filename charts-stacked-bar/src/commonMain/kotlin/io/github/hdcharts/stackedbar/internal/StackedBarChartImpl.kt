@@ -24,6 +24,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
@@ -53,6 +54,8 @@ import io.github.hdcharts.core.internal.composable.rememberDenseExpandedState
 import io.github.hdcharts.core.internal.composable.rememberZoomScaleState
 import io.github.hdcharts.core.internal.composable.zoomInScale
 import io.github.hdcharts.core.internal.composable.zoomOutScale
+import io.github.hdcharts.core.internal.drawing.drawHorizontalGrid
+import io.github.hdcharts.core.internal.drawing.drawPlotAxisLines
 import io.github.hdcharts.core.internal.drawing.drawSelectionLine
 import io.github.hdcharts.core.internal.drawing.gradientBrush
 import io.github.hdcharts.core.internal.layout.chartCanvasFits
@@ -103,7 +106,7 @@ internal fun StackedBarChartImpl(
             }
         val yAxisLayout =
             rememberNumericYAxisLayout(
-                labels = style.axis.yLabels,
+                labels = style.axes.yLabels.copy(visible = style.axes.visible && style.axes.yLabels.visible),
                 minValue = sourceMinTotal,
                 maxValue = sourceMaxTotal,
                 // The plot height is not known yet. A short plot can show fewer ticks than this estimate.
@@ -308,8 +311,8 @@ private fun StackedBarChartContent(
     onZoomScaleChange: (Float) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val xLabels = style.axis.xLabels
-    val yLabels = style.axis.yLabels
+    val xLabels = style.axes.xLabels.copy(visible = style.axes.visible && style.axes.xLabels.visible)
+    val yLabels = style.axes.yLabels.copy(visible = style.axes.visible && style.axes.yLabels.visible)
     val dataSize = data.series.size
     val labels = remember(data) { data.series.map { item -> item.name.orEmpty() } }
     val currentToggleSelection by rememberUpdatedState(onToggleSelection)
@@ -499,7 +502,16 @@ private fun StackedBarChartContent(
                             .fillMaxSize()
                             .testTag(TestTags.STACKED_BAR_CHART_PLOT)
                             .then(interactionModifier)
-                            .horizontalScroll(state = scrollState, enabled = isScrollable),
+                            // Drawn over the scrolling bars so the axis lines stay put and show over the bars.
+                            .drawWithContent {
+                                drawContent()
+                                if (style.axes.visible && style.axes.lines.visible) {
+                                    drawPlotAxisLines(
+                                        color = style.axes.lines.color,
+                                        lineWidth = style.axes.lines.lineWidth,
+                                    )
+                                }
+                            }.horizontalScroll(state = scrollState, enabled = isScrollable),
                 ) {
                     Canvas(
                         modifier =
@@ -507,6 +519,9 @@ private fun StackedBarChartContent(
                                 .fillMaxHeight()
                                 .requiredWidth(canvasWidth),
                         onDraw = {
+                            if (style.axes.visible) {
+                                drawHorizontalGrid(grid = style.axes.grid, ticks = yAxisLayout.ticks)
+                            }
                             drawStackedBars(
                                 data = data,
                                 style = style,

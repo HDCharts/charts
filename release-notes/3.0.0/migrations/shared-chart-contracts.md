@@ -53,6 +53,29 @@ Callbacks run only when the selected index changes. Use
 `staticChartSelection(index)` for an initial selection in a preview or
 screenshot.
 
+## Axes
+
+Bar, histogram, line, stacked bar, and stacked area use the shared `axes` style block.
+Configure axis strokes with `axes.lines`, horizontal grid lines with `axes.grid`, and labels
+with `axes.xLabels` and `axes.yLabels`.
+
+```kotlin
+LineChartDefaults.style(
+    axes = AxesDefaults.style(
+        lines = AxisLinesDefaults.style(visible = false),
+        grid = GridDefaults.style(color = Color.LightGray),
+    ),
+)
+```
+
+`AxesDefaults.style(visible = false)` hides all axis strokes, grid lines, and labels, and releases
+label space. Use it for sparklines. Hiding only `lines` leaves grid and label visibility independent.
+These charts show a grid by default, including line and stacked charts.
+
+With Y labels visible, the grid follows their ticks: `yLabels.maxCount` controls the maximum count,
+which defaults to five and reduces on short plots. With Y labels hidden, `grid.steps` controls
+intervals; four steps draw five lines. Zero steps always hides the grid.
+
 ## Default colors
 
 Series colors draw at full opacity. `alpha` defaults to `1f` on bar, histogram,

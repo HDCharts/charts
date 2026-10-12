@@ -45,8 +45,7 @@ fun HistogramChart(
                 chartContainerStyle = style.chartContainerStyle,
                 bars = style.bars,
                 range = style.range,
-                grid = style.grid,
-                axis = style.axis,
+                axes = style.axes,
                 selection = style.selection,
                 zoomControlsVisible = style.zoomControlsVisible,
             )

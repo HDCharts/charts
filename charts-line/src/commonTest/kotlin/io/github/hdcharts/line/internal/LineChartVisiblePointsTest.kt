@@ -18,12 +18,14 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import io.github.hdcharts.core.internal.ANIMATION_TARGET
 import io.github.hdcharts.core.internal.bezier.DEFAULT_BEZIER_TENSION
+import io.github.hdcharts.core.style.AxesStyle
 import io.github.hdcharts.core.style.AxisLabelStyle
+import io.github.hdcharts.core.style.AxisLinesStyle
 import io.github.hdcharts.core.style.ChartContainerStyle
 import io.github.hdcharts.core.style.ChartGradient
 import io.github.hdcharts.core.style.ChartGradients
+import io.github.hdcharts.core.style.GridStyle
 import io.github.hdcharts.core.style.LegendStyle
-import io.github.hdcharts.line.LineAxisStyle
 import io.github.hdcharts.line.LineChartStyle
 import io.github.hdcharts.line.LinePointStyle
 import io.github.hdcharts.line.LineRangeStyle
@@ -360,13 +362,13 @@ class LineChartVisiblePointsTest {
                         markerSize = 5.dp,
                         pointSize = 5.dp,
                     ),
-                axis =
-                    LineAxisStyle(
+                axes =
+                    AxesStyle(
                         visible = true,
-                        color = Color.Black,
-                        lineWidth = 1.dp,
+                        lines = AxisLinesStyle(visible = true, color = Color.Black, lineWidth = 1.dp),
                         xLabels = axisLabels(),
                         yLabels = axisLabels(),
+                        grid = GridStyle(visible = false, steps = 0, color = Color.Black, lineWidth = 1.dp),
                     ),
                 range = LineRangeStyle(min = null, max = null),
                 legend = LegendStyle(visible = false),

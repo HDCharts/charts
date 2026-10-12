@@ -40,8 +40,8 @@ object StackedAreaChartSpec : ChartSpec<StackedAreaChartStyle> {
             colorCount = style.fill.colors.size,
             rangeMin = null,
             rangeMax = null,
-            xLabels = style.axis.xLabels,
-            yLabels = style.axis.yLabels,
+            xLabels = style.axes.xLabels,
+            yLabels = style.axes.yLabels,
         )
 
     override fun clamp(
