@@ -58,8 +58,9 @@ permission to post.
    ```
 
    Use `bug` for broken behavior and `feature` for requests.
-6. Show the proposed title, labels, body, story (or "standalone"), and the
-   exact commands in one `question` prompt. Apply the user's edits to the
+6. Show the proposed title, labels, `Priority` and `Effort` issue fields
+   (always set both), body, story (or "standalone"), and the exact commands
+   in one `question` prompt. Apply the user's edits to the
    draft and ask again until they approve.
 7. Create the issue. Reading the title from its file keeps quotes in it
    intact. Pass one `labels[]` field per label, and none when there is no
