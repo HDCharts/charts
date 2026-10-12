@@ -32,6 +32,6 @@ object AxisLabelDefaults {
         visible: Boolean = StyleDefaults.axisLabelsVisible,
         color: Color = StyleDefaults.axisLabelColor,
         size: TextUnit = StyleDefaults.axisLabelSize,
-        maxCount: Int? = null,
+        maxCount: Int? = StyleDefaults.axisLabelMaxCount,
     ): AxisLabelStyle = AxisLabelStyle(visible = visible, color = color, size = size, maxCount = maxCount)
 }

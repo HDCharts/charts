@@ -248,7 +248,7 @@ object LineChartDefaults {
         visible: Boolean = StyleDefaults.axisLabelsVisible,
         color: Color = StyleDefaults.axisLabelColor,
         size: TextUnit = StyleDefaults.axisLabelSize,
-        maxCount: Int? = null,
+        maxCount: Int? = StyleDefaults.axisLabelMaxCount,
     ): AxisLabelStyle = AxisLabelStyle(visible = visible, color = color, size = size, maxCount = maxCount)
 
     /** Returns an [AxisLabelStyle] for Y-axis labels. */
@@ -257,7 +257,7 @@ object LineChartDefaults {
         visible: Boolean = StyleDefaults.axisLabelsVisible,
         color: Color = StyleDefaults.axisLabelColor,
         size: TextUnit = StyleDefaults.axisLabelSize,
-        maxCount: Int? = null,
+        maxCount: Int? = StyleDefaults.axisLabelMaxCount,
     ): AxisLabelStyle = AxisLabelStyle(visible = visible, color = color, size = size, maxCount = maxCount)
 
     /**
