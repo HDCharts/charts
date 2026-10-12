@@ -50,6 +50,7 @@ internal fun BarChartImpl(
     onValueChanged: (Int) -> Unit = {},
     selectedValueFormatter: ChartValueFormatter,
     axisValueFormatter: ChartValueFormatter,
+    subtitle: String?,
 ) {
     // Opaque, because drawBars applies bars.alpha to solid and gradient bars alike.
     val baseBarColor = style.bars.color.copy(alpha = 1f)
@@ -171,7 +172,8 @@ internal fun BarChartImpl(
 
         val showZoomControlsInHeader = interactionEnabled && isScrollable && style.zoomControlsVisible
         val showCompactToggle = interactionEnabled && isDenseData
-        val showHeader = resolvedTitle.isNotBlank() || showCompactToggle || showZoomControlsInHeader
+        val showHeader =
+            resolvedTitle.isNotBlank() || !subtitle.isNullOrBlank() || showCompactToggle || showZoomControlsInHeader
 
         val onToggleSelection: (Int) -> Unit = { index ->
             if (effectiveSelectedIndex == index && effectiveSelectedIndex != NO_SELECTION) {
@@ -186,6 +188,8 @@ internal fun BarChartImpl(
                 ChartHeader(
                     title = resolvedTitle,
                     titleTextStyle = style.chartContainerStyle.styleTitle,
+                    subtitle = subtitle,
+                    subtitleTextStyle = style.chartContainerStyle.styleSubtitle,
                     testTags = HEADER_TEST_TAGS,
                     showDensityToggle = showCompactToggle,
                     denseExpanded = denseExpanded,

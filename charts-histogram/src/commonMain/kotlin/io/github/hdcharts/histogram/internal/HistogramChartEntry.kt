@@ -67,6 +67,7 @@ internal fun HistogramChartEntry(
     animateOnStart: Boolean,
     selectedValueFormatter: ChartValueFormatter,
     axisValueFormatter: ChartValueFormatter,
+    subtitle: String?,
 ) {
     ChartEntry(
         spec = HistogramChartSpec,
@@ -76,6 +77,7 @@ internal fun HistogramChartEntry(
         title = title,
         content = { renderData, drawStyle ->
             BarChartInternalPlot(
+                subtitle = subtitle,
                 data = renderData,
                 style = drawStyle,
                 selection = selection,

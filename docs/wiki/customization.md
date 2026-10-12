@@ -60,7 +60,7 @@ private fun ShowStyledBar() {
 }
 ```
 
-Chart chrome (background, shape, shadow, and outer padding) lives on the caller-supplied `modifier`; sizing is fully modifier-driven. The `chartContainerStyle` block only carries `contentPadding` and the title text style.
+Chart chrome (background, shape, shadow, and outer padding) lives on the caller-supplied `modifier`; sizing is fully modifier-driven. The `chartContainerStyle` block carries `contentPadding` and the title and subtitle text styles.
 
 Here `selectedValueFormatter` adds currency to selected raw values only; Y ticks keep the independent `axisValueFormatter` default. Titles do not generate labels: omitting `categories` hides X labels and leaves only the formatted value in selected readouts.
 
@@ -145,9 +145,39 @@ Card(modifier = Modifier.padding(16.dp)) {
 }
 ```
 
+## Title and Subtitle
+
+Every chart accepts optional `title` and `subtitle` text. The subtitle appears below the title
+with a 4 dp gap and stays visible when selection changes the title. A subtitle also works on its
+own. Null or blank subtitles reserve no space.
+
+```kotlin
+LineChart(
+    data = dataSet,
+    title = "Daily Support Tickets",
+    subtitle = "Resolved tickets per day · October 2026",
+)
+```
+
+Use `ChartContainerDefaults.style(styleTitle = ..., styleSubtitle = ...)` to customize each text
+style. The subtitle defaults to 14 sp text with the theme's `onSurfaceVariant` color.
+
+```kotlin
+val container = ChartContainerDefaults.style()
+LineChart(
+    data = dataSet,
+    subtitle = "Resolved tickets per day",
+    style = LineChartDefaults.style(
+        chartContainerStyle = ChartContainerDefaults.style(
+            styleSubtitle = container.styleSubtitle.copy(fontSize = 16.sp),
+        ),
+    ),
+)
+```
+
 ## Content Spacing
 
-`ChartContainerDefaults.style()` returns a `ChartContainerStyle` with `styleTitle` and `contentPadding`. Set `contentPadding` to change the internal spacing reserved for axes, title, and legend.
+`ChartContainerDefaults.style()` returns a `ChartContainerStyle` with `styleTitle`, `styleSubtitle`, and `contentPadding`. Set `contentPadding` to change the internal spacing reserved for axes, title, and legend.
 
 ```kotlin
 val dataSet = listOf(42.0, 38.0, 45.0, 51.0, 47.0, 54.0, 49.0).toChartData()
@@ -196,8 +226,8 @@ StackedBarChart(
 
 While a point is selected, a chart with several series shows each series' value in its legend item,
 and the title shows the selected category. A chart with one series shows `Category: value` in the
-title instead. Pass `selectedValueFormatter` to format these values. A pie shows the selected slice's share
-in percent next to its category, formatted by its `selectedValueFormatter`, and its legend does not change. A ring gauge is one series, so it
+title instead. Pass `selectedValueFormatter` to format these values. A pie shows `Category: share` in the title,
+with the share in percent formatted by its `selectedValueFormatter`, and its legend does not change. A ring gauge is one series, so it
 shows `Category: value` in the title, and its legend does not change either. A hidden legend hides the values
 too; read `selectedIndex` from a hoisted selection to show them in your own UI.
 

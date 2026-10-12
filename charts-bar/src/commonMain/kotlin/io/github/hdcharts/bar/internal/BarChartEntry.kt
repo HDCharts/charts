@@ -68,6 +68,7 @@ internal fun BarChartEntry(
     animateOnStart: Boolean,
     selectedValueFormatter: ChartValueFormatter,
     axisValueFormatter: ChartValueFormatter,
+    subtitle: String?,
 ) {
     ChartEntry(
         spec = BarChartSpec,
@@ -77,6 +78,7 @@ internal fun BarChartEntry(
         title = title,
         content = { renderData, drawStyle ->
             BarChartInternalPlot(
+                subtitle = subtitle,
                 data = renderData,
                 style = drawStyle,
                 selection = selection,

@@ -92,6 +92,13 @@ object StyleDefaults {
         @Composable @ReadOnlyComposable
         get() = MaterialTheme.colorScheme.onSurface
 
+    val subtitleSize: TextUnit = 14.sp
+    val subtitleWeight: FontWeight = FontWeight.Normal
+    val subtitleSpacing: Dp = 4.dp
+    val subtitleColor: Color
+        @Composable @ReadOnlyComposable
+        get() = MaterialTheme.colorScheme.onSurfaceVariant
+
     // ===========================================================================
     // Formatters
     // ===========================================================================

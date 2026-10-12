@@ -13,6 +13,8 @@ import io.github.hdcharts.stackedbar.internal.StackedBarChartEntry
 /**
  * Displays nonnegative absolute stacks from one aligned series per segment.
  * [selectedValueFormatter] formats the selected values; [axisValueFormatter] formats Y ticks.
+ *
+ * [subtitle] appears below the title and stays visible while a value is selected.
  */
 @Composable
 fun StackedBarChart(
@@ -25,6 +27,7 @@ fun StackedBarChart(
     animateOnStart: Boolean = true,
     selectedValueFormatter: ChartValueFormatter = StackedBarChartDefaults.selectedValueFormatter,
     axisValueFormatter: ChartValueFormatter = StackedBarChartDefaults.axisValueFormatter,
+    subtitle: String? = null,
 ) {
     val pointCount =
         data.series
@@ -38,6 +41,7 @@ fun StackedBarChart(
         itemCount = pointCount,
     )
     StackedBarChartEntry(
+        subtitle = subtitle,
         data = data,
         modifier = modifier,
         style = style,

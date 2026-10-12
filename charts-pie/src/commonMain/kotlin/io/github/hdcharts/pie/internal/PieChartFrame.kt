@@ -1,31 +1,21 @@
 package io.github.hdcharts.pie.internal
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import io.github.hdcharts.core.internal.InternalChartsApi
 import io.github.hdcharts.core.internal.NO_SELECTION
-import io.github.hdcharts.core.internal.TestTags
+import io.github.hdcharts.core.internal.composable.ChartHeading
 import io.github.hdcharts.core.internal.composable.ChartSquarePlotLayout
 import io.github.hdcharts.core.internal.composable.Legend
 import io.github.hdcharts.core.internal.layout.modifierTopTitle
 import io.github.hdcharts.core.internal.selectedCategoryTitle
+import io.github.hdcharts.core.internal.selectedValueTitle
 import io.github.hdcharts.core.model.ChartSelection
 import io.github.hdcharts.core.model.ChartValueFormatter
 import io.github.hdcharts.pie.PieChartStyle
 import kotlinx.collections.immutable.ImmutableList
-
-internal const val SELECTED_TITLE_PERCENTAGE_SIZE_FACTOR = 0.72f
 
 /**
  * The layout shell around a pie: a title that becomes the selected slice's name and share, the
@@ -46,6 +36,7 @@ internal fun PieChartFrame(
     interactionEnabled: Boolean,
     animateOnStart: Boolean,
     onSelectionInteraction: () -> Unit,
+    subtitle: String?,
 ) {
     val shares =
         remember(points) {
@@ -59,46 +50,28 @@ internal fun PieChartFrame(
         modifier = modifier,
         title = {
             // A selected slice is named by its category, falling back to the chart title.
-            val displayedTitle =
+            val categoryTitle =
                 selectedCategoryTitle(
                     categories = labels,
                     selectedIndex = forcedSelectedIndex,
                     title = title,
                 )
-            if (hasSelection) {
-                Row(
-                    modifier =
-                        style.chartContainerStyle.modifierTopTitle
-                            .padding(end = style.chartContainerStyle.contentPadding),
-                    horizontalArrangement =
-                        Arrangement.spacedBy(style.chartContainerStyle.contentPadding),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    // With no category and no title, the share stands alone.
-                    if (displayedTitle.isNotBlank()) {
-                        Text(
-                            modifier = Modifier.testTag(TestTags.CHART_TITLE),
-                            text = displayedTitle,
-                            style = style.chartContainerStyle.styleTitle,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                    }
-                    Text(
-                        text = selectedValueFormatter.format(shares[forcedSelectedIndex]),
-                        style = selectedPercentageStyle(style.chartContainerStyle.styleTitle),
-                        maxLines = 1,
+            val displayedTitle =
+                if (hasSelection) {
+                    selectedValueTitle(
+                        category = categoryTitle,
+                        value = selectedValueFormatter.format(shares[forcedSelectedIndex]),
                     )
+                } else {
+                    categoryTitle
                 }
-            } else if (displayedTitle.isNotBlank()) {
-                Text(
-                    modifier =
-                        style.chartContainerStyle.modifierTopTitle
-                            .testTag(TestTags.CHART_TITLE),
-                    text = displayedTitle,
-                    style = style.chartContainerStyle.styleTitle,
-                )
-            }
+            ChartHeading(
+                title = displayedTitle,
+                titleTextStyle = style.chartContainerStyle.styleTitle,
+                subtitle = subtitle,
+                subtitleTextStyle = style.chartContainerStyle.styleSubtitle,
+                modifier = style.chartContainerStyle.modifierTopTitle,
+            )
         },
         legend = {
             // The legend names the slices.
@@ -128,9 +101,3 @@ internal fun PieChartFrame(
         },
     )
 }
-
-private fun selectedPercentageStyle(base: TextStyle): TextStyle =
-    base.copy(
-        fontSize = base.fontSize * SELECTED_TITLE_PERCENTAGE_SIZE_FACTOR,
-        fontWeight = FontWeight.SemiBold,
-    )

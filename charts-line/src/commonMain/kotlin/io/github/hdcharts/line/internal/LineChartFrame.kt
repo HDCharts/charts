@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.hdcharts.core.internal.composable.Legend
+import io.github.hdcharts.core.internal.layout.FiniteWidthChartSizeModifier
 import io.github.hdcharts.core.internal.model.ChartRenderData
 import io.github.hdcharts.line.LineChartStyle
 import kotlinx.collections.immutable.ImmutableList
@@ -31,7 +32,7 @@ internal fun LineChartFrame(
 ) {
     BoxWithConstraints(modifier = modifier) {
         val boundedHeight = maxHeight != Dp.Infinity
-        Column {
+        Column(modifier = FiniteWidthChartSizeModifier) {
             header()
 
             val plotModifier = if (boundedHeight) Modifier.weight(1f) else Modifier

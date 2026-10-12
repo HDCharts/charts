@@ -13,6 +13,8 @@ import io.github.hdcharts.stackedarea.internal.StackedAreaChartEntry
 /**
  * Displays absolute stacked areas from one or more aligned series sharing common X categories.
  * [selectedValueFormatter] formats the selected values; [axisValueFormatter] formats Y ticks.
+ *
+ * [subtitle] appears below the title and stays visible while a value is selected.
  */
 @Composable
 fun StackedAreaChart(
@@ -25,6 +27,7 @@ fun StackedAreaChart(
     animateOnStart: Boolean = true,
     selectedValueFormatter: ChartValueFormatter = StackedAreaChartDefaults.selectedValueFormatter,
     axisValueFormatter: ChartValueFormatter = StackedAreaChartDefaults.axisValueFormatter,
+    subtitle: String? = null,
 ) {
     val pointCount =
         data.series
@@ -38,6 +41,7 @@ fun StackedAreaChart(
         itemCount = pointCount,
     )
     StackedAreaChartEntry(
+        subtitle = subtitle,
         data = data,
         modifier = modifier,
         style = style,

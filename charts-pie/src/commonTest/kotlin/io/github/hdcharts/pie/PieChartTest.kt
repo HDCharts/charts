@@ -125,8 +125,9 @@ class PieChartTest {
                     down(sliceMiddlePosition)
                     up()
                 }
-                onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(value).assertIsDisplayed()
-                onNodeWithText("${percentages[index]}%").assertIsDisplayed()
+                onNodeWithTag(TestTags.CHART_TITLE)
+                    .assertTextEquals("$value: ${percentages[index]}%")
+                    .assertIsDisplayed()
             }
         }
 
@@ -239,7 +240,7 @@ class PieChartTest {
             }
 
             onNodeWithTag(TestTags.PIE_CHART).assertIsDisplayed()
-            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(TITLE)
+            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("$TITLE: 10.0%")
         }
 
     /** A selected slice with no category and no title still shows its share. */
@@ -254,8 +255,9 @@ class PieChartTest {
                 )
             }
 
-            onNodeWithTag(TestTags.CHART_TITLE).assertDoesNotExist()
-            onNodeWithText("${calculatePercentages(points)[0]}%").assertIsDisplayed()
+            onNodeWithTag(TestTags.CHART_TITLE)
+                .assertIsDisplayed()
+                .assertTextEquals("${calculatePercentages(points)[0]}%")
         }
 
     /** A selected slice with no categories and no title still shows its share. */
@@ -270,8 +272,9 @@ class PieChartTest {
                 )
             }
 
-            onNodeWithTag(TestTags.CHART_TITLE).assertDoesNotExist()
-            onNodeWithText("${calculatePercentages(points)[0]}%").assertIsDisplayed()
+            onNodeWithTag(TestTags.CHART_TITLE)
+                .assertIsDisplayed()
+                .assertTextEquals("${calculatePercentages(points)[0]}%")
         }
 
     @OptIn(ExperimentalTestApi::class)
@@ -300,8 +303,9 @@ class PieChartTest {
                     down(sliceMiddlePosition)
                     up()
                 }
-                onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(value).assertIsDisplayed()
-                onNodeWithText("${percentages[index]}%").assertIsDisplayed()
+                onNodeWithTag(TestTags.CHART_TITLE)
+                    .assertTextEquals("$value: ${percentages[index]}%")
+                    .assertIsDisplayed()
             }
         }
 
@@ -323,8 +327,9 @@ class PieChartTest {
             }
 
             onNodeWithTag(TestTags.PIE_CHART).assertIsDisplayed()
-            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(expectedTitle)
-            onNodeWithText(expectedPercentage).assertIsDisplayed()
+            onNodeWithTag(TestTags.CHART_TITLE)
+                .assertTextEquals("$expectedTitle: $expectedPercentage")
+                .assertIsDisplayed()
         }
 
     /** The selected share goes through the caller's formatter, in percent from 0 to 100. */
@@ -342,8 +347,7 @@ class PieChartTest {
                 )
             }
 
-            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(labels[1])
-            onNodeWithText("share=20.0").assertIsDisplayed()
+            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("${labels[1]}: share=20.0").assertIsDisplayed()
         }
 
     /** The default keeps the share at two decimals with a `%` suffix. */
@@ -371,7 +375,7 @@ class PieChartTest {
                 down(sliceMiddlePosition)
                 up()
             }
-            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(selectedLabel)
+            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("$selectedLabel: 10.0%")
 
             waitUntil(timeoutMillis = PIE_SELECTION_AUTO_DESELECT_TIMEOUT_MS + 2_000L) {
                 runCatching {
@@ -445,12 +449,10 @@ class PieChartTest {
             }
 
             runOnIdle { selection.select(1) }
-            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(labels[1])
-            onNodeWithText("20.0%").assertIsDisplayed()
+            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("${labels[1]}: 20.0%")
 
             runOnIdle { selection.clear() }
             onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(TITLE)
-            onNodeWithText("20.0%").assertDoesNotExist()
         }
 
     @OptIn(ExperimentalTestApi::class)
@@ -471,7 +473,7 @@ class PieChartTest {
             runOnIdle {
                 assertEquals(expected = 1, actual = selection.selectedIndex)
             }
-            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(labels[1])
+            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("${labels[1]}: 20.0%")
         }
 
     @OptIn(ExperimentalTestApi::class)
@@ -484,7 +486,7 @@ class PieChartTest {
                 PieChart(data, title = TITLE, selection = selection)
             }
 
-            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(labels[2])
+            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("${labels[2]}: 30.0%")
             runOnIdle {
                 data = listOf(1.0).toChartData(categories = listOf("Only"))
             }
@@ -523,7 +525,7 @@ class PieChartTest {
                     assertEquals(expected = 0, actual = selection.selectedIndex)
                     assertEquals(expected = listOf<Int?>(0), actual = notifications)
                 }
-                onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(labels[0])
+                onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("${labels[0]}: 10.0%")
             }
 
             tapFirstSlice()
@@ -564,7 +566,7 @@ class PieChartTest {
                 down(firstPosition)
                 up()
             }
-            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(labels[0])
+            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("${labels[0]}: 10.0%")
 
             runOnIdle { selection = newSelection }
             onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(TITLE)
@@ -574,7 +576,7 @@ class PieChartTest {
                 down(secondPosition)
                 up()
             }
-            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals(labels[1])
+            onNodeWithTag(TestTags.CHART_TITLE).assertTextEquals("${labels[1]}: 20.0%")
             runOnIdle {
                 assertEquals(expected = 0, actual = oldSelection.selectedIndex)
                 assertEquals(expected = 1, actual = newSelection.selectedIndex)

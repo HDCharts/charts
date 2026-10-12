@@ -92,6 +92,7 @@ internal fun StackedBarChartImpl(
     axisValueFormatter: ChartValueFormatter,
     selectedBarIndex: Int = NO_SELECTION,
     onValueChanged: (Int) -> Unit = {},
+    subtitle: String?,
 ) {
     val isPreview = LocalInspectionMode.current
     val sourceDataSize = data.series.size
@@ -223,13 +224,16 @@ internal fun StackedBarChartImpl(
 
         val showZoomControlsInHeader = interactionEnabled && isScrollable && style.zoomControlsVisible
         val showCompactToggle = interactionEnabled && isDenseData
-        val showHeader = title.isNotBlank() || showCompactToggle || showZoomControlsInHeader
+        val showHeader =
+            title.isNotBlank() || !subtitle.isNullOrBlank() || showCompactToggle || showZoomControlsInHeader
 
         Column(modifier = Modifier.fillMaxSize()) {
             if (showHeader) {
                 ChartHeader(
                     title = title,
                     titleTextStyle = style.chartContainerStyle.styleTitle,
+                    subtitle = subtitle,
+                    subtitleTextStyle = style.chartContainerStyle.styleSubtitle,
                     testTags = HEADER_TEST_TAGS,
                     showDensityToggle = showCompactToggle,
                     denseExpanded = denseExpanded,

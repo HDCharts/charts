@@ -71,6 +71,7 @@ internal fun PieChartEntry(
     interactionEnabled: Boolean,
     animateOnStart: Boolean,
     onSelectionInteraction: () -> Unit,
+    subtitle: String?,
 ) {
     ChartEntry(
         spec = PieChartSpec,
@@ -85,6 +86,7 @@ internal fun PieChartEntry(
                     resolveSliceColors(style = drawStyle.slices, sliceCount = values.size)
                 }
             PieChartFrame(
+                subtitle = subtitle,
                 modifier = modifier,
                 title = title,
                 selectedValueFormatter = selectedValueFormatter,

@@ -26,6 +26,8 @@ import io.github.hdcharts.histogram.internal.HistogramChartEntry
  * [interactionEnabled] disables all user controls, but programmatic selection still renders.
  * [animateOnStart] controls initial reveal, not subsequent update animations.
  * [selectedValueFormatter] formats selected raw values; [axisValueFormatter] formats Y ticks.
+ *
+ * [subtitle] appears below the title and stays visible while a value is selected.
  */
 @Composable
 fun HistogramChart(
@@ -38,6 +40,7 @@ fun HistogramChart(
     animateOnStart: Boolean = true,
     selectedValueFormatter: ChartValueFormatter = BarChartDefaults.selectedValueFormatter,
     axisValueFormatter: ChartValueFormatter = BarChartDefaults.axisValueFormatter,
+    subtitle: String? = null,
 ) {
     val barStyle =
         remember(style) {
@@ -52,6 +55,7 @@ fun HistogramChart(
         }
     val selectedIndex = rememberBarSelection(data, selection)
     HistogramChartEntry(
+        subtitle = subtitle,
         data = data,
         modifier = modifier,
         style = barStyle,

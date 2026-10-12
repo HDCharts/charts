@@ -10,6 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import io.github.hdcharts.core.internal.InternalChartsApi
+import io.github.hdcharts.core.internal.layout.FiniteWidthChartSizeModifier
 
 /**
  * Lays out a plot of fixed shape between an optional title above it and an optional legend below
@@ -38,7 +39,7 @@ fun ChartPlotLayout(
 ) {
     BoxWithConstraints(modifier = modifier) {
         val boundedHeight = maxHeight != Dp.Infinity
-        Column(modifier = Modifier.widthIn(min = minWidth)) {
+        Column(modifier = Modifier.widthIn(min = minWidth).then(FiniteWidthChartSizeModifier)) {
             title()
 
             val plotModifier =

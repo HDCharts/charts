@@ -18,6 +18,7 @@ internal fun LiveLineChartImpl(
     shiftDuration: Duration,
     animateOnStart: Boolean,
     axisValueFormatter: ChartValueFormatter,
+    subtitle: String?,
 ) {
     val renderMode = remember(shiftDuration) { LineChartRenderMode.Timeline(shiftDuration = shiftDuration) }
     val colors = rememberLineColors(style = style, count = data.series.size)
@@ -27,10 +28,12 @@ internal fun LiveLineChartImpl(
         colors = colors,
         modifier = modifier,
         header = {
-            if (data.title.isNotBlank()) {
+            if (data.title.isNotBlank() || !subtitle.isNullOrBlank()) {
                 ChartHeaderLayout(
                     title = data.title,
                     titleTextStyle = style.chartContainerStyle.styleTitle,
+                    subtitle = subtitle,
+                    subtitleTextStyle = style.chartContainerStyle.styleSubtitle,
                     showControls = false,
                     modifier = lineHeaderModifier(contentPadding = style.chartContainerStyle.contentPadding),
                 )

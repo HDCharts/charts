@@ -16,7 +16,7 @@ class ChartHeaderTestTags(
     val zoomIn: String,
 )
 
-/** Chart title with the optional dense toggle and zoom controls. */
+/** Chart heading with the optional dense toggle and zoom controls. */
 @Composable
 @InternalChartsApi
 fun ChartHeader(
@@ -33,10 +33,14 @@ fun ChartHeader(
     onZoomOut: () -> Unit,
     onZoomIn: () -> Unit,
     modifier: Modifier = Modifier,
+    subtitle: String?,
+    subtitleTextStyle: TextStyle,
 ) {
     ChartHeaderLayout(
         title = title,
         titleTextStyle = titleTextStyle,
+        subtitle = subtitle,
+        subtitleTextStyle = subtitleTextStyle,
         showControls = showDensityToggle || showZoomControls,
         modifier = modifier,
     ) {
