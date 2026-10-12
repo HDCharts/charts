@@ -70,6 +70,7 @@ class StyleDefaultsTest {
                 assertEquals(expected = true, actual = StyleDefaults.axesVisible)
                 assertEquals(expected = true, actual = StyleDefaults.axisLinesVisible)
                 assertEquals(expected = true, actual = StyleDefaults.axisLabelsVisible)
+                assertEquals(expected = null, actual = StyleDefaults.axisLabelMaxCount)
                 assertEquals(expected = 5, actual = StyleDefaults.yAxisMaxLabelCount)
                 assertEquals(expected = 10.dp, actual = StyleDefaults.axisLabelPadding)
                 assertEquals(expected = 1f, actual = StyleDefaults.seriesAlpha)

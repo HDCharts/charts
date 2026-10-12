@@ -123,7 +123,7 @@ removed stacked-area boundary line. At full opacity it cannot be seen.
 | Range | Fitted to the data, minimum `0.0` on histogram | Bar, histogram, line |
 | Gauge range | `0.0..100.0` | Ring gauge |
 | Gauge track and range labels visible | `true` | Ring gauge |
-| Axis label `maxCount` | `null` (X: as many as fit; Y: up to `yAxisMaxLabelCount`) | Bar, histogram, line, stacked bar, stacked area |
+| Axis label `maxCount` (`axisLabelMaxCount`) | `null` (X: as many as fit; Y: up to `yAxisMaxLabelCount`) | Bar, histogram, line, stacked bar, stacked area |
 | Y-axis label maximum (`yAxisMaxLabelCount`) | `5`; short plots show fewer | Bar, histogram, line, stacked bar, stacked area |
 | Curved lines (`bezier`) | `true` on line, `false` on stacked area | Line, stacked area |
 | Points visible | `false`; the selected point is still drawn | Line, radar |

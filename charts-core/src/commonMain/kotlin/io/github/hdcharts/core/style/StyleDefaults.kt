@@ -48,6 +48,9 @@ object StyleDefaults {
     val axisLinesVisible: Boolean = true
     val axisLabelsVisible: Boolean = true
 
+    /** Axis label cap; null lets the chart choose how many labels fit. */
+    val axisLabelMaxCount: Int? = null
+
     /** Maximum numeric Y-axis labels when the label count is unset; short plots show fewer. */
     val yAxisMaxLabelCount: Int = 5
 

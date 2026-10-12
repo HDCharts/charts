@@ -103,7 +103,7 @@ object HistogramChartDefaults {
         visible: Boolean = StyleDefaults.axisLabelsVisible,
         color: Color = StyleDefaults.axisLabelColor,
         size: TextUnit = StyleDefaults.axisLabelSize,
-        maxCount: Int? = null,
+        maxCount: Int? = StyleDefaults.axisLabelMaxCount,
     ): AxisLabelStyle =
         BarChartDefaults.xLabels(
             visible = visible,
@@ -120,7 +120,7 @@ object HistogramChartDefaults {
         visible: Boolean = StyleDefaults.axisLabelsVisible,
         color: Color = StyleDefaults.axisLabelColor,
         size: TextUnit = StyleDefaults.axisLabelSize,
-        maxCount: Int? = null,
+        maxCount: Int? = StyleDefaults.axisLabelMaxCount,
     ): AxisLabelStyle =
         BarChartDefaults.yLabels(
             visible = visible,

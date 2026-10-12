@@ -229,7 +229,7 @@ object BarChartDefaults {
         visible: Boolean = StyleDefaults.axisLabelsVisible,
         color: Color = StyleDefaults.axisLabelColor,
         size: TextUnit = StyleDefaults.axisLabelSize,
-        maxCount: Int? = null,
+        maxCount: Int? = StyleDefaults.axisLabelMaxCount,
     ) = AxisLabelStyle(
         visible = visible,
         color = color,
@@ -245,7 +245,7 @@ object BarChartDefaults {
         visible: Boolean = StyleDefaults.axisLabelsVisible,
         color: Color = StyleDefaults.axisLabelColor,
         size: TextUnit = StyleDefaults.axisLabelSize,
-        maxCount: Int? = null,
+        maxCount: Int? = StyleDefaults.axisLabelMaxCount,
     ) = AxisLabelStyle(
         visible = visible,
         color = color,
