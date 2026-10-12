@@ -25,13 +25,13 @@ selected title and legend values come from `selectedTitle` and `selectedLegendVa
    `selectedIndex` from `rememberChartSelection()` and show them in its own UI.
 4. **A selection names its category in the title.** The title shows the selected category, or the
    caller's title when the category is blank.
-5. **One series puts its value in the title,** as `Category: value`. Pie is the exception; see
-   rule 8.
+5. **One series puts its value in the title,** as `Category: value`. Pie uses the slice's share as
+   the value; see rule 8.
 6. **Several series put their values in the legend,** as `Name - value` on each item. An item with
    a blank name shows only its value. The title then shows only the category.
 7. **Selected values use the chart's `selectedValueFormatter`.** Pie's formats the slice's share,
    in percent from 0 to 100.
-8. **Pie shows the slice's share in the title**, such as `Mobile 42.5%`, next to its category, or
+8. **Pie shows the slice's share in the title**, such as `Mobile: 42.5%`, with its category, or
    the caller's title when the category is blank, or alone when both are blank. Its legend does not
    change.
 
@@ -43,7 +43,7 @@ selected title and legend values come from `selectedTitle` and `selectedLegendVa
 | Live line | Series names | 2+ series, a non-blank name, and `legend.visible` | No selection | No selection |
 | Bar | — | Never | `Category: value`, or the value without a category | — |
 | Histogram | — | Never | Same as bar | — |
-| Pie | Categories | 2+ categories, a non-blank name, and `legend.visible` | Category, or the caller's title when it is blank, then the share in percent | No change |
+| Pie | Categories | 2+ categories, a non-blank name, and `legend.visible` | `Category: share`, falling back to the caller's title for a blank category, or the share alone | No change |
 | Radar | Series names | 2+ series, a non-blank name, and `legend.visible` | Same as line | Several series: `Name - value` |
 | Stacked bar | Segment names | 2+ segments, a non-blank name, and `legend.visible` | Same as line | Several segments: `Name - value` |
 | Stacked area | Series names | 2+ series, a non-blank name, and `legend.visible` | Same as line | Several series: `Name - value` |

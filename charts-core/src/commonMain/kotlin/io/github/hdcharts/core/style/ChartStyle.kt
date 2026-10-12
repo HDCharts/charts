@@ -11,15 +11,22 @@ import androidx.compose.ui.unit.Dp
  *
  * The caller controls the surrounding chrome (background, shadow, shape, and outer padding) and
  * the chart's size through the chart `modifier`. The style supplies the chart-internal content
- * spacing and the title text style.
+ * spacing and the title and subtitle text styles.
  *
  * @property styleTitle The text style applied to chart titles.
  * @property contentPadding The internal spacing used for axes, title, legend, and plot content.
+ * @property styleSubtitle The text style applied to chart subtitles.
  */
 @Immutable
 class ChartContainerStyle(
     val styleTitle: TextStyle,
     val contentPadding: Dp,
+    val styleSubtitle: TextStyle =
+        TextStyle(
+            fontSize = StyleDefaults.subtitleSize,
+            fontWeight = StyleDefaults.subtitleWeight,
+            textAlign = TextAlign.Start,
+        ),
 )
 
 /**
@@ -34,19 +41,30 @@ object ChartContainerDefaults {
      * `Surface`, `Card`, or `Modifier.background()` to add chrome when desired.
      *
      * @param contentPadding The spacing reserved inside the chart for axes and supporting content.
+     * @param styleTitle The text style applied to the title.
+     * @param styleSubtitle The text style applied to the subtitle.
      */
     @Composable
-    fun style(contentPadding: Dp = StyleDefaults.containerPadding): ChartContainerStyle {
-        val titleStyle =
+    fun style(
+        contentPadding: Dp = StyleDefaults.containerPadding,
+        styleTitle: TextStyle =
             TextStyle(
                 fontSize = StyleDefaults.titleSize,
                 color = StyleDefaults.titleColor,
                 textAlign = TextAlign.Start,
                 fontWeight = StyleDefaults.titleWeight,
-            )
-        return ChartContainerStyle(
-            styleTitle = titleStyle,
+            ),
+        styleSubtitle: TextStyle =
+            TextStyle(
+                fontSize = StyleDefaults.subtitleSize,
+                color = StyleDefaults.subtitleColor,
+                textAlign = TextAlign.Start,
+                fontWeight = StyleDefaults.subtitleWeight,
+            ),
+    ): ChartContainerStyle =
+        ChartContainerStyle(
+            styleTitle = styleTitle,
             contentPadding = contentPadding,
+            styleSubtitle = styleSubtitle,
         )
-    }
 }

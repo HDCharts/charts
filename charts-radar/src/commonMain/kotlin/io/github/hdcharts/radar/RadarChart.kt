@@ -16,6 +16,8 @@ import io.github.hdcharts.radar.internal.RadarChartEntry
  *
  * [selection] holds the axis selected by dragging, and a tap clears it. [seriesSelection] holds the
  * series focused by tapping its outline. [selectedValueFormatter] formats the selected values.
+ *
+ * [subtitle] appears below the title and stays visible while a value is selected.
  */
 @OptIn(InternalChartsApi::class)
 @Composable
@@ -29,6 +31,7 @@ fun RadarChart(
     interactionEnabled: Boolean = true,
     animateOnStart: Boolean = true,
     selectedValueFormatter: ChartValueFormatter = RadarChartDefaults.selectedValueFormatter,
+    subtitle: String? = null,
 ) {
     val axisCount =
         data.series
@@ -50,6 +53,7 @@ fun RadarChart(
         itemCount = if (hasMultipleSeries) data.series.size else 0,
     )
     RadarChartEntry(
+        subtitle = subtitle,
         data = data,
         modifier = modifier,
         style = style,

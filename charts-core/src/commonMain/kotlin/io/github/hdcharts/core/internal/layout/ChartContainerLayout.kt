@@ -98,3 +98,23 @@ internal object AdaptiveChartSizeModifier : LayoutModifier {
         }
     }
 }
+
+/**
+ * Applies [AdaptiveChartSizeModifier] only when the caller leaves the width unbounded, so a chart's
+ * header always measures against a finite width. Bounded widths pass through unchanged.
+ */
+@InternalChartsApi
+object FiniteWidthChartSizeModifier : LayoutModifier {
+    override fun MeasureScope.measure(
+        measurable: Measurable,
+        constraints: Constraints,
+    ): MeasureResult {
+        if (!constraints.hasBoundedWidth) {
+            return with(AdaptiveChartSizeModifier) { measure(measurable, constraints) }
+        }
+        val placeable = measurable.measure(constraints)
+        return layout(placeable.width, placeable.height) {
+            placeable.place(0, 0)
+        }
+    }
+}

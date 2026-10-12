@@ -24,6 +24,8 @@ import io.github.hdcharts.core.style.BarChartStyle
  * [interactionEnabled] disables all user controls, but programmatic selection still renders.
  * [animateOnStart] controls initial reveal, not subsequent update animations.
  * [selectedValueFormatter] formats selected raw values; [axisValueFormatter] formats Y ticks.
+ *
+ * [subtitle] appears below the title and stays visible while a value is selected.
  */
 @Composable
 fun BarChart(
@@ -36,9 +38,11 @@ fun BarChart(
     animateOnStart: Boolean = true,
     selectedValueFormatter: ChartValueFormatter = BarChartDefaults.selectedValueFormatter,
     axisValueFormatter: ChartValueFormatter = BarChartDefaults.axisValueFormatter,
+    subtitle: String? = null,
 ) {
     val selectedIndex = rememberBarSelection(data, selection)
     BarChartEntry(
+        subtitle = subtitle,
         data = data,
         modifier = modifier,
         style = style,

@@ -33,6 +33,7 @@ class StyleDefaultsTest {
                             StyleDefaults.axisLabelColor,
                             StyleDefaults.selectionColor,
                             StyleDefaults.titleColor,
+                            StyleDefaults.subtitleColor,
                             StyleDefaults.pieBorderColor,
                             StyleDefaults.gaugeTrackColor,
                         )
@@ -54,6 +55,7 @@ class StyleDefaultsTest {
                             scheme.onSurfaceVariant,
                             scheme.onSurface,
                             scheme.onSurface,
+                            scheme.onSurfaceVariant,
                             scheme.surface,
                             scheme.surfaceVariant,
                         ),
@@ -79,6 +81,9 @@ class StyleDefaultsTest {
                 assertEquals(expected = 15.dp, actual = StyleDefaults.containerPadding)
                 assertEquals(expected = 20.sp, actual = StyleDefaults.titleSize)
                 assertEquals(expected = FontWeight.ExtraBold, actual = StyleDefaults.titleWeight)
+                assertEquals(expected = 14.sp, actual = StyleDefaults.subtitleSize)
+                assertEquals(expected = FontWeight.Normal, actual = StyleDefaults.subtitleWeight)
+                assertEquals(expected = 4.dp, actual = StyleDefaults.subtitleSpacing)
                 assertEquals(expected = 0.dp, actual = StyleDefaults.histogramBarSpacing)
                 assertEquals(expected = 0.0, actual = StyleDefaults.histogramRangeMin)
                 assertEquals(expected = 3.dp, actual = StyleDefaults.lineSelectionMarkerSize)

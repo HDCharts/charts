@@ -67,6 +67,7 @@ internal fun StackedAreaChartEntry(
     selectedValueFormatter: ChartValueFormatter,
     axisValueFormatter: ChartValueFormatter,
     onValueChanged: (Int) -> Unit,
+    subtitle: String?,
 ) {
     ChartEntry(
         spec = StackedAreaChartSpec,
@@ -104,6 +105,7 @@ internal fun StackedAreaChartEntry(
                 modifier = modifier,
             ) {
                 StackedAreaChartImpl(
+                    subtitle = subtitle,
                     data = renderData,
                     title = effectiveTitle,
                     style = drawStyle,

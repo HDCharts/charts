@@ -1,11 +1,9 @@
 package io.github.hdcharts.gauge.internal
 
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Density
 import io.github.hdcharts.core.internal.ChartEntry
 import io.github.hdcharts.core.internal.ChartPolicy
@@ -13,8 +11,8 @@ import io.github.hdcharts.core.internal.ChartSpec
 import io.github.hdcharts.core.internal.ChartValidationInputs
 import io.github.hdcharts.core.internal.InternalChartsApi
 import io.github.hdcharts.core.internal.NO_SELECTION
-import io.github.hdcharts.core.internal.TestTags
 import io.github.hdcharts.core.internal.ValidationErrors
+import io.github.hdcharts.core.internal.composable.ChartHeaderLayout
 import io.github.hdcharts.core.internal.composable.ChartPlotLayout
 import io.github.hdcharts.core.internal.composable.Legend
 import io.github.hdcharts.core.internal.layout.modifierTopTitle
@@ -82,6 +80,7 @@ internal fun RingGaugeChartEntry(
     selection: ChartSelection,
     interactionEnabled: Boolean,
     animateOnStart: Boolean,
+    subtitle: String?,
 ) {
     ChartEntry(
         spec = RingGaugeChartSpec,
@@ -109,13 +108,14 @@ internal fun RingGaugeChartEntry(
                 plotAspectRatio = GAUGE_PLOT_ASPECT_RATIO,
                 modifier = modifier,
                 title = {
-                    if (displayedTitle.isNotBlank()) {
-                        Text(
-                            modifier =
-                                drawStyle.chartContainerStyle.modifierTopTitle
-                                    .testTag(TestTags.CHART_TITLE),
-                            text = displayedTitle,
-                            style = drawStyle.chartContainerStyle.styleTitle,
+                    if (displayedTitle.isNotBlank() || !subtitle.isNullOrBlank()) {
+                        ChartHeaderLayout(
+                            title = displayedTitle,
+                            titleTextStyle = drawStyle.chartContainerStyle.styleTitle,
+                            subtitle = subtitle,
+                            subtitleTextStyle = drawStyle.chartContainerStyle.styleSubtitle,
+                            showControls = false,
+                            modifier = drawStyle.chartContainerStyle.modifierTopTitle,
                         )
                     }
                 },

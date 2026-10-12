@@ -26,6 +26,8 @@ import io.github.hdcharts.line.internal.LineChartImpl
  *
  * [interactionEnabled] disables all user controls and returns dense data to the fit view, but
  * programmatic selection still renders.
+ *
+ * [subtitle] appears below the title and stays visible while a value is selected.
  */
 @OptIn(InternalChartsApi::class)
 @Composable
@@ -39,6 +41,7 @@ fun LineChart(
     animateOnStart: Boolean = true,
     selectedValueFormatter: ChartValueFormatter = LineChartDefaults.selectedValueFormatter,
     axisValueFormatter: ChartValueFormatter = LineChartDefaults.axisValueFormatter,
+    subtitle: String? = null,
 ) {
     val pointCount =
         data.series
@@ -58,6 +61,7 @@ fun LineChart(
         title = title,
     ) { internalData, drawStyle ->
         LineChartImpl(
+            subtitle = subtitle,
             data = internalData,
             modifier = modifier,
             style = drawStyle,

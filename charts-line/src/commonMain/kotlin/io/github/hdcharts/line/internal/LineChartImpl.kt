@@ -42,6 +42,7 @@ internal fun LineChartImpl(
     axisValueFormatter: io.github.hdcharts.core.model.ChartValueFormatter,
     legendLabels: ImmutableList<String>,
     selectedTitle: String? = null,
+    subtitle: String?,
 ) {
     val sourcePointsCount = remember(data) { data.valueCount() }
     val isDenseData =
@@ -92,7 +93,7 @@ internal fun LineChartImpl(
     val lineColors = rememberLineColors(style = style, count = renderData.series.size)
     val showCompactToggle = interactionEnabled && isDenseData
     val showZoomControlsInHeader = interactionEnabled && isDenseMode && style.zoomControlsVisible
-    val showHeader = title.isNotBlank() || showCompactToggle || showZoomControlsInHeader
+    val showHeader = title.isNotBlank() || !subtitle.isNullOrBlank() || showCompactToggle || showZoomControlsInHeader
     LineChartFrame(
         data = renderData,
         style = style,
@@ -104,6 +105,8 @@ internal fun LineChartImpl(
                 ChartHeader(
                     title = title,
                     titleTextStyle = style.chartContainerStyle.styleTitle,
+                    subtitle = subtitle,
+                    subtitleTextStyle = style.chartContainerStyle.styleSubtitle,
                     testTags = HEADER_TEST_TAGS,
                     showDensityToggle = showCompactToggle,
                     denseExpanded = denseExpanded,

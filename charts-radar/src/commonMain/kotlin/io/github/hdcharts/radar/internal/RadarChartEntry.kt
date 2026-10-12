@@ -1,10 +1,8 @@
 package io.github.hdcharts.radar.internal
 
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Density
 import io.github.hdcharts.core.internal.ChartEntry
 import io.github.hdcharts.core.internal.ChartPolicy
@@ -12,8 +10,8 @@ import io.github.hdcharts.core.internal.ChartSpec
 import io.github.hdcharts.core.internal.ChartValidationInputs
 import io.github.hdcharts.core.internal.InternalChartsApi
 import io.github.hdcharts.core.internal.NO_SELECTION
-import io.github.hdcharts.core.internal.TestTags
 import io.github.hdcharts.core.internal.ValidationErrors
+import io.github.hdcharts.core.internal.composable.ChartHeading
 import io.github.hdcharts.core.internal.composable.ChartSquarePlotLayout
 import io.github.hdcharts.core.internal.composable.Legend
 import io.github.hdcharts.core.internal.layout.modifierTopTitle
@@ -80,6 +78,7 @@ internal fun RadarChartEntry(
     interactionEnabled: Boolean,
     animateOnStart: Boolean,
     selectedValueFormatter: ChartValueFormatter,
+    subtitle: String?,
 ) {
     ChartEntry(
         spec = RadarChartSpec,
@@ -105,15 +104,13 @@ internal fun RadarChartEntry(
             ChartSquarePlotLayout(
                 modifier = modifier,
                 title = {
-                    if (effectiveTitle.isNotBlank()) {
-                        Text(
-                            modifier =
-                                drawStyle.chartContainerStyle.modifierTopTitle
-                                    .testTag(TestTags.CHART_TITLE),
-                            text = effectiveTitle,
-                            style = drawStyle.chartContainerStyle.styleTitle,
-                        )
-                    }
+                    ChartHeading(
+                        title = effectiveTitle,
+                        titleTextStyle = drawStyle.chartContainerStyle.styleTitle,
+                        subtitle = subtitle,
+                        subtitleTextStyle = drawStyle.chartContainerStyle.styleSubtitle,
+                        modifier = drawStyle.chartContainerStyle.modifierTopTitle,
+                    )
                 },
                 legend = {
                     // The legend names the series and shows each value while an axis is selected.

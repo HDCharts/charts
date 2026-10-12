@@ -20,6 +20,8 @@ import kotlin.time.Duration.Companion.milliseconds
  *
  * - [shiftDuration] is how long each new point takes to slide into place. Match it to how often
  *   [data] changes so each shift finishes as the next point arrives.
+ *
+ * [subtitle] appears below the title and can also be shown on its own.
  */
 @Composable
 fun LiveLineChart(
@@ -30,6 +32,7 @@ fun LiveLineChart(
     shiftDuration: Duration = 420.milliseconds,
     animateOnStart: Boolean = true,
     axisValueFormatter: ChartValueFormatter = LineChartDefaults.axisValueFormatter,
+    subtitle: String? = null,
 ) {
     LineChartEntry(
         data = data,
@@ -38,6 +41,7 @@ fun LiveLineChart(
         title = title,
     ) { internalData, drawStyle ->
         LiveLineChartImpl(
+            subtitle = subtitle,
             data = internalData,
             modifier = modifier,
             style = drawStyle,

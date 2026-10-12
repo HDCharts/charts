@@ -33,10 +33,12 @@ fun BarChartInternalPlot(
     axisValueFormatter: ChartValueFormatter,
     modifier: Modifier = Modifier,
     chartTag: String? = null,
+    subtitle: String?,
 ) {
     Box(modifier = modifier) {
         Box(modifier = if (chartTag == null) Modifier else Modifier.testTag(chartTag)) {
             BarChartImpl(
+                subtitle = subtitle,
                 chartData = data.data,
                 title = data.title,
                 style = style,

@@ -28,6 +28,7 @@ const val DONUT_MAX_PERCENTAGE = 70f
 object TestTags {
     const val CHART_ERROR = "ChartError"
     const val CHART_TITLE = "ChartTitle"
+    const val CHART_SUBTITLE = "ChartSubtitle"
     const val PIE_CHART = "PieChart"
     const val BAR_CHART = "BarChart"
     const val HISTOGRAM_CHART = "HistogramChart"

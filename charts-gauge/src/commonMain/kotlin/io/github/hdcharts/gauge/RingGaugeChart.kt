@@ -37,6 +37,8 @@ import io.github.hdcharts.gauge.internal.RingGaugeChartEntry
  * @param interactionEnabled When `false`, disables tap-to-select.
  * @param animateOnStart When `false`, renders the chart in its final state without the initial fill
  * animation.
+ *
+ * [subtitle] appears below the title and stays visible while a value is selected.
  */
 @OptIn(InternalChartsApi::class)
 @Composable
@@ -50,6 +52,7 @@ fun RingGaugeChart(
     selection: ChartSelection = rememberChartSelection(),
     interactionEnabled: Boolean = true,
     animateOnStart: Boolean = true,
+    subtitle: String? = null,
 ) {
     val ringCount =
         data.series
@@ -64,6 +67,7 @@ fun RingGaugeChart(
     val selectedIndex = selection.selectedIndex?.takeIf { it in 0 until ringCount } ?: NO_SELECTION
 
     RingGaugeChartEntry(
+        subtitle = subtitle,
         data = data,
         modifier = modifier,
         style = style,

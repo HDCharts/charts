@@ -53,7 +53,8 @@ fun selectedLegendValues(
     }
 
 /** `Category: value`, or the value without a category. */
-private fun selectedValueTitle(
+@InternalChartsApi
+fun selectedValueTitle(
     category: String?,
     value: String,
 ): String = if (category.isNullOrBlank()) value else "$category: $value"

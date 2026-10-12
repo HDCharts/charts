@@ -108,6 +108,7 @@ internal fun StackedAreaChartImpl(
     axisValueFormatter: ChartValueFormatter,
     selectedPointIndex: Int = NO_SELECTION,
     onValueChanged: (Int) -> Unit = {},
+    subtitle: String?,
 ) {
     val isPreview = LocalInspectionMode.current
     var show by rememberShowState(isPreviewMode = isPreview || !animateOnStart)
@@ -209,7 +210,7 @@ internal fun StackedAreaChartImpl(
 
     val showZoomControlsInHeader = interactionEnabled && isScrollable && style.zoomControlsVisible
     val showCompactToggle = interactionEnabled && isDenseData
-    val showHeader = title.isNotBlank() || showCompactToggle || showZoomControlsInHeader
+    val showHeader = title.isNotBlank() || !subtitle.isNullOrBlank() || showCompactToggle || showZoomControlsInHeader
 
     Column(
         modifier =
@@ -220,6 +221,8 @@ internal fun StackedAreaChartImpl(
             ChartHeader(
                 title = title,
                 titleTextStyle = style.chartContainerStyle.styleTitle,
+                subtitle = subtitle,
+                subtitleTextStyle = style.chartContainerStyle.styleSubtitle,
                 testTags = HEADER_TEST_TAGS,
                 showDensityToggle = showCompactToggle,
                 denseExpanded = denseExpanded,

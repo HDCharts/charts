@@ -47,7 +47,7 @@ A palette whose count does not match the slice count is reported as an error rat
 
 ## Selected Share
 
-A selected slice shows its share of the total next to its category, such as `42.5%`.
+A selected slice shows its category and share of the total in the title, such as `Lighting: 42.5%`.
 `selectedValueFormatter` formats that share, given in percent from 0 to 100. This one shows whole
 percents:
 

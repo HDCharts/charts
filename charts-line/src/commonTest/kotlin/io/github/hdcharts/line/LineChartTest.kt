@@ -1,8 +1,11 @@
 package io.github.hdcharts.line
 
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -45,6 +48,26 @@ import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
 class LineChartTest {
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun lineChart_subtitleWithUnboundedWidth_keepsHeadingAndPlotVisible() =
+        runComposeUiTest {
+            setContent {
+                Row(modifier = Modifier.height(240.dp).horizontalScroll(rememberScrollState())) {
+                    LineChart(
+                        data = dataSet,
+                        title = TITLE,
+                        subtitle = "A monthly overview",
+                        animateOnStart = false,
+                    )
+                }
+            }
+
+            onNodeWithTag(TestTags.CHART_TITLE).assertIsDisplayed()
+            onNodeWithTag(TestTags.CHART_SUBTITLE).assertIsDisplayed()
+            onNodeWithTag(TestTags.LINE_CHART_PLOT).assertIsDisplayed()
+        }
+
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun axesVisibilityToggle_removesLabelSpaceAndRestoresLabels() =

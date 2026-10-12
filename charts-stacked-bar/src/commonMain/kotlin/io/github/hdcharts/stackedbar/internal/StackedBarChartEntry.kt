@@ -79,6 +79,7 @@ internal fun StackedBarChartEntry(
     selectedValueFormatter: ChartValueFormatter,
     axisValueFormatter: ChartValueFormatter,
     onValueChanged: (Int) -> Unit,
+    subtitle: String?,
 ) {
     ChartEntry(
         spec = StackedBarChartSpec,
@@ -116,6 +117,7 @@ internal fun StackedBarChartEntry(
                 modifier = modifier,
             ) {
                 StackedBarChartImpl(
+                    subtitle = subtitle,
                     data = renderData,
                     title = effectiveTitle,
                     style = drawStyle,
