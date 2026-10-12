@@ -14,23 +14,23 @@ between charts. The tables below list what it holds.
 
 ## Factories
 
-A chart's `*ChartDefaults` object has one factory per style block, plus `style()`. Users write every
-call against one object:
+Chart-specific blocks live on `*ChartDefaults`. Cartesian axes use shared factories in
+`charts-core`: `AxesDefaults`, `AxisLinesDefaults`, `GridDefaults`, and `AxisLabelDefaults`.
 
 ```kotlin
 BarChartDefaults.style(
-    axis = BarChartDefaults.axis(xLabels = BarChartDefaults.xLabels(maxCount = 4)),
+    axes = AxesDefaults.style(xLabels = AxisLabelDefaults.style(maxCount = 4)),
 )
 ```
 
-- **Nesting stops at three levels:** `style`, then a block, then axis labels. Axis labels are the
-  only third level, and all Cartesian charts share them as `AxisLabelStyle`. Values passed into a
-  block, such as `Color`, `TextStyle` and `ChartGradient`, are not levels.
-- **Every block gets a factory on the chart's own object**, even when the block type is shared.
-  `HistogramChartDefaults` forwards `grid`, `axis`, `xLabels`, `yLabels` and `selection` to
-  `BarChartDefaults`, and its `range` keeps a zero minimum.
-- **Forwarding factories repeat the default parameters**, because Kotlin cannot forward them. Both
-  read the same `StyleDefaults` value, and a test compares the two objects (`BarStyleDefaultsTest`).
+- **Nesting stops at three levels:** `style`, then `axes`, then `lines`, `grid`, `xLabels`, or
+  `yLabels`. Values such as `Color`, `TextStyle`, and `ChartGradient` are not levels.
+- **Shared axes have one owner.** Charts default to `AxesDefaults.style()`. The master `visible`
+  switch gates drawing and label layout; each child keeps its own visibility setting.
+- **Label convenience factories remain available:** `*ChartDefaults.xLabels` and `yLabels`.
+  Histogram also forwards `bars` and `selection` to `BarChartDefaults`; its range keeps a zero minimum.
+- **Defaults come from `StyleDefaults`.** Forwarding factories use the same values as their shared
+  counterparts.
 
 ## Colors
 
@@ -44,8 +44,8 @@ theme in light and dark mode. Do not lower the alpha of a theme color, and do no
 | Points | `tertiary` | Line, radar (with `colorSameAsLine = false`) |
 | Axis labels | `onSurfaceVariant` | Bar, histogram, line, stacked bar, stacked area, radar, ring gauge (range labels) |
 | Title | `onSurface` | All |
-| Grid lines | `outlineVariant` | Bar, histogram, radar (rings and spokes) |
-| Axis lines | `outline` | Bar, histogram, line |
+| Grid lines | `outlineVariant` | Bar, histogram, line, stacked bar, stacked area, radar (rings and spokes) |
+| Axis lines | `outline` | Bar, histogram, line, stacked bar, stacked area |
 | Selection line | `onSurface` | Bar, histogram, line, stacked bar, stacked area |
 | Selection marker | `tertiary` | Line |
 | Slice border | `surface` | Pie |
@@ -60,7 +60,8 @@ Sizes are `Dp`, so they scale with screen density. Point and marker sizes are ra
 
 | Element | Default | Charts |
 | --- | --- | --- |
-| Grid and axis lines | `1.dp` | Bar, histogram, line, radar |
+| Grid lines | `1.dp` | Bar, histogram, line, stacked bar, stacked area, radar |
+| Axis lines | `1.dp` | Bar, histogram, line, stacked bar, stacked area, radar |
 | Selection line | `1.dp` | Bar, histogram, line, stacked bar, stacked area |
 | Slice border | `1.dp` | Pie |
 | Series line | `2.dp` | Line (`strokeWidth`), radar (`lineWidth`) |
@@ -116,11 +117,14 @@ removed stacked-area boundary line. At full opacity it cannot be seen.
 
 | Setting | Default | Charts |
 | --- | --- | --- |
-| Grid steps | `4` | Bar, histogram, radar |
+| Axes, axis lines, and axis labels visible | `true` | Bar, histogram, line, stacked bar, stacked area |
+| Grid visible | `true` | Bar, histogram, line, stacked bar, stacked area, radar |
+| Grid steps | `4` | Bar, histogram, line, stacked bar, stacked area, radar |
 | Range | Fitted to the data, minimum `0.0` on histogram | Bar, histogram, line |
 | Gauge range | `0.0..100.0` | Ring gauge |
 | Gauge track and range labels visible | `true` | Ring gauge |
-| Axis label `maxCount` | `null` (as many as fit) | Bar, histogram, line, stacked bar, stacked area |
+| Axis label `maxCount` | `null` (X: as many as fit; Y: up to `yAxisMaxLabelCount`) | Bar, histogram, line, stacked bar, stacked area |
+| Y-axis label maximum (`yAxisMaxLabelCount`) | `5`; short plots show fewer | Bar, histogram, line, stacked bar, stacked area |
 | Curved lines (`bezier`) | `true` on line, `false` on stacked area | Line, stacked area |
 | Points visible | `false`; the selected point is still drawn | Line, radar |
 | Radar axis labels visible | `true`; the web shrinks to leave room for them | Radar |

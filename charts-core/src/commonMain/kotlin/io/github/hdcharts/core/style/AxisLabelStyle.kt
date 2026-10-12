@@ -1,5 +1,6 @@
 package io.github.hdcharts.core.style
 
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.TextUnit
@@ -23,3 +24,14 @@ data class AxisLabelStyle(
     val size: TextUnit,
     val maxCount: Int?,
 )
+
+/** Shared defaults for X- and Y-axis labels. */
+object AxisLabelDefaults {
+    @Composable
+    fun style(
+        visible: Boolean = StyleDefaults.axisLabelsVisible,
+        color: Color = StyleDefaults.axisLabelColor,
+        size: TextUnit = StyleDefaults.axisLabelSize,
+        maxCount: Int? = null,
+    ): AxisLabelStyle = AxisLabelStyle(visible = visible, color = color, size = size, maxCount = maxCount)
+}

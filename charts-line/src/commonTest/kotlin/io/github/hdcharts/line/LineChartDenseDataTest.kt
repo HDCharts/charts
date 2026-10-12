@@ -25,6 +25,8 @@ import io.github.hdcharts.core.internal.TestTags
 import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.model.ChartSelection
 import io.github.hdcharts.core.model.toChartData
+import io.github.hdcharts.core.style.AxesDefaults
+import io.github.hdcharts.core.style.AxisLinesDefaults
 import io.github.hdcharts.core.style.ChartContainerDefaults
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -231,7 +233,7 @@ class LineChartDenseDataTest {
                                         bezier = false,
                                     ),
                                 points = LineChartDefaults.points(visible = false),
-                                axis = LineChartDefaults.axis(visible = false),
+                                axes = AxesDefaults.style(visible = false),
                             ),
                     )
                 }
@@ -289,10 +291,9 @@ class LineChartDenseDataTest {
                                 chartContainerStyle = ChartContainerDefaults.style(contentPadding = 0.dp),
                                 line = LineChartDefaults.line(color = Color.Blue, alpha = 1f, strokeWidth = 8.dp),
                                 points = LineChartDefaults.points(visible = false),
-                                axis =
-                                    LineChartDefaults.axis(
-                                        color = Color.Red,
-                                        lineWidth = 4.dp,
+                                axes =
+                                    AxesDefaults.style(
+                                        lines = AxisLinesDefaults.style(color = Color.Red, lineWidth = 4.dp),
                                         xLabels = LineChartDefaults.xLabels(visible = false),
                                     ),
                             ),

@@ -37,8 +37,11 @@ import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.model.ChartSelection
 import io.github.hdcharts.core.model.ChartValueFormatter
 import io.github.hdcharts.core.model.toChartData
+import io.github.hdcharts.core.style.AxesDefaults
+import io.github.hdcharts.core.style.AxisLinesDefaults
 import io.github.hdcharts.core.style.BarChartDefaults
 import io.github.hdcharts.core.style.ChartContainerDefaults
+import io.github.hdcharts.core.style.GridDefaults
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlin.test.Test
@@ -230,10 +233,8 @@ class BarChartDenseDataTest {
                     title = DEFAULT_TITLE,
                     style =
                         BarChartDefaults.style(
-                            axis =
-                                BarChartDefaults.axis(
-                                    xLabels = BarChartDefaults.xLabels(visible = false),
-                                ),
+                            axes =
+                                AxesDefaults.style(xLabels = BarChartDefaults.xLabels(visible = false)),
                         ),
                 )
             }
@@ -251,10 +252,8 @@ class BarChartDenseDataTest {
                     title = DEFAULT_TITLE,
                     style =
                         BarChartDefaults.style(
-                            axis =
-                                BarChartDefaults.axis(
-                                    yLabels = BarChartDefaults.yLabels(visible = false),
-                                ),
+                            axes =
+                                AxesDefaults.style(yLabels = BarChartDefaults.yLabels(visible = false)),
                         ),
                 )
             }
@@ -358,7 +357,7 @@ class BarChartDenseDataTest {
                         BarChartDefaults.style(
                             chartContainerStyle = ChartContainerDefaults.style(contentPadding = 0.dp),
                             bars = BarChartDefaults.bars(space = 0.dp, minBarWidth = 100.dp),
-                            axis = BarChartDefaults.axis(yLabels = BarChartDefaults.yLabels(visible = false)),
+                            axes = AxesDefaults.style(yLabels = BarChartDefaults.yLabels(visible = false)),
                         ),
                 )
             }
@@ -420,12 +419,12 @@ class BarChartDenseDataTest {
                                     minBarWidth = 100.dp,
                                 ),
                             range = BarChartDefaults.range(min = 0.0, max = 20.0),
-                            grid = BarChartDefaults.grid(visible = false),
-                            axis =
-                                BarChartDefaults.axis(
+                            axes =
+                                AxesDefaults.style(
                                     visible = false,
                                     xLabels = BarChartDefaults.xLabels(visible = false),
                                     yLabels = BarChartDefaults.yLabels(visible = false),
+                                    grid = GridDefaults.style(visible = false),
                                 ),
                             selection = BarChartDefaults.selection(color = Color.Magenta, width = 4.dp),
                         ),
@@ -557,13 +556,12 @@ class BarChartDenseDataTest {
                                 chartContainerStyle = ChartContainerDefaults.style(contentPadding = 0.dp),
                                 bars = BarChartDefaults.bars(color = Color.Blue, alpha = 1f, space = 0.dp),
                                 range = BarChartDefaults.range(min = 0.0, max = 100.0),
-                                grid = BarChartDefaults.grid(color = Color.Green),
-                                axis =
-                                    BarChartDefaults.axis(
-                                        color = Color.Red,
-                                        lineWidth = 4.dp,
+                                axes =
+                                    AxesDefaults.style(
+                                        lines = AxisLinesDefaults.style(color = Color.Red, lineWidth = 4.dp),
                                         xLabels = BarChartDefaults.xLabels(visible = false),
                                         yLabels = BarChartDefaults.yLabels(visible = false),
+                                        grid = GridDefaults.style(color = Color.Green),
                                     ),
                             ),
                     )

@@ -6,6 +6,8 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import io.github.hdcharts.core.internal.animation.ChartMorphState
+import io.github.hdcharts.core.internal.axis.AxisYLayoutTick
+import io.github.hdcharts.core.internal.drawing.drawHorizontalGrid
 import io.github.hdcharts.core.internal.drawing.drawSelectionLine
 import io.github.hdcharts.core.internal.drawing.gradientBrush
 import io.github.hdcharts.core.style.BarChartStyle
@@ -21,6 +23,7 @@ import kotlin.math.abs
  *   so the bar itself shows through.
  *
  * Selection has no visual effect when [selectedIndex] is outside [visibleRange] (e.g., scrolled out of view).
+ * Grid lines sit on the [yLabelTicks] when Y labels show.
  *
  * A [style.bars.gradient] paints each bar from its resolved color; its plot span is the whole canvas, so
  * the gradient scrolls with the bars.
@@ -37,6 +40,7 @@ internal fun DrawScope.drawBars(
     barWidthPx: Float,
     spacingPx: Float,
     selectedCenterX: Float,
+    yLabelTicks: List<AxisYLayoutTick>,
 ) {
     val barCount = morph.to.firstOrNull()?.size ?: 0
     if (barCount == 0 || visibleRange.isEmpty()) return
@@ -48,26 +52,18 @@ internal fun DrawScope.drawBars(
             heightPx = size.height,
         )
 
-    if (style.grid.visible && style.grid.steps > 0) {
-        val safeSteps = style.grid.steps.coerceAtLeast(1)
-        repeat(safeSteps + 1) { step ->
-            val progress = step / safeSteps.toFloat()
-            val y = size.height * progress
-            drawLine(
-                color = style.grid.color,
-                start = Offset(0f, y),
-                end = Offset(size.width, y),
-                strokeWidth = style.grid.lineWidth.toPx(),
-            )
-        }
+    if (style.axes.visible) {
+        drawHorizontalGrid(grid = style.axes.grid, ticks = yLabelTicks)
     }
 
-    if (style.axis.visible) {
+    if (style.axes.visible && style.axes.lines.visible) {
         drawLine(
-            color = style.axis.color,
+            color = style.axes.lines.color,
             start = Offset(0f, clampedBaselineY),
             end = Offset(size.width, clampedBaselineY),
-            strokeWidth = style.axis.lineWidth.toPx(),
+            strokeWidth =
+                style.axes.lines.lineWidth
+                    .toPx(),
         )
     }
 

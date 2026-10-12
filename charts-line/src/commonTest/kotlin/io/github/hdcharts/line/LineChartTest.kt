@@ -34,6 +34,7 @@ import io.github.hdcharts.core.model.ChartValueFormatter
 import io.github.hdcharts.core.model.chartDataOf
 import io.github.hdcharts.core.model.staticChartSelection
 import io.github.hdcharts.core.model.toChartData
+import io.github.hdcharts.core.style.AxesDefaults
 import io.github.hdcharts.core.style.ChartContainerDefaults
 import io.github.hdcharts.line.LineTestFixtures.TITLE
 import io.github.hdcharts.line.LineTestFixtures.dataSet
@@ -44,6 +45,37 @@ import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
 class LineChartTest {
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun axesVisibilityToggle_removesLabelSpaceAndRestoresLabels() =
+        runComposeUiTest {
+            val axesVisible = mutableStateOf(true)
+            setContent {
+                LineChart(
+                    data = listOf(10.0, 20.0, 30.0).toChartData(categories = listOf("A", "B", "C")),
+                    modifier = Modifier.size(width = 400.dp, height = 300.dp),
+                    style = LineChartDefaults.style(axes = AxesDefaults.style(visible = axesVisible.value)),
+                    animateOnStart = false,
+                )
+            }
+
+            onNodeWithTag(TestTags.LINE_CHART_X_AXIS_LABELS).assertIsDisplayed()
+            onNodeWithTag(TestTags.LINE_CHART_Y_AXIS_LABELS).assertIsDisplayed()
+            val labeledPlot = onNodeWithTag(TestTags.LINE_CHART_PLOT).fetchSemanticsNode().boundsInRoot
+
+            runOnIdle { axesVisible.value = false }
+            onAllNodesWithTag(TestTags.LINE_CHART_X_AXIS_LABELS).assertCountEquals(0)
+            onAllNodesWithTag(TestTags.LINE_CHART_Y_AXIS_LABELS).assertCountEquals(0)
+            val hiddenPlot = onNodeWithTag(TestTags.LINE_CHART_PLOT).fetchSemanticsNode().boundsInRoot
+            assertTrue(hiddenPlot.width > labeledPlot.width)
+            assertTrue(hiddenPlot.height > labeledPlot.height)
+
+            runOnIdle { axesVisible.value = true }
+            onNodeWithTag(TestTags.LINE_CHART_X_AXIS_LABELS).assertIsDisplayed()
+            onNodeWithTag(TestTags.LINE_CHART_Y_AXIS_LABELS).assertIsDisplayed()
+            assertEquals(labeledPlot, onNodeWithTag(TestTags.LINE_CHART_PLOT).fetchSemanticsNode().boundsInRoot)
+        }
+
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun lineChart_longEdgeXAxisLabels_stayInsideChartBounds() =
@@ -135,7 +167,7 @@ class LineChartTest {
                     data = listOf(10.0, 20.0, 30.0).toChartData(),
                     style =
                         LineChartDefaults.style(
-                            axis = LineChartDefaults.axis(xLabels = LineChartDefaults.xLabels(size = 1.em)),
+                            axes = AxesDefaults.style(xLabels = LineChartDefaults.xLabels(size = 1.em)),
                         ),
                     animateOnStart = false,
                 )
@@ -365,7 +397,7 @@ class LineChartTest {
                     data = dataSet,
                     style =
                         LineChartDefaults.style(
-                            axis = LineChartDefaults.axis(xLabels = LineChartDefaults.xLabels(visible = false)),
+                            axes = AxesDefaults.style(xLabels = LineChartDefaults.xLabels(visible = false)),
                         ),
                 )
             }
@@ -383,7 +415,7 @@ class LineChartTest {
                     data = dataSet,
                     style =
                         LineChartDefaults.style(
-                            axis = LineChartDefaults.axis(yLabels = LineChartDefaults.yLabels(visible = false)),
+                            axes = AxesDefaults.style(yLabels = LineChartDefaults.yLabels(visible = false)),
                         ),
                 )
             }

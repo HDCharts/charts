@@ -19,8 +19,7 @@ import androidx.compose.ui.unit.TextUnit
  * bins (zero spacing) and a 10.dp minimum bar width; call sites can override.
  * @property range Optional fixed Y-axis range. Defaults to a zero minimum so a bin
  * count of zero renders at the baseline.
- * @property grid Horizontal grid configuration.
- * @property axis Axis lines and X/Y label configuration.
+ * @property axes Axis lines, grid, X/Y labels, and their shared visibility.
  * @property selection Selection indicator configuration.
  * @property zoomControlsVisible Whether zoom controls appear in the chart header.
  */
@@ -29,8 +28,7 @@ class HistogramChartStyle(
     val chartContainerStyle: ChartContainerStyle,
     val bars: BarBarsStyle,
     val range: BarRangeStyle,
-    val grid: BarGridStyle,
-    val axis: BarAxisStyle,
+    val axes: AxesStyle,
     val selection: BarSelectionStyle,
     val zoomControlsVisible: Boolean,
 )
@@ -48,16 +46,14 @@ object HistogramChartDefaults {
         chartContainerStyle: ChartContainerStyle = ChartContainerDefaults.style(),
         bars: BarBarsStyle = bars(),
         range: BarRangeStyle = range(),
-        grid: BarGridStyle = grid(),
-        axis: BarAxisStyle = axis(),
+        axes: AxesStyle = AxesDefaults.style(),
         selection: BarSelectionStyle = selection(),
         zoomControlsVisible: Boolean = true,
     ) = HistogramChartStyle(
         chartContainerStyle = chartContainerStyle,
         bars = bars,
         range = range,
-        grid = grid,
-        axis = axis,
+        axes = axes,
         selection = selection,
         zoomControlsVisible = zoomControlsVisible,
     )
@@ -100,47 +96,11 @@ object HistogramChartDefaults {
     ): BarRangeStyle = BarChartDefaults.range(min = min, max = max)
 
     /**
-     * Returns a [BarGridStyle] for horizontal grid configuration.
-     */
-    @Composable
-    fun grid(
-        visible: Boolean = true,
-        steps: Int = StyleDefaults.gridSteps,
-        color: Color = StyleDefaults.gridColor,
-        lineWidth: Dp = StyleDefaults.lineWidth,
-    ): BarGridStyle =
-        BarChartDefaults.grid(
-            visible = visible,
-            steps = steps,
-            color = color,
-            lineWidth = lineWidth,
-        )
-
-    /**
-     * Returns a [BarAxisStyle] for axis and label configuration.
-     */
-    @Composable
-    fun axis(
-        visible: Boolean = true,
-        color: Color = StyleDefaults.axisColor,
-        lineWidth: Dp = StyleDefaults.lineWidth,
-        xLabels: AxisLabelStyle = xLabels(),
-        yLabels: AxisLabelStyle = yLabels(),
-    ): BarAxisStyle =
-        BarChartDefaults.axis(
-            visible = visible,
-            color = color,
-            lineWidth = lineWidth,
-            xLabels = xLabels,
-            yLabels = yLabels,
-        )
-
-    /**
      * Returns an [AxisLabelStyle] for X-axis labels.
      */
     @Composable
     fun xLabels(
-        visible: Boolean = true,
+        visible: Boolean = StyleDefaults.axisLabelsVisible,
         color: Color = StyleDefaults.axisLabelColor,
         size: TextUnit = StyleDefaults.axisLabelSize,
         maxCount: Int? = null,
@@ -157,7 +117,7 @@ object HistogramChartDefaults {
      */
     @Composable
     fun yLabels(
-        visible: Boolean = true,
+        visible: Boolean = StyleDefaults.axisLabelsVisible,
         color: Color = StyleDefaults.axisLabelColor,
         size: TextUnit = StyleDefaults.axisLabelSize,
         maxCount: Int? = null,

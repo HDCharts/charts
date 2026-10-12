@@ -17,6 +17,9 @@ import androidx.compose.ui.unit.sp
 import io.github.hdcharts.bar.BarChart
 import io.github.hdcharts.core.model.ChartValueFormatters
 import io.github.hdcharts.core.model.toChartData
+import io.github.hdcharts.core.style.AxesDefaults
+import io.github.hdcharts.core.style.AxisLinesDefaults
+import io.github.hdcharts.core.style.GridDefaults
 import io.github.hdcharts.core.style.BarChartDefaults
 
 @Composable
@@ -32,7 +35,7 @@ private fun ShowStyledBar() {
         space = 14.dp,
         minBarWidth = 10.dp,
     )
-    val grid = BarChartDefaults.grid(steps = 5, color = Color(0xFF94A3B8), lineWidth = 1.dp)
+    val grid = GridDefaults.style(color = Color(0xFF94A3B8), lineWidth = 1.dp)
     val selection = BarChartDefaults.selection(
         color = Color(0xFFEA580C),
         width = 1.dp,
@@ -40,13 +43,18 @@ private fun ShowStyledBar() {
     )
     val xLabels = BarChartDefaults.xLabels(color = Color.Gray, size = 11.sp, maxCount = 6)
     val yLabels = BarChartDefaults.yLabels(color = Color.Gray, size = 11.sp, maxCount = 6)
-    val axis = BarChartDefaults.axis(color = Color.Gray, lineWidth = 1.dp, xLabels = xLabels, yLabels = yLabels)
+    val axes = AxesDefaults.style(
+        lines = AxisLinesDefaults.style(color = Color.Gray, lineWidth = 1.dp),
+        grid = grid,
+        xLabels = xLabels,
+        yLabels = yLabels,
+    )
 
     BarChart(
         data = data,
         modifier = Modifier.background(Color(0xFFF8FAFC), RoundedCornerShape(18.dp)).padding(20.dp),
         title = "Daily Net Cash Flow",
-        style = BarChartDefaults.style(bars = bars, grid = grid, axis = axis, selection = selection),
+        style = BarChartDefaults.style(bars = bars, axes = axes, selection = selection),
         selectedValueFormatter = ChartValueFormatters.prefix("$"),
     )
 }
@@ -58,6 +66,16 @@ Here `selectedValueFormatter` adds currency to selected raw values only; Y ticks
 
 Several charts can paint their shapes with a gradient instead of a solid color, covered in
 [Gradients](/{{version}}/wiki/gradients).
+
+## Axes
+
+Bar, histogram, line, stacked bar, and stacked area charts share `AxesStyle`. Its `lines`, `grid`,
+`xLabels`, and `yLabels` blocks control each element separately. `lines` means the X- and Y-axis
+strokes, including the chart baseline.
+
+Set `axes = AxesDefaults.style(visible = false)` to hide all four elements and reclaim label space.
+This also hides the grid on a sparkline. To keep labels and grid while hiding just the axis strokes,
+use `AxesDefaults.style(lines = AxisLinesDefaults.style(visible = false))`.
 
 ## Axis Labels
 
@@ -74,13 +92,26 @@ Set `maxCount` to cap the number of labels; it must be in 2..1000. Labels never 
 ```kotlin
 val style =
     BarChartDefaults.style(
-        axis =
-            BarChartDefaults.axis(
+        axes =
+            AxesDefaults.style(
                 xLabels = BarChartDefaults.xLabels(maxCount = 4),
                 yLabels = BarChartDefaults.yLabels(maxCount = 6),
             ),
     )
 ```
+
+## Grid Lines
+
+Bar, histogram, line, stacked bar, and stacked area charts draw horizontal grid lines. Configure `axes.grid` with `GridDefaults.style(...)`: `visible`, `steps`, `color`, and `lineWidth`. When Y labels show, the grid draws one line on each label, so it keeps matching them on short plots and with `yLabels(maxCount = ...)`. With Y labels hidden, `steps` sets the number of intervals; the default 4 steps draw 5 evenly spaced lines.
+
+```kotlin
+val style =
+    LineChartDefaults.style(
+        axes = AxesDefaults.style(grid = GridDefaults.style(color = Color.LightGray)),
+    )
+```
+
+Pass `GridDefaults.style(visible = false)` to hide only the grid.
 
 ## Sizing
 

@@ -10,6 +10,8 @@ import io.github.hdcharts.core.internal.clampAlpha
 import io.github.hdcharts.core.internal.clampSize
 import io.github.hdcharts.core.internal.palette.resolvePaletteColors
 import io.github.hdcharts.core.model.ChartValueFormatter
+import io.github.hdcharts.core.style.AxesDefaults
+import io.github.hdcharts.core.style.AxesStyle
 import io.github.hdcharts.core.style.AxisLabelStyle
 import io.github.hdcharts.core.style.ChartContainerDefaults
 import io.github.hdcharts.core.style.ChartContainerStyle
@@ -81,12 +83,6 @@ data class StackedBarLayoutStyle(
         )
 }
 
-@Immutable
-data class StackedBarAxisStyle(
-    val xLabels: AxisLabelStyle,
-    val yLabels: AxisLabelStyle,
-)
-
 /**
  * Selection indicator configuration for stacked bar charts.
  *
@@ -124,7 +120,7 @@ class StackedBarChartStyle(
     val chartContainerStyle: ChartContainerStyle,
     val segments: StackedBarSegmentStyle,
     val layout: StackedBarLayoutStyle,
-    val axis: StackedBarAxisStyle,
+    val axes: AxesStyle,
     val selection: StackedBarSelectionStyle,
     val legend: LegendStyle,
     val zoomControlsVisible: Boolean,
@@ -137,7 +133,7 @@ object StackedBarChartDefaults {
         chartContainerStyle: ChartContainerStyle = ChartContainerDefaults.style(),
         segments: StackedBarSegmentStyle = segments(),
         layout: StackedBarLayoutStyle = layout(),
-        axis: StackedBarAxisStyle = axis(),
+        axes: AxesStyle = AxesDefaults.style(),
         selection: StackedBarSelectionStyle = selection(),
         legend: LegendStyle = legend(),
         zoomControlsVisible: Boolean = true,
@@ -145,7 +141,7 @@ object StackedBarChartDefaults {
         chartContainerStyle = chartContainerStyle,
         segments = segments,
         layout = layout,
-        axis = axis,
+        axes = axes,
         selection = selection,
         legend = legend,
         zoomControlsVisible = zoomControlsVisible,
@@ -173,17 +169,10 @@ object StackedBarChartDefaults {
         minBarWidth: Dp = StyleDefaults.minBarWidth,
     ): StackedBarLayoutStyle = StackedBarLayoutStyle(space = space, minBarWidth = minBarWidth)
 
-    /** Returns a [StackedBarAxisStyle] for axis labels. */
-    @Composable
-    fun axis(
-        xLabels: AxisLabelStyle = xLabels(),
-        yLabels: AxisLabelStyle = yLabels(),
-    ): StackedBarAxisStyle = StackedBarAxisStyle(xLabels = xLabels, yLabels = yLabels)
-
     /** Returns an [AxisLabelStyle] for X-axis labels. */
     @Composable
     fun xLabels(
-        visible: Boolean = true,
+        visible: Boolean = StyleDefaults.axisLabelsVisible,
         color: Color = StyleDefaults.axisLabelColor,
         size: TextUnit = StyleDefaults.axisLabelSize,
         maxCount: Int? = null,
@@ -192,7 +181,7 @@ object StackedBarChartDefaults {
     /** Returns an [AxisLabelStyle] for Y-axis labels. */
     @Composable
     fun yLabels(
-        visible: Boolean = true,
+        visible: Boolean = StyleDefaults.axisLabelsVisible,
         color: Color = StyleDefaults.axisLabelColor,
         size: TextUnit = StyleDefaults.axisLabelSize,
         maxCount: Int? = null,
@@ -236,7 +225,7 @@ internal fun StackedBarChartStyle.clamp(density: Density) =
         chartContainerStyle = chartContainerStyle,
         segments = segments.clamp(),
         layout = layout.clamp(density),
-        axis = axis,
+        axes = axes.clamp(density),
         selection = selection.clamp(density),
         legend = legend,
         zoomControlsVisible = zoomControlsVisible,

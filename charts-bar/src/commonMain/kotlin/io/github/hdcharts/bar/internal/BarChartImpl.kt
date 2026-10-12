@@ -69,7 +69,7 @@ internal fun BarChartImpl(
             }
         val yAxisLayout =
             rememberNumericYAxisLayout(
-                labels = style.axis.yLabels,
+                labels = style.axes.yLabels.copy(visible = style.axes.visible && style.axes.yLabels.visible),
                 minValue = fixedMin,
                 maxValue = fixedMax,
                 // The plot height is not known yet. A short plot can show fewer ticks than this estimate.

@@ -2,15 +2,14 @@ package io.github.hdcharts.core.internal.axis
 
 import io.github.hdcharts.core.internal.InternalChartsApi
 import io.github.hdcharts.core.model.ChartValueFormatter
-
-// Most ticks when the style leaves the label count unset.
-private const val DEFAULT_Y_AXIS_MAX_TICK_COUNT = 5
+import io.github.hdcharts.core.style.StyleDefaults
 
 // Fewest ticks: the two ends of the range.
 private const val MIN_Y_AXIS_TICK_COUNT = 2
 
 /**
- * Y-axis tick count for ticks spread over [spanPx]: at most [maxCount], or five when it is null, and
+ * Y-axis tick count for ticks spread over [spanPx]: at most [maxCount], or
+ * [StyleDefaults.yAxisMaxLabelCount] when it is null, and
  * no more than fit [yAxisLabelMinSpacingPx] apart at [fontSizePx], but always the two ends.
  */
 @InternalChartsApi
@@ -28,7 +27,9 @@ fun yAxisTickCount(
         } else {
             Int.MAX_VALUE
         }
-    return (maxCount ?: DEFAULT_Y_AXIS_MAX_TICK_COUNT).coerceAtMost(fittingCount).coerceAtLeast(MIN_Y_AXIS_TICK_COUNT)
+    return (maxCount ?: StyleDefaults.yAxisMaxLabelCount)
+        .coerceAtMost(fittingCount)
+        .coerceAtLeast(MIN_Y_AXIS_TICK_COUNT)
 }
 
 /**

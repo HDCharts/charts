@@ -5,7 +5,6 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.hdcharts.core.internal.MAX_SIZE_PX
-import io.github.hdcharts.core.style.AxisLabelStyle
 import io.github.hdcharts.core.style.ChartGradients
 import io.github.hdcharts.core.style.StyleDefaults
 import kotlinx.collections.immutable.persistentListOf
@@ -58,22 +57,5 @@ class LineStyleBlocksClampTest {
         assertEquals(expected = StyleDefaults.lineWidth, actual = clamped.width)
         assertEquals(expected = StyleDefaults.lineSelectionMarkerSize, actual = clamped.markerSize)
         assertEquals(expected = with(density) { MAX_SIZE_PX.toDp() }, actual = clamped.pointSize)
-    }
-
-    @Test
-    fun axis_clampsLineWidthAndPassesLabelsThrough() {
-        val labels =
-            AxisLabelStyle(visible = true, color = Color.Black, size = StyleDefaults.axisLabelSize, maxCount = null)
-        val clamped =
-            LineAxisStyle(
-                visible = true,
-                color = Color.Black,
-                lineWidth = (-1f).dp,
-                xLabels = labels,
-                yLabels = labels,
-            ).clamp(density)
-
-        assertEquals(expected = 0.dp, actual = clamped.lineWidth)
-        assertEquals(expected = labels, actual = clamped.yLabels)
     }
 }

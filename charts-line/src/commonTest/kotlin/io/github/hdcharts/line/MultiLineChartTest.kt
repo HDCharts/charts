@@ -198,9 +198,7 @@ class MultiLineChartTest {
             // Act
             setContent {
                 val style =
-                    LineChartDefaults.style(
-                        line = LineChartDefaults.line(colors = colors),
-                    )
+                    LineChartDefaults.style(line = LineChartDefaults.line(colors = colors))
                 LineChart(
                     data = dataSet,
                     title = "Title",

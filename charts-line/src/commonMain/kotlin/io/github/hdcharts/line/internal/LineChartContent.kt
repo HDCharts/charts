@@ -54,6 +54,8 @@ import io.github.hdcharts.core.internal.bezier.DEFAULT_BEZIER_TENSION
 import io.github.hdcharts.core.internal.composable.ChartErrors
 import io.github.hdcharts.core.internal.composable.rememberShowState
 import io.github.hdcharts.core.internal.density.denseStepForViewport
+import io.github.hdcharts.core.internal.drawing.drawHorizontalGrid
+import io.github.hdcharts.core.internal.drawing.drawPlotYAxisLine
 import io.github.hdcharts.core.internal.interaction.buildHorizontalDragGestureModifier
 import io.github.hdcharts.core.internal.interaction.buildTapGestureModifier
 import io.github.hdcharts.core.internal.interaction.horizontalScrollGestures
@@ -101,8 +103,8 @@ internal fun LineChartContent(
     onValueChanged: (Int) -> Unit = {},
     axisValueFormatter: ChartValueFormatter,
 ) {
-    val xLabels = style.axis.xLabels
-    val yLabels = style.axis.yLabels
+    val xLabels = style.axes.xLabels.copy(visible = style.axes.visible && style.axes.xLabels.visible)
+    val yLabels = style.axes.yLabels.copy(visible = style.axes.visible && style.axes.yLabels.visible)
     val isPreview = LocalInspectionMode.current
     var show by rememberShowState(isPreviewMode = isPreview || !animateOnStart)
     val touchX = remember { mutableFloatStateOf(0f) }
@@ -222,7 +224,7 @@ internal fun LineChartContent(
     val showXAxisLabels =
         xLabels.visible &&
             xAxisLabels.isNotEmpty()
-    val showAxisLines = style.axis.visible
+    val showAxisLines = style.axes.visible && style.axes.lines.visible
 
     BoxWithConstraints(
         modifier =
@@ -463,11 +465,9 @@ internal fun LineChartContent(
                             .drawWithContent {
                                 drawContent()
                                 if (show && showAxisLines) {
-                                    drawLine(
-                                        color = style.axis.color,
-                                        start = Offset(0f, 0f),
-                                        end = Offset(0f, size.height),
-                                        strokeWidth = style.axis.lineWidth.toPx(),
+                                    drawPlotYAxisLine(
+                                        color = style.axes.lines.color,
+                                        lineWidth = style.axes.lines.lineWidth,
                                     )
                                 }
                             }.then(
@@ -487,6 +487,14 @@ internal fun LineChartContent(
                         onDraw = {
                             if (!show) return@Canvas
 
+                            if (style.axes.visible) {
+                                drawHorizontalGrid(
+                                    grid = style.axes.grid,
+                                    ticks = yAxisLayout.ticks,
+                                    verticalInsetPx = lineVerticalInsetPx,
+                                )
+                            }
+
                             if (showAxisLines) {
                                 val drawableHeight = (size.height - (lineVerticalInsetPx * 2f)).coerceAtLeast(0f)
                                 val baselineY =
@@ -498,10 +506,12 @@ internal fun LineChartContent(
                                         )
 
                                 drawLine(
-                                    color = style.axis.color,
+                                    color = style.axes.lines.color,
                                     start = Offset(0f, baselineY),
                                     end = Offset(size.width, baselineY),
-                                    strokeWidth = style.axis.lineWidth.toPx(),
+                                    strokeWidth =
+                                        style.axes.lines.lineWidth
+                                            .toPx(),
                                 )
                             }
 

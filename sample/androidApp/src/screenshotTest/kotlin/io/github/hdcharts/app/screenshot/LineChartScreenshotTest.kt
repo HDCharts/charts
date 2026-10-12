@@ -8,6 +8,7 @@ import io.github.hdcharts.app.screenshot.shared.ScreenshotChartSurface
 import io.github.hdcharts.app.screenshot.shared.ScreenshotPreview
 import io.github.hdcharts.app.screenshot.shared.categoryIndex
 import io.github.hdcharts.core.model.staticChartSelection
+import io.github.hdcharts.core.style.AxesDefaults
 import io.github.hdcharts.line.LineChart
 import io.github.hdcharts.line.LineChartDefaults
 
@@ -109,9 +110,7 @@ fun LineChartFixedRangePreview() {
             data = data,
             title = data.series.single().name,
             style =
-                LineChartDefaults.style(
-                    range = LineChartDefaults.range(min = FIXED_RANGE_MIN, max = FIXED_RANGE_MAX),
-                ),
+                LineChartDefaults.style(range = LineChartDefaults.range(min = FIXED_RANGE_MIN, max = FIXED_RANGE_MAX)),
             animateOnStart = SCREENSHOT_ANIMATE_ON_START,
         )
     }
@@ -159,8 +158,8 @@ fun LineChartHiddenAxisPreview() {
             title = data.series.single().name,
             style =
                 LineChartDefaults.style(
-                    axis =
-                        LineChartDefaults.axis(
+                    axes =
+                        AxesDefaults.style(
                             visible = false,
                             xLabels = LineChartDefaults.xLabels(visible = false),
                             yLabels = LineChartDefaults.yLabels(visible = false),

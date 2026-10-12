@@ -40,8 +40,8 @@ object HistogramChartSpec : ChartSpec<BarChartStyle> {
             colorCount = style.bars.colors.size,
             rangeMin = style.range.min,
             rangeMax = style.range.max,
-            xLabels = style.axis.xLabels,
-            yLabels = style.axis.yLabels,
+            xLabels = style.axes.xLabels,
+            yLabels = style.axes.yLabels,
         )
 
     override fun clamp(

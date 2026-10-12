@@ -25,6 +25,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.ClipOp
@@ -61,6 +62,8 @@ import io.github.hdcharts.core.internal.composable.rememberZoomScaleState
 import io.github.hdcharts.core.internal.composable.zoomInScale
 import io.github.hdcharts.core.internal.composable.zoomOutScale
 import io.github.hdcharts.core.internal.density.denseStepForViewport
+import io.github.hdcharts.core.internal.drawing.drawHorizontalGrid
+import io.github.hdcharts.core.internal.drawing.drawPlotAxisLines
 import io.github.hdcharts.core.internal.drawing.drawSelectionLine
 import io.github.hdcharts.core.internal.drawing.gradientBrush
 import io.github.hdcharts.core.internal.interaction.buildHorizontalDragGestureModifier
@@ -289,8 +292,8 @@ private fun StackedAreaChartContent(
     onZoomScaleChange: (Float) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val xLabels = style.axis.xLabels
-    val yLabels = style.axis.yLabels
+    val xLabels = style.axes.xLabels.copy(visible = style.axes.visible && style.axes.xLabels.visible)
+    val yLabels = style.axes.yLabels.copy(visible = style.axes.visible && style.axes.yLabels.visible)
     val xAxisLabels =
         remember(data) {
             data.categories
@@ -525,7 +528,16 @@ private fun StackedAreaChartContent(
                             .fillMaxSize()
                             .padding(end = plotEndPadding)
                             .testTag(TestTags.STACKED_AREA_CHART_PLOT)
-                            .then(
+                            // Drawn over the scrolling areas so the axis lines stay put and show over the fill.
+                            .drawWithContent {
+                                drawContent()
+                                if (style.axes.visible && style.axes.lines.visible) {
+                                    drawPlotAxisLines(
+                                        color = style.axes.lines.color,
+                                        lineWidth = style.axes.lines.lineWidth,
+                                    )
+                                }
+                            }.then(
                                 if (isScrollable) {
                                     // Touch scrolling comes from the gesture area above; a second handler here fights it.
                                     Modifier.horizontalScroll(state = scrollState, enabled = false)
@@ -540,6 +552,9 @@ private fun StackedAreaChartContent(
                                 .fillMaxHeight()
                                 .requiredWidth(plotContentWidth),
                     ) {
+                        if (style.axes.visible) {
+                            drawHorizontalGrid(grid = style.axes.grid, ticks = yAxisLayout.ticks)
+                        }
                         val morphProgress = morph.progress.value
                         val stackedUpperBounds =
                             List(morph.to.size) { seriesIndex ->

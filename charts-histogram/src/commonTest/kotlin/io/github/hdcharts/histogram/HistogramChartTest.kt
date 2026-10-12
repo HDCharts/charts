@@ -13,10 +13,12 @@ import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertHeightIsEqualTo
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.assertWidthIsEqualTo
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.v2.runComposeUiTest
@@ -30,15 +32,49 @@ import io.github.hdcharts.core.model.ChartValueFormatter
 import io.github.hdcharts.core.model.ChartValueFormatters
 import io.github.hdcharts.core.model.staticChartSelection
 import io.github.hdcharts.core.model.toChartData
+import io.github.hdcharts.core.style.AxesDefaults
 import io.github.hdcharts.core.style.BarChartDefaults
 import io.github.hdcharts.core.style.ChartContainerDefaults
+import io.github.hdcharts.core.style.GridDefaults
 import io.github.hdcharts.core.style.HistogramChartDefaults
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class HistogramChartTest {
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun axesVisibilityToggle_removesLabelSpaceAndRestoresLabels() =
+        runComposeUiTest {
+            val axesVisible = mutableStateOf(true)
+            setContent {
+                HistogramChart(
+                    data = listOf(10.0, 20.0, 30.0).toChartData(categories = listOf("A", "B", "C")),
+                    modifier = Modifier.size(width = 400.dp, height = 300.dp),
+                    style = HistogramChartDefaults.style(axes = AxesDefaults.style(visible = axesVisible.value)),
+                    animateOnStart = false,
+                )
+            }
+
+            onNodeWithTag(TestTags.BAR_CHART_X_AXIS_LABELS).assertIsDisplayed()
+            onNodeWithTag(TestTags.BAR_CHART_Y_AXIS_LABELS).assertIsDisplayed()
+            val labeledPlot = onNodeWithTag(TestTags.BAR_CHART_PLOT).fetchSemanticsNode().boundsInRoot
+
+            runOnIdle { axesVisible.value = false }
+            onAllNodesWithTag(TestTags.BAR_CHART_X_AXIS_LABELS).assertCountEquals(0)
+            onAllNodesWithTag(TestTags.BAR_CHART_Y_AXIS_LABELS).assertCountEquals(0)
+            val hiddenPlot = onNodeWithTag(TestTags.BAR_CHART_PLOT).fetchSemanticsNode().boundsInRoot
+            assertTrue(hiddenPlot.width > labeledPlot.width)
+            assertTrue(hiddenPlot.height > labeledPlot.height)
+
+            runOnIdle { axesVisible.value = true }
+            onNodeWithTag(TestTags.BAR_CHART_X_AXIS_LABELS).assertIsDisplayed()
+            onNodeWithTag(TestTags.BAR_CHART_Y_AXIS_LABELS).assertIsDisplayed()
+            assertEquals(labeledPlot, onNodeWithTag(TestTags.BAR_CHART_PLOT).fetchSemanticsNode().boundsInRoot)
+        }
+
     private val data: ChartData =
         listOf(3.0, 7.0, 10.0, 6.0)
             .toChartData(
@@ -318,11 +354,11 @@ class HistogramChartTest {
                             chartContainerStyle = ChartContainerDefaults.style(contentPadding = 0.dp),
                             bars = HistogramChartDefaults.bars(colors = colors, alpha = 1f, minBarWidth = 100.dp),
                             range = HistogramChartDefaults.range(min = 0.0, max = 1.0),
-                            grid = HistogramChartDefaults.grid(visible = false),
-                            axis =
-                                HistogramChartDefaults.axis(
+                            axes =
+                                AxesDefaults.style(
                                     visible = false,
                                     yLabels = HistogramChartDefaults.yLabels(visible = false),
+                                    grid = GridDefaults.style(visible = false),
                                 ),
                         ),
                 )

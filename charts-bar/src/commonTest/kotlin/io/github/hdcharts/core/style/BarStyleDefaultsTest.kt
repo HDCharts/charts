@@ -132,8 +132,8 @@ class BarStyleDefaultsTest {
                 assertEquals(expected = histogramBars, actual = histogramStyle.bars)
                 assertEquals(expected = StyleDefaults.histogramRangeMin, actual = histogramStyle.range.min)
                 assertNull(histogramStyle.range.max)
-                assertEquals(expected = barStyle.grid, actual = histogramStyle.grid)
-                assertEquals(expected = barStyle.axis, actual = histogramStyle.axis)
+                assertEquals(expected = barStyle.axes.grid, actual = histogramStyle.axes.grid)
+                assertEquals(expected = barStyle.axes, actual = histogramStyle.axes)
                 assertEquals(expected = barStyle.selection, actual = histogramStyle.selection)
                 assertEquals(expected = selectionColor, actual = barStyle.selection.color)
                 assertEquals(expected = StyleDefaults.unselectedAlpha, actual = barStyle.selection.unselectedAlpha)
@@ -149,9 +149,7 @@ class BarStyleDefaultsTest {
             setContent {
                 MaterialTheme {
                     val style =
-                        HistogramChartDefaults.style(
-                            bars = HistogramChartDefaults.bars(color = Color.Magenta),
-                        )
+                        HistogramChartDefaults.style(bars = HistogramChartDefaults.bars(color = Color.Magenta))
                     SideEffect { histogramStyle = style }
                 }
             }
@@ -191,8 +189,11 @@ class BarStyleDefaultsTest {
                         val custom =
                             BarChartDefaults.style(
                                 range = BarChartDefaults.range(min = min, max = max),
-                                grid = BarChartDefaults.grid(lineWidth = 2.dp),
-                                axis = BarChartDefaults.axis(lineWidth = 2.dp),
+                                axes =
+                                    AxesDefaults.style(
+                                        lines = AxisLinesDefaults.style(lineWidth = 2.dp),
+                                        grid = GridDefaults.style(lineWidth = 2.dp),
+                                    ),
                                 selection = BarChartDefaults.selection(width = 2.dp),
                             )
                         SideEffect {
@@ -204,11 +205,11 @@ class BarStyleDefaultsTest {
             }
 
             runOnIdle {
-                assertEquals(expected = 1.dp, actual = defaultStyle.grid.lineWidth)
-                assertEquals(expected = 1.dp, actual = defaultStyle.axis.lineWidth)
+                assertEquals(expected = 1.dp, actual = defaultStyle.axes.grid.lineWidth)
+                assertEquals(expected = 1.dp, actual = defaultStyle.axes.lines.lineWidth)
                 assertEquals(expected = 1.dp, actual = defaultStyle.selection.width)
-                assertEquals(expected = 2.dp, actual = customStyle.grid.lineWidth)
-                assertEquals(expected = 2.dp, actual = customStyle.axis.lineWidth)
+                assertEquals(expected = 2.dp, actual = customStyle.axes.grid.lineWidth)
+                assertEquals(expected = 2.dp, actual = customStyle.axes.lines.lineWidth)
                 assertEquals(expected = 2.dp, actual = customStyle.selection.width)
                 assertEquals(expected = min, actual = customStyle.range.min)
                 assertEquals(expected = max, actual = customStyle.range.max)
@@ -258,19 +259,17 @@ class BarStyleDefaultsTest {
                     listOf(
                         BarChartDefaults.style(range = BarChartDefaults.range(max = Double.POSITIVE_INFINITY)),
                         BarChartDefaults.style(
-                            axis =
-                                BarChartDefaults.axis(
-                                    yLabels = BarChartDefaults.yLabels(size = TextUnit.Unspecified),
-                                ),
+                            axes =
+                                AxesDefaults.style(yLabels = BarChartDefaults.yLabels(size = TextUnit.Unspecified)),
                         ),
                         BarChartDefaults.style(
-                            axis = BarChartDefaults.axis(xLabels = BarChartDefaults.xLabels(maxCount = 0)),
+                            axes = AxesDefaults.style(xLabels = BarChartDefaults.xLabels(maxCount = 0)),
                         ),
                     )
                 val validation =
                     styles.map {
                         validateRange(min = it.range.min, max = it.range.max) +
-                            validateAxisLabels(it.axis.xLabels, it.axis.yLabels, Density(2f))
+                            validateAxisLabels(it.axes.xLabels, it.axes.yLabels, Density(2f))
                     }
                 SideEffect { errors = validation }
             }
@@ -288,8 +287,11 @@ class BarStyleDefaultsTest {
                 val invalidStyle =
                     BarChartDefaults.style(
                         bars = BarChartDefaults.bars(space = Dp.Infinity, minBarWidth = (-1).dp, alpha = Float.NaN),
-                        grid = BarChartDefaults.grid(lineWidth = Dp.Unspecified, steps = Int.MAX_VALUE),
                         selection = BarChartDefaults.selection(unselectedAlpha = 1.5f),
+                        axes =
+                            AxesDefaults.style(
+                                grid = GridDefaults.style(lineWidth = Dp.Unspecified, steps = Int.MAX_VALUE),
+                            ),
                     )
                 SideEffect { style = invalidStyle }
             }
@@ -300,8 +302,8 @@ class BarStyleDefaultsTest {
                 assertEquals(expected = with(density) { MAX_SIZE_PX.toDp() }, actual = clamped.bars.space)
                 assertEquals(expected = 0.dp, actual = clamped.bars.minBarWidth)
                 assertEquals(expected = 1f, actual = clamped.bars.alpha)
-                assertEquals(expected = StyleDefaults.lineWidth, actual = clamped.grid.lineWidth)
-                assertEquals(expected = MAX_GRID_STEPS, actual = clamped.grid.steps)
+                assertEquals(expected = StyleDefaults.lineWidth, actual = clamped.axes.grid.lineWidth)
+                assertEquals(expected = MAX_GRID_STEPS, actual = clamped.axes.grid.steps)
                 assertEquals(expected = 1f, actual = clamped.selection.unselectedAlpha)
             }
         }

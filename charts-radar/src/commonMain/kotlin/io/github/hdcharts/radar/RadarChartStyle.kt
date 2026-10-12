@@ -207,7 +207,7 @@ object RadarChartDefaults {
     /** Returns a [RadarGridStyle] for the grid rings. */
     @Composable
     fun grid(
-        visible: Boolean = true,
+        visible: Boolean = StyleDefaults.gridVisible,
         color: Color = StyleDefaults.gridColor,
         lineWidth: Dp = StyleDefaults.lineWidth,
         steps: Int = StyleDefaults.gridSteps,
