@@ -52,6 +52,16 @@
 <body>
 <div id="startup-loader" role="progressbar" aria-label="Loading HDCharts"></div>
 <div id="HDCharts"></div>
-<script type="module" src="HDCharts.js"></script>
+<script type="module">
+    // Compose's per-load reset of this cache loses a race in WebKit, so stale resources from an older deploy get read.
+    try {
+        await window.caches?.delete("compose_web_resources_cache");
+    } catch (e) {}
+    // Appended as a <script src> tag because webpack derives its publicPath from the last script tag.
+    const app = document.createElement("script");
+    app.type = "module";
+    app.src = "HDCharts.js";
+    document.body.append(app);
+</script>
 </body>
 </html>
