@@ -14,10 +14,12 @@ release-notes/<version>/
   describes one user outcome. Only put text in `release_note` when it belongs
   in the public "What's New" section. Internal release automation, CI,
   refactors, and maintenance-only changes should omit a release note.
-- `migrations/` contains one concise migration document for each coherent
-  breaking API topic. Merge related changes into the topic's canonical file;
-  do not create separate fragments for expected cleanup within the same API
-  transition.
+- `migrations/` contains the canonical migration guidance for the release.
+  Prefer one `<topic>-agent-prompt.md` document when the release has a broad
+  API transition: make it a complete, copyable prompt that tells a coding agent
+  how to inspect, migrate, and validate the consumer project. Use separate
+  topic files only when a focused migration cannot fit that prompt. Do not
+  duplicate the same instructions across prompt and topic files.
 
 The target release is the current Axion-resolved snapshot version (the
 `currentVersion` value without the `-SNAPSHOT` suffix). When the target directory

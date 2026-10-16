@@ -154,10 +154,6 @@ Card {
 }
 ```
 
-<p align="center">
-  <img src="docs/content/snapshot/wiki/assets/line_default.gif" alt="Basic line chart example" width="400" />
-</p>
-
 ## v3 API
 
 ### Sizing

@@ -2,4 +2,4 @@
 
 - type: `feat`
 - module: `charts-line`
-- release_note: `A dedicated live line chart slides each new point into view.`
+- release_note: `Live line charts slide points into view and rescale their window.`
