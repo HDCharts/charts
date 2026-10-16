@@ -73,12 +73,14 @@ kotlin {
 
             implementation(chartsDependencies.module(project(":charts"), "charts"))
             implementation(project(":sample-shared"))
+            implementation(project(":sample-api"))
             implementation(libs.androidx.lifecycle.runtime.compose)
             implementation(libs.androidx.navigation.compose)
             implementation(libs.androidx.lifecycle.viewmodel.compose)
             implementation(libs.koin.core)
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.kotlinx.collections.immutable)
+            implementation(libs.kotlinx.datetime)
         }
 
         commonTest.dependencies {

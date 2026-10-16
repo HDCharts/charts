@@ -3,6 +3,7 @@ package io.github.hdcharts.app.di
 import io.github.hdcharts.app.ChartGalleryViewModel
 import io.github.hdcharts.app.MainViewModel
 import io.github.hdcharts.app.demo.bar.BarChartViewModel
+import io.github.hdcharts.app.demo.earthquake.EarthquakeDashboardViewModel
 import io.github.hdcharts.app.demo.gauge.RingGaugeChartViewModel
 import io.github.hdcharts.app.demo.histogram.HistogramChartViewModel
 import io.github.hdcharts.app.demo.line.LineChartViewModel
@@ -14,6 +15,7 @@ import io.github.hdcharts.app.demo.pie.PieChartViewModel
 import io.github.hdcharts.app.demo.radar.RadarChartViewModel
 import io.github.hdcharts.app.demo.stackedarea.StackedAreaChartViewModel
 import io.github.hdcharts.app.demo.stackedbar.StackedBarChartViewModel
+import io.github.hdcharts.sampleapi.sampleApiModule
 import io.github.hdcharts.sampleshared.data.BarSampleUseCase
 import io.github.hdcharts.sampleshared.data.ChartPreviewUseCase
 import io.github.hdcharts.sampleshared.data.HistogramSampleUseCase
@@ -37,6 +39,7 @@ import org.koin.dsl.module
 
 val appModule =
     module {
+        includes(sampleApiModule)
         single<ChartPreviewUseCase> { chartPreviewUseCase() }
         single<LiveLatencyTimelineUseCase> { liveLatencyTimelineUseCase() }
         single<PieSampleUseCase> { pieSampleUseCase() }
@@ -60,4 +63,5 @@ val appModule =
         viewModel { StackedAreaChartViewModel(get()) }
         viewModel { RadarChartViewModel(get()) }
         viewModel { RingGaugeChartViewModel(get()) }
+        viewModel { EarthquakeDashboardViewModel(get(), get()) }
     }

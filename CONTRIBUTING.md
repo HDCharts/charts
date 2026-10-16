@@ -28,6 +28,8 @@ HDCharts
 │   └── sample
 │       ├── shared demo resources
 │       │   └── :sample-shared
+│       ├── real API clients
+│       │   └── :sample-api
 │       └── apps
 │           ├── :app (common)
 │           ├── :androidApp
@@ -49,6 +51,7 @@ See why things are built the way they are: https://charts.hdcode.dev/dev/decisio
 | `:charts-*` | Kotlin Multiplatform, Compose Multiplatform (Android/iOS/JVM/JS) |
 | `:charts-bom` | Gradle Java Platform (BOM), Maven Publishing |
 | `:app` | Kotlin Multiplatform, Compose Multiplatform (Android/iOS/JVM/JS) |
+| `:sample-api` | Kotlin Multiplatform, Ktor, kotlinx.serialization, Koin |
 | `:androidApp` | Kotlin, Android, Jetpack Compose |
 | `:iosApp` | Swift, SwiftUI, Xcode |
 | `charts-playground` | Kotlin Multiplatform (JVM/JS), Compose Multiplatform, Ktor |

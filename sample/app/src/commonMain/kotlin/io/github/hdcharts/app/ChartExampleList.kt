@@ -46,23 +46,36 @@ fun ChartExampleList(
             verticalArrangement = Arrangement.spacedBy(Dimens.sm),
         ) {
             items(examples, key = { it.id }) { example ->
-                ElevatedCard(
+                ChartExampleRow(
+                    example = example,
                     onClick = { onExampleSelected(example) },
-                    shape = ExampleRowShape,
-                ) {
-                    ListItem(
-                        headlineContent = { Text(stringResource(example.title)) },
-                        supportingContent = { Text(stringResource(example.summary)) },
-                        trailingContent = {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                                contentDescription = null,
-                            )
-                        },
-                        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                    )
-                }
+                )
             }
         }
+    }
+}
+
+@Composable
+internal fun ChartExampleRow(
+    example: ChartExample,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    ElevatedCard(
+        onClick = onClick,
+        modifier = modifier,
+        shape = ExampleRowShape,
+    ) {
+        ListItem(
+            headlineContent = { Text(stringResource(example.title)) },
+            supportingContent = { Text(stringResource(example.summary)) },
+            trailingContent = {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = null,
+                )
+            },
+            colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+        )
     }
 }

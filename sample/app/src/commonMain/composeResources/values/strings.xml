@@ -79,6 +79,41 @@
     <string name="example_stacked_gradients_summary">Each series color fades from top to bottom.</string>
     <string name="example_line_gradients_summary">Color the line by value or along time, or fade older points.</string>
 
+    <!-- Live API demos -->
+    <string name="live_api_section_title">Real data from public APIs</string>
+    <string name="live_api_section_subtitle">These demos fetch real data over the network.</string>
+    <string name="example_earthquakes_title">Earthquake dashboard</string>
+    <string name="example_earthquakes_summary">Live earthquakes from EMSC, grouped by continent.</string>
+    <string name="earthquakes_status_connecting">Connecting to the EMSC live feed…</string>
+    <string name="earthquakes_status_live">Live from EMSC</string>
+    <string name="earthquakes_status_reconnecting">Connection lost · reconnecting…</string>
+    <string name="earthquakes_latest">Latest: M%1$s · %2$s · %3$s UTC</string>
+    <string name="earthquakes_section_seismographs">Right now · live seismographs, about 1 min behind real time</string>
+    <string name="earthquakes_seismograph_station">%1$s · station %2$s.%3$s · ground velocity, nm/s</string>
+    <string name="earthquakes_seismograph_unavailable">Unavailable</string>
+    <string name="earthquakes_seismograph_last_recorded">Last recorded %1$s UTC</string>
+    <string name="earthquakes_seismograph_waiting">Waiting for station data</string>
+    <string name="earthquakes_level_quiet">Quieter than usual</string>
+    <string name="earthquakes_level_normal">Normal</string>
+    <string name="earthquakes_level_elevated">Elevated</string>
+    <string name="earthquakes_level_strong">Strong shaking</string>
+    <string name="earthquakes_arrival_upcoming">Waves in ≈ %4$s · M%1$s %2$s · %3$d km</string>
+    <string name="earthquakes_arrival_none">No waves expected from the last hour's quakes</string>
+    <string name="earthquakes_arrival_past">Waves arrived ≈ %4$s UTC · M%1$s %2$s · %3$d km</string>
+    <string name="earthquakes_section_last_day">Last 24 hours · magnitude of each quake</string>
+    <string name="earthquakes_section_last_month">Last 30 days</string>
+    <string name="earthquakes_daily_counts_title">Earthquakes per day</string>
+    <string name="earthquakes_daily_counts_subtitle">M4 and stronger · days in UTC</string>
+    <string name="earthquakes_waiting">Waiting for quakes</string>
+    <string name="earthquakes_updated">Updated %1$s UTC</string>
+    <string name="earthquakes_last_day">%1$d quakes in the last 24 h · tap a point for details</string>
+    <string name="earthquakes_selected">M%1$s · %2$s · %3$s UTC</string>
+    <string name="earthquakes_magnitudes_title">Quakes in the last 24 h by magnitude</string>
+    <string name="earthquakes_magnitudes_subtitle">Number of quakes in each magnitude band, all continents · tap a bar</string>
+    <string name="earthquakes_load_failed">Couldn't load earthquakes from EMSC.</string>
+    <string name="earthquakes_retry">Try again</string>
+    <string name="earthquakes_attribution">Quakes: EMSC, seismicportal.eu. Seismographs: EarthScope, IU network. Continents are approximate regions.</string>
+
     <string name="gradient_per_bar">Per bar</string>
     <string name="gradient_per_bin">Per bin</string>
     <string name="gradient_plot_horizontal">Plot, left to right</string>

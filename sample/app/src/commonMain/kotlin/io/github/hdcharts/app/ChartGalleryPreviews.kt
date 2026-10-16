@@ -86,17 +86,17 @@ internal fun ChartPreview(
     previews: ChartGalleryPreview,
 ) {
     when (destination) {
-        is ChartDestination.PieChartScreen -> PieChartPreview(previews.pieValues)
-        is ChartDestination.LineChartScreen -> LineChartPreview(previews.lineValues)
-        is ChartDestination.MultiLineChartScreen ->
+        ChartDestination.PieChartScreen -> PieChartPreview(previews.pieValues)
+        ChartDestination.LineChartScreen -> LineChartPreview(previews.lineValues)
+        ChartDestination.MultiLineChartScreen ->
             MultiLineChartPreview(previews.multiLineSeries)
-        is ChartDestination.StackedAreaChartScreen ->
+        ChartDestination.StackedAreaChartScreen ->
             StackedAreaChartPreview(previews.stackedAreaSeries)
-        is ChartDestination.BarChartScreen -> BarChartPreview(previews.barValues)
-        is ChartDestination.HistogramChartScreen -> HistogramChartPreview(previews.histogramValues)
-        is ChartDestination.StackedBarChartScreen -> StackedBarChartPreview(previews.stackedSeries)
-        is ChartDestination.RadarChartScreen -> RadarChartPreview(previews.radarSeries)
-        is ChartDestination.RingGaugeChartScreen -> RingGaugeChartPreview(previews.ringGaugeValues)
+        ChartDestination.BarChartScreen -> BarChartPreview(previews.barValues)
+        ChartDestination.HistogramChartScreen -> HistogramChartPreview(previews.histogramValues)
+        ChartDestination.StackedBarChartScreen -> StackedBarChartPreview(previews.stackedSeries)
+        ChartDestination.RadarChartScreen -> RadarChartPreview(previews.radarSeries)
+        ChartDestination.RingGaugeChartScreen -> RingGaugeChartPreview(previews.ringGaugeValues)
     }
 }
 

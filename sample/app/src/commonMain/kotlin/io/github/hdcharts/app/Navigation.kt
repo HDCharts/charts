@@ -216,7 +216,15 @@ fun Navigation(
             MainScreenContent(
                 menuState = menuState,
                 onChartSelected = onChartSelected,
+                liveApiExamples = LiveApiExamples,
+                onLiveApiExampleSelected = { example -> navController.navigate(liveApiRoute(example)) },
             )
+        }
+
+        LiveApiExamples.forEach { example ->
+            composable(liveApiRoute(example)) {
+                example.content()
+            }
         }
 
         menuState.menuItems.forEach { destination ->
