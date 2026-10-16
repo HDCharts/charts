@@ -19,15 +19,20 @@ import io.github.hdcharts.histogram.internal.HistogramChartEntry
  *
  * [modifier] applies to both the chart and validation errors. [title] is optional and
  * independent of category labels. Empty categories hide X labels; selected readouts
- * then show only the formatted value. [selection] always identifies a source bar.
- * Tapping a bar selects it; selecting the same bar again clears selection.
+ * then show only the formatted value. [selection] always identifies a source bin. In compact
+ * mode, bars show bucket averages; tapping a bucket selects its middle source bin.
+ * Selecting the same bucket again clears selection. Selected readouts use the source value.
  *
- * Replacing [data] clears selection; resizing or changing density does not. Disabling
+ * Changing [data] to an unequal value clears selection; resizing or changing density does not. Disabling
  * [interactionEnabled] disables all user controls, but programmatic selection still renders.
  * [animateOnStart] controls initial reveal, not subsequent update animations.
  * [selectedValueFormatter] formats selected raw values; [axisValueFormatter] formats Y ticks.
  *
  * [subtitle] appears below the title and stays visible while a value is selected.
+ *
+ * Exactly one series of at least two finite, nonnegative bin heights is required.
+ * Categories may be empty; otherwise their count must match the bin count.
+ * Invalid data renders validation errors in place of the chart.
  */
 @Composable
 fun HistogramChart(

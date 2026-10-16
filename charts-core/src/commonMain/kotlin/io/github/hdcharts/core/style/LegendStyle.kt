@@ -17,6 +17,7 @@ data class LegendStyle(
  * Shared defaults for [LegendStyle].
  */
 object LegendDefaults {
+    /** Returns a [LegendStyle] with the supplied values or theme-aware defaults. */
     @Composable
     fun style(visible: Boolean = StyleDefaults.legendVisible): LegendStyle = LegendStyle(visible = visible)
 }

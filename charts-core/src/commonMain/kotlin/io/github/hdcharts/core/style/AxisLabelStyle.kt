@@ -10,7 +10,8 @@ import androidx.compose.ui.unit.TextUnit
  *
  * @property visible Whether the labels are visible.
  * @property color The label color.
- * @property size The label text size.
+ * @property size Label text size: finite, positive `sp`, at most 16,384 pixels.
+ * Invalid size or [maxCount] shows an error even when axes or labels are hidden.
  * @property maxCount The most labels to show, or null to let the chart choose. Labels are evenly
  * spaced and never overlap, so a chart shows fewer labels when [maxCount] would not fit. X-axis labels
  * start at the first item and count per screen while the chart scrolls; null shows as many as fit.
@@ -27,6 +28,7 @@ data class AxisLabelStyle(
 
 /** Shared defaults for X- and Y-axis labels. */
 object AxisLabelDefaults {
+    /** Returns an [AxisLabelStyle] with the supplied values or theme-aware defaults. */
     @Composable
     fun style(
         visible: Boolean = StyleDefaults.axisLabelsVisible,

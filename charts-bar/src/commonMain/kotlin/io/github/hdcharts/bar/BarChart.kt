@@ -20,12 +20,16 @@ import io.github.hdcharts.core.style.BarChartStyle
  * including when compact mode displays bucket averages. Tapping a bucket selects its
  * middle source bar; selecting the same bucket again clears selection.
  *
- * Replacing [data] clears selection; resizing or changing density does not. Disabling
+ * Changing [data] to an unequal value clears selection; resizing or changing density does not. Disabling
  * [interactionEnabled] disables all user controls, but programmatic selection still renders.
  * [animateOnStart] controls initial reveal, not subsequent update animations.
  * [selectedValueFormatter] formats selected raw values; [axisValueFormatter] formats Y ticks.
  *
  * [subtitle] appears below the title and stays visible while a value is selected.
+ *
+ * Exactly one series of at least two finite values is required. Negative values are supported.
+ * Categories may be empty; otherwise their count must match the value count.
+ * Invalid data renders validation errors in place of the chart.
  */
 @Composable
 fun BarChart(

@@ -26,6 +26,10 @@ import kotlinx.collections.immutable.toImmutableList
 /**
  * Fill configuration for the stacked layers.
  *
+ * @property color Single-series fill color and base color for generated palettes.
+ * @property colors Optional multi-series palette; when set, its count must match the series count.
+ * A single series uses [color], even when a one-color palette is supplied.
+ * @property alpha Fill alpha in `0..1`. Replaces solid color alpha and multiplies gradient alphas.
  * @property bezier Draws each layer's edges as smooth curves when `true`, or as straight
  * segments between points when `false`.
  * @property gradient Shared gradient that paints every layer. `null` draws solid fills.
@@ -38,6 +42,7 @@ data class StackedAreaFillStyle(
     val bezier: Boolean,
     val gradient: ChartGradient?,
 ) {
+    /** Copies the supplied list into an immutable list. */
     constructor(
         color: Color,
         colors: List<Color>,
@@ -113,6 +118,16 @@ data class StackedAreaSelectionStyle(
         )
 }
 
+/**
+ * Presentation for stacked area charts.
+ *
+ * @property chartContainerStyle Shared content spacing and title and subtitle text styles.
+ * @property fill Series palette, alpha, interpolation, and gradient.
+ * @property axes Axis lines, grid, and X/Y labels.
+ * @property selection Selection line and dimming outside the selected column.
+ * @property legend Series legend visibility.
+ * @property zoomControlsVisible Whether zoom controls appear when interaction and scrolling are enabled.
+ */
 @Immutable
 class StackedAreaChartStyle(
     val chartContainerStyle: ChartContainerStyle,
@@ -123,6 +138,7 @@ class StackedAreaChartStyle(
     val zoomControlsVisible: Boolean,
 )
 
+/** Theme-aware style factories and default value formatters for [StackedAreaChartStyle]. */
 object StackedAreaChartDefaults {
     /** Returns a [StackedAreaChartStyle] with the provided parameters or their default values. */
     @Composable

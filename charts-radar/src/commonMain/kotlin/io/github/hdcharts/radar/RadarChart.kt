@@ -18,6 +18,11 @@ import io.github.hdcharts.radar.internal.RadarChartEntry
  * series focused by tapping its outline. [selectedValueFormatter] formats the selected values.
  *
  * [subtitle] appears below the title and stays visible while a value is selected.
+ *
+ * At least one series of at least three finite values is required. Negative values are supported.
+ * Series must have equal lengths. Categories may be empty; otherwise their count must match
+ * the values in each series.
+ * Invalid data renders validation errors in place of the chart.
  */
 @OptIn(InternalChartsApi::class)
 @Composable

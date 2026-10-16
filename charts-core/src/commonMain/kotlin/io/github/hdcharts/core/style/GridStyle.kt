@@ -30,6 +30,7 @@ data class GridStyle(
  * Shared defaults for [GridStyle].
  */
 object GridDefaults {
+    /** Returns a [GridStyle] with the supplied values or theme-aware defaults. */
     @Composable
     fun style(
         visible: Boolean = StyleDefaults.gridVisible,

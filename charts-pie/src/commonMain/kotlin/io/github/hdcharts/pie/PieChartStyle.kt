@@ -46,8 +46,7 @@ class PieChartStyle(
  * Donut configuration for a [PieChartStyle].
  *
  * @property holePercentage The percentage of the chart that is a donut hole. The chart clamps it to
- * [io.github.hdcharts.core.internal.DONUT_MIN_PERCENTAGE]..[io.github.hdcharts.core.internal.DONUT_MAX_PERCENTAGE]
- * when drawing.
+ * `0..70` when drawing. NaN uses the default of zero.
  */
 @Immutable
 data class PieChartDonutStyle(

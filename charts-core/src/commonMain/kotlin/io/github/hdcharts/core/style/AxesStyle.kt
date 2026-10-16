@@ -29,6 +29,7 @@ data class AxesStyle(
 
 /** Shared defaults for Cartesian axes. */
 object AxesDefaults {
+    /** Returns an [AxesStyle] with the supplied values or theme-aware defaults. */
     @Composable
     fun style(
         visible: Boolean = StyleDefaults.axesVisible,
@@ -55,6 +56,7 @@ data class AxisLinesStyle(
 
 /** Shared defaults for axis strokes. */
 object AxisLinesDefaults {
+    /** Returns an [AxisLinesStyle] with the supplied values or theme-aware defaults. */
     @Composable
     fun style(
         visible: Boolean = StyleDefaults.axisLinesVisible,
