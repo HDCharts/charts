@@ -13,7 +13,7 @@ inputs:
   signing-in-memory-key:
     required: true
   gradle-arguments:
-    description: Extra arguments passed to publishChartsModules.
+    description: Extra arguments passed to both publishing runs.
     required: false
     default: ""
   prepare-publishing:
@@ -36,3 +36,6 @@ runs:
     - name: Publish charts modules
       shell: bash
       run: ./gradlew publishChartsModules ${{ inputs.gradle-arguments }} --no-daemon --stacktrace
+    - name: Publish relocation POMs
+      shell: bash
+      run: ./gradlew :charts-relocation:publish ${{ inputs.gradle-arguments }} --no-daemon --stacktrace
