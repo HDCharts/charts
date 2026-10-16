@@ -74,7 +74,11 @@ fun MainScreen(viewModel: MainViewModel = koinViewModel()) {
     val currentRoute = currentBackStackEntry?.destination?.route
     val canNavigateBack = currentBackStackEntry?.destination?.route != ChartDestination.MainScreen.ROUTE
     val isMainRoute = currentRoute == ChartDestination.MainScreen.ROUTE
-    val topBarTitleByRoute = remember(menuState.menuItems) { menuState.menuItems.topBarTitleByRoute() }
+    val topBarTitleByRoute =
+        remember(menuState.menuItems) {
+            menuState.menuItems.topBarTitleByRoute() + LiveApiExamples.associate { liveApiRoute(it) to it.title }
+        }
+    val isLiveApiRoute = LiveApiExamples.any { liveApiRoute(it) == currentRoute }
     val topBarTitle =
         if (isMainRoute) {
             null
@@ -105,7 +109,8 @@ fun MainScreen(viewModel: MainViewModel = koinViewModel()) {
         ) {
             CompositionLocalProvider(LocalInteractiveSurfaceCallbacks provides interactionCallbacks) {
                 BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-                    val useWideLayout = maxWidth >= WideLayoutBreakpoint
+                    // Dashboards get the full width; settings open as a drawer from the top bar instead.
+                    val useWideLayout = maxWidth >= WideLayoutBreakpoint && !isLiveApiRoute
 
                     LaunchedEffect(useWideLayout) {
                         if (useWideLayout && drawerState.currentValue == DrawerValue.Open) {
@@ -325,6 +330,8 @@ private fun BoxScope.SettingsEdgeSwipeOpenZone(
 fun MainScreenContent(
     menuState: MenuState,
     onChartSelected: (selected: ChartDestination) -> Unit,
+    liveApiExamples: List<ChartExample>,
+    onLiveApiExampleSelected: (ChartExample) -> Unit,
 ) {
     val githubUrl = stringResource(Res.string.github_url)
     Surface(
@@ -334,6 +341,8 @@ fun MainScreenContent(
         ChartGallery(
             menuState = menuState,
             onChartSelected = onChartSelected,
+            liveApiExamples = liveApiExamples,
+            onLiveApiExampleSelected = onLiveApiExampleSelected,
             versionLabel =
                 listOf(
                     "HDCharts: ${BuildConfig.CHARTS_VERSION}",

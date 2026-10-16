@@ -41,4 +41,5 @@ object Config {
     const val CHARTS_RADAR_NAMESPACE = "$GROUP_ID.charts.radar"
     const val CHARTS_GAUGE_NAMESPACE = "$GROUP_ID.charts.gauge"
     const val SAMPLE_SHARED_NAMESPACE = "io.github.hdcharts.sampleshared"
+    const val SAMPLE_API_NAMESPACE = "io.github.hdcharts.sampleapi"
 }

@@ -34,6 +34,10 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import hdcharts.app.generated.resources.Res
+import hdcharts.app.generated.resources.live_api_section_subtitle
+import hdcharts.app.generated.resources.live_api_section_title
+import io.github.hdcharts.app.ui.composable.CardGrid
 import io.github.hdcharts.sampleshared.theme.Dimens
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -48,6 +52,8 @@ internal val LocalChartGalleryColumns = staticCompositionLocalOf { 2 }
 fun ChartGallery(
     menuState: MenuState,
     onChartSelected: (ChartDestination) -> Unit,
+    liveApiExamples: List<ChartExample>,
+    onLiveApiExampleSelected: (ChartExample) -> Unit,
     versionLabel: String,
     versionUrl: String?,
     modifier: Modifier = Modifier,
@@ -115,6 +121,14 @@ fun ChartGallery(
                         }
                     }
                 }
+
+                if (liveApiExamples.isNotEmpty()) {
+                    LiveApiSection(
+                        examples = liveApiExamples,
+                        columns = columns,
+                        onExampleSelected = onLiveApiExampleSelected,
+                    )
+                }
             }
         }
 
@@ -134,6 +148,37 @@ fun ChartGallery(
                     versionUrl?.let {
                         Modifier.pointerHoverIcon(PointerIcon.Hand).clickable { uriHandler.openUri(it) }
                     } ?: Modifier,
+            )
+        }
+    }
+}
+
+// Kept apart from the chart cards so it is clear these demos use network data, not sample data.
+@Composable
+private fun LiveApiSection(
+    examples: List<ChartExample>,
+    columns: Int,
+    onExampleSelected: (ChartExample) -> Unit,
+) {
+    Column(
+        modifier = Modifier.padding(top = Dimens.md),
+        verticalArrangement = Arrangement.spacedBy(Dimens.sm),
+    ) {
+        Text(
+            text = stringResource(Res.string.live_api_section_title),
+            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        Text(
+            text = stringResource(Res.string.live_api_section_subtitle),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        CardGrid(items = examples, columns = columns) { example, modifier ->
+            ChartExampleRow(
+                example = example,
+                onClick = { onExampleSelected(example) },
+                modifier = modifier,
             )
         }
     }

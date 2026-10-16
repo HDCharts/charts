@@ -20,9 +20,12 @@ import hdcharts.app.generated.resources.drawer_title_dynamic_colors
 import hdcharts.app.generated.resources.drawer_title_github
 import hdcharts.app.generated.resources.drawer_title_snapshot_demo
 import hdcharts.app.generated.resources.github_url
+import hdcharts.app.generated.resources.live_api_section_subtitle
+import hdcharts.app.generated.resources.live_api_section_title
 import hdcharts.app.generated.resources.snapshot_demo_url
 import hdcharts.sample_shared.generated.resources.ic_github
 import io.github.hdcharts.app.ChartDestination
+import io.github.hdcharts.app.LiveApiExamples
 import io.github.hdcharts.app.LocalChartGalleryColumns
 import io.github.hdcharts.app.MainScreen
 import io.github.hdcharts.app.ui.composable.LocalChartDemoMaxWidth
@@ -97,7 +100,14 @@ private fun rememberWebDemoStartupResources(): StartupResources {
     return remember(galleryDestinations, drawerStrings) {
         StartupResources(
             vectorDrawables = (galleryDestinations.map { it.icon } + SharedRes.drawable.ic_github).distinct(),
-            strings = (galleryDestinations.map { it.title } + drawerStrings).distinct(),
+            strings =
+                (
+                    galleryDestinations.map { it.title } +
+                        AppRes.string.live_api_section_title +
+                        AppRes.string.live_api_section_subtitle +
+                        LiveApiExamples.flatMap { listOf(it.title, it.summary) } +
+                        drawerStrings
+                ).distinct(),
         )
     }
 }

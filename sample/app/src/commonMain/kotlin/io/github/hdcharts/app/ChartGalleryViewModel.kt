@@ -143,15 +143,15 @@ class ChartGalleryViewModel(
 
     private fun subtitleFor(item: ChartDestination): String =
         when (item) {
-            is ChartDestination.PieChartScreen -> "Composition at a glance."
-            is ChartDestination.LineChartScreen -> "Trends over time."
-            is ChartDestination.MultiLineChartScreen -> "Compare multiple series."
-            is ChartDestination.StackedAreaChartScreen -> "Cumulative layers by category."
-            is ChartDestination.BarChartScreen -> "Rank values quickly."
-            is ChartDestination.HistogramChartScreen -> "Distribution across bins."
-            is ChartDestination.StackedBarChartScreen -> "Segment composition by category."
-            is ChartDestination.RadarChartScreen -> "Live radial signals."
-            is ChartDestination.RingGaugeChartScreen -> "Progress toward a target."
+            ChartDestination.PieChartScreen -> "Composition at a glance."
+            ChartDestination.LineChartScreen -> "Trends over time."
+            ChartDestination.MultiLineChartScreen -> "Compare multiple series."
+            ChartDestination.StackedAreaChartScreen -> "Cumulative layers by category."
+            ChartDestination.BarChartScreen -> "Rank values quickly."
+            ChartDestination.HistogramChartScreen -> "Distribution across bins."
+            ChartDestination.StackedBarChartScreen -> "Segment composition by category."
+            ChartDestination.RadarChartScreen -> "Live radial signals."
+            ChartDestination.RingGaugeChartScreen -> "Progress toward a target."
         }
 
     private companion object {

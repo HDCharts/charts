@@ -30,6 +30,12 @@ compose-screenshot = "0.0.1-alpha16"
 # Coroutines version
 kotlinx-coroutines = "1.11.0"
 kotlinx-collections-immutable = "0.5.2"
+# https://github.com/Kotlin/kotlinx.serialization
+kotlinx-serialization = "1.11.0"
+# https://github.com/Kotlin/kotlinx-datetime
+kotlinx-datetime = "0.8.0"
+# https://ktor.io
+ktor = "3.6.0"
 ksp = "2.3.12"
 compose-gif-recorder = "0.1.7-SNAPSHOT"
 # https://www.cve.org/CVERecord?id=CVE-2024-7254
@@ -82,8 +88,16 @@ dokka-versions = {group = "org.jetbrains.dokka", name = "versioning-plugin", ver
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin-bom" }
 koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin-bom" }
 koin-compose-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel", version.ref = "koin-bom" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 kotlinx-coroutines-swing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
+kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
+ktor-client-js = { module = "io.ktor:ktor-client-js", version.ref = "ktor" }
+ktor-client-mock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor" }
+ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
 kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinx-collections-immutable" }
 screenshot-validation-api = { module = "com.android.tools.screenshot:screenshot-validation-api", version.ref = "compose-screenshot" }
 compose-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4", version.ref = "composeUi" }
@@ -102,6 +116,7 @@ kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref =
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 mavenPublish = { id = "com.vanniktech.maven.publish", version.ref = "mavenPublish" }
 build-config = { id = "com.github.gmazzo.buildconfig", version.ref = "buildConfig" }
+kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin-multiplatform" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin-multiplatform" }
 composeScreenshot = { id = "com.android.compose.screenshot", version.ref = "compose-screenshot" }
 ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }
