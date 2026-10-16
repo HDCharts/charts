@@ -28,6 +28,11 @@ import io.github.hdcharts.line.internal.LineChartImpl
  * programmatic selection still renders.
  *
  * [subtitle] appears below the title and stays visible while a value is selected.
+ *
+ * At least one series of at least two finite values is required. Negative values are supported.
+ * Series must have equal lengths.
+ * Categories may be empty; otherwise their count must match the values in each series.
+ * Invalid data renders validation errors in place of the chart.
  */
 @OptIn(InternalChartsApi::class)
 @Composable

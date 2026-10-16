@@ -21,6 +21,8 @@ sealed interface SelectionLifetime {
     /**
      * Selection auto-clears after [delayMs] milliseconds unless renewed
      * by a new selection. Each new selection restarts the timer.
+     *
+     * @property delayMs Delay before clearing selection, in milliseconds. Must be nonnegative.
      */
     data class AutoDeselect(
         val delayMs: Long,

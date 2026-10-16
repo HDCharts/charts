@@ -20,6 +20,14 @@ import io.github.hdcharts.core.style.StyleDefaults
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 
+/**
+ * Concentric polygon grid behind radar series.
+ *
+ * @property visible Whether the grid is drawn.
+ * @property color Grid stroke color.
+ * @property lineWidth Grid stroke width in density-independent pixels.
+ * @property steps Number of grid intervals, clamped to `0..1000`. Zero hides the grid.
+ */
 @Immutable
 data class RadarGridStyle(
     val visible: Boolean,
@@ -40,6 +48,17 @@ data class RadarGridStyle(
         )
 }
 
+/**
+ * Radial axis lines and category labels.
+ *
+ * @property visible Whether radial axis lines are drawn. Label visibility is independent.
+ * @property lineColor Radial axis stroke color.
+ * @property lineWidth Radial axis stroke width in density-independent pixels.
+ * @property labelColor Category label color.
+ * @property labelSize Category label text size.
+ * @property labelPadding Spacing between the polygon web and category labels.
+ * @property labelVisible Whether category labels are drawn when categories are supplied.
+ */
 @Immutable
 data class RadarAxesStyle(
     val visible: Boolean,
@@ -67,6 +86,16 @@ data class RadarAxesStyle(
         )
 }
 
+/**
+ * Radar series outlines and optional translucent fills.
+ *
+ * @property fillVisible Whether polygon interiors are filled.
+ * @property fillAlpha Fill alpha in `0..1`, replacing the outline color alpha.
+ * @property lineColor Single-series outline color and base color for generated palettes.
+ * @property lineColors Optional multi-series palette; when set, its count must match the series count.
+ * A single series uses [lineColor] and ignores this palette.
+ * @property lineWidth Outline stroke width in density-independent pixels.
+ */
 @Immutable
 data class RadarPolygonStyle(
     val fillVisible: Boolean,
@@ -75,6 +104,7 @@ data class RadarPolygonStyle(
     val lineColors: ImmutableList<Color>,
     val lineWidth: Dp,
 ) {
+    /** Copies the supplied list into an immutable list. */
     constructor(
         fillVisible: Boolean,
         fillAlpha: Float,
@@ -117,6 +147,14 @@ data class RadarPolygonStyle(
         )
 }
 
+/**
+ * Markers at radar series vertices.
+ *
+ * @property visible Whether markers are drawn at rest. Selected axes can still show markers.
+ * @property color Marker color when [colorSameAsLine] is false.
+ * @property colorSameAsLine Whether markers use their series outline color.
+ * @property size Marker radius in density-independent pixels.
+ */
 @Immutable
 data class RadarPointStyle(
     val visible: Boolean,
@@ -172,6 +210,17 @@ data class RadarSelectionStyle(
         )
 }
 
+/**
+ * Presentation for radar charts.
+ *
+ * @property chartContainerStyle Shared content spacing and title and subtitle text styles.
+ * @property grid Concentric polygon grid.
+ * @property axes Radial lines and category labels.
+ * @property polygon Series outlines, palettes, and fills.
+ * @property points Vertex markers.
+ * @property selection Selected-axis and focused-series appearance.
+ * @property legend Series legend visibility.
+ */
 @Immutable
 class RadarChartStyle(
     val chartContainerStyle: ChartContainerStyle,
@@ -183,6 +232,7 @@ class RadarChartStyle(
     val legend: LegendStyle,
 )
 
+/** Theme-aware style factories and default value formatters for [RadarChartStyle]. */
 object RadarChartDefaults {
     /** Returns a [RadarChartStyle] with the provided parameters or their default values. */
     @Composable

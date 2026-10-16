@@ -43,8 +43,7 @@ internal const val PIE_SELECTION_AUTO_DESELECT_TIMEOUT_MS = 3000L
  * @param interactionEnabled When `false`, disables tap-to-select and the auto-deselect timeout.
  * @param animateOnStart When `false`, renders the chart in its final state without the
  *   initial reveal animation.
- *
- * [subtitle] appears below the title and stays visible while a value is selected.
+ * @param subtitle Text below the title that stays visible while a value is selected.
  */
 @OptIn(InternalChartsApi::class)
 @Composable

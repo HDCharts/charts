@@ -14,6 +14,7 @@ import io.github.hdcharts.core.internal.theme.ChartsDefaultTheme
 import io.github.hdcharts.core.style.ChartContainerDefaults
 import kotlinx.collections.immutable.persistentListOf
 
+/** Adds light and dark Android Studio previews to a composable. */
 @Retention(AnnotationRetention.BINARY)
 @Target(AnnotationTarget.ANNOTATION_CLASS, AnnotationTarget.FUNCTION)
 @Preview(
@@ -28,6 +29,7 @@ import kotlinx.collections.immutable.persistentListOf
 )
 annotation class ChartsPreviewLightDark
 
+/** Wraps preview [content] in the chart theme with dynamic colors disabled. */
 @Composable
 fun ChartsPreviewTheme(content: @Composable () -> Unit) {
     ChartsDefaultTheme(

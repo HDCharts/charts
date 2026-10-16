@@ -26,6 +26,11 @@ import kotlinx.collections.immutable.toImmutableList
 /**
  * Style of the series lines.
  *
+ * @property color Color used for a single series and to generate a multi-series palette.
+ * @property colors Optional multi-series palette. When set, its count must match the series count.
+ * A single series uses [color], even when a one-color palette is supplied.
+ * @property strokeWidth Line stroke width in density-independent pixels.
+ * @property bezier Whether points are joined by smooth curves rather than straight segments.
  * @property alpha The line alpha. Replaces the line colors' alpha, and multiplies a gradient's own alphas.
  * @property gradient Shared gradient that paints every line. Its span picks one gradient per line or
  * one across the plot. `null` draws solid lines.
@@ -39,6 +44,7 @@ data class LineVisualStyle(
     val bezier: Boolean,
     val gradient: ChartGradient?,
 ) {
+    /** Copies the supplied list into an immutable list. */
     constructor(
         color: Color,
         alpha: Float,
@@ -84,6 +90,13 @@ data class LineVisualStyle(
         )
 }
 
+/**
+ * Markers drawn at the source points of each line.
+ *
+ * @property color Marker color.
+ * @property size Marker radius in density-independent pixels.
+ * @property visible Whether markers are drawn at rest. Selection markers use [LineSelectionStyle].
+ */
 @Immutable
 data class LinePointStyle(
     val color: Color,
@@ -106,7 +119,7 @@ data class LinePointStyle(
  * Selection configuration for line charts.
  *
  * @property visible Whether the selection indicator is visible. `false` keeps the selected point drawn when
- * [LinePointsStyle.visible] is `true`.
+ * [LinePointStyle.visible] is `true`.
  * @property color The selection line color.
  * @property width The selection line stroke width in density-independent pixels.
  * @property markerColor The marker color.
@@ -141,9 +154,9 @@ data class LineSelectionStyle(
 /**
  * Optional fixed Y-axis range for line charts.
  *
- * `null` for either bound means the chart derives that bound from data, so [min] and [max]
- * can be set independently. Explicit bounds must be finite. If the resolved range is equal
- * or reversed, both bounds fall back to the data-derived domain.
+ * Null bounds use the data range. Set bounds must be finite.
+ * If both are set and `min >= max`, the chart uses the data range.
+ * If only one is set, the other is clamped to keep `min <= max`.
  *
  * @property min Optional minimum value.
  * @property max Optional maximum value.
@@ -154,7 +167,18 @@ data class LineRangeStyle(
     val max: Double?,
 )
 
-/** Grouped, Compose-friendly v3 style for single- and multi-line charts. */
+/**
+ * Presentation for single- and multi-line charts.
+ *
+ * @property chartContainerStyle Shared content spacing and title and subtitle text styles.
+ * @property line Series colors, strokes, interpolation, and gradient.
+ * @property points Markers drawn at rest.
+ * @property selection Selection line and marker appearance.
+ * @property axes Axis lines, grid, and X/Y labels.
+ * @property range Optional fixed Y-axis bounds.
+ * @property legend Series legend visibility.
+ * @property zoomControlsVisible Whether zoom controls appear when interaction and scrolling are enabled.
+ */
 @Immutable
 class LineChartStyle(
     val chartContainerStyle: ChartContainerStyle,
@@ -167,6 +191,7 @@ class LineChartStyle(
     val zoomControlsVisible: Boolean,
 )
 
+/** Theme-aware style factories and default value formatters for [LineChartStyle]. */
 object LineChartDefaults {
     /** Returns a [LineChartStyle] with the provided parameters or their default values. */
     @Composable

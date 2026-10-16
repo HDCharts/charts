@@ -22,6 +22,11 @@ import kotlin.time.Duration.Companion.milliseconds
  *   [data] changes so each shift finishes as the next point arrives.
  *
  * [subtitle] appears below the title and can also be shown on its own.
+ *
+ * At least one series of at least two finite values is required. Negative values are supported.
+ * Series must have equal lengths.
+ * Categories may be empty; otherwise their count must match the values in each series.
+ * Invalid data renders validation errors in place of the chart.
  */
 @Composable
 fun LiveLineChart(

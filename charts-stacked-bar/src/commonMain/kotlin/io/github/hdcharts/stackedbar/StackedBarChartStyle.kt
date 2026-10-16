@@ -23,6 +23,15 @@ import io.github.hdcharts.core.style.clamp
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 
+/**
+ * Colors and fills for stacked bar segments.
+ *
+ * @property color Base color for the generated series palette.
+ * @property colors Optional palette in series order; empty generates shades of [color].
+ * When set, its count must match the series count.
+ * @property alpha Segment alpha in `0..1`. Replaces solid color alpha and multiplies gradient alphas.
+ * @property gradient Optional gradient per shape or across the plot. Null draws solid segments.
+ */
 @Immutable
 data class StackedBarSegmentStyle(
     val color: Color,
@@ -30,6 +39,7 @@ data class StackedBarSegmentStyle(
     val alpha: Float,
     val gradient: ChartGradient?,
 ) {
+    /** Copies the supplied list into an immutable list. */
     constructor(
         color: Color,
         colors: List<Color>,
@@ -67,6 +77,12 @@ data class StackedBarSegmentStyle(
         )
 }
 
+/**
+ * Spacing and minimum width of stacked bars.
+ *
+ * @property space Gap between bars in density-independent pixels.
+ * @property minBarWidth Minimum bar width used to determine when data needs compact mode or scrolling.
+ */
 @Immutable
 data class StackedBarLayoutStyle(
     val space: Dp,
@@ -115,6 +131,17 @@ data class StackedBarSelectionStyle(
         )
 }
 
+/**
+ * Presentation for stacked bar charts.
+ *
+ * @property chartContainerStyle Shared content spacing and title and subtitle text styles.
+ * @property segments Series palette, alpha, and gradient.
+ * @property layout Bar spacing and minimum width.
+ * @property axes Axis lines, grid, and X/Y labels.
+ * @property selection Selection line and dimming of other bars.
+ * @property legend Segment legend visibility.
+ * @property zoomControlsVisible Whether zoom controls appear when interaction and scrolling are enabled.
+ */
 @Immutable
 class StackedBarChartStyle(
     val chartContainerStyle: ChartContainerStyle,
@@ -126,6 +153,7 @@ class StackedBarChartStyle(
     val zoomControlsVisible: Boolean,
 )
 
+/** Theme-aware style factories and default value formatters for [StackedBarChartStyle]. */
 object StackedBarChartDefaults {
     /** Returns a [StackedBarChartStyle] with the provided parameters or their default values. */
     @Composable

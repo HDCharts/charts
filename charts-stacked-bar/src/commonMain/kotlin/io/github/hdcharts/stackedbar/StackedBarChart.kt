@@ -15,6 +15,11 @@ import io.github.hdcharts.stackedbar.internal.StackedBarChartEntry
  * [selectedValueFormatter] formats the selected values; [axisValueFormatter] formats Y ticks.
  *
  * [subtitle] appears below the title and stays visible while a value is selected.
+ *
+ * At least one series of at least two finite, nonnegative values is required. Series must have
+ * equal lengths, and each stacked total must be finite. Categories may be empty; otherwise
+ * their count must match the values in each series.
+ * Invalid data renders validation errors in place of the chart.
  */
 @Composable
 fun StackedBarChart(

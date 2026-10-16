@@ -34,8 +34,8 @@ class ChartSelection constructor(
         private set
 
     /**
-     * Monotonic counter bumped on every [select], [clear], and [renew] call,
-     * including no-ops. Lifecycle helpers observe this counter to react to
+     * Counter bumped when [select] or [clear] changes selection, and on every [renew] call.
+     * Lifecycle helpers observe this counter to react to
      * taps that do not change the selected index (e.g. renewing an
      * auto-deselect timer without changing which point is selected).
      */

@@ -9,6 +9,7 @@ import kotlin.math.abs
  * Implementations should be deterministic for a given input.
  */
 fun interface ChartValueFormatter {
+    /** Returns the display text for the raw [value]. */
     fun format(value: Double): String
 }
 

@@ -87,9 +87,9 @@ data class BarBarsStyle(
 /**
  * Optional fixed Y-axis range for vertical bar and histogram charts.
  *
- * `null` for either bound means the chart derives that bound from data.
- * Explicit bounds must be finite. If the resolved range is equal or reversed,
- * both bounds fall back to the zero-inclusive source domain.
+ * Null bounds use the zero-inclusive data range. Set bounds must be finite.
+ * If both are set and `min >= max`, the chart uses the data range.
+ * If only one is set, the other is clamped to keep `min <= max`.
  *
  * @property min Optional minimum value.
  * @property max Optional maximum value.
@@ -135,7 +135,7 @@ data class BarSelectionStyle(
 /**
  * Immutable v3 style for vertical [io.github.hdcharts.bar.BarChart].
  *
- * Configuration is grouped into [bars], [range], [grid], [axis], and [selection]
+ * Configuration is grouped into [bars], [range], [axes], and [selection]
  * blocks. The chart-level selection state is a top-level composable parameter, not part
  * of this style. Compose with [BarChartDefaults.style] for theme-aware defaults.
  *

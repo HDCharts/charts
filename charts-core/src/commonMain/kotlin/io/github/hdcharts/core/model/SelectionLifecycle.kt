@@ -12,7 +12,7 @@ import kotlinx.coroutines.delay
 /**
  * Drives the background lifecycle of a [ChartSelection]:
  *
- *  - Clears the selection when [data] reference changes between recompositions.
+ *  - Clears the selection when [data] changes according to equality between recompositions.
  *    The first composition never clears selection, so an `initialIndex` provided
  *    to [rememberChartSelection] is preserved.
  *  - Clears the selection when [itemCount] becomes zero, or when the currently
@@ -30,8 +30,8 @@ import kotlinx.coroutines.delay
  * `itemCount = Int.MAX_VALUE` to skip the bounds check.
  *
  * @param selection The hoisted selection holder.
- * @param data Stable identity key for the source data. Changing this
- *   reference clears selection.
+ * @param data Source data key compared using equality. An unequal value clears selection;
+ *   a new instance equal to the previous value preserves it.
  * @param itemCount Number of selectable items in the *source* data, or
  *   `Int.MAX_VALUE` to skip the bounds check.
  * @param lifetime Background policy. Defaults to

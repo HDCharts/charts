@@ -34,6 +34,8 @@ sealed interface ChartGradient {
     /**
      * A gradient along the line from [start] to [end].
      *
+     * @property start Start position as fractions of the selected bounds.
+     * @property end End position as fractions of the selected bounds.
      * @property tileMode How the gradient continues beyond [start] and [end].
      */
     @Immutable
@@ -44,6 +46,7 @@ sealed interface ChartGradient {
         override val span: GradientSpan,
         val tileMode: TileMode,
     ) : ChartGradient {
+        /** Copies the supplied stops into an immutable list. */
         constructor(
             stops: List<GradientStop>,
             start: GradientPoint,
@@ -66,7 +69,11 @@ sealed interface GradientStop {
     /** Where the color sits, from `0` at the gradient's start to `1` at its end. */
     val offset: Float
 
-    /** A fixed [color], drawn as given. */
+    /**
+     * A fixed color, drawn as given.
+     *
+     * @property color The stop color, including its alpha.
+     */
     @Immutable
     data class Fixed(
         override val offset: Float,
@@ -89,6 +96,9 @@ sealed interface GradientStop {
 /**
  * A position as fractions of a gradient's bounds: `(0, 0)` is the top-left corner and `(1, 1)` the
  * bottom-right. Values outside `0..1` sit outside the bounds.
+ *
+ * @property x Horizontal fraction, increasing from left to right.
+ * @property y Vertical fraction, increasing from top to bottom.
  */
 @Immutable
 data class GradientPoint(
@@ -112,7 +122,7 @@ enum class GradientSpan {
 object ChartGradients {
     /**
      * Returns a top-to-bottom gradient through [colors]. With [GradientSpan.Shape], that is from each
-     * shape's top edge to its bottom edge.
+     * shape's top edge to its bottom edge. Bars below the baseline mirror it vertically.
      */
     fun vertical(
         colors: List<Color>,
