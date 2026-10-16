@@ -198,7 +198,8 @@ tasks.named("ktlintFormat").configure {
 tasks.register("publishChartsModules") {
     group = "publishing"
     description = "Publishes all HDCharts modules and BOM to the configured Maven repository"
-    dependsOn(ChartsModules.publishable.map { "$it:publish" })
+    // Central requires the old namespace's relocation POMs in a separate deployment.
+    dependsOn(ChartsModules.publishable.filterNot { it == ":charts-relocation" }.map { "$it:publish" })
 }
 
 tasks.register("publishChartsModulesToMavenLocal") {
