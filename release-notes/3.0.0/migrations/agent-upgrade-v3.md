@@ -8,7 +8,7 @@ You are migrating a Kotlin Multiplatform and Compose Multiplatform project
 from HDCharts 2.x to HDCharts 3.0.0.
 
 You have access to the official HDCharts 3.0.0 Dokka API documentation:
-https://charts.hdcode.dev/api/3.0.0/
+https://charts.hdcode.dev/static/api/3.0.0/index.html
 
 Read and use that Dokka documentation as your API knowledge and source of truth
 before editing. It contains the current public classes, functions, parameters,
