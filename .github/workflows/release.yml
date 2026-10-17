@@ -96,6 +96,45 @@ jobs:
               output.write(f'publish={str(not published).lower()}\n')
           print(f'{len(published)}/{len(artifacts)} relocation POMs already published')
           CHECK
+      - name: Prepare and validate relocation POM metadata
+        if: steps.relocation.outputs.publish == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'CHECK'
+          import re
+          import subprocess
+          import xml.etree.ElementTree as ET
+          from pathlib import Path
+
+          path = Path('charts-relocation/build.gradle.kts')
+          source = path.read_text()
+          needle = '                pom {\n                    packaging = "pom"'
+          replacement = '                pom {\n                    ChartsPublishing.configurePom(\n                        pom = this,\n                        moduleName = "HDCharts $artifactId relocation",\n                        moduleDescription = "Relocation to $relocationNewGroupId:$artifactId.",\n                    )\n                    packaging = "pom"'
+          assert source.count(needle) == 1
+          path.write_text(source.replace(needle, replacement))
+          artifacts = re.findall(r'const val ARTIFACT(?:_\w+)?_ID = "([^"]+)"', Path('buildSrc/src/main/kotlin/Config.kt').read_text())
+          artifacts.remove('gauge')
+          tasks = [f':charts-relocation:generatePomFileForRelocation-{artifact}Publication' for artifact in artifacts]
+          subprocess.run(['./gradlew', *tasks, '-PchartsReleaseVersion=3.0.0', '--no-daemon', '--stacktrace'], check=True)
+          ns = {'m': 'http://maven.apache.org/POM/4.0.0'}
+          required = ['name', 'description', 'url', 'licenses/license/name', 'licenses/license/url', 'developers/developer/id', 'developers/developer/name', 'scm/url', 'scm/connection']
+          for artifact in artifacts:
+              pom = Path(f'charts-relocation/build/publications/relocation-{artifact}/pom-default.xml')
+              root = ET.parse(pom).getroot()
+              def value(path):
+                  return root.findtext('/'.join('m:' + part for part in path.split('/')), namespaces=ns)
+              for field in required:
+                  assert value(field), (artifact, field)
+              assert value('groupId') == 'io.github.dautovicharis'
+              assert value('artifactId') == artifact
+              assert value('version') == '3.0.0'
+              assert value('packaging') == 'pom'
+              assert value('distributionManagement/relocation/groupId') == 'io.github.hdcharts'
+              assert value('distributionManagement/relocation/artifactId') == artifact
+              assert value('distributionManagement/relocation/version') == '3.0.0'
+              print(f'Validated complete relocation POM: {artifact}', flush=True)
+          CHECK
       - name: Prepare Maven publishing
         if: steps.relocation.outputs.publish == 'true'
         uses: ./.github/actions/prepare-maven-publishing
