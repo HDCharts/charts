@@ -1,153 +1,52 @@
-# Coordinates every public release concern from one immutable charts commit.
-name: Release
+name: Recover 3.0.0 release
 
 on:
   workflow_dispatch:
-    inputs:
-      replace_static_assets:
-        description: Replace existing static assets for this unreleased version.
-        required: false
-        default: false
-        type: boolean
 
 permissions:
   contents: write
   id-token: write
-  issues: write
-  pull-requests: write
 
 concurrency:
-  group: release-${{ github.ref }}
+  group: recover-release-3.0.0
   cancel-in-progress: false
 
 jobs:
   prepare-release:
-    name: Validate release
+    name: Verify published release source
+    if: github.ref == 'refs/heads/recovery/release-3.0.0'
     runs-on: ubuntu-26.04
-    if: ${{ github.ref == 'refs/heads/main' }}
     outputs:
-      release_version: ${{ steps.version.outputs.release_version }}
-      source_sha: ${{ steps.source.outputs.source_sha }}
+      release_version: '3.0.0'
+      source_sha: '60864f821601ef8b12afe84586638553ce8f8090'
     steps:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - uses: ./.github/actions/setup-jdk
-        with:
-          gradle-cache: false
-      - name: Resolve release version from Axion
-        id: version
+          ref: 60864f821601ef8b12afe84586638553ce8f8090
+      - name: Verify source and published chart artifacts
         shell: bash
         run: |
           set -euo pipefail
-          version="$(bash .github/scripts/resolve-release-version.sh)"
-          echo "release_version=${version}" >> "$GITHUB_OUTPUT"
-      - name: Record immutable release source
-        id: source
-        shell: bash
-        run: echo "source_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
-      - name: Verify release readiness with Axion
-        shell: bash
-        run: |
-          ./gradlew verifyRelease -PchartsReleaseVersion="${{ steps.version.outputs.release_version }}" --no-daemon --stacktrace
-      - name: Verify tag does not already exist
-        shell: bash
-        run: |
-          if git rev-parse -q --verify "refs/tags/${{ steps.version.outputs.release_version }}" >/dev/null; then
-            echo "Release tag already exists: ${{ steps.version.outputs.release_version }}" >&2
-            exit 1
-          fi
-      - name: Audit API against previous release
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          set +e
-          set -o pipefail
-          ./gradlew apiCompatibilityCheck --no-daemon --continue \
-            2>&1 | tee release-api-compatibility.log
-          exit_code=${PIPESTATUS[0]}
-          set -e
-
-          echo "## Release API Audit" >> "$GITHUB_STEP_SUMMARY"
-
-          if [[ "${exit_code}" == "0" ]]; then
-            echo "- Result: compatible" >> "$GITHUB_STEP_SUMMARY"
-            exit 0
-          fi
-
-          if grep -Eq "Unacknowledged breaking API change\(s\) detected" release-api-compatibility.log; then
-            echo "- Result: unacknowledged API changes detected; see the job log" >> "$GITHUB_STEP_SUMMARY"
-            echo "::warning::Release contains unacknowledged API changes; see the job log."
-            exit 0
-          fi
-
-          echo "- Result: audit failed" >> "$GITHUB_STEP_SUMMARY"
-          echo "API compatibility audit failed for a non-compatibility reason." >&2
-          exit "${exit_code}"
-      - name: Validate existing docs provenance
-        uses: actions/checkout@v7
-        with:
-          repository: HDCharts/charts-docs
-          ref: main
-          fetch-depth: 1
-          path: charts-docs-repo
-      - name: Reject stale immutable docs promotion
-        env:
-          RELEASE_VERSION: ${{ steps.version.outputs.release_version }}
-          SOURCE_SHA: ${{ steps.source.outputs.source_sha }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          if jq -e --arg version "$RELEASE_VERSION" \
-            'any(.versions[]?; .id == $version)' charts-docs-repo/registry/versions.json >/dev/null; then
-            manifest="charts-docs-repo/docs-app/public/release-manifest.json"
-            if [[ ! -f "$manifest" ]] || ! jq -e \
-              --arg version "$RELEASE_VERSION" --arg sha "$SOURCE_SHA" \
-              '.charts_version == $version and .source_sha == $sha' "$manifest" >/dev/null; then
-              echo "Existing docs release ${RELEASE_VERSION} has no matching charts provenance marker." >&2
-              exit 1
-            fi
-          fi
-      - name: Require matching snapshot provenance
-        env:
-          RELEASE_VERSION: ${{ steps.version.outputs.release_version }}
-          SOURCE_SHA: ${{ steps.source.outputs.source_sha }}
-        shell: bash
-        run: |
-          bash .github/scripts/validate-snapshot-provenance.sh \
-            charts-docs-repo/docs-app/public/snapshot-manifest.json \
-            "$RELEASE_VERSION" \
-            "$SOURCE_SHA"
-
-  approve-release:
-    name: Approve Release
-    needs: prepare-release
-    runs-on: ubuntu-26.04
-    environment: Release Approval
-    steps:
-      - name: Record approval
-        run: |
-          echo "## Release Approval" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Version: \`${{ needs.prepare-release.outputs.release_version }}\`" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Source: \`${{ needs.prepare-release.outputs.source_sha }}\`" >> "$GITHUB_STEP_SUMMARY"
-
-  publish-static-assets:
-    name: Publish API reference and demo
-    needs: [prepare-release, approve-release]
-    uses: ./.github/workflows/publish-static-assets.yml
-    with:
-      mode: release
-      charts-version: ${{ needs.prepare-release.outputs.release_version }}
-      source-sha: ${{ needs.prepare-release.outputs.source_sha }}
-      source-ref: ${{ needs.prepare-release.outputs.source_sha }}
-      replace-static-assets: ${{ inputs.replace_static_assets }}
-    secrets:
-      AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
+          test "$(git rev-parse HEAD)" = 60864f821601ef8b12afe84586638553ce8f8090
+          python3 - <<'CHECK'
+          import re
+          import urllib.request
+          from pathlib import Path
+          source = Path('buildSrc/src/main/kotlin/Config.kt').read_text()
+          artifacts = re.findall(r'const val ARTIFACT(?:_\w+)?_ID = "([^"]+)"', source)
+          assert len(artifacts) == 11, artifacts
+          for artifact in artifacts:
+              url = f'https://repo.maven.apache.org/maven2/io/github/hdcharts/{artifact}/3.0.0/{artifact}-3.0.0.pom'
+              with urllib.request.urlopen(url, timeout=30) as response:
+                  assert response.status == 200
+              print(f'Published: io.github.hdcharts:{artifact}:3.0.0')
+          CHECK
 
   publish-maven:
-    name: Publish Maven release
-    needs: [prepare-release, publish-static-assets]
+    name: Publish missing relocation POMs and tag
+    needs: prepare-release
+    timeout-minutes: 80
     runs-on: ubuntu-26.04
     environment: Production
     steps:
@@ -168,7 +67,37 @@ jobs:
           release-version: ${{ needs.prepare-release.outputs.release_version }}
           source-sha: ${{ needs.prepare-release.outputs.source_sha }}
           docs-static-bucket: ${{ vars.DOCS_STATIC_BUCKET }}
+      - name: Check relocation publication state
+        id: relocation
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'CHECK'
+          import os
+          import re
+          import urllib.error
+          import urllib.request
+          from pathlib import Path
+          source = Path('buildSrc/src/main/kotlin/Config.kt').read_text()
+          artifacts = re.findall(r'const val ARTIFACT(?:_\w+)?_ID = "([^"]+)"', source)
+          artifacts.remove('gauge')
+          published = []
+          for artifact in artifacts:
+              url = f'https://repo.maven.apache.org/maven2/io/github/dautovicharis/{artifact}/3.0.0/{artifact}-3.0.0.pom'
+              try:
+                  with urllib.request.urlopen(url, timeout=30) as response:
+                      published.append(artifact)
+              except urllib.error.HTTPError as error:
+                  if error.code != 404:
+                      raise
+          if published and len(published) != len(artifacts):
+              raise SystemExit(f'Partial relocation publication; refusing duplicate upload: {published}')
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write(f'publish={str(not published).lower()}\n')
+          print(f'{len(published)}/{len(artifacts)} relocation POMs already published')
+          CHECK
       - name: Prepare Maven publishing
+        if: steps.relocation.outputs.publish == 'true'
         uses: ./.github/actions/prepare-maven-publishing
         with:
           maven-central-username: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
@@ -176,20 +105,53 @@ jobs:
           signing-key-id: ${{ secrets.SIGNING_KEY_ID }}
           signing-password: ${{ secrets.SIGNING_PASSWORD }}
           signing-in-memory-key: ${{ secrets.SIGNING_IN_MEMORY_KEY }}
-      - name: Create release tag locally with Axion
-        run: ./gradlew createRelease -PchartsReleaseVersion="${{ needs.prepare-release.outputs.release_version }}" -Prelease.disableRemoteCheck --no-daemon --stacktrace
-      - name: Publish to Maven Central
-        uses: ./.github/actions/publish-charts-modules
-        with:
-          maven-central-username: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
-          maven-central-password: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
-          signing-key-id: ${{ secrets.SIGNING_KEY_ID }}
-          signing-password: ${{ secrets.SIGNING_PASSWORD }}
-          signing-in-memory-key: ${{ secrets.SIGNING_IN_MEMORY_KEY }}
-          gradle-arguments: -PchartsReleaseVersion=${{ needs.prepare-release.outputs.release_version }} --no-build-cache
-          prepare-publishing: false
-      - name: Push release tag with Axion
-        run: ./gradlew pushRelease -Prelease.pushTagsOnly --no-daemon --stacktrace
+      - name: Publish only relocation POMs
+        if: steps.relocation.outputs.publish == 'true'
+        shell: bash
+        run: |
+          ./gradlew :charts-relocation:publish -PchartsReleaseVersion=3.0.0 \
+            -PSONATYPE_CLOSE_TIMEOUT_SECONDS=3600 \
+            --no-build-cache --no-daemon --stacktrace
+      - name: Verify relocation POMs are publicly available
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'CHECK'
+          import re
+          import time
+          import urllib.error
+          import urllib.request
+          from pathlib import Path
+          source = Path('buildSrc/src/main/kotlin/Config.kt').read_text()
+          pending = set(re.findall(r'const val ARTIFACT(?:_\w+)?_ID = "([^"]+)"', source)) - {'gauge'}
+          deadline = time.monotonic() + 1200
+          while pending:
+              for artifact in list(pending):
+                  url = f'https://repo.maven.apache.org/maven2/io/github/dautovicharis/{artifact}/3.0.0/{artifact}-3.0.0.pom'
+                  try:
+                      with urllib.request.urlopen(url, timeout=30) as response:
+                          response.read()
+                      pending.remove(artifact)
+                      print(f'Published relocation: {artifact}', flush=True)
+                  except urllib.error.HTTPError as error:
+                      if error.code != 404:
+                          raise
+              if pending:
+                  if time.monotonic() >= deadline:
+                      raise SystemExit(f'Relocation availability timed out: {sorted(pending)}')
+                  print(f'Waiting for {len(pending)} relocation POMs', flush=True)
+                  time.sleep(20)
+          CHECK
+      - name: Push release tag at the published source
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git rev-parse -q --verify refs/tags/3.0.0 >/dev/null; then
+            test "$(git rev-parse 'refs/tags/3.0.0^{commit}')" = 60864f821601ef8b12afe84586638553ce8f8090
+          else
+            git tag 3.0.0 60864f821601ef8b12afe84586638553ce8f8090
+            git push origin refs/tags/3.0.0
+          fi
 
   build-android:
     name: Build Android Release
@@ -301,24 +263,3 @@ jobs:
         with:
           source-sha: ${{ needs.prepare-release.outputs.source_sha }}
           version: ${{ needs.prepare-release.outputs.release_version }}
-      - name: Comment on commit
-        uses: actions/github-script@v9
-        env:
-          RELEASE_VERSION: ${{ needs.prepare-release.outputs.release_version }}
-          RELEASE_URL: ${{ steps.publish.outputs.release-url }}
-        with:
-          script: |
-            const version = process.env.RELEASE_VERSION;
-            const releaseUrl = process.env.RELEASE_URL;
-
-            const message = [
-              `📚 [Documentation](https://charts.hdcode.dev/)`,
-              `📦 [Maven Central](https://central.sonatype.com/artifact/io.github.hdcharts/charts/${version})`,
-            ].join('\n');
-
-            await github.rest.repos.createCommitComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              commit_sha: context.sha,
-              body: `${message}\n\n🔗 [GitHub Release](${releaseUrl})`,
-            });
