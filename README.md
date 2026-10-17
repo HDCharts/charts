@@ -46,7 +46,7 @@
 ---
 
 ## 📚 Documentation
-https://charts.hdcode.dev/snapshot/wiki
+https://charts.hdcode.dev/
 
 ## 🟢 Interactive Demo
 https://charts.hdcode.dev/demo/snapshot/
