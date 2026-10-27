@@ -17,8 +17,14 @@ inputs:
 
 outputs:
   cache-hit:
-    description: Whether the cache was restored from its primary key.
+    description: Whether the dependency cache was restored from its primary key.
     value: ${{ steps.java.outputs.cache-hit }}
+  build-cache-hit:
+    description: Whether task outputs were restored for this exact commit.
+    value: ${{ steps.build-cache.outputs.cache-hit }}
+  build-cache-key:
+    description: Key under which the warm workflow saves this commit's task outputs.
+    value: ${{ steps.build-cache.outputs.cache-primary-key }}
 
 runs:
   using: composite
@@ -45,8 +51,20 @@ runs:
         java-version: 17
         distribution: 'zulu'
         cache: ${{ inputs.gradle-cache == 'true' && 'gradle' || '' }}
-        # Blank lines are dropped, so without kotlin-native setup-java uses its default paths.
+        # Cache each child separately so tar cannot include build-cache-1 through its parent.
         cache-path: |
-          ${{ inputs.kotlin-native == 'true' && '~/.gradle/caches' || '' }}
+          ~/.gradle/caches/*
+          !~/.gradle/caches/build-cache-1
           ${{ inputs.kotlin-native == 'true' && '~/.konan' || '' }}
         cache-read-only: ${{ inputs.cache-read-only }}
+
+    # Restore only: the warm workflow is the sole writer of task outputs on main.
+    - name: Restore Gradle task outputs
+      if: ${{ inputs.gradle-cache == 'true' }}
+      id: build-cache
+      uses: actions/cache/restore@v6
+      with:
+        path: ~/.gradle/caches/build-cache-1
+        key: gradle-build-v1-${{ runner.os }}-${{ runner.arch }}-${{ github.sha }}
+        restore-keys: |
+          gradle-build-v1-${{ runner.os }}-${{ runner.arch }}-

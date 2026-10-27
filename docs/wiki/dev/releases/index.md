@@ -44,8 +44,11 @@ That makes the pull-request checks the tests that gate every commit. See
 [Pull Requests](pull-requests.md) for the jobs they run and
 [Validation Matrix](validation-matrix.md) for what each one covers.
 
-`warm-gradle-cache.yml` runs on `main` when build files change and twice a week. It runs lint, the
-JVM tests and the API diff, compiles the other Linux and iOS CI targets, and saves the Gradle caches
-that pull-request jobs restore. Other workflows on `main` restore those caches read-only. The
-playground job keeps its own cache, and release jobs start fresh. Pull requests use the cache from
-its latest passing run.
+`warm-gradle-cache.yml` runs on `main` when sources, resources, or build files change and twice a
+week. It runs lint, the JVM tests and the API diff, and compiles the other Linux and iOS CI targets.
+Dependencies use a cache keyed by build files. Gradle task outputs use a separate cache keyed by
+runner OS, architecture, and commit, so source changes refresh the outputs that pull requests
+restore. Each warm job restores earlier outputs and saves the updated cache after a successful
+build. Pull requests restore the latest available outputs for their platform without saving them.
+Other workflows on `main` restore caches read-only. The playground job keeps its own dependency
+cache, and release jobs start fresh.
