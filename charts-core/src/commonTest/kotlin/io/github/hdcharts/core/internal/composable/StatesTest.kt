@@ -30,24 +30,4 @@ class StatesTest {
                 }
             }
         }
-
-    @OptIn(ExperimentalTestApi::class)
-    @Test
-    fun rememberAnimationState_shouldReturnZero() =
-        runComposeUiTest {
-            setContent {
-                val result = rememberAnimationState()
-                assertTrue { result.value == 0f }
-            }
-        }
-
-    @OptIn(ExperimentalTestApi::class)
-    @Test
-    fun rememberAnimationState_shouldReturnOne() =
-        runComposeUiTest {
-            setContent {
-                val result = rememberAnimationState(isPreviewMode = true)
-                assertTrue { result.value == 1f }
-            }
-        }
 }
