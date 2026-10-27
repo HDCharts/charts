@@ -64,4 +64,5 @@ runs:
         write_env ORG_GRADLE_PROJECT_mavenCentralPublishing "true"
         write_env ORG_GRADLE_PROJECT_mavenCentralAutomaticPublishing "true"
         write_env ORG_GRADLE_PROJECT_mavenCentralDeploymentValidation "PUBLISHED"
+        write_env ORG_GRADLE_PROJECT_SONATYPE_CLOSE_TIMEOUT_SECONDS "3600"
         write_env ORG_GRADLE_PROJECT_signAllPublications "true"
