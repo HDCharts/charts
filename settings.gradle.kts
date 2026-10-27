@@ -86,7 +86,6 @@ include(":charts-gauge")
 include(":charts-stacked-bar")
 include(":charts-stacked-area")
 include(":charts-bom")
-include(":charts-relocation")
 include(":smoke-line")
 
 // Demo app modules live under sample/.
