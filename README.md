@@ -18,7 +18,7 @@
     <img src="https://img.shields.io/maven-central/v/io.github.hdcharts/charts.svg?label=Maven%20Central" />
   </a>
   <a href="https://central.sonatype.com/repository/maven-snapshots/io/github/hdcharts/charts/maven-metadata.xml">
-    <img src="https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fcentral.sonatype.com%2Frepository%2Fmaven-snapshots%2Fio%2Fgithub%2Fhdcharts%2Fcharts%2Fmaven-metadata.xml&label=Snapshots&color=4285F4" />
+    <img src="https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fcentral.sonatype.com%2Frepository%2Fmaven-snapshots%2Fio%2Fgithub%2Fhdcharts%2Fcharts%2Fmaven-metadata.xml&strategy=latestProperty&label=Snapshots&color=4285F4" />
   </a>
   <img src="https://img.shields.io/badge/Compose_Multiplatform-1.12.1-4285F4?logo=jetpackcompose" />
   <img src="https://img.shields.io/badge/Kotlin_Multiplatform-2.4.20-0095D5?logo=kotlin" />
