@@ -42,6 +42,9 @@ HDCharts
 ## Report issues
 Open an issue: https://github.com/HDCharts/charts/issues
 
+## AI-assisted contributions
+See [AI-Assisted Contributions Policy](AI_POLICY.md).
+
 ## Technical decisions
 See why things are built the way they are: https://charts.hdcode.dev/dev/decisions
 
