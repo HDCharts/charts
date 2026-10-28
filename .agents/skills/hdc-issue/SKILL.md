@@ -46,11 +46,11 @@ permission to post.
    ```
 
    Report close matches to the user before drafting.
-4. Write the title to `temp/issues/<short-kebab-summary>.title` and the body
-   to `temp/issues/<short-kebab-summary>.md` (both gitignored). Keep every
-   template heading in its order and fill each one. Write `N/A` for sections
-   that do not apply, such as Steps To Reproduce for a feature request. For
-   the version, use the current commit (`git rev-parse --short HEAD`).
+4. Draft the title and body in the conversation. Do not write draft files in
+   or outside the repository. Keep every template heading in its order and
+   fill each one. Write `N/A` for sections that do not apply, such as Steps To
+   Reproduce for a feature request. For the version, use the current commit
+   (`git rev-parse --short HEAD`).
 5. Pick labels only from the existing set; never create labels:
 
    ```bash
@@ -58,35 +58,62 @@ permission to post.
    ```
 
    Use `bug` for broken behavior and `feature` for requests.
-6. Show the proposed title, labels, `Priority` and `Effort` issue fields
-   (always set both), body, story (or "standalone"), and the exact commands
-   in one `question` prompt. Apply the user's edits to the
-   draft and ask again until they approve.
-7. Create the issue. Reading the title from its file keeps quotes in it
-   intact. Pass one `labels[]` field per label, and none when there is no
-   label:
+6. Set a `Type`, `Priority`, and `Effort` for every issue. `Type` is `Task`
+   for a specific piece of work, `Bug` for unexpected behavior, or `Feature`
+   for a request, idea, or new functionality. `Priority` accepts `Urgent`,
+   `High`, `Medium`, or `Low`; `Effort` accepts `High`, `Medium`, or `Low`.
+   Pass an option name, not its numeric option id. Look up the available
+   types, field ids, and allowed values before drafting the commands, because
+   the repository configuration can change:
 
    ```bash
-   gh api repos/HDCharts/charts/issues \
-     -f title="$(cat temp/issues/<short-kebab-summary>.title)" \
-     -F body=@temp/issues/<short-kebab-summary>.md \
-     -f 'labels[]=<label>' \
-     --jq '"\(.id) \(.html_url)"'
+   gh api repos/HDCharts/charts/issue-types --jq \
+     '.[].name'
+
+   gh api orgs/HDCharts/issue-fields --jq \
+     '.[] | select(.name == "Priority" or .name == "Effort") | "\(.name) (field_id=\(.id)): \([.options[].name] | join(", "))"'
    ```
 
-8. With a story, attach the new issue using the `id` from step 7. The `id` is
-   GitHub's internal id, which differs from the `#number`; `-F` sends it as
-   an integer:
+   Show the proposed title, labels, `Type`, `Priority`, and `Effort` values,
+   body, story (or "standalone"), and the exact create, field-update, and
+   verification commands in one `question` prompt. Apply the user's edits to
+   the draft and ask again until they approve.
+7. Create the issue with `gh issue create`. Pipe the exact approved Markdown
+   body through standard input, capture the returned URL, and derive the issue
+   number for step 8. Omit `--label` when there are no labels and `--parent`
+   for a standalone issue. For a story supplied as `#690`, pass `690` to
+   `--parent`; a full story URL also works:
 
    ```bash
-   gh api repos/HDCharts/charts/issues/<story>/sub_issues \
-     -F sub_issue_id=<id>
+   issue_url="$(gh issue create \
+     --repo HDCharts/charts \
+     --title '<title>' \
+     --body-file - \
+     --label '<label>' \
+     --type '<type>' \
+     --parent <story-number-or-url> <<'ISSUE_BODY'
+   <body>
+   ISSUE_BODY
+   )"
+   issue_number="${issue_url##*/}"
    ```
 
-   If attaching fails, report the created issue URL and the error. Leave the
-   issue in place; creating it again makes a duplicate.
-9. Report the issue URL, and the story it belongs to. Leave the draft in
-   `temp/issues/`.
+8. Set the approved field values using the `number` from step 7 and the field
+   ids from step 6. Verify the `Type` and field values before continuing:
+
+   ```bash
+   gh api -X POST repos/HDCharts/charts/issues/<number>/issue-field-values \
+     --input - <<< '{"issue_field_values":[{"field_id":<priority-field-id>,"value":"<priority>"},{"field_id":<effort-field-id>,"value":"<effort>"}]}'
+
+   gh api repos/HDCharts/charts/issues/<number> \
+     --jq '"Type=\(.type.name)"'
+
+   gh api repos/HDCharts/charts/issues/<number>/issue-field-values \
+     --jq '.[] | "\(.issue_field_name)=\(.single_select_option.name)"'
+   ```
+
+9. Report the issue URL, its `Type`, `Priority`, and `Effort` values, and
+   the story it belongs to.
 
 ## Wording
 
