@@ -10,4 +10,5 @@ repositories {
 
 dependencies {
     implementation(libs.japicmp.gradle.plugin)
+    testImplementation(kotlin("test"))
 }
