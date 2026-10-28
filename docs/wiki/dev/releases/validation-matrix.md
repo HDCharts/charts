@@ -11,7 +11,7 @@ only when the pull request changes code or build files. Workflow:
 
 | CI job | Gradle entry task | Tests included | Runs on |
 | --- | --- | --- | --- |
-| JVM Tests | `./gradlew ciTestJvm` | `jvmTest` for the library modules, plus `:sample-shared`, `:sample-api`, and `:app`. | Ubuntu, Zulu JDK 17. |
+| JVM Tests | `./gradlew ciTestJvm` | `jvmTest` for the library modules, plus `:sample-shared`, `:sample-api`, `:app`, and `buildSrc` unit tests. | Ubuntu, Zulu JDK 17. |
 | Android Instrumented Tests 1/2 and 2/2 | `./gradlew ciTestAndroidInstrumented -PandroidTestShard=<1\|2>` | `connectedAndroidTest` for every chart library module except `charts-core` and `charts`, split across two emulator jobs. | Ubuntu; API 35 `aosp_atd` x86_64 Nexus 6 emulator at 280 dpi with KVM. |
 | Screenshot Tests | `./gradlew ciTestScreenshot` | `:androidApp:validateDebugScreenshotTest`. | Ubuntu, Zulu JDK 17. |
 | Wasm Tests | `./gradlew ciTestWeb` | `wasmJsTest` for every chart library module. | Ubuntu, Kotlin/Wasm browser tests. |
