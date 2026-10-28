@@ -9,13 +9,13 @@ class ApiCompatibilityExclusionsTest {
     fun `matches JApiCmp filtering for API classes`() {
         val cases =
             mapOf(
-                "com.example.internal.Foo" to true,
-                "com.example.internal.Foo\$Nested" to true,
-                "com.example.internal.deep.Foo" to true,
-                "com.example.ComposableSingletons\$FooKt" to true,
-                "com.example.internalUtils.Foo" to false,
-                "com.example.api.Foo" to false,
-                "com.example.api.ComposableSingletonsHelper" to false,
+                "io.github.hdcharts.core.internal.ApiCompatibilityTestClass" to true,
+                "io.github.hdcharts.core.internal.ApiCompatibilityTestClass\$Nested" to true,
+                "io.github.hdcharts.core.internal.deep.ApiCompatibilityTestClass" to true,
+                "io.github.hdcharts.core.ComposableSingletons\$ApiCompatibilityTestKt" to true,
+                "io.github.hdcharts.core.internalUtils.ApiCompatibilityTestClass" to false,
+                "io.github.hdcharts.core.model.ApiCompatibilityTestClass" to false,
+                "io.github.hdcharts.core.model.ComposableSingletonsHelper" to false,
             )
 
         cases.forEach { (className, expectedExcluded) ->
