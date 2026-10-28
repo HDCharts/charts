@@ -85,17 +85,6 @@ class BarChartHelpersTest {
     }
 
     @Test
-    fun shouldUseScrollableDensity_resolvesFromThreshold() {
-        assertEquals(expected = false, actual = shouldUseScrollableDensity(pointsCount = 49))
-        assertEquals(expected = true, actual = shouldUseScrollableDensity(pointsCount = 50))
-    }
-
-    @Test
-    fun shouldUseScrollableDensity_returnsFalseForEmptyData() {
-        assertEquals(expected = false, actual = shouldUseScrollableDensity(pointsCount = 0))
-    }
-
-    @Test
     fun contentWidth_usesBarUnitAndSpacing() {
         val barWidth = 8f
         val spacing = 2f

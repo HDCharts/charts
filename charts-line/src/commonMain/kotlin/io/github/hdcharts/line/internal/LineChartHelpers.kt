@@ -12,7 +12,6 @@ import io.github.hdcharts.core.internal.density.aggregatePointsByAverage
 import io.github.hdcharts.core.internal.density.bucketCenterIndex
 import io.github.hdcharts.core.internal.density.bucketSizeForTarget
 import io.github.hdcharts.core.internal.density.buildBucketRanges
-import io.github.hdcharts.core.internal.density.shouldUseScrollableDensity
 import io.github.hdcharts.core.internal.model.ChartRenderData
 import io.github.hdcharts.core.internal.model.minMax
 import io.github.hdcharts.core.internal.model.resolveOptionalRange
@@ -20,12 +19,6 @@ import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.model.ChartSeries
 
 internal const val LINE_DENSE_THRESHOLD = 50
-
-internal fun shouldUseScrollableDensity(pointsCount: Int): Boolean =
-    shouldUseScrollableDensity(
-        pointsCount = pointsCount,
-        threshold = LINE_DENSE_THRESHOLD,
-    )
 
 internal fun compactDensityRanges(
     sourcePointsCount: Int,

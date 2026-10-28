@@ -38,12 +38,6 @@ class LineChartHelpersTest {
     }
 
     @Test
-    fun shouldUseScrollableDensity_resolvesFromThreshold() {
-        assertEquals(expected = false, actual = shouldUseScrollableDensity(pointsCount = 49))
-        assertEquals(expected = true, actual = shouldUseScrollableDensity(pointsCount = 50))
-    }
-
-    @Test
     fun aggregateForCompactDensity_aboveThreshold_reducesPointCount() {
         val sourcePoints = List(120) { index -> (index + 1).toDouble() }
         val sourceLabels = List(120) { index -> "P${index + 1}" }

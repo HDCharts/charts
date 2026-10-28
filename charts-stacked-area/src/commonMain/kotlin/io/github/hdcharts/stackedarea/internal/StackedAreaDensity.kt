@@ -8,7 +8,6 @@ import io.github.hdcharts.core.internal.density.aggregateLabelsByCenterValue as 
 import io.github.hdcharts.core.internal.density.aggregatePointsByAverage as aggregatePointsByAverageCore
 import io.github.hdcharts.core.internal.density.bucketSizeForTarget as bucketSizeForTargetCore
 import io.github.hdcharts.core.internal.density.buildBucketRanges as buildBucketRangesCore
-import io.github.hdcharts.core.internal.density.shouldUseScrollableDensity as shouldUseScrollableDensityCore
 
 internal const val STACKED_AREA_DENSE_THRESHOLD = 50
 
@@ -27,12 +26,6 @@ internal data class StackedAreaRenderData(
         return renderIndex.takeIf { it >= 0 } ?: NO_SELECTION
     }
 }
-
-internal fun shouldUseScrollableDensity(pointsCount: Int): Boolean =
-    shouldUseScrollableDensityCore(
-        pointsCount = pointsCount,
-        threshold = STACKED_AREA_DENSE_THRESHOLD,
-    )
 
 internal fun resolveStackedAreaTotalsRange(data: ChartRenderData): Pair<Double, Double> {
     val pointsCount = data.valueCount()

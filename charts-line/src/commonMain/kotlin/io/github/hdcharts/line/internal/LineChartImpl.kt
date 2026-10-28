@@ -14,6 +14,7 @@ import io.github.hdcharts.core.internal.composable.rememberDenseExpandedState
 import io.github.hdcharts.core.internal.composable.rememberZoomScaleState
 import io.github.hdcharts.core.internal.composable.zoomInScale
 import io.github.hdcharts.core.internal.composable.zoomOutScale
+import io.github.hdcharts.core.internal.density.shouldUseScrollableDensity
 import io.github.hdcharts.core.internal.model.ChartRenderData
 import io.github.hdcharts.line.LineChartStyle
 import kotlinx.collections.immutable.ImmutableList
@@ -47,7 +48,10 @@ internal fun LineChartImpl(
     val sourcePointsCount = remember(data) { data.valueCount() }
     val isDenseData =
         remember(sourcePointsCount) {
-            shouldUseScrollableDensity(sourcePointsCount)
+            shouldUseScrollableDensity(
+                pointsCount = sourcePointsCount,
+                threshold = LINE_DENSE_THRESHOLD,
+            )
         }
     // Without interaction the user cannot collapse, so fall back to the fit view.
     var denseExpanded by rememberDenseExpandedState(isDenseModeAvailable = interactionEnabled && isDenseData)

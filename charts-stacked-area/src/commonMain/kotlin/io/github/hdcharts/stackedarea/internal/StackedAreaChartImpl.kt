@@ -62,6 +62,7 @@ import io.github.hdcharts.core.internal.composable.rememberZoomScaleState
 import io.github.hdcharts.core.internal.composable.zoomInScale
 import io.github.hdcharts.core.internal.composable.zoomOutScale
 import io.github.hdcharts.core.internal.density.denseStepForViewport
+import io.github.hdcharts.core.internal.density.shouldUseScrollableDensity
 import io.github.hdcharts.core.internal.drawing.drawHorizontalGrid
 import io.github.hdcharts.core.internal.drawing.drawPlotAxisLines
 import io.github.hdcharts.core.internal.drawing.drawSelectionLine
@@ -115,7 +116,10 @@ internal fun StackedAreaChartImpl(
     val sourcePointsCount = data.valueCount()
     val isDenseData =
         remember(sourcePointsCount) {
-            shouldUseScrollableDensity(sourcePointsCount)
+            shouldUseScrollableDensity(
+                pointsCount = sourcePointsCount,
+                threshold = STACKED_AREA_DENSE_THRESHOLD,
+            )
         }
     var denseExpanded by rememberDenseExpandedState(isDenseModeAvailable = isDenseData)
     val compactDenseMode = isDenseData && !denseExpanded
