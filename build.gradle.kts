@@ -181,6 +181,12 @@ tasks.register<Exec>("buildSrcKtlintCheck") {
     commandLine("./gradlew", "-p", "buildSrc", "ktlintCheck")
 }
 
+tasks.register<Exec>("buildSrcTest") {
+    group = "verification"
+    description = "Runs unit tests for buildSrc Kotlin code and scripts"
+    commandLine("./gradlew", "-p", "buildSrc", "test")
+}
+
 tasks.register<Exec>("buildSrcKtlintFormat") {
     group = "formatting"
     description = "Runs ktlintFormat for buildSrc Kotlin code and scripts"
@@ -283,6 +289,7 @@ tasks.register("ciTestJvm") {
     group = "CI"
     description = "CI entry point for JVM tests"
     dependsOn("chartsTestJvm")
+    dependsOn("buildSrcTest")
 }
 
 // CI splits instrumented tests across two emulator jobs with -PandroidTestShard=1|2.

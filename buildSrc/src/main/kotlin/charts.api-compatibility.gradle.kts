@@ -20,10 +20,6 @@ private val apiCompatibilitySemVerPattern = Regex("^[0-9]+\\.[0-9]+\\.[0-9]+$")
 // release heading can only match a leading X.Y.Z prefix, not the whole resolved version string.
 private val apiCompatibilitySemVerPrefixPattern = Regex("^[0-9]+\\.[0-9]+\\.[0-9]+")
 private val apiCompatibilityDefaultBaselineJarsDir = "api-compatibility/baseline-jars"
-// japicmp --exclude expects wildcard expressions, not regex.
-private val apiCompatibilityInternalExcludePattern = "*.internal.*"
-// Compose compiler implementation detail whose generated members can change between Kotlin versions.
-private val apiCompatibilityComposeSingletonsExcludePattern = "*.ComposableSingletons\$*"
 
 private fun Project.baselineJarsDir(): File =
     providers
@@ -216,8 +212,8 @@ private val apiCompatibilityTasks =
             failOnModification = false
             onlyBinaryIncompatibleModified = true
             failOnSourceIncompatibility = false
-            packageExcludes = listOf(apiCompatibilityInternalExcludePattern)
-            classExcludes = listOf(apiCompatibilityComposeSingletonsExcludePattern)
+            packageExcludes = apiCompatibilityPackageExcludes
+            classExcludes = apiCompatibilityClassExcludes
             mdOutputFile.set(layout.buildDirectory.file("reports/api-compatibility/$artifactId.md"))
             xmlOutputFile.set(project.apiCompatibilityXmlReportFile(artifactId))
 

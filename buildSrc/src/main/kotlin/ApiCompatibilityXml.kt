@@ -64,5 +64,9 @@ internal fun parseJapicmpXmlFindings(
             .apply { isNamespaceAware = false }
             .newDocumentBuilder()
             .parse(xmlFile)
-    return document.getElementsByTagName("class").elements().flatMap { it.classFindings(module) }
+    return document
+        .getElementsByTagName("class")
+        .elements()
+        .filterNot { isExcludedApiClass(it.getAttribute("fullyQualifiedName")) }
+        .flatMap { it.classFindings(module) }
 }
