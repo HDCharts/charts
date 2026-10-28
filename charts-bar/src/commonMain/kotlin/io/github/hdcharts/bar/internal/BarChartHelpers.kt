@@ -5,7 +5,6 @@ import androidx.compose.ui.unit.IntSize
 import io.github.hdcharts.core.internal.density.aggregateLabelsByCenterValue
 import io.github.hdcharts.core.internal.density.bucketSizeForTarget
 import io.github.hdcharts.core.internal.density.buildBucketRanges
-import io.github.hdcharts.core.internal.density.shouldUseScrollableDensity
 import io.github.hdcharts.core.internal.model.resolveOptionalRange
 import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.model.ChartSeries
@@ -33,12 +32,6 @@ internal fun getSelectedIndexForContentX(
     dataSize: Int,
     unitWidthPx: Float,
 ): Int = if (dataSize <= 0 || unitWidthPx <= 0f) 0 else (contentX / unitWidthPx).toInt().coerceIn(0, dataSize - 1)
-
-internal fun shouldUseScrollableDensity(pointsCount: Int): Boolean =
-    shouldUseScrollableDensity(
-        pointsCount = pointsCount,
-        threshold = BAR_DENSE_THRESHOLD,
-    )
 
 /**
  * The same data with neighbouring bars averaged into [targetPoints] buckets, for compact dense mode.
