@@ -36,8 +36,8 @@ class ChartPolicyConformanceTest {
     }
 
     /**
-     * What the table records about each policy. [colors] is the rule rather than a value, because
-     * `expectedColors` is a function and two policies can declare the same behaviour two ways.
+     * What the table records about each policy. [colors] summarizes the actual expected color counts
+     * for one-series and two-series inputs.
      */
     private data class PolicyRow(
         val minValues: Int,
@@ -192,8 +192,9 @@ class ChartPolicyConformanceTest {
             val twoSeries = expectedColors(TWO_SERIES)
             return when {
                 oneSeries == null && twoSeries == null -> "skipped"
-                oneSeries != null && twoSeries != null -> "series count"
-                else -> "series count, only with more than one series"
+                oneSeries == 1 && twoSeries == 2 -> "series count"
+                oneSeries == null && twoSeries == 2 -> "series count, only with more than one series"
+                else -> error("Unexpected expectedColors results: one=$oneSeries, two=$twoSeries")
             }
         }
 

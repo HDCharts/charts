@@ -27,9 +27,13 @@ flowchart LR
 | Clamp | Puts style values into their drawable ranges at the current density | Seam, through the spec's `clamp` |
 | Draw | Picks a domain, aggregates, resolves colors, lays out header, plot and legend, and draws | The chart's content composable |
 
-Everything up to and including the clamp is the seam. Each step is remembered against the values it
-reads, including the specification, so it runs once per specification, data, style, title or density
-change rather than on every recomposition.
+Everything up to and including the clamp is the seam. Validation extracts a value-based
+`ValidationSnapshot` from the style and remembers errors against the specification, public data,
+snapshot and density. A new style instance with equivalent validation values therefore reuses the
+validation result. Conversion is remembered against the specification, data and title. Clamping is
+remembered against the specification, full style and density because it reads drawable style values.
+The snapshot extraction is lightweight and runs during recomposition; the validation pass runs only
+when one of its value-based dependencies changes.
 
 Clamping is last rather than in stage order because invalid data returns before it: nothing is
 clamped for a chart that is about to render errors.
@@ -105,6 +109,17 @@ cannot carry stacking or a multi-series color rule.
 | `SeriesRule.Multiple.expectedColors` | How many colors the style must set; a null result disables matching for that data |
 | `range = { ... }` | The range-bound check and its style values |
 | `axes = { ... }` | The X and Y axis label checks and their style values |
+
+## Future chart families
+
+`ChartPolicy<S>` and `SeriesRule` describe charts built on the current indexed-series `ChartData`
+model. That covers the existing line, bar, pie, radar, stacked and gauge families naturally.
+
+Future charts may use fundamentally different data models. Scatter and bubble charts need XY
+coordinates, candlesticks need OHLC values, heatmaps need two-dimensional values, Sankey charts need
+nodes and connections, and treemaps need hierarchical data. Do not force those models into
+`SeriesRule` just to reuse the current validator. The shared `ChartEntry` lifecycle may still be
+useful, but each new chart family can define a validation contract that matches its data.
 
 A policy reads the style through its mappers. A null range or axes mapper means that capability does
 not apply. `RangeInputs(min = null, max = null)` means the chart has an explicit automatic range,

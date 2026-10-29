@@ -63,11 +63,28 @@ data class AxisInputs(
     val yLabels: AxisLabelStyle,
 )
 
+/** The value-based style inputs that validation reads for one policy evaluation. */
+@InternalChartsApi
+data class ValidationSnapshot(
+    val colorCount: Int,
+    val range: RangeInputs?,
+    val axes: AxisInputs?,
+)
+
+/** Extracts the style values that can affect validation. */
+@InternalChartsApi
+fun <S : Any> ChartPolicy<S>.snapshot(style: S): ValidationSnapshot =
+    ValidationSnapshot(
+        colorCount = colorCount(style),
+        range = range?.invoke(style),
+        axes = axes?.invoke(style),
+    )
+
 /** The errors of every check this policy enables, in the order the checks read. */
 @InternalChartsApi
 fun <S : Any> ChartPolicy<S>.errorsFor(
     data: ChartData,
-    style: S,
+    inputs: ValidationSnapshot,
     density: Density,
 ): List<String> {
     val errors =
@@ -77,7 +94,7 @@ fun <S : Any> ChartPolicy<S>.errorsFor(
                     data = data,
                     minValues = rule.minValues,
                     allowNegative = rule.allowNegative,
-                    colorCount = colorCount(style),
+                    colorCount = inputs.colorCount,
                 )
             is SeriesRule.Multiple ->
                 validateSeries(
@@ -85,15 +102,23 @@ fun <S : Any> ChartPolicy<S>.errorsFor(
                     minValues = rule.minValues,
                     allowNegative = rule.allowNegative,
                     stacksValues = rule.stacked,
-                    colorCount = colorCount(style),
+                    colorCount = inputs.colorCount,
                     expectedColors = rule.expectedColors(data),
                 )
         }.toMutableList()
-    range?.invoke(style)?.let { inputs ->
-        errors += validateRange(min = inputs.min, max = inputs.max)
+    inputs.range?.let { range ->
+        errors += validateRange(min = range.min, max = range.max)
     }
-    axes?.invoke(style)?.let { inputs ->
-        errors += validateAxisLabels(xLabels = inputs.xLabels, yLabels = inputs.yLabels, density = density)
+    inputs.axes?.let { axes ->
+        errors += validateAxisLabels(xLabels = axes.xLabels, yLabels = axes.yLabels, density = density)
     }
     return errors
 }
+
+/** Evaluates validation directly from a style for non-composable callers. */
+@InternalChartsApi
+fun <S : Any> ChartPolicy<S>.errorsFor(
+    data: ChartData,
+    style: S,
+    density: Density,
+): List<String> = errorsFor(data = data, inputs = snapshot(style), density = density)

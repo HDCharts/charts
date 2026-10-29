@@ -25,8 +25,9 @@ import kotlinx.collections.immutable.toImmutableList
  * Stages that need layout size — domain, normalization, density, drawing — belong in the content
  * composable, below this seam, because they cannot be decided before constraints are known.
  *
- * All three run inside a `remember`, so none may capture state that changes without [spec],
- * [style], [data], or [title] changing.
+ * Validation extracts a value-based snapshot from [style] and remembers errors against [spec],
+ * [data], the snapshot and density. Conversion is remembered against [spec], [data] and [title].
+ * Clamping is remembered against [spec], [style] and density.
  */
 @InternalChartsApi
 @Composable
@@ -40,9 +41,11 @@ fun <S : Any> ChartEntry(
     title: String? = null,
 ) {
     val density = LocalDensity.current
+    val policy = spec.policy
+    val snapshot = policy.snapshot(style)
     val errors =
-        remember(data, spec, style, density) {
-            spec.policy.errorsFor(data = data, style = style, density = density)
+        remember(data, spec, snapshot, density) {
+            policy.errorsFor(data = data, inputs = snapshot, density = density)
         }
     if (errors.isNotEmpty()) {
         ChartErrors(

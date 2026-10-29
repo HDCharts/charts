@@ -3,6 +3,7 @@ package io.github.hdcharts.core.internal
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
@@ -11,15 +12,19 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import io.github.hdcharts.core.internal.model.ChartRenderData
 import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.model.ChartSeries
 import io.github.hdcharts.core.model.chartDataOf
+import io.github.hdcharts.core.style.AxisLabelStyle
 import io.github.hdcharts.core.style.ChartContainerDefaults
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 /**
  * The seam validates first, then converts and clamps once, then hands both to the content. A chart
@@ -79,7 +84,7 @@ class ChartEntryTest {
                     entry(
                         data = chartData(ChartSeries(name = "One", values = listOf(1.0, 2.0))),
                         title = "Title",
-                        spec = TestSpec { density -> clampedAtDensity = density.density },
+                        spec = TestSpec(onClamp = { density -> clampedAtDensity = density.density }),
                     )
                 }
             }
@@ -168,6 +173,94 @@ class ChartEntryTest {
             onNodeWithText("Color count (3) must match series count (1).", substring = true).assertIsDisplayed()
         }
 
+    @Test
+    fun equivalentValidationInputs_doNotRepeatValidation() =
+        runComposeUiTest {
+            var validationRuns = 0
+            val activeStyle =
+                androidx.compose.runtime.mutableStateOf(
+                    TestEntryStyle(size = 8.dp, colorCount = 0),
+                )
+            val spec = TestSpec(onExpectedColors = { validationRuns++ })
+
+            setContent {
+                entry(
+                    spec = spec,
+                    style = activeStyle.value,
+                    data = chartData(ChartSeries(name = "One", values = listOf(1.0, 2.0))),
+                    title = "Title",
+                )
+            }
+
+            assertEquals(expected = 1, actual = validationRuns)
+
+            runOnIdle {
+                activeStyle.value = TestEntryStyle(size = 9.dp, colorCount = 0)
+            }
+            waitForIdle()
+
+            assertEquals(expected = 1, actual = validationRuns)
+        }
+
+    @Test
+    fun changingData_recomputesValidation() =
+        runComposeUiTest {
+            var validationRuns = 0
+            val activeData =
+                androidx.compose.runtime.mutableStateOf(
+                    chartData(ChartSeries(name = "One", values = listOf(1.0, 2.0))),
+                )
+            val spec = TestSpec(onExpectedColors = { validationRuns++ })
+
+            setContent {
+                entry(
+                    spec = spec,
+                    data = activeData.value,
+                    title = "Title",
+                )
+            }
+
+            assertEquals(expected = 1, actual = validationRuns)
+
+            runOnIdle {
+                activeData.value = chartData(ChartSeries(name = "One", values = listOf(1.0)))
+            }
+            waitForIdle()
+
+            assertEquals(expected = 2, actual = validationRuns)
+            onNodeWithText("At least 2 values are required.", substring = true).assertIsDisplayed()
+        }
+
+    @Test
+    fun changingDensity_recomputesDensitySensitiveValidation() =
+        runComposeUiTest {
+            var contentRan = false
+            val activeDensity = androidx.compose.runtime.mutableStateOf(Density(1f))
+            val style = TestEntryStyle(size = 8.dp, axisLabelSize = 20_000.sp)
+
+            setContent {
+                CompositionLocalProvider(LocalDensity provides activeDensity.value) {
+                    entry(
+                        spec = TestSpec(includeAxes = true),
+                        style = style,
+                        data = chartData(ChartSeries(name = "One", values = listOf(1.0, 2.0))),
+                        title = "Title",
+                        content = { _, _ -> SideEffect { contentRan = true } },
+                    )
+                }
+            }
+
+            onNodeWithText("X-axis label size must resolve to at most 16384 pixels.", substring = true)
+                .assertIsDisplayed()
+
+            runOnIdle {
+                activeDensity.value = Density(0.5f)
+            }
+            waitForIdle()
+
+            assertTrue(contentRan)
+        }
+
     @Composable
     private fun entry(
         data: ChartData,
@@ -186,9 +279,10 @@ class ChartEntryTest {
         )
     }
 
-    private data class TestEntryStyle(
+    private class TestEntryStyle(
         val size: Dp,
         val colorCount: Int = 0,
+        val axisLabelSize: TextUnit = 11.sp,
     )
 
     /** A minimal chart: the checks every chart shares, without range or axis inputs. */
@@ -196,6 +290,8 @@ class ChartEntryTest {
         private val minValues: Int = ValidationErrors.MIN_VALUES,
         private val conversionTitle: String? = null,
         private val onClamp: (density: Density) -> Unit = {},
+        private val includeAxes: Boolean = false,
+        private val onExpectedColors: () -> Unit = {},
     ) : ChartSpec<TestEntryStyle> {
         override val policy =
             ChartPolicy<TestEntryStyle>(
@@ -204,11 +300,28 @@ class ChartEntryTest {
                         minValues = minValues,
                         allowNegative = true,
                         stacked = false,
-                        expectedColors = { data -> data.series.size },
+                        expectedColors = { data ->
+                            onExpectedColors()
+                            data.series.size
+                        },
                     ),
                 colorCount = { it.colorCount },
                 range = null,
-                axes = null,
+                axes =
+                    if (includeAxes) {
+                        { style ->
+                            val labels =
+                                AxisLabelStyle(
+                                    visible = true,
+                                    color = Color.Unspecified,
+                                    size = style.axisLabelSize,
+                                    maxCount = null,
+                                )
+                            AxisInputs(xLabels = labels, yLabels = labels)
+                        }
+                    } else {
+                        null
+                    },
             )
 
         override fun clamp(
@@ -216,7 +329,11 @@ class ChartEntryTest {
             density: Density,
         ): TestEntryStyle {
             onClamp(density)
-            return style.copy(size = style.size.clampSize(fallback = FALLBACK_SIZE, density = density))
+            return TestEntryStyle(
+                size = style.size.clampSize(fallback = FALLBACK_SIZE, density = density),
+                colorCount = style.colorCount,
+                axisLabelSize = style.axisLabelSize,
+            )
         }
 
         /** Marks the conversion so the test can tell the seam's output from the caller's input. */
