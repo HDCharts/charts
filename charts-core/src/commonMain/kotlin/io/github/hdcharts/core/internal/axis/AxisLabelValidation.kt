@@ -2,9 +2,9 @@ package io.github.hdcharts.core.internal.axis
 
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.TextUnitType
+import io.github.hdcharts.core.internal.AxisLabelValidationValues
 import io.github.hdcharts.core.internal.InternalChartsApi
 import io.github.hdcharts.core.internal.MAX_SIZE_PX
-import io.github.hdcharts.core.style.AxisLabelStyle
 
 // Smallest label count a style may set; Y-axis ticks need the two ends of the range.
 private const val MIN_AXIS_LABEL_COUNT = 2
@@ -19,8 +19,8 @@ private const val MAX_AXIS_LABEL_COUNT = 1000
  */
 @InternalChartsApi
 fun validateAxisLabels(
-    xLabels: AxisLabelStyle,
-    yLabels: AxisLabelStyle,
+    xLabels: AxisLabelValidationValues,
+    yLabels: AxisLabelValidationValues,
     density: Density,
 ): List<String> =
     listOfNotNull(
@@ -32,7 +32,7 @@ fun validateAxisLabels(
 
 private fun axisLabelSizeError(
     axis: String,
-    labels: AxisLabelStyle,
+    labels: AxisLabelValidationValues,
     density: Density,
 ): String? {
     val size = labels.size
@@ -49,7 +49,7 @@ private fun axisLabelSizeError(
 
 private fun axisLabelCountError(
     axis: String,
-    labels: AxisLabelStyle,
+    labels: AxisLabelValidationValues,
 ): String? {
     val maxCount = labels.maxCount ?: return null
     if (maxCount in MIN_AXIS_LABEL_COUNT..MAX_AXIS_LABEL_COUNT) return null

@@ -1,6 +1,7 @@
 package io.github.hdcharts.core.internal
 
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.TextUnit
 import io.github.hdcharts.core.internal.axis.validateAxisLabels
 import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.style.AxisLabelStyle
@@ -59,9 +60,24 @@ data class RangeInputs(
 /** Both axis label inputs are required whenever a chart declares Cartesian axes. */
 @InternalChartsApi
 data class AxisInputs(
-    val xLabels: AxisLabelStyle,
-    val yLabels: AxisLabelStyle,
+    val xLabels: AxisLabelValidationValues,
+    val yLabels: AxisLabelValidationValues,
 )
+
+/** The axis-label values that can affect validation. */
+@InternalChartsApi
+data class AxisLabelValidationValues(
+    val size: TextUnit,
+    val maxCount: Int?,
+)
+
+/** Extracts the validation-relevant values from a public axis-label style. */
+@InternalChartsApi
+fun AxisLabelStyle.validationValues() =
+    AxisLabelValidationValues(
+        size = size,
+        maxCount = maxCount,
+    )
 
 /** The value-based style inputs that validation reads for one policy evaluation. */
 @InternalChartsApi
@@ -73,7 +89,7 @@ data class ValidationSnapshot(
 
 /** Extracts the style values that can affect validation. */
 @InternalChartsApi
-fun <S : Any> ChartPolicy<S>.snapshot(style: S): ValidationSnapshot =
+fun <S : Any> ChartPolicy<S>.snapshot(style: S) =
     ValidationSnapshot(
         colorCount = colorCount(style),
         range = range?.invoke(style),

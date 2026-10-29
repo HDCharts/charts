@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import io.github.hdcharts.core.internal.AxisLabelValidationValues
 import io.github.hdcharts.core.internal.MAX_GRID_STEPS
 import io.github.hdcharts.core.internal.MAX_SIZE_PX
 import io.github.hdcharts.core.internal.axis.validateAxisLabels
@@ -269,7 +270,11 @@ class BarStyleDefaultsTest {
                 val validation =
                     styles.map {
                         validateRange(min = it.range.min, max = it.range.max) +
-                            validateAxisLabels(it.axes.xLabels, it.axes.yLabels, Density(2f))
+                            validateAxisLabels(
+                                xLabels = AxisLabelValidationValues(it.axes.xLabels.size, it.axes.xLabels.maxCount),
+                                yLabels = AxisLabelValidationValues(it.axes.yLabels.size, it.axes.yLabels.maxCount),
+                                density = Density(2f),
+                            )
                     }
                 SideEffect { errors = validation }
             }

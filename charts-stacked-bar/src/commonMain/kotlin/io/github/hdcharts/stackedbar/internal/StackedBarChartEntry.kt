@@ -15,6 +15,7 @@ import io.github.hdcharts.core.internal.model.ChartRenderData
 import io.github.hdcharts.core.internal.model.transposeForStacking
 import io.github.hdcharts.core.internal.selectedLegendValues
 import io.github.hdcharts.core.internal.selectedTitle
+import io.github.hdcharts.core.internal.validationValues
 import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.model.ChartValueFormatter
 import io.github.hdcharts.stackedbar.StackedBarChartStyle
@@ -38,7 +39,12 @@ object StackedBarChartSpec : ChartSpec<StackedBarChartStyle> {
                 ),
             colorCount = { it.segments.colors.size },
             range = null,
-            axes = { AxisInputs(xLabels = it.axes.xLabels, yLabels = it.axes.yLabels) },
+            axes = {
+                AxisInputs(
+                    xLabels = it.axes.xLabels.validationValues(),
+                    yLabels = it.axes.yLabels.validationValues(),
+                )
+            },
         )
 
     override fun clamp(

@@ -19,7 +19,6 @@ import io.github.hdcharts.core.internal.model.ChartRenderData
 import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.model.ChartSeries
 import io.github.hdcharts.core.model.chartDataOf
-import io.github.hdcharts.core.style.AxisLabelStyle
 import io.github.hdcharts.core.style.ChartContainerDefaults
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -174,14 +173,31 @@ class ChartEntryTest {
         }
 
     @Test
-    fun equivalentValidationInputs_doNotRepeatValidation() =
+    fun equivalentValidationInputs_compareEqualAndDoNotRepeatValidation() =
         runComposeUiTest {
             var validationRuns = 0
+            val spec = TestSpec(includeAxes = true, onExpectedColors = { validationRuns++ })
+            val firstStyle =
+                TestEntryStyle(
+                    size = 8.dp,
+                    axisLabelColor = Color.Black,
+                    axisLabelVisible = true,
+                    axisLabelSize = 12.sp,
+                    axisLabelMaxCount = 5,
+                )
+            val equivalentStyle =
+                TestEntryStyle(
+                    size = 9.dp,
+                    axisLabelColor = Color.Red,
+                    axisLabelVisible = false,
+                    axisLabelSize = 12.sp,
+                    axisLabelMaxCount = 5,
+                )
+            assertEquals(expected = spec.policy.snapshot(firstStyle), actual = spec.policy.snapshot(equivalentStyle))
             val activeStyle =
                 androidx.compose.runtime.mutableStateOf(
-                    TestEntryStyle(size = 8.dp, colorCount = 0),
+                    firstStyle,
                 )
-            val spec = TestSpec(onExpectedColors = { validationRuns++ })
 
             setContent {
                 entry(
@@ -195,11 +211,131 @@ class ChartEntryTest {
             assertEquals(expected = 1, actual = validationRuns)
 
             runOnIdle {
-                activeStyle.value = TestEntryStyle(size = 9.dp, colorCount = 0)
+                activeStyle.value = equivalentStyle
             }
             waitForIdle()
 
             assertEquals(expected = 1, actual = validationRuns)
+        }
+
+    @Test
+    fun changingAxisLabelColor_reusesValidation() =
+        runComposeUiTest {
+            var validationRuns = 0
+            val activeStyle =
+                androidx.compose.runtime.mutableStateOf(
+                    TestEntryStyle(size = 8.dp, axisLabelColor = Color.Black),
+                )
+            val spec = TestSpec(includeAxes = true, onExpectedColors = { validationRuns++ })
+
+            setContent {
+                entry(
+                    spec = spec,
+                    style = activeStyle.value,
+                    data = chartData(ChartSeries(name = "One", values = listOf(1.0, 2.0))),
+                    title = "Title",
+                )
+            }
+
+            assertEquals(expected = 1, actual = validationRuns)
+
+            runOnIdle {
+                activeStyle.value = TestEntryStyle(size = 8.dp, axisLabelColor = Color.Red)
+            }
+            waitForIdle()
+
+            assertEquals(expected = 1, actual = validationRuns)
+        }
+
+    @Test
+    fun changingAxisLabelVisibility_reusesValidation() =
+        runComposeUiTest {
+            var validationRuns = 0
+            val activeStyle =
+                androidx.compose.runtime.mutableStateOf(
+                    TestEntryStyle(size = 8.dp, axisLabelVisible = true),
+                )
+            val spec = TestSpec(includeAxes = true, onExpectedColors = { validationRuns++ })
+
+            setContent {
+                entry(
+                    spec = spec,
+                    style = activeStyle.value,
+                    data = chartData(ChartSeries(name = "One", values = listOf(1.0, 2.0))),
+                    title = "Title",
+                )
+            }
+
+            assertEquals(expected = 1, actual = validationRuns)
+
+            runOnIdle {
+                activeStyle.value = TestEntryStyle(size = 8.dp, axisLabelVisible = false)
+            }
+            waitForIdle()
+
+            assertEquals(expected = 1, actual = validationRuns)
+        }
+
+    @Test
+    fun changingAxisLabelSize_recomputesValidation() =
+        runComposeUiTest {
+            var validationRuns = 0
+            val activeStyle =
+                androidx.compose.runtime.mutableStateOf(
+                    TestEntryStyle(size = 8.dp, axisLabelSize = 11.sp),
+                )
+            val spec = TestSpec(includeAxes = true, onExpectedColors = { validationRuns++ })
+
+            setContent {
+                entry(
+                    spec = spec,
+                    style = activeStyle.value,
+                    data = chartData(ChartSeries(name = "One", values = listOf(1.0, 2.0))),
+                    title = "Title",
+                )
+            }
+
+            assertEquals(expected = 1, actual = validationRuns)
+
+            runOnIdle {
+                activeStyle.value = TestEntryStyle(size = 8.dp, axisLabelSize = 20_000.sp)
+            }
+            waitForIdle()
+
+            assertEquals(expected = 2, actual = validationRuns)
+            onNodeWithText("X-axis label size must resolve to at most 16384 pixels.", substring = true)
+                .assertIsDisplayed()
+        }
+
+    @Test
+    fun changingAxisLabelMaxCount_recomputesValidation() =
+        runComposeUiTest {
+            var validationRuns = 0
+            val activeStyle =
+                androidx.compose.runtime.mutableStateOf(
+                    TestEntryStyle(size = 8.dp, axisLabelMaxCount = null),
+                )
+            val spec = TestSpec(includeAxes = true, onExpectedColors = { validationRuns++ })
+
+            setContent {
+                entry(
+                    spec = spec,
+                    style = activeStyle.value,
+                    data = chartData(ChartSeries(name = "One", values = listOf(1.0, 2.0))),
+                    title = "Title",
+                )
+            }
+
+            assertEquals(expected = 1, actual = validationRuns)
+
+            runOnIdle {
+                activeStyle.value = TestEntryStyle(size = 8.dp, axisLabelMaxCount = 1)
+            }
+            waitForIdle()
+
+            assertEquals(expected = 2, actual = validationRuns)
+            onNodeWithText("X-axis label max count must be in 2..1000.", substring = true)
+                .assertIsDisplayed()
         }
 
     @Test
@@ -234,14 +370,16 @@ class ChartEntryTest {
     @Test
     fun changingDensity_recomputesDensitySensitiveValidation() =
         runComposeUiTest {
+            var validationRuns = 0
             var contentRan = false
             val activeDensity = androidx.compose.runtime.mutableStateOf(Density(1f))
             val style = TestEntryStyle(size = 8.dp, axisLabelSize = 20_000.sp)
+            val spec = TestSpec(includeAxes = true, onExpectedColors = { validationRuns++ })
 
             setContent {
                 CompositionLocalProvider(LocalDensity provides activeDensity.value) {
                     entry(
-                        spec = TestSpec(includeAxes = true),
+                        spec = spec,
                         style = style,
                         data = chartData(ChartSeries(name = "One", values = listOf(1.0, 2.0))),
                         title = "Title",
@@ -252,12 +390,14 @@ class ChartEntryTest {
 
             onNodeWithText("X-axis label size must resolve to at most 16384 pixels.", substring = true)
                 .assertIsDisplayed()
+            assertEquals(expected = 1, actual = validationRuns)
 
             runOnIdle {
                 activeDensity.value = Density(0.5f)
             }
             waitForIdle()
 
+            assertEquals(expected = 2, actual = validationRuns)
             assertTrue(contentRan)
         }
 
@@ -282,7 +422,10 @@ class ChartEntryTest {
     private class TestEntryStyle(
         val size: Dp,
         val colorCount: Int = 0,
+        val axisLabelColor: Color = Color.Unspecified,
+        val axisLabelVisible: Boolean = true,
         val axisLabelSize: TextUnit = 11.sp,
+        val axisLabelMaxCount: Int? = null,
     )
 
     /** A minimal chart: the checks every chart shares, without range or axis inputs. */
@@ -311,11 +454,9 @@ class ChartEntryTest {
                     if (includeAxes) {
                         { style ->
                             val labels =
-                                AxisLabelStyle(
-                                    visible = true,
-                                    color = Color.Unspecified,
+                                AxisLabelValidationValues(
                                     size = style.axisLabelSize,
-                                    maxCount = null,
+                                    maxCount = style.axisLabelMaxCount,
                                 )
                             AxisInputs(xLabels = labels, yLabels = labels)
                         }
@@ -332,7 +473,10 @@ class ChartEntryTest {
             return TestEntryStyle(
                 size = style.size.clampSize(fallback = FALLBACK_SIZE, density = density),
                 colorCount = style.colorCount,
+                axisLabelColor = style.axisLabelColor,
+                axisLabelVisible = style.axisLabelVisible,
                 axisLabelSize = style.axisLabelSize,
+                axisLabelMaxCount = style.axisLabelMaxCount,
             )
         }
 

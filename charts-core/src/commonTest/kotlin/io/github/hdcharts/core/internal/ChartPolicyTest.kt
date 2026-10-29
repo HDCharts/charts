@@ -1,11 +1,9 @@
 package io.github.hdcharts.core.internal
 
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.sp
 import io.github.hdcharts.core.model.ChartSeries
 import io.github.hdcharts.core.model.chartDataOf
-import io.github.hdcharts.core.style.AxisLabelStyle
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -350,15 +348,15 @@ class ChartPolicyTest {
                 axes = null,
             )
 
-        val DRAWABLE_LABELS = AxisLabelStyle(visible = true, color = Color.Unspecified, size = 12.sp, maxCount = null)
+        val DRAWABLE_LABELS = AxisLabelValidationValues(size = 12.sp, maxCount = null)
         val UNDRAWABLE_LABELS = DRAWABLE_LABELS.copy(size = 0.sp)
 
         fun chartInputs(
             colorCount: Int = 0,
             rangeMin: Double? = null,
             rangeMax: Double? = null,
-            xLabels: AxisLabelStyle = DRAWABLE_LABELS,
-            yLabels: AxisLabelStyle = DRAWABLE_LABELS,
+            xLabels: AxisLabelValidationValues = DRAWABLE_LABELS,
+            yLabels: AxisLabelValidationValues = DRAWABLE_LABELS,
         ): PolicyStyle =
             PolicyStyle(
                 colorCount = colorCount,

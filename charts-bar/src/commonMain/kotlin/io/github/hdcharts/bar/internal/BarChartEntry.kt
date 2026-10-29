@@ -11,6 +11,7 @@ import io.github.hdcharts.core.internal.InternalChartsApi
 import io.github.hdcharts.core.internal.RangeInputs
 import io.github.hdcharts.core.internal.SeriesRule
 import io.github.hdcharts.core.internal.ValidationErrors
+import io.github.hdcharts.core.internal.validationValues
 import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.model.ChartSelection
 import io.github.hdcharts.core.model.ChartValueFormatter
@@ -36,7 +37,12 @@ object BarChartSpec : ChartSpec<BarChartStyle> {
                 ),
             colorCount = { it.bars.colors.size },
             range = { RangeInputs(min = it.range.min, max = it.range.max) },
-            axes = { AxisInputs(xLabels = it.axes.xLabels, yLabels = it.axes.yLabels) },
+            axes = {
+                AxisInputs(
+                    xLabels = it.axes.xLabels.validationValues(),
+                    yLabels = it.axes.yLabels.validationValues(),
+                )
+            },
         )
 
     override fun clamp(
