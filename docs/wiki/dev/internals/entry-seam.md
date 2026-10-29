@@ -55,7 +55,7 @@ public composables passes the content in as a lambda, so both share one entry â€
 
 ```kotlin
 object LineChartSpec : ChartSpec<LineChartStyle> {
-    override val policy = ChartPolicy(
+    override val policy = ChartPolicy<LineChartStyle>(
         series = SeriesRule.Multiple(
             minValues = ValidationErrors.MIN_VALUES,
             allowNegative = true,
@@ -64,7 +64,12 @@ object LineChartSpec : ChartSpec<LineChartStyle> {
         ),
         colorCount = { it.line.colors.size },
         range = { RangeInputs(min = it.range.min, max = it.range.max) },
-        axes = { AxisInputs(xLabels = it.axes.xLabels, yLabels = it.axes.yLabels) },
+        axes = {
+            AxisInputs(
+                xLabels = it.axes.xLabels.validationValues(),
+                yLabels = it.axes.yLabels.validationValues(),
+            )
+        },
     )
 
     override fun clamp(style: LineChartStyle, density: Density) = style.clamp(density)
@@ -123,8 +128,8 @@ useful, but each new chart family can define a validation contract that matches 
 
 A policy reads the style through its mappers. A null range or axes mapper means that capability does
 not apply. `RangeInputs(min = null, max = null)` means the chart has an explicit automatic range,
-which is distinct from a missing range mapper. A present `AxisInputs` always supplies both label
-styles, so a chart with axes cannot accidentally omit one of them. The mapper return types also
+which is distinct from a missing range mapper. A present `AxisInputs` always supplies both axis-label
+validation values, so a chart with axes cannot accidentally omit one of them. The mapper return types also
 make it impossible for a chart declaration to enable range or axis validation without supplying the
 corresponding values.
 
@@ -139,8 +144,8 @@ check. A chart writes `range = null` or `axes = null` to say that capability doe
 other mapper fields have no defaults, so a new chart must state its validation inputs in the policy
 itself.
 
-A non-null axes mapper supplies both label styles through `AxisInputs`, so an axis policy cannot
-declare only one label style.
+A non-null axes mapper supplies both axis-label validation values through `AxisInputs`, so an axis
+policy cannot declare only one label's validation values.
 
 ### Series-rule variants
 

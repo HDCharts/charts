@@ -219,9 +219,10 @@ class ChartEntryTest {
         }
 
     @Test
-    fun changingAxisLabelColor_reusesValidation() =
+    fun changingAxisLabelColor_reusesValidationAndUpdatesContent() =
         runComposeUiTest {
             var validationRuns = 0
+            var renderedColor = Color.Unspecified
             val activeStyle =
                 androidx.compose.runtime.mutableStateOf(
                     TestEntryStyle(size = 8.dp, axisLabelColor = Color.Black),
@@ -234,17 +235,22 @@ class ChartEntryTest {
                     style = activeStyle.value,
                     data = chartData(ChartSeries(name = "One", values = listOf(1.0, 2.0))),
                     title = "Title",
+                    content = { _, drawStyle -> SideEffect { renderedColor = drawStyle.axisLabelColor } },
                 )
             }
 
-            assertEquals(expected = 1, actual = validationRuns)
-
             runOnIdle {
+                assertEquals(expected = Color.Black, actual = renderedColor)
+                assertEquals(expected = 1, actual = validationRuns)
                 activeStyle.value = TestEntryStyle(size = 8.dp, axisLabelColor = Color.Red)
             }
+
             waitForIdle()
 
-            assertEquals(expected = 1, actual = validationRuns)
+            runOnIdle {
+                assertEquals(expected = Color.Red, actual = renderedColor)
+                assertEquals(expected = 1, actual = validationRuns)
+            }
         }
 
     @Test
