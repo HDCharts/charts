@@ -8,7 +8,6 @@ import io.github.hdcharts.core.internal.AxisInputs
 import io.github.hdcharts.core.internal.ChartEntry
 import io.github.hdcharts.core.internal.ChartPolicy
 import io.github.hdcharts.core.internal.ChartSpec
-import io.github.hdcharts.core.internal.ChartValidationInputs
 import io.github.hdcharts.core.internal.InternalChartsApi
 import io.github.hdcharts.core.internal.RangeInputs
 import io.github.hdcharts.core.internal.SeriesRule
@@ -28,21 +27,15 @@ import io.github.hdcharts.core.style.clamp
 @InternalChartsApi
 object HistogramChartSpec : ChartSpec<BarChartStyle> {
     override val policy =
-        ChartPolicy(
+        ChartPolicy<BarChartStyle>(
             series =
                 SeriesRule.Single(
                     minValues = ValidationErrors.MIN_VALUES,
                     allowNegative = false,
                 ),
-            hasAxis = true,
-            hasFixedRange = true,
-        )
-
-    override fun validationInputs(style: BarChartStyle): ChartValidationInputs =
-        ChartValidationInputs(
-            colorCount = style.bars.colors.size,
-            range = RangeInputs(min = style.range.min, max = style.range.max),
-            axes = AxisInputs(xLabels = style.axes.xLabels, yLabels = style.axes.yLabels),
+            colorCount = { it.bars.colors.size },
+            range = { RangeInputs(min = it.range.min, max = it.range.max) },
+            axes = { AxisInputs(xLabels = it.axes.xLabels, yLabels = it.axes.yLabels) },
         )
 
     override fun clamp(

@@ -44,8 +44,8 @@ class ChartPolicyConformanceTest {
         val allowNegative: Boolean,
         val series: String,
         val stacked: Boolean,
-        val hasAxis: Boolean,
-        val hasFixedRange: Boolean,
+        val axes: Boolean,
+        val range: Boolean,
         val colors: String,
     )
 
@@ -83,8 +83,8 @@ class ChartPolicyConformanceTest {
                         allowNegative = true,
                         series = "multiple",
                         stacked = false,
-                        hasAxis = true,
-                        hasFixedRange = true,
+                        axes = true,
+                        range = true,
                         colors = "series count",
                     ),
                 "Bar" to
@@ -93,8 +93,8 @@ class ChartPolicyConformanceTest {
                         allowNegative = true,
                         series = "single",
                         stacked = false,
-                        hasAxis = true,
-                        hasFixedRange = true,
+                        axes = true,
+                        range = true,
                         colors = "value count",
                     ),
                 "Histogram" to
@@ -103,8 +103,8 @@ class ChartPolicyConformanceTest {
                         allowNegative = false,
                         series = "single",
                         stacked = false,
-                        hasAxis = true,
-                        hasFixedRange = true,
+                        axes = true,
+                        range = true,
                         colors = "value count",
                     ),
                 "Radar" to
@@ -113,8 +113,8 @@ class ChartPolicyConformanceTest {
                         allowNegative = true,
                         series = "multiple",
                         stacked = false,
-                        hasAxis = false,
-                        hasFixedRange = false,
+                        axes = false,
+                        range = false,
                         colors = "series count, only with more than one series",
                     ),
                 "Stacked bar" to
@@ -123,8 +123,8 @@ class ChartPolicyConformanceTest {
                         allowNegative = false,
                         series = "multiple",
                         stacked = true,
-                        hasAxis = true,
-                        hasFixedRange = false,
+                        axes = true,
+                        range = false,
                         colors = "series count",
                     ),
                 "Stacked area" to
@@ -133,8 +133,8 @@ class ChartPolicyConformanceTest {
                         allowNegative = false,
                         series = "multiple",
                         stacked = true,
-                        hasAxis = true,
-                        hasFixedRange = false,
+                        axes = true,
+                        range = false,
                         colors = "series count",
                     ),
                 "Pie" to
@@ -143,8 +143,8 @@ class ChartPolicyConformanceTest {
                         allowNegative = false,
                         series = "single",
                         stacked = false,
-                        hasAxis = false,
-                        hasFixedRange = false,
+                        axes = false,
+                        range = false,
                         colors = "value count",
                     ),
                 "Ring gauge" to
@@ -153,13 +153,13 @@ class ChartPolicyConformanceTest {
                         allowNegative = true,
                         series = "single",
                         stacked = false,
-                        hasAxis = false,
-                        hasFixedRange = true,
+                        axes = false,
+                        range = true,
                         colors = "value count",
                     ),
             )
 
-        fun ChartPolicy.toRow() =
+        fun <S : Any> ChartPolicy<S>.toRow() =
             when (val rule = series) {
                 is SeriesRule.Single ->
                     PolicyRow(
@@ -167,8 +167,8 @@ class ChartPolicyConformanceTest {
                         allowNegative = rule.allowNegative,
                         series = "single",
                         stacked = false,
-                        hasAxis = hasAxis,
-                        hasFixedRange = hasFixedRange,
+                        axes = axes != null,
+                        range = range != null,
                         colors = "value count",
                     )
                 is SeriesRule.Multiple ->
@@ -177,8 +177,8 @@ class ChartPolicyConformanceTest {
                         allowNegative = rule.allowNegative,
                         series = "multiple",
                         stacked = rule.stacked,
-                        hasAxis = hasAxis,
-                        hasFixedRange = hasFixedRange,
+                        axes = axes != null,
+                        range = range != null,
                         colors = rule.describeColors(),
                     )
             }

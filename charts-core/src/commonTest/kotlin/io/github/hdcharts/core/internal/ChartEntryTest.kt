@@ -118,6 +118,56 @@ class ChartEntryTest {
             assertEquals(expected = "Second", actual = clampedBy)
         }
 
+    @Test
+    fun changingSpec_recomputesValidation() =
+        runComposeUiTest {
+            val activeSpec =
+                androidx.compose.runtime.mutableStateOf(
+                    TestSpec(minValues = ValidationErrors.MIN_VALUES),
+                )
+
+            setContent {
+                entry(
+                    spec = activeSpec.value,
+                    data = chartData(ChartSeries(name = "One", values = listOf(1.0))),
+                    title = "Title",
+                )
+            }
+
+            onNodeWithText("At least 2 values are required.", substring = true).assertIsDisplayed()
+
+            runOnIdle {
+                activeSpec.value = TestSpec(minValues = 3)
+            }
+            waitForIdle()
+
+            onNodeWithText("At least 3 values are required.", substring = true).assertIsDisplayed()
+        }
+
+    @Test
+    fun changingStyle_recomputesValidation() =
+        runComposeUiTest {
+            val activeStyle =
+                androidx.compose.runtime.mutableStateOf(
+                    TestEntryStyle(size = 8.dp, colorCount = 0),
+                )
+
+            setContent {
+                entry(
+                    style = activeStyle.value,
+                    data = chartData(ChartSeries(name = "One", values = listOf(1.0, 2.0))),
+                    title = "Title",
+                )
+            }
+
+            runOnIdle {
+                activeStyle.value = TestEntryStyle(size = 8.dp, colorCount = 3)
+            }
+            waitForIdle()
+
+            onNodeWithText("Color count (3) must match series count (1).", substring = true).assertIsDisplayed()
+        }
+
     @Composable
     private fun entry(
         data: ChartData,
@@ -138,29 +188,25 @@ class ChartEntryTest {
 
     private data class TestEntryStyle(
         val size: Dp,
+        val colorCount: Int = 0,
     )
 
-    /** A minimal chart: the checks every chart shares, minus the two this fake style cannot supply. */
+    /** A minimal chart: the checks every chart shares, without range or axis inputs. */
     private class TestSpec(
+        private val minValues: Int = ValidationErrors.MIN_VALUES,
         private val conversionTitle: String? = null,
         private val onClamp: (density: Density) -> Unit = {},
     ) : ChartSpec<TestEntryStyle> {
         override val policy =
-            ChartPolicy(
+            ChartPolicy<TestEntryStyle>(
                 series =
                     SeriesRule.Multiple(
-                        minValues = ValidationErrors.MIN_VALUES,
+                        minValues = minValues,
                         allowNegative = true,
                         stacked = false,
                         expectedColors = { data -> data.series.size },
                     ),
-                hasAxis = false,
-                hasFixedRange = false,
-            )
-
-        override fun validationInputs(style: TestEntryStyle): ChartValidationInputs =
-            ChartValidationInputs(
-                colorCount = 0,
+                colorCount = { it.colorCount },
                 range = null,
                 axes = null,
             )

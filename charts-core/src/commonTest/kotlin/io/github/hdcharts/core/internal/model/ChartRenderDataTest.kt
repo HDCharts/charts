@@ -2,7 +2,6 @@ package io.github.hdcharts.core.internal.model
 
 import androidx.compose.ui.unit.Density
 import io.github.hdcharts.core.internal.ChartPolicy
-import io.github.hdcharts.core.internal.ChartValidationInputs
 import io.github.hdcharts.core.internal.SeriesRule
 import io.github.hdcharts.core.internal.ValidationErrors
 import io.github.hdcharts.core.internal.errorsFor
@@ -280,16 +279,11 @@ class ChartRenderDataTest {
         assertContentEquals(expected = listOf(1.0), actual = barMajor.series[0].values)
     }
 
-    private val multiSeriesInputs =
-        ChartValidationInputs(
-            colorCount = 0,
-            range = null,
-            axes = null,
-        )
+    private val multiSeriesStyle = Unit
 
     /** Takes any number of aligned series, no axis and no fixed range, so only data checks fire. */
     private val multiSeriesPolicy =
-        ChartPolicy(
+        ChartPolicy<Unit>(
             series =
                 SeriesRule.Multiple(
                     minValues = ValidationErrors.MIN_VALUES,
@@ -297,8 +291,9 @@ class ChartRenderDataTest {
                     stacked = false,
                     expectedColors = { data -> data.series.size },
                 ),
-            hasAxis = false,
-            hasFixedRange = false,
+            colorCount = { 0 },
+            range = null,
+            axes = null,
         )
 
     /**
@@ -314,7 +309,7 @@ class ChartRenderDataTest {
             actual =
                 multiSeriesPolicy.errorsFor(
                     data = chartDataOf(categories = listOf("Jan")),
-                    inputs = multiSeriesInputs,
+                    style = multiSeriesStyle,
                     density = Density(1f),
                 ),
         )
@@ -328,7 +323,7 @@ class ChartRenderDataTest {
                             ChartSeries(name = "One", values = listOf(1.0, 2.0)),
                             ChartSeries(name = "Two", values = listOf(3.0)),
                         ),
-                    inputs = multiSeriesInputs,
+                    style = multiSeriesStyle,
                     density = Density(1f),
                 ),
         )
@@ -341,7 +336,7 @@ class ChartRenderDataTest {
                             categories = listOf("Jan", "Feb"),
                             ChartSeries(name = "One", values = listOf(1.0, Double.NaN)),
                         ),
-                    inputs = multiSeriesInputs,
+                    style = multiSeriesStyle,
                     density = Density(1f),
                 ),
         )
@@ -364,7 +359,7 @@ class ChartRenderDataTest {
             actual =
                 multiSeriesPolicy.errorsFor(
                     data = mismatched,
-                    inputs = multiSeriesInputs,
+                    style = multiSeriesStyle,
                     density = Density(1f),
                 ),
         )

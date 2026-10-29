@@ -8,7 +8,6 @@ import io.github.hdcharts.core.internal.AxisInputs
 import io.github.hdcharts.core.internal.ChartEntry
 import io.github.hdcharts.core.internal.ChartPolicy
 import io.github.hdcharts.core.internal.ChartSpec
-import io.github.hdcharts.core.internal.ChartValidationInputs
 import io.github.hdcharts.core.internal.InternalChartsApi
 import io.github.hdcharts.core.internal.SeriesRule
 import io.github.hdcharts.core.internal.ValidationErrors
@@ -29,7 +28,7 @@ import kotlinx.collections.immutable.toImmutableList
 @InternalChartsApi
 object StackedBarChartSpec : ChartSpec<StackedBarChartStyle> {
     override val policy =
-        ChartPolicy(
+        ChartPolicy<StackedBarChartStyle>(
             series =
                 SeriesRule.Multiple(
                     minValues = ValidationErrors.MIN_VALUES,
@@ -37,15 +36,9 @@ object StackedBarChartSpec : ChartSpec<StackedBarChartStyle> {
                     stacked = true,
                     expectedColors = { data -> data.series.size },
                 ),
-            hasAxis = true,
-            hasFixedRange = false,
-        )
-
-    override fun validationInputs(style: StackedBarChartStyle): ChartValidationInputs =
-        ChartValidationInputs(
-            colorCount = style.segments.colors.size,
+            colorCount = { it.segments.colors.size },
             range = null,
-            axes = AxisInputs(xLabels = style.axes.xLabels, yLabels = style.axes.yLabels),
+            axes = { AxisInputs(xLabels = it.axes.xLabels, yLabels = it.axes.yLabels) },
         )
 
     override fun clamp(

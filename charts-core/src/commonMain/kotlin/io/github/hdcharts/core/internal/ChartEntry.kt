@@ -14,9 +14,9 @@ import kotlinx.collections.immutable.toImmutableList
  * Runs the input stages every chart shares, then hands the result to [content]. Pipeline stages 2,
  * 3 and 4, and the chart answers all three through [spec]:
  *
- *  1. Stage 2, validation. [data] is checked against [ChartSpec.policy] and the style values
- *     [ChartSpec.validationInputs] returns. Errors render through [errorStyle] and nothing else
- *     runs — which is why clamping comes last rather than in stage order.
+ *  1. Stage 2, validation. [data] is checked against [ChartSpec.policy] and the style values its
+ *     policy maps. Errors render through [errorStyle] and nothing else runs — which is why clamping
+ *     comes last rather than in stage order.
  *  2. Stage 4, conversion. The validated [data] becomes the chart's render model, once, through
  *     [ChartSpec.convert].
  *  3. Stage 3, clamping. [style] is clamped for drawing at the current density, through
@@ -40,10 +40,9 @@ fun <S : Any> ChartEntry(
     title: String? = null,
 ) {
     val density = LocalDensity.current
-    val inputs = spec.validationInputs(style)
     val errors =
-        remember(data, spec, inputs, density) {
-            spec.policy.errorsFor(data = data, inputs = inputs, density = density)
+        remember(data, spec, style, density) {
+            spec.policy.errorsFor(data = data, style = style, density = density)
         }
     if (errors.isNotEmpty()) {
         ChartErrors(

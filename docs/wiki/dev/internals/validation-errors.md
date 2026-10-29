@@ -77,7 +77,8 @@ it per value, with its index.
 ## Where it happens
 
 All checks live in `DataValidation.kt` in `charts-core`. A chart writes no check and no message text
-of its own: it declares which checks apply in its `ChartSpec` and lets `ChartEntry` combine them.
+of its own: it declares which checks apply and maps their style inputs in its `ChartPolicy<S>`, then
+lets `ChartEntry` combine them.
 Every chart is on the seam. The declaration and the per-chart table are on Entry Seam and
 Chart Policy.
 
@@ -94,7 +95,7 @@ Axis label settings are checked by `validateAxisLabels` in `AxisLabelValidation.
 The seam composes the enabled checks in one order — data shape, then range, then axis labels — so two
 charts with the same policy report the same problems in the same sequence. `ChartPolicy.errorsFor` is
 the only caller of the four functions above, and Entry Seam and Chart Policy has which checks each
-chart enables.
+chart enables and how its style supplies their inputs.
 
 The minimums are `ValidationErrors.MIN_VALUES` (2), `ValidationErrors.MIN_RADAR_VALUES` (3), and
 `ValidationErrors.MIN_RING_GAUGE_VALUES` (1).
@@ -103,7 +104,8 @@ first shape problem.
 
 `validateSeries` takes the expected color count as `expectedColors`, read from the data by the
 policy. A chart whose count depends on the data states the rule rather than a constant, which is
-what radar does.
+what radar does. The policy's color mapper supplies the style's color count; range and axis mappers
+are nullable capabilities, not separate flags.
 
 ## Adding a rule
 

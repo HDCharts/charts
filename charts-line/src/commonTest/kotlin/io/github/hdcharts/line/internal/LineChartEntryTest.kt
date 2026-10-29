@@ -170,7 +170,7 @@ class LineChartEntryTest {
                 errors =
                     LineChartSpec.policy.errorsFor(
                         data = data,
-                        inputs = LineChartSpec.validationInputs(style),
+                        style = style,
                         density = Density(1f),
                     )
             }

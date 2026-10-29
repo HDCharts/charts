@@ -45,10 +45,6 @@ object ValidationErrors {
 
     fun nonFiniteStackedTotal(index: Int): String = "Stacked total at index $index is not finite."
 
-    fun missingAxisLabels(): String = "Axis label styles are missing."
-
-    fun missingRange(): String = "Range inputs are missing."
-
     fun nonFiniteRange(): String = "Range bounds must be finite."
 }
 

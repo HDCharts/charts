@@ -162,9 +162,9 @@ none of the four roles on its own.
 
 - Name the public composable after the file, and give it its own file.
 - Give each internal composable the suffix for its role, and give it a file to match.
-- Declare the chart's `ChartPolicy` in its entry file, and add its row to
-  `ChartPolicyConformanceTest` in the `charts` module. Entry Seam and Chart Policy has the fields
-  and the per-chart table.
+- Declare the chart's generic `ChartPolicy<S>` in its entry file, including the style mappers for
+  colors, range and axes, and add its row to `ChartPolicyConformanceTest` in the `charts` module.
+  Entry Seam and Chart Policy has the fields and the per-chart table.
 - Never repeat the public name on an internal composable, and never alias or shadow an import to
   work around a repeat.
 - Give the content composable the canvas, and keep state out of it.

@@ -7,7 +7,6 @@ import androidx.compose.ui.unit.Density
 import io.github.hdcharts.core.internal.ChartEntry
 import io.github.hdcharts.core.internal.ChartPolicy
 import io.github.hdcharts.core.internal.ChartSpec
-import io.github.hdcharts.core.internal.ChartValidationInputs
 import io.github.hdcharts.core.internal.InternalChartsApi
 import io.github.hdcharts.core.internal.NO_SELECTION
 import io.github.hdcharts.core.internal.SeriesRule
@@ -34,7 +33,7 @@ import kotlinx.collections.immutable.toImmutableList
 @InternalChartsApi
 object RadarChartSpec : ChartSpec<RadarChartStyle> {
     override val policy =
-        ChartPolicy(
+        ChartPolicy<RadarChartStyle>(
             series =
                 SeriesRule.Multiple(
                     minValues = ValidationErrors.MIN_RADAR_VALUES,
@@ -43,14 +42,7 @@ object RadarChartSpec : ChartSpec<RadarChartStyle> {
                     // One series cannot be mis-coloured, so the count is only checked when there are several.
                     expectedColors = { data -> data.series.size.takeIf { count -> count > 1 } },
                 ),
-            hasAxis = false,
-            hasFixedRange = false,
-        )
-
-    /** A radar chart has no Cartesian axis, so there are no axis label styles to check. */
-    override fun validationInputs(style: RadarChartStyle): ChartValidationInputs =
-        ChartValidationInputs(
-            colorCount = style.polygon.lineColors.size,
+            colorCount = { it.polygon.lineColors.size },
             range = null,
             axes = null,
         )

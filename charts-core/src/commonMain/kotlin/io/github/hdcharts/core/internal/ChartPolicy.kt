@@ -28,44 +28,25 @@ sealed interface SeriesRule {
 }
 
 /**
- * Which input checks a chart runs before it draws, declared once by the chart and composed into one
- * error list by [ChartEntry]. A chart declares every field, so the declaration reads as the chart's
- * row in the pipeline table.
+ * Which input checks a chart runs before it draws, and where each check gets its style values.
+ * [ChartEntry] composes the results into one error list.
  *
  * The [series] rule selects the data-shape algorithm and carries only the options that algorithm
  * understands. Single-series charts therefore cannot accidentally declare stacking or a
  * multi-series color rule.
  *
- * @property hasAxis Whether the chart draws X and Y axes, and therefore validates its axis labels.
- * @property hasFixedRange Whether the chart's style carries optional range bounds, and therefore
- *   validates them.
+ * A non-null mapper declares and supplies the input for its check. A null [range] or [axes] mapper
+ * means that capability does not apply. A range mapper that returns [RangeInputs] with null bounds
+ * declares automatic range bounds; it is different from having no range mapper.
+ *
+ * @param S The chart's style type.
  */
 @InternalChartsApi
-data class ChartPolicy(
+data class ChartPolicy<S : Any>(
     val series: SeriesRule,
-    val hasAxis: Boolean,
-    val hasFixedRange: Boolean,
-)
-
-/**
- * The style-derived values validation reads. A chart maps its own style onto these once, so
- * [ChartPolicy] stays a declaration of *which* checks run.
- *
- * @property colorCount Colors the style sets, checked against the series rule. Zero skips the
- *   check, so state it even when the style sets no colors.
- * @property range Range bounds the style sets, or null when it has no range. A non-null range with
- *   null bounds represents an explicitly configured automatic bound and is distinct from no range.
- * @property axes The two axis label styles, or null when the style has no Cartesian axes. A present
- *   value always supplies both styles.
- *
- * No field has a default. A skipped check looks exactly like a forgotten one, so every mapper states
- * every value and the omission is a compile error.
- */
-@InternalChartsApi
-data class ChartValidationInputs(
-    val colorCount: Int,
-    val range: RangeInputs?,
-    val axes: AxisInputs?,
+    val colorCount: (S) -> Int,
+    val range: ((S) -> RangeInputs)?,
+    val axes: ((S) -> AxisInputs)?,
 )
 
 /** Explicit range inputs; null bounds are automatic values, not absent validation inputs. */
@@ -84,9 +65,9 @@ data class AxisInputs(
 
 /** The errors of every check this policy enables, in the order the checks read. */
 @InternalChartsApi
-fun ChartPolicy.errorsFor(
+fun <S : Any> ChartPolicy<S>.errorsFor(
     data: ChartData,
-    inputs: ChartValidationInputs,
+    style: S,
     density: Density,
 ): List<String> {
     val errors =
@@ -96,7 +77,7 @@ fun ChartPolicy.errorsFor(
                     data = data,
                     minValues = rule.minValues,
                     allowNegative = rule.allowNegative,
-                    colorCount = inputs.colorCount,
+                    colorCount = colorCount(style),
                 )
             is SeriesRule.Multiple ->
                 validateSeries(
@@ -104,27 +85,15 @@ fun ChartPolicy.errorsFor(
                     minValues = rule.minValues,
                     allowNegative = rule.allowNegative,
                     stacksValues = rule.stacked,
-                    colorCount = inputs.colorCount,
+                    colorCount = colorCount(style),
                     expectedColors = rule.expectedColors(data),
                 )
         }.toMutableList()
-    if (hasFixedRange) {
-        val range = inputs.range
-        errors +=
-            if (range == null) {
-                listOf(ValidationErrors.missingRange())
-            } else {
-                validateRange(min = range.min, max = range.max)
-            }
+    range?.invoke(style)?.let { inputs ->
+        errors += validateRange(min = inputs.min, max = inputs.max)
     }
-    if (hasAxis) {
-        val axes = inputs.axes
-        errors +=
-            if (axes == null) {
-                listOf(ValidationErrors.missingAxisLabels())
-            } else {
-                validateAxisLabels(xLabels = axes.xLabels, yLabels = axes.yLabels, density = density)
-            }
+    axes?.invoke(style)?.let { inputs ->
+        errors += validateAxisLabels(xLabels = inputs.xLabels, yLabels = inputs.yLabels, density = density)
     }
     return errors
 }
