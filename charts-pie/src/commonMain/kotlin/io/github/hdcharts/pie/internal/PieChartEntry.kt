@@ -10,6 +10,7 @@ import io.github.hdcharts.core.internal.ChartPolicy
 import io.github.hdcharts.core.internal.ChartSpec
 import io.github.hdcharts.core.internal.ChartValidationInputs
 import io.github.hdcharts.core.internal.InternalChartsApi
+import io.github.hdcharts.core.internal.SeriesRule
 import io.github.hdcharts.core.internal.ValidationErrors
 import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.model.ChartSelection
@@ -29,24 +30,21 @@ import kotlinx.collections.immutable.toImmutableList
 object PieChartSpec : ChartSpec<PieChartStyle> {
     override val policy =
         ChartPolicy(
-            minValues = ValidationErrors.MIN_VALUES,
-            allowNegative = false,
-            stacksValues = false,
-            singleSeries = true,
+            series =
+                SeriesRule.Single(
+                    minValues = ValidationErrors.MIN_VALUES,
+                    allowNegative = false,
+                ),
             hasAxis = false,
             hasFixedRange = false,
-            // A single-series chart counts its colors against its value count, so it states no rule.
-            colorsMatch = null,
         )
 
     /** A pie has no Cartesian axis, so there are no axis label styles to check, and no range bounds. */
     override fun validationInputs(style: PieChartStyle): ChartValidationInputs =
         ChartValidationInputs(
             colorCount = style.slices.colors.size,
-            rangeMin = null,
-            rangeMax = null,
-            xLabels = null,
-            yLabels = null,
+            range = null,
+            axes = null,
         )
 
     override fun clamp(

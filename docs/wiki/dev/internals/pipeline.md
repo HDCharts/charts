@@ -39,7 +39,7 @@ sit either side of that split and are the interesting ones.
 These four are the contract. Everything above is a description of them.
 
 **1. Stages 2 and 3 happen at the entry point, once.** Validation *logic* lives in `charts-core`;
-which checks apply is the chart's `ChartPolicy`. The style is clamped at the ambient density before
+which checks apply is the chart's `ChartPolicy` and its `SeriesRule` variant. The style is clamped at the ambient density before
 any content runs.
 
 **2. Stage 4 happens once, between the entry and the content composable.** Public `ChartData`

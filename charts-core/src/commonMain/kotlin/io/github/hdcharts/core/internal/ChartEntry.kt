@@ -54,8 +54,8 @@ fun <S : Any> ChartEntry(
         return
     }
     // Convert to internal data
-    val internalData = remember(data, title) { spec.convert(data, title) }
+    val internalData = remember(spec, data, title) { spec.convert(data, title) }
     // Clamp unsafe styles
-    val drawStyle = remember(style, density) { spec.clamp(style, density) }
+    val drawStyle = remember(spec, style, density) { spec.clamp(style, density) }
     content(internalData, drawStyle)
 }

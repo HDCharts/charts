@@ -201,7 +201,7 @@ class ChartPolicyTest {
 
         val errors =
             SINGLE_SERIES
-                .copy(minValues = 3)
+                .copy(series = SeriesRule.Single(minValues = 3, allowNegative = true))
                 .errorsFor(
                     data = data,
                     inputs = chartInputs(),
@@ -252,14 +252,22 @@ class ChartPolicyTest {
                 ChartSeries(name = "Two", values = listOf(3.0, 4.0)),
             )
 
+        val policy =
+            ALIGNED_SERIES.copy(
+                series =
+                    SeriesRule.Multiple(
+                        minValues = ValidationErrors.MIN_VALUES,
+                        allowNegative = true,
+                        stacked = false,
+                        expectedColors = { null },
+                    ),
+            )
         val errors =
-            ALIGNED_SERIES
-                .copy(colorsMatch = { null })
-                .errorsFor(
-                    data = data,
-                    inputs = chartInputs(colorCount = 5),
-                    density = Density(1f),
-                )
+            policy.errorsFor(
+                data = data,
+                inputs = chartInputs(colorCount = 5),
+                density = Density(1f),
+            )
 
         assertEquals(expected = emptyList(), actual = errors)
     }
@@ -268,7 +276,13 @@ class ChartPolicyTest {
     fun colorsMatch_dependingOnTheSeriesCount_isTheRadarRule() {
         val radar =
             ALIGNED_SERIES.copy(
-                colorsMatch = { data -> data.series.size.takeIf { count -> count > 1 } },
+                series =
+                    SeriesRule.Multiple(
+                        minValues = ValidationErrors.MIN_VALUES,
+                        allowNegative = true,
+                        stacked = false,
+                        expectedColors = { data -> data.series.size.takeIf { count -> count > 1 } },
+                    ),
             )
         val oneSeries = chartData(ChartSeries(name = "One", values = listOf(1.0, 2.0)))
         val twoSeries =
@@ -287,21 +301,19 @@ class ChartPolicyTest {
         )
     }
 
-    /** A single-series chart matches its value count, so its policy's color rule is never read. */
+    /** A single-series rule has no multi-series color rule to read. */
     @Test
-    fun singleSeriesPolicy_doesNotReadColorsMatch() {
+    fun singleSeriesPolicy_matchesColorsAgainstValueCount() {
         val data = chartData(ChartSeries(name = "One", values = listOf(1.0, 2.0)))
 
         val errors =
-            SINGLE_SERIES
-                .copy(colorsMatch = { error("colorsMatch must not be read when singleSeries is set") })
-                .errorsFor(
-                    data = data,
-                    inputs = chartInputs(colorCount = 2),
-                    density = Density(1f),
-                )
+            SINGLE_SERIES.errorsFor(
+                data = data,
+                inputs = chartInputs(colorCount = 3),
+                density = Density(1f),
+            )
 
-        assertEquals(expected = emptyList(), actual = errors)
+        assertEquals(expected = listOf("Color count (3) must match value count (2)."), actual = errors)
     }
 
     private companion object {
@@ -310,49 +322,55 @@ class ChartPolicyTest {
         /** A chart that takes any number of aligned series, with axes and an optional fixed range. */
         val ALIGNED_SERIES =
             ChartPolicy(
-                minValues = ValidationErrors.MIN_VALUES,
-                allowNegative = true,
-                stacksValues = false,
-                singleSeries = false,
+                series =
+                    SeriesRule.Multiple(
+                        minValues = ValidationErrors.MIN_VALUES,
+                        allowNegative = true,
+                        stacked = false,
+                        expectedColors = { data -> data.series.size },
+                    ),
                 hasAxis = true,
                 hasFixedRange = true,
-                colorsMatch = { data -> data.series.size },
             )
 
         /** A chart that needs exactly one series, with axes and an optional fixed range. */
         val SINGLE_SERIES =
             ChartPolicy(
-                minValues = ValidationErrors.MIN_VALUES,
-                allowNegative = true,
-                stacksValues = false,
-                singleSeries = true,
+                series =
+                    SeriesRule.Single(
+                        minValues = ValidationErrors.MIN_VALUES,
+                        allowNegative = true,
+                    ),
                 hasAxis = true,
                 hasFixedRange = true,
-                colorsMatch = { data -> data.series.size },
             )
 
         /** A chart that stacks nonnegative series, with axes and no fixed range. */
         val STACKED =
             ChartPolicy(
-                minValues = ValidationErrors.MIN_VALUES,
-                allowNegative = false,
-                stacksValues = true,
-                singleSeries = false,
+                series =
+                    SeriesRule.Multiple(
+                        minValues = ValidationErrors.MIN_VALUES,
+                        allowNegative = false,
+                        stacked = true,
+                        expectedColors = { data -> data.series.size },
+                    ),
                 hasAxis = true,
                 hasFixedRange = false,
-                colorsMatch = { data -> data.series.size },
             )
 
         /** A chart that draws polygons around a shared axis, with no Cartesian axis and no fixed range. */
         val RADAR =
             ChartPolicy(
-                minValues = ValidationErrors.MIN_RADAR_VALUES,
-                allowNegative = true,
-                stacksValues = false,
-                singleSeries = false,
+                series =
+                    SeriesRule.Multiple(
+                        minValues = ValidationErrors.MIN_RADAR_VALUES,
+                        allowNegative = true,
+                        stacked = false,
+                        expectedColors = { data -> data.series.size },
+                    ),
                 hasAxis = false,
                 hasFixedRange = false,
-                colorsMatch = { data -> data.series.size },
             )
 
         val DRAWABLE_LABELS = AxisLabelStyle(visible = true, color = Color.Unspecified, size = 12.sp, maxCount = null)
@@ -366,20 +384,21 @@ class ChartPolicyTest {
             yLabels: AxisLabelStyle? = DRAWABLE_LABELS,
         ) = ChartValidationInputs(
             colorCount = colorCount,
-            rangeMin = rangeMin,
-            rangeMax = rangeMax,
-            xLabels = xLabels,
-            yLabels = yLabels,
+            range = RangeInputs(min = rangeMin, max = rangeMax),
+            axes =
+                if (xLabels != null && yLabels != null) {
+                    AxisInputs(xLabels = xLabels, yLabels = yLabels)
+                } else {
+                    null
+                },
         )
 
         /** A style that sets no colors, no range and no labels, stated in full. */
         val NO_STYLE_VALUES =
             ChartValidationInputs(
                 colorCount = 0,
-                rangeMin = null,
-                rangeMax = null,
-                xLabels = null,
-                yLabels = null,
+                range = null,
+                axes = null,
             )
     }
 }

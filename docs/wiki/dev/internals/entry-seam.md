@@ -28,7 +28,8 @@ flowchart LR
 | Draw | Picks a domain, aggregates, resolves colors, lays out header, plot and legend, and draws | The chart's content composable |
 
 Everything up to and including the clamp is the seam. Each step is remembered against the values it
-reads, so it runs once per data, style, title or density change rather than on every recomposition.
+reads, including the specification, so it runs once per specification, data, style, title or density
+change rather than on every recomposition.
 
 Clamping is last rather than in stage order because invalid data returns before it: nothing is
 clamped for a chart that is about to render errors.
@@ -51,22 +52,21 @@ public composables passes the content in as a lambda, so both share one entry �
 ```kotlin
 object LineChartSpec : ChartSpec<LineChartStyle> {
     override val policy = ChartPolicy(
-        minValues = ValidationErrors.MIN_VALUES,
-        allowNegative = true,
-        stacksValues = false,
-        singleSeries = false,
+        series = SeriesRule.Multiple(
+            minValues = ValidationErrors.MIN_VALUES,
+            allowNegative = true,
+            stacked = false,
+            expectedColors = { data -> data.series.size },
+        ),
         hasAxis = true,
         hasFixedRange = true,
-        colorsMatch = { data -> data.series.size },
     )
 
     override fun validationInputs(style: LineChartStyle) =
         ChartValidationInputs(
             colorCount = style.line.colors.size,
-            rangeMin = style.range.min,
-            rangeMax = style.range.max,
-            xLabels = style.axis.xLabels,
-            yLabels = style.axis.yLabels,
+            range = RangeInputs(min = style.range.min, max = style.range.max),
+            axes = AxisInputs(xLabels = style.axes.xLabels, yLabels = style.axes.yLabels),
         )
 
     override fun clamp(style: LineChartStyle, density: Density) = style.clamp(density)
@@ -92,27 +92,30 @@ four values that have to change together — policy, style mapping, clamping, co
 declaration, so they cannot drift apart, and a chart that has two public composables states them
 once.
 
-`clamp` is the one member no chart varies: all six specs delegate to the `clamp(density)` extension
+`clamp` is the one member no chart varies: all chart specs delegate to the `clamp(density)` extension
 next to their own style, because the rules belong with the values they describe and the seam must not
 know any style. It stays on the spec so a chart that draws another chart's style has somewhere to map
 between the two.
 
 ## The policy
 
-`ChartPolicy` answers one question: which checks apply.
+`ChartPolicy` answers which checks apply. Its `series` rule also selects the data-shape algorithm,
+so a single-series declaration cannot carry stacking or a multi-series color rule.
 
 | Field | Turns on |
 | --- | --- |
-| `minValues` | The fewest values a point needs |
-| `allowNegative` | Negative values reported as errors |
-| `stacksValues` | Sums across the series at an index that overflow reported as errors |
-| `singleSeries` | `validateSingleSeries`, which matches the color count against the value count |
+| `series = Single` | `validateSingleSeries`, with its minimum and negative-value rules; colors match the value count |
+| `series = Multiple` | `validateSeries`, with its minimum and negative-value rules |
+| `SeriesRule.Multiple.stacked` | Sums across the series at an index that overflow reported as errors |
+| `SeriesRule.Multiple.expectedColors` | How many colors the style must set; a null result disables matching for that data |
 | `hasAxis` | The X and Y axis label checks |
 | `hasFixedRange` | The range-bound check |
-| `colorsMatch` | How many colors the style must set; null defers to the value count on a `singleSeries` chart, and skips the check otherwise |
 
-A policy cannot read a style, so the style values travel beside it in `ChartValidationInputs`: the
-color count, the range bounds, and both axis label styles. Each chart maps its own style onto them in
+A policy cannot read a style, so the style values travel beside it in `ChartValidationInputs`. The
+input model has a color count, an optional `RangeInputs`, and an optional `AxisInputs`. A null range
+means the style has no range capability; `RangeInputs(min = null, max = null)` means it has an
+explicit automatic range. A null axis input means the style has no Cartesian axes, while a present
+`AxisInputs` always supplies both label styles. Each chart maps its own style onto these values in
 its spec's `validationInputs`, next to its entry — `LineChartSpec.validationInputs` in
 `LineChartEntry.kt`.
 
@@ -123,47 +126,53 @@ The checks live in `DataValidation.kt` and `AxisLabelValidation.kt`. Validation 
 each one reports.
 
 Neither type has a default value, and no parameter of a check function has a default either. A chart
-writes `colorCount = 0` or `rangeMin = null` to say it has no colors and no range. Leave a field out
-and the build fails.
+writes `colorCount = 0` or `range = null` to say it has no colors and no range. Leave a field out and
+the build fails.
 
 A policy that declares an axis must supply both label styles. A missing pair is reported as an error:
 an axis with nothing to validate would draw unclamped labels and report nothing about them.
 
+### Series-rule variants
+
+Use `SeriesRule.Single` for a chart such as pie, bar, histogram or ring gauge. It requires exactly
+one series and always matches colors against that series' values. It has no stacking option and no
+color function because neither concept applies.
+
+Use `SeriesRule.Multiple` for aligned-series charts. It carries the `stacked` option and an
+`expectedColors` function. This keeps stacking and color matching on the same branch as the
+multi-series validator rather than allowing a single-series policy to declare settings that its
+algorithm ignores.
+
 ### When the color count depends on the data
 
-`colorsMatch` is a function, so a chart that cannot state the expected count as a constant says how
-it derives it. Radar is the case that needs it: one series cannot be mis-coloured, so the check runs
-only when the data holds more than one.
+`expectedColors` is a function, so a chart that cannot state the expected count as a constant says
+how it derives it. Radar is the case that needs it: one series cannot be mis-coloured, so the check
+runs only when the data holds more than one.
 
 ```kotlin
-colorsMatch = { data -> data.series.size.takeIf { count -> count > 1 } }
+expectedColors = { data -> data.series.size.takeIf { count -> count > 1 } }
 ```
 
 A rule that returns null skips the check for that data. The alternative — reporting `colorCount = 0` —
 makes "this chart has no colors" mean "this chart declines to check", which is a rule hiding in a
 style value.
 
-A `singleSeries` policy always matches its value count, so it declares `colorsMatch = null`: it has
-no rule of its own to state. Bar, histogram and pie write `null` so that their rows read the same way
-as every other chart's, and a reader does not have to know the rule to compare two rows. The null says
-"counted against the value count", not "declined to check", so it cannot be mistaken for a chart that
-skips the color check.
 
 ## The policy table
 
 Each chart has a row here and a row in `ChartPolicyConformanceTest`, in the `charts` module. Both are
 written by hand and change in the same commit.
 
-| Chart | `minValues` | `allowNegative` | `stacksValues` | `singleSeries` | `hasAxis` | `hasFixedRange` | `colorsMatch` |
+| Chart | `minValues` | `allowNegative` | `series` | `stacked` | `hasAxis` | `hasFixedRange` | `expectedColors` |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Line | 2 | yes | no | no | yes | yes | series count |
-| Bar | 2 | yes | no | yes | yes | yes | value count |
-| Histogram | 2 | no | no | yes | yes | yes | value count |
-| Radar | 3 | yes | no | no | no | no | series count, only with more than one series |
-| Stacked bar | 2 | no | yes | no | yes | no | series count |
-| Stacked area | 2 | no | yes | no | yes | no | series count |
-| Pie | 2 | no | no | yes | no | no | value count |
-| Ring gauge | 1 | yes | no | yes | no | yes | value count |
+| Line | 2 | yes | multiple | no | yes | yes | series count |
+| Bar | 2 | yes | single | no | yes | yes | value count |
+| Histogram | 2 | no | single | no | yes | yes | value count |
+| Radar | 3 | yes | multiple | no | no | no | series count, only with more than one series |
+| Stacked bar | 2 | no | multiple | yes | yes | no | series count |
+| Stacked area | 2 | no | multiple | yes | yes | no | series count |
+| Pie | 2 | no | single | no | no | no | value count |
+| Ring gauge | 1 | yes | single | no | no | yes | value count |
 
 Every chart is on the seam. Bar and histogram draw the same plot, so they share
 `BarChartInternalPlot`. Their specs differ in the policy — histogram forbids negative bin heights —
@@ -185,10 +194,10 @@ model.
 
 ## Pie names its values by category
 
-Pie is one series whose values are the slices, so it declares `singleSeries` and its categories are
+Pie is one series whose values are the slices, so it declares `SeriesRule.Single` and its categories are
 the slice names. It draws no Cartesian axis and formats its readouts from its own helper, so it
-declares `hasAxis` and `hasFixedRange` off. It states no `colorsMatch`, because `singleSeries`
-already counts its colors against the value count, like bar's and histogram's.
+declares `hasAxis` and `hasFixedRange` off. `SeriesRule.Single` counts its colors against the value
+count, like bar's and histogram's.
 
 Empty categories are not an error for any chart, pie included. A chart with an X axis drops its
 labels and keeps the axis; a pie drops its legend and keeps the slices, and a selected slice with a
@@ -215,8 +224,8 @@ in the same commit.
 
 `charts-core` cannot see the chart modules' specs without a test dependency that inverts the
 dependency direction, so the table's test lives in the umbrella `charts` module, which already
-depends on every chart. The five scalar fields are compared by equality; `colorsMatch` is compared
-by asking each policy what it returns for one series and for two.
+depends on every chart. The scalar fields are compared by equality; the series rule is compared by
+its variant, values, and by asking `expectedColors` what it returns for one series and for two.
 
 That test pins the table against the declarations, not against the codebase. It cannot notice a
 chart that has a spec and no row, because its chart list and its expectation are written side by
