@@ -14,9 +14,9 @@ import kotlinx.collections.immutable.toImmutableList
  * Runs the input stages every chart shares, then hands the result to [content]. Pipeline stages 2,
  * 3 and 4, and the chart answers all three through [spec]:
  *
- *  1. Stage 2, validation. [data] is checked against [ChartSpec.policy] and the style values
- *     [ChartSpec.validationInputs] returns. Errors render through [errorStyle] and nothing else
- *     runs — which is why clamping comes last rather than in stage order.
+ *  1. Stage 2, validation. [data] is checked against [ChartSpec.policy] and the style values its
+ *     policy maps. Errors render through [errorStyle] and nothing else runs — which is why clamping
+ *     comes last rather than in stage order.
  *  2. Stage 4, conversion. The validated [data] becomes the chart's render model, once, through
  *     [ChartSpec.convert].
  *  3. Stage 3, clamping. [style] is clamped for drawing at the current density, through
@@ -25,8 +25,9 @@ import kotlinx.collections.immutable.toImmutableList
  * Stages that need layout size — domain, normalization, density, drawing — belong in the content
  * composable, below this seam, because they cannot be decided before constraints are known.
  *
- * All three run inside a `remember`, so none may capture state that changes without [spec],
- * [style], [data], or [title] changing.
+ * Validation extracts a value-based snapshot from [style] and remembers errors against [spec],
+ * [data], the snapshot and density. Conversion is remembered against [spec], [data] and [title].
+ * Clamping is remembered against [spec], [style] and density.
  */
 @InternalChartsApi
 @Composable
@@ -40,10 +41,11 @@ fun <S : Any> ChartEntry(
     title: String? = null,
 ) {
     val density = LocalDensity.current
-    val inputs = spec.validationInputs(style)
+    val policy = spec.policy
+    val snapshot = policy.snapshot(style)
     val errors =
-        remember(data, spec, inputs, density) {
-            spec.policy.errorsFor(data = data, inputs = inputs, density = density)
+        remember(data, spec, snapshot, density) {
+            policy.errorsFor(data = data, inputs = snapshot, density = density)
         }
     if (errors.isNotEmpty()) {
         ChartErrors(

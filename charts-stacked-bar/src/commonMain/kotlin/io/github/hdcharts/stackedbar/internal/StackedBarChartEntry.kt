@@ -8,7 +8,6 @@ import io.github.hdcharts.core.internal.AxisInputs
 import io.github.hdcharts.core.internal.ChartEntry
 import io.github.hdcharts.core.internal.ChartPolicy
 import io.github.hdcharts.core.internal.ChartSpec
-import io.github.hdcharts.core.internal.ChartValidationInputs
 import io.github.hdcharts.core.internal.InternalChartsApi
 import io.github.hdcharts.core.internal.SeriesRule
 import io.github.hdcharts.core.internal.ValidationErrors
@@ -16,6 +15,7 @@ import io.github.hdcharts.core.internal.model.ChartRenderData
 import io.github.hdcharts.core.internal.model.transposeForStacking
 import io.github.hdcharts.core.internal.selectedLegendValues
 import io.github.hdcharts.core.internal.selectedTitle
+import io.github.hdcharts.core.internal.validationValues
 import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.model.ChartValueFormatter
 import io.github.hdcharts.stackedbar.StackedBarChartStyle
@@ -29,7 +29,7 @@ import kotlinx.collections.immutable.toImmutableList
 @InternalChartsApi
 object StackedBarChartSpec : ChartSpec<StackedBarChartStyle> {
     override val policy =
-        ChartPolicy(
+        ChartPolicy<StackedBarChartStyle>(
             series =
                 SeriesRule.Multiple(
                     minValues = ValidationErrors.MIN_VALUES,
@@ -37,15 +37,14 @@ object StackedBarChartSpec : ChartSpec<StackedBarChartStyle> {
                     stacked = true,
                     expectedColors = { data -> data.series.size },
                 ),
-            hasAxis = true,
-            hasFixedRange = false,
-        )
-
-    override fun validationInputs(style: StackedBarChartStyle): ChartValidationInputs =
-        ChartValidationInputs(
-            colorCount = style.segments.colors.size,
+            colorCount = { it.segments.colors.size },
             range = null,
-            axes = AxisInputs(xLabels = style.axes.xLabels, yLabels = style.axes.yLabels),
+            axes = {
+                AxisInputs(
+                    xLabels = it.axes.xLabels.validationValues(),
+                    yLabels = it.axes.yLabels.validationValues(),
+                )
+            },
         )
 
     override fun clamp(

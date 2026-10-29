@@ -18,13 +18,7 @@ import io.github.hdcharts.core.model.ChartData
 @InternalChartsApi
 interface ChartSpec<S : Any> {
     /** Which input checks apply to this chart. */
-    val policy: ChartPolicy
-
-    /**
-     * The values [policy] reads out of [style]. Every field of [ChartValidationInputs] is stated
-     * here; none has a default, so a skipped check and a forgotten mapping do not look alike.
-     */
-    fun validationInputs(style: S): ChartValidationInputs
+    val policy: ChartPolicy<S>
 
     /**
      * The style at [density], with every drawable value inside its range.

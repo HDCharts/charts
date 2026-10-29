@@ -7,11 +7,11 @@ import io.github.hdcharts.core.internal.AxisInputs
 import io.github.hdcharts.core.internal.ChartEntry
 import io.github.hdcharts.core.internal.ChartPolicy
 import io.github.hdcharts.core.internal.ChartSpec
-import io.github.hdcharts.core.internal.ChartValidationInputs
 import io.github.hdcharts.core.internal.InternalChartsApi
 import io.github.hdcharts.core.internal.RangeInputs
 import io.github.hdcharts.core.internal.SeriesRule
 import io.github.hdcharts.core.internal.ValidationErrors
+import io.github.hdcharts.core.internal.validationValues
 import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.model.ChartSelection
 import io.github.hdcharts.core.model.ChartValueFormatter
@@ -29,21 +29,20 @@ import io.github.hdcharts.core.style.clamp
 @InternalChartsApi
 object BarChartSpec : ChartSpec<BarChartStyle> {
     override val policy =
-        ChartPolicy(
+        ChartPolicy<BarChartStyle>(
             series =
                 SeriesRule.Single(
                     minValues = ValidationErrors.MIN_VALUES,
                     allowNegative = true,
                 ),
-            hasAxis = true,
-            hasFixedRange = true,
-        )
-
-    override fun validationInputs(style: BarChartStyle): ChartValidationInputs =
-        ChartValidationInputs(
-            colorCount = style.bars.colors.size,
-            range = RangeInputs(min = style.range.min, max = style.range.max),
-            axes = AxisInputs(xLabels = style.axes.xLabels, yLabels = style.axes.yLabels),
+            colorCount = { it.bars.colors.size },
+            range = { RangeInputs(min = it.range.min, max = it.range.max) },
+            axes = {
+                AxisInputs(
+                    xLabels = it.axes.xLabels.validationValues(),
+                    yLabels = it.axes.yLabels.validationValues(),
+                )
+            },
         )
 
     override fun clamp(

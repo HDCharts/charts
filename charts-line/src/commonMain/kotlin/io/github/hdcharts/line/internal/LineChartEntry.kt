@@ -7,12 +7,12 @@ import io.github.hdcharts.core.internal.AxisInputs
 import io.github.hdcharts.core.internal.ChartEntry
 import io.github.hdcharts.core.internal.ChartPolicy
 import io.github.hdcharts.core.internal.ChartSpec
-import io.github.hdcharts.core.internal.ChartValidationInputs
 import io.github.hdcharts.core.internal.InternalChartsApi
 import io.github.hdcharts.core.internal.RangeInputs
 import io.github.hdcharts.core.internal.SeriesRule
 import io.github.hdcharts.core.internal.ValidationErrors
 import io.github.hdcharts.core.internal.model.ChartRenderData
+import io.github.hdcharts.core.internal.validationValues
 import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.line.LineChartStyle
 import io.github.hdcharts.line.clamp
@@ -24,7 +24,7 @@ import io.github.hdcharts.line.clamp
 @InternalChartsApi
 object LineChartSpec : ChartSpec<LineChartStyle> {
     override val policy =
-        ChartPolicy(
+        ChartPolicy<LineChartStyle>(
             series =
                 SeriesRule.Multiple(
                     minValues = ValidationErrors.MIN_VALUES,
@@ -32,15 +32,14 @@ object LineChartSpec : ChartSpec<LineChartStyle> {
                     stacked = false,
                     expectedColors = { data -> data.series.size },
                 ),
-            hasAxis = true,
-            hasFixedRange = true,
-        )
-
-    override fun validationInputs(style: LineChartStyle) =
-        ChartValidationInputs(
-            colorCount = style.line.colors.size,
-            range = RangeInputs(min = style.range.min, max = style.range.max),
-            axes = AxisInputs(xLabels = style.axes.xLabels, yLabels = style.axes.yLabels),
+            colorCount = { it.line.colors.size },
+            range = { RangeInputs(min = it.range.min, max = it.range.max) },
+            axes = {
+                AxisInputs(
+                    xLabels = it.axes.xLabels.validationValues(),
+                    yLabels = it.axes.yLabels.validationValues(),
+                )
+            },
         )
 
     override fun clamp(

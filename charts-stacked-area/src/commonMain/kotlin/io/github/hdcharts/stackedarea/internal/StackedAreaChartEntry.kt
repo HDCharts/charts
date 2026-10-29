@@ -8,12 +8,12 @@ import io.github.hdcharts.core.internal.AxisInputs
 import io.github.hdcharts.core.internal.ChartEntry
 import io.github.hdcharts.core.internal.ChartPolicy
 import io.github.hdcharts.core.internal.ChartSpec
-import io.github.hdcharts.core.internal.ChartValidationInputs
 import io.github.hdcharts.core.internal.InternalChartsApi
 import io.github.hdcharts.core.internal.SeriesRule
 import io.github.hdcharts.core.internal.ValidationErrors
 import io.github.hdcharts.core.internal.selectedLegendValues
 import io.github.hdcharts.core.internal.selectedTitle
+import io.github.hdcharts.core.internal.validationValues
 import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.model.ChartValueFormatter
 import io.github.hdcharts.stackedarea.StackedAreaChartStyle
@@ -27,7 +27,7 @@ import kotlinx.collections.immutable.toImmutableList
 @InternalChartsApi
 object StackedAreaChartSpec : ChartSpec<StackedAreaChartStyle> {
     override val policy =
-        ChartPolicy(
+        ChartPolicy<StackedAreaChartStyle>(
             series =
                 SeriesRule.Multiple(
                     minValues = ValidationErrors.MIN_VALUES,
@@ -35,15 +35,14 @@ object StackedAreaChartSpec : ChartSpec<StackedAreaChartStyle> {
                     stacked = true,
                     expectedColors = { data -> data.series.size },
                 ),
-            hasAxis = true,
-            hasFixedRange = false,
-        )
-
-    override fun validationInputs(style: StackedAreaChartStyle): ChartValidationInputs =
-        ChartValidationInputs(
-            colorCount = style.fill.colors.size,
+            colorCount = { it.fill.colors.size },
             range = null,
-            axes = AxisInputs(xLabels = style.axes.xLabels, yLabels = style.axes.yLabels),
+            axes = {
+                AxisInputs(
+                    xLabels = it.axes.xLabels.validationValues(),
+                    yLabels = it.axes.yLabels.validationValues(),
+                )
+            },
         )
 
     override fun clamp(

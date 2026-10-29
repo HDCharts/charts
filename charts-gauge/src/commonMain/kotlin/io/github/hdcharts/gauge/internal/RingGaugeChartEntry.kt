@@ -8,7 +8,6 @@ import androidx.compose.ui.unit.Density
 import io.github.hdcharts.core.internal.ChartEntry
 import io.github.hdcharts.core.internal.ChartPolicy
 import io.github.hdcharts.core.internal.ChartSpec
-import io.github.hdcharts.core.internal.ChartValidationInputs
 import io.github.hdcharts.core.internal.InternalChartsApi
 import io.github.hdcharts.core.internal.NO_SELECTION
 import io.github.hdcharts.core.internal.RangeInputs
@@ -39,21 +38,14 @@ private const val GAUGE_PLOT_ASPECT_RATIO = 2f
 @InternalChartsApi
 object RingGaugeChartSpec : ChartSpec<RingGaugeChartStyle> {
     override val policy =
-        ChartPolicy(
+        ChartPolicy<RingGaugeChartStyle>(
             series =
                 SeriesRule.Single(
                     minValues = ValidationErrors.MIN_RING_GAUGE_VALUES,
                     allowNegative = true,
                 ),
-            hasAxis = false,
-            hasFixedRange = true,
-        )
-
-    /** A ring gauge has no Cartesian axis, so there are no axis label styles to check. */
-    override fun validationInputs(style: RingGaugeChartStyle): ChartValidationInputs =
-        ChartValidationInputs(
-            colorCount = style.rings.colors.size,
-            range = RangeInputs(min = style.range.min, max = style.range.max),
+            colorCount = { it.rings.colors.size },
+            range = { RangeInputs(min = it.range.min, max = it.range.max) },
             axes = null,
         )
 

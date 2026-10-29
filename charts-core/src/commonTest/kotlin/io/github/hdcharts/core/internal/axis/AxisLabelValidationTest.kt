@@ -1,11 +1,10 @@
 package io.github.hdcharts.core.internal.axis
 
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
-import io.github.hdcharts.core.style.AxisLabelStyle
+import io.github.hdcharts.core.internal.AxisLabelValidationValues
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -111,5 +110,5 @@ class AxisLabelValidationTest {
     private fun labels(
         size: TextUnit = 11.sp,
         maxCount: Int? = null,
-    ) = AxisLabelStyle(visible = true, color = Color.Black, size = size, maxCount = maxCount)
+    ) = AxisLabelValidationValues(size = size, maxCount = maxCount)
 }
