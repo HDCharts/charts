@@ -47,6 +47,8 @@ object ValidationErrors {
 
     fun missingAxisLabels(): String = "Axis label styles are missing."
 
+    fun missingRange(): String = "Range inputs are missing."
+
     fun nonFiniteRange(): String = "Range bounds must be finite."
 }
 

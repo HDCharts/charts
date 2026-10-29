@@ -142,7 +142,7 @@ class ChartEntryTest {
 
     /** A minimal chart: the checks every chart shares, minus the two this fake style cannot supply. */
     private class TestSpec(
-        private val conversionTitle: String = "Title:1",
+        private val conversionTitle: String? = null,
         private val onClamp: (density: Density) -> Unit = {},
     ) : ChartSpec<TestEntryStyle> {
         override val policy =
@@ -180,7 +180,7 @@ class ChartEntryTest {
         ): ChartRenderData =
             ChartRenderData(
                 data = data,
-                title = conversionTitle,
+                title = conversionTitle ?: "$title:${data.series.size}",
             )
     }
 

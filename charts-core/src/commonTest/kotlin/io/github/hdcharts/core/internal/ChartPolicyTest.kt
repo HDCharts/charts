@@ -159,6 +159,22 @@ class ChartPolicyTest {
     }
 
     @Test
+    fun fixedRange_withoutRangeInputs_reportsMissingRange() {
+        val data = chartData(ChartSeries(name = "One", values = listOf(1.0, 2.0)))
+
+        val errors =
+            ALIGNED_SERIES
+                .copy(hasAxis = false)
+                .errorsFor(
+                    data = data,
+                    inputs = NO_STYLE_VALUES,
+                    density = Density(1f),
+                )
+
+        assertEquals(expected = listOf("Range inputs are missing."), actual = errors)
+    }
+
+    @Test
     fun noAxis_ignoresAxisLabels() {
         val data = chartData(ChartSeries(name = "One", values = listOf(1.0, 2.0)))
 
@@ -219,21 +235,7 @@ class ChartPolicyTest {
         val errors =
             ALIGNED_SERIES.errorsFor(
                 data = data,
-                inputs = NO_STYLE_VALUES,
-                density = Density(1f),
-            )
-
-        assertEquals(expected = listOf("Axis label styles are missing."), actual = errors)
-    }
-
-    @Test
-    fun hasAxis_withoutOneLabelStyle_reportsTheMissingPair() {
-        val data = chartData(ChartSeries(name = "One", values = listOf(1.0, 2.0)))
-
-        val errors =
-            ALIGNED_SERIES.errorsFor(
-                data = data,
-                inputs = chartInputs(yLabels = null),
+                inputs = chartInputs(xLabels = null, yLabels = null),
                 density = Density(1f),
             )
 

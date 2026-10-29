@@ -110,7 +110,12 @@ fun ChartPolicy.errorsFor(
         }.toMutableList()
     if (hasFixedRange) {
         val range = inputs.range
-        errors += validateRange(min = range?.min, max = range?.max)
+        errors +=
+            if (range == null) {
+                listOf(ValidationErrors.missingRange())
+            } else {
+                validateRange(min = range.min, max = range.max)
+            }
     }
     if (hasAxis) {
         val axes = inputs.axes
