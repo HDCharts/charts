@@ -10,6 +10,7 @@ import io.github.hdcharts.core.internal.ChartSpec
 import io.github.hdcharts.core.internal.ChartValidationInputs
 import io.github.hdcharts.core.internal.InternalChartsApi
 import io.github.hdcharts.core.internal.NO_SELECTION
+import io.github.hdcharts.core.internal.SeriesRule
 import io.github.hdcharts.core.internal.ValidationErrors
 import io.github.hdcharts.core.internal.composable.ChartHeading
 import io.github.hdcharts.core.internal.composable.ChartSquarePlotLayout
@@ -34,24 +35,24 @@ import kotlinx.collections.immutable.toImmutableList
 object RadarChartSpec : ChartSpec<RadarChartStyle> {
     override val policy =
         ChartPolicy(
-            minValues = ValidationErrors.MIN_RADAR_VALUES,
-            allowNegative = true,
-            stacksValues = false,
-            singleSeries = false,
+            series =
+                SeriesRule.Multiple(
+                    minValues = ValidationErrors.MIN_RADAR_VALUES,
+                    allowNegative = true,
+                    stacked = false,
+                    // One series cannot be mis-coloured, so the count is only checked when there are several.
+                    expectedColors = { data -> data.series.size.takeIf { count -> count > 1 } },
+                ),
             hasAxis = false,
             hasFixedRange = false,
-            // One series cannot be mis-coloured, so the count is only checked when there are several.
-            colorsMatch = { data -> data.series.size.takeIf { count -> count > 1 } },
         )
 
     /** A radar chart has no Cartesian axis, so there are no axis label styles to check. */
     override fun validationInputs(style: RadarChartStyle): ChartValidationInputs =
         ChartValidationInputs(
             colorCount = style.polygon.lineColors.size,
-            rangeMin = null,
-            rangeMax = null,
-            xLabels = null,
-            yLabels = null,
+            range = null,
+            axes = null,
         )
 
     override fun clamp(

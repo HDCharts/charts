@@ -3,6 +3,7 @@ package io.github.hdcharts.charts
 import io.github.hdcharts.bar.internal.BarChartSpec
 import io.github.hdcharts.core.internal.ChartPolicy
 import io.github.hdcharts.core.internal.InternalChartsApi
+import io.github.hdcharts.core.internal.SeriesRule
 import io.github.hdcharts.core.internal.ValidationErrors
 import io.github.hdcharts.core.model.ChartSeries
 import io.github.hdcharts.core.model.chartDataOf
@@ -36,13 +37,13 @@ class ChartPolicyConformanceTest {
 
     /**
      * What the table records about each policy. [colors] is the rule rather than a value, because
-     * `colorsMatch` is a function and two policies can declare the same behaviour two ways.
+     * `expectedColors` is a function and two policies can declare the same behaviour two ways.
      */
     private data class PolicyRow(
         val minValues: Int,
         val allowNegative: Boolean,
-        val stacksValues: Boolean,
-        val singleSeries: Boolean,
+        val series: String,
+        val stacked: Boolean,
         val hasAxis: Boolean,
         val hasFixedRange: Boolean,
         val colors: String,
@@ -80,8 +81,8 @@ class ChartPolicyConformanceTest {
                     PolicyRow(
                         minValues = ValidationErrors.MIN_VALUES,
                         allowNegative = true,
-                        stacksValues = false,
-                        singleSeries = false,
+                        series = "multiple",
+                        stacked = false,
                         hasAxis = true,
                         hasFixedRange = true,
                         colors = "series count",
@@ -90,8 +91,8 @@ class ChartPolicyConformanceTest {
                     PolicyRow(
                         minValues = ValidationErrors.MIN_VALUES,
                         allowNegative = true,
-                        stacksValues = false,
-                        singleSeries = true,
+                        series = "single",
+                        stacked = false,
                         hasAxis = true,
                         hasFixedRange = true,
                         colors = "value count",
@@ -100,8 +101,8 @@ class ChartPolicyConformanceTest {
                     PolicyRow(
                         minValues = ValidationErrors.MIN_VALUES,
                         allowNegative = false,
-                        stacksValues = false,
-                        singleSeries = true,
+                        series = "single",
+                        stacked = false,
                         hasAxis = true,
                         hasFixedRange = true,
                         colors = "value count",
@@ -110,8 +111,8 @@ class ChartPolicyConformanceTest {
                     PolicyRow(
                         minValues = ValidationErrors.MIN_RADAR_VALUES,
                         allowNegative = true,
-                        stacksValues = false,
-                        singleSeries = false,
+                        series = "multiple",
+                        stacked = false,
                         hasAxis = false,
                         hasFixedRange = false,
                         colors = "series count, only with more than one series",
@@ -120,8 +121,8 @@ class ChartPolicyConformanceTest {
                     PolicyRow(
                         minValues = ValidationErrors.MIN_VALUES,
                         allowNegative = false,
-                        stacksValues = true,
-                        singleSeries = false,
+                        series = "multiple",
+                        stacked = true,
                         hasAxis = true,
                         hasFixedRange = false,
                         colors = "series count",
@@ -130,8 +131,8 @@ class ChartPolicyConformanceTest {
                     PolicyRow(
                         minValues = ValidationErrors.MIN_VALUES,
                         allowNegative = false,
-                        stacksValues = true,
-                        singleSeries = false,
+                        series = "multiple",
+                        stacked = true,
                         hasAxis = true,
                         hasFixedRange = false,
                         colors = "series count",
@@ -140,8 +141,8 @@ class ChartPolicyConformanceTest {
                     PolicyRow(
                         minValues = ValidationErrors.MIN_VALUES,
                         allowNegative = false,
-                        stacksValues = false,
-                        singleSeries = true,
+                        series = "single",
+                        stacked = false,
                         hasAxis = false,
                         hasFixedRange = false,
                         colors = "value count",
@@ -150,8 +151,8 @@ class ChartPolicyConformanceTest {
                     PolicyRow(
                         minValues = ValidationErrors.MIN_RING_GAUGE_VALUES,
                         allowNegative = true,
-                        stacksValues = false,
-                        singleSeries = true,
+                        series = "single",
+                        stacked = false,
                         hasAxis = false,
                         hasFixedRange = true,
                         colors = "value count",
@@ -159,28 +160,39 @@ class ChartPolicyConformanceTest {
             )
 
         fun ChartPolicy.toRow() =
-            PolicyRow(
-                minValues = minValues,
-                allowNegative = allowNegative,
-                stacksValues = stacksValues,
-                singleSeries = singleSeries,
-                hasAxis = hasAxis,
-                hasFixedRange = hasFixedRange,
-                colors = describeColors(),
-            )
+            when (val rule = series) {
+                is SeriesRule.Single ->
+                    PolicyRow(
+                        minValues = rule.minValues,
+                        allowNegative = rule.allowNegative,
+                        series = "single",
+                        stacked = false,
+                        hasAxis = hasAxis,
+                        hasFixedRange = hasFixedRange,
+                        colors = "value count",
+                    )
+                is SeriesRule.Multiple ->
+                    PolicyRow(
+                        minValues = rule.minValues,
+                        allowNegative = rule.allowNegative,
+                        series = "multiple",
+                        stacked = rule.stacked,
+                        hasAxis = hasAxis,
+                        hasFixedRange = hasFixedRange,
+                        colors = rule.describeColors(),
+                    )
+            }
 
         /**
-         * A single-series chart matches its value count, which [ChartPolicy.singleSeries] already
-         * says. For every other chart the rule is read off the declaration by asking it about one
-         * series and about two.
+         * A single-series chart matches its value count. For every multiple-series chart the rule
+         * is read off the declaration by asking it about one series and about two.
          */
-        fun ChartPolicy.describeColors(): String {
-            val rule = colorsMatch
+        fun SeriesRule.Multiple.describeColors(): String {
+            val oneSeries = expectedColors(ONE_SERIES)
+            val twoSeries = expectedColors(TWO_SERIES)
             return when {
-                singleSeries -> "value count"
-                rule == null -> "skipped"
-                rule(ONE_SERIES) == null && rule(TWO_SERIES) == null -> "skipped"
-                rule(ONE_SERIES) != null && rule(TWO_SERIES) != null -> "series count"
+                oneSeries == null && twoSeries == null -> "skipped"
+                oneSeries != null && twoSeries != null -> "series count"
                 else -> "series count, only with more than one series"
             }
         }

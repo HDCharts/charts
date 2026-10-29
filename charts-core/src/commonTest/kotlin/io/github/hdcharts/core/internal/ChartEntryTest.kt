@@ -87,6 +87,37 @@ class ChartEntryTest {
             assertEquals(expected = 3f, actual = clampedAtDensity)
         }
 
+    @Test
+    fun changingSpec_recomputesConversionAndClamping() =
+        runComposeUiTest {
+            var clampedBy: String? = null
+            val activeSpec =
+                androidx.compose.runtime.mutableStateOf(
+                    TestSpec(conversionTitle = "First", onClamp = { clampedBy = "First" }),
+                )
+            var convertedTitle: String? = null
+
+            setContent {
+                entry(
+                    spec = activeSpec.value,
+                    data = chartData(ChartSeries(name = "One", values = listOf(1.0, 2.0))),
+                    title = "Title",
+                    content = { converted, _ -> SideEffect { convertedTitle = converted.title } },
+                )
+            }
+
+            assertEquals(expected = "First", actual = convertedTitle)
+            assertEquals(expected = "First", actual = clampedBy)
+
+            runOnIdle {
+                activeSpec.value = TestSpec(conversionTitle = "Second", onClamp = { clampedBy = "Second" })
+            }
+            waitForIdle()
+
+            assertEquals(expected = "Second", actual = convertedTitle)
+            assertEquals(expected = "Second", actual = clampedBy)
+        }
+
     @Composable
     private fun entry(
         data: ChartData,
@@ -111,26 +142,27 @@ class ChartEntryTest {
 
     /** A minimal chart: the checks every chart shares, minus the two this fake style cannot supply. */
     private class TestSpec(
+        private val conversionTitle: String? = null,
         private val onClamp: (density: Density) -> Unit = {},
     ) : ChartSpec<TestEntryStyle> {
         override val policy =
             ChartPolicy(
-                minValues = ValidationErrors.MIN_VALUES,
-                allowNegative = true,
-                stacksValues = false,
-                singleSeries = false,
+                series =
+                    SeriesRule.Multiple(
+                        minValues = ValidationErrors.MIN_VALUES,
+                        allowNegative = true,
+                        stacked = false,
+                        expectedColors = { data -> data.series.size },
+                    ),
                 hasAxis = false,
                 hasFixedRange = false,
-                colorsMatch = { data -> data.series.size },
             )
 
         override fun validationInputs(style: TestEntryStyle): ChartValidationInputs =
             ChartValidationInputs(
                 colorCount = 0,
-                rangeMin = null,
-                rangeMax = null,
-                xLabels = null,
-                yLabels = null,
+                range = null,
+                axes = null,
             )
 
         override fun clamp(
@@ -148,7 +180,7 @@ class ChartEntryTest {
         ): ChartRenderData =
             ChartRenderData(
                 data = data,
-                title = "$title:${data.series.size}",
+                title = conversionTitle ?: "$title:${data.series.size}",
             )
     }
 

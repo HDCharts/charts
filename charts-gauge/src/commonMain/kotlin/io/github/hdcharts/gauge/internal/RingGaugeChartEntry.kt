@@ -11,6 +11,8 @@ import io.github.hdcharts.core.internal.ChartSpec
 import io.github.hdcharts.core.internal.ChartValidationInputs
 import io.github.hdcharts.core.internal.InternalChartsApi
 import io.github.hdcharts.core.internal.NO_SELECTION
+import io.github.hdcharts.core.internal.RangeInputs
+import io.github.hdcharts.core.internal.SeriesRule
 import io.github.hdcharts.core.internal.ValidationErrors
 import io.github.hdcharts.core.internal.composable.ChartHeaderLayout
 import io.github.hdcharts.core.internal.composable.ChartPlotLayout
@@ -38,24 +40,21 @@ private const val GAUGE_PLOT_ASPECT_RATIO = 2f
 object RingGaugeChartSpec : ChartSpec<RingGaugeChartStyle> {
     override val policy =
         ChartPolicy(
-            minValues = ValidationErrors.MIN_RING_GAUGE_VALUES,
-            allowNegative = true,
-            stacksValues = false,
-            singleSeries = true,
+            series =
+                SeriesRule.Single(
+                    minValues = ValidationErrors.MIN_RING_GAUGE_VALUES,
+                    allowNegative = true,
+                ),
             hasAxis = false,
             hasFixedRange = true,
-            // A single-series chart counts its colors against its value count, so it states no rule.
-            colorsMatch = null,
         )
 
     /** A ring gauge has no Cartesian axis, so there are no axis label styles to check. */
     override fun validationInputs(style: RingGaugeChartStyle): ChartValidationInputs =
         ChartValidationInputs(
             colorCount = style.rings.colors.size,
-            rangeMin = style.range.min,
-            rangeMax = style.range.max,
-            xLabels = null,
-            yLabels = null,
+            range = RangeInputs(min = style.range.min, max = style.range.max),
+            axes = null,
         )
 
     override fun clamp(

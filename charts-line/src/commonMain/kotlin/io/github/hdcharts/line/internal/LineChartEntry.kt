@@ -3,11 +3,14 @@ package io.github.hdcharts.line.internal
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Density
+import io.github.hdcharts.core.internal.AxisInputs
 import io.github.hdcharts.core.internal.ChartEntry
 import io.github.hdcharts.core.internal.ChartPolicy
 import io.github.hdcharts.core.internal.ChartSpec
 import io.github.hdcharts.core.internal.ChartValidationInputs
 import io.github.hdcharts.core.internal.InternalChartsApi
+import io.github.hdcharts.core.internal.RangeInputs
+import io.github.hdcharts.core.internal.SeriesRule
 import io.github.hdcharts.core.internal.ValidationErrors
 import io.github.hdcharts.core.internal.model.ChartRenderData
 import io.github.hdcharts.core.model.ChartData
@@ -22,22 +25,22 @@ import io.github.hdcharts.line.clamp
 object LineChartSpec : ChartSpec<LineChartStyle> {
     override val policy =
         ChartPolicy(
-            minValues = ValidationErrors.MIN_VALUES,
-            allowNegative = true,
-            stacksValues = false,
-            singleSeries = false,
+            series =
+                SeriesRule.Multiple(
+                    minValues = ValidationErrors.MIN_VALUES,
+                    allowNegative = true,
+                    stacked = false,
+                    expectedColors = { data -> data.series.size },
+                ),
             hasAxis = true,
             hasFixedRange = true,
-            colorsMatch = { data -> data.series.size },
         )
 
     override fun validationInputs(style: LineChartStyle) =
         ChartValidationInputs(
             colorCount = style.line.colors.size,
-            rangeMin = style.range.min,
-            rangeMax = style.range.max,
-            xLabels = style.axes.xLabels,
-            yLabels = style.axes.yLabels,
+            range = RangeInputs(min = style.range.min, max = style.range.max),
+            axes = AxisInputs(xLabels = style.axes.xLabels, yLabels = style.axes.yLabels),
         )
 
     override fun clamp(

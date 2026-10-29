@@ -3,6 +3,7 @@ package io.github.hdcharts.core.internal.model
 import androidx.compose.ui.unit.Density
 import io.github.hdcharts.core.internal.ChartPolicy
 import io.github.hdcharts.core.internal.ChartValidationInputs
+import io.github.hdcharts.core.internal.SeriesRule
 import io.github.hdcharts.core.internal.ValidationErrors
 import io.github.hdcharts.core.internal.errorsFor
 import io.github.hdcharts.core.model.ChartData
@@ -282,22 +283,22 @@ class ChartRenderDataTest {
     private val multiSeriesInputs =
         ChartValidationInputs(
             colorCount = 0,
-            rangeMin = null,
-            rangeMax = null,
-            xLabels = null,
-            yLabels = null,
+            range = null,
+            axes = null,
         )
 
     /** Takes any number of aligned series, no axis and no fixed range, so only data checks fire. */
     private val multiSeriesPolicy =
         ChartPolicy(
-            minValues = ValidationErrors.MIN_VALUES,
-            allowNegative = true,
-            stacksValues = false,
-            singleSeries = false,
+            series =
+                SeriesRule.Multiple(
+                    minValues = ValidationErrors.MIN_VALUES,
+                    allowNegative = true,
+                    stacked = false,
+                    expectedColors = { data -> data.series.size },
+                ),
             hasAxis = false,
             hasFixedRange = false,
-            colorsMatch = { data -> data.series.size },
         )
 
     /**

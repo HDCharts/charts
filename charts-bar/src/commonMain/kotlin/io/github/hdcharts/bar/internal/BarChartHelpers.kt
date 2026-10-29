@@ -66,7 +66,8 @@ internal fun aggregateForCompactDensity(
 /**
  * The one series bar and histogram draw, as values.
  *
- * Both policies declare `singleSeries`, so validation has already checked there is exactly one, and
+ * Both chart specifications declare `SeriesRule.Single`, so validation has already checked there is
+ * exactly one, and
  * every read below the seam can take the values without re-checking that.
  */
 internal val ChartData.barValues: List<Double> get() = series.single().values

@@ -3,11 +3,14 @@ package io.github.hdcharts.bar.internal
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Density
+import io.github.hdcharts.core.internal.AxisInputs
 import io.github.hdcharts.core.internal.ChartEntry
 import io.github.hdcharts.core.internal.ChartPolicy
 import io.github.hdcharts.core.internal.ChartSpec
 import io.github.hdcharts.core.internal.ChartValidationInputs
 import io.github.hdcharts.core.internal.InternalChartsApi
+import io.github.hdcharts.core.internal.RangeInputs
+import io.github.hdcharts.core.internal.SeriesRule
 import io.github.hdcharts.core.internal.ValidationErrors
 import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.model.ChartSelection
@@ -27,22 +30,20 @@ import io.github.hdcharts.core.style.clamp
 object BarChartSpec : ChartSpec<BarChartStyle> {
     override val policy =
         ChartPolicy(
-            minValues = ValidationErrors.MIN_VALUES,
-            allowNegative = true,
-            stacksValues = false,
-            singleSeries = true,
+            series =
+                SeriesRule.Single(
+                    minValues = ValidationErrors.MIN_VALUES,
+                    allowNegative = true,
+                ),
             hasAxis = true,
             hasFixedRange = true,
-            colorsMatch = null,
         )
 
     override fun validationInputs(style: BarChartStyle): ChartValidationInputs =
         ChartValidationInputs(
             colorCount = style.bars.colors.size,
-            rangeMin = style.range.min,
-            rangeMax = style.range.max,
-            xLabels = style.axes.xLabels,
-            yLabels = style.axes.yLabels,
+            range = RangeInputs(min = style.range.min, max = style.range.max),
+            axes = AxisInputs(xLabels = style.axes.xLabels, yLabels = style.axes.yLabels),
         )
 
     override fun clamp(

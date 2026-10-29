@@ -4,11 +4,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Density
+import io.github.hdcharts.core.internal.AxisInputs
 import io.github.hdcharts.core.internal.ChartEntry
 import io.github.hdcharts.core.internal.ChartPolicy
 import io.github.hdcharts.core.internal.ChartSpec
 import io.github.hdcharts.core.internal.ChartValidationInputs
 import io.github.hdcharts.core.internal.InternalChartsApi
+import io.github.hdcharts.core.internal.SeriesRule
 import io.github.hdcharts.core.internal.ValidationErrors
 import io.github.hdcharts.core.internal.model.ChartRenderData
 import io.github.hdcharts.core.internal.model.transposeForStacking
@@ -28,22 +30,22 @@ import kotlinx.collections.immutable.toImmutableList
 object StackedBarChartSpec : ChartSpec<StackedBarChartStyle> {
     override val policy =
         ChartPolicy(
-            minValues = ValidationErrors.MIN_VALUES,
-            allowNegative = false,
-            stacksValues = true,
-            singleSeries = false,
+            series =
+                SeriesRule.Multiple(
+                    minValues = ValidationErrors.MIN_VALUES,
+                    allowNegative = false,
+                    stacked = true,
+                    expectedColors = { data -> data.series.size },
+                ),
             hasAxis = true,
             hasFixedRange = false,
-            colorsMatch = { data -> data.series.size },
         )
 
     override fun validationInputs(style: StackedBarChartStyle): ChartValidationInputs =
         ChartValidationInputs(
             colorCount = style.segments.colors.size,
-            rangeMin = null,
-            rangeMax = null,
-            xLabels = style.axes.xLabels,
-            yLabels = style.axes.yLabels,
+            range = null,
+            axes = AxisInputs(xLabels = style.axes.xLabels, yLabels = style.axes.yLabels),
         )
 
     override fun clamp(
