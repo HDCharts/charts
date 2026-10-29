@@ -7,8 +7,8 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.sqrt
 
-/** Rings never grow into the innermost part of the half circle, so the gauge keeps its arc shape. */
-internal const val RING_GAUGE_MIN_HOLE_FRACTION = 0.35f
+/** Rings leave this share of the outer radius open so the gauge keeps its ring shape. */
+internal const val GAUGE_MIN_HOLE_FRACTION = 0.35f
 
 /** The arc starts on the left and sweeps clockwise over the top to the right. */
 internal const val GAUGE_START_ANGLE = 180f
@@ -67,7 +67,7 @@ internal fun ringGaugeLayout(
         return RingGaugeLayout(center = center, outerRadius = outerRadius, rings = emptyList(), spacing = 0f)
     }
 
-    val band = outerRadius * (1f - RING_GAUGE_MIN_HOLE_FRACTION)
+    val band = outerRadius * (1f - GAUGE_MIN_HOLE_FRACTION)
     val gaps = ringCount - 1
     val fittedSpacing = if (band - spacing * gaps > 0f) spacing else 0f
     val width = min(maxRingWidth, (band - fittedSpacing * gaps) / ringCount).coerceAtLeast(0f)

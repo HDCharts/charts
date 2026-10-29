@@ -2,6 +2,7 @@ package io.github.hdcharts.app.demo.stackedbar
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -60,8 +61,8 @@ private fun StackedBarChartDemoContent(
         },
     ) {
         StackedBarChart(
+            modifier = Modifier.fillMaxSize(),
             data = uiState.chart.dataSet,
-            modifier = Modifier.fillMaxWidth(),
             title = uiState.chart.title,
             style =
                 StackedBarChartDefaults.style(

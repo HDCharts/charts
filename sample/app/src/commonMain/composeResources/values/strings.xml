@@ -60,7 +60,9 @@
     <string name="stacked_area_chart">Stacked Area</string>
     <string name="multi_line_chart">Multi Line</string>
     <string name="radar_chart">Radar</string>
+    <string name="gauge_charts">Gauge Charts</string>
     <string name="ring_gauge_chart">Ring Gauge</string>
+    <string name="segmented_ring_gauge_chart">Segmented Ring Gauge</string>
 
 
     <string name="example_defaults_title">Defaults</string>
@@ -78,6 +80,8 @@
     <string name="example_histogram_gradients_summary">Switch between per-bin, plot-wide, and fade gradients.</string>
     <string name="example_stacked_gradients_summary">Each series color fades from top to bottom.</string>
     <string name="example_line_gradients_summary">Color the line by value or along time, or fade older points.</string>
+    <string name="example_ring_gauge_summary">Progress toward a target.</string>
+    <string name="example_segmented_ring_gauge_summary">Contributions toward a capacity.</string>
 
     <!-- Live API demos -->
     <string name="live_api_section_title">Real data from public APIs</string>

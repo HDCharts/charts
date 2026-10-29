@@ -59,7 +59,7 @@ fun ChartDemo(
     modifier: Modifier = Modifier,
     refreshVisible: Boolean = true,
     extraButtons: @Composable RowScope.() -> Unit = {},
-    controlsContent: @Composable () -> Unit = {},
+    controlsContent: (@Composable () -> Unit)? = null,
     chartItem: @Composable () -> Unit,
 ) {
     var chartRefreshKey by remember { mutableIntStateOf(0) }
@@ -74,7 +74,7 @@ fun ChartDemo(
                 }
             }
         }
-    val controls = remember { movableContentOf { currentControlsContent() } }
+    val controls = remember { movableContentOf { currentControlsContent?.invoke() } }
     val actions: @Composable () -> Unit = {
         ChartDemoActions(
             onRegenerate = { chartRefreshKey += 1 },
@@ -94,7 +94,7 @@ fun ChartDemo(
     } else {
         StackedChartDemo(
             actions = actions,
-            controls = controls,
+            controls = controls.takeIf { controlsContent != null },
             chart = chart,
             modifier = modifier,
         )
@@ -104,20 +104,22 @@ fun ChartDemo(
 @Composable
 private fun StackedChartDemo(
     actions: @Composable () -> Unit,
-    controls: @Composable () -> Unit,
+    controls: (@Composable () -> Unit)?,
     chart: @Composable () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
         modifier =
             modifier
-                .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
+                .fillMaxSize()
                 .padding(Dimens.cardPadding),
         verticalArrangement = Arrangement.spacedBy(Dimens.md),
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
             horizontalArrangement = Arrangement.Center,
         ) {
             DrawerGestureLockContainer(
@@ -128,7 +130,17 @@ private fun StackedChartDemo(
         }
 
         actions()
-        controls()
+        if (controls != null) {
+            Column(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .weight(1f, fill = false)
+                        .verticalScroll(rememberScrollState()),
+            ) {
+                controls()
+            }
+        }
     }
 }
 

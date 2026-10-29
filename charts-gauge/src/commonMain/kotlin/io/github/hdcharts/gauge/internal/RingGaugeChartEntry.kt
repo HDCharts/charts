@@ -13,7 +13,7 @@ import io.github.hdcharts.core.internal.NO_SELECTION
 import io.github.hdcharts.core.internal.RangeInputs
 import io.github.hdcharts.core.internal.SeriesRule
 import io.github.hdcharts.core.internal.ValidationErrors
-import io.github.hdcharts.core.internal.composable.ChartHeaderLayout
+import io.github.hdcharts.core.internal.composable.ChartHeading
 import io.github.hdcharts.core.internal.composable.ChartPlotLayout
 import io.github.hdcharts.core.internal.composable.Legend
 import io.github.hdcharts.core.internal.layout.modifierTopTitle
@@ -99,16 +99,13 @@ internal fun RingGaugeChartEntry(
                 plotAspectRatio = GAUGE_PLOT_ASPECT_RATIO,
                 modifier = modifier,
                 title = {
-                    if (displayedTitle.isNotBlank() || !subtitle.isNullOrBlank()) {
-                        ChartHeaderLayout(
-                            title = displayedTitle,
-                            titleTextStyle = drawStyle.chartContainerStyle.styleTitle,
-                            subtitle = subtitle,
-                            subtitleTextStyle = drawStyle.chartContainerStyle.styleSubtitle,
-                            showControls = false,
-                            modifier = drawStyle.chartContainerStyle.modifierTopTitle,
-                        )
-                    }
+                    ChartHeading(
+                        title = displayedTitle,
+                        titleTextStyle = drawStyle.chartContainerStyle.styleTitle,
+                        subtitle = subtitle,
+                        subtitleTextStyle = drawStyle.chartContainerStyle.styleSubtitle,
+                        modifier = drawStyle.chartContainerStyle.modifierTopTitle,
+                    )
                 },
                 legend = {
                     // The legend names the rings, like pie names its slices.

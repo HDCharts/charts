@@ -96,6 +96,11 @@ class StyleDefaultsTest {
                 assertEquals(expected = 100.0, actual = StyleDefaults.gaugeRangeMax)
                 assertEquals(expected = 24.dp, actual = StyleDefaults.ringGaugeWidth)
                 assertEquals(expected = 4.dp, actual = StyleDefaults.ringGaugeSpacing)
+                assertEquals(expected = 72.dp, actual = StyleDefaults.segmentedRingGaugeWidth)
+                assertEquals(expected = 14.dp, actual = StyleDefaults.segmentedRingGaugeCornerRadius)
+                assertEquals(expected = 4.dp, actual = StyleDefaults.segmentedRingGaugeSpacing)
+                assertEquals(expected = 28.sp, actual = StyleDefaults.segmentedRingGaugeCenterValueSize)
+                assertEquals(expected = 16.sp, actual = StyleDefaults.segmentedRingGaugeCenterSupportingSize)
             }
         }
 

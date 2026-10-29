@@ -2,6 +2,7 @@ package io.github.hdcharts.app.demo.bar
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -78,8 +79,8 @@ private fun BarChartDemoContent(
         },
     ) {
         BarChart(
+            modifier = Modifier.fillMaxSize(),
             data = uiState.dataSet,
-            modifier = Modifier.fillMaxWidth(),
             title =
                 uiState.dataSet.series
                     .single()

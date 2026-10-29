@@ -38,6 +38,8 @@ class DefaultChartPreviewUseCase : ChartPreviewUseCase {
             "Release 2.3" to listOf(86.0, 82.0, 78.0, 89.0, 84.0, 77.0),
         )
     private val previewRingGaugeValues = listOf(72.0, 54.0, 36.0)
+    private val previewSegmentedRingGaugeValues = listOf(240.0, 180.0, 320.0)
+    private val previewSegmentedRingGaugeCapacity = 2_000.0
 
     override fun previewSeed(): ChartGalleryPreview =
         ChartGalleryPreview(
@@ -50,6 +52,8 @@ class DefaultChartPreviewUseCase : ChartPreviewUseCase {
             stackedSeries = previewStackedSeries,
             radarSeries = previewRadarSeries,
             ringGaugeValues = previewRingGaugeValues,
+            segmentedRingGaugeValues = previewSegmentedRingGaugeValues,
+            segmentedRingGaugeCapacity = previewSegmentedRingGaugeCapacity,
         )
 
     override fun nextPiePreview(values: List<Double>): List<Double> =

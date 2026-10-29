@@ -22,13 +22,17 @@ import hdcharts.app.generated.resources.example_live_latency_summary
 import hdcharts.app.generated.resources.example_live_latency_title
 import hdcharts.app.generated.resources.example_live_percentiles_summary
 import hdcharts.app.generated.resources.example_live_percentiles_title
+import hdcharts.app.generated.resources.example_ring_gauge_summary
+import hdcharts.app.generated.resources.example_segmented_ring_gauge_summary
 import hdcharts.app.generated.resources.example_stacked_gradients_summary
+import hdcharts.app.generated.resources.gauge_charts
 import hdcharts.app.generated.resources.histogram_chart
 import hdcharts.app.generated.resources.line_chart
 import hdcharts.app.generated.resources.multi_line_chart
 import hdcharts.app.generated.resources.pie_chart
 import hdcharts.app.generated.resources.radar_chart
 import hdcharts.app.generated.resources.ring_gauge_chart
+import hdcharts.app.generated.resources.segmented_ring_gauge_chart
 import hdcharts.app.generated.resources.stacked_area_chart
 import hdcharts.sample_shared.generated.resources.ic_bar_chart
 import hdcharts.sample_shared.generated.resources.ic_histogram_chart
@@ -42,6 +46,7 @@ import io.github.hdcharts.app.demo.bar.BarChartDemo
 import io.github.hdcharts.app.demo.bar.BarGradientDemo
 import io.github.hdcharts.app.demo.debug.DebugChartsScreen
 import io.github.hdcharts.app.demo.gauge.RingGaugeChartDemo
+import io.github.hdcharts.app.demo.gauge.SegmentedRingGaugeChartDemo
 import io.github.hdcharts.app.demo.histogram.HistogramChartDemo
 import io.github.hdcharts.app.demo.histogram.HistogramGradientDemo
 import io.github.hdcharts.app.demo.line.LineChartDemo
@@ -191,12 +196,26 @@ sealed class ChartDestination(
             examples = listOf(defaultsExample { RadarChartDemo() }),
         )
 
-    data object RingGaugeChartScreen :
+    data object GaugeChartsScreen :
         ChartDestination(
-            route = "ringGaugeChart",
+            route = "gaugeCharts",
             icon = SharedRes.drawable.ic_ring_gauge_chart,
-            title = Res.string.ring_gauge_chart,
-            examples = listOf(defaultsExample { RingGaugeChartDemo() }),
+            title = Res.string.gauge_charts,
+            examples =
+                listOf(
+                    ChartExample(
+                        id = "ring-gauge",
+                        title = Res.string.ring_gauge_chart,
+                        summary = Res.string.example_ring_gauge_summary,
+                        content = { RingGaugeChartDemo() },
+                    ),
+                    ChartExample(
+                        id = "segmented-ring-gauge",
+                        title = Res.string.segmented_ring_gauge_chart,
+                        summary = Res.string.example_segmented_ring_gauge_summary,
+                        content = { SegmentedRingGaugeChartDemo() },
+                    ),
+                ),
         )
 }
 

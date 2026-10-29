@@ -26,6 +26,8 @@ import io.github.hdcharts.core.style.ChartContainerStyle
 import io.github.hdcharts.core.style.HistogramChartDefaults
 import io.github.hdcharts.gauge.RingGaugeChart
 import io.github.hdcharts.gauge.RingGaugeChartDefaults
+import io.github.hdcharts.gauge.SegmentedRingGaugeChart
+import io.github.hdcharts.gauge.SegmentedRingGaugeChartDefaults
 import io.github.hdcharts.histogram.HistogramChart
 import io.github.hdcharts.line.LineChart
 import io.github.hdcharts.line.LineChartDefaults
@@ -96,7 +98,7 @@ internal fun ChartPreview(
         ChartDestination.HistogramChartScreen -> HistogramChartPreview(previews.histogramValues)
         ChartDestination.StackedBarChartScreen -> StackedBarChartPreview(previews.stackedSeries)
         ChartDestination.RadarChartScreen -> RadarChartPreview(previews.radarSeries)
-        ChartDestination.RingGaugeChartScreen -> RingGaugeChartPreview(previews.ringGaugeValues)
+        ChartDestination.GaugeChartsScreen -> RingGaugeChartPreview(previews.ringGaugeValues)
     }
 }
 
@@ -297,6 +299,32 @@ private fun RingGaugeChartPreview(values: List<Double>) {
                 chartContainerStyle = previewChartContainerStyle(),
                 labels = RingGaugeChartDefaults.labels(visible = false),
                 legend = RingGaugeChartDefaults.legend(visible = false),
+            ),
+        interactionEnabled = false,
+        animateOnStart = false,
+    )
+}
+
+@Composable
+private fun SegmentedRingGaugeChartPreview(
+    values: List<Double>,
+    capacity: Double,
+) {
+    val data =
+        remember(values) {
+            values.toChartData(
+                categories = listOf("Carbs", "Protein", "Fat"),
+            )
+        }
+
+    SegmentedRingGaugeChart(
+        data = data,
+        capacity = capacity,
+        modifier = Modifier.size(PreviewChartSize),
+        style =
+            SegmentedRingGaugeChartDefaults.style(
+                chartContainerStyle = previewChartContainerStyle(),
+                legend = SegmentedRingGaugeChartDefaults.legend(visible = false),
             ),
         interactionEnabled = false,
         animateOnStart = false,

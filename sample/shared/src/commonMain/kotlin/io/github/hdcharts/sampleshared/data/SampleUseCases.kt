@@ -9,6 +9,7 @@ import io.github.hdcharts.sampleshared.data.impl.DefaultMultiLineSampleUseCase
 import io.github.hdcharts.sampleshared.data.impl.DefaultPieSampleUseCase
 import io.github.hdcharts.sampleshared.data.impl.DefaultRadarSampleUseCase
 import io.github.hdcharts.sampleshared.data.impl.DefaultRingGaugeSampleUseCase
+import io.github.hdcharts.sampleshared.data.impl.DefaultSegmentedRingGaugeSampleUseCase
 import io.github.hdcharts.sampleshared.data.impl.DefaultStackedAreaSampleUseCase
 import io.github.hdcharts.sampleshared.data.impl.DefaultStackedBarSampleUseCase
 import kotlin.random.Random
@@ -30,6 +31,8 @@ fun stackedAreaSampleUseCase(): StackedAreaSampleUseCase = DefaultStackedAreaSam
 fun radarSampleUseCase(): RadarSampleUseCase = DefaultRadarSampleUseCase()
 
 fun ringGaugeSampleUseCase(): RingGaugeSampleUseCase = DefaultRingGaugeSampleUseCase()
+
+fun segmentedRingGaugeSampleUseCase(): SegmentedRingGaugeSampleUseCase = DefaultSegmentedRingGaugeSampleUseCase()
 
 /** Pass a seeded [random] for a repeatable window, such as a screenshot fixture. */
 fun liveLatencyTimelineUseCase(random: Random = Random.Default): LiveLatencyTimelineUseCase =

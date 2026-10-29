@@ -43,7 +43,7 @@ class RingGaugeChartHelpersTest {
         val innermost = layout.rings.last()
         assertTrue(layout.rings.all { it.width < 50f })
         assertEquals(
-            expected = 200f * RING_GAUGE_MIN_HOLE_FRACTION,
+            expected = 200f * GAUGE_MIN_HOLE_FRACTION,
             actual = innermost.innerRadius,
             absoluteTolerance = 0.01f,
         )
