@@ -12,13 +12,21 @@ The example below is minimal and runs as written. The full source behind the GIF
 [`RadarExample.kt`](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/RadarExample.kt).
 
 ```kotlin
+data class ReadinessMetric(val name: String, val score: Double)
+
 @Composable
 fun ShowRadar() {
-    val data = listOf(84.0, 79.0, 76.0, 88.0, 82.0, 74.0).toChartData(
-        categories = listOf(
-            "Performance", "Reliability", "Usability",
-            "Security", "Scalability", "Observability",
-        ),
+    val metrics = listOf(
+        ReadinessMetric("Performance", 84.0),
+        ReadinessMetric("Reliability", 79.0),
+        ReadinessMetric("Usability", 76.0),
+        ReadinessMetric("Security", 88.0),
+        ReadinessMetric("Scalability", 82.0),
+        ReadinessMetric("Observability", 74.0),
+    )
+    val data = metrics.toChartData(
+        value = { it.score },
+        category = { it.name },
         seriesName = "Platform Readiness Score",
     )
 

@@ -13,13 +13,23 @@ distribution; its full source is in
 [`HistogramExample.kt`](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/HistogramExample.kt).
 
 ```kotlin
+data class RequestDurationBucket(val range: String, val requests: Double)
+
 @Composable
 fun ShowHistogram() {
-    val data = listOf(4.0, 18.0, 47.0, 72.0, 58.0, 31.0, 14.0, 6.0).toChartData(
-        categories = listOf(
-            "0-25ms", "25-50ms", "50-75ms", "75-100ms",
-            "100-125ms", "125-150ms", "150-175ms", "175ms+",
-        ),
+    val buckets = listOf(
+        RequestDurationBucket("0-25ms", 4.0),
+        RequestDurationBucket("25-50ms", 18.0),
+        RequestDurationBucket("50-75ms", 47.0),
+        RequestDurationBucket("75-100ms", 72.0),
+        RequestDurationBucket("100-125ms", 58.0),
+        RequestDurationBucket("125-150ms", 31.0),
+        RequestDurationBucket("150-175ms", 14.0),
+        RequestDurationBucket("175ms+", 6.0),
+    )
+    val data = buckets.toChartData(
+        value = { it.requests },
+        category = { it.range },
         seriesName = "Request Duration Distribution",
     )
 
