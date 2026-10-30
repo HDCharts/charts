@@ -12,7 +12,6 @@ import io.github.hdcharts.core.internal.InternalChartsApi
 import io.github.hdcharts.core.internal.NO_SELECTION
 import io.github.hdcharts.core.internal.SeriesRule
 import io.github.hdcharts.core.internal.ValidationErrors
-import io.github.hdcharts.core.internal.composable.ChartErrors
 import io.github.hdcharts.core.internal.composable.ChartHeading
 import io.github.hdcharts.core.internal.composable.ChartPlotLayout
 import io.github.hdcharts.core.internal.composable.Legend
@@ -66,15 +65,6 @@ internal fun SegmentedRingGaugeChartEntry(
     onSelectionInteraction: () -> Unit,
 ) {
     val capacityErrors = remember(data, capacity) { segmentedGaugeCapacityErrors(data = data, capacity = capacity) }
-    if (capacityErrors.isNotEmpty()) {
-        ChartErrors(
-            style = style.chartContainerStyle,
-            errors = capacityErrors.toImmutableList(),
-            modifier = modifier,
-        )
-        return
-    }
-
     ChartEntry(
         spec = SegmentedRingGaugeChartSpec,
         data = data,
@@ -82,6 +72,7 @@ internal fun SegmentedRingGaugeChartEntry(
         errorStyle = style.chartContainerStyle,
         modifier = modifier,
         title = title,
+        additionalErrors = capacityErrors,
         content = { renderData, drawStyle ->
             val values = renderData.series.single().values
             val colors =
@@ -153,7 +144,8 @@ private fun segmentedGaugeCapacityErrors(
     val total = values.sum()
     return when {
         !total.isFinite() -> listOf("Segment total must be finite.")
-        total > capacity -> listOf("Segment total ($total) must not exceed capacity ($capacity).")
+        totalExceedsCapacity(total = total, capacity = capacity) ->
+            listOf("Segment total ($total) must not exceed capacity ($capacity).")
         else -> emptyList()
     }
 }

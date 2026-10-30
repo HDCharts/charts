@@ -33,6 +33,38 @@ class SegmentedRingGaugeChartStyle(
     val legend: LegendStyle,
 )
 
+/** The direction in which segments expand from [SegmentedRingGaugeSegmentsStyle.startPosition]. */
+enum class SegmentedRingGaugeDirection {
+    Clockwise,
+    CounterClockwise,
+}
+
+/** A named boundary before the first segment of a segmented ring gauge. */
+enum class SegmentedRingGaugeStartPosition {
+    Top,
+    TopRight,
+    Right,
+    BottomRight,
+    Bottom,
+    BottomLeft,
+    Left,
+    TopLeft,
+    ;
+
+    internal val angle: Float
+        get() =
+            when (this) {
+                Top -> -90f
+                TopRight -> -45f
+                Right -> 0f
+                BottomRight -> 45f
+                Bottom -> 90f
+                BottomLeft -> 135f
+                Left -> 180f
+                TopLeft -> 225f
+            }
+}
+
 /**
  * The colored portions of a segmented ring gauge.
  *
@@ -75,38 +107,6 @@ data class SegmentedRingGaugeSegmentsStyle(
             startPosition = startPosition,
             direction = direction,
         )
-}
-
-/** The direction in which segments expand from [SegmentedRingGaugeSegmentsStyle.startPosition]. */
-enum class SegmentedRingGaugeDirection {
-    Clockwise,
-    CounterClockwise,
-}
-
-/** A named boundary before the first segment of a segmented ring gauge. */
-enum class SegmentedRingGaugeStartPosition {
-    Top,
-    TopRight,
-    Right,
-    BottomRight,
-    Bottom,
-    BottomLeft,
-    Left,
-    TopLeft,
-    ;
-
-    internal val angle: Float
-        get() =
-            when (this) {
-                Top -> -90f
-                TopRight -> -45f
-                Right -> 0f
-                BottomRight -> 45f
-                Bottom -> 90f
-                BottomLeft -> 135f
-                Left -> 180f
-                TopLeft -> 225f
-            }
 }
 
 /** The unfilled capacity behind the colored segments. */

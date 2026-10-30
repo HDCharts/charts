@@ -70,6 +70,20 @@ class SegmentedRingGaugeMathTest {
     }
 
     @Test
+    fun segmentGeometries_singleSegmentWithinCapacityRounding_usesTheWholeCircle() {
+        val geometries =
+            segmentGeometries(
+                values = listOf(0.3),
+                capacity = 0.1 + 0.2,
+                gapAngle = 4f,
+                startAngle = -90f,
+                direction = SegmentedRingGaugeDirection.Clockwise,
+            )
+
+        assertEquals(expected = 360f, actual = geometries.single().sweepAngle)
+    }
+
+    @Test
     fun segmentIndexAt_selectsOnlyTheVisibleSegmentInsteadOfTheTrackOrHole() {
         val layout = segmentedRingGaugeLayout(size = Size(200f, 200f), width = 20f)
         val geometries =
@@ -127,6 +141,43 @@ class SegmentedRingGaugeMathTest {
 
         assertEquals(expected = -138f, actual = geometry?.startAngle)
         assertEquals(expected = 222.8f, actual = geometry?.sweepAngle)
+    }
+
+    @Test
+    fun remainingSegmentGeometry_emptyGauge_hasNoGap() {
+        val geometry =
+            remainingSegmentGeometry(
+                values = listOf(0.0, 0.0),
+                capacity = 100.0,
+                gapAngle = 4f,
+                startAngle = -90f,
+                direction = SegmentedRingGaugeDirection.Clockwise,
+            )
+
+        assertEquals(expected = -90f, actual = geometry?.startAngle)
+        assertEquals(expected = 360f, actual = geometry?.sweepAngle)
+    }
+
+    @Test
+    fun animatedSegmentGeometry_counterClockwise_growsFromTheConfiguredBoundary() {
+        val geometry =
+            segmentGeometries(
+                values = listOf(100.0),
+                capacity = 1_000.0,
+                gapAngle = 4f,
+                startAngle = 220f,
+                direction = SegmentedRingGaugeDirection.CounterClockwise,
+            ).single()
+
+        val halfway =
+            animatedSegmentGeometry(
+                geometry = geometry,
+                progress = 0.5f,
+                direction = SegmentedRingGaugeDirection.CounterClockwise,
+            )
+
+        assertEquals(expected = 202f, actual = halfway.startAngle)
+        assertEquals(expected = 16f, actual = halfway.sweepAngle)
     }
 
     @Test

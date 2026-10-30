@@ -148,6 +148,12 @@ internal fun SegmentedRingGaugeChartContent(
                         }
                         geometries.forEachIndexed { index, geometry ->
                             val segmentScale = if (selectedIndex == index) selectedSegmentScale else DEFAULT_SCALE
+                            val animatedGeometry =
+                                animatedSegmentGeometry(
+                                    geometry = geometry,
+                                    progress = animation.value,
+                                    direction = style.segments.direction,
+                                )
                             scale(scale = segmentScale, pivot = layout.center) {
                                 drawRoundedSegmentedRing(
                                     center = layout.center,
@@ -155,8 +161,8 @@ internal fun SegmentedRingGaugeChartContent(
                                     width = layout.width,
                                     cornerRadius = cornerRadiusPx,
                                     color = colors[index],
-                                    startAngle = geometry.startAngle,
-                                    sweepAngle = geometry.sweepAngle * animation.value,
+                                    startAngle = animatedGeometry.startAngle,
+                                    sweepAngle = animatedGeometry.sweepAngle,
                                 )
                             }
                         }
@@ -190,7 +196,7 @@ private fun DrawScope.drawSegmentedRing(
         useCenter = false,
         topLeft = Offset(center.x - radius, center.y - radius),
         size = Size(radius * 2f, radius * 2f),
-        style = Stroke(width = width, cap = StrokeCap.Round),
+        style = Stroke(width = width, cap = StrokeCap.Butt),
     )
 }
 

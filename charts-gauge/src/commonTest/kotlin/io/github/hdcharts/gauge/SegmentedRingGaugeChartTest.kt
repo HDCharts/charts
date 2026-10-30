@@ -150,6 +150,55 @@ class SegmentedRingGaugeChartTest {
         }
 
     @Test
+    fun segmentedRingGaugeChart_roundingAtCapacity_doesNotDisplayAnError() =
+        runComposeUiTest {
+            setContent {
+                SegmentedRingGaugeChart(
+                    data = listOf(0.1, 0.2).toChartData(),
+                    capacity = 0.3,
+                    animateOnStart = false,
+                )
+            }
+
+            onNodeWithTag(SEGMENTED_RING_GAUGE_CHART_TAG).assertIsDisplayed()
+            onNodeWithTag(TestTags.CHART_ERROR).assertDoesNotExist()
+        }
+
+    @Test
+    fun segmentedRingGaugeChart_sharedAndCapacityErrors_areDisplayedTogether() =
+        runComposeUiTest {
+            setContent {
+                SegmentedRingGaugeChart(
+                    data = listOf(2.0, -1.0).toChartData(),
+                    capacity = 0.5,
+                )
+            }
+
+            onNodeWithText("Value at index 1 is negative.", substring = true).assertIsDisplayed()
+            onNodeWithText("Segment total (1.0) must not exceed capacity (0.5).", substring = true)
+                .assertIsDisplayed()
+        }
+
+    @Test
+    fun segmentedRingGaugeChart_changingCapacity_recomputesCapacityValidation() =
+        runComposeUiTest {
+            val capacity = androidx.compose.runtime.mutableStateOf(0.5)
+            setContent {
+                SegmentedRingGaugeChart(
+                    data = listOf(0.4, 0.2).toChartData(),
+                    capacity = capacity.value,
+                    animateOnStart = false,
+                )
+            }
+
+            onNodeWithTag(TestTags.CHART_ERROR).assertIsDisplayed()
+            runOnIdle { capacity.value = 1.0 }
+            waitForIdle()
+            onNodeWithTag(SEGMENTED_RING_GAUGE_CHART_TAG).assertIsDisplayed()
+            onNodeWithTag(TestTags.CHART_ERROR).assertDoesNotExist()
+        }
+
+    @Test
     fun segmentedRingGaugeChart_withInvalidCapacity_forwardsModifierToTheError() =
         runComposeUiTest {
             setContent {
