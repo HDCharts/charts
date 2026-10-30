@@ -39,6 +39,18 @@ Public chart models and styles
   prepared values and geometry.
 - Preserve the caller `Modifier` and documented error UI on validation errors.
 
+## Validation Contracts
+
+- `ChartPolicy<S>` and `SeriesRule` describe the current indexed-series
+  `ChartData` model used by the line, bar, pie, radar, stacked, and gauge
+  families.
+- Do not force a new chart family into `SeriesRule` when its data model is
+  fundamentally different, such as XY coordinates, OHLC values, matrices,
+  graph connections, or hierarchical data.
+- Reuse the shared `ChartEntry` lifecycle only where it remains
+  data-model-neutral. Each new chart family should define validation rules
+  that match its own public data contract.
+
 ## Dependency Direction
 
 - Dependencies flow from chart modules to `charts-core`, from `charts` to chart
