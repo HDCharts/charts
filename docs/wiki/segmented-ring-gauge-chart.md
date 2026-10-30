@@ -19,12 +19,14 @@ implementation("io.github.hdcharts:gauge:<version>")
 ```kotlin
 @Composable
 fun CalorieProgress() {
+    val capacity = 2_000.0
+
     SegmentedRingGaugeChart(
         data = listOf(240.0, 180.0, 320.0).toChartData(
             categories = listOf("Carbs", "Protein", "Fat"),
         ),
-        capacity = 2_000.0,
-        centerSupportingLabel = "of 2000 kcal",
+        capacity = capacity,
+        centerSupportingLabel = "of ${capacity.toInt()} kcal",
         style = SegmentedRingGaugeChartDefaults.style(
             segments = SegmentedRingGaugeChartDefaults.segments(
                 colors = listOf(Color(0xFF3B91CC), Color(0xFF1EB157), Color(0xFFE3B713)),
