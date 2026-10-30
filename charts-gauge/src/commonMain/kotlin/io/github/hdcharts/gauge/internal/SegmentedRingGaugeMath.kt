@@ -33,6 +33,23 @@ internal data class SegmentGeometry(
     val sweepAngle: Float,
 )
 
+/** Returns the sum of [values] with compensation for rounding lost during accumulation. */
+internal fun List<Double>.compensatedSum(): Double {
+    var sum = 0.0
+    var compensation = 0.0
+    for (value in this) {
+        val next = sum + value
+        compensation +=
+            if (abs(sum) >= abs(value)) {
+                (sum - next) + value
+            } else {
+                (value - next) + sum
+            }
+        sum = next
+    }
+    return sum + compensation
+}
+
 /** Returns whether [total] and [capacity] differ only by the bounded comparison tolerance. */
 internal fun isCapacityFull(
     total: Double,
@@ -71,6 +88,14 @@ internal fun animatedSegmentGeometry(
     }
 }
 
+/** Limits a segment corner radius to the ring thickness and the available segment sweep. */
+internal fun segmentedRingGaugeCornerRadius(
+    cornerRadius: Float,
+    width: Float,
+    innerRadius: Float,
+    sweepRadians: Float,
+): Float = min(cornerRadius, min(width / 2f, innerRadius * sweepRadians / 4f))
+
 /** Fits the ring inside [size], reserving [overflowInset] for the selected-segment scale. */
 internal fun segmentedRingGaugeLayout(
     size: Size,
@@ -99,7 +124,7 @@ internal fun segmentGeometries(
     val hasSingleFullSegment =
         values.count { it > 0.0 } == 1 &&
             isCapacityFull(
-                total = values.sum(),
+                total = values.compensatedSum(),
                 capacity = capacity,
             )
     val effectiveGapAngle = if (hasSingleFullSegment) 0f else gapAngle
@@ -129,7 +154,7 @@ internal fun remainingSegmentGeometry(
     startAngle: Float,
     direction: SegmentedRingGaugeDirection,
 ): SegmentGeometry? {
-    val consumedSweep = (values.sum() / capacity * FULL_CIRCLE).toFloat()
+    val consumedSweep = (values.compensatedSum() / capacity * FULL_CIRCLE).toFloat()
     val remainingSweep = (FULL_CIRCLE - consumedSweep).coerceAtLeast(0f)
     if (remainingSweep <= 0f) return null
     if (consumedSweep <= 0f) return SegmentGeometry(startAngle = startAngle, sweepAngle = FULL_CIRCLE)

@@ -12,6 +12,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.v2.runComposeUiTest
+import androidx.compose.ui.unit.dp
 import io.github.hdcharts.core.internal.TestTags
 import io.github.hdcharts.core.model.staticChartSelection
 import io.github.hdcharts.core.model.toChartData
@@ -156,6 +157,40 @@ class SegmentedRingGaugeChartTest {
                 SegmentedRingGaugeChart(
                     data = listOf(0.1, 0.2).toChartData(),
                     capacity = 0.3,
+                    animateOnStart = false,
+                )
+            }
+
+            onNodeWithTag(SEGMENTED_RING_GAUGE_CHART_TAG).assertIsDisplayed()
+            onNodeWithTag(TestTags.CHART_ERROR).assertDoesNotExist()
+        }
+
+    @Test
+    fun segmentedRingGaugeChart_repeatedRoundingAtCapacity_doesNotDisplayAnError() =
+        runComposeUiTest {
+            setContent {
+                SegmentedRingGaugeChart(
+                    data = List(300) { 0.1 }.toChartData(),
+                    capacity = 30.0,
+                    animateOnStart = false,
+                )
+            }
+
+            onNodeWithTag(SEGMENTED_RING_GAUGE_CHART_TAG).assertIsDisplayed()
+            onNodeWithTag(TestTags.CHART_ERROR).assertDoesNotExist()
+        }
+
+    @Test
+    fun segmentedRingGaugeChart_zeroCornerRadius_isAcceptedByPublicConfiguration() =
+        runComposeUiTest {
+            setContent {
+                SegmentedRingGaugeChart(
+                    data = values.toChartData(),
+                    capacity = 2_000.0,
+                    style =
+                        SegmentedRingGaugeChartDefaults.style(
+                            segments = SegmentedRingGaugeChartDefaults.segments(cornerRadius = 0.dp),
+                        ),
                     animateOnStart = false,
                 )
             }

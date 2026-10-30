@@ -38,7 +38,6 @@ import io.github.hdcharts.core.internal.NO_SELECTION
 import io.github.hdcharts.gauge.SegmentedRingGaugeChartStyle
 import kotlinx.collections.immutable.ImmutableList
 import kotlin.math.cos
-import kotlin.math.min
 import kotlin.math.sin
 
 internal const val SEGMENTED_RING_GAUGE_CHART_TAG = "SegmentedRingGaugeChart"
@@ -225,7 +224,13 @@ private fun DrawScope.drawRoundedSegmentedRing(
     }
 
     val sweepRadians = sweepAngle.toRadians()
-    val actualCornerRadius = min(cornerRadius, min(width / 2f, innerRadius * sweepRadians / 4f))
+    val actualCornerRadius =
+        segmentedRingGaugeCornerRadius(
+            cornerRadius = cornerRadius,
+            width = width,
+            innerRadius = innerRadius,
+            sweepRadians = sweepRadians,
+        )
     if (actualCornerRadius <= 0f) {
         drawSegmentedRing(
             center = center,

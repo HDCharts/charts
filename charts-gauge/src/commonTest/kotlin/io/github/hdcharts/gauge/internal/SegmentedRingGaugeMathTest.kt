@@ -6,8 +6,63 @@ import io.github.hdcharts.core.internal.NO_SELECTION
 import io.github.hdcharts.gauge.SegmentedRingGaugeDirection
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class SegmentedRingGaugeMathTest {
+    @Test
+    fun compensatedSum_correctsAccumulatedRoundingAtCapacity() {
+        val values = List(300) { 0.1 }
+
+        assertEquals(expected = 30.0, actual = values.compensatedSum())
+        assertFalse(totalExceedsCapacity(total = values.compensatedSum(), capacity = 30.0))
+    }
+
+    @Test
+    fun compensatedSum_keepsMixedMagnitudeContributions() {
+        val values = listOf(1_000_000.0) + List(300) { 0.1 }
+
+        assertEquals(expected = 1_000_030.0, actual = values.compensatedSum())
+        assertFalse(totalExceedsCapacity(total = values.compensatedSum(), capacity = 1_000_030.0))
+    }
+
+    @Test
+    fun totalExceedsCapacity_rejectsMeaningfulOverCapacityValues() {
+        assertTrue(totalExceedsCapacity(total = List(300) { 0.1 }.compensatedSum() + 0.001, capacity = 30.0))
+        assertTrue(totalExceedsCapacity(total = Double.MIN_VALUE * 2.0, capacity = Double.MIN_VALUE))
+        assertTrue(totalExceedsCapacity(total = 1.00000000000001e308, capacity = 1e308))
+    }
+
+    @Test
+    fun totalExceedsCapacity_acceptsVerySmallAndVeryLargeExactCapacities() {
+        assertFalse(totalExceedsCapacity(total = Double.MIN_VALUE, capacity = Double.MIN_VALUE))
+        assertFalse(totalExceedsCapacity(total = Double.MAX_VALUE, capacity = Double.MAX_VALUE))
+    }
+
+    @Test
+    fun segmentedRingGaugeCornerRadius_zeroUsesSquareEndedGeometryForShortAndThickRings() {
+        assertEquals(
+            expected = 0f,
+            actual =
+                segmentedRingGaugeCornerRadius(
+                    cornerRadius = 0f,
+                    width = 20f,
+                    innerRadius = 100f,
+                    sweepRadians = 1f,
+                ),
+        )
+        assertEquals(
+            expected = 0f,
+            actual =
+                segmentedRingGaugeCornerRadius(
+                    cornerRadius = 0f,
+                    width = 2f,
+                    innerRadius = 1f,
+                    sweepRadians = 0.01f,
+                ),
+        )
+    }
+
     @Test
     fun segmentedRingGaugeLayout_withRoom_keepsTheRequestedThickness() {
         val layout = segmentedRingGaugeLayout(size = Size(400f, 200f), width = 20f)

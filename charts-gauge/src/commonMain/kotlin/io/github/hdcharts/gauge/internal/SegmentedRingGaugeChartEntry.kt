@@ -77,7 +77,7 @@ internal fun SegmentedRingGaugeChartEntry(
             val values = renderData.series.single().values
             val colors =
                 remember(drawStyle.segments, values.size) { resolveSegmentColors(drawStyle.segments, values.size) }
-            val total = values.sum()
+            val total = values.compensatedSum()
             val displayedTitle =
                 selectedTitle(
                     data = renderData.data,
@@ -141,7 +141,7 @@ private fun segmentedGaugeCapacityErrors(
     if (capacity <= 0.0) return listOf("Capacity must be greater than zero.")
     val values = data.series.singleOrNull()?.values ?: return emptyList()
     if (values.any { !it.isFinite() }) return emptyList()
-    val total = values.sum()
+    val total = values.compensatedSum()
     return when {
         !total.isFinite() -> listOf("Segment total must be finite.")
         totalExceedsCapacity(total = total, capacity = capacity) ->
