@@ -20,10 +20,27 @@ The example below is minimal and runs as written. The full source behind the GIF
 [`PieExample.kt`](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/PieExample.kt).
 
 ```kotlin
+import androidx.compose.runtime.Composable
+import io.github.hdcharts.core.model.toChartData
+import io.github.hdcharts.pie.PieChart
+
+private data class EnergyUsage(
+    val category: String,
+    val consumption: Double,
+)
+
 @Composable
 fun ShowPie() {
-    val data = listOf(32.0, 21.0, 24.0, 14.0, 9.0).toChartData(
-        categories = listOf("Heating", "Cooling", "Appliances", "Water Heating", "Lighting"),
+    val energyUsage = listOf(
+        EnergyUsage("Heating", 32.0),
+        EnergyUsage("Cooling", 21.0),
+        EnergyUsage("Appliances", 24.0),
+        EnergyUsage("Water Heating", 14.0),
+        EnergyUsage("Lighting", 9.0),
+    )
+    val data = energyUsage.toChartData(
+        value = { it.consumption },
+        category = { it.category },
     )
 
     PieChart(data = data, title = "Household Energy")
