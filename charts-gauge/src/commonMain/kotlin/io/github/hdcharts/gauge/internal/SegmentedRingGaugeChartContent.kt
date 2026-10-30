@@ -133,6 +133,7 @@ internal fun SegmentedRingGaugeChartContent(
                             startAngle = style.segments.startPosition.angle,
                             direction = style.segments.direction,
                         )
+                    val animationRanges = sequentialSegmentAnimationRanges(geometries)
                     onDrawBehind {
                         remainingGeometry?.let { geometry ->
                             drawRoundedSegmentedRing(
@@ -150,7 +151,7 @@ internal fun SegmentedRingGaugeChartContent(
                             val animatedGeometry =
                                 animatedSegmentGeometry(
                                     geometry = geometry,
-                                    progress = animation.value,
+                                    progress = animationRanges[index].progressAt(animation.value),
                                     direction = style.segments.direction,
                                 )
                             scale(scale = segmentScale, pivot = layout.center) {
@@ -162,6 +163,7 @@ internal fun SegmentedRingGaugeChartContent(
                                     color = colors[index],
                                     startAngle = animatedGeometry.startAngle,
                                     sweepAngle = animatedGeometry.sweepAngle,
+                                    finalSweepAngle = geometry.sweepAngle,
                                 )
                             }
                         }
@@ -207,6 +209,7 @@ private fun DrawScope.drawRoundedSegmentedRing(
     color: Color,
     startAngle: Float,
     sweepAngle: Float,
+    finalSweepAngle: Float = sweepAngle,
 ) {
     val outerRadius = radius + width / 2f
     val innerRadius = radius - width / 2f
@@ -223,13 +226,12 @@ private fun DrawScope.drawRoundedSegmentedRing(
         return
     }
 
-    val sweepRadians = sweepAngle.toRadians()
     val actualCornerRadius =
         segmentedRingGaugeCornerRadius(
             cornerRadius = cornerRadius,
             width = width,
             innerRadius = innerRadius,
-            sweepRadians = sweepRadians,
+            sweepRadians = finalSweepAngle.toRadians(),
         )
     if (actualCornerRadius <= 0f) {
         drawSegmentedRing(
@@ -243,8 +245,9 @@ private fun DrawScope.drawRoundedSegmentedRing(
         return
     }
 
-    val outerCornerAngle = (actualCornerRadius / outerRadius).toDegrees()
-    val innerCornerAngle = (actualCornerRadius / innerRadius).toDegrees()
+    // Keep the radial inset stable; only compress the corner curves along a short animated arc.
+    val outerCornerAngle = minOf((actualCornerRadius / outerRadius).toDegrees(), sweepAngle / 2f)
+    val innerCornerAngle = minOf((actualCornerRadius / innerRadius).toDegrees(), sweepAngle / 2f)
     val endAngle = startAngle + sweepAngle
     val outerBounds = center.ringBounds(radius = outerRadius)
     val innerBounds = center.ringBounds(radius = innerRadius)
@@ -300,7 +303,9 @@ private fun DrawScope.drawRoundedSegmentedRing(
             )
             close()
         }
-    drawPath(path = path, color = color)
+    // Ease the thin first frames into view until the arc has room for both corner curves.
+    val entranceAlpha = (innerRadius * sweepAngle.toRadians() / (2f * actualCornerRadius)).coerceIn(0f, 1f)
+    drawPath(path = path, color = color, alpha = entranceAlpha)
 }
 
 private fun Offset.ringBounds(radius: Float): Rect =
