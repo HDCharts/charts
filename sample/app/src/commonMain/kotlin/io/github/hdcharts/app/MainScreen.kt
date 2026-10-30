@@ -41,6 +41,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import hdcharts.app.generated.resources.Res
@@ -64,7 +65,10 @@ private val SettingsEdgeOpenDragThreshold = 28.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen(viewModel: MainViewModel = koinViewModel()) {
+fun MainScreen(
+    viewModel: MainViewModel = koinViewModel(),
+    onNavHostReady: suspend (NavController) -> Unit = {},
+) {
     val themeState by viewModel.themeState.collectAsStateWithLifecycle()
     val menuState by viewModel.menuState.collectAsStateWithLifecycle()
     val navController = rememberNavController()
@@ -217,6 +221,10 @@ fun MainScreen(viewModel: MainViewModel = koinViewModel()) {
                 }
             }
         }
+    }
+
+    LaunchedEffect(navController) {
+        onNavHostReady(navController)
     }
 
     LaunchedEffect(menuState.selectedDestination) {

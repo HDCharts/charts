@@ -2,6 +2,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.unit.dp
+import androidx.navigation.ExperimentalBrowserHistoryApi
+import androidx.navigation.bindToBrowserNavigation
 import hdcharts.app.generated.resources.dark_mode_off
 import hdcharts.app.generated.resources.dark_mode_on
 import hdcharts.app.generated.resources.dark_mode_system
@@ -37,6 +39,7 @@ import hdcharts.app.generated.resources.Res as AppRes
 import hdcharts.sample_shared.generated.resources.Res as SharedRes
 
 @Composable
+@OptIn(ExperimentalBrowserHistoryApi::class)
 internal fun WebMainScreen() {
     val startupResources = rememberWebDemoStartupResources()
 
@@ -49,7 +52,7 @@ internal fun WebMainScreen() {
                 LocalChartDemoMaxWidth provides 500.dp,
                 LocalChartGalleryColumns provides 3,
             ) {
-                MainScreen()
+                MainScreen(onNavHostReady = { it.bindToBrowserNavigation() })
             }
         }
     }
