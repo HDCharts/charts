@@ -10,6 +10,7 @@ import io.github.hdcharts.app.gif.docs.MultiLineViewModel
 import io.github.hdcharts.app.gif.docs.PieViewModel
 import io.github.hdcharts.app.gif.docs.RadarViewModel
 import io.github.hdcharts.app.gif.docs.RingGaugeViewModel
+import io.github.hdcharts.app.gif.docs.SegmentedRingGaugeViewModel
 import io.github.hdcharts.app.gif.docs.SignedBarViewModel
 import io.github.hdcharts.app.gif.docs.StackedAreaViewModel
 import io.github.hdcharts.app.gif.docs.StackedBarViewModel
@@ -30,6 +31,7 @@ import io.github.hdcharts.core.model.ChartValueFormatters
 import io.github.hdcharts.core.style.ChartGradients
 import io.github.hdcharts.core.style.GradientSpan
 import io.github.hdcharts.gauge.RingGaugeChart
+import io.github.hdcharts.gauge.SegmentedRingGaugeChart
 import io.github.hdcharts.histogram.HistogramChart
 import io.github.hdcharts.line.LineChart
 import io.github.hdcharts.line.LineChartDefaults
@@ -263,6 +265,21 @@ fun RingGaugeDocsGifScenarioPreview() {
             title = viewModel.title,
             selectedValueFormatter = viewModel.selectedValueFormatter,
             axisValueFormatter = viewModel.axisValueFormatter,
+        )
+    }
+}
+
+@PreviewTest
+@DocsGifLandscapePreview
+@Composable
+fun SegmentedRingGaugeDocsGifScenarioPreview() {
+    ScreenshotSurface {
+        val viewModel = SegmentedRingGaugeViewModel()
+        SegmentedRingGaugeChart(
+            data = viewModel.data.value,
+            capacity = 2_000.0,
+            title = "Daily Nutrition",
+            centerSupportingLabel = "of 2000 kcal",
         )
     }
 }

@@ -1,6 +1,6 @@
 package io.github.hdcharts.app.demo.line
 
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -71,8 +71,8 @@ fun LiveLineChartDemo(
         },
     ) {
         LiveLineChart(
+            modifier = Modifier.fillMaxSize(),
             data = uiState.dataSet,
-            modifier = Modifier.fillMaxWidth(),
             title =
                 uiState.dataSet.series
                     .firstOrNull()

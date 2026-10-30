@@ -1,6 +1,6 @@
 package io.github.hdcharts.app.demo.multiline
 
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -42,8 +42,8 @@ fun LiveMultiLineChartDemo(viewModel: LiveMultiLineChartViewModel = koinViewMode
         },
     ) {
         LiveLineChart(
+            modifier = Modifier.fillMaxSize(),
             data = uiState.dataSet.dataSet,
-            modifier = Modifier.fillMaxWidth(),
             title = uiState.dataSet.title,
             style = LineChartDefaults.style(chartContainerStyle = chartContainerStyle),
             shiftDuration = animationDuration.milliseconds,

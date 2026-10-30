@@ -39,13 +39,14 @@ fun <S : Any> ChartEntry(
     content: @Composable (data: ChartRenderData, style: S) -> Unit,
     modifier: Modifier = Modifier,
     title: String? = null,
+    additionalErrors: List<String> = emptyList(),
 ) {
     val density = LocalDensity.current
     val policy = spec.policy
     val snapshot = policy.snapshot(style)
     val errors =
-        remember(data, spec, snapshot, density) {
-            policy.errorsFor(data = data, inputs = snapshot, density = density)
+        remember(data, spec, snapshot, density, additionalErrors) {
+            policy.errorsFor(data = data, inputs = snapshot, density = density) + additionalErrors
         }
     if (errors.isNotEmpty()) {
         ChartErrors(

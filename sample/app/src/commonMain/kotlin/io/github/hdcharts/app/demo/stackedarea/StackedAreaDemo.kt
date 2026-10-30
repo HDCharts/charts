@@ -2,6 +2,7 @@ package io.github.hdcharts.app.demo.stackedarea
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -60,8 +61,8 @@ private fun StackedAreaChartDemoContent(
         },
     ) {
         StackedAreaChart(
+            modifier = Modifier.fillMaxSize(),
             data = uiState.chart.data,
-            modifier = Modifier.fillMaxWidth(),
             title = uiState.chart.title,
             style =
                 StackedAreaChartDefaults.style(

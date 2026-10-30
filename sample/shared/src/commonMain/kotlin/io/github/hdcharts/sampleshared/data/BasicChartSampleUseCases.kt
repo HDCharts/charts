@@ -73,3 +73,8 @@ interface RingGaugeSampleUseCase {
     /** Demo refresh: the rings of [deterministic] with random values in the 0 to 100 range. */
     fun random(rings: Int = DEFAULT_RINGS): RingGaugeSampleData
 }
+
+/** A fixed calorie-capacity example for SegmentedRingGaugeChartScreenshotTest. */
+interface SegmentedRingGaugeSampleUseCase {
+    fun deterministic(): SegmentedRingGaugeSampleData
+}

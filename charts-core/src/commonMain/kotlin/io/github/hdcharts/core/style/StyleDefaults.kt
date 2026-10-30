@@ -180,4 +180,23 @@ object StyleDefaults {
     val gaugeTrackColor: Color
         @Composable @ReadOnlyComposable
         get() = MaterialTheme.colorScheme.surfaceVariant
+
+    // ===========================================================================
+    // Segmented Ring Gauge
+    // ===========================================================================
+
+    /** Thickness shared by segmented capacity gauge contributions and their track. */
+    val segmentedRingGaugeWidth: Dp = 72.dp
+
+    /** Radius applied to the corners of each segmented capacity gauge contribution. */
+    val segmentedRingGaugeCornerRadius: Dp = 14.dp
+
+    /** Physical space between neighbouring segmented capacity gauge contributions. */
+    val segmentedRingGaugeSpacing: Dp = 4.dp
+
+    /** Text size for the primary value in a segmented capacity gauge. */
+    val segmentedRingGaugeCenterValueSize: TextUnit = 28.sp
+
+    /** Text size for the supporting value in a segmented capacity gauge. */
+    val segmentedRingGaugeCenterSupportingSize: TextUnit = 16.sp
 }

@@ -1,7 +1,9 @@
 package io.github.hdcharts.app.demo.radar
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.hdcharts.app.ui.composable.ChartDemo
 import io.github.hdcharts.app.ui.composable.PlayPauseButton
@@ -19,6 +21,7 @@ fun RadarChartDemo(viewModel: RadarChartViewModel = koinViewModel()) {
         },
     ) {
         RadarChart(
+            modifier = Modifier.fillMaxSize(),
             data = uiState.chart.data,
             title = uiState.chart.title,
         )

@@ -29,6 +29,7 @@ import io.github.hdcharts.app.gif.docs.ShowMultiLine
 import io.github.hdcharts.app.gif.docs.ShowPie
 import io.github.hdcharts.app.gif.docs.ShowRadar
 import io.github.hdcharts.app.gif.docs.ShowRingGauge
+import io.github.hdcharts.app.gif.docs.ShowSegmentedRingGauge
 import io.github.hdcharts.app.gif.docs.ShowStackedArea
 import io.github.hdcharts.app.gif.docs.ShowStackedBar
 import io.github.hdcharts.app.gif.docs.SignedBarViewModel
@@ -439,6 +440,22 @@ fun RadarDefaultGifScenario() {
 @Composable
 fun RingGaugeDefaultGifScenario() {
     DocsGifScene { ShowRingGauge() }
+}
+
+// Taps the three filled segments from top to bottom-left. Fractions are local to the square plot
+// node, whose centre is at 0.5/0.5; each point lands near the middle of a filled segment.
+@RecordGif(
+    name = "segmented_ring_gauge_default",
+    interactionNodeTag = "SegmentedRingGaugeChart",
+    gestures = [
+        GifGestureStep(type = GifGestureType.TAP, xFraction = 0.13f, yFraction = 0.33f, framesAfter = 14),
+        GifGestureStep(type = GifGestureType.TAP, xFraction = 0.10f, yFraction = 0.60f, framesAfter = 14),
+        GifGestureStep(type = GifGestureType.TAP, xFraction = 0.31f, yFraction = 0.87f, framesAfter = 14),
+    ],
+)
+@Composable
+fun SegmentedRingGaugeDefaultGifScenario() {
+    DocsGifScene { ShowSegmentedRingGauge() }
 }
 
 @Composable

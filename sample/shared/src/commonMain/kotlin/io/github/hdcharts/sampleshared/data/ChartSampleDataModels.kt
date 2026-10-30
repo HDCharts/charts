@@ -15,6 +15,13 @@ data class RingGaugeSampleData(
     val rangeMax: Double,
 )
 
+data class SegmentedRingGaugeSampleData(
+    val data: ChartData,
+    val title: String,
+    val capacity: Double,
+    val centerSupportingLabel: String,
+)
+
 data class MultiLineSampleData(
     val dataSet: ChartData,
     val seriesKeys: List<String>,
@@ -49,4 +56,6 @@ data class ChartGalleryPreview(
     val stackedSeries: List<Pair<String, List<Double>>>,
     val radarSeries: List<Pair<String, List<Double>>>,
     val ringGaugeValues: List<Double>,
+    val segmentedRingGaugeValues: List<Double>,
+    val segmentedRingGaugeCapacity: Double,
 )
