@@ -29,8 +29,9 @@ class LineViewModel : ViewModel() {
                 seed = 19,
                 targetMax = 360.0,
             )
+        val categories = DocsGifScenariosData.weekLabels(count = POINTS)
         return values.toChartData(
-            categories = DocsGifScenariosData.weekLabels(count = POINTS),
+            categories = categories,
             seriesName = TITLE,
         )
     }

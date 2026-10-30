@@ -13,10 +13,19 @@ series; its full source is in
 [`BarExample.kt`](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/BarExample.kt).
 
 ```kotlin
+data class DailyCashFlow(val day: String, val amount: Double)
+
 @Composable
 fun ShowBar() {
-    val data = listOf(45.0, -12.0, 38.0, 27.0, -19.0, 42.0, 31.0).toChartData(
-        categories = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"),
+    val cashFlow = listOf(
+        DailyCashFlow("Mon", 45.0), DailyCashFlow("Tue", -12.0),
+        DailyCashFlow("Wed", 38.0), DailyCashFlow("Thu", 27.0),
+        DailyCashFlow("Fri", -19.0), DailyCashFlow("Sat", 42.0),
+        DailyCashFlow("Sun", 31.0),
+    )
+    val data = cashFlow.toChartData(
+        value = { it.amount },
+        category = { it.day },
         seriesName = "Net cash flow",
     )
 
@@ -32,10 +41,19 @@ to pin `min`, `max`, or both, independently of one another; whichever bound you 
 keeps deriving from the data.
 
 ```kotlin
+data class DailyCashFlow(val day: String, val amount: Double)
+
 @Composable
 fun ShowBarWithRange() {
-    val data = listOf(45.0, -12.0, 38.0, 27.0, -19.0, 42.0, 31.0).toChartData(
-        categories = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"),
+    val cashFlow = listOf(
+        DailyCashFlow("Mon", 45.0), DailyCashFlow("Tue", -12.0),
+        DailyCashFlow("Wed", 38.0), DailyCashFlow("Thu", 27.0),
+        DailyCashFlow("Fri", -19.0), DailyCashFlow("Sat", 42.0),
+        DailyCashFlow("Sun", 31.0),
+    )
+    val data = cashFlow.toChartData(
+        value = { it.amount },
+        category = { it.day },
         seriesName = "Net cash flow",
     )
 

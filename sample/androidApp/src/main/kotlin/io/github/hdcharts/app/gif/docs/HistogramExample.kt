@@ -33,8 +33,9 @@ class HistogramViewModel : ViewModel() {
                 dipEnd = 18,
                 lastEnd = 36.0,
             )
+        val categories = DocsGifScenariosData.msBuckets(count = POINTS, stepMs = 25)
         return values.toChartData(
-            categories = DocsGifScenariosData.msBuckets(count = POINTS, stepMs = 25),
+            categories = categories,
             seriesName = TITLE,
         )
     }

@@ -16,10 +16,19 @@ series; its full source is in
 [`LineExample.kt`](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/LineExample.kt).
 
 ```kotlin
+data class DailyTicketCount(val day: String, val count: Double)
+
 @Composable
 fun ShowLine() {
-    val data = listOf(30.0, 45.0, 38.0, 52.0, 61.0, 49.0, 58.0).toChartData(
-        categories = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"),
+    val tickets = listOf(
+        DailyTicketCount("Mon", 30.0), DailyTicketCount("Tue", 45.0),
+        DailyTicketCount("Wed", 38.0), DailyTicketCount("Thu", 52.0),
+        DailyTicketCount("Fri", 61.0), DailyTicketCount("Sat", 49.0),
+        DailyTicketCount("Sun", 58.0),
+    )
+    val data = tickets.toChartData(
+        value = { it.count },
+        category = { it.day },
         seriesName = "Daily Support Tickets",
     )
 

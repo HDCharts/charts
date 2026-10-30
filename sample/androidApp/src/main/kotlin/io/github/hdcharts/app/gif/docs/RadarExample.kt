@@ -13,23 +13,29 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 private const val TITLE = "Platform Readiness Score"
-private val CATEGORIES =
+
+private data class ReadinessMetric(
+    val name: String,
+    val score: Double,
+)
+
+private val METRICS =
     listOf(
-        "Performance",
-        "Reliability",
-        "Usability",
-        "Security",
-        "Scalability",
-        "Observability",
+        ReadinessMetric("Performance", 84.0),
+        ReadinessMetric("Reliability", 79.0),
+        ReadinessMetric("Usability", 76.0),
+        ReadinessMetric("Security", 88.0),
+        ReadinessMetric("Scalability", 82.0),
+        ReadinessMetric("Observability", 74.0),
     )
-private val VALUES = listOf(84.0, 79.0, 76.0, 88.0, 82.0, 74.0)
 
 class RadarViewModel : ViewModel() {
     val chartData: StateFlow<ChartData> = MutableStateFlow(buildChartData()).asStateFlow()
 
     private fun buildChartData(): ChartData =
-        VALUES.toChartData(
-            categories = CATEGORIES,
+        METRICS.toChartData(
+            value = { it.score },
+            category = { it.name },
             seriesName = TITLE,
         )
 }

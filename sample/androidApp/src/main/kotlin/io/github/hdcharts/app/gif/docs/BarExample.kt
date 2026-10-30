@@ -29,8 +29,9 @@ class BarViewModel : ViewModel() {
                 seed = 7,
                 targetMax = 280.0,
             )
+        val categories = DocsGifScenariosData.monthLabels(count = POINTS)
         return values.toChartData(
-            categories = DocsGifScenariosData.monthLabels(count = POINTS),
+            categories = categories,
             seriesName = BAR_TITLE,
         )
     }
