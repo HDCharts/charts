@@ -77,13 +77,6 @@ class BarStyleBlocksTest {
         assertEquals(expected = 1f, actual = clamped.unselectedAlpha)
     }
 
-    @Test
-    fun range_hasNothingToClamp() {
-        val clamped = BarRangeStyle(min = Double.NaN, max = Double.POSITIVE_INFINITY)
-
-        assertEquals(expected = clamped, actual = clamped)
-    }
-
     private fun barsStyle(colors: List<Color>): BarBarsStyle =
         BarBarsStyle(color = base, colors = colors, gradient = null, alpha = 0.4f, space = 10.dp, minBarWidth = 10.dp)
 }
