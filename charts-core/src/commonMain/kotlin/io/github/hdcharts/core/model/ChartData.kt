@@ -79,6 +79,22 @@ fun List<Double>.toChartData(
 )
 
 /**
+ * Converts a list of domain objects into single-series [ChartData].
+ *
+ * Values and categories are mapped in list order. Use chart style configuration for visual
+ * properties such as colors.
+ *
+ * @param value Selects the numeric value for each item.
+ * @param category Selects the indexed-dimension label for each item.
+ * @param seriesName Optional series name.
+ */
+fun <T> List<T>.toChartData(
+    value: (T) -> Double,
+    category: (T) -> String,
+    seriesName: String? = null,
+): ChartData = map(value).toChartData(categories = map(category), seriesName = seriesName)
+
+/**
  * Builds multi-series [ChartData] from a list of named series.
  *
  * Each pair supplies a series name and its values. For a more explicit

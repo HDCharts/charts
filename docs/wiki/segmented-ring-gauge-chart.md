@@ -17,19 +17,32 @@ implementation("io.github.hdcharts:gauge:<version>")
 ```
 
 ```kotlin
+data class Nutrient(
+    val name: String,
+    val calories: Double,
+    val color: Color,
+)
+
 @Composable
 fun CalorieProgress() {
     val capacity = 2_000.0
+    val nutrients =
+        listOf(
+            Nutrient("Carbs", 240.0, Color(0xFF3B91CC)),
+            Nutrient("Protein", 180.0, Color(0xFF1EB157)),
+            Nutrient("Fat", 320.0, Color(0xFFE3B713)),
+        )
 
     SegmentedRingGaugeChart(
-        data = listOf(240.0, 180.0, 320.0).toChartData(
-            categories = listOf("Carbs", "Protein", "Fat"),
+        data = nutrients.toChartData(
+            value = { it.calories },
+            category = { it.name },
         ),
         capacity = capacity,
         centerSupportingLabel = "of ${capacity.toInt()} kcal",
         style = SegmentedRingGaugeChartDefaults.style(
             segments = SegmentedRingGaugeChartDefaults.segments(
-                colors = listOf(Color(0xFF3B91CC), Color(0xFF1EB157), Color(0xFFE3B713)),
+                colors = nutrients.map { it.color },
             ),
             legend = SegmentedRingGaugeChartDefaults.legend(visible = false),
         ),
@@ -62,11 +75,18 @@ text yourself. Keep `centerValueFormatter` when the primary readout should updat
 fun AdvancedSegmentedRingGauge() {
     val selection = rememberChartSelection(initialIndex = 1)
     val capacity = 2_000.0
+    val nutrients =
+        listOf(
+            Nutrient("Carbs", 240.0, Color(0xFF3B91CC)),
+            Nutrient("Protein", 180.0, Color(0xFF1EB157)),
+            Nutrient("Fat", 320.0, Color(0xFFE3B713)),
+        )
 
     SegmentedRingGaugeChart(
         modifier = Modifier.fillMaxWidth().height(320.dp),
-        data = listOf(240.0, 180.0, 320.0).toChartData(
-            categories = listOf("Carbs", "Protein", "Fat"),
+        data = nutrients.toChartData(
+            value = { it.calories },
+            category = { it.name },
         ),
         capacity = capacity,
         title = "Daily Nutrition",
@@ -85,12 +105,7 @@ fun AdvancedSegmentedRingGauge() {
                 segments =
                     SegmentedRingGaugeChartDefaults.segments(
                         alpha = 0.95f,
-                        colors =
-                            listOf(
-                                Color(0xFF3B91CC),
-                                Color(0xFF1EB157),
-                                Color(0xFFE3B713),
-                            ),
+                        colors = nutrients.map { it.color },
                         // Alternative palette: remove colors above and uncomment baseColor.
                         // baseColor = Color(0xFF3B91CC),
                         width = 28.dp,
