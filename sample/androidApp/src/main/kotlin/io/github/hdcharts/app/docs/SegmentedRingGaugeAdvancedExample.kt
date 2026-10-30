@@ -17,18 +17,27 @@ import io.github.hdcharts.gauge.SegmentedRingGaugeChartDefaults
 import io.github.hdcharts.gauge.SegmentedRingGaugeDirection
 import io.github.hdcharts.gauge.SegmentedRingGaugeStartPosition
 
+private data class NutrientSegment(
+    val name: String,
+    val calories: Double,
+    val color: Color,
+)
+
 /** Demonstrates the complete chart-specific segmented ring gauge configuration. */
 @Composable
 fun AdvancedSegmentedRingGauge() {
     val selection = rememberChartSelection(initialIndex = 1)
     val capacity = 2_000.0
+    val nutrients =
+        listOf(
+            NutrientSegment("Carbs", 240.0, Color(0xFF3B91CC)),
+            NutrientSegment("Protein", 180.0, Color(0xFF1EB157)),
+            NutrientSegment("Fat", 320.0, Color(0xFFE3B713)),
+        )
 
     SegmentedRingGaugeChart(
         modifier = Modifier.fillMaxWidth().height(320.dp),
-        data =
-            listOf(240.0, 180.0, 320.0).toChartData(
-                categories = listOf("Carbs", "Protein", "Fat"),
-            ),
+        data = nutrients.toChartData(value = { it.calories }, category = { it.name }),
         capacity = capacity,
         title = "Daily Nutrition",
         subtitle = "Current intake by macronutrient",
@@ -46,12 +55,7 @@ fun AdvancedSegmentedRingGauge() {
                 segments =
                     SegmentedRingGaugeChartDefaults.segments(
                         alpha = 0.95f,
-                        colors =
-                            listOf(
-                                Color(0xFF3B91CC),
-                                Color(0xFF1EB157),
-                                Color(0xFFE3B713),
-                            ),
+                        colors = nutrients.map { it.color },
                         // Alternative palette: remove colors above and uncomment baseColor.
                         // baseColor = Color(0xFF3B91CC),
                         width = 28.dp,

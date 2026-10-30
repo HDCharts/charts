@@ -7,6 +7,11 @@ import kotlin.test.assertNull
 import kotlin.test.assertSame
 
 class ChartDataTest {
+    private data class Nutrient(
+        val name: String,
+        val calories: Double,
+    )
+
     @Test
     fun doubleList_toChartData_singleSeriesWithoutCategories() {
         // Act
@@ -32,6 +37,77 @@ class ChartDataTest {
         assertContentEquals(actual = data.categories, expected = listOf("Product A", "Product B"))
         assertEquals(actual = data.series[0].name, expected = "Sales")
         assertContentEquals(actual = data.series[0].values, expected = listOf(24.0, 18.0))
+    }
+
+    @Test
+    fun domainObjects_toChartData_mapsValuesAndCategoriesInItemOrder() {
+        val nutrients =
+            listOf(
+                Nutrient("Carbs", 240.0),
+                Nutrient("Protein", 180.0),
+                Nutrient("Fat", 320.0),
+            )
+
+        val data = nutrients.toChartData(value = Nutrient::calories, category = Nutrient::name)
+
+        assertContentEquals(expected = listOf("Carbs", "Protein", "Fat"), actual = data.categories)
+        assertContentEquals(expected = listOf(240.0, 180.0, 320.0), actual = data.series.single().values)
+        assertNull(actual = data.series.single().name)
+    }
+
+    @Test
+    fun domainObjects_toChartData_supportsSeriesNameAndDuplicateCategories() {
+        val data =
+            listOf(Nutrient("Other", 1.0), Nutrient("Other", 2.0)).toChartData(
+                value = { it.calories },
+                category = { it.name },
+                seriesName = "Energy",
+            )
+
+        assertContentEquals(expected = listOf("Other", "Other"), actual = data.categories)
+        assertContentEquals(expected = listOf(1.0, 2.0), actual = data.series.single().values)
+        assertEquals(expected = "Energy", actual = data.series.single().name)
+    }
+
+    @Test
+    fun domainObjects_toChartData_emptyListProducesEmptySingleSeries() {
+        val data =
+            emptyList<Nutrient>().toChartData(
+                value = { it.calories },
+                category = { it.name },
+            )
+
+        assertContentEquals(expected = emptyList(), actual = data.categories)
+        assertContentEquals(expected = emptyList(), actual = data.series.single().values)
+    }
+
+    @Test
+    fun domainObjects_toChartData_supportsOtherItemTypesAndPreservesInvalidValues() {
+        data class Reading(
+            val timestamp: String,
+            val value: Double,
+        )
+
+        val data =
+            listOf(
+                Reading("first", Double.NaN),
+                Reading("second", 2.0),
+            ).toChartData(
+                value = { it.value },
+                category = { it.timestamp },
+            )
+
+        assertContentEquals(expected = listOf("first", "second"), actual = data.categories)
+        assertEquals(
+            expected = true,
+            actual =
+                data.series
+                    .single()
+                    .values
+                    .first()
+                    .isNaN(),
+        )
+        assertEquals(expected = 2.0, actual = data.series.single().values[1])
     }
 
     @Test

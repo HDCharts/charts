@@ -162,6 +162,28 @@ fun SubscribersByPlanChart() {
 
 Unless defined locally, `dataSet` refers to the data from the first example.
 
+### Map application models
+
+For structured application data, map values and categories from each item in one ordered list:
+
+```kotlin
+data class Nutrient(val name: String, val calories: Double)
+
+val nutrients = listOf(
+    Nutrient("Carbs", 240.0),
+    Nutrient("Protein", 180.0),
+    Nutrient("Fat", 320.0),
+)
+
+val data = nutrients.toChartData(
+    value = { it.calories },
+    category = { it.name },
+)
+```
+
+Colors and other visual properties stay in the chart's style configuration. Numeric lists can
+continue to use `toChartData()` directly.
+
 ## Chart API
 
 ### Sizing
