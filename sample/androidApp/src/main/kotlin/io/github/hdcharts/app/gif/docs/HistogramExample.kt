@@ -16,11 +16,6 @@ import kotlinx.coroutines.flow.asStateFlow
 
 private const val TITLE = "Request Duration Distribution"
 
-private data class RequestDurationBucket(
-    val range: String,
-    val requests: Double,
-)
-
 class HistogramViewModel : ViewModel() {
     val chartData: StateFlow<ChartData> = MutableStateFlow(buildChartData()).asStateFlow()
 
@@ -38,15 +33,9 @@ class HistogramViewModel : ViewModel() {
                 dipEnd = 18,
                 lastEnd = 36.0,
             )
-        val buckets =
-            values.zip(
-                DocsGifScenariosData.msBuckets(count = POINTS, stepMs = 25),
-            ) { requests, range ->
-                RequestDurationBucket(range = range, requests = requests)
-            }
-        return buckets.toChartData(
-            value = { it.requests },
-            category = { it.range },
+        val categories = DocsGifScenariosData.msBuckets(count = POINTS, stepMs = 25)
+        return values.toChartData(
+            categories = categories,
             seriesName = TITLE,
         )
     }

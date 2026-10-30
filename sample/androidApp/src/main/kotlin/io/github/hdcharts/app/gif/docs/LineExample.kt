@@ -16,11 +16,6 @@ import kotlinx.coroutines.flow.asStateFlow
 
 private const val TITLE = "Daily Support Tickets"
 
-private data class DailyTicketCount(
-    val day: String,
-    val count: Double,
-)
-
 class LineViewModel : ViewModel() {
     val chartData: StateFlow<ChartData> = MutableStateFlow(buildChartData()).asStateFlow()
 
@@ -34,15 +29,9 @@ class LineViewModel : ViewModel() {
                 seed = 19,
                 targetMax = 360.0,
             )
-        val tickets =
-            values.zip(
-                DocsGifScenariosData.weekLabels(count = POINTS),
-            ) { count, day ->
-                DailyTicketCount(day = day, count = count)
-            }
-        return tickets.toChartData(
-            value = { it.count },
-            category = { it.day },
+        val categories = DocsGifScenariosData.weekLabels(count = POINTS)
+        return values.toChartData(
+            categories = categories,
             seriesName = TITLE,
         )
     }
