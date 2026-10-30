@@ -33,6 +33,18 @@ internal data class SegmentGeometry(
     val sweepAngle: Float,
 )
 
+/** The normalized part of the timeline assigned to one segment's reveal. */
+internal data class SegmentAnimationRange(
+    val startProgress: Float,
+    val endProgress: Float,
+) {
+    fun progressAt(timelineProgress: Float): Float {
+        val duration = endProgress - startProgress
+        if (duration <= 0f) return 0f
+        return ((timelineProgress - startProgress) / duration).coerceIn(0f, 1f)
+    }
+}
+
 /** Returns the sum of [values] with compensation for rounding lost during accumulation. */
 internal fun List<Double>.compensatedSum(): Double {
     var sum = 0.0
@@ -85,6 +97,25 @@ internal fun animatedSegmentGeometry(
                 startAngle = geometry.startAngle + geometry.sweepAngle - animatedSweep,
                 sweepAngle = animatedSweep,
             )
+    }
+}
+
+/**
+ * Assigns each visible segment a consecutive part of the animation timeline, weighted by its
+ * sweep, so each segment starts when the preceding one finishes.
+ */
+internal fun sequentialSegmentAnimationRanges(geometries: List<SegmentGeometry>): List<SegmentAnimationRange> {
+    val totalSweep = geometries.sumOf { it.sweepAngle.toDouble() }
+    if (totalSweep <= 0.0) return geometries.map { SegmentAnimationRange(0f, 0f) }
+
+    var elapsedSweep = 0.0
+    return geometries.map { geometry ->
+        val startProgress = (elapsedSweep / totalSweep).toFloat()
+        elapsedSweep += geometry.sweepAngle
+        SegmentAnimationRange(
+            startProgress = startProgress,
+            endProgress = (elapsedSweep / totalSweep).toFloat(),
+        )
     }
 }
 
