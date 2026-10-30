@@ -14,15 +14,31 @@ import kotlinx.coroutines.flow.asStateFlow
 
 private const val TITLE = "Household Energy"
 
+private data class EnergyUsage(
+    val category: String,
+    val consumption: Double,
+)
+
 class PieViewModel : ViewModel() {
     val title: String = TITLE
 
     val data: StateFlow<ChartData> = MutableStateFlow(buildData()).asStateFlow()
 
-    private fun buildData(): ChartData =
-        listOf(32.0, 21.0, 24.0, 14.0, 9.0).toChartData(
-            categories = listOf("Heating", "Cooling", "Appliances", "Water Heating", "Lighting"),
+    private fun buildData(): ChartData {
+        val energyUsage =
+            listOf(
+                EnergyUsage("Heating", 32.0),
+                EnergyUsage("Cooling", 21.0),
+                EnergyUsage("Appliances", 24.0),
+                EnergyUsage("Water Heating", 14.0),
+                EnergyUsage("Lighting", 9.0),
+            )
+
+        return energyUsage.toChartData(
+            value = { it.consumption },
+            category = { it.category },
         )
+    }
 }
 
 @Composable
