@@ -35,9 +35,11 @@ import io.github.hdcharts.core.internal.ANIMATION_DURATION
 import io.github.hdcharts.core.internal.DEFAULT_SCALE
 import io.github.hdcharts.core.internal.MAX_SCALE
 import io.github.hdcharts.core.internal.NO_SELECTION
+import io.github.hdcharts.core.model.ChartValueFormatter
 import io.github.hdcharts.gauge.SegmentedRingGaugeChartStyle
 import kotlinx.collections.immutable.ImmutableList
 import kotlin.math.cos
+import kotlin.math.round
 import kotlin.math.sin
 
 internal const val SEGMENTED_RING_GAUGE_CHART_TAG = "SegmentedRingGaugeChart"
@@ -48,7 +50,9 @@ internal fun SegmentedRingGaugeChartContent(
     capacity: Double,
     colors: ImmutableList<Color>,
     style: SegmentedRingGaugeChartStyle,
-    centerLabel: String,
+    centerLabel: String?,
+    centerValueFormatter: ChartValueFormatter,
+    total: Double,
     centerSupportingLabel: String?,
     interactionEnabled: Boolean,
     animateOnStart: Boolean,
@@ -61,6 +65,9 @@ internal fun SegmentedRingGaugeChartContent(
     val spacingPx = with(density) { style.segments.spacing.toPx() }
     val cornerRadiusPx = with(density) { style.segments.cornerRadius.toPx() }
     val animation = remember(isPreview, animateOnStart) { Animatable(if (isPreview || !animateOnStart) 1f else 0f) }
+    val animationProgress = animation.value
+    val animatedTotal = if (animationProgress >= 1f) total else round(total * animationProgress)
+    val displayedCenterLabel = centerLabel ?: centerValueFormatter.format(animatedTotal)
     val selectedSegmentScale by
         animateFloatAsState(
             targetValue = if (selectedIndex == NO_SELECTION) DEFAULT_SCALE else MAX_SCALE,
@@ -71,6 +78,7 @@ internal fun SegmentedRingGaugeChartContent(
         if (isPreview || !animateOnStart) {
             animation.snapTo(1f)
         } else {
+            animation.snapTo(0f)
             animation.animateTo(1f, animationSpec = AnimationSpec.ringGauge())
         }
     }
@@ -151,7 +159,7 @@ internal fun SegmentedRingGaugeChartContent(
                             val animatedGeometry =
                                 animatedSegmentGeometry(
                                     geometry = geometry,
-                                    progress = animationRanges[index].progressAt(animation.value),
+                                    progress = animationRanges[index].progressAt(animationProgress),
                                     direction = style.segments.direction,
                                 )
                             scale(scale = segmentScale, pivot = layout.center) {
@@ -172,7 +180,7 @@ internal fun SegmentedRingGaugeChartContent(
         contentAlignment = Alignment.Center,
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.wrapContentSize()) {
-            Text(text = centerLabel, style = style.centerLabels.value)
+            Text(text = displayedCenterLabel, style = style.centerLabels.value)
             if (!centerSupportingLabel.isNullOrBlank()) {
                 Spacer(modifier = Modifier.height(style.centerLabels.spacing))
                 Text(text = centerSupportingLabel, style = style.centerLabels.supporting)
