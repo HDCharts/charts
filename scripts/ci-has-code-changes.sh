@@ -196,10 +196,12 @@ main() {
 
   local base_sha="${1:?base sha is required}"
   local head_sha="${2:?head sha is required}"
+  local comparison_base
   local changed_files
 
+  comparison_base="$(git merge-base "$base_sha" "$head_sha")"
   changed_files="$(collect_changed_files "$base_sha" "$head_sha")"
-  is_code_change "$changed_files" "$base_sha" "$head_sha"
+  is_code_change "$changed_files" "$comparison_base" "$head_sha"
 }
 
 main "$@"

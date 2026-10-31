@@ -15,6 +15,22 @@ spec.loader.exec_module(kdoc_change)
 
 
 class KdocOnlyChangeTest(unittest.TestCase):
+    def test_uses_merge_base_when_base_branch_changes_same_file(self):
+        merge_base = ["/**", " * Description", " */", "fun value() = 1"]
+        base_tip = ["/**", " * Description", " */", "fun value() = 2"]
+        pull_request_head = ["/**", " * Updated description", " */", "fun value() = 1"]
+
+        def read_revision(revision, path):
+            return {
+                "merge-base": merge_base,
+                "base-tip": base_tip,
+                "head": pull_request_head,
+            }[revision]
+
+        with patch.object(kdoc_change, "read_lines", side_effect=read_revision):
+            self.assertTrue(kdoc_change.is_kdoc_only("merge-base", "head", "Example.kt"))
+            self.assertFalse(kdoc_change.is_kdoc_only("base-tip", "head", "Example.kt"))
+
     def test_classifies_kotlin_edits(self):
         cases = [
             (
