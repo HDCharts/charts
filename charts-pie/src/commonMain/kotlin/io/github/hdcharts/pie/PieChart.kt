@@ -23,7 +23,8 @@ internal const val PIE_SELECTION_AUTO_DESELECT_TIMEOUT_MS = 3000L
  * A pie is one series whose values are the slices. Categories are optional and name the slices in
  * the legend and while they are selected; when present, there must be one per value. The slice
  * colors come from the style, either as an explicit palette or as shades generated from its base
- * color.
+ * color. Selecting a slice shows its category and formatted share in the title; without a category,
+ * the title falls back to [title] or shows only the share.
  *
  * [interactionEnabled] disables user controls (tap-to-select and the auto-deselect timeout), but
  * programmatic selection still renders. [animateOnStart] controls the initial reveal, not subsequent
