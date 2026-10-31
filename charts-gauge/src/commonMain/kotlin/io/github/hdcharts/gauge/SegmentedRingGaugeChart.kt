@@ -32,6 +32,8 @@ internal const val SEGMENTED_RING_GAUGE_SELECTION_AUTO_DESELECT_TIMEOUT_MS = 300
  * @param capacity The finite positive total represented by the full ring.
  * @param centerLabel The primary text inside the ring. When null, the sum of segments is formatted.
  * @param centerSupportingLabel Optional text below [centerLabel], such as `of 2000 kcal`.
+ * @param centerValueFormatter Formats the default center total. During animation, intermediate
+ * values are rounded to whole numbers before formatting; the final total retains its precision.
  * @param interactionEnabled When `false`, disables tap-to-select and the auto-deselect timeout.
  */
 @OptIn(InternalChartsApi::class)

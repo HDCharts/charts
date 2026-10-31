@@ -31,6 +31,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.TextStyle
 import io.github.hdcharts.core.internal.ANIMATION_DURATION
 import io.github.hdcharts.core.internal.DEFAULT_SCALE
 import io.github.hdcharts.core.internal.MAX_SCALE
@@ -65,9 +66,6 @@ internal fun SegmentedRingGaugeChartContent(
     val spacingPx = with(density) { style.segments.spacing.toPx() }
     val cornerRadiusPx = with(density) { style.segments.cornerRadius.toPx() }
     val animation = remember(isPreview, animateOnStart) { Animatable(if (isPreview || !animateOnStart) 1f else 0f) }
-    val animationProgress = animation.value
-    val animatedTotal = if (animationProgress >= 1f) total else round(total * animationProgress)
-    val displayedCenterLabel = centerLabel ?: centerValueFormatter.format(animatedTotal)
     val selectedSegmentScale by
         animateFloatAsState(
             targetValue = if (selectedIndex == NO_SELECTION) DEFAULT_SCALE else MAX_SCALE,
@@ -159,7 +157,7 @@ internal fun SegmentedRingGaugeChartContent(
                             val animatedGeometry =
                                 animatedSegmentGeometry(
                                     geometry = geometry,
-                                    progress = animationRanges[index].progressAt(animationProgress),
+                                    progress = animationRanges[index].progressAt(animation.value),
                                     direction = style.segments.direction,
                                 )
                             scale(scale = segmentScale, pivot = layout.center) {
@@ -180,13 +178,34 @@ internal fun SegmentedRingGaugeChartContent(
         contentAlignment = Alignment.Center,
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.wrapContentSize()) {
-            Text(text = displayedCenterLabel, style = style.centerLabels.value)
+            if (centerLabel != null) {
+                Text(text = centerLabel, style = style.centerLabels.value)
+            } else {
+                AnimatedCenterLabel(
+                    total = total,
+                    progress = { animation.value },
+                    formatter = centerValueFormatter,
+                    style = style.centerLabels.value,
+                )
+            }
             if (!centerSupportingLabel.isNullOrBlank()) {
                 Spacer(modifier = Modifier.height(style.centerLabels.spacing))
                 Text(text = centerSupportingLabel, style = style.centerLabels.supporting)
             }
         }
     }
+}
+
+@Composable
+private fun AnimatedCenterLabel(
+    total: Double,
+    progress: () -> Float,
+    formatter: ChartValueFormatter,
+    style: TextStyle,
+) {
+    val animationProgress = progress()
+    val animatedTotal = if (animationProgress >= 1f) total else round(total * animationProgress)
+    Text(text = formatter.format(animatedTotal), style = style)
 }
 
 private fun DrawScope.drawSegmentedRing(
