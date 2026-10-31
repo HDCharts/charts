@@ -28,11 +28,21 @@ is_ignored_path() {
 
 is_code_change() {
   local changed_files="$1"
+  local base_sha="${2:-}"
+  local head_sha="${3:-}"
   local changed_file
 
   while IFS= read -r changed_file; do
     [[ -n "$changed_file" ]] || continue
     if ! is_ignored_path core "$changed_file"; then
+      case "$changed_file" in
+        *.kt|*.kts)
+          if [[ -n "$base_sha" && -n "$head_sha" ]] && \
+            python3 .github/scripts/ci-kdoc-only-change.py "$base_sha" "$head_sha" "$changed_file"; then
+            continue
+          fi
+          ;;
+      esac
       echo "true"
       return
     fi
@@ -189,7 +199,7 @@ main() {
   local changed_files
 
   changed_files="$(collect_changed_files "$base_sha" "$head_sha")"
-  is_code_change "$changed_files"
+  is_code_change "$changed_files" "$base_sha" "$head_sha"
 }
 
 main "$@"

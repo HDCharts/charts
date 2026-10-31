@@ -50,3 +50,7 @@ Pods/
 
 # Local scratch files
 /temp/
+
+# Python cache files
+__pycache__/
+*.pyc
