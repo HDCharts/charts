@@ -4,6 +4,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
@@ -13,7 +14,9 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
+import io.github.hdcharts.core.internal.ANIMATION_DURATION_LINE
 import io.github.hdcharts.core.internal.TestTags
+import io.github.hdcharts.core.model.ChartValueFormatter
 import io.github.hdcharts.core.model.staticChartSelection
 import io.github.hdcharts.core.model.toChartData
 import io.github.hdcharts.core.style.StyleDefaults
@@ -23,13 +26,96 @@ import io.github.hdcharts.gauge.internal.segmentGeometries
 import io.github.hdcharts.gauge.internal.segmentedRingGaugeLayout
 import io.github.hdcharts.gauge.internal.toRadians
 import kotlin.math.cos
+import kotlin.math.round
 import kotlin.math.sin
 import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalTestApi::class)
 class SegmentedRingGaugeChartTest {
     private val values = listOf(240.0, 180.0, 320.0)
     private val categories = listOf("Carbs", "Protein", "Fat")
+
+    @Test
+    fun segmentedRingGaugeChart_defaultTotal_countsUpToTheFinalValue() =
+        runComposeUiTest {
+            mainClock.autoAdvance = false
+            setContent {
+                SegmentedRingGaugeChart(data = values.toChartData(), capacity = 2_000.0)
+            }
+
+            onNodeWithText("0").assertIsDisplayed()
+            mainClock.advanceTimeBy(ANIMATION_DURATION_LINE / 2L)
+            onNodeWithText("0").assertDoesNotExist()
+            onNodeWithText("740").assertDoesNotExist()
+
+            mainClock.advanceTimeBy(ANIMATION_DURATION_LINE.toLong())
+            onNodeWithText("740").assertIsDisplayed()
+        }
+
+    @Test
+    fun segmentedRingGaugeChart_customCenterLabel_staysUnchangedDuringAnimation() =
+        runComposeUiTest {
+            mainClock.autoAdvance = false
+            setContent {
+                SegmentedRingGaugeChart(
+                    data = values.toChartData(),
+                    capacity = 2_000.0,
+                    centerLabel = "Daily total",
+                )
+            }
+
+            onNodeWithText("Daily total").assertIsDisplayed()
+            mainClock.advanceTimeBy(ANIMATION_DURATION_LINE / 2L)
+            onNodeWithText("Daily total").assertIsDisplayed()
+            mainClock.advanceTimeBy(ANIMATION_DURATION_LINE.toLong())
+            onNodeWithText("Daily total").assertIsDisplayed()
+        }
+
+    @Test
+    fun segmentedRingGaugeChart_withoutAnimation_displaysTheExactFormattedTotalImmediately() =
+        runComposeUiTest {
+            mainClock.autoAdvance = false
+            setContent {
+                SegmentedRingGaugeChart(
+                    data = listOf(120.5).toChartData(),
+                    capacity = 200.0,
+                    centerValueFormatter = ChartValueFormatter { "total=$it" },
+                    animateOnStart = false,
+                )
+            }
+
+            onNodeWithText("total=120.5").assertIsDisplayed()
+        }
+
+    @Test
+    fun segmentedRingGaugeChart_fractionalTotal_formatsRoundedStepsAndTheExactFinalValue() =
+        runComposeUiTest {
+            mainClock.autoAdvance = false
+            setContent {
+                SegmentedRingGaugeChart(
+                    data = listOf(120.5).toChartData(),
+                    capacity = 200.0,
+                    centerValueFormatter = ChartValueFormatter { "total=$it" },
+                )
+            }
+
+            onNodeWithText("total=0.0").assertIsDisplayed()
+            mainClock.advanceTimeBy(ANIMATION_DURATION_LINE / 2L)
+            val intermediateText =
+                onNodeWithText("total=", substring = true)
+                    .fetchSemanticsNode()
+                    .config[SemanticsProperties.Text]
+                    .single()
+                    .text
+            val intermediateValue = intermediateText.removePrefix("total=").toDouble()
+            assertTrue(intermediateValue > 0.0 && intermediateValue < 120.5)
+            assertEquals(round(intermediateValue), intermediateValue)
+
+            mainClock.advanceTimeBy(ANIMATION_DURATION_LINE.toLong())
+            onNodeWithText("total=120.5").assertIsDisplayed()
+        }
 
     @Test
     fun segmentedRingGaugeChart_displaysTheRingTotalSupportingTextAndLegend() =
