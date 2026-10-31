@@ -60,7 +60,7 @@ sequenceDiagram
 
 | Job | What it does |
 | --- | --- |
-| `Prepare PR` | Two jobs share this name, one per workflow, with the same steps. Each detects code changes with `scripts/ci-has-code-changes.sh` and runs the self-tests of the release scripts. |
+| `Prepare PR` | Detects code changes with `scripts/ci-has-code-changes.sh`. The core workflow also tests the KDoc-only change detector and runs the release-script self-tests. |
 | `Assemble` | Runs `./gradlew ciAssemble`. |
 | `Compile` | Runs `./gradlew ciCompile`, including the `smoke-line` consumer. |
 | `Lint` | Runs `./gradlew ktlintCheck buildSrcKtlintCheck`. |
