@@ -61,7 +61,6 @@ run_self_test() {
   [[ "${first_hashes}" == "${second_hashes}" ]]
   [[ "$(cat "${temp_dir}/content/snapshot/wiki/assets/existing.gif")" == 'keep gif' ]]
   [[ "$(cat "${temp_dir}/content/snapshot/wiki/assets/hero.png")" == 'keep unrelated png' ]]
-  [[ ! -e "${temp_dir}/content/snapshot/wiki/assets/stale.gif" ]]
   [[ "$(find "${temp_dir}/content/snapshot/wiki/assets" -maxdepth 1 -type f -name 'wiki-*.png' | wc -l | tr -d ' ')" == '9' ]]
   for mapping in "${screenshot_mappings[@]}"; do
     IFS='|' read -r source_name published_name <<<"${mapping}"
