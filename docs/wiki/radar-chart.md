@@ -19,8 +19,9 @@ scores. Set a shared range when values have known bounds or need to remain compa
 
 ![Radar Demo](/content/{{version}}/wiki/assets/radar_default.gif)
 
-The [GIF recording source](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/RadarExample.kt)
-uses a multi-series selection interaction; Basic Usage below maps one current release.
+The GIF demonstrates multi-series selection.
+
+Recording source: [RadarExample.kt](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/RadarExample.kt).
 
 ## Basic Usage
 

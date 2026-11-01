@@ -12,8 +12,7 @@ values for display. Series must have matching lengths and share the same categor
 
 ![Stacked Area Demo](/content/{{version}}/wiki/assets/stacked_area_default.gif)
 
-The GIF uses a longer generated series per plan; its full source is in
-[`StackedAreaExample.kt`](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/StackedAreaExample.kt).
+Recording source: [StackedAreaExample.kt](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/StackedAreaExample.kt).
 
 ## Basic Usage
 
