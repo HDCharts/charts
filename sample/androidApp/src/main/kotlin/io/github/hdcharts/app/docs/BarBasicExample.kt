@@ -9,7 +9,10 @@ import androidx.compose.ui.unit.dp
 import io.github.hdcharts.bar.BarChart
 import io.github.hdcharts.core.model.toChartData
 
-private data class DailyCashFlow(val day: String, val amount: Double)
+private data class DailyCashFlow(
+    val day: String,
+    val amount: Double,
+)
 
 @Composable
 fun ShowDailyCashFlow() {

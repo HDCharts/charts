@@ -9,7 +9,10 @@ import androidx.compose.ui.unit.dp
 import io.github.hdcharts.core.model.toChartData
 import io.github.hdcharts.histogram.HistogramChart
 
-private data class RequestDurationBin(val interval: String, val requestCount: Double)
+private data class RequestDurationBin(
+    val interval: String,
+    val requestCount: Double,
+)
 
 @Composable
 fun ShowRequestDurationDistribution() {

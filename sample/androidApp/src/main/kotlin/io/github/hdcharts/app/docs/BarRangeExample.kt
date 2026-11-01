@@ -10,9 +10,10 @@ import io.github.hdcharts.core.style.BarChartDefaults
 fun CompareCashFlow(data: ChartData) {
     BarChart(
         data = data,
-        style = BarChartDefaults.style(
-            range = BarChartDefaults.range(min = -50.0, max = 50.0),
-        ),
+        style =
+            BarChartDefaults.style(
+                range = BarChartDefaults.range(min = -50.0, max = 50.0),
+            ),
     )
 }
 // END WIKI EXAMPLE: bar-fixed-range

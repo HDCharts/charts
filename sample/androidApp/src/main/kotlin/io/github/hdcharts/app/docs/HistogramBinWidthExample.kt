@@ -11,9 +11,10 @@ import io.github.hdcharts.histogram.HistogramChart
 fun ShowWiderRequestBins(data: ChartData) {
     HistogramChart(
         data = data,
-        style = HistogramChartDefaults.style(
-            bars = HistogramChartDefaults.bars(minBarWidth = 16.dp),
-        ),
+        style =
+            HistogramChartDefaults.style(
+                bars = HistogramChartDefaults.bars(minBarWidth = 16.dp),
+            ),
     )
 }
 // END WIKI EXAMPLE: histogram-bin-width
