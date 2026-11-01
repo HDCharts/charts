@@ -92,26 +92,53 @@ class SyncWikiExamplesTest(unittest.TestCase):
         self.assertEqual(1, self.run_sync())
         self.assertIn("malformed source marker", self.last_output)
 
-    def test_multiple_named_regions_can_share_a_source_file(self):
+    def test_multiple_regions_preserve_markdown_and_check_drift(self):
         self.source.write_text(
             "package sample\n"
-            "// BEGIN WIKI EXAMPLE: basic\nfun Basic() = PieChart()\n"
+            "// BEGIN WIKI EXAMPLE: basic\n"
+            "import sample.PieChart\n\n"
+            "fun Basic() {\n    val data = listOf(1, 2, 3)\n    PieChart(data)\n}\n"
             "// END WIKI EXAMPLE: basic\n"
             "// BEGIN WIKI EXAMPLE: palette\nfun Palette() = PieChart(style = style)\n"
             "// END WIKI EXAMPLE: palette\n",
             encoding="utf-8",
         )
         self.markdown.write_text(
-            "<!-- BEGIN WIKI EXAMPLE: sample/Pie.kt#basic -->\n```kotlin\n```\n"
-            "<!-- END WIKI EXAMPLE: basic -->\n\n"
-            "<!-- BEGIN WIKI EXAMPLE: sample/Pie.kt#palette -->\n```kotlin\n```\n"
-            "<!-- END WIKI EXAMPLE: palette -->\n",
+            "# Pie\n\nBefore first.\n"
+            "<!-- BEGIN WIKI EXAMPLE: sample/Pie.kt#basic -->\n"
+            "```kotlin\nold()\n```\n"
+            "<!-- END WIKI EXAMPLE: basic -->\n"
+            "Between regions.\n"
+            "<!-- BEGIN WIKI EXAMPLE: sample/Pie.kt#palette -->\n"
+            "```kotlin\nold one\nold two\nold three\n```\n"
+            "<!-- END WIKI EXAMPLE: palette -->\n"
+            "After second.\n",
             encoding="utf-8",
         )
         self.assertEqual(0, self.run_sync())
-        content = self.markdown.read_text(encoding="utf-8")
-        self.assertIn("fun Basic() = PieChart()", content)
-        self.assertIn("fun Palette() = PieChart(style = style)", content)
+        expected = (
+            "# Pie\n\nBefore first.\n"
+            "<!-- BEGIN WIKI EXAMPLE: sample/Pie.kt#basic -->\n"
+            "```kotlin\nimport sample.PieChart\n\n"
+            "fun Basic() {\n    val data = listOf(1, 2, 3)\n    PieChart(data)\n}\n```\n"
+            "<!-- END WIKI EXAMPLE: basic -->\n"
+            "Between regions.\n"
+            "<!-- BEGIN WIKI EXAMPLE: sample/Pie.kt#palette -->\n"
+            "```kotlin\nfun Palette() = PieChart(style = style)\n```\n"
+            "<!-- END WIKI EXAMPLE: palette -->\n"
+            "After second.\n"
+        )
+        self.assertEqual(expected, self.markdown.read_text(encoding="utf-8"))
+
+        self.assertEqual(0, self.run_sync())
+        self.assertEqual(expected, self.markdown.read_text(encoding="utf-8"))
+        self.assertEqual(0, self.run_sync(check=True))
+
+        drifted = expected.replace("fun Palette()", "fun StalePalette()")
+        self.markdown.write_text(drifted, encoding="utf-8")
+        before_check = self.markdown.read_bytes()
+        self.assertEqual(1, self.run_sync(check=True))
+        self.assertEqual(before_check, self.markdown.read_bytes())
 
     def test_duplicate_or_malformed_destination_markers_are_rejected(self):
         duplicate = (

@@ -104,9 +104,9 @@ def sync_markdown(repo_root: Path, markdown: Path, check: bool) -> bool:
     original = markdown.read_bytes().decode("utf-8")
     newline = "\r\n" if "\r\n" in original else "\n"
     lines = original.splitlines()
-    updated = lines.copy()
+    updated: list[str] = []
+    cursor = 0
     index = 0
-    changed = False
     seen_ids: set[str] = set()
     while index < len(lines):
         line = lines[index]
@@ -136,11 +136,14 @@ def sync_markdown(repo_root: Path, markdown: Path, check: bool) -> bool:
             )
         snippet = read_snippet(repo_root, f"{source_ref}#{identifier}", markdown)
         block = ["```kotlin", *snippet.splitlines(), "```"]
-        if updated[index + 1 : end_index] != block:
-            updated[index + 1 : end_index] = block
-            changed = True
+        updated.extend(lines[cursor : index + 1])
+        updated.extend(block)
+        updated.append(lines[end_index])
+        cursor = end_index + 1
         index = end_index + 1
 
+    updated.extend(lines[cursor:])
+    changed = updated != lines
     if changed:
         if check:
             raise SyncError(f"{markdown}: managed Kotlin example is out of sync; run scripts/sync-wiki-examples.py")
