@@ -63,29 +63,41 @@ fun ShowPie() {
 Set one color per slice, in slice order. The chart reports a validation error when the palette size
 does not match the slice count. This excerpt reuses `data` from Basic Usage.
 
+<!-- BEGIN WIKI EXAMPLE: sample/androidApp/src/main/kotlin/io/github/hdcharts/app/docs/PieCapabilities.kt#pie-slice-colors -->
 ```kotlin
-PieChart(
-    data = data,
-    style = PieChartDefaults.style(
-        slices = PieChartDefaults.slices(
-            colors = listOf(Color.Red, Color.Green, Color.Blue, Color.Yellow, Color.Magenta),
-        ),
-    ),
-)
+@Composable
+fun ShowPieWithSliceColors(data: ChartData) {
+    val colors = listOf(Color.Red, Color.Green, Color.Blue, Color.Yellow, Color.Magenta)
+
+    PieChart(
+        data = data,
+        style =
+            PieChartDefaults.style(
+                slices = PieChartDefaults.slices(colors = colors),
+            ),
+    )
+}
 ```
+<!-- END WIKI EXAMPLE: pie-slice-colors -->
 
 ### Selected Share
 
-A selected slice shows its category and share of the total in the title, such as `Lighting: 42.5%`.
+A selected slice shows its category and share of the total in the title, such as `Lighting: 9%` for
+the Basic Usage data.
 `selectedValueFormatter` formats that share, given in percent from 0 to 100. This one shows whole
 percents and reuses `data` from Basic Usage:
 
+<!-- BEGIN WIKI EXAMPLE: sample/androidApp/src/main/kotlin/io/github/hdcharts/app/docs/PieCapabilities.kt#pie-selected-share -->
 ```kotlin
-PieChart(
-    data = data,
-    selectedValueFormatter = ChartValueFormatter { share -> "${share.roundToInt()}%" },
-)
+@Composable
+fun ShowPieWithRoundedShare(data: ChartData) {
+    PieChart(
+        data = data,
+        selectedValueFormatter = ChartValueFormatter { share -> "${share.roundToInt()}%" },
+    )
+}
 ```
+<!-- END WIKI EXAMPLE: pie-selected-share -->
 
 ## API Reference
 

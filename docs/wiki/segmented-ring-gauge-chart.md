@@ -4,9 +4,6 @@ title: Segmented Ring Gauge
 
 # Segmented Ring Gauge Chart
 
-On this page: [Capacity and Center Labels](#capacity-and-center-labels) · [Selection](#selection) ·
-[Segment Styling](#segment-styling) · [Start Position and Direction](#start-position-and-direction)
-
 ## Overview
 
 `SegmentedRingGaugeChart` shows how several contributions fill one fixed capacity. The colored

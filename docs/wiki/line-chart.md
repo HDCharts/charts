@@ -4,8 +4,6 @@ title: Line Chart
 
 # Line Chart
 
-On this page: [Multiple Series](#multiple-series) · [Fixed Value Range](#fixed-value-range) · [Selection and Interaction](#selection-and-interaction) · [Gradients](#gradients) · [Morphing](#morphing) · [Live Line Chart](#live-line-chart)
-
 ## Overview
 
 `LineChart` shows how one or more numeric series change across ordered categories. It derives the

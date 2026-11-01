@@ -4,9 +4,6 @@ title: Ring Gauge
 
 # Ring Gauge Chart
 
-On this page: [Range and Clamping](#range-and-clamping) · [Ring Selection](#ring-selection) ·
-[Ring Styling](#ring-styling) · [Labels and Formatting](#labels-and-formatting)
-
 ## Overview
 
 `RingGaugeChart` compares independent values on separate half-circle rings. Every value uses the same
