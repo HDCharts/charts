@@ -61,14 +61,3 @@ fun StyledTeamProgress(data: ChartData) {
     )
 }
 // END WIKI EXAMPLE: ring-gauge-styling
-
-// BEGIN WIKI EXAMPLE: ring-gauge-label-formatting
-@Composable
-fun FormattedTeamProgress(data: ChartData) {
-    RingGaugeChart(
-        data = data,
-        selectedValueFormatter = ChartValueFormatters.suffix("%"),
-        axisValueFormatter = ChartValueFormatters.suffix("%"),
-    )
-}
-// END WIKI EXAMPLE: ring-gauge-label-formatting

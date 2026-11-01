@@ -145,23 +145,10 @@ fun StyledTeamProgress(data: ChartData) {
 
 ### Labels and Formatting
 
-The labels beneath the arc show the configured range endpoints. `axisValueFormatter` formats those
-endpoints, while `selectedValueFormatter` formats the selected ring's original value in the title.
-The defaults omit a terminal `.0` for whole endpoint values and show selected values with up to two
-decimal places. This excerpt reuses `data` from Basic Usage.
-
-<!-- BEGIN WIKI EXAMPLE: sample/androidApp/src/main/kotlin/io/github/hdcharts/app/docs/RingGaugeCapabilities.kt#ring-gauge-label-formatting -->
-```kotlin
-@Composable
-fun FormattedTeamProgress(data: ChartData) {
-    RingGaugeChart(
-        data = data,
-        selectedValueFormatter = ChartValueFormatters.suffix("%"),
-        axisValueFormatter = ChartValueFormatters.suffix("%"),
-    )
-}
-```
-<!-- END WIKI EXAMPLE: ring-gauge-label-formatting -->
+`selectedValueFormatter` formats the selected ring's original value in the title, and
+`axisValueFormatter` formats the range endpoint labels. The temperature example in [Range and
+Clamping](#range-and-clamping) shows both formatters and keeps whole-number endpoints free of a
+trailing `.0`.
 
 ## API Reference
 
