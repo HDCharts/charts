@@ -27,6 +27,10 @@ the page structure. Avoid manually maintained TOC lists that duplicate this navi
 
 Dokka output is published under `/static/api/{{version}}/`; `{{version}}` follows the wiki's existing version placeholder convention. The generated chart pages are under `charts/<package>/`, with the composable page named for its symbol and defaults/style pages nested under their generated symbol directory. For each page, copy the exact relative paths from generated output (snapshot output is under `docs/static/api/snapshot/`) and verify the linked symbol exists. Do not construct an anchor or page name from memory.
 
+## Chart module installation
+
+Every chart-specific page must show its correct published module dependency inside `## Overview`, after the introductory explanation and before the introductory GIF. Verify artifact coordinates against the repository publishing configuration; both Ring Gauge and Segmented Ring Gauge use the shared `gauge` artifact. Use `{{artifactVersion}}` for Maven dependency versions and do not hardcode release versions in shared wiki Markdown. Keep `{{version}}` for documentation routes and API links. Do not add separate Installation headings or independent version declarations to chart pages. Link to Getting Started when broader setup details are needed; keep chart-page installation instructions focused on the module coordinate.
+
 ## Code examples
 
 Use these terms precisely:

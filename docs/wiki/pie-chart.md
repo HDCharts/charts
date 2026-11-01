@@ -10,6 +10,10 @@ title: Pie
 nonnegative finite values. Categories are optional; when supplied, each names a slice in the legend
 and while it is selected.
 
+```kotlin
+implementation("io.github.hdcharts:pie:{{artifactVersion}}")
+```
+
 ![Pie Demo](/content/{{version}}/wiki/assets/pie_default.gif)
 
 Slice colors come from the style, either as an explicit palette or as shades generated from its base

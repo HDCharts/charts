@@ -11,10 +11,8 @@ configured range, and the first value is the outer ring. Use it for progress ind
 workstreams. A [Segmented Ring Gauge](/{{version}}/wiki/segmented-ring-gauge-chart) instead shows
 contributions that add together toward one shared capacity.
 
-Add the `gauge` module:
-
 ```kotlin
-implementation("io.github.hdcharts:gauge:<version>")
+implementation("io.github.hdcharts:gauge:{{artifactVersion}}")
 ```
 
 ![Ring Gauge Demo](/content/{{version}}/wiki/assets/ring_gauge_default.gif)

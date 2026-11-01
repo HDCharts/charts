@@ -8,7 +8,7 @@ This guide will help you integrate the HDCharts library into your Kotlin Multipl
 
 ## Installation
 
-Replace `<version>` with the latest release: [![Release](https://img.shields.io/maven-central/v/io.github.hdcharts/charts.svg?label=Maven%20Central)](https://central.sonatype.com/artifact/io.github.hdcharts/charts/overview)
+[![Release](https://img.shields.io/maven-central/v/io.github.hdcharts/charts.svg?label=Maven%20Central)](https://central.sonatype.com/artifact/io.github.hdcharts/charts/overview)
 
 ### Repository
 ```kotlin
@@ -22,21 +22,21 @@ dependencyResolutionManagement {
 ### Umbrella Dependency
 ```kotlin
 commonMain.dependencies {
-    implementation("io.github.hdcharts:charts:<version>")
+    implementation("io.github.hdcharts:charts:{{artifactVersion}}")
 }
 ```
 
 ### Modular Dependencies (Pick What You Need)
 ```kotlin
 commonMain.dependencies {
-    implementation("io.github.hdcharts:line:<version>")
-    implementation("io.github.hdcharts:pie:<version>")
-    implementation("io.github.hdcharts:bar:<version>")
-    implementation("io.github.hdcharts:histogram:<version>")
-    implementation("io.github.hdcharts:stacked-bar:<version>")
-    implementation("io.github.hdcharts:stacked-area:<version>")
-    implementation("io.github.hdcharts:radar:<version>")
-    implementation("io.github.hdcharts:gauge:<version>")
+    implementation("io.github.hdcharts:line:{{artifactVersion}}")
+    implementation("io.github.hdcharts:pie:{{artifactVersion}}")
+    implementation("io.github.hdcharts:bar:{{artifactVersion}}")
+    implementation("io.github.hdcharts:histogram:{{artifactVersion}}")
+    implementation("io.github.hdcharts:stacked-bar:{{artifactVersion}}")
+    implementation("io.github.hdcharts:stacked-area:{{artifactVersion}}")
+    implementation("io.github.hdcharts:radar:{{artifactVersion}}")
+    implementation("io.github.hdcharts:gauge:{{artifactVersion}}")
 }
 ```
 
@@ -46,7 +46,7 @@ For KMP `commonMain`, keep explicit versions as shown above.
 
 ```kotlin
 dependencies {
-    implementation(platform("io.github.hdcharts:bom:<version>"))
+    implementation(platform("io.github.hdcharts:bom:{{artifactVersion}}"))
     implementation("io.github.hdcharts:line")
     implementation("io.github.hdcharts:pie")
     implementation("io.github.hdcharts:bar")
@@ -67,7 +67,6 @@ commonMain.dependencies {
 
 dependencyResolutionManagement {
     repositories {
-        // Sonatype Central Portal Snapshots (replaces old s01.oss.sonatype.org)
         maven("https://central.sonatype.com/repository/maven-snapshots/")
     }
 }
