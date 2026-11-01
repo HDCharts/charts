@@ -70,20 +70,36 @@ fun CompareShapeAndPlotGradients() {
 ```
 <!-- END WIKI EXAMPLE: gradients-shape-and-plot -->
 
+The recordings below use longer generated datasets than the minimal Kotlin examples, while demonstrating the same gradient configurations.
+
+The [bar guide's gradient example](/{{version}}/wiki/bar-chart#gradients) shows a basic chart setup.
+
+**Bar — Shape.** The recording uses blue-purple-orange stops with `ChartGradients.vertical(colors = colors, span = GradientSpan.Shape)`, passed through `BarChartDefaults.bars(gradient = ...)` in `BarChartDefaults.style(...)`. Each bar shows the full gradient; negative bars mirror it from the value edge toward zero.
+
 ![Bar shape gradient: each bar repeats the full vertical gradient](/content/{{version}}/wiki/assets/bar_gradient_shape.gif)
+
+Recording source: [BarGradientExample.kt](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/BarGradientExample.kt).
+
+**Bar — Plot.** The same stops use `ChartGradients.vertical(colors = colors, span = GradientSpan.Plot)` with `BarChartDefaults.bars(gradient = ...)` in `BarChartDefaults.style(...)`. The gradient spans the plot, so each bar shows the color at its height.
 
 ![Bar plot gradient: one vertical gradient spans all bars](/content/{{version}}/wiki/assets/bar_gradient_plot_vertical.gif)
 
+Recording source: [BarGradientExample.kt](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/BarGradientExample.kt).
+
+**Histogram — Shape.** The recording uses blue-purple-orange stops with `ChartGradients.vertical(colors = colors, span = GradientSpan.Shape)`, passed through `HistogramChartDefaults.bars(gradient = ...)` in `HistogramChartDefaults.style(...)`. Each bin shows the full gradient; a bin below zero mirrors it toward the baseline.
+
 ![Histogram shape gradient: each bin repeats the full vertical gradient](/content/{{version}}/wiki/assets/histogram_gradient_shape.gif)
+
+Recording source: [HistogramGradientExample.kt](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/HistogramGradientExample.kt).
+
+**Histogram — Plot.** The same stops use `ChartGradients.vertical(colors = colors, span = GradientSpan.Plot)` with `HistogramChartDefaults.bars(gradient = ...)` in `HistogramChartDefaults.style(...)`. Taller bins reach farther toward the top color in the plot-spanning gradient.
 
 ![Histogram plot gradient: one vertical gradient spans all bins](/content/{{version}}/wiki/assets/histogram_gradient_plot_vertical.gif)
 
-These recordings use longer generated series than the teaching example. Sources: [BarGradientExample.kt](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/BarGradientExample.kt) and [HistogramGradientExample.kt](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/HistogramGradientExample.kt). The [bar guide's gradient example](/{{version}}/wiki/bar-chart#gradients) shows a basic chart setup.
+Recording source: [HistogramGradientExample.kt](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/HistogramGradientExample.kt).
 
-For a shape-spanning vertical gradient, color follows each shape's extent. For a plot-spanning vertical
-gradient, taller bars reach farther toward the top color. A horizontal plot gradient runs from the left
-side of the plot to its right side. In dense scrollable charts, the plot bounds include the full series,
-so the gradient moves with the scrolling content.
+A horizontal plot gradient runs from the left side of the plot to its right. In dense scrollable charts,
+plot-spanning gradients cover the full series and move with the scrolling content.
 
 ## Ready-Made Gradients
 
@@ -103,21 +119,33 @@ gradient the useful choice when a chart legend needs to remain visually matched 
 bar and stacked area styles apply one gradient to all segments or layers; they do not accept a separate
 gradient per series.
 
+**Bar fade.** `ChartGradients.fade(endAlpha = 0.35f)` goes to `BarChartDefaults.bars(gradient = ...)` inside `BarChartDefaults.style(...)`. Each bar fades its resolved color toward the baseline; negative bars mirror the fade around zero.
+
 ![Bar gradient fade: each bar keeps its own color](/content/{{version}}/wiki/assets/bar_gradient_fade.gif)
+
+Recording source: [BarGradientExample.kt](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/BarGradientExample.kt).
+
+**Stacked bar fade.** `StackedBarChartDefaults.segments(colors = seriesColors, gradient = ChartGradients.fade(endAlpha = 0.35f))` is used by `StackedBarChartDefaults.style(segments = ...)`. The fade preserves each segment's series color.
 
 ![Stacked bar gradient fade: segments keep their series colors](/content/{{version}}/wiki/assets/stacked_bar_gradient.gif)
 
+Recording source: [StackedBarGradientExample.kt](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/StackedBarGradientExample.kt).
+
+**Stacked area fade.** `StackedAreaChartDefaults.fill(colors = seriesColors, gradient = ChartGradients.fade(endAlpha = 0.35f))` is used by `StackedAreaChartDefaults.style(fill = ...)`. Each layer fades while retaining its series color.
+
 ![Stacked area gradient fade: layers keep their series colors](/content/{{version}}/wiki/assets/stacked_area_gradient.gif)
 
-These recordings use longer generated series than the teaching examples. Sources: [BarGradientExample.kt](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/BarGradientExample.kt), [StackedBarGradientExample.kt](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/StackedBarGradientExample.kt), and [StackedAreaGradientExample.kt](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/StackedAreaGradientExample.kt).
+Recording source: [StackedAreaGradientExample.kt](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/StackedAreaGradientExample.kt).
 
 Line gradients paint the stroke; points and selection markers keep their own colors. `Shape` uses the
 line's bounds, while `Plot` follows the full plot. In `LiveLineChart`, a shape-spanning gradient follows
-the visible line bounds as they change. See the [line gradient example](/{{version}}/wiki/line-chart#gradients)
+the visible line bounds as they change. See the [line gradient example](/{{version}}/wiki/line-chart#gradients).
+
+**Line — Plot.** The red-orange-blue stops use `ChartGradients.vertical(colors = valueColors, span = GradientSpan.Plot)` with `LineChartDefaults.line(gradient = ...)` in `LineChartDefaults.style(line = ...)`. Color follows value across the full plot; points and selection markers keep their own colors.
 
 ![Line gradient: color follows the line's value](/content/{{version}}/wiki/assets/line_gradient.gif)
 
-The recording uses a longer generated series; its source is [LineGradientExample.kt](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/LineGradientExample.kt).
+Recording source: [LineGradientExample.kt](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/LineGradientExample.kt).
 
 ## Custom Stops and Geometry
 
