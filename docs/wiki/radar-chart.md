@@ -104,7 +104,9 @@ fun ShowReadinessOnFixedScale(
 
 | Automatic scaling | Fixed range (0–100) |
 | --- | --- |
-| ![Radar chart with automatic scaling, where the dataset minimum maps to the center](/content/{{version}}/wiki/assets/wiki-radar-basic.png) | ![Radar chart with a fixed 0 to 100 range](/content/{{version}}/wiki/assets/wiki-radar-fixed-range.png) |
+| [![Radar chart with automatic scaling, where the dataset minimum maps to the center](/content/{{version}}/wiki/assets/wiki-radar-basic.png)](/content/{{version}}/wiki/assets/wiki-radar-basic.png) | [![Radar chart with a fixed 0 to 100 range](/content/{{version}}/wiki/assets/wiki-radar-fixed-range.png)](/content/{{version}}/wiki/assets/wiki-radar-fixed-range.png) |
+
+Tap either screenshot to view it at full size.
 
 ### Multiple Series
 
