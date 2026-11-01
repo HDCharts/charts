@@ -22,13 +22,14 @@ fun CalorieProgress() {
             Nutrient("Protein", 180.0, Color(0xFF1EB157)),
             Nutrient("Fat", 320.0, Color(0xFFE3B713)),
         )
+    val data =
+        nutrients.toChartData(
+            value = { it.calories },
+            category = { it.name },
+        )
 
     SegmentedRingGaugeChart(
-        data =
-            nutrients.toChartData(
-                value = { it.calories },
-                category = { it.name },
-            ),
+        data = data,
         capacity = capacity,
         centerSupportingLabel = "of ${capacity.toInt()} kcal",
         style =

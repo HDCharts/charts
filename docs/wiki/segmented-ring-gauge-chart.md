@@ -15,6 +15,10 @@ up of named parts, such as daily nutrition; use a pie chart when the parts shoul
 
 ![Segmented Ring Gauge Demo](/content/{{version}}/wiki/assets/segmented_ring_gauge_default.gif)
 
+The [GIF recording source](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/SegmentedRingGaugeExample.kt)
+feeds the same calorie values through a `ViewModel` and `StateFlow`. Basic Usage instead maps
+`Nutrient` records and uses their names and colors for the chart.
+
 Add the existing `gauge` module:
 
 ```kotlin
@@ -49,13 +53,14 @@ fun CalorieProgress() {
             Nutrient("Protein", 180.0, Color(0xFF1EB157)),
             Nutrient("Fat", 320.0, Color(0xFFE3B713)),
         )
+    val data =
+        nutrients.toChartData(
+            value = { it.calories },
+            category = { it.name },
+        )
 
     SegmentedRingGaugeChart(
-        data =
-            nutrients.toChartData(
-                value = { it.calories },
-                category = { it.name },
-            ),
+        data = data,
         capacity = capacity,
         centerSupportingLabel = "of ${capacity.toInt()} kcal",
         style =
@@ -77,10 +82,11 @@ non-negative, and their sum must not exceed the finite positive capacity.
 
 ### Capacity and Center Labels
 
-Capacity sets the full ring amount; segment values determine the filled portion. By default, the
-center shows the segment total. `centerValueFormatter` can format that calculated value, while
-`centerLabel` supplies a custom primary label. Use `centerSupportingLabel` for context such as a
-unit or capacity. This excerpt reuses `data` from Basic Usage.
+Capacity sets the full ring amount; segment values determine the filled portion.
+`centerValueFormatter` formats the calculated total, while `centerLabel` explicitly overrides the
+displayed primary center text. `style.centerLabels` controls typography and spacing, not text
+content. `centerSupportingLabel` supplies context such as a unit or capacity. Each capability
+composable accepts a `ChartData`; pass the `data` mapped in Basic Usage or another `ChartData` value.
 
 <!-- BEGIN WIKI EXAMPLE: sample/androidApp/src/main/kotlin/io/github/hdcharts/app/docs/SegmentedRingGaugeCapabilities.kt#segmented-ring-gauge-capacity-labels -->
 ```kotlin
