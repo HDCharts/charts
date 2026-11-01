@@ -51,17 +51,20 @@ fun CalorieProgress() {
         )
 
     SegmentedRingGaugeChart(
-        data = nutrients.toChartData(
-            value = { it.calories },
-            category = { it.name },
-        ),
+        data =
+            nutrients.toChartData(
+                value = { it.calories },
+                category = { it.name },
+            ),
         capacity = capacity,
         centerSupportingLabel = "of ${capacity.toInt()} kcal",
-        style = SegmentedRingGaugeChartDefaults.style(
-            segments = SegmentedRingGaugeChartDefaults.segments(
-                colors = nutrients.map { it.color },
+        style =
+            SegmentedRingGaugeChartDefaults.style(
+                segments =
+                    SegmentedRingGaugeChartDefaults.segments(
+                        colors = nutrients.map { it.color },
+                    ),
             ),
-        ),
     )
 }
 ```
@@ -87,13 +90,15 @@ fun CapacityAndCenterLabels(data: ChartData) {
         data = data,
         capacity = 2_000.0,
         centerSupportingLabel = "of 2,000 kcal",
-        style = SegmentedRingGaugeChartDefaults.style(
-            centerLabels = SegmentedRingGaugeChartDefaults.centerLabels(
-                value = TextStyle(fontSize = 32.sp),
-                supporting = TextStyle(fontSize = 14.sp),
-                spacing = 6.dp,
+        style =
+            SegmentedRingGaugeChartDefaults.style(
+                centerLabels =
+                    SegmentedRingGaugeChartDefaults.centerLabels(
+                        value = TextStyle(fontSize = 32.sp),
+                        supporting = TextStyle(fontSize = 14.sp),
+                        spacing = 6.dp,
+                    ),
             ),
-        ),
     )
 }
 ```
@@ -138,14 +143,16 @@ fun StyledNutrition(data: ChartData) {
     SegmentedRingGaugeChart(
         data = data,
         capacity = 2_000.0,
-        style = SegmentedRingGaugeChartDefaults.style(
-            segments = SegmentedRingGaugeChartDefaults.segments(
-                width = 24.dp,
-                spacing = 5.dp,
-                cornerRadius = 8.dp,
+        style =
+            SegmentedRingGaugeChartDefaults.style(
+                segments =
+                    SegmentedRingGaugeChartDefaults.segments(
+                        width = 24.dp,
+                        spacing = 5.dp,
+                        cornerRadius = 8.dp,
+                    ),
+                track = SegmentedRingGaugeChartDefaults.track(color = Color(0xFFE5E7EB)),
             ),
-            track = SegmentedRingGaugeChartDefaults.track(color = Color(0xFFE5E7EB)),
-        ),
     )
 }
 ```
@@ -163,12 +170,14 @@ fun ReversedNutrition(data: ChartData) {
     SegmentedRingGaugeChart(
         data = data,
         capacity = 2_000.0,
-        style = SegmentedRingGaugeChartDefaults.style(
-            segments = SegmentedRingGaugeChartDefaults.segments(
-                startPosition = SegmentedRingGaugeStartPosition.Top,
-                direction = SegmentedRingGaugeDirection.Clockwise,
+        style =
+            SegmentedRingGaugeChartDefaults.style(
+                segments =
+                    SegmentedRingGaugeChartDefaults.segments(
+                        startPosition = SegmentedRingGaugeStartPosition.Top,
+                        direction = SegmentedRingGaugeDirection.Clockwise,
+                    ),
             ),
-        ),
     )
 }
 ```
