@@ -10,10 +10,8 @@ title: Segmented Ring Gauge
 segments cover the contributions, and the track shows the unused capacity. Use it for progress made
 up of named parts, such as daily nutrition; use a pie chart when the parts should represent a whole.
 
-Add the existing `gauge` module:
-
 ```kotlin
-implementation("io.github.hdcharts:gauge:<version>")
+implementation("io.github.hdcharts:gauge:{{artifactVersion}}")
 ```
 
 ![Segmented Ring Gauge Demo](/content/{{version}}/wiki/assets/segmented_ring_gauge_default.gif)

@@ -11,6 +11,10 @@ vertical range from the data by default and morphs between updates that keep the
 series and points. Use `LiveLineChart` for a continuously advancing window where new points slide
 into view.
 
+```kotlin
+implementation("io.github.hdcharts:line:{{artifactVersion}}")
+```
+
 ![Line Demo](/content/{{version}}/wiki/assets/line_default.gif)
 
 Recording source: [LineExample.kt](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/LineExample.kt).

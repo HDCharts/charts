@@ -11,6 +11,10 @@ bin's height and each category labels that bin; the chart does not group raw obs
 calculate statistical bin boundaries. Use it when your application has already grouped a numeric
 distribution, such as request counts by duration interval.
 
+```kotlin
+implementation("io.github.hdcharts:histogram:{{artifactVersion}}")
+```
+
 ![Histogram Demo](/content/{{version}}/wiki/assets/histogram_default.gif)
 
 Recording source: [HistogramExample.kt](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/HistogramExample.kt).
