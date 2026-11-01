@@ -16,7 +16,7 @@ validate_snapshot_provenance() {
   if ! jq -e \
     --arg expected_version "${expected_snapshot_version}" \
     --arg expected_sha "${source_sha}" \
-    '.charts_version == $expected_version and .source_sha == $expected_sha' \
+    '.charts_version == $expected_version and .source_sha == $expected_sha and .docs_source_sha == $expected_sha' \
     "${manifest_path}" >/dev/null; then
     echo "Snapshot provenance does not match the release source." >&2
     echo "Expected snapshot version: ${expected_snapshot_version}" >&2
@@ -36,21 +36,28 @@ run_self_test() {
   trap "rm -rf -- '${temp_dir}'" RETURN
   manifest_path="${temp_dir}/snapshot-manifest.json"
 
-  printf '{"source_sha":"%s","charts_version":"2.5.0-SNAPSHOT"}\n' \
-    "${source_sha}" > "${manifest_path}"
+  printf '{"source_sha":"%s","charts_version":"2.5.0-SNAPSHOT","docs_source_sha":"%s"}\n' \
+    "${source_sha}" "${source_sha}" > "${manifest_path}"
   validate_snapshot_provenance "${manifest_path}" 2.5.0 "${source_sha}" >/dev/null
 
-  printf '{"source_sha":"%s","charts_version":"2.5.0-SNAPSHOT"}\n' \
-    "fedcba9876543210fedcba9876543210fedcba98" > "${manifest_path}"
+  printf '{"source_sha":"%s","charts_version":"2.5.0-SNAPSHOT","docs_source_sha":"%s"}\n' \
+    "fedcba9876543210fedcba9876543210fedcba98" "fedcba9876543210fedcba9876543210fedcba98" > "${manifest_path}"
   if validate_snapshot_provenance "${manifest_path}" 2.5.0 "${source_sha}" >/dev/null 2>&1; then
     echo "FAIL: mismatched source SHA was accepted." >&2
     return 1
   fi
 
-  printf '{"source_sha":"%s","charts_version":"2.4.0-SNAPSHOT"}\n' \
-    "${source_sha}" > "${manifest_path}"
+  printf '{"source_sha":"%s","charts_version":"2.4.0-SNAPSHOT","docs_source_sha":"%s"}\n' \
+    "${source_sha}" "${source_sha}" > "${manifest_path}"
   if validate_snapshot_provenance "${manifest_path}" 2.5.0 "${source_sha}" >/dev/null 2>&1; then
     echo "FAIL: mismatched snapshot version was accepted." >&2
+    return 1
+  fi
+
+  printf '{"source_sha":"%s","charts_version":"2.5.0-SNAPSHOT","docs_source_sha":"%s"}\n' \
+    "${source_sha}" "fedcba9876543210fedcba9876543210fedcba98" > "${manifest_path}"
+  if validate_snapshot_provenance "${manifest_path}" 2.5.0 "${source_sha}" >/dev/null 2>&1; then
+    echo "FAIL: docs from a different source SHA were accepted." >&2
     return 1
   fi
 

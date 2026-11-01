@@ -72,17 +72,40 @@ jobs:
         run: bash .github/scripts/sync-gif-baselines.sh charts-docs-repo
       - name: Sync hero chart image
         run: bash .github/scripts/sync-hero-image.sh charts-docs-repo
+      - name: Record snapshot docs source
+        env:
+          DOCS_SOURCE_SHA: ${{ inputs.source-ref }}
+        working-directory: charts-docs-repo
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ ! "${DOCS_SOURCE_SHA}" =~ ^[0-9a-fA-F]{40}$ ]]; then
+            echo "Expected a full docs source commit SHA, got: ${DOCS_SOURCE_SHA}" >&2
+            exit 1
+          fi
+          manifest="docs-app/public/snapshot-manifest.json"
+          mkdir -p "$(dirname "${manifest}")"
+          temp_manifest="$(mktemp)"
+          if [[ -f "${manifest}" ]]; then
+            jq --arg docs_source_sha "${DOCS_SOURCE_SHA}" \
+              '. + {docs_source_sha: $docs_source_sha}' "${manifest}" > "${temp_manifest}"
+          else
+            jq -n --arg docs_source_sha "${DOCS_SOURCE_SHA}" \
+              '{docs_source_sha: $docs_source_sha}' > "${temp_manifest}"
+          fi
+          mv "${temp_manifest}" "${manifest}"
       - name: Write snapshot provenance
         if: ${{ inputs.write-provenance-manifest }}
         env:
           SNAPSHOT_VERSION: ${{ inputs.charts-version }}
           SOURCE_SHA: ${{ inputs.source-ref }}
+          DOCS_SOURCE_SHA: ${{ inputs.source-ref }}
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p charts-docs-repo/docs-app/public
-          printf '{"source_sha":"%s","charts_version":"%s"}\n' \
-            "$SOURCE_SHA" "$SNAPSHOT_VERSION" \
+          printf '{"source_sha":"%s","charts_version":"%s","docs_source_sha":"%s"}\n' \
+            "$SOURCE_SHA" "$SNAPSHOT_VERSION" "$DOCS_SOURCE_SHA" \
             > charts-docs-repo/docs-app/public/snapshot-manifest.json
       - name: Commit and push charts-docs main
         working-directory: charts-docs-repo
@@ -96,7 +119,7 @@ jobs:
             message="docs(snapshot): sync release notes, wiki docs, chart screenshots, GIF baselines, hero image, and provenance"
             already_current_message="Snapshot release notes, wiki docs, chart screenshots, GIF baselines, hero image, and provenance are already current."
           else
-            git add release-notes content/snapshot content/dev docs-app/public/charts-hero-chart.png
+            git add release-notes content/snapshot content/dev docs-app/public/charts-hero-chart.png docs-app/public/snapshot-manifest.json
             message="docs(snapshot): sync release notes, wiki docs, chart screenshots, GIF baselines, and hero image"
             already_current_message="Release notes, wiki docs, chart screenshots, GIF baselines, and hero image are already current."
           fi
