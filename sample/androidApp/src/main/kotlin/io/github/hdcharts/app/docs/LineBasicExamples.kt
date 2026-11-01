@@ -9,26 +9,32 @@ import androidx.compose.ui.unit.dp
 import io.github.hdcharts.core.model.toChartData
 import io.github.hdcharts.line.LineChart
 
-data class DailyMeasurement(
+internal data class DailyMeasurement(
     val day: String,
     val temperatureCelsius: Double,
-)
+) {
+    companion object {
+        const val SERIES_NAME = "Temperature"
+
+        val sample =
+            listOf(
+                DailyMeasurement("Mon", 18.0),
+                DailyMeasurement("Tue", 21.0),
+                DailyMeasurement("Wed", 19.0),
+                DailyMeasurement("Thu", 24.0),
+                DailyMeasurement("Fri", 22.0),
+            )
+    }
+}
 
 @Composable
 fun ShowDailyTemperatures(modifier: Modifier = Modifier) {
-    val measurements =
-        listOf(
-            DailyMeasurement("Mon", 18.0),
-            DailyMeasurement("Tue", 21.0),
-            DailyMeasurement("Wed", 19.0),
-            DailyMeasurement("Thu", 24.0),
-            DailyMeasurement("Fri", 22.0),
-        )
+    val measurements = DailyMeasurement.sample
     val data =
         measurements.toChartData(
             value = { it.temperatureCelsius },
             category = { it.day },
-            seriesName = "Temperature",
+            seriesName = DailyMeasurement.SERIES_NAME,
         )
 
     LineChart(

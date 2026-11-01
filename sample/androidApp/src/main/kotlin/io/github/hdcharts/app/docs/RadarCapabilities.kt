@@ -1,6 +1,7 @@
 package io.github.hdcharts.app.docs
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import io.github.hdcharts.core.model.ChartData
@@ -11,7 +12,7 @@ import io.github.hdcharts.radar.RadarChartDefaults
 
 // BEGIN WIKI EXAMPLE: radar-multiple-series
 @Composable
-fun ComparePlatformReleases() {
+fun ComparePlatformReleases(modifier: Modifier = Modifier) {
     val categories = listOf("Performance", "Reliability", "Usability", "Security", "Scalability", "Observability")
     val data =
         listOf(
@@ -19,7 +20,7 @@ fun ComparePlatformReleases() {
             "Previous release" to listOf(75.0, 82.0, 71.0, 80.0, 76.0, 68.0),
         ).toChartData(categories = categories)
 
-    RadarChart(data = data, title = "Platform Readiness by Release")
+    RadarChart(data = data, modifier = modifier, title = "Platform Readiness by Release")
 }
 // END WIKI EXAMPLE: radar-multiple-series
 

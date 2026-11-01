@@ -14,6 +14,9 @@ declare -a screenshot_mappings=(
   'RadarWikiPreview_Light Tablet Landscape_5e637cf0_0.png|wiki-radar-basic.png'
   'RingGaugeWikiPreview_Light Tablet Landscape_5e637cf0_0.png|wiki-ring-gauge-basic.png'
   'SegmentedRingGaugeWikiPreview_Light Tablet Landscape_5e637cf0_0.png|wiki-segmented-ring-gauge-basic.png'
+  'PieSelectedShareWikiPreview_Light Tablet Landscape_5e637cf0_0.png|wiki-pie-selected-share.png'
+  'LineSelectionWikiPreview_Light Tablet Landscape_5e637cf0_0.png|wiki-line-selection.png'
+  'RadarMultipleSeriesWikiPreview_Light Tablet Landscape_5e637cf0_0.png|wiki-radar-multiple-series.png'
 )
 
 sync_screenshots() {
@@ -61,7 +64,7 @@ run_self_test() {
   [[ "${first_hashes}" == "${second_hashes}" ]]
   [[ "$(cat "${temp_dir}/content/snapshot/wiki/assets/existing.gif")" == 'keep gif' ]]
   [[ "$(cat "${temp_dir}/content/snapshot/wiki/assets/hero.png")" == 'keep unrelated png' ]]
-  [[ "$(find "${temp_dir}/content/snapshot/wiki/assets" -maxdepth 1 -type f -name 'wiki-*.png' | wc -l | tr -d ' ')" == '9' ]]
+  [[ "$(find "${temp_dir}/content/snapshot/wiki/assets" -maxdepth 1 -type f -name 'wiki-*.png' | wc -l | tr -d ' ')" == '12' ]]
   for mapping in "${screenshot_mappings[@]}"; do
     IFS='|' read -r source_name published_name <<<"${mapping}"
     cmp "${temp_dir}/baselines/${source_name}" "${temp_dir}/content/snapshot/wiki/assets/${published_name}"
@@ -76,7 +79,10 @@ run_self_test() {
     'stacked-area-chart.md|wiki-stacked-area-basic.png' \
     'radar-chart.md|wiki-radar-basic.png' \
     'ring-gauge-chart.md|wiki-ring-gauge-basic.png' \
-    'segmented-ring-gauge-chart.md|wiki-segmented-ring-gauge-basic.png'; do
+    'segmented-ring-gauge-chart.md|wiki-segmented-ring-gauge-basic.png' \
+    'pie-chart.md|wiki-pie-selected-share.png' \
+    'line-chart.md|wiki-line-selection.png' \
+    'radar-chart.md|wiki-radar-multiple-series.png'; do
     IFS='|' read -r page_name published_name <<<"${page}"
     grep -Fq "/content/{{version}}/wiki/assets/${published_name}" "${repo_root}/docs/wiki/${page_name}"
   done

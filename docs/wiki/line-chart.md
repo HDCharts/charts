@@ -11,12 +11,12 @@ vertical range from the data by default and morphs between updates that keep the
 series and points. Use `LiveLineChart` for a continuously advancing window where new points slide
 into view.
 
-## Basic Usage
-
 ![Line Demo](/content/{{version}}/wiki/assets/line_default.gif)
 
 The GIF uses a longer generated series; its full recording source is
 [`LineExample.kt`](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/LineExample.kt).
+
+## Basic Usage
 
 <!-- BEGIN WIKI EXAMPLE: sample/androidApp/src/main/kotlin/io/github/hdcharts/app/docs/LineBasicExamples.kt#line-basic-usage -->
 ```kotlin
@@ -28,26 +28,32 @@ import androidx.compose.ui.unit.dp
 import io.github.hdcharts.core.model.toChartData
 import io.github.hdcharts.line.LineChart
 
-data class DailyMeasurement(
+internal data class DailyMeasurement(
     val day: String,
     val temperatureCelsius: Double,
-)
+) {
+    companion object {
+        const val SERIES_NAME = "Temperature"
+
+        val sample =
+            listOf(
+                DailyMeasurement("Mon", 18.0),
+                DailyMeasurement("Tue", 21.0),
+                DailyMeasurement("Wed", 19.0),
+                DailyMeasurement("Thu", 24.0),
+                DailyMeasurement("Fri", 22.0),
+            )
+    }
+}
 
 @Composable
 fun ShowDailyTemperatures(modifier: Modifier = Modifier) {
-    val measurements =
-        listOf(
-            DailyMeasurement("Mon", 18.0),
-            DailyMeasurement("Tue", 21.0),
-            DailyMeasurement("Wed", 19.0),
-            DailyMeasurement("Thu", 24.0),
-            DailyMeasurement("Fri", 22.0),
-        )
+    val measurements = DailyMeasurement.sample
     val data =
         measurements.toChartData(
             value = { it.temperatureCelsius },
             category = { it.day },
-            seriesName = "Temperature",
+            seriesName = DailyMeasurement.SERIES_NAME,
         )
 
     LineChart(
@@ -131,14 +137,24 @@ disables user controls while programmatic selection can still be displayed. This
 <!-- BEGIN WIKI EXAMPLE: sample/androidApp/src/main/kotlin/io/github/hdcharts/app/docs/LineCapabilities.kt#line-selection -->
 ```kotlin
 @Composable
-fun SelectTemperature(data: ChartData) {
-    val selection = rememberChartSelection()
-
-    LineChart(data = data, selection = selection)
-    Text("Selected point index: ${selection.selectedIndex ?: "none"}")
+fun SelectTemperature(
+    data: ChartData,
+    modifier: Modifier = Modifier,
+    selection: ChartSelection = rememberChartSelection(),
+) {
+    Column(modifier = modifier) {
+        LineChart(
+            data = data,
+            modifier = Modifier.weight(1f).fillMaxWidth(),
+            selection = selection,
+        )
+        Text("Selected point index: ${selection.selectedIndex ?: "none"}")
+    }
 }
 ```
 <!-- END WIKI EXAMPLE: line-selection -->
+
+![Line chart with Thursday selected and its value highlighted](/content/{{version}}/wiki/assets/wiki-line-selection.png)
 
 ### Gradients
 
