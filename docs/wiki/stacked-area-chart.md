@@ -22,11 +22,7 @@ pre-accumulated totals: the chart builds the stacked boundaries from the per-pla
 
 <!-- BEGIN WIKI EXAMPLE: sample/androidApp/src/main/kotlin/io/github/hdcharts/app/docs/StackedAreaBasicExample.kt#stacked-area-basic-usage -->
 ```kotlin
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import io.github.hdcharts.core.model.toChartData
 import io.github.hdcharts.stackedarea.StackedAreaChart
 
@@ -41,7 +37,6 @@ fun ShowMonthlySubscribers() {
 
     StackedAreaChart(
         data = data,
-        modifier = Modifier.fillMaxWidth().height(300.dp),
         title = "Monthly Active Subscribers by Plan",
     )
 }

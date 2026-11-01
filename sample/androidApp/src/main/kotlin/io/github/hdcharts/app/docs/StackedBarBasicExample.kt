@@ -1,11 +1,7 @@
 package io.github.hdcharts.app.docs
 
 // BEGIN WIKI EXAMPLE: stacked-bar-basic-usage
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import io.github.hdcharts.core.model.toChartData
 import io.github.hdcharts.stackedbar.StackedBarChart
 
@@ -20,7 +16,6 @@ fun ShowQuarterlyRevenue() {
 
     StackedBarChart(
         data = data,
-        modifier = Modifier.fillMaxWidth().height(300.dp),
         title = "Quarterly Revenue by Channel",
     )
 }

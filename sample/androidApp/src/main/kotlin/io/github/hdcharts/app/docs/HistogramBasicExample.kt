@@ -1,11 +1,7 @@
 package io.github.hdcharts.app.docs
 
 // BEGIN WIKI EXAMPLE: histogram-basic-usage
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import io.github.hdcharts.core.model.toChartData
 import io.github.hdcharts.histogram.HistogramChart
 
@@ -35,7 +31,6 @@ fun ShowRequestDurationDistribution() {
 
     HistogramChart(
         data = data,
-        modifier = Modifier.fillMaxWidth().height(280.dp),
         title = "Request Duration",
     )
 }

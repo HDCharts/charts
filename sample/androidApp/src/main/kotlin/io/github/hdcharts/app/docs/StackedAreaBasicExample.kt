@@ -1,11 +1,7 @@
 package io.github.hdcharts.app.docs
 
 // BEGIN WIKI EXAMPLE: stacked-area-basic-usage
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import io.github.hdcharts.core.model.toChartData
 import io.github.hdcharts.stackedarea.StackedAreaChart
 
@@ -20,7 +16,6 @@ fun ShowMonthlySubscribers() {
 
     StackedAreaChart(
         data = data,
-        modifier = Modifier.fillMaxWidth().height(300.dp),
         title = "Monthly Active Subscribers by Plan",
     )
 }

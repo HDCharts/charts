@@ -1,11 +1,7 @@
 package io.github.hdcharts.app.docs
 
 // BEGIN WIKI EXAMPLE: radar-basic-usage
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import io.github.hdcharts.core.model.toChartData
 import io.github.hdcharts.radar.RadarChart
 
@@ -34,7 +30,6 @@ fun ShowPlatformReadiness() {
 
     RadarChart(
         data = data,
-        modifier = Modifier.fillMaxWidth().height(320.dp),
         title = "Platform Readiness",
     )
 }

@@ -52,7 +52,6 @@ fun ShowDailyTemperatures() {
 
     LineChart(
         data = data,
-        modifier = Modifier.fillMaxWidth().height(300.dp),
         title = "Daily High Temperature (°C)",
     )
 }
