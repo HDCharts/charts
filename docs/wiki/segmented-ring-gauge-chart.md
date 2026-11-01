@@ -4,11 +4,20 @@ title: Segmented Ring Gauge
 
 # Segmented Ring Gauge Chart
 
-`SegmentedRingGaugeChart` shows how several contributions fill one fixed capacity. It differs from
-a pie chart: the colored segments can occupy only part of the ring, and the remaining capacity stays
-visible as its own rounded track segment.
+On this page: [Capacity and Center Labels](#capacity-and-center-labels) · [Selection](#selection) ·
+[Segment Styling](#segment-styling) · [Start Position and Direction](#start-position-and-direction)
+
+## Overview
+
+`SegmentedRingGaugeChart` shows how several contributions fill one fixed capacity. The colored
+segments cover the contributions, and the track shows the unused capacity. Use it for progress made
+up of named parts, such as daily nutrition; use a pie chart when the parts should represent a whole.
 
 ![Segmented Ring Gauge Demo](/content/{{version}}/wiki/assets/segmented_ring_gauge_default.gif)
+
+The [GIF recording source](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/SegmentedRingGaugeExample.kt)
+feeds the same calorie values through a `ViewModel` and `StateFlow`. Basic Usage instead maps
+`Nutrient` records and uses their names and colors for the chart.
 
 Add the existing `gauge` module:
 
@@ -16,8 +25,20 @@ Add the existing `gauge` module:
 implementation("io.github.hdcharts:gauge:<version>")
 ```
 
+## Basic Usage
+
+This complete example maps a nutrition domain model to chart data and derives each segment color
+from the same nutrient record. The chart uses its default center value and legend.
+
+<!-- BEGIN WIKI EXAMPLE: sample/androidApp/src/main/kotlin/io/github/hdcharts/app/docs/SegmentedRingGaugeBasicExample.kt#segmented-ring-gauge-basic-usage -->
 ```kotlin
-data class Nutrient(
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
+import io.github.hdcharts.core.model.toChartData
+import io.github.hdcharts.gauge.SegmentedRingGaugeChart
+import io.github.hdcharts.gauge.SegmentedRingGaugeChartDefaults
+
+private data class Nutrient(
     val name: String,
     val calories: Double,
     val color: Color,
@@ -28,122 +49,147 @@ fun CalorieProgress() {
     val capacity = 2_000.0
     val nutrients =
         listOf(
-            Nutrient("Carbs", 240.0, Color(0xFF3B91CC)),
+            Nutrient("Carbohydrates", 240.0, Color(0xFF3B91CC)),
             Nutrient("Protein", 180.0, Color(0xFF1EB157)),
             Nutrient("Fat", 320.0, Color(0xFFE3B713)),
         )
-
-    SegmentedRingGaugeChart(
-        data = nutrients.toChartData(
+    val data =
+        nutrients.toChartData(
             value = { it.calories },
             category = { it.name },
-        ),
-        capacity = capacity,
-        centerSupportingLabel = "of ${capacity.toInt()} kcal",
-        style = SegmentedRingGaugeChartDefaults.style(
-            segments = SegmentedRingGaugeChartDefaults.segments(
-                colors = nutrients.map { it.color },
-            ),
-            legend = SegmentedRingGaugeChartDefaults.legend(visible = false),
-        ),
-    )
-}
-```
-
-The complete advanced example is in
-[`SegmentedRingGaugeAdvancedExample.kt`](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/docs/SegmentedRingGaugeAdvancedExample.kt).
-
-The chart calculates the centre value from its segments (`740` in this example) unless you pass a
-custom `centerLabel`. Use `centerSupportingLabel` for context such as the capacity and unit.
-
-## Advanced example
-
-Use the chart-specific style groups for the ring geometry, track, centre labels, and legend. The
-example also shows hoisted selection and value formatters.
-
-The centre has two text lines. `centerLabel`, or `centerValueFormatter` when `centerLabel` is
-omitted, controls the primary line. `centerSupportingLabel` supplies the secondary line as
-ready-to-display text, while `centerLabels` styles both lines. `selectedValueFormatter` formats the
-selected segment in the chart title; it does not format either centre line.
-
-Use `centerLabel` for a fixed or custom primary readout that is not calculated from the segment
-total. Uncomment it in the example and remove `centerValueFormatter` when you want to provide that
-text yourself. Keep `centerValueFormatter` when the primary readout should update with the data.
-
-```kotlin
-@Composable
-fun AdvancedSegmentedRingGauge() {
-    val selection = rememberChartSelection(initialIndex = 1)
-    val capacity = 2_000.0
-    val nutrients =
-        listOf(
-            Nutrient("Carbs", 240.0, Color(0xFF3B91CC)),
-            Nutrient("Protein", 180.0, Color(0xFF1EB157)),
-            Nutrient("Fat", 320.0, Color(0xFFE3B713)),
         )
 
     SegmentedRingGaugeChart(
-        modifier = Modifier.fillMaxWidth().height(320.dp),
-        data = nutrients.toChartData(
-            value = { it.calories },
-            category = { it.name },
-        ),
+        data = data,
         capacity = capacity,
-        title = "Daily Nutrition",
-        subtitle = "Current intake by macronutrient",
         centerSupportingLabel = "of ${capacity.toInt()} kcal",
-        // Alternative fixed primary label: uncomment this and remove centerValueFormatter below.
-        // centerLabel = "740 kcal",
-        centerValueFormatter = ChartValueFormatters.suffix(" kcal"),
-        selectedValueFormatter = ChartValueFormatters.suffix(" kcal"),
-        selection = selection,
-        interactionEnabled = false,
-        animateOnStart = false,
         style =
             SegmentedRingGaugeChartDefaults.style(
-                chartContainerStyle = ChartContainerDefaults.style(contentPadding = 16.dp),
                 segments =
                     SegmentedRingGaugeChartDefaults.segments(
-                        alpha = 0.95f,
                         colors = nutrients.map { it.color },
-                        // Alternative palette: remove colors above and uncomment baseColor.
-                        // baseColor = Color(0xFF3B91CC),
-                        width = 28.dp,
-                        spacing = 6.dp,
-                        cornerRadius = 8.dp,
-                        // Any start position can be paired with either direction.
-                        // Options: Top, TopRight, Right, BottomRight, Bottom, BottomLeft, Left, TopLeft.
-                        startPosition = SegmentedRingGaugeStartPosition.Top,
-                        // Options: Clockwise or CounterClockwise.
-                        direction = SegmentedRingGaugeDirection.Clockwise,
                     ),
-                track = SegmentedRingGaugeChartDefaults.track(color = Color(0xFFE5E7EB)),
-                centerLabels =
-                    SegmentedRingGaugeChartDefaults.centerLabels(
-                        value = TextStyle(color = Color(0xFF111827), fontSize = 32.sp),
-                        supporting = TextStyle(color = Color(0xFF6B7280), fontSize = 14.sp),
-                        spacing = 6.dp,
-                    ),
-                legend = SegmentedRingGaugeChartDefaults.legend(visible = false),
             ),
     )
 }
 ```
+<!-- END WIKI EXAMPLE: segmented-ring-gauge-basic-usage -->
 
-## Input and selection
+The total is `740` kcal, so the ring fills 740 of its 2,000 kcal capacity. Segment values must be
+non-negative, and their sum must not exceed the finite positive capacity.
 
-Pass exactly one series of non-negative values. Its total must be finite and no greater than the
-finite, positive `capacity`; invalid input renders the standard chart error UI. Categories are
-optional, but when supplied they name the segments in the legend and in the selected title.
+## Capabilities
 
-Tap a visible segment to select it. The selected segment scales up and the title reads
-`Category: value`. User selections clear automatically after three seconds; tapping the same or
-another segment renews the timeout. Tap the track or the hole to clear the selection. Set
-`interactionEnabled = false` for a static display with persistent programmatic selection.
+### Capacity and Center Labels
 
-## Styling
+Capacity sets the full ring amount; segment values determine the filled portion.
+`centerValueFormatter` formats the calculated total, while `centerLabel` explicitly overrides the
+displayed primary center text. `style.centerLabels` controls typography and spacing, not text
+content. `centerSupportingLabel` supplies context such as a unit or capacity. Each capability
+composable accepts a `ChartData`; pass the `data` mapped in Basic Usage or another `ChartData` value.
 
-`segments` controls the palette, ring width, opacity, and angular space between segments. The track
-represents only unused capacity, and `centerLabels` styles the value and supporting text. Its
-`width`, `spacing`, `cornerRadius`, `startPosition`, and `direction` parameters control the complete
-segment silhouette and placement.
+<!-- BEGIN WIKI EXAMPLE: sample/androidApp/src/main/kotlin/io/github/hdcharts/app/docs/SegmentedRingGaugeCapabilities.kt#segmented-ring-gauge-capacity-labels -->
+```kotlin
+@Composable
+fun CapacityAndCenterLabels(data: ChartData) {
+    SegmentedRingGaugeChart(
+        data = data,
+        capacity = 2_000.0,
+        centerSupportingLabel = "of 2,000 kcal",
+        style =
+            SegmentedRingGaugeChartDefaults.style(
+                centerLabels =
+                    SegmentedRingGaugeChartDefaults.centerLabels(
+                        value = TextStyle(fontSize = 32.sp),
+                        supporting = TextStyle(fontSize = 14.sp),
+                        spacing = 6.dp,
+                    ),
+            ),
+    )
+}
+```
+<!-- END WIKI EXAMPLE: segmented-ring-gauge-capacity-labels -->
+
+### Selection
+
+Tapping a segment selects it, enlarges it, and shows its category and value in the chart title.
+User selections clear after three seconds; another segment tap renews the timeout. Tapping the
+track or center clears the selection. This excerpt reuses `data` from Basic Usage and keeps the
+default user interaction enabled.
+
+<!-- BEGIN WIKI EXAMPLE: sample/androidApp/src/main/kotlin/io/github/hdcharts/app/docs/SegmentedRingGaugeCapabilities.kt#segmented-ring-gauge-selection -->
+```kotlin
+@Composable
+fun SelectableNutrition(data: ChartData) {
+    val selection = rememberChartSelection()
+
+    SegmentedRingGaugeChart(
+        data = data,
+        capacity = 2_000.0,
+        selection = selection,
+    )
+}
+```
+<!-- END WIKI EXAMPLE: segmented-ring-gauge-selection -->
+
+The selection is hoisted, so application UI can also observe or clear it. Set
+`interactionEnabled = false` when a selection should be controlled by the application and remain
+persistent; the chart then does not handle selection taps or start the auto-clear timeout.
+
+### Segment Styling
+
+Set ring thickness, spacing, and corner radius through `segments`; the width may shrink to preserve
+the center hole in a small layout. The track represents only unused capacity. This excerpt reuses
+`data` from Basic Usage.
+
+<!-- BEGIN WIKI EXAMPLE: sample/androidApp/src/main/kotlin/io/github/hdcharts/app/docs/SegmentedRingGaugeCapabilities.kt#segmented-ring-gauge-segment-styling -->
+```kotlin
+@Composable
+fun StyledNutrition(data: ChartData) {
+    SegmentedRingGaugeChart(
+        data = data,
+        capacity = 2_000.0,
+        style =
+            SegmentedRingGaugeChartDefaults.style(
+                segments =
+                    SegmentedRingGaugeChartDefaults.segments(
+                        width = 24.dp,
+                        spacing = 5.dp,
+                        cornerRadius = 8.dp,
+                    ),
+                track = SegmentedRingGaugeChartDefaults.track(color = Color(0xFFE5E7EB)),
+            ),
+    )
+}
+```
+<!-- END WIKI EXAMPLE: segmented-ring-gauge-segment-styling -->
+
+### Start Position and Direction
+
+Choose the boundary before the first segment and the direction segments advance from that point.
+The defaults are `TopLeft` and `CounterClockwise`. This excerpt reuses `data` from Basic Usage.
+
+<!-- BEGIN WIKI EXAMPLE: sample/androidApp/src/main/kotlin/io/github/hdcharts/app/docs/SegmentedRingGaugeCapabilities.kt#segmented-ring-gauge-position-direction -->
+```kotlin
+@Composable
+fun ReversedNutrition(data: ChartData) {
+    SegmentedRingGaugeChart(
+        data = data,
+        capacity = 2_000.0,
+        style =
+            SegmentedRingGaugeChartDefaults.style(
+                segments =
+                    SegmentedRingGaugeChartDefaults.segments(
+                        startPosition = SegmentedRingGaugeStartPosition.Top,
+                        direction = SegmentedRingGaugeDirection.Clockwise,
+                    ),
+            ),
+    )
+}
+```
+<!-- END WIKI EXAMPLE: segmented-ring-gauge-position-direction -->
+
+## API Reference
+
+- [SegmentedRingGaugeChart](/static/api/{{version}}/charts/io.github.hdcharts.gauge/-segmented-ring-gauge-chart.html)
+- [SegmentedRingGaugeChartDefaults](/static/api/{{version}}/charts/io.github.hdcharts.gauge/-segmented-ring-gauge-chart-defaults/index.html)

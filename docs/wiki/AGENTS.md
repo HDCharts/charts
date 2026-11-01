@@ -39,7 +39,7 @@ Use `kotlin` fenced code blocks. Give complete examples a short descriptive comp
 
 ### Compile-verified wiki examples
 
-Canonical examples live in `sample/androidApp/src/main/kotlin/io/github/hdcharts/app/docs/`. Mark the copyable snippet with paired `// BEGIN WIKI EXAMPLE: <id>` and `// END WIKI EXAMPLE: <id>` comments; the Markdown destination uses matching HTML comments with a repository-relative source path and identifier. Keep the Kotlin file valid, including its package and imports. Run `python3 scripts/sync-wiki-examples.py` to update Markdown and `python3 scripts/sync-wiki-examples.py --check` to verify it without writing. The source is compiled separately by `./gradlew ciCompile`. Pie Chart Basic Usage is the only synchronized snippet currently covered.
+Canonical examples live in `sample/androidApp/src/main/kotlin/io/github/hdcharts/app/docs/`. Mark each managed snippet with paired `// BEGIN WIKI EXAMPLE: <id>` and `// END WIKI EXAMPLE: <id>` comments; the Markdown destination uses matching HTML comments with a repository-relative source path and identifier. The synchronizer discovers managed regions by scanning `docs/wiki/`; do not maintain a separate example inventory in this guide. Keep each Kotlin file valid, including its package and imports. Run `python3 scripts/sync-wiki-examples.py` to update Markdown and `python3 scripts/sync-wiki-examples.py --check` to verify it without writing. The sources are compiled separately by `./gradlew ciCompile`.
 
 ## Visual references
 
