@@ -31,7 +31,10 @@ import androidx.compose.ui.unit.dp
 import io.github.hdcharts.core.model.toChartData
 import io.github.hdcharts.histogram.HistogramChart
 
-private data class RequestDurationBin(val interval: String, val requestCount: Double)
+private data class RequestDurationBin(
+    val interval: String,
+    val requestCount: Double,
+)
 
 @Composable
 fun ShowRequestDurationDistribution() {
@@ -71,15 +74,16 @@ average height of its source bins, while selection still identifies the middle s
 the chart reveals every bin. Increasing the minimum width makes the chart enter compact mode with
 fewer visible bins. This excerpt reuses `data` from Basic Usage.
 
-<!-- BEGIN WIKI EXAMPLE: sample/androidApp/src/main/kotlin/io/github/hdcharts/app/docs/HistogramBinWidthExample.kt#histogram-bin-width -->
+<!-- BEGIN WIKI EXAMPLE: sample/androidApp/src/main/kotlin/io/github/hdcharts/app/docs/HistogramCapabilities.kt#histogram-bin-width -->
 ```kotlin
 @Composable
 fun ShowWiderRequestBins(data: ChartData) {
     HistogramChart(
         data = data,
-        style = HistogramChartDefaults.style(
-            bars = HistogramChartDefaults.bars(minBarWidth = 16.dp),
-        ),
+        style =
+            HistogramChartDefaults.style(
+                bars = HistogramChartDefaults.bars(minBarWidth = 16.dp),
+            ),
     )
 }
 ```
@@ -87,8 +91,34 @@ fun ShowWiderRequestBins(data: ChartData) {
 
 ### Gradients
 
-Bins can use a linear gradient through `HistogramChartDefaults.bars(gradient = ...)`. See
-[Gradients](/{{version}}/wiki/gradients) for gradient setup and color-stop behavior.
+One horizontal teal-to-lime-to-amber gradient spans the plot, so colors transition across the
+duration bins instead of repeating in every bin. The excerpt reuses `data` from Basic Usage.
+
+<!-- BEGIN WIKI EXAMPLE: sample/androidApp/src/main/kotlin/io/github/hdcharts/app/docs/HistogramCapabilities.kt#histogram-gradient -->
+```kotlin
+@Composable
+fun RequestDurationGradient(data: ChartData) {
+    val colors =
+        listOf(
+            Color(0xFF0F766E),
+            Color(0xFF84CC16),
+            Color(0xFFF59E0B),
+        )
+    val gradient = ChartGradients.horizontal(colors = colors, span = GradientSpan.Plot)
+
+    HistogramChart(
+        data = data,
+        style =
+            HistogramChartDefaults.style(
+                bars = HistogramChartDefaults.bars(gradient = gradient),
+            ),
+    )
+}
+```
+<!-- END WIKI EXAMPLE: histogram-gradient -->
+
+For `GradientSpan.Shape` and `GradientSpan.Plot`, custom stops, and gradient direction, see the
+shared [Gradients guide](/{{version}}/wiki/gradients).
 
 ## API Reference
 

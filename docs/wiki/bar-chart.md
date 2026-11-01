@@ -30,7 +30,10 @@ import androidx.compose.ui.unit.dp
 import io.github.hdcharts.bar.BarChart
 import io.github.hdcharts.core.model.toChartData
 
-private data class DailyCashFlow(val day: String, val amount: Double)
+private data class DailyCashFlow(
+    val day: String,
+    val amount: Double,
+)
 
 @Composable
 fun ShowDailyCashFlow() {
@@ -66,15 +69,16 @@ The automatic range includes zero, so it provides a meaningful baseline for posi
 mixed values. Set explicit bounds when related charts or changing datasets need a consistent scale.
 This excerpt reuses `data` from Basic Usage.
 
-<!-- BEGIN WIKI EXAMPLE: sample/androidApp/src/main/kotlin/io/github/hdcharts/app/docs/BarRangeExample.kt#bar-fixed-range -->
+<!-- BEGIN WIKI EXAMPLE: sample/androidApp/src/main/kotlin/io/github/hdcharts/app/docs/BarCapabilities.kt#bar-fixed-range -->
 ```kotlin
 @Composable
 fun CompareCashFlow(data: ChartData) {
     BarChart(
         data = data,
-        style = BarChartDefaults.style(
-            range = BarChartDefaults.range(min = -50.0, max = 50.0),
-        ),
+        style =
+            BarChartDefaults.style(
+                range = BarChartDefaults.range(min = -50.0, max = 50.0),
+            ),
     )
 }
 ```
@@ -82,8 +86,34 @@ fun CompareCashFlow(data: ChartData) {
 
 ### Gradients
 
-Bars can use a linear gradient through `BarChartDefaults.bars(gradient = ...)`. See
-[Gradients](/{{version}}/wiki/gradients) for gradient setup and color-stop behavior.
+Each bar repeats the vertical blue-to-purple-to-pink gradient. The excerpt reuses `data` from Basic
+Usage.
+
+<!-- BEGIN WIKI EXAMPLE: sample/androidApp/src/main/kotlin/io/github/hdcharts/app/docs/BarCapabilities.kt#bar-gradient -->
+```kotlin
+@Composable
+fun DailyCashFlowGradient(data: ChartData) {
+    val colors =
+        listOf(
+            Color(0xFF2563EB),
+            Color(0xFF8B5CF6),
+            Color(0xFFEC4899),
+        )
+    val gradient = ChartGradients.vertical(colors = colors)
+
+    BarChart(
+        data = data,
+        style =
+            BarChartDefaults.style(
+                bars = BarChartDefaults.bars(gradient = gradient),
+            ),
+    )
+}
+```
+<!-- END WIKI EXAMPLE: bar-gradient -->
+
+For `GradientSpan.Shape` and `GradientSpan.Plot`, custom stops, and gradient direction, see the
+shared [Gradients guide](/{{version}}/wiki/gradients).
 
 ## API Reference
 
