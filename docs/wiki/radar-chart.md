@@ -74,7 +74,7 @@ Usage and adds the previous release.
 <!-- BEGIN WIKI EXAMPLE: sample/androidApp/src/main/kotlin/io/github/hdcharts/app/docs/RadarCapabilities.kt#radar-multiple-series -->
 ```kotlin
 @Composable
-fun ComparePlatformReleases() {
+fun ComparePlatformReleases(modifier: Modifier = Modifier) {
     val categories = listOf("Performance", "Reliability", "Usability", "Security", "Scalability", "Observability")
     val data =
         listOf(
@@ -82,10 +82,12 @@ fun ComparePlatformReleases() {
             "Previous release" to listOf(75.0, 82.0, 71.0, 80.0, 76.0, 68.0),
         ).toChartData(categories = categories)
 
-    RadarChart(data = data, title = "Platform Readiness by Release")
+    RadarChart(data = data, modifier = modifier, title = "Platform Readiness by Release")
 }
 ```
 <!-- END WIKI EXAMPLE: radar-multiple-series -->
+
+![Radar chart comparing current and previous release readiness across six categories](/content/{{version}}/wiki/assets/wiki-radar-multiple-series.png)
 
 ### Category Selection
 

@@ -30,21 +30,25 @@ import androidx.compose.runtime.Composable
 import io.github.hdcharts.core.model.toChartData
 import io.github.hdcharts.pie.PieChart
 
-private data class EnergyUsage(
+internal data class EnergyUsage(
     val category: String,
     val consumption: Double,
-)
+) {
+    companion object {
+        val sample =
+            listOf(
+                EnergyUsage("Heating", 32.0),
+                EnergyUsage("Cooling", 21.0),
+                EnergyUsage("Appliances", 24.0),
+                EnergyUsage("Water Heating", 14.0),
+                EnergyUsage("Lighting", 9.0),
+            )
+    }
+}
 
 @Composable
 fun ShowPie() {
-    val energyUsage =
-        listOf(
-            EnergyUsage("Heating", 32.0),
-            EnergyUsage("Cooling", 21.0),
-            EnergyUsage("Appliances", 24.0),
-            EnergyUsage("Water Heating", 14.0),
-            EnergyUsage("Lighting", 9.0),
-        )
+    val energyUsage = EnergyUsage.sample
     val data =
         energyUsage.toChartData(
             value = { it.consumption },
@@ -92,14 +96,20 @@ percents and reuses `data` from Basic Usage:
 <!-- BEGIN WIKI EXAMPLE: sample/androidApp/src/main/kotlin/io/github/hdcharts/app/docs/PieCapabilities.kt#pie-selected-share -->
 ```kotlin
 @Composable
-fun ShowPieWithRoundedShare(data: ChartData) {
+fun ShowPieWithRoundedShare(
+    data: ChartData,
+    selection: ChartSelection = rememberChartSelection(),
+) {
     PieChart(
         data = data,
+        selection = selection,
         selectedValueFormatter = ChartValueFormatter { share -> "${share.roundToInt()}%" },
     )
 }
 ```
 <!-- END WIKI EXAMPLE: pie-selected-share -->
+
+![Pie chart with Lighting selected and its 9% share shown](/content/{{version}}/wiki/assets/wiki-pie-selected-share.png)
 
 ## API Reference
 

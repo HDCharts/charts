@@ -1,14 +1,15 @@
 package io.github.hdcharts.app.docs
 
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import io.github.hdcharts.core.model.ChartData
+import io.github.hdcharts.core.model.ChartSelection
 import io.github.hdcharts.core.model.rememberChartSelection
 import io.github.hdcharts.core.model.toChartData
 import io.github.hdcharts.core.style.ChartGradients
@@ -30,11 +31,16 @@ fun CompareTemperatures(data: ChartData) {
 
 // BEGIN WIKI EXAMPLE: line-selection
 @Composable
-fun SelectTemperature(data: ChartData) {
-    val selection = rememberChartSelection()
-
-    LineChart(data = data, selection = selection)
-    Text("Selected point index: ${selection.selectedIndex ?: "none"}")
+fun SelectTemperature(
+    data: ChartData,
+    modifier: Modifier = Modifier,
+    selection: ChartSelection = rememberChartSelection(),
+) {
+    LineChart(
+        data = data,
+        modifier = modifier,
+        selection = selection,
+    )
 }
 // END WIKI EXAMPLE: line-selection
 
