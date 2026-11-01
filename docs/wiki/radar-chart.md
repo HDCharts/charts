@@ -61,6 +61,8 @@ fun ShowPlatformReadiness(modifier: Modifier = Modifier) {
 ```
 <!-- END WIKI EXAMPLE: radar-basic-usage -->
 
+![Radar chart comparing platform readiness across categories](/content/{{version}}/wiki/assets/wiki-radar-basic.png)
+
 ## Capabilities
 
 ### Multiple Series

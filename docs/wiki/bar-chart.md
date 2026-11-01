@@ -118,6 +118,8 @@ fun DailyCashFlowGradient(data: ChartData) {
 ```
 <!-- END WIKI EXAMPLE: bar-gradient -->
 
+![Bar chart with a vertical blue, purple, and pink gradient](/content/{{version}}/wiki/assets/wiki-bar-gradient.png)
+
 For `GradientSpan.Shape` and `GradientSpan.Plot`, custom stops, and gradient direction, see the
 shared [Gradients guide](/{{version}}/wiki/gradients).
 

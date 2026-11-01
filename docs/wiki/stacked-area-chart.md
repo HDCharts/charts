@@ -45,6 +45,8 @@ fun ShowMonthlySubscribers(modifier: Modifier = Modifier) {
 ```
 <!-- END WIKI EXAMPLE: stacked-area-basic-usage -->
 
+![Stacked area chart showing monthly subscribers by plan](/content/{{version}}/wiki/assets/wiki-stacked-area-basic.png)
+
 ## Capabilities
 
 ### Value Formatting

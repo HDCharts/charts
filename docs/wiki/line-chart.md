@@ -59,6 +59,8 @@ fun ShowDailyTemperatures(modifier: Modifier = Modifier) {
 ```
 <!-- END WIKI EXAMPLE: line-basic-usage -->
 
+![Line chart showing daily high temperatures across five weekdays](/content/{{version}}/wiki/assets/wiki-line-basic.png)
+
 ## Capabilities
 
 ### Multiple Series

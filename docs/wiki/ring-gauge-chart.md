@@ -58,6 +58,8 @@ fun ShowTeamProgress() {
 ```
 <!-- END WIKI EXAMPLE: ring-gauge-basic-usage -->
 
+![Ring gauge showing team progress](/content/{{version}}/wiki/assets/wiki-ring-gauge-basic.png)
+
 ## Capabilities
 
 ### Range and Clamping

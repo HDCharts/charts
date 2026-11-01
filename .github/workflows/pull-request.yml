@@ -38,6 +38,7 @@ jobs:
           python3 -B .github/scripts/tests/test_sync_wiki_examples.py
           python3 -B scripts/sync-wiki-examples.py --check
           bash .github/scripts/sync-gif-baselines.sh --self-test
+          bash .github/scripts/sync-wiki-screenshots.sh --self-test
           bash .github/scripts/sync-hero-image.sh --self-test
           bash .github/scripts/sync-wiki-docs.sh --self-test
           bash .github/scripts/sync-dev-docs.sh --self-test

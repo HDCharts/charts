@@ -56,6 +56,8 @@ fun ShowPie() {
 ```
 <!-- END WIKI EXAMPLE: pie-basic-usage -->
 
+![Pie chart showing household energy usage by category](/content/{{version}}/wiki/assets/wiki-pie-basic.png)
+
 ## Capabilities
 
 ### Slice Colors

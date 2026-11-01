@@ -72,6 +72,8 @@ fun CalorieProgress() {
 ```
 <!-- END WIKI EXAMPLE: segmented-ring-gauge-basic-usage -->
 
+![Segmented ring gauge showing calorie progress by category](/content/{{version}}/wiki/assets/wiki-segmented-ring-gauge-basic.png)
+
 The total is `740` kcal, so the ring fills 740 of its 2,000 kcal capacity. Segment values must be
 non-negative, and their sum must not exceed the finite positive capacity.
 
