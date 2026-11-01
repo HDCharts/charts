@@ -4,70 +4,118 @@ title: Bar
 
 # Bar Chart
 
-`BarChart` renders categorical values as vertical bars, positive or negative.
+## Overview
+
+`BarChart` compares values across named categories. It supports positive and negative values and
+draws them from a zero baseline. Use it for discrete comparisons such as daily totals or category
+counts.
 
 ![Bar Demo](/content/{{version}}/wiki/assets/bar_default.gif)
 
-The example below is minimal and runs as written. The GIF above uses a longer generated
-series; its full source is in
+The GIF uses a longer generated series to show the chart animation. Its recording source is
 [`BarExample.kt`](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/BarExample.kt).
 
+## Basic Usage
+
+This complete example maps application data with `toChartData()` and renders signed daily cash
+flow with the default bar style.
+
+<!-- BEGIN WIKI EXAMPLE: sample/androidApp/src/main/kotlin/io/github/hdcharts/app/docs/BarBasicExample.kt#bar-basic-usage -->
 ```kotlin
-data class DailyCashFlow(val day: String, val amount: Double)
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import io.github.hdcharts.bar.BarChart
+import io.github.hdcharts.core.model.toChartData
+
+private data class DailyCashFlow(
+    val day: String,
+    val amount: Double,
+)
 
 @Composable
-fun ShowBar() {
-    val cashFlow = listOf(
-        DailyCashFlow("Mon", 45.0), DailyCashFlow("Tue", -12.0),
-        DailyCashFlow("Wed", 38.0), DailyCashFlow("Thu", 27.0),
-        DailyCashFlow("Fri", -19.0), DailyCashFlow("Sat", 42.0),
-        DailyCashFlow("Sun", 31.0),
-    )
-    val data = cashFlow.toChartData(
-        value = { it.amount },
-        category = { it.day },
-        seriesName = "Net cash flow",
-    )
-
-    BarChart(data = data, title = "Daily Net Cash Flow")
-}
-```
-
-## Fixed Y-Axis Range
-
-By default the Y-axis is derived from the data, which can make small fluctuations look
-exaggerated when the axis doesn't start at zero. Set `range` on `BarChartDefaults.style()`
-to pin `min`, `max`, or both, independently of one another; whichever bound you leave `null`
-keeps deriving from the data.
-
-```kotlin
-data class DailyCashFlow(val day: String, val amount: Double)
-
-@Composable
-fun ShowBarWithRange() {
-    val cashFlow = listOf(
-        DailyCashFlow("Mon", 45.0), DailyCashFlow("Tue", -12.0),
-        DailyCashFlow("Wed", 38.0), DailyCashFlow("Thu", 27.0),
-        DailyCashFlow("Fri", -19.0), DailyCashFlow("Sat", 42.0),
-        DailyCashFlow("Sun", 31.0),
-    )
-    val data = cashFlow.toChartData(
-        value = { it.amount },
-        category = { it.day },
-        seriesName = "Net cash flow",
-    )
+fun ShowDailyCashFlow() {
+    val cashFlow =
+        listOf(
+            DailyCashFlow("Mon", 45.0),
+            DailyCashFlow("Tue", -12.0),
+            DailyCashFlow("Wed", 38.0),
+            DailyCashFlow("Thu", 27.0),
+            DailyCashFlow("Fri", -19.0),
+        )
+    val data =
+        cashFlow.toChartData(
+            value = { it.amount },
+            category = { it.day },
+            seriesName = "Net cash flow",
+        )
 
     BarChart(
         data = data,
+        modifier = Modifier.fillMaxWidth().height(280.dp),
         title = "Daily Net Cash Flow",
-        style = BarChartDefaults.style(
-            range = BarChartDefaults.range(min = -50.0, max = 50.0),
-        ),
     )
 }
 ```
+<!-- END WIKI EXAMPLE: bar-basic-usage -->
 
-## Gradients
+## Capabilities
 
-Bars take a linear gradient through `BarChartDefaults.bars(gradient = ...)`,
-covered in [Gradients](/{{version}}/wiki/gradients).
+### Fixed Value Range
+
+The automatic range includes zero, so it provides a meaningful baseline for positive, negative, or
+mixed values. Set explicit bounds when related charts or changing datasets need a consistent scale.
+This excerpt reuses `data` from Basic Usage.
+
+<!-- BEGIN WIKI EXAMPLE: sample/androidApp/src/main/kotlin/io/github/hdcharts/app/docs/BarCapabilities.kt#bar-fixed-range -->
+```kotlin
+@Composable
+fun CompareCashFlow(data: ChartData) {
+    BarChart(
+        data = data,
+        style =
+            BarChartDefaults.style(
+                range = BarChartDefaults.range(min = -50.0, max = 50.0),
+            ),
+    )
+}
+```
+<!-- END WIKI EXAMPLE: bar-fixed-range -->
+
+### Gradients
+
+Each bar repeats the vertical blue-to-purple-to-pink gradient. The excerpt reuses `data` from Basic
+Usage.
+
+<!-- BEGIN WIKI EXAMPLE: sample/androidApp/src/main/kotlin/io/github/hdcharts/app/docs/BarCapabilities.kt#bar-gradient -->
+```kotlin
+@Composable
+fun DailyCashFlowGradient(data: ChartData) {
+    val colors =
+        listOf(
+            Color(0xFF2563EB),
+            Color(0xFF8B5CF6),
+            Color(0xFFEC4899),
+        )
+    val gradient = ChartGradients.vertical(colors = colors)
+
+    BarChart(
+        data = data,
+        style =
+            BarChartDefaults.style(
+                bars = BarChartDefaults.bars(gradient = gradient),
+            ),
+    )
+}
+```
+<!-- END WIKI EXAMPLE: bar-gradient -->
+
+For `GradientSpan.Shape` and `GradientSpan.Plot`, custom stops, and gradient direction, see the
+shared [Gradients guide](/{{version}}/wiki/gradients).
+
+## API Reference
+
+- [BarChart](/static/api/{{version}}/charts/io.github.hdcharts.bar/-bar-chart.html)
+- [BarChartDefaults](/static/api/{{version}}/charts/io.github.hdcharts.core.style/-bar-chart-defaults/index.html)
