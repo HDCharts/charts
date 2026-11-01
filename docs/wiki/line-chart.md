@@ -4,7 +4,7 @@ title: Line Chart
 
 # Line Chart
 
-[On this page](#multiple-series) · [Fixed Value Range](#fixed-value-range) · [Selection and Interaction](#selection-and-interaction) · [Gradients](#gradients) · [Morphing](#morphing) · [Live Line Chart](#live-line-chart)
+On this page: [Multiple Series](#multiple-series) · [Fixed Value Range](#fixed-value-range) · [Selection and Interaction](#selection-and-interaction) · [Gradients](#gradients) · [Morphing](#morphing) · [Live Line Chart](#live-line-chart)
 
 ## Overview
 
@@ -68,7 +68,7 @@ fun ShowDailyTemperatures() {
 Use one named value list per series and provide one shared category list in matching order. Each
 series must have the same number of values, and the category count must match that length. The
 chart uses its line palette to distinguish series and shows their names in the legend. This
-complete example reuses the imports from Basic Usage.
+focused example reuses the imports from Basic Usage.
 
 ![MultiLine Demo](/content/{{version}}/wiki/assets/multi_line_default.gif)
 
@@ -102,6 +102,11 @@ The default Y-axis range follows the minimum and maximum values in the data. Set
 bounds to compare changing measurements on a consistent scale. A `null` bound continues to follow
 the data; this is useful when the measurements are meaningful relative to their observed values,
 without implying a zero baseline.
+
+![Line Range Demo](/content/{{version}}/wiki/assets/line_range.gif)
+
+The recording uses a different dataset from the teaching example. Its source is
+[`LineWithRangeExample.kt`](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/LineWithRangeExample.kt).
 
 <!-- BEGIN WIKI EXAMPLE: sample/androidApp/src/main/kotlin/io/github/hdcharts/app/docs/LineCapabilities.kt#line-fixed-range -->
 ```kotlin
