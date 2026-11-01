@@ -1,14 +1,19 @@
 # Customization
 
-General patterns for styling, sizing, and interaction that apply across chart types.
+Customize charts through the style factories that accompany each chart. Start with the defaults and
+override the properties that support the result your screen needs. Style APIs vary by chart family;
+use the chart guides for chart-specific capabilities.
 
-## Style Customization
+## Style, Labels, and Formatting
 
-To customize chart appearance, start from each chart's `*ChartDefaults.style(...)` factory and override only the fields you need.
+This complete example styles a cash-flow chart with a teal bar color, quiet axes, a subtitle, and
+currency in selected-value readouts. The selected-value formatter does not change axis tick labels;
+each formatter has a separate role.
 
+<!-- BEGIN WIKI EXAMPLE: sample/androidApp/src/main/kotlin/io/github/hdcharts/app/docs/CustomizationGuideExample.kt#customization-styled-cash-flow -->
 ```kotlin
-import androidx.compose.foundation.background
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -19,247 +24,93 @@ import io.github.hdcharts.core.model.ChartValueFormatters
 import io.github.hdcharts.core.model.toChartData
 import io.github.hdcharts.core.style.AxesDefaults
 import io.github.hdcharts.core.style.AxisLinesDefaults
-import io.github.hdcharts.core.style.GridDefaults
 import io.github.hdcharts.core.style.BarChartDefaults
+import io.github.hdcharts.core.style.ChartContainerDefaults
+import io.github.hdcharts.core.style.GridDefaults
 
 @Composable
-private fun ShowStyledBar() {
-    val data = listOf(45.0, -12.0, 38.0, 27.0, -19.0, 42.0, 31.0).toChartData(
-        categories = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"),
-        seriesName = "Net cash flow",
-    )
-
-    val bars = BarChartDefaults.bars(
-        color = Color(0xFF0F766E),
-        alpha = 0.78f,
-        space = 14.dp,
-        minBarWidth = 10.dp,
-    )
-    val grid = GridDefaults.style(color = Color(0xFF94A3B8), lineWidth = 1.dp)
-    val selection = BarChartDefaults.selection(
-        color = Color(0xFFEA580C),
-        width = 1.dp,
-        unselectedAlpha = 0.7f,
-    )
-    val xLabels = BarChartDefaults.xLabels(color = Color.Gray, size = 11.sp, maxCount = 6)
-    val yLabels = BarChartDefaults.yLabels(color = Color.Gray, size = 11.sp, maxCount = 6)
-    val axes = AxesDefaults.style(
-        lines = AxisLinesDefaults.style(color = Color.Gray, lineWidth = 1.dp),
-        grid = grid,
-        xLabels = xLabels,
-        yLabels = yLabels,
-    )
+fun StyledCashFlowChart() {
+    val data =
+        listOf(45.0, -12.0, 38.0, 27.0, -19.0).toChartData(
+            categories = listOf("Mon", "Tue", "Wed", "Thu", "Fri"),
+            seriesName = "Net cash flow",
+        )
+    val axes =
+        AxesDefaults.style(
+            lines = AxisLinesDefaults.style(color = Color(0xFF64748B)),
+            grid = GridDefaults.style(color = Color(0xFFCBD5E1)),
+            xLabels = BarChartDefaults.xLabels(color = Color(0xFF475569), size = 12.sp),
+            yLabels = BarChartDefaults.yLabels(color = Color(0xFF475569), size = 12.sp),
+        )
 
     BarChart(
         data = data,
-        modifier = Modifier.background(Color(0xFFF8FAFC), RoundedCornerShape(18.dp)).padding(20.dp),
-        title = "Daily Net Cash Flow",
-        style = BarChartDefaults.style(bars = bars, axes = axes, selection = selection),
+        modifier = Modifier.fillMaxWidth().height(280.dp),
+        title = "Daily net cash flow",
+        subtitle = "Revenue minus costs · 14–18 October",
+        style =
+            BarChartDefaults.style(
+                bars = BarChartDefaults.bars(color = Color(0xFF0F766E)),
+                axes = axes,
+                chartContainerStyle =
+                    ChartContainerDefaults.style(
+                        styleSubtitle = ChartContainerDefaults.style().styleSubtitle.copy(fontSize = 16.sp),
+                        contentPadding = 12.dp,
+                    ),
+            ),
         selectedValueFormatter = ChartValueFormatters.prefix("$"),
     )
 }
 ```
+<!-- END WIKI EXAMPLE: customization-styled-cash-flow -->
 
-Chart chrome (background, shape, shadow, and outer padding) lives on the caller-supplied `modifier`; sizing is fully modifier-driven. The `chartContainerStyle` block carries `contentPadding` and the title and subtitle text styles.
+## Titles and Typography
 
-Here `selectedValueFormatter` adds currency to selected raw values only; Y ticks keep the independent `axisValueFormatter` default. Titles do not generate labels: omitting `categories` hides X labels and leaves only the formatted value in selected readouts.
+Every chart accepts a title and subtitle. A subtitle appears below the title and can also appear by
+itself. Set `styleTitle` and `styleSubtitle` through `ChartContainerDefaults.style(...)` to customize
+their `TextStyle`s. The container style also controls internal `contentPadding`, which reserves room
+for chart content such as labels and legends.
 
-Several charts can paint their shapes with a gradient instead of a solid color, covered in
-[Gradients](/{{version}}/wiki/gradients).
+## Size and Surrounding Layout
 
-## Axes
+Use the chart composable's `modifier` to set its size. Standard Compose layout modifiers such as
+`fillMaxWidth()` and `height(...)` work with charts. Bounded width and height define the chart size;
+when one axis is unbounded the chart uses a square fallback based on the bounded axis, and when both
+are unbounded the default plot size is 200 dp. Put a chart in a `Card`, `Column`, or other container
+to add a background, shape, shadow, or outer spacing; those belong to the caller's layout.
 
-Bar, histogram, line, stacked bar, and stacked area charts share `AxesStyle`. Its `lines`, `grid`,
-`xLabels`, and `yLabels` blocks control each element separately. `lines` means the X- and Y-axis
-strokes, including the chart baseline.
+## Axes, Colors, and Palettes
 
-Set `axes = AxesDefaults.style(visible = false)` to hide all four elements and reclaim label space.
-This also hides the grid on a sparkline. To keep labels and grid while hiding just the axis strokes,
-use `AxesDefaults.style(lines = AxisLinesDefaults.style(visible = false))`.
+Bar, histogram, line, stacked bar, and stacked area charts provide `AxesStyle` for axis lines, grid lines, and X and Y labels. `AxesDefaults.style(visible = false)` hides those elements together; set an individual block's visibility when only one element needs to change. The pie and ring chart families expose different labels and style options.
 
-## Axis Labels
+Axis labels are evenly spaced and avoid overlap. By default the chart chooses how many X labels fit; Y axes show up to five values and short charts can show fewer. Set a label block's `maxCount` to cap the count (valid values are 2 through 1000); the chart can still show fewer when labels do not fit. When Y labels are visible, grid lines align with them. When they are hidden, `GridStyle.steps` controls the horizontal intervals; the default four steps produce five lines.
 
-Cartesian charts take `xLabels(...)` and `yLabels(...)` from their `*ChartDefaults`. Their `maxCount` is null by default, which lets the chart choose:
+Use each chart family's style factory to choose shape colors, line widths, label text styles, spacing,
+or palettes. Default colors follow the Material theme. Multi-series chart families can use a palette in series order; palette support and
+legend behavior vary by chart. A gradient can replace a shape's solid color on supported chart families; see the
+[Gradients guide](/{{version}}/wiki/gradients). For chart-specific palette and legend behavior, see
+[pie](/{{version}}/wiki/pie-chart), [radar](/{{version}}/wiki/radar-chart), [stacked bar](/{{version}}/wiki/stacked-bar-chart), and [stacked area](/{{version}}/wiki/stacked-area-chart).
 
-- X labels show as many categories as fit, evenly spaced from the first item, and never overlapping. Wider charts show more labels.
-- Y labels show up to five values, evenly spaced from the lowest to the highest value. Short charts show fewer, so labels never overlap.
+## Formatting and Selection
 
-Set `maxCount` to cap the number of labels; it must be in 2..1000. Labels never overlap, so a chart can show fewer than `maxCount`:
+Axis tick formatters and selected-value formatters are separate. Use `axisValueFormatter` for numeric
+axis labels and `selectedValueFormatter` for selection readouts; the supported parameters vary by
+chart. `ChartValueFormatters` provides common prefix and suffix formatters. See [bar formatting](/{{version}}/wiki/bar-chart), [stacked bar formatting](/{{version}}/wiki/stacked-bar-chart), and [ring gauge formatting](/{{version}}/wiki/ring-gauge-chart) for examples matched to those chart APIs.
 
-- X labels use the densest even grid from the first item with at most `maxCount` labels. When the chart scrolls, the cap applies per screen. Without scrolling, a grid that ends on the last item wins when it shows at most one label fewer.
-- Y labels show `maxCount` values when they fit.
-
-```kotlin
-val style =
-    BarChartDefaults.style(
-        axes =
-            AxesDefaults.style(
-                xLabels = BarChartDefaults.xLabels(maxCount = 4),
-                yLabels = BarChartDefaults.yLabels(maxCount = 6),
-            ),
-    )
-```
-
-## Grid Lines
-
-Bar, histogram, line, stacked bar, and stacked area charts draw horizontal grid lines. Configure `axes.grid` with `GridDefaults.style(...)`: `visible`, `steps`, `color`, and `lineWidth`. When Y labels show, the grid draws one line on each label, so it keeps matching them on short plots and with `yLabels(maxCount = ...)`. With Y labels hidden, `steps` sets the number of intervals; the default 4 steps draw 5 evenly spaced lines.
-
-```kotlin
-val style =
-    LineChartDefaults.style(
-        axes = AxesDefaults.style(grid = GridDefaults.style(color = Color.LightGray)),
-    )
-```
-
-Pass `GridDefaults.style(visible = false)` to hide only the grid.
-
-## Sizing
-
-The chart composable's `modifier` is the only sizing control. A bounded `modifier` becomes a rectangular plot; a one-axis bounded `modifier` derives a square fallback; a fully unbounded `modifier` falls back to a 200.dp default.
-
-```kotlin
-val dataSet = listOf(42.0, 38.0, 45.0, 51.0, 47.0, 54.0, 49.0).toChartData()
-
-LineChart(
-    data = dataSet,
-    modifier = Modifier
-        .fillMaxWidth()
-        .height(260.dp),
-)
-```
-
-## Surrounding Chrome
-
-Background, shadow, shape, and outer spacing are not applied by the chart. Wrap the chart in any Compose surface to add chrome.
-
-```kotlin
-val dataSet = listOf(42.0, 38.0, 45.0, 51.0, 47.0, 54.0, 49.0).toChartData()
-
-Card(modifier = Modifier.padding(16.dp)) {
-    LineChart(
-        data = dataSet,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(260.dp),
-    )
-}
-```
-
-## Title and Subtitle
-
-Every chart accepts optional `title` and `subtitle` text. The subtitle appears below the title
-with a 4 dp gap and stays visible when selection changes the title. A subtitle also works on its
-own. Null or blank subtitles reserve no space.
-
-```kotlin
-LineChart(
-    data = dataSet,
-    title = "Daily Support Tickets",
-    subtitle = "Resolved tickets per day · October 2026",
-)
-```
-
-Use `ChartContainerDefaults.style(styleTitle = ..., styleSubtitle = ...)` to customize each text
-style. The subtitle defaults to 14 sp text with the theme's `onSurfaceVariant` color.
-
-```kotlin
-val container = ChartContainerDefaults.style()
-LineChart(
-    data = dataSet,
-    subtitle = "Resolved tickets per day",
-    style = LineChartDefaults.style(
-        chartContainerStyle = ChartContainerDefaults.style(
-            styleSubtitle = container.styleSubtitle.copy(fontSize = 16.sp),
-        ),
-    ),
-)
-```
-
-## Content Spacing
-
-`ChartContainerDefaults.style()` returns a `ChartContainerStyle` with `styleTitle`, `styleSubtitle`, and `contentPadding`. Set `contentPadding` to change the internal spacing reserved for axes, title, and legend.
-
-```kotlin
-val dataSet = listOf(42.0, 38.0, 45.0, 51.0, 47.0, 54.0, 49.0).toChartData()
-
-LineChart(
-    data = dataSet,
-    modifier = Modifier.fillMaxWidth().height(260.dp),
-    style = LineChartDefaults.style(
-        chartContainerStyle = ChartContainerDefaults.style(contentPadding = 8.dp),
-    ),
-)
-```
-
-## Selection
-
-Use `rememberChartSelection()` to hoist selection. The chart calls back into it; you read `selectedIndex` to drive external UI such as legends or summary cards.
-
-```kotlin
-val selection = rememberChartSelection()
-val values = listOf(42.0, 38.0, 45.0, 51.0, 47.0, 54.0, 49.0)
-
-LineChart(
-    data = values.toChartData(),
-    modifier = Modifier.fillMaxWidth().height(260.dp),
-    selection = selection,
-)
-
-val selected = values.getOrNull(selection.selectedIndex ?: 0)
-Text("Selected: $selected")
-```
-
-## Legend
-
-Line, live line, radar, stacked bar, and stacked area charts list their series in a legend, and pie
-and ring gauge charts list their categories. The legend shows when there are at least two items and at least one has a name.
-Hide it with the chart's `legend` style:
-
-```kotlin
-StackedBarChart(
-    data = data,
-    style = StackedBarChartDefaults.style(
-        legend = StackedBarChartDefaults.legend(visible = false),
-    ),
-)
-```
-
-While a point is selected, a chart with several series shows each series' value in its legend item,
-and the title shows the selected category. A chart with one series shows `Category: value` in the
-title instead. Pass `selectedValueFormatter` to format these values. A pie shows `Category: share` in the title,
-with the share in percent formatted by its `selectedValueFormatter`, and its legend does not change. A ring gauge is one series, so it
-shows `Category: value` in the title, and its legend does not change either. A hidden legend hides the values
-too; read `selectedIndex` from a hoisted selection to show them in your own UI.
+Charts that support selection can expose it to surrounding Compose UI through
+`rememberChartSelection()`. Legend contents and selection behavior differ between chart families;
+the [legend guide](/{{version}}/wiki/dev/internals/legend) describes the shared behavior, and individual
+chart guides show supported interactions.
 
 ## Animation and Interaction
 
-`animateOnStart` controls the initial reveal animation; `interactionEnabled` disables gestures, selection, and zoom controls together. Disable interaction to embed a chart inside a tappable card without conflicts.
+Where offered, `animateOnStart` controls the initial reveal and `interactionEnabled` controls chart
+gestures. Their availability and effects depend on the chart family. Check that chart's guide before
+using either parameter.
 
-```kotlin
-val dataSet = listOf(42.0, 38.0, 45.0, 51.0, 47.0, 54.0, 49.0).toChartData()
+## API Reference
 
-LineChart(
-    data = dataSet,
-    modifier = Modifier.fillMaxWidth().height(260.dp),
-    animateOnStart = true,
-    interactionEnabled = false,
-)
-```
-
-## Responsive Layout
-
-Compose the chart with any layout, including `Row`, `Column`, `LazyColumn`, or `BoxWithConstraints`. A bounded `modifier` is always honored; an unbounded one falls back to the documented defaults.
-
-```kotlin
-Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-    LineChart(
-        data = lineData,
-        modifier = Modifier.fillMaxWidth().height(220.dp),
-    )
-    Spacer(modifier = Modifier.height(16.dp))
-    BarChart(
-        data = barData,
-        modifier = Modifier.fillMaxWidth().height(220.dp),
-    )
-}
-```
+- [ChartContainerDefaults](/static/api/{{version}}/charts/io.github.hdcharts.core.style/-chart-container-defaults/index.html)
+- [AxesStyle](/static/api/{{version}}/charts/io.github.hdcharts.core.style/-axes-style/index.html)
+- [BarChartDefaults](/static/api/{{version}}/charts/io.github.hdcharts.core.style/-bar-chart-defaults/index.html)
+- [ChartValueFormatters](/static/api/{{version}}/charts/io.github.hdcharts.core.model/-chart-value-formatters/index.html)

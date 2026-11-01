@@ -18,7 +18,10 @@ Omit optional sections that add no useful information. Link to common documentat
 
 ### Table of contents
 
-The `charts-docs` renderer automatically shows an **On this page** list for each chart page, generated from its `##` headings. Use that navigation for the standard page sections; do not add a second manual list of those links. The generated list currently omits `###` capability subsections. If a page has important capability subsections that readers should be able to reach directly, add a compact manual **On this page** list with links to those subsections only. Keep links limited to headings present on the page and capability links one level deep. If the renderer later includes the needed subsections, remove the manual list.
+The `charts-docs` renderer automatically shows an **On this page** list generated from page headings.
+H2 headings appear as top-level entries, and relevant H3 capability headings appear nested under
+their parent section. Use consistent, descriptive heading levels so the generated navigation reflects
+the page structure. Avoid manually maintained TOC lists that duplicate this navigation.
 
 ### API links
 
@@ -57,8 +60,6 @@ title: "Chart name"
 ---
 
 # [Chart name]
-
-[Optional manual On this page list linking to important capability subsections not included in the generated navigation.]
 
 ## Overview
 
@@ -105,7 +106,7 @@ source when available and explain any difference from the teaching example.]
 - [Relevant defaults or style API](/static/api/{{version}}/charts/PACKAGE/DEFAULTS_PAGE/index.html)
 ````
 
-In the template, the `Data Mapping` and `Capabilities` sections are optional; include them only when useful. Remove optional section placeholders when their sections are omitted. `Overview`, `Basic Usage`, and `API Reference` are required. Use `###` capability headings directly under `## Capabilities`; do not add an `Advanced Usage` section that combines unrelated options. The generated TOC covers the H2 sections; include the optional manual list only for important H3 capability links it omits. Replace `Chart name` in the quoted frontmatter title and replace every other placeholder with final content before publication. Replace API path placeholders with paths verified against generated output.
+In the template, the `Data Mapping` and `Capabilities` sections are optional; include them only when useful. Remove optional section placeholders when their sections are omitted. `Overview`, `Basic Usage`, and `API Reference` are required. Use `###` capability headings directly under `## Capabilities`; do not add an `Advanced Usage` section that combines unrelated options. The generated navigation nests relevant H3 capability headings under their parent. Replace `Chart name` in the quoted frontmatter title and replace every other placeholder with final content before publication. Replace API path placeholders with paths verified against generated output.
 
 ## Completion checklist
 
