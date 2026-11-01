@@ -18,6 +18,8 @@ fun CompareShapeAndPlotGradients() {
             seriesName = "Net cash flow",
         )
     val colors = listOf(Color(0xFF1E89E6), Color(0xFF9B4EDD), Color(0xFFEA7A2E))
+    val shapeGradient = ChartGradients.vertical(colors = colors, span = GradientSpan.Shape)
+    val plotGradient = ChartGradients.vertical(colors = colors, span = GradientSpan.Plot)
 
     Column {
         BarChart(
@@ -25,7 +27,7 @@ fun CompareShapeAndPlotGradients() {
             title = "Every bar repeats the gradient",
             style =
                 BarChartDefaults.style(
-                    bars = BarChartDefaults.bars(gradient = ChartGradients.vertical(colors)),
+                    bars = BarChartDefaults.bars(gradient = shapeGradient),
                 ),
         )
         BarChart(
@@ -35,7 +37,7 @@ fun CompareShapeAndPlotGradients() {
                 BarChartDefaults.style(
                     bars =
                         BarChartDefaults.bars(
-                            gradient = ChartGradients.horizontal(colors, span = GradientSpan.Plot),
+                            gradient = plotGradient,
                         ),
                 ),
         )
