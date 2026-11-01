@@ -1,218 +1,290 @@
 ---
-title: Line
+title: Line Chart
 ---
 
 # Line Chart
 
-`LineChart` renders single or multi-series line data and morphs to new values when the
-data changes. `LiveLineChart` renders a live window that slides as new points arrive.
+On this page: [Multiple Series](#multiple-series) · [Fixed Value Range](#fixed-value-range) · [Selection and Interaction](#selection-and-interaction) · [Gradients](#gradients) · [Morphing](#morphing) · [Live Line Chart](#live-line-chart)
 
-![Line Demo](/content/{{version}}/wiki/assets/line_default.gif)
+## Overview
+
+`LineChart` shows how one or more numeric series change across ordered categories. It derives the
+vertical range from the data by default and morphs between updates that keep the same number of
+series and points. Use `LiveLineChart` for a continuously advancing window where new points slide
+into view.
 
 ## Basic Usage
 
-The example below is minimal and runs as written. The GIF above uses a longer generated
-series; its full source is in
+![Line Demo](/content/{{version}}/wiki/assets/line_default.gif)
+
+The GIF uses a longer generated series; its full recording source is
 [`LineExample.kt`](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/LineExample.kt).
 
+<!-- BEGIN WIKI EXAMPLE: sample/androidApp/src/main/kotlin/io/github/hdcharts/app/docs/LineBasicExamples.kt#line-basic-usage -->
 ```kotlin
-data class DailyTicketCount(val day: String, val count: Double)
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import io.github.hdcharts.core.model.toChartData
+import io.github.hdcharts.line.LineChart
+
+data class DailyMeasurement(
+    val day: String,
+    val temperatureCelsius: Double,
+)
 
 @Composable
-fun ShowLine() {
-    val tickets = listOf(
-        DailyTicketCount("Mon", 30.0), DailyTicketCount("Tue", 45.0),
-        DailyTicketCount("Wed", 38.0), DailyTicketCount("Thu", 52.0),
-        DailyTicketCount("Fri", 61.0), DailyTicketCount("Sat", 49.0),
-        DailyTicketCount("Sun", 58.0),
-    )
-    val data = tickets.toChartData(
-        value = { it.count },
-        category = { it.day },
-        seriesName = "Daily Support Tickets",
-    )
+fun ShowDailyTemperatures() {
+    val measurements =
+        listOf(
+            DailyMeasurement("Mon", 18.0),
+            DailyMeasurement("Tue", 21.0),
+            DailyMeasurement("Wed", 19.0),
+            DailyMeasurement("Thu", 24.0),
+            DailyMeasurement("Fri", 22.0),
+        )
+    val data =
+        measurements.toChartData(
+            value = { it.temperatureCelsius },
+            category = { it.day },
+            seriesName = "Temperature",
+        )
 
-    LineChart(data = data, title = "Daily Support Tickets")
+    LineChart(
+        data = data,
+        modifier = Modifier.fillMaxWidth().height(300.dp),
+        title = "Daily High Temperature (°C)",
+    )
 }
 ```
+<!-- END WIKI EXAMPLE: line-basic-usage -->
 
-## Multi-Series
+## Capabilities
 
-Pass more than one named series to plot multiple lines on the same chart.
+### Multiple Series
+
+Use one named value list per series and provide one shared category list in matching order. Each
+series must have the same number of values, and the category count must match that length. The
+chart uses its line palette to distinguish series and shows their names in the legend. This
+focused example reuses the imports from Basic Usage.
 
 ![MultiLine Demo](/content/{{version}}/wiki/assets/multi_line_default.gif)
 
-Full source behind the GIF:
+The recording uses a longer data set. Its source is
 [`MultiLineExample.kt`](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/MultiLineExample.kt).
 
+<!-- BEGIN WIKI EXAMPLE: sample/androidApp/src/main/kotlin/io/github/hdcharts/app/docs/LineBasicExamples.kt#line-multiple-series -->
 ```kotlin
 @Composable
-fun ShowMultiLine() {
-    val data = listOf(
-        "Web Store" to listOf(180.0, 310.0, 420.0, 560.0, 640.0, 720.0),
-        "Mobile App" to listOf(120.0, 240.0, 350.0, 430.0, 520.0, 580.0),
-        "Partner Sales" to listOf(60.0, 130.0, 190.0, 240.0, 300.0, 340.0),
-    ).toChartData(
-        categories = listOf("W1", "W2", "W3", "W4", "W5", "W6"),
-    )
+fun ShowWeeklyRevenueByChannel() {
+    val weeks = listOf("W1", "W2", "W3", "W4", "W5")
+    val data =
+        listOf(
+            "Web Store" to listOf(180.0, 310.0, 420.0, 560.0, 640.0),
+            "Mobile App" to listOf(120.0, 240.0, 350.0, 430.0, 520.0),
+            "Partner Sales" to listOf(60.0, 130.0, 190.0, 240.0, 300.0),
+        ).toChartData(categories = weeks)
 
     LineChart(
         data = data,
+        modifier = Modifier.fillMaxWidth().height(300.dp),
         title = "Weekly Revenue by Channel",
-        selectedValueFormatter = ChartValueFormatters.prefix("$"),
     )
 }
 ```
+<!-- END WIKI EXAMPLE: line-multiple-series -->
 
-## Fixed Y-Axis Range
+### Fixed Value Range
 
-By default the Y-axis is derived from the data, which can make small fluctuations look
-exaggerated when the axis doesn't start at zero. Set `range` on `LineChartDefaults.style()`
-to pin `min`, `max`, or both, independently of one another; whichever bound you leave `null`
-keeps deriving from the data.
+The default Y-axis range follows the minimum and maximum values in the data. Set either or both
+bounds to compare changing measurements on a consistent scale. A `null` bound continues to follow
+the data; this is useful when the measurements are meaningful relative to their observed values,
+without implying a zero baseline.
 
 ![Line Range Demo](/content/{{version}}/wiki/assets/line_range.gif)
 
-Full source behind the GIF:
+The recording uses a different dataset from the teaching example. Its source is
 [`LineWithRangeExample.kt`](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/LineWithRangeExample.kt).
 
+<!-- BEGIN WIKI EXAMPLE: sample/androidApp/src/main/kotlin/io/github/hdcharts/app/docs/LineCapabilities.kt#line-fixed-range -->
 ```kotlin
 @Composable
-fun ShowLineWithRange() {
-    val data = listOf(62.0, 58.0, 65.0, 60.0, 67.0, 59.0, 63.0).toChartData(
-        categories = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"),
-        seriesName = "Daily Support Tickets",
-    )
-
+fun CompareTemperatures(data: ChartData) {
     LineChart(
         data = data,
-        title = "Daily Support Tickets",
-        style = LineChartDefaults.style(
-            range = LineChartDefaults.range(min = 40.0, max = 80.0),
-        ),
+        style = LineChartDefaults.style(range = LineChartDefaults.range(min = 0.0, max = 40.0)),
     )
 }
 ```
+<!-- END WIKI EXAMPLE: line-fixed-range -->
 
-## Gradients
+### Selection and Interaction
 
-Pass a `ChartGradient` to `LineChartDefaults.line(gradient = ...)` to paint the lines with it.
-A vertical gradient across the plot colors the line by its value. See
-[Gradients](/{{version}}/wiki/gradients) for details.
+`LineChart` supports user selection and programmatic selection through `ChartSelection`. Its
+`selectedIndex` is the selected source X index shared by every series; in a multi-series chart,
+the selection represents that category across the aligned series. `interactionEnabled = false`
+disables user controls while programmatic selection can still be displayed. This excerpt reuses
+`data` from Basic Usage.
+
+<!-- BEGIN WIKI EXAMPLE: sample/androidApp/src/main/kotlin/io/github/hdcharts/app/docs/LineCapabilities.kt#line-selection -->
+```kotlin
+@Composable
+fun SelectTemperature(data: ChartData) {
+    val selection = rememberChartSelection()
+
+    LineChart(data = data, selection = selection)
+    Text("Selected point index: ${selection.selectedIndex ?: "none"}")
+}
+```
+<!-- END WIKI EXAMPLE: line-selection -->
+
+### Gradients
+
+Use a line gradient to color the line across the plot. This example reuses `data` from Basic Usage.
+For gradient directions, spans, and stops, see the shared [Gradients guide](/{{version}}/wiki/gradients).
 
 ![Line Gradient](/content/{{version}}/wiki/assets/line_gradient.gif)
 
-The example below is minimal and runs as written. The GIF above uses a longer generated
-series; its full source is in
+The GIF uses generated data; its source is
 [`LineGradientExample.kt`](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/LineGradientExample.kt).
 
+<!-- BEGIN WIKI EXAMPLE: sample/androidApp/src/main/kotlin/io/github/hdcharts/app/docs/LineCapabilities.kt#line-gradient -->
 ```kotlin
 @Composable
-fun ShowGradientLine() {
-    val data = listOf(18.0, 24.0, 31.0, 36.0, 29.0, 22.0, 15.0).toChartData(
-        categories = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"),
-        seriesName = "Daily High",
-    )
-    // Warm colors at the top of the plot, cool ones at the bottom.
-    val gradient = ChartGradients.vertical(
-        colors = listOf(Color(0xFFE5484D), Color(0xFFF5A524), Color(0xFF1E89E6)),
-        span = GradientSpan.Plot,
-    )
-    val line = LineChartDefaults.line(gradient = gradient)
+fun GradientTemperature(data: ChartData) {
+    val gradient =
+        ChartGradients.vertical(
+            colors = listOf(Color(0xFF2563EB), Color(0xFFF59E0B), Color(0xFFDC2626)),
+            span = GradientSpan.Plot,
+        )
 
     LineChart(
         data = data,
-        title = "Daily High (°C)",
-        style = LineChartDefaults.style(line = line),
+        style = LineChartDefaults.style(line = LineChartDefaults.line(gradient = gradient)),
     )
 }
 ```
+<!-- END WIKI EXAMPLE: line-gradient -->
 
-We currently recommend gradients for single-series line charts. A multi-series chart shows a
-legend, and a gradient can make its lines hard to match to it. Points and selection markers keep
-their own colors. `LiveLineChart` takes the same style. Below, a horizontal gradient colors the
-line from its oldest points to its newest as it slides.
+### Morphing
 
-![Live Line Gradient](/content/{{version}}/wiki/assets/line_timeline_gradient.gif)
-
-Its full source is in
-[`LiveLineGradientExample.kt`](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/LiveLineGradientExample.kt).
-
-## Morphing Updates
-
-When `data` changes, `LineChart` animates the line from its old shape to the new one.
-This is the right choice for most charts, including ones with large point counts that
-support zoom and scroll.
+When new `LineChart` data keeps the same series count and the same number of points in each series,
+the chart morphs between the old and new line shapes. A change to either count redraws the chart
+instead. Keep categories aligned across updates so each point continues to represent the same
+position in the series. Morphing transitions between datasets; it does not advance a sliding
+timeline. The existing recording shows a longer, pinned-range example:
+[`MorphingLineExample.kt`](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/MorphingLineExample.kt).
 
 ![Line Morph Demo](/content/{{version}}/wiki/assets/line_morph.gif)
 
-The example below cycles three weeks of the same metric on a timer, with the range
-pinned so the axis doesn't jump between weeks — see
-[Fixed Y-Axis Range](#fixed-y-axis-range) above. Full source behind the GIF:
-[`MorphingLineExample.kt`](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/MorphingLineExample.kt).
-
+<!-- BEGIN WIKI EXAMPLE: sample/androidApp/src/main/kotlin/io/github/hdcharts/app/docs/LineCapabilities.kt#line-morphing -->
 ```kotlin
 @Composable
-fun ShowMorphingLine() {
-    val weeks = listOf(
-        listOf(42.0, 38.0, 45.0, 51.0, 47.0, 54.0, 49.0),
-        listOf(46.0, 52.0, 68.0, 74.0, 61.0, 50.0, 44.0),
-        listOf(58.0, 55.0, 49.0, 43.0, 39.0, 31.0, 28.0),
-    )
-    var index by remember { mutableIntStateOf(0) }
+fun MorphWeeklyMeasurements() {
+    val weeks =
+        listOf(
+            listOf(42.0, 38.0, 45.0, 51.0, 47.0),
+            listOf(46.0, 52.0, 48.0, 44.0, 50.0),
+        )
+    var weekIndex by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(Unit) {
         while (true) {
-            delay(1400.milliseconds)
-            index = (index + 1) % weeks.size
+            delay(2_000.milliseconds)
+            weekIndex = (weekIndex + 1) % weeks.size
         }
     }
 
+    val data =
+        weeks[weekIndex].toChartData(
+            categories = listOf("Mon", "Tue", "Wed", "Thu", "Fri"),
+            seriesName = "Daily Measurements",
+        )
+
     LineChart(
-        data = weeks[index].toChartData(
-            categories = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"),
-            seriesName = "Daily Support Tickets",
-        ),
-        title = "Daily Support Tickets",
-        style = LineChartDefaults.style(
-            range = LineChartDefaults.range(min = 0.0, max = 80.0),
-        ),
+        data = data,
+        title = "Daily Measurements",
         animateOnStart = false,
     )
 }
 ```
+<!-- END WIKI EXAMPLE: line-morphing -->
 
-## Live Line Chart
+### Live Line Chart
 
-`LiveLineChart` is built for live, continuously updating data. New points slide the whole
-chart horizontally like a rolling window, and the Y-axis rescales automatically as old
-values leave the window. The chart is display-only, so it has no selection.
-`shiftDuration` sets how long each new point takes to slide into place. Match it to how
-often `data` changes.
+`LiveLineChart` displays a rolling window of one or more aligned series. When each update removes
+the oldest point and appends a new point, the plot and its category labels shift together, while
+the Y-axis range follows values in the current window. Other updates with the same series and
+point counts morph over `shiftDuration`; changing either count redraws immediately.
+
+Update data at a cadence close to `shiftDuration` so each shift can finish as the next point
+arrives. The example uses a fixed-size window, a deterministic repeating reading sequence, and a
+500 ms update cadence. `LiveLineChart` is display-only and ignores gestures; it does not expose
+`selection` or `interactionEnabled` parameters. For multiple live series, supply equally sized
+named series and shared categories through the same `ChartData` structure used by `LineChart`.
 
 ![Live Line Demo](/content/{{version}}/wiki/assets/line_timeline.gif)
 
-Keep a fixed-size window of values and replace it on every tick. Full source behind the
-GIF, including its heartbeat-shaped reading generator, is in
+The GIF uses a heartbeat-shaped generator; its full source is
 [`LiveLineExample.kt`](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/LiveLineExample.kt).
 
+<!-- BEGIN WIKI EXAMPLE: sample/androidApp/src/main/kotlin/io/github/hdcharts/app/docs/LiveLineExample.kt#live-line-basic -->
 ```kotlin
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import io.github.hdcharts.core.model.toChartData
+import io.github.hdcharts.line.LiveLineChart
+import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
+
 @Composable
-fun ShowLiveLine() {
-    var values by remember { mutableStateOf(List(120) { 18.0 }) }
+fun ShowLiveSensorReadings() {
+    val readings = listOf(18.0, 18.5, 19.0, 18.7, 19.4, 20.0, 19.6, 19.1)
+    val windowSize = 12
+    var firstSample by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(Unit) {
         while (true) {
-            delay(150.milliseconds)
-            values = values.drop(1) + nextReading()
+            delay(500.milliseconds)
+            firstSample++
         }
     }
 
+    val sampleNumbers = firstSample until (firstSample + windowSize)
+    val values = sampleNumbers.map { sample -> readings[sample % readings.size] }
+    val categories = sampleNumbers.map { "#${it + 1}" }
+    val data = values.toChartData(categories = categories, seriesName = "Sensor")
+
     LiveLineChart(
-        data = values.toChartData(seriesName = "Live Sensor Reading"),
+        data = data,
+        modifier = Modifier.fillMaxWidth().height(300.dp),
         title = "Live Sensor Reading",
-        shiftDuration = 120.milliseconds,
+        shiftDuration = 500.milliseconds,
         animateOnStart = false,
     )
 }
 ```
+<!-- END WIKI EXAMPLE: live-line-basic -->
+
+The live gradient GIF demonstrates colors progressing from older to newer points as the window
+slides. Its source is
+[`LiveLineGradientExample.kt`](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/LiveLineGradientExample.kt).
+
+![Live Line Gradient](/content/{{version}}/wiki/assets/line_timeline_gradient.gif)
+
+## API Reference
+
+- [LineChart](/static/api/{{version}}/charts/io.github.hdcharts.line/-line-chart.html)
+- [LiveLineChart](/static/api/{{version}}/charts/io.github.hdcharts.line/-live-line-chart.html)
+- [LineChartDefaults](/static/api/{{version}}/charts/io.github.hdcharts.line/-line-chart-defaults/index.html)
+- [LineChartStyle](/static/api/{{version}}/charts/io.github.hdcharts.line/-line-chart-style/index.html)
