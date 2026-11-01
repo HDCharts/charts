@@ -28,8 +28,8 @@ import kotlinx.collections.immutable.toImmutableList
 
 /**
  * Everything [io.github.hdcharts.radar.RadarChart] declares about its input. A radar axis holds one
- * value per category, so it needs at least three; it has no Cartesian axis and no fixed range, and it
- * allows negative values.
+ * value per category, so it needs at least three; it has no Cartesian axis, supports optional radial
+ * bounds, and allows negative values.
  */
 @InternalChartsApi
 object RadarChartSpec : ChartSpec<RadarChartStyle> {
