@@ -37,6 +37,10 @@ Do not call a Markdown example compile-verified just because a related sample, G
 
 Use `kotlin` fenced code blocks. Give complete examples a short descriptive composable name, such as `ShowMonthlyRevenue`; keep names consistent if the page links the example to a source file. Include only imports needed by the example, and keep each code block focused on the capability being taught. Preserve comments that explain a meaningful choice, remove comments that merely narrate syntax, and prefer readable formatting over compressed lines. Avoid unnecessary state, selection setup, animation, styling, or application configuration in Basic Usage. Add these only when they explain the chart behavior under discussion. Use Compose conventions and public HDCharts APIs.
 
+### Compile-verified wiki examples
+
+Canonical examples live in `sample/androidApp/src/main/kotlin/io/github/hdcharts/app/docs/`. Mark the copyable snippet with paired `// BEGIN WIKI EXAMPLE: <id>` and `// END WIKI EXAMPLE: <id>` comments; the Markdown destination uses matching HTML comments with a repository-relative source path and identifier. Keep the Kotlin file valid, including its package and imports. Run `python3 scripts/sync-wiki-examples.py` to update Markdown and `python3 scripts/sync-wiki-examples.py --check` to verify it without writing. The source is compiled separately by `./gradlew ciCompile`. Pie Chart Basic Usage is the only synchronized snippet currently covered.
+
 ## Visual references
 
 Add a static chart screenshot when it clarifies chart structure, labels, or a visual option that is difficult to explain in prose. Link a GIF when motion or interaction is itself instructive, such as animation, selection, or live updates. A visual is optional; do not create one for every capability.
