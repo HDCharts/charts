@@ -61,6 +61,8 @@ fun ShowRequestDurationDistribution(modifier: Modifier = Modifier) {
 ```
 <!-- END WIKI EXAMPLE: histogram-basic-usage -->
 
+![Histogram showing request duration distribution](/content/{{version}}/wiki/assets/wiki-histogram-basic.png)
+
 ## Capabilities
 
 ### Bin Width and Compact Mode

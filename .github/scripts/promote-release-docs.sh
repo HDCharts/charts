@@ -18,6 +18,7 @@ fi
 # release freezes docs from the code being released rather than whatever the
 # last snapshot happened to contain.
 bash .github/scripts/sync-wiki-docs.sh "${docs_dir}"
+bash .github/scripts/sync-wiki-screenshots.sh "${docs_dir}"
 
 # Release content is immutable once present, so an existing registry entry may
 # only be reused when the committed manifest proves it came from this charts SHA.

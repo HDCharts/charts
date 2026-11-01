@@ -45,6 +45,8 @@ fun ShowQuarterlyRevenue(modifier: Modifier = Modifier) {
 ```
 <!-- END WIKI EXAMPLE: stacked-bar-basic-usage -->
 
+![Stacked bar chart comparing quarterly revenue by channel](/content/{{version}}/wiki/assets/wiki-stacked-bar-basic.png)
+
 ## Capabilities
 
 ### Value Formatting
