@@ -125,6 +125,35 @@ class RadarChartTest {
 
     @OptIn(ExperimentalTestApi::class)
     @Test
+    fun radarChart_withNonFiniteRange_displaysValidationError() =
+        runComposeUiTest {
+            setContent {
+                RadarChart(
+                    data = data,
+                    style = RadarChartDefaults.style(range = RadarChartDefaults.range(min = Double.NaN)),
+                )
+            }
+
+            onNodeWithTag(TestTags.CHART_ERROR).isDisplayed()
+            onNodeWithText("Range bounds must be finite.\n").isDisplayed()
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun radarChart_withNonFiniteValue_displaysValidationError() =
+        runComposeUiTest {
+            val invalidData =
+                chartDataOf(
+                    categories = listOf("A", "B", "C"),
+                    ChartSeries(name = "Series", values = listOf(1.0, Double.NaN, 3.0)),
+                )
+            setContent { RadarChart(data = invalidData) }
+
+            onNodeWithTag(TestTags.CHART_ERROR).isDisplayed()
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
     fun radarChart_withSelectedAxisIndex_displaysSelectedAxisDetails() =
         runComposeUiTest {
             val selectedAxisIndex = 1

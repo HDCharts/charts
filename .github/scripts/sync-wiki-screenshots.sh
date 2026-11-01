@@ -17,6 +17,7 @@ declare -a screenshot_mappings=(
   'PieSelectedShareWikiPreview_Light Tablet Landscape_5e637cf0_0.png|wiki-pie-selected-share.png'
   'LineSelectionWikiPreview_Light Tablet Landscape_5e637cf0_0.png|wiki-line-selection.png'
   'RadarMultipleSeriesWikiPreview_Light Tablet Landscape_5e637cf0_0.png|wiki-radar-multiple-series.png'
+  'RadarFixedRangeWikiPreview_Light Tablet Landscape_5e637cf0_0.png|wiki-radar-fixed-range.png'
 )
 
 sync_screenshots() {
@@ -64,7 +65,7 @@ run_self_test() {
   [[ "${first_hashes}" == "${second_hashes}" ]]
   [[ "$(cat "${temp_dir}/content/snapshot/wiki/assets/existing.gif")" == 'keep gif' ]]
   [[ "$(cat "${temp_dir}/content/snapshot/wiki/assets/hero.png")" == 'keep unrelated png' ]]
-  [[ "$(find "${temp_dir}/content/snapshot/wiki/assets" -maxdepth 1 -type f -name 'wiki-*.png' | wc -l | tr -d ' ')" == '12' ]]
+  [[ "$(find "${temp_dir}/content/snapshot/wiki/assets" -maxdepth 1 -type f -name 'wiki-*.png' | wc -l | tr -d ' ')" == '13' ]]
   for mapping in "${screenshot_mappings[@]}"; do
     IFS='|' read -r source_name published_name <<<"${mapping}"
     cmp "${temp_dir}/baselines/${source_name}" "${temp_dir}/content/snapshot/wiki/assets/${published_name}"
@@ -82,7 +83,8 @@ run_self_test() {
     'segmented-ring-gauge-chart.md|wiki-segmented-ring-gauge-basic.png' \
     'pie-chart.md|wiki-pie-selected-share.png' \
     'line-chart.md|wiki-line-selection.png' \
-    'radar-chart.md|wiki-radar-multiple-series.png'; do
+    'radar-chart.md|wiki-radar-multiple-series.png' \
+    'radar-chart.md|wiki-radar-fixed-range.png'; do
     IFS='|' read -r page_name published_name <<<"${page}"
     grep -Fq "/content/{{version}}/wiki/assets/${published_name}" "${repo_root}/docs/wiki/${page_name}"
   done

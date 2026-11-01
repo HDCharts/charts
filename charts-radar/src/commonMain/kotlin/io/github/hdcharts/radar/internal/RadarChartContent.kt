@@ -39,7 +39,6 @@ import io.github.hdcharts.core.internal.TestTags
 import io.github.hdcharts.core.internal.composable.rememberShowState
 import io.github.hdcharts.core.internal.layout.fillMaxSizeChartModifier
 import io.github.hdcharts.core.internal.model.ChartRenderData
-import io.github.hdcharts.core.internal.model.minMax
 import io.github.hdcharts.core.internal.model.normalizeByMinMax
 import io.github.hdcharts.core.style.StyleDefaults
 import io.github.hdcharts.radar.RadarChartStyle
@@ -92,7 +91,7 @@ internal fun RadarChartContent(
         val widthPx = with(density) { maxWidth.toPx() }
         val heightPx = with(density) { maxHeight.toPx() }
 
-        val minMax = remember(data) { data.minMax() }
+        val minMax = remember(data, style.range) { data.resolveRadarRange(style.range) }
         val targetNormalized = remember(data, minMax) { data.normalizeByMinMax(minMax, 1f) }
         val initialValues =
             remember(axisCount, data.series.size, isPreview, animateOnStart) {
