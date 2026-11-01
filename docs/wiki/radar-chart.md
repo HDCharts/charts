@@ -4,9 +4,6 @@ title: Radar
 
 # Radar Chart
 
-On this page: [Multiple Series](#multiple-series) · [Category Selection](#category-selection) ·
-[Series Selection](#series-selection) · [Styling and Layout](#styling-and-layout)
-
 ## Overview
 
 `RadarChart` compares one or more series across shared categories drawn as radial axes. Use it for
