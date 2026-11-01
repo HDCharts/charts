@@ -15,7 +15,7 @@ data class DailyMeasurement(
 )
 
 @Composable
-fun ShowDailyTemperatures() {
+fun ShowDailyTemperatures(modifier: Modifier = Modifier) {
     val measurements =
         listOf(
             DailyMeasurement("Mon", 18.0),
@@ -33,7 +33,7 @@ fun ShowDailyTemperatures() {
 
     LineChart(
         data = data,
-        modifier = Modifier.fillMaxWidth().height(300.dp),
+        modifier = modifier,
         title = "Daily High Temperature (°C)",
     )
 }

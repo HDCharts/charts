@@ -1,11 +1,8 @@
 package io.github.hdcharts.app.docs
 
 // BEGIN WIKI EXAMPLE: histogram-basic-usage
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import io.github.hdcharts.core.model.toChartData
 import io.github.hdcharts.histogram.HistogramChart
 
@@ -15,7 +12,7 @@ private data class RequestDurationBin(
 )
 
 @Composable
-fun ShowRequestDurationDistribution() {
+fun ShowRequestDurationDistribution(modifier: Modifier = Modifier) {
     // Counts have already been grouped into these equal-width intervals.
     val bins =
         listOf(
@@ -35,7 +32,7 @@ fun ShowRequestDurationDistribution() {
 
     HistogramChart(
         data = data,
-        modifier = Modifier.fillMaxWidth().height(280.dp),
+        modifier = modifier,
         title = "Request Duration",
     )
 }
