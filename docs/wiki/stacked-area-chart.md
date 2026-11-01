@@ -4,40 +4,97 @@ title: Stacked Area
 
 # Stacked Area Chart
 
-`StackedAreaChart` renders multiple series as cumulative, stacked areas over a shared category axis.
+## Overview
+
+`StackedAreaChart` shows how multiple nonnegative series change across ordered categories and how
+their totals accumulate. Supply each series' raw value at each category; the chart stacks those
+values for display. Series must have matching lengths and share the same category order.
 
 ![Stacked Area Demo](/content/{{version}}/wiki/assets/stacked_area_default.gif)
 
-The example below is minimal and runs as written. The GIF above uses a longer generated
-series per plan; its full source is in
+The GIF uses a longer generated series per plan; its full source is in
 [`StackedAreaExample.kt`](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/StackedAreaExample.kt).
 
-```kotlin
-@Composable
-fun ShowStackedArea() {
-    val data = listOf(
-        "Free Plan" to listOf(240.0, 380.0, 520.0, 610.0, 740.0, 880.0),
-        "Standard Plan" to listOf(100.0, 210.0, 330.0, 450.0, 580.0, 700.0),
-        "Premium Plan" to listOf(60.0, 140.0, 260.0, 380.0, 520.0, 660.0),
-    ).toChartData(
-        categories = listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun"),
-    )
+## Basic Usage
 
-    StackedAreaChart(data = data, title = "Monthly Active Subscribers by Plan")
+Each subscription plan contributes its own monthly active subscriber count. These inputs are not
+pre-accumulated totals: the chart builds the stacked boundaries from the per-plan values.
+
+<!-- BEGIN WIKI EXAMPLE: sample/androidApp/src/main/kotlin/io/github/hdcharts/app/docs/StackedAreaBasicExample.kt#stacked-area-basic-usage -->
+```kotlin
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import io.github.hdcharts.core.model.toChartData
+import io.github.hdcharts.stackedarea.StackedAreaChart
+
+@Composable
+fun ShowMonthlySubscribers() {
+    val data =
+        listOf(
+            "Free Plan" to listOf(240.0, 380.0, 520.0, 610.0, 740.0, 880.0),
+            "Standard Plan" to listOf(100.0, 210.0, 330.0, 450.0, 580.0, 700.0),
+            "Premium Plan" to listOf(60.0, 140.0, 260.0, 380.0, 520.0, 660.0),
+        ).toChartData(categories = listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun"))
+
+    StackedAreaChart(
+        data = data,
+        modifier = Modifier.fillMaxWidth().height(300.dp),
+        title = "Monthly Active Subscribers by Plan",
+    )
 }
 ```
+<!-- END WIKI EXAMPLE: stacked-area-basic-usage -->
 
-## Gradients
+## Capabilities
 
-Pass a shared `ChartGradient` to `StackedAreaChartDefaults.fill(gradient = ...)` to use it for every
-area layer. `ChartGradients.fade()` follows each layer's series color. See
-[Gradients](/{{version}}/wiki/gradients) for details.
+### Value Formatting
 
-We currently recommend only fade gradients for stacked area charts. Fades preserve each series'
-color. Gradients through multiple colors within a layer can make series hard to distinguish.
+When a category is selected, `selectedValueFormatter` formats each plan's input value in the
+legend. It does not format the cumulative boundary as a plan value. `axisValueFormatter` formats
+the Y-axis ticks, which reflect the cumulative stack. This excerpt reuses `data` from Basic Usage.
 
+<!-- BEGIN WIKI EXAMPLE: sample/androidApp/src/main/kotlin/io/github/hdcharts/app/docs/StackedAreaCapabilities.kt#stacked-area-value-formatting -->
 ```kotlin
-StackedAreaChartDefaults.fill(
-    gradient = ChartGradients.fade(endAlpha = 0.35f),
-)
+@Composable
+fun FormattedMonthlySubscribers(data: ChartData) {
+    StackedAreaChart(
+        data = data,
+        selectedValueFormatter = ChartValueFormatters.suffix(" subscribers"),
+        axisValueFormatter = ChartValueFormatters.suffix(" total subscribers"),
+    )
+}
 ```
+<!-- END WIKI EXAMPLE: stacked-area-value-formatting -->
+
+### Fade Gradient
+
+The vertical fade follows each plan's series color, so the fill stays associated with its legend
+entry. This excerpt reuses `data` from Basic Usage. See the shared
+[Gradients guide](/{{version}}/wiki/gradients) for gradient spans and custom stops.
+
+<!-- BEGIN WIKI EXAMPLE: sample/androidApp/src/main/kotlin/io/github/hdcharts/app/docs/StackedAreaCapabilities.kt#stacked-area-fade-gradient -->
+```kotlin
+@Composable
+fun FadedMonthlySubscribers(data: ChartData) {
+    StackedAreaChart(
+        data = data,
+        style =
+            StackedAreaChartDefaults.style(
+                fill =
+                    StackedAreaChartDefaults.fill(
+                        gradient = ChartGradients.fade(endAlpha = 0.35f),
+                    ),
+            ),
+    )
+}
+```
+<!-- END WIKI EXAMPLE: stacked-area-fade-gradient -->
+
+## API Reference
+
+- [StackedAreaChart](/static/api/{{version}}/charts/io.github.hdcharts.stackedarea/-stacked-area-chart.html)
+- [StackedAreaChartDefaults](/static/api/{{version}}/charts/io.github.hdcharts.stackedarea/-stacked-area-chart-defaults/index.html)
+- [StackedAreaChartDefaults.fill](/static/api/{{version}}/charts/io.github.hdcharts.stackedarea/-stacked-area-chart-defaults/fill.html)
