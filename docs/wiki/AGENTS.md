@@ -46,9 +46,13 @@ Canonical examples live in `sample/androidApp/src/main/kotlin/io/github/hdcharts
 
 ## Visual references
 
-Add a static chart screenshot when it clarifies chart structure, labels, or a visual option that is difficult to explain in prose. Link a GIF when motion or interaction is itself instructive, such as animation, selection, or live updates. A visual is optional; do not create one for every capability.
+Every chart page has at least one representative static chart image unless the page explains why a static image would mislead or add no value. Use an approved screenshot-test baseline as the source. The canonical Kotlin documentation composable must render the screenshot; do not duplicate chart rendering in screenshot tests or maintain an image approximation separately.
 
-Keep the Basic Usage example minimal even when a GIF uses a longer or more interactive scenario. Say when the recording uses different data or setup, and link its complete recording source when available. The source link identifies the recording implementation; it does not verify a separate Markdown snippet.
+Use deterministic data, explicit selection, and settled animation state. Light landscape is the default. Keep labels, titles, and legends readable and inside the canvas. Circular charts may use a centered, chart-appropriate size instead of filling the landscape canvas. Keep layout sizing in the screenshot preview and pass a modifier to reusable example composables where appropriate.
+
+Add capability screenshots only when they explain a meaningful visual state or option that the Basic Usage image, an existing GIF, and the prose do not already communicate. Keep the Kotlin example before its screenshot and use concise alt text that describes the visible chart and state. Use version-aware asset paths such as `/content/{{version}}/wiki/assets/<name>.png`.
+
+Use GIFs when animation, interaction, or state transitions add educational value. Static behavior does not require a GIF. Preserve the recording-source reference, explain the relevant API when the GIF demonstrates a capability, and state when recording data or setup differs from the teaching example. Do not add a GIF that repeats an existing static visual more effectively.
 
 ## Reusable page skeleton
 
@@ -110,10 +114,31 @@ In the template, the `Data Mapping` and `Capabilities` sections are optional; in
 
 ## Completion checklist
 
-- [ ] Required sections and heading order are present; optional sections add clear value.
+- [ ] Overview, Basic Usage, relevant capabilities, and API Reference are present in that order; the site generates heading navigation automatically.
 - [ ] Overview and capability claims match current public chart behavior.
 - [ ] Basic Usage is readable, complete, deterministic, and uses public APIs and sensible defaults.
 - [ ] Each focused example teaches one capability and identifies reused context.
-- [ ] Visuals clarify the explanation; GIF recording source is linked when available.
+- [ ] A representative static screenshot uses an approved baseline and matches its canonical Kotlin example; capability visuals add distinct value.
+- [ ] GIFs teach motion, interaction, or transitions, retain their recording-source reference, and explain the demonstrated API.
 - [ ] API references point to the correct generated, versioned documentation.
 - [ ] Verification wording reflects checks actually performed; no Markdown snippet is called verified based only on a related source compiling.
+
+## Verification commands and ownership
+
+Run the checks that cover the files changed:
+
+| Requirement | Command or workflow | Responsibility |
+| --- | --- | --- |
+| Compile canonical Kotlin examples | `./gradlew ciCompile` | Contributor locally for Kotlin changes; CI also compiles changed code. |
+| Check Kotlin formatting | `./gradlew ktlintCheck` | Contributor locally for Kotlin changes; CI runs the check. |
+| Synchronize Kotlin snippets into Markdown | `python3 scripts/sync-wiki-examples.py` | Contributor runs after editing canonical examples. |
+| Verify snippet synchronization without writing | `python3 scripts/sync-wiki-examples.py --check` | Contributor and CI (`Prepare PR`). |
+| Run synchronizer regression tests | `python3 -B .github/scripts/tests/test_sync_wiki_examples.py` | Contributor and CI (`Prepare PR`). |
+| Generate new screenshot baselines | `./gradlew :androidApp:updateDebugScreenshotTest` | Contributor, limited to new previews; inspect generated images and preserve unrelated references. |
+| Validate screenshot baselines | `./gradlew :androidApp:validateDebugScreenshotTest` | Contributor locally; CI validates screenshot tests. |
+| Validate wiki screenshot asset sync | `bash .github/scripts/sync-wiki-screenshots.sh --self-test` | Contributor and CI (`Prepare PR`). |
+| Synchronize wiki pages and approved assets | `bash .github/scripts/sync-wiki-docs.sh --self-test` and the release/snapshot documentation workflow | Contributor checks the sync script; release/snapshot workflow publishes synced documentation and assets. |
+| Validate documentation links | Documentation CI link validation | CI owns published-site link checking; verify API targets locally against `docs/static/api/snapshot/`. |
+| Check whitespace errors | `git diff --check` | Contributor before handoff. |
+
+Compilation, synchronization, asset byte identity, and link targets are objectively verifiable. Screenshot value, example realism, and whether an existing GIF already teaches a state require author judgment; explain those choices briefly in the change when useful. Do not build a new validation framework for subjective presentation rules.

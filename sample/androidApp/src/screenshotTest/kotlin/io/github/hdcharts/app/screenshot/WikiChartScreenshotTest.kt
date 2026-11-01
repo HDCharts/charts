@@ -11,17 +11,23 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.android.tools.screenshot.PreviewTest
 import io.github.hdcharts.app.docs.CalorieProgress
+import io.github.hdcharts.app.docs.ComparePlatformReleases
 import io.github.hdcharts.app.docs.DailyCashFlow
 import io.github.hdcharts.app.docs.DailyCashFlowGradient
+import io.github.hdcharts.app.docs.DailyMeasurement
+import io.github.hdcharts.app.docs.EnergyUsage
+import io.github.hdcharts.app.docs.SelectTemperature
 import io.github.hdcharts.app.docs.ShowDailyTemperatures
 import io.github.hdcharts.app.docs.ShowMonthlySubscribers
 import io.github.hdcharts.app.docs.ShowPie
+import io.github.hdcharts.app.docs.ShowPieWithRoundedShare
 import io.github.hdcharts.app.docs.ShowPlatformReadiness
 import io.github.hdcharts.app.docs.ShowQuarterlyRevenue
 import io.github.hdcharts.app.docs.ShowRequestDurationDistribution
 import io.github.hdcharts.app.docs.ShowTeamProgress
 import io.github.hdcharts.app.screenshot.shared.PREVIEW_DEVICE_TABLET_LANDSCAPE
 import io.github.hdcharts.app.screenshot.shared.ScreenshotSurface
+import io.github.hdcharts.core.model.rememberChartSelection
 import io.github.hdcharts.core.model.toChartData
 
 /** The Bar Gradient wiki example rendered with the data from Bar Basic Usage. */
@@ -65,9 +71,50 @@ fun PieWikiPreview() {
     device = PREVIEW_DEVICE_TABLET_LANDSCAPE,
 )
 @Composable
+fun PieSelectedShareWikiPreview() {
+    WikiScreenshotSurface {
+        ShowPieWithRoundedShare(
+            EnergyUsage.sample.toChartData(
+                value = EnergyUsage::consumption,
+                category = EnergyUsage::category,
+            ),
+            selection = rememberChartSelection(initialIndex = 4),
+        )
+    }
+}
+
+@PreviewTest
+@Preview(
+    name = "Light Tablet Landscape",
+    uiMode = Configuration.UI_MODE_NIGHT_NO,
+    device = PREVIEW_DEVICE_TABLET_LANDSCAPE,
+)
+@Composable
 fun LineWikiPreview() {
     WikiScreenshotSurface {
         ShowDailyTemperatures(modifier = Modifier.fillMaxSize())
+    }
+}
+
+@PreviewTest
+@Preview(
+    name = "Light Tablet Landscape",
+    uiMode = Configuration.UI_MODE_NIGHT_NO,
+    device = PREVIEW_DEVICE_TABLET_LANDSCAPE,
+)
+@Composable
+fun LineSelectionWikiPreview() {
+    WikiScreenshotSurface {
+        SelectTemperature(
+            data =
+                DailyMeasurement.sample.toChartData(
+                    value = DailyMeasurement::temperatureCelsius,
+                    category = DailyMeasurement::day,
+                    seriesName = DailyMeasurement.SERIES_NAME,
+                ),
+            modifier = Modifier.fillMaxSize(),
+            selection = rememberChartSelection(initialIndex = 3),
+        )
     }
 }
 
@@ -120,6 +167,19 @@ fun StackedAreaWikiPreview() {
 fun RadarWikiPreview() {
     WikiScreenshotSurface {
         ShowPlatformReadiness(modifier = Modifier.fillMaxSize())
+    }
+}
+
+@PreviewTest
+@Preview(
+    name = "Light Tablet Landscape",
+    uiMode = Configuration.UI_MODE_NIGHT_NO,
+    device = PREVIEW_DEVICE_TABLET_LANDSCAPE,
+)
+@Composable
+fun RadarMultipleSeriesWikiPreview() {
+    WikiScreenshotSurface {
+        ComparePlatformReleases(modifier = Modifier.fillMaxSize())
     }
 }
 
