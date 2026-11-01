@@ -13,8 +13,7 @@ into view.
 
 ![Line Demo](/content/{{version}}/wiki/assets/line_default.gif)
 
-The GIF uses a longer generated series; its full recording source is
-[`LineExample.kt`](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/LineExample.kt).
+Recording source: [LineExample.kt](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/LineExample.kt).
 
 ## Basic Usage
 
@@ -78,8 +77,7 @@ focused example reuses the imports from Basic Usage.
 
 ![MultiLine Demo](/content/{{version}}/wiki/assets/multi_line_default.gif)
 
-The recording uses a longer data set. Its source is
-[`MultiLineExample.kt`](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/MultiLineExample.kt).
+Recording source: [MultiLineExample.kt](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/MultiLineExample.kt).
 
 <!-- BEGIN WIKI EXAMPLE: sample/androidApp/src/main/kotlin/io/github/hdcharts/app/docs/LineBasicExamples.kt#line-multiple-series -->
 ```kotlin
@@ -111,8 +109,7 @@ without implying a zero baseline.
 
 ![Line Range Demo](/content/{{version}}/wiki/assets/line_range.gif)
 
-The recording uses a different dataset from the teaching example. Its source is
-[`LineWithRangeExample.kt`](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/LineWithRangeExample.kt).
+Recording source: [LineWithRangeExample.kt](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/LineWithRangeExample.kt).
 
 <!-- BEGIN WIKI EXAMPLE: sample/androidApp/src/main/kotlin/io/github/hdcharts/app/docs/LineCapabilities.kt#line-fixed-range -->
 ```kotlin
@@ -163,8 +160,7 @@ For gradient directions, spans, and stops, see the shared [Gradients guide](/{{v
 
 ![Line Gradient](/content/{{version}}/wiki/assets/line_gradient.gif)
 
-The GIF uses generated data; its source is
-[`LineGradientExample.kt`](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/LineGradientExample.kt).
+Recording source: [LineGradientExample.kt](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/LineGradientExample.kt).
 
 <!-- BEGIN WIKI EXAMPLE: sample/androidApp/src/main/kotlin/io/github/hdcharts/app/docs/LineCapabilities.kt#line-gradient -->
 ```kotlin
@@ -190,10 +186,11 @@ When new `LineChart` data keeps the same series count and the same number of poi
 the chart morphs between the old and new line shapes. A change to either count redraws the chart
 instead. Keep categories aligned across updates so each point continues to represent the same
 position in the series. Morphing transitions between datasets; it does not advance a sliding
-timeline. The existing recording shows a longer, pinned-range example:
-[`MorphingLineExample.kt`](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/MorphingLineExample.kt).
+timeline.
 
 ![Line Morph Demo](/content/{{version}}/wiki/assets/line_morph.gif)
+
+Recording source: [MorphingLineExample.kt](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/MorphingLineExample.kt).
 
 <!-- BEGIN WIKI EXAMPLE: sample/androidApp/src/main/kotlin/io/github/hdcharts/app/docs/LineCapabilities.kt#line-morphing -->
 ```kotlin
@@ -243,8 +240,7 @@ named series and shared categories through the same `ChartData` structure used b
 
 ![Live Line Demo](/content/{{version}}/wiki/assets/line_timeline.gif)
 
-The GIF uses a heartbeat-shaped generator; its full source is
-[`LiveLineExample.kt`](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/LiveLineExample.kt).
+Recording source: [LiveLineExample.kt](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/LiveLineExample.kt).
 
 <!-- BEGIN WIKI EXAMPLE: sample/androidApp/src/main/kotlin/io/github/hdcharts/app/docs/LiveLineExample.kt#live-line-basic -->
 ```kotlin
@@ -293,10 +289,11 @@ fun ShowLiveSensorReadings() {
 <!-- END WIKI EXAMPLE: live-line-basic -->
 
 The live gradient GIF demonstrates colors progressing from older to newer points as the window
-slides. Its source is
-[`LiveLineGradientExample.kt`](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/LiveLineGradientExample.kt).
+slides.
 
 ![Live Line Gradient](/content/{{version}}/wiki/assets/line_timeline_gradient.gif)
+
+Recording source: [LiveLineGradientExample.kt](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/LiveLineGradientExample.kt).
 
 ## API Reference
 

@@ -12,8 +12,7 @@ counts.
 
 ![Bar Demo](/content/{{version}}/wiki/assets/bar_default.gif)
 
-The GIF uses a longer generated series to show the chart animation. Its recording source is
-[`BarExample.kt`](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/BarExample.kt).
+Recording source: [BarExample.kt](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/BarExample.kt).
 
 ## Basic Usage
 

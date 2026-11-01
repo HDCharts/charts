@@ -70,8 +70,6 @@ fun CompareShapeAndPlotGradients() {
 ```
 <!-- END WIKI EXAMPLE: gradients-shape-and-plot -->
 
-The recordings below use longer generated datasets than the minimal Kotlin examples, while demonstrating the same gradient configurations.
-
 The [bar guide's gradient example](/{{version}}/wiki/bar-chart#gradients) shows a basic chart setup.
 
 **Bar — Shape.** The recording uses blue-purple-orange stops with `ChartGradients.vertical(colors = colors, span = GradientSpan.Shape)`, passed through `BarChartDefaults.bars(gradient = ...)` in `BarChartDefaults.style(...)`. Each bar shows the full gradient; negative bars mirror it from the value edge toward zero.

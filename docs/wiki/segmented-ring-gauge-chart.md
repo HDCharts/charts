@@ -10,17 +10,15 @@ title: Segmented Ring Gauge
 segments cover the contributions, and the track shows the unused capacity. Use it for progress made
 up of named parts, such as daily nutrition; use a pie chart when the parts should represent a whole.
 
-![Segmented Ring Gauge Demo](/content/{{version}}/wiki/assets/segmented_ring_gauge_default.gif)
-
-The [GIF recording source](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/SegmentedRingGaugeExample.kt)
-feeds the same calorie values through a `ViewModel` and `StateFlow`. Basic Usage instead maps
-`Nutrient` records and uses their names and colors for the chart.
-
 Add the existing `gauge` module:
 
 ```kotlin
 implementation("io.github.hdcharts:gauge:<version>")
 ```
+
+![Segmented Ring Gauge Demo](/content/{{version}}/wiki/assets/segmented_ring_gauge_default.gif)
+
+Recording source: [SegmentedRingGaugeExample.kt](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/SegmentedRingGaugeExample.kt).
 
 ## Basic Usage
 

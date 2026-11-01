@@ -12,8 +12,7 @@ for every category, in the same order.
 
 ![Stacked Bar Demo](/content/{{version}}/wiki/assets/stacked_bar_default.gif)
 
-The GIF uses a longer generated series per channel; its full source is in
-[`StackedBarExample.kt`](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/StackedBarExample.kt).
+Recording source: [StackedBarExample.kt](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/StackedBarExample.kt).
 
 ## Basic Usage
 

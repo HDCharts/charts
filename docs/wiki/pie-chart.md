@@ -16,8 +16,7 @@ Slice colors come from the style, either as an explicit palette or as shades gen
 color. Without categories the chart has no legend. With no category and no title, a selected slice
 shows only its share.
 
-The GIF uses the same energy data. Its recording source supplies it through a `ViewModel` and
-`StateFlow`: [`PieExample.kt`](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/PieExample.kt).
+Recording source: [PieExample.kt](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/PieExample.kt).
 
 ## Basic Usage
 

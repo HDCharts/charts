@@ -11,17 +11,15 @@ configured range, and the first value is the outer ring. Use it for progress ind
 workstreams. A [Segmented Ring Gauge](/{{version}}/wiki/segmented-ring-gauge-chart) instead shows
 contributions that add together toward one shared capacity.
 
-![Ring Gauge Demo](/content/{{version}}/wiki/assets/ring_gauge_default.gif)
-
-The [GIF recording source](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/RingGaugeExample.kt)
-uses the same independent-ring model. Basic Usage maps team progress records to ring values and
-labels.
-
 Add the `gauge` module:
 
 ```kotlin
 implementation("io.github.hdcharts:gauge:<version>")
 ```
+
+![Ring Gauge Demo](/content/{{version}}/wiki/assets/ring_gauge_default.gif)
+
+Recording source: [RingGaugeExample.kt](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/RingGaugeExample.kt).
 
 ## Basic Usage
 

@@ -13,8 +13,7 @@ distribution, such as request counts by duration interval.
 
 ![Histogram Demo](/content/{{version}}/wiki/assets/histogram_default.gif)
 
-The GIF uses a longer generated distribution to show the chart animation. Its recording source is
-[`HistogramExample.kt`](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/HistogramExample.kt).
+Recording source: [HistogramExample.kt](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/HistogramExample.kt).
 
 ## Basic Usage
 
