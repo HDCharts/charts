@@ -63,10 +63,7 @@ fun FormattedMonthlySubscribers(data: ChartData) {
     StackedAreaChart(
         data = data,
         selectedValueFormatter = ChartValueFormatters.suffix(" subscribers"),
-        axisValueFormatter =
-            ChartValueFormatter { value ->
-                StackedAreaChartDefaults.axisValueFormatter.format(value)
-            },
+        axisValueFormatter = ChartValueFormatters.suffix(" total subscribers"),
     )
 }
 ```

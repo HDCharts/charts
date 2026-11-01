@@ -2,7 +2,6 @@ package io.github.hdcharts.app.docs
 
 import androidx.compose.runtime.Composable
 import io.github.hdcharts.core.model.ChartData
-import io.github.hdcharts.core.model.ChartValueFormatter
 import io.github.hdcharts.core.model.ChartValueFormatters
 import io.github.hdcharts.core.style.ChartGradients
 import io.github.hdcharts.stackedarea.StackedAreaChart
@@ -14,10 +13,7 @@ fun FormattedMonthlySubscribers(data: ChartData) {
     StackedAreaChart(
         data = data,
         selectedValueFormatter = ChartValueFormatters.suffix(" subscribers"),
-        axisValueFormatter =
-            ChartValueFormatter { value ->
-                StackedAreaChartDefaults.axisValueFormatter.format(value)
-            },
+        axisValueFormatter = ChartValueFormatters.suffix(" total subscribers"),
     )
 }
 // END WIKI EXAMPLE: stacked-area-value-formatting
