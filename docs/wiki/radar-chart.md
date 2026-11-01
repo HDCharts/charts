@@ -12,6 +12,11 @@ least three values, and all series must have the same number of values. Category
 provided, name those axes in order. Values at each list position map to the category at that same
 position.
 
+The chart scales all series together from the minimum to the maximum value in the data. The minimum
+appears at the center and the maximum at the outer web, so the center does not mean zero. In the
+example below, 74 is at the center; the polygon emphasizes the profile shape rather than a fixed
+0–100 scale. `RadarChart` does not currently expose a fixed range option.
+
 ![Radar Demo](/content/{{version}}/wiki/assets/radar_default.gif)
 
 The [GIF recording source](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/RadarExample.kt)
