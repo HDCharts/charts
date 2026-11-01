@@ -330,6 +330,7 @@ tasks.register("ciTestIos") {
 tasks.register("ciCompile") {
     group = "CI"
     description = "Compiles all CI targets without packaging outputs"
+    dependsOn(":androidApp:compileDebugKotlin")
     dependsOn(ChartsModules.ciKmpCompile.map { "$it:compileKotlinJvm" })
     dependsOn(ChartsModules.ciKmpCompile.map { "$it:compileKotlinWasmJs" })
     dependsOn(ChartsModules.ciAndroidCompile.map { "$it:compileAndroidMain" })
