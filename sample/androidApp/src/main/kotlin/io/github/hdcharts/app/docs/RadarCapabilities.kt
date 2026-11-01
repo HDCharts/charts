@@ -24,6 +24,24 @@ fun ComparePlatformReleases(modifier: Modifier = Modifier) {
 }
 // END WIKI EXAMPLE: radar-multiple-series
 
+// BEGIN WIKI EXAMPLE: radar-fixed-range
+@Composable
+fun ShowReadinessOnFixedScale(
+    data: ChartData,
+    modifier: Modifier = Modifier,
+) {
+    RadarChart(
+        data = data,
+        modifier = modifier,
+        title = "Platform Readiness",
+        style =
+            RadarChartDefaults.style(
+                range = RadarChartDefaults.range(min = 0.0, max = 100.0),
+            ),
+    )
+}
+// END WIKI EXAMPLE: radar-fixed-range
+
 // BEGIN WIKI EXAMPLE: radar-category-selection
 @Composable
 fun SelectReadinessCategory(data: ChartData) {

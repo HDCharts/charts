@@ -12,6 +12,11 @@ least three values, and all series must have the same number of values. Category
 provided, name those axes in order. Values at each list position map to the category at that same
 position.
 
+By default, the chart scales all series together from the data minimum to the maximum. The minimum
+appears at the center and the maximum at the outer web, so the center does not mean zero. In the
+example below, 74 is at the center and the polygon emphasizes profile shape rather than absolute
+scores. Set a shared range when values have known bounds or need to remain comparable as data changes.
+
 ![Radar Demo](/content/{{version}}/wiki/assets/radar_default.gif)
 
 The [GIF recording source](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/RadarExample.kt)
@@ -29,33 +34,39 @@ import androidx.compose.ui.Modifier
 import io.github.hdcharts.core.model.toChartData
 import io.github.hdcharts.radar.RadarChart
 
-private data class ReadinessMetric(
+internal data class ReadinessMetric(
     val category: String,
     val score: Double,
-)
+) {
+    companion object {
+        const val TITLE = "Platform Readiness"
+        const val SERIES_NAME = "Current release"
+
+        val sample =
+            listOf(
+                ReadinessMetric("Performance", 84.0),
+                ReadinessMetric("Reliability", 79.0),
+                ReadinessMetric("Usability", 76.0),
+                ReadinessMetric("Security", 88.0),
+                ReadinessMetric("Scalability", 82.0),
+                ReadinessMetric("Observability", 74.0),
+            )
+    }
+}
 
 @Composable
 fun ShowPlatformReadiness(modifier: Modifier = Modifier) {
-    val metrics =
-        listOf(
-            ReadinessMetric("Performance", 84.0),
-            ReadinessMetric("Reliability", 79.0),
-            ReadinessMetric("Usability", 76.0),
-            ReadinessMetric("Security", 88.0),
-            ReadinessMetric("Scalability", 82.0),
-            ReadinessMetric("Observability", 74.0),
-        )
     val data =
-        metrics.toChartData(
-            value = { it.score },
-            category = { it.category },
-            seriesName = "Current release",
+        ReadinessMetric.sample.toChartData(
+            value = ReadinessMetric::score,
+            category = ReadinessMetric::category,
+            seriesName = ReadinessMetric.SERIES_NAME,
         )
 
     RadarChart(
         data = data,
         modifier = modifier,
-        title = "Platform Readiness",
+        title = ReadinessMetric.TITLE,
     )
 }
 ```
@@ -64,6 +75,38 @@ fun ShowPlatformReadiness(modifier: Modifier = Modifier) {
 ![Radar chart comparing platform readiness across categories](/content/{{version}}/wiki/assets/wiki-radar-basic.png)
 
 ## Capabilities
+
+### Fixed Value Range
+
+Automatic scaling maps the dataset minimum to the center and maximum to the outer edge. A fixed
+`0..100` range maps zero to the center and 100 to the outer edge. Both visuals use the same data;
+only the range configuration changes. This excerpt reuses `data` from Basic Usage.
+
+<!-- BEGIN WIKI EXAMPLE: sample/androidApp/src/main/kotlin/io/github/hdcharts/app/docs/RadarCapabilities.kt#radar-fixed-range -->
+```kotlin
+@Composable
+fun ShowReadinessOnFixedScale(
+    data: ChartData,
+    modifier: Modifier = Modifier,
+) {
+    RadarChart(
+        data = data,
+        modifier = modifier,
+        title = "Platform Readiness",
+        style =
+            RadarChartDefaults.style(
+                range = RadarChartDefaults.range(min = 0.0, max = 100.0),
+            ),
+    )
+}
+```
+<!-- END WIKI EXAMPLE: radar-fixed-range -->
+
+| Automatic scaling | Fixed range (0–100) |
+| --- | --- |
+| [![Radar chart with automatic scaling, where the dataset minimum maps to the center](/content/{{version}}/wiki/assets/wiki-radar-basic.png)](/content/{{version}}/wiki/assets/wiki-radar-basic.png) | [![Radar chart with a fixed 0 to 100 range](/content/{{version}}/wiki/assets/wiki-radar-fixed-range.png)](/content/{{version}}/wiki/assets/wiki-radar-fixed-range.png) |
+
+Tap either screenshot to view it at full size.
 
 ### Multiple Series
 

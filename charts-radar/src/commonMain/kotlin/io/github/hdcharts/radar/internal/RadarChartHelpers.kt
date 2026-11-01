@@ -3,6 +3,10 @@ package io.github.hdcharts.radar.internal
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.IntSize
 import io.github.hdcharts.core.internal.NO_SELECTION
+import io.github.hdcharts.core.internal.model.ChartRenderData
+import io.github.hdcharts.core.internal.model.minMax
+import io.github.hdcharts.core.internal.model.resolveOptionalRange
+import io.github.hdcharts.radar.RadarRangeStyle
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.atan2
@@ -10,6 +14,17 @@ import kotlin.math.cos
 import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlin.math.sin
+
+/** Resolves one shared radial scale for every Radar series. */
+internal fun ChartRenderData.resolveRadarRange(range: RadarRangeStyle): Pair<Double, Double> {
+    val (dataMin, dataMax) = minMax()
+    return resolveOptionalRange(
+        dataMin = dataMin,
+        dataMax = dataMax,
+        minValue = range.min,
+        maxValue = range.max,
+    )
+}
 
 /** Below this a label sits straight up or sideways, where its reach is already measured exactly. */
 private const val DIAGONAL_EPSILON = 0.0001f

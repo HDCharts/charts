@@ -183,7 +183,7 @@ written by hand and change in the same commit.
 | Line | 2 | yes | multiple | no | yes | yes | series count |
 | Bar | 2 | yes | single | no | yes | yes | value count |
 | Histogram | 2 | no | single | no | yes | yes | value count |
-| Radar | 3 | yes | multiple | no | no | no | series count, only with more than one series |
+| Radar | 3 | yes | multiple | no | no | yes | series count, only with more than one series |
 | Stacked bar | 2 | no | multiple | yes | yes | no | series count |
 | Stacked area | 2 | no | multiple | yes | yes | no | series count |
 | Pie | 2 | no | single | no | no | no | value count |

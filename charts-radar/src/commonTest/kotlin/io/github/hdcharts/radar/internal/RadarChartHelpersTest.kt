@@ -2,13 +2,21 @@ package io.github.hdcharts.radar.internal
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.IntSize
+import io.github.hdcharts.core.internal.InternalChartsApi
 import io.github.hdcharts.core.internal.NO_SELECTION
+import io.github.hdcharts.core.internal.model.ChartRenderData
+import io.github.hdcharts.core.internal.model.normalizeByMinMax
+import io.github.hdcharts.core.model.ChartData
+import io.github.hdcharts.core.model.ChartSeries
+import io.github.hdcharts.radar.RadarRangeStyle
 import kotlin.math.abs
 import kotlin.math.hypot
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
+@OptIn(InternalChartsApi::class)
 class RadarChartHelpersTest {
     private val eps = 0.0001f
     private val pixelEps = 0.01f
@@ -263,6 +271,94 @@ class RadarChartHelpersTest {
         assertEquals(expected = anchor.x * unitX + anchor.y * unitY, actual = innerEdge, absoluteTolerance = 0.5f)
     }
 
+    @Test
+    fun resolveRadarRange_defaultRangeUsesOneDataDerivedScaleAcrossAllSeries() {
+        val data =
+            renderData(
+                ChartSeries(name = "Alpha", values = listOf(10.0, 20.0, 30.0)),
+                ChartSeries(name = "Beta", values = listOf(0.0, 40.0, 20.0)),
+            )
+
+        val range = data.resolveRadarRange(RadarRangeStyle(min = null, max = null))
+
+        assertEquals(0.0 to 40.0, range)
+        assertEquals(
+            listOf(listOf(0.25f, 0.5f, 0.75f), listOf(0f, 1f, 0.5f)),
+            data.normalizeByMinMax(range, zeroRangeValue = 1f),
+        )
+    }
+
+    @Test
+    fun resolveRadarRange_fixedBoundsKeepAnUnchangedSeriesAtTheSameRadialPositions() {
+        val alpha = ChartSeries(name = "Alpha", values = listOf(10.0, 50.0, 90.0))
+        val initialData = renderData(alpha)
+        val withOutlier =
+            renderData(
+                alpha,
+                ChartSeries(name = "Outlier", values = listOf(-100.0, 200.0, 50.0)),
+            )
+        val range = withOutlier.resolveRadarRange(RadarRangeStyle(min = 0.0, max = 100.0))
+
+        val automaticBefore = initialData.resolveRadarRange(RadarRangeStyle(min = null, max = null))
+        val automaticAfter = withOutlier.resolveRadarRange(RadarRangeStyle(min = null, max = null))
+        assertNotEquals(
+            initialData.normalizeByMinMax(automaticBefore, zeroRangeValue = 1f).first(),
+            withOutlier.normalizeByMinMax(automaticAfter, zeroRangeValue = 1f).first(),
+        )
+        assertEquals(0.0 to 100.0, range)
+        assertEquals(
+            initialData.normalizeByMinMax(0.0 to 100.0, zeroRangeValue = 1f).first(),
+            withOutlier.normalizeByMinMax(range, zeroRangeValue = 1f).first(),
+        )
+        assertEquals(
+            listOf(listOf(0f, 1f, 0.5f)),
+            withOutlier.normalizeByMinMax(range, zeroRangeValue = 1f).drop(1),
+        )
+    }
+
+    @Test
+    fun resolveRadarRange_customBoundsSupportMixedSignsAndClampOutOfRangeValues() {
+        val data = renderData(ChartSeries(values = listOf(-20.0, 0.0, 10.0, 40.0)))
+        val range = data.resolveRadarRange(RadarRangeStyle(min = -10.0, max = 30.0))
+        val positiveMinimumRange = data.resolveRadarRange(RadarRangeStyle(min = 5.0, max = 25.0))
+
+        assertEquals(-10.0 to 30.0, range)
+        assertEquals(
+            listOf(listOf(0f, 0.25f, 0.5f, 1f)),
+            data.normalizeByMinMax(range, zeroRangeValue = 1f),
+        )
+        assertEquals(5.0 to 25.0, positiveMinimumRange)
+        assertEquals(
+            listOf(listOf(0f, 0f, 0.25f, 1f)),
+            data.normalizeByMinMax(positiveMinimumRange, zeroRangeValue = 1f),
+        )
+    }
+
+    @Test
+    fun resolveRadarRange_conflictingExplicitBoundsFallBackToDataRange() {
+        val data = renderData(ChartSeries(values = listOf(-5.0, 5.0, 15.0)))
+
+        assertEquals(
+            -5.0 to 15.0,
+            data.resolveRadarRange(RadarRangeStyle(min = 20.0, max = 10.0)),
+        )
+    }
+
+    @Test
+    fun resolveRadarRange_zeroWidthAutomaticRangePreservesOuterWebFallback() {
+        val allZero = renderData(ChartSeries(values = listOf(0.0, 0.0, 0.0)))
+        val allEqual = renderData(ChartSeries(values = listOf(7.0, 7.0, 7.0)))
+        val fixedRange = allZero.resolveRadarRange(RadarRangeStyle(min = 0.0, max = 100.0))
+        val automaticRange = allZero.resolveRadarRange(RadarRangeStyle(min = null, max = null))
+
+        assertEquals(listOf(listOf(1f, 1f, 1f)), allZero.normalizeByMinMax(automaticRange, 1f))
+        assertEquals(
+            listOf(listOf(1f, 1f, 1f)),
+            allEqual.normalizeByMinMax(allEqual.resolveRadarRange(RadarRangeStyle(null, null)), 1f),
+        )
+        assertEquals(listOf(listOf(0f, 0f, 0f)), allZero.normalizeByMinMax(fixedRange, 1f))
+    }
+
     private val nestedSquares =
         listOf(
             square(left = 40f, top = 40f, size = 20f),
@@ -279,5 +375,11 @@ class RadarChartHelpersTest {
             Offset(left + size, top),
             Offset(left + size, top + size),
             Offset(left, top + size),
+        )
+
+    private fun renderData(vararg series: ChartSeries) =
+        ChartRenderData(
+            data = ChartData(series = series.toList()),
+            title = "",
         )
 }

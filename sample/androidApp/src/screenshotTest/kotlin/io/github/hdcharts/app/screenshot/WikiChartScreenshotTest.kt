@@ -16,6 +16,7 @@ import io.github.hdcharts.app.docs.DailyCashFlow
 import io.github.hdcharts.app.docs.DailyCashFlowGradient
 import io.github.hdcharts.app.docs.DailyMeasurement
 import io.github.hdcharts.app.docs.EnergyUsage
+import io.github.hdcharts.app.docs.ReadinessMetric
 import io.github.hdcharts.app.docs.SelectTemperature
 import io.github.hdcharts.app.docs.ShowDailyTemperatures
 import io.github.hdcharts.app.docs.ShowMonthlySubscribers
@@ -23,6 +24,7 @@ import io.github.hdcharts.app.docs.ShowPie
 import io.github.hdcharts.app.docs.ShowPieWithRoundedShare
 import io.github.hdcharts.app.docs.ShowPlatformReadiness
 import io.github.hdcharts.app.docs.ShowQuarterlyRevenue
+import io.github.hdcharts.app.docs.ShowReadinessOnFixedScale
 import io.github.hdcharts.app.docs.ShowRequestDurationDistribution
 import io.github.hdcharts.app.docs.ShowTeamProgress
 import io.github.hdcharts.app.screenshot.shared.PREVIEW_DEVICE_TABLET_LANDSCAPE
@@ -180,6 +182,27 @@ fun RadarWikiPreview() {
 fun RadarMultipleSeriesWikiPreview() {
     WikiScreenshotSurface {
         ComparePlatformReleases(modifier = Modifier.fillMaxSize())
+    }
+}
+
+@PreviewTest
+@Preview(
+    name = "Light Tablet Landscape",
+    uiMode = Configuration.UI_MODE_NIGHT_NO,
+    device = PREVIEW_DEVICE_TABLET_LANDSCAPE,
+)
+@Composable
+fun RadarFixedRangeWikiPreview() {
+    WikiScreenshotSurface {
+        ShowReadinessOnFixedScale(
+            data =
+                ReadinessMetric.sample.toChartData(
+                    value = ReadinessMetric::score,
+                    category = ReadinessMetric::category,
+                    seriesName = ReadinessMetric.SERIES_NAME,
+                ),
+            modifier = Modifier.fillMaxSize(),
+        )
     }
 }
 

@@ -9,6 +9,7 @@ import io.github.hdcharts.core.internal.ChartPolicy
 import io.github.hdcharts.core.internal.ChartSpec
 import io.github.hdcharts.core.internal.InternalChartsApi
 import io.github.hdcharts.core.internal.NO_SELECTION
+import io.github.hdcharts.core.internal.RangeInputs
 import io.github.hdcharts.core.internal.SeriesRule
 import io.github.hdcharts.core.internal.ValidationErrors
 import io.github.hdcharts.core.internal.composable.ChartHeading
@@ -27,8 +28,8 @@ import kotlinx.collections.immutable.toImmutableList
 
 /**
  * Everything [io.github.hdcharts.radar.RadarChart] declares about its input. A radar axis holds one
- * value per category, so it needs at least three; it has no Cartesian axis and no fixed range, and it
- * allows negative values.
+ * value per category, so it needs at least three; it has no Cartesian axis, supports optional radial
+ * bounds, and allows negative values.
  */
 @InternalChartsApi
 object RadarChartSpec : ChartSpec<RadarChartStyle> {
@@ -43,7 +44,7 @@ object RadarChartSpec : ChartSpec<RadarChartStyle> {
                     expectedColors = { data -> data.series.size.takeIf { count -> count > 1 } },
                 ),
             colorCount = { it.polygon.lineColors.size },
-            range = null,
+            range = { RangeInputs(min = it.range.min, max = it.range.max) },
             axes = null,
         )
 

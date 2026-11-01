@@ -211,6 +211,23 @@ data class RadarSelectionStyle(
 }
 
 /**
+ * Optional radial bounds shared by every series.
+ *
+ * Null bounds use the corresponding data minimum or maximum. Values outside the resolved range are
+ * drawn at the center or outer web. If both bounds are set and [min] is not less than [max], the
+ * chart uses the data range. A single bound that crosses the data-derived opposite bound resolves
+ * to a zero-width range at that bound.
+ *
+ * @property min Optional minimum value mapped to the center.
+ * @property max Optional maximum value mapped to the outer web.
+ */
+@Immutable
+data class RadarRangeStyle(
+    val min: Double?,
+    val max: Double?,
+)
+
+/**
  * Presentation for radar charts.
  *
  * @property chartContainerStyle Shared content spacing and title and subtitle text styles.
@@ -220,6 +237,7 @@ data class RadarSelectionStyle(
  * @property points Vertex markers.
  * @property selection Selected-axis and focused-series appearance.
  * @property legend Series legend visibility.
+ * @property range Optional radial value bounds.
  */
 @Immutable
 class RadarChartStyle(
@@ -230,7 +248,28 @@ class RadarChartStyle(
     val points: RadarPointStyle,
     val selection: RadarSelectionStyle,
     val legend: LegendStyle,
-)
+    val range: RadarRangeStyle,
+) {
+    /** Retains the constructor used before radial range configuration was added. */
+    constructor(
+        chartContainerStyle: ChartContainerStyle,
+        grid: RadarGridStyle,
+        axes: RadarAxesStyle,
+        polygon: RadarPolygonStyle,
+        points: RadarPointStyle,
+        selection: RadarSelectionStyle,
+        legend: LegendStyle,
+    ) : this(
+        chartContainerStyle = chartContainerStyle,
+        grid = grid,
+        axes = axes,
+        polygon = polygon,
+        points = points,
+        selection = selection,
+        legend = legend,
+        range = RadarRangeStyle(min = null, max = null),
+    )
+}
 
 /** Theme-aware style factories and default value formatters for [RadarChartStyle]. */
 object RadarChartDefaults {
@@ -252,7 +291,36 @@ object RadarChartDefaults {
         points = points,
         selection = selection,
         legend = legend,
+        range = range(),
     )
+
+    /** Returns a [RadarChartStyle] with explicit [range] bounds and the provided presentation. */
+    @Composable
+    fun style(
+        chartContainerStyle: ChartContainerStyle = ChartContainerDefaults.style(),
+        grid: RadarGridStyle = grid(),
+        axes: RadarAxesStyle = axes(),
+        polygon: RadarPolygonStyle = polygon(),
+        points: RadarPointStyle = points(),
+        selection: RadarSelectionStyle = selection(),
+        legend: LegendStyle = legend(),
+        range: RadarRangeStyle,
+    ) = RadarChartStyle(
+        chartContainerStyle = chartContainerStyle,
+        grid = grid,
+        axes = axes,
+        polygon = polygon,
+        points = points,
+        selection = selection,
+        legend = legend,
+        range = range,
+    )
+
+    /** Returns a [RadarRangeStyle] for optional radial bounds. */
+    fun range(
+        min: Double? = null,
+        max: Double? = null,
+    ): RadarRangeStyle = RadarRangeStyle(min = min, max = max)
 
     /** Returns a [RadarGridStyle] for the grid rings. */
     @Composable
@@ -352,4 +420,5 @@ internal fun RadarChartStyle.clamp(density: Density) =
         points = points.clamp(density),
         selection = selection.clamp(density),
         legend = legend,
+        range = range,
     )

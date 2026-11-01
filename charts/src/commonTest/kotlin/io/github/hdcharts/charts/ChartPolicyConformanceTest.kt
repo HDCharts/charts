@@ -114,7 +114,7 @@ class ChartPolicyConformanceTest {
                         series = "multiple",
                         stacked = false,
                         axes = false,
-                        range = false,
+                        range = true,
                         colors = "series count, only with more than one series",
                     ),
                 "Stacked bar" to
