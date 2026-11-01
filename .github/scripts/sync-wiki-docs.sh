@@ -24,6 +24,7 @@ sync_wiki_docs() {
   # dev/ holds unversioned developer docs, synced by sync-dev-docs.sh and never frozen into a release.
   rsync --archive --delete \
     --exclude='README.md' \
+    --exclude='AGENTS.md' \
     --exclude='assets/' \
     --exclude='/dev/' \
     "${source_dir}/" "${target_dir}/"
@@ -42,12 +43,13 @@ run_self_test() {
 
   [[ ! -e "${temp_dir}/content/snapshot/wiki/stale.md" ]]
   [[ ! -e "${temp_dir}/content/snapshot/wiki/README.md" ]]
+  [[ ! -e "${temp_dir}/content/snapshot/wiki/AGENTS.md" ]]
   [[ -f "${temp_dir}/content/snapshot/wiki/assets/keep.gif" ]]
   [[ ! -e "${temp_dir}/content/snapshot/wiki/dev" ]]
 
   local source_file
   for source_file in "${source_dir}"/*.md; do
-    [[ "$(basename "${source_file}")" == "README.md" ]] && continue
+    [[ "$(basename "${source_file}")" == "README.md" || "$(basename "${source_file}")" == "AGENTS.md" ]] && continue
     cmp "${source_file}" "${temp_dir}/content/snapshot/wiki/$(basename "${source_file}")"
   done
 }
