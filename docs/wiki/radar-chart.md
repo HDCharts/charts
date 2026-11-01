@@ -25,6 +25,7 @@ category names label the same positions.
 <!-- BEGIN WIKI EXAMPLE: sample/androidApp/src/main/kotlin/io/github/hdcharts/app/docs/RadarBasicExample.kt#radar-basic-usage -->
 ```kotlin
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import io.github.hdcharts.core.model.toChartData
 import io.github.hdcharts.radar.RadarChart
 
@@ -34,7 +35,7 @@ private data class ReadinessMetric(
 )
 
 @Composable
-fun ShowPlatformReadiness() {
+fun ShowPlatformReadiness(modifier: Modifier = Modifier) {
     val metrics =
         listOf(
             ReadinessMetric("Performance", 84.0),
@@ -53,6 +54,7 @@ fun ShowPlatformReadiness() {
 
     RadarChart(
         data = data,
+        modifier = modifier,
         title = "Platform Readiness",
     )
 }

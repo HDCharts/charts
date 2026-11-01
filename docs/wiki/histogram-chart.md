@@ -24,6 +24,7 @@ these equal-width bins as adjacent bars; it does not derive them from individual
 <!-- BEGIN WIKI EXAMPLE: sample/androidApp/src/main/kotlin/io/github/hdcharts/app/docs/HistogramBasicExample.kt#histogram-basic-usage -->
 ```kotlin
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import io.github.hdcharts.core.model.toChartData
 import io.github.hdcharts.histogram.HistogramChart
 
@@ -33,7 +34,7 @@ private data class RequestDurationBin(
 )
 
 @Composable
-fun ShowRequestDurationDistribution() {
+fun ShowRequestDurationDistribution(modifier: Modifier = Modifier) {
     // Counts have already been grouped into these equal-width intervals.
     val bins =
         listOf(
@@ -53,6 +54,7 @@ fun ShowRequestDurationDistribution() {
 
     HistogramChart(
         data = data,
+        modifier = modifier,
         title = "Request Duration",
     )
 }

@@ -2,11 +2,12 @@ package io.github.hdcharts.app.docs
 
 // BEGIN WIKI EXAMPLE: stacked-bar-basic-usage
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import io.github.hdcharts.core.model.toChartData
 import io.github.hdcharts.stackedbar.StackedBarChart
 
 @Composable
-fun ShowQuarterlyRevenue() {
+fun ShowQuarterlyRevenue(modifier: Modifier = Modifier) {
     val data =
         listOf(
             "Online" to listOf(280.0, 520.0, 760.0, 1_080.0),
@@ -16,6 +17,7 @@ fun ShowQuarterlyRevenue() {
 
     StackedBarChart(
         data = data,
+        modifier = modifier,
         title = "Quarterly Revenue by Channel",
     )
 }

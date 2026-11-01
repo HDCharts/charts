@@ -67,7 +67,7 @@ fun PieWikiPreview() {
 @Composable
 fun LineWikiPreview() {
     WikiScreenshotSurface {
-        ShowDailyTemperatures()
+        ShowDailyTemperatures(modifier = Modifier.fillMaxSize())
     }
 }
 
@@ -80,7 +80,7 @@ fun LineWikiPreview() {
 @Composable
 fun HistogramWikiPreview() {
     WikiScreenshotSurface {
-        ShowRequestDurationDistribution()
+        ShowRequestDurationDistribution(modifier = Modifier.fillMaxSize())
     }
 }
 
@@ -93,7 +93,7 @@ fun HistogramWikiPreview() {
 @Composable
 fun StackedBarWikiPreview() {
     WikiScreenshotSurface {
-        ShowQuarterlyRevenue()
+        ShowQuarterlyRevenue(modifier = Modifier.fillMaxSize())
     }
 }
 
@@ -106,7 +106,7 @@ fun StackedBarWikiPreview() {
 @Composable
 fun StackedAreaWikiPreview() {
     WikiScreenshotSurface {
-        ShowMonthlySubscribers()
+        ShowMonthlySubscribers(modifier = Modifier.fillMaxSize())
     }
 }
 
@@ -119,7 +119,7 @@ fun StackedAreaWikiPreview() {
 @Composable
 fun RadarWikiPreview() {
     WikiScreenshotSurface {
-        ShowPlatformReadiness()
+        ShowPlatformReadiness(modifier = Modifier.fillMaxSize())
     }
 }
 
