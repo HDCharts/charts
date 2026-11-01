@@ -142,11 +142,14 @@ fun SelectTemperature(
     modifier: Modifier = Modifier,
     selection: ChartSelection = rememberChartSelection(),
 ) {
-    LineChart(
-        data = data,
-        modifier = modifier,
-        selection = selection,
-    )
+    Column(modifier = modifier) {
+        LineChart(
+            data = data,
+            modifier = Modifier.weight(1f).fillMaxWidth(),
+            selection = selection,
+        )
+        Text("Selected point index: ${selection.selectedIndex ?: "none"}")
+    }
 }
 ```
 <!-- END WIKI EXAMPLE: line-selection -->
