@@ -90,6 +90,7 @@ data class RingGaugeRingsStyle(
     /**
      * Returns the default colors for [ringCount] rings, before `alpha` is applied:
      * [colors] when set, or generated shades of [baseColor] when it is empty.
+     * @suppress
      */
     fun resolveColors(ringCount: Int): ImmutableList<Color> =
         resolvePaletteColors(

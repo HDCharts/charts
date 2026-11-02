@@ -86,7 +86,9 @@ data class SegmentedRingGaugeSegmentsStyle(
     val startPosition: SegmentedRingGaugeStartPosition,
     val direction: SegmentedRingGaugeDirection,
 ) {
-    /** Resolves one color per input value before [alpha] is applied. */
+    /** Resolves one color per input value before [alpha] is applied.
+     * @suppress
+     */
     fun resolveColors(segmentCount: Int): ImmutableList<Color> =
         resolvePaletteColors(
             baseColor = baseColor,

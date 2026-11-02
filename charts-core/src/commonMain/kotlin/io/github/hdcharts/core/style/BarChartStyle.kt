@@ -59,6 +59,7 @@ data class BarBarsStyle(
     /**
      * Returns the bar colors the chart draws for [barCount] bars, before [alpha] is applied:
      * [colors] when set, or [color] for every bar when [colors] is empty.
+     * @suppress
      */
     fun resolveColors(barCount: Int): ImmutableList<Color> =
         when {
@@ -270,7 +271,9 @@ object BarChartDefaults {
     )
 }
 
-/** Returns [this] with alphas, sizes, and grid steps clamped to drawable values. */
+/** Returns [this] with alphas, sizes, and grid steps clamped to drawable values.
+ * @suppress
+ */
 @InternalChartsApi
 fun BarChartStyle.clamp(density: Density) =
     BarChartStyle(

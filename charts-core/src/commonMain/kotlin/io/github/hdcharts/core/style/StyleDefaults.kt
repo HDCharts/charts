@@ -16,7 +16,9 @@ import io.github.hdcharts.core.model.ChartValueFormatters
 /** Every chart style default in one place, so the same element looks the same in every chart.
  *
  * When adding a new default here, also update [StyleDefaultsTest.defaults_matchCurrentValues] with
- * an assertion for the new property. */
+ * an assertion for the new property.
+ * @suppress
+ */
 @InternalChartsApi
 object StyleDefaults {
     // ===========================================================================

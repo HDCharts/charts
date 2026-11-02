@@ -72,6 +72,7 @@ class ChartSelection constructor(
      * Signals a lifecycle "touch" without changing the selected index. Use to renew
      * timers (e.g. an auto-deselect countdown) when a user re-taps the same point.
      * Does not invoke [onSelectionChanged].
+     * @suppress
      */
     @InternalChartsApi
     fun renew() {
