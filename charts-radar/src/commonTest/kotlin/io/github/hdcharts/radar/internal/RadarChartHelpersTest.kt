@@ -359,6 +359,59 @@ class RadarChartHelpersTest {
         assertEquals(listOf(listOf(0f, 0f, 0f)), allZero.normalizeByMinMax(fixedRange, 1f))
     }
 
+    @Test
+    fun normalizeRadarValues_minimumAboveAllValuesUsesCenterForCollapsedRange() {
+        val data = renderData(ChartSeries(values = listOf(10.0, 20.0, 30.0)))
+        val range = RadarRangeStyle(min = 40.0, max = null)
+        val resolvedRange = data.resolveRadarRange(range)
+
+        assertEquals(40.0 to 40.0, resolvedRange)
+        assertEquals(listOf(listOf(0f, 0f, 0f)), data.normalizeRadarValues(resolvedRange, range))
+    }
+
+    @Test
+    fun normalizeRadarValues_explicitZeroMinimumWithAllZeroDataUsesCenter() {
+        val data = renderData(ChartSeries(values = listOf(0.0, 0.0, 0.0)))
+        val range = RadarRangeStyle(min = 0.0, max = null)
+        val resolvedRange = data.resolveRadarRange(range)
+
+        assertEquals(0.0 to 0.0, resolvedRange)
+        assertEquals(listOf(listOf(0f, 0f, 0f)), data.normalizeRadarValues(resolvedRange, range))
+    }
+
+    @Test
+    fun normalizeRadarValues_automaticEqualDataKeepsOuterWebFallback() {
+        val data = renderData(ChartSeries(values = listOf(7.0, 7.0, 7.0)))
+        val range = RadarRangeStyle(min = null, max = null)
+        val resolvedRange = data.resolveRadarRange(range)
+
+        assertEquals(7.0 to 7.0, resolvedRange)
+        assertEquals(listOf(listOf(1f, 1f, 1f)), data.normalizeRadarValues(resolvedRange, range))
+    }
+
+    @Test
+    fun normalizeRadarValues_upperBoundOnlyKeepsZeroWidthFallback() {
+        val data = renderData(ChartSeries(values = listOf(7.0, 7.0, 7.0)))
+        val range = RadarRangeStyle(min = null, max = 7.0)
+        val resolvedRange = data.resolveRadarRange(range)
+
+        assertEquals(7.0 to 7.0, resolvedRange)
+        assertEquals(listOf(listOf(1f, 1f, 1f)), data.normalizeRadarValues(resolvedRange, range))
+    }
+
+    @Test
+    fun normalizeRadarValues_rangeModeChangesOutputWhenResolvedBoundsStayEqual() {
+        val data = renderData(ChartSeries(values = listOf(40.0, 40.0, 40.0)))
+        val automaticRange = RadarRangeStyle(min = null, max = null)
+        val minimumOnlyRange = RadarRangeStyle(min = 40.0, max = null)
+        val automaticBounds = data.resolveRadarRange(automaticRange)
+        val minimumOnlyBounds = data.resolveRadarRange(minimumOnlyRange)
+
+        assertEquals(automaticBounds, minimumOnlyBounds)
+        assertEquals(listOf(listOf(1f, 1f, 1f)), data.normalizeRadarValues(automaticBounds, automaticRange))
+        assertEquals(listOf(listOf(0f, 0f, 0f)), data.normalizeRadarValues(minimumOnlyBounds, minimumOnlyRange))
+    }
+
     private val nestedSquares =
         listOf(
             square(left = 40f, top = 40f, size = 20f),
