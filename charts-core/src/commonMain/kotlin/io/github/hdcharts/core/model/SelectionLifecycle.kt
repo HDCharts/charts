@@ -38,6 +38,7 @@ import kotlinx.coroutines.delay
  *   [SelectionLifetime.Persistent].
  * @param autoDeselectTrigger Restarts [SelectionLifetime.AutoDeselect] when
  *   its value changes. Pass `null` until automatic cleanup is armed.
+ * @suppress
  */
 @InternalChartsApi
 @Composable

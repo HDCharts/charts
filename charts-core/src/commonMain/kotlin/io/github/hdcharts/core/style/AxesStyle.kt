@@ -65,7 +65,9 @@ object AxisLinesDefaults {
     ): AxisLinesStyle = AxisLinesStyle(visible = visible, color = color, lineWidth = lineWidth)
 }
 
-/** Clamps stroke widths and grid steps. Label sizes pass through for validation. */
+/** Clamps stroke widths and grid steps. Label sizes pass through for validation.
+ * @suppress
+ */
 @InternalChartsApi
 fun AxesStyle.clamp(density: Density): AxesStyle =
     AxesStyle(

@@ -12,8 +12,7 @@ private const val MIN_Y_AXIS_TICK_COUNT = 2
  * [StyleDefaults.yAxisMaxLabelCount] when it is null, and
  * no more than fit [yAxisLabelMinSpacingPx] apart at [fontSizePx], but always the two ends.
  */
-@InternalChartsApi
-fun yAxisTickCount(
+internal fun yAxisTickCount(
     maxCount: Int?,
     spanPx: Float,
     fontSizePx: Float,

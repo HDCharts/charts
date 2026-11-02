@@ -43,6 +43,7 @@ object GridDefaults {
 /**
  * Returns [this] with [GridStyle.steps] and [GridStyle.lineWidth] clamped. Names every field instead of
  * using `copy`, so a field added to the constructor fails to compile here until it is dealt with.
+ * @suppress
  */
 @InternalChartsApi
 fun GridStyle.clamp(density: Density) =

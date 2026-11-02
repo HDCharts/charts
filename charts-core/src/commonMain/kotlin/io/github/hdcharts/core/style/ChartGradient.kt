@@ -194,6 +194,7 @@ object ChartGradients {
  * Drops stops with non-finite offsets, coerces the rest into `0..1`, sorts them, and clamps each
  * [GradientStop.Series] alpha. A single stop paints its color solid. No stops, non-finite positions,
  * or a start equal to the end return null.
+ * @suppress
  */
 @InternalChartsApi
 fun ChartGradient.clamp(): ChartGradient? {

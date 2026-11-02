@@ -8,7 +8,6 @@ import androidx.compose.ui.unit.Density
 import io.github.hdcharts.core.internal.ChartEntry
 import io.github.hdcharts.core.internal.ChartPolicy
 import io.github.hdcharts.core.internal.ChartSpec
-import io.github.hdcharts.core.internal.InternalChartsApi
 import io.github.hdcharts.core.internal.NO_SELECTION
 import io.github.hdcharts.core.internal.SeriesRule
 import io.github.hdcharts.core.internal.ValidationErrors
@@ -26,8 +25,7 @@ import io.github.hdcharts.gauge.clamp
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 
-@InternalChartsApi
-object SegmentedRingGaugeChartSpec : ChartSpec<SegmentedRingGaugeChartStyle> {
+internal object SegmentedRingGaugeChartSpec : ChartSpec<SegmentedRingGaugeChartStyle> {
     override val policy =
         ChartPolicy<SegmentedRingGaugeChartStyle>(
             series =

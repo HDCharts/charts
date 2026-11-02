@@ -80,16 +80,14 @@ fun AxisLabelStyle.validationValues() =
     )
 
 /** The value-based style inputs that validation reads for one policy evaluation. */
-@InternalChartsApi
-data class ValidationSnapshot(
+internal data class ValidationSnapshot(
     val colorCount: Int,
     val range: RangeInputs?,
     val axes: AxisInputs?,
 )
 
 /** Extracts the style values that can affect validation. */
-@InternalChartsApi
-fun <S : Any> ChartPolicy<S>.snapshot(style: S) =
+internal fun <S : Any> ChartPolicy<S>.snapshot(style: S) =
     ValidationSnapshot(
         colorCount = colorCount(style),
         range = range?.invoke(style),
@@ -97,8 +95,7 @@ fun <S : Any> ChartPolicy<S>.snapshot(style: S) =
     )
 
 /** The errors of every check this policy enables, in the order the checks read. */
-@InternalChartsApi
-fun <S : Any> ChartPolicy<S>.errorsFor(
+internal fun <S : Any> ChartPolicy<S>.errorsFor(
     data: ChartData,
     inputs: ValidationSnapshot,
     density: Density,

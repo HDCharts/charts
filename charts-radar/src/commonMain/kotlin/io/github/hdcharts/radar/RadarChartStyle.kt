@@ -125,7 +125,7 @@ data class RadarPolygonStyle(
      * A single series uses [lineColor]. Multiple series use [lineColors] when set, or
      * generated shades of [lineColor] when [lineColors] is empty.
      */
-    fun resolveLineColors(seriesCount: Int): ImmutableList<Color> =
+    internal fun resolveLineColors(seriesCount: Int): ImmutableList<Color> =
         resolvePaletteColors(
             baseColor = lineColor,
             colors = lineColors,

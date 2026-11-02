@@ -9,6 +9,7 @@ import io.github.hdcharts.core.internal.InternalChartsApi
  * and explicit `clear()` calls are always honored. Data changes and
  * out-of-bounds indices are handled by [rememberSelectionLifecycle]
  * independently of this policy.
+ * @suppress
  */
 @InternalChartsApi
 sealed interface SelectionLifetime {

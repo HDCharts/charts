@@ -43,8 +43,7 @@ data class AxisXLayoutTick(
 )
 
 /** X-axis ticks for [labelIndices]. Item `index` sits at `firstTickPx + index * unitWidthPx`, minus the scroll. */
-@InternalChartsApi
-fun buildXAxisLayoutTicks(
+internal fun buildXAxisLayoutTicks(
     labels: List<String>,
     labelIndices: List<Int>,
     unitWidthPx: Float,
