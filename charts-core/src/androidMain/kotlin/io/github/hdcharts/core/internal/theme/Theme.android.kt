@@ -8,7 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
 @Composable
-actual fun ChartsDefaultTheme(
+internal actual fun ChartsDefaultTheme(
     darkTheme: Boolean,
     dynamicColor: Boolean,
     content: @Composable () -> Unit,

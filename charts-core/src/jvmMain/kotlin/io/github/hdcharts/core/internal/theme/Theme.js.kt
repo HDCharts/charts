@@ -4,7 +4,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 
 @Composable
-actual fun ChartsDefaultTheme(
+internal actual fun ChartsDefaultTheme(
     darkTheme: Boolean,
     dynamicColor: Boolean,
     content: @Composable () -> Unit,

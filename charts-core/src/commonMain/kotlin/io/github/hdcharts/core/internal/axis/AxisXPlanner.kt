@@ -53,8 +53,7 @@ data class AxisXPlanResult(
  * The search checks the divisors of the last index, so it takes about the square root of the item
  * count in steps.
  */
-@InternalChartsApi
-fun planAxisXLabelStride(request: AxisXPlanRequest): Int {
+internal fun planAxisXLabelStride(request: AxisXPlanRequest): Int {
     val dataSize = request.dataSize
     if (dataSize <= 0 || request.viewportWidthPx <= 0f || request.unitWidthPx <= 0f) return 1
 

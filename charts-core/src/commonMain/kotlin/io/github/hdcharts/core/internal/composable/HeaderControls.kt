@@ -13,11 +13,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import io.github.hdcharts.core.internal.InternalChartsApi
 
 @Composable
-@InternalChartsApi
-fun DenseToggleControl(
+internal fun DenseToggleControl(
     expanded: Boolean,
     onToggle: () -> Unit,
     expandTag: String,
@@ -38,8 +36,7 @@ fun DenseToggleControl(
 }
 
 @Composable
-@InternalChartsApi
-fun ZoomControls(
+internal fun ZoomControls(
     zoomScale: Float,
     minZoom: Float,
     maxZoom: Float,

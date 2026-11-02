@@ -54,7 +54,7 @@ fun Legend(
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun LegendItems(
+private fun LegendItems(
     items: ImmutableList<String>,
     colors: ImmutableList<Color>?,
     fallbackColor: Color,

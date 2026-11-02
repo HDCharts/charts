@@ -32,8 +32,7 @@ private val xAxisLabelTiltSin = sin(X_AXIS_LABEL_TILT_DEGREES * PI.toFloat() / 1
 private val xAxisLabelTiltCos = cos(X_AXIS_LABEL_TILT_DEGREES * PI.toFloat() / 180f)
 
 /** Label for item [index]: its text in [labels], or the 1-based item number when it is missing or blank. */
-@InternalChartsApi
-fun resolveAxisLabel(
+internal fun resolveAxisLabel(
     labels: List<String>,
     index: Int,
 ): String = labels.getOrNull(index).orEmpty().ifBlank { (index + 1).toString() }
@@ -102,16 +101,14 @@ private fun digitCount(value: Int): Int {
  * Smallest distance between two X-axis label ticks that keeps their labels apart. Tilted labels
  * are parallel, so only their line height can make them touch, never their length.
  */
-@InternalChartsApi
-fun xAxisLabelMinSpacingPx(fontSizePx: Float): Float =
+internal fun xAxisLabelMinSpacingPx(fontSizePx: Float): Float =
     fontSizePx.coerceAtLeast(0f) * AXIS_LABEL_LINE_HEIGHT_FACTOR * (1f + AXIS_LABEL_GAP_FACTOR) / xAxisLabelTiltSin
 
 /**
  * Smallest distance between two Y-axis label ticks that keeps their labels apart: one line of text
  * plus the same gap as between X-axis labels.
  */
-@InternalChartsApi
-fun yAxisLabelMinSpacingPx(fontSizePx: Float): Float =
+internal fun yAxisLabelMinSpacingPx(fontSizePx: Float): Float =
     fontSizePx.coerceAtLeast(0f) * AXIS_LABEL_LINE_HEIGHT_FACTOR * (1f + AXIS_LABEL_GAP_FACTOR)
 
 /**
@@ -120,8 +117,7 @@ fun yAxisLabelMinSpacingPx(fontSizePx: Float): Float =
  * ticks keep labels of any length apart. A label is drawn whenever its tick is inside the row, and
  * edge labels may extend into the chart padding. Returns null when the tick is outside the row.
  */
-@InternalChartsApi
-fun placeXAxisLabel(
+internal fun placeXAxisLabel(
     tickX: Float,
     labelWidthPx: Int,
     labelHeightPx: Int,
@@ -141,8 +137,7 @@ fun placeXAxisLabel(
  * its column and vertically centered on [tickY], but kept inside the column. Returns null when the
  * tick is outside the column height, with 1 px of slack for rounding.
  */
-@InternalChartsApi
-fun placeYAxisLabel(
+internal fun placeYAxisLabel(
     tickY: Float,
     labelWidthPx: Int,
     labelHeightPx: Int,
@@ -163,8 +158,7 @@ fun placeYAxisLabel(
  * Width the Y-axis labels need, estimated from the longest label at [fontSizePx]. Returns 0 when
  * there are no labels or the font size is not positive.
  */
-@InternalChartsApi
-fun estimateYAxisLabelWidthPx(
+internal fun estimateYAxisLabelWidthPx(
     labels: List<String>,
     fontSizePx: Float,
 ): Float {

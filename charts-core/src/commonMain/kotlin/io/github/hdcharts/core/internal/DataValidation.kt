@@ -14,14 +14,14 @@ object ValidationErrors {
     /** Fewest values a ring gauge needs: one ring is a valid gauge. */
     const val MIN_RING_GAUGE_VALUES: Int = 1
 
-    fun noSeries(): String = "At least one series is required."
+    internal fun noSeries(): String = "At least one series is required."
 
     fun exactlyOneSeries(count: Int): String = "Exactly one series is required; got $count."
 
     fun tooFewValues(min: Int): String =
         if (min == 1) "At least one value is required." else "At least $min values are required."
 
-    fun categoryCountMismatch(
+    internal fun categoryCountMismatch(
         categories: Int,
         values: Int,
     ): String = "Category count ($categories) must match value count ($values)."
@@ -33,17 +33,17 @@ object ValidationErrors {
         target: String,
     ): String = "Color count ($colors) must match $target count ($expected)."
 
-    fun seriesNotAligned(series: Int): String = "Series $series is not aligned with the first series."
+    internal fun seriesNotAligned(series: Int): String = "Series $series is not aligned with the first series."
 
-    fun nonFiniteSeriesValue(series: Int): String = "Series $series contains a non-finite value."
+    internal fun nonFiniteSeriesValue(series: Int): String = "Series $series contains a non-finite value."
 
-    fun negativeSeriesValue(series: Int): String = "Series $series contains a negative value."
+    internal fun negativeSeriesValue(series: Int): String = "Series $series contains a negative value."
 
     fun nonFiniteValue(index: Int): String = "Value at index $index is not finite."
 
     fun negativeValue(index: Int): String = "Value at index $index is negative."
 
-    fun nonFiniteStackedTotal(index: Int): String = "Stacked total at index $index is not finite."
+    internal fun nonFiniteStackedTotal(index: Int): String = "Stacked total at index $index is not finite."
 
     fun nonFiniteRange(): String = "Range bounds must be finite."
 }
@@ -57,8 +57,7 @@ object ValidationErrors {
  * [expectedColors] is null when the chart's policy skips the color check, which is how a chart whose
  * color count depends on the data says so.
  */
-@InternalChartsApi
-fun validateSeries(
+internal fun validateSeries(
     data: ChartData,
     minValues: Int,
     allowNegative: Boolean,
@@ -106,8 +105,7 @@ fun validateSeries(
  * values, [colorCount] colors that do not match the value count, a category count that does not
  * match, and each bad value. With [allowNegative] set to `false`, negative values are errors.
  */
-@InternalChartsApi
-fun validateSingleSeries(
+internal fun validateSingleSeries(
     data: ChartData,
     minValues: Int,
     allowNegative: Boolean,
@@ -127,8 +125,7 @@ fun validateSingleSeries(
 }
 
 /** Returns an error for each value that is not finite or, with [allowNegative] set to `false`, negative. */
-@InternalChartsApi
-fun validateValues(
+internal fun validateValues(
     values: List<Double>,
     allowNegative: Boolean,
 ): List<String> =
@@ -145,8 +142,7 @@ fun validateValues(
  * color. A null [expected] is a chart that skips the check, and [colors] of zero is a style that sets
  * none.
  */
-@InternalChartsApi
-fun validateColorCount(
+internal fun validateColorCount(
     colors: Int,
     expected: Int?,
     target: String,
