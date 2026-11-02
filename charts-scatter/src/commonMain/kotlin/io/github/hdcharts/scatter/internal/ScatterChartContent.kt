@@ -1,5 +1,6 @@
 package io.github.hdcharts.scatter.internal
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -9,14 +10,20 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
+import io.github.hdcharts.core.internal.AnimationSpec
 import io.github.hdcharts.core.internal.NO_SELECTION
 import io.github.hdcharts.core.internal.axis.AxisXItems
 import io.github.hdcharts.core.internal.axis.AxisXLabelsLayout
@@ -29,6 +36,7 @@ import io.github.hdcharts.core.internal.axis.xAxisLabelRowHeightPx
 import io.github.hdcharts.core.internal.composable.ChartHeading
 import io.github.hdcharts.core.internal.composable.ChartPlotLayout
 import io.github.hdcharts.core.internal.composable.Legend
+import io.github.hdcharts.core.internal.composable.rememberShowState
 import io.github.hdcharts.core.internal.layout.modifierTopTitle
 import io.github.hdcharts.core.model.ChartSelection
 import io.github.hdcharts.core.model.ChartValueFormatter
@@ -45,13 +53,25 @@ internal fun ScatterChartContent(
     title: String?,
     selection: ChartSelection,
     interactionEnabled: Boolean,
+    animateOnStart: Boolean,
     xValueFormatter: ChartValueFormatter,
     yValueFormatter: ChartValueFormatter,
     sizeValueFormatter: ChartValueFormatter,
 ) {
+    val isPreview = LocalInspectionMode.current
+    var show by rememberShowState(isPreviewMode = isPreview || !animateOnStart)
+    val pointAnimation by animateFloatAsState(
+        targetValue = if (show) 1f else 0f,
+        animationSpec = AnimationSpec.barChartSmooth(),
+        label = "scatterPointReveal",
+    )
     val points = remember(data) { data.series.flatMap { it.points } }
     val selectedIndex = selection.selectedIndex?.takeIf { it in points.indices } ?: NO_SELECTION
     val selected = points.getOrNull(selectedIndex)
+    val selectedSeriesIndex =
+        remember(data, selectedIndex) {
+            scatterSeriesIndexForPointIndex(data.series.map { it.points.size }, selectedIndex)
+        }
     val chartTitle =
         buildString {
             if (!title.isNullOrBlank()) append(title)
@@ -63,7 +83,7 @@ internal fun ScatterChartContent(
         }
     val colors = remember(style.points, data.series.size) { style.points.resolveColors(data.series.size) }
     val domain = remember(points, style.range) { scatterDomain(points, style.range) }
-    val positions = remember(points, domain) { normalizedScatterPositions(points, domain) }
+    val positions = remember(points, domain, style.range) { normalizedScatterPositions(points, domain, style.range) }
     val density = LocalDensity.current
     val radii =
         remember(points, style.points, density) {
@@ -96,8 +116,8 @@ internal fun ScatterChartContent(
                 colors = colors,
                 labels =
                     data.series
-                        .map { series ->
-                            val selectedSize = selected?.takeIf { it in series.points }?.size
+                        .mapIndexed { seriesIndex, series ->
+                            val selectedSize = selected?.takeIf { selectedSeriesIndex == seriesIndex }?.size
                             selectedSize?.let(sizeValueFormatter::format).orEmpty()
                         }.toImmutableList(),
             )
@@ -166,19 +186,28 @@ internal fun ScatterChartContent(
                         items = AxisXItems.Points,
                         scrollOffsetPx = 0f,
                     )
+                val touchRadius = with(density) { StyleDefaults.scatterSelectionTouchRadius.toPx() }
                 Canvas(
-                    Modifier.fillMaxSize().testTag("ScatterChart").then(
+                    Modifier.fillMaxSize().onGloballyPositioned { show = true }.testTag("ScatterChart").then(
                         if (interactionEnabled) {
                             Modifier
-                                .pointerInput(positions, layout, selection) {
+                                .pointerInput(positions, radii, layout, touchRadius, selection) {
                                     detectTapGestures { position ->
-                                        val index = nearestScatterPointIndex(position, positions, layout)
-                                        if (index != NO_SELECTION) selection.select(index)
+                                        val index =
+                                            nearestScatterPointIndex(position, positions, radii, layout, touchRadius)
+                                        if (index == NO_SELECTION) selection.clear() else selection.select(index)
                                     }
-                                }.pointerInput(positions, layout, selection) {
+                                }.pointerInput(positions, radii, layout, touchRadius, selection) {
                                     detectDragGestures { change, _ ->
-                                        val index = nearestScatterPointIndex(change.position, positions, layout)
-                                        if (index != NO_SELECTION) selection.select(index)
+                                        val index =
+                                            nearestScatterPointIndex(
+                                                change.position,
+                                                positions,
+                                                radii,
+                                                layout,
+                                                touchRadius,
+                                            )
+                                        if (index == NO_SELECTION) selection.clear() else selection.select(index)
                                     }
                                 }
                         } else {
@@ -211,22 +240,24 @@ internal fun ScatterChartContent(
                         drawLine(color, Offset(layout.left, layout.top), Offset(layout.left, bottom))
                         drawLine(color, Offset(layout.left, bottom), Offset(right, bottom))
                     }
-                    var pointIndex = 0
-                    data.series.forEachIndexed { seriesIndex, series ->
-                        series.points.forEach { _ ->
-                            val radius = radii[pointIndex]
-                            val center = layout.position(positions[pointIndex])
-                            drawCircle(colors[seriesIndex].copy(alpha = style.points.alpha), radius, center)
-                            if (pointIndex == selectedIndex) {
-                                drawCircle(
-                                    style.axes.lines.color,
-                                    radius + StyleDefaults.scatterSelectionPadding.toPx(),
-                                    center,
-                                    style.points.alpha,
-                                    style = Stroke(StyleDefaults.scatterSelectionWidth.toPx()),
-                                )
+                    clipRect(layout.left, layout.top, right, bottom) {
+                        var pointIndex = 0
+                        data.series.forEachIndexed { seriesIndex, series ->
+                            series.points.forEach { _ ->
+                                val radius = radii[pointIndex] * pointAnimation
+                                val center = layout.position(positions[pointIndex])
+                                drawCircle(colors[seriesIndex].copy(alpha = style.points.alpha), radius, center)
+                                if (pointIndex == selectedIndex && pointAnimation > 0f) {
+                                    drawCircle(
+                                        style.axes.lines.color,
+                                        radius + StyleDefaults.scatterSelectionPadding.toPx() * pointAnimation,
+                                        center,
+                                        style.points.alpha,
+                                        style = Stroke(StyleDefaults.scatterSelectionWidth.toPx() * pointAnimation),
+                                    )
+                                }
+                                pointIndex++
                             }
-                            pointIndex++
                         }
                     }
                 }

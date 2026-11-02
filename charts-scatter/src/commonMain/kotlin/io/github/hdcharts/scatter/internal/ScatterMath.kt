@@ -3,6 +3,7 @@ package io.github.hdcharts.scatter.internal
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import io.github.hdcharts.core.internal.NO_SELECTION
+import io.github.hdcharts.core.internal.model.normalizeValue
 import io.github.hdcharts.core.internal.model.resolveOptionalRange
 import io.github.hdcharts.scatter.ScatterPoint
 import io.github.hdcharts.scatter.ScatterRangeStyle
@@ -15,10 +16,7 @@ internal data class ScatterDomain(
     val maxX: Double,
     val minY: Double,
     val maxY: Double,
-) {
-    val xRange: Double = (maxX - minX).takeIf { it.isFinite() && it > 0.0 } ?: 1.0
-    val yRange: Double = (maxY - minY).takeIf { it.isFinite() && it > 0.0 } ?: 1.0
-}
+)
 
 /** Resolves automatic bounds from validated, non-empty points. */
 internal fun scatterDomain(
@@ -30,16 +28,27 @@ internal fun scatterDomain(
     return ScatterDomain(minX = xRange.first, maxX = xRange.second, minY = yRange.first, maxY = yRange.second)
 }
 
-/** Normalizes points in source order, with Y increasing toward the top of the plot. */
+/** Normalizes points in source order, clamping out-of-range values to the plot edges. */
 internal fun normalizedScatterPositions(
     points: List<ScatterPoint>,
     domain: ScatterDomain,
+    range: ScatterRangeStyle,
 ): List<Offset> =
     points.map { point ->
         Offset(
-            x = ((point.x - domain.minX) / domain.xRange).toFloat(),
-            y = (1.0 - (point.y - domain.minY) / domain.yRange).toFloat(),
+            x = normalizeValue(point.x, domain.minX, domain.maxX, rangeZeroPosition(range.xMin, range.xMax)),
+            y = 1f - normalizeValue(point.y, domain.minY, domain.maxY, rangeZeroPosition(range.yMin, range.yMax)),
         )
+    }
+
+private fun rangeZeroPosition(
+    minValue: Double?,
+    maxValue: Double?,
+): Float =
+    when {
+        minValue != null && maxValue == null -> 0f
+        minValue == null && maxValue != null -> 1f
+        else -> 0f
     }
 
 /** Interpolates bubble area between the radius limits; unsized points use [pointRadius]. */
@@ -110,13 +119,33 @@ internal fun scatterXAxisValues(
     }
 }
 
-/** Returns the nearest point in pixel space, or [NO_SELECTION] when no points are present. */
+/** Returns the nearest touchable point in pixel space, or [NO_SELECTION] when none is close enough. */
 internal fun nearestScatterPointIndex(
     point: Offset,
     positions: List<Offset>,
+    radii: List<Float>,
     layout: ScatterPlotLayout,
+    touchRadius: Float,
 ): Int =
-    positions.indices.minByOrNull { index ->
-        val target = layout.position(positions[index])
-        hypot(target.x - point.x, target.y - point.y)
-    } ?: NO_SELECTION
+    positions.indices
+        .map { index ->
+            val target = layout.position(positions[index])
+            val distance = hypot(target.x - point.x, target.y - point.y)
+            index to distance
+        }.filter { (index, distance) -> distance <= maxOf(touchRadius, radii.getOrElse(index) { 0f }) }
+        .minByOrNull { (_, distance) -> distance }
+        ?.first ?: NO_SELECTION
+
+/** Resolves a flattened source point index to its owning series. */
+internal fun scatterSeriesIndexForPointIndex(
+    pointCounts: List<Int>,
+    pointIndex: Int,
+): Int {
+    if (pointIndex < 0) return NO_SELECTION
+    var startIndex = 0
+    pointCounts.forEachIndexed { seriesIndex, count ->
+        if (pointIndex < startIndex + count) return seriesIndex
+        startIndex += count
+    }
+    return NO_SELECTION
+}

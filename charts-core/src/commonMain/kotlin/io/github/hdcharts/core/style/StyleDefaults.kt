@@ -148,6 +148,7 @@ object StyleDefaults {
 
     val scatterPlotAspectRatio: Float = 1.25f
     val scatterPlotPadding: Dp = 28.dp
+    val scatterSelectionTouchRadius: Dp = 24.dp
     val scatterSelectionPadding: Dp = 3.dp
     val scatterSelectionWidth: Dp = 2.dp
 

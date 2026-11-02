@@ -49,7 +49,10 @@ data class ScatterPointStyle(
         )
 }
 
-/** Optional fixed bounds for numeric axes. Null bounds are derived from data. */
+/**
+ * Optional fixed bounds for numeric axes. Null bounds are derived from data. Out-of-range points
+ * draw at the nearest plot edge; their bubbles are clipped to the plot rectangle.
+ */
 @Immutable
 data class ScatterRangeStyle(
     val xMin: Double? = null,

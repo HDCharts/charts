@@ -8,6 +8,12 @@ title: "Scatter and Bubble Chart"
 
 Scatter charts place each point at its numeric X and Y coordinates to show how two measures relate. Add a size to each point to encode a third measure as a bubble whose area scales with that value. Each series uses a palette color; overlapping bubbles use transparency.
 
+Add the scatter chart module to your dependencies:
+
+```kotlin
+implementation("io.github.hdcharts:scatter:{{artifactVersion}}")
+```
+
 ## Basic Usage
 
 ![Scatter and bubble chart showing two regional series](/content/{{version}}/wiki/assets/wiki-scatter-basic.png)

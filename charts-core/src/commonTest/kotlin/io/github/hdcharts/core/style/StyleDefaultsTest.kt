@@ -91,6 +91,7 @@ class StyleDefaultsTest {
                 assertEquals(expected = 10.dp, actual = StyleDefaults.scatterMaxBubbleSize)
                 assertEquals(expected = 1.25f, actual = StyleDefaults.scatterPlotAspectRatio)
                 assertEquals(expected = 28.dp, actual = StyleDefaults.scatterPlotPadding)
+                assertEquals(expected = 24.dp, actual = StyleDefaults.scatterSelectionTouchRadius)
                 assertEquals(expected = 3.dp, actual = StyleDefaults.scatterSelectionPadding)
                 assertEquals(expected = 2.dp, actual = StyleDefaults.scatterSelectionWidth)
                 assertEquals(expected = 0f, actual = StyleDefaults.pieDonutHole)
