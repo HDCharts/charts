@@ -21,6 +21,9 @@ import io.github.hdcharts.core.model.ChartSelection
 import io.github.hdcharts.core.style.AxesDefaults
 import io.github.hdcharts.core.style.AxisLabelDefaults
 import io.github.hdcharts.core.style.GridDefaults
+import io.github.hdcharts.scatter.internal.SCATTER_CHART_TAG
+import io.github.hdcharts.scatter.internal.SCATTER_CHART_X_AXIS_LABELS_TAG
+import io.github.hdcharts.scatter.internal.SCATTER_CHART_Y_AXIS_LABELS_TAG
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -31,7 +34,7 @@ class ScatterChartTest {
     fun scatterChart_displaysNumericPointsAndTitle() =
         runComposeUiTest {
             setContent { ScatterChart(data = sample, title = "Study") }
-            onNodeWithTag("ScatterChart").assertIsDisplayed()
+            onNodeWithTag(SCATTER_CHART_TAG).assertIsDisplayed()
             onNodeWithText("Study").assertIsDisplayed()
         }
 
@@ -53,7 +56,7 @@ class ScatterChartTest {
                 )
             }
 
-            onNodeWithTag("ScatterChart").performTouchInput {
+            onNodeWithTag(SCATTER_CHART_TAG).performTouchInput {
                 click(Offset(x = width * 0.9f, y = height * 0.1f))
             }
             runOnIdle { assertEquals(expected = null, actual = selection.selectedIndex) }
@@ -71,7 +74,7 @@ class ScatterChartTest {
             onNodeWithText(
                 "Point coordinates must be finite and sizes must be finite and non-negative.\n",
             ).assertIsDisplayed()
-            onNodeWithTag("ScatterChart").assertDoesNotExist()
+            onNodeWithTag(SCATTER_CHART_TAG).assertDoesNotExist()
         }
 
     @OptIn(ExperimentalTestApi::class)
@@ -89,7 +92,7 @@ class ScatterChartTest {
                         ),
                 )
             }
-            onNodeWithTag("ScatterChart").assertIsDisplayed()
+            onNodeWithTag(SCATTER_CHART_TAG).assertIsDisplayed()
         }
 
     @OptIn(ExperimentalTestApi::class)
@@ -104,7 +107,7 @@ class ScatterChartTest {
             }
             onNodeWithText("At least one series is required.", substring = true).assertIsDisplayed()
             onNodeWithTag("ScatterContainer").assertIsDisplayed()
-            onNodeWithTag("ScatterChart").assertDoesNotExist()
+            onNodeWithTag(SCATTER_CHART_TAG).assertDoesNotExist()
         }
 
     @OptIn(ExperimentalTestApi::class)
@@ -130,7 +133,7 @@ class ScatterChartTest {
             onNodeWithText("X-axis label size must resolve to at most 16384 pixels.", substring = true)
                 .assertIsDisplayed()
             onNodeWithText("Y-axis label max count must be in 2..1000.", substring = true).assertIsDisplayed()
-            onNodeWithTag("ScatterChart").assertDoesNotExist()
+            onNodeWithTag(SCATTER_CHART_TAG).assertDoesNotExist()
         }
 
     @OptIn(ExperimentalTestApi::class)
@@ -153,19 +156,19 @@ class ScatterChartTest {
                     )
                 }
             }
-            onNodeWithTag("ScatterChart").assertIsDisplayed()
+            onNodeWithTag(SCATTER_CHART_TAG).assertIsDisplayed()
 
             runOnIdle { labelSize.value = 20_000.sp }
             waitForIdle()
 
             onNodeWithText("X-axis label size must resolve to at most 16384 pixels.", substring = true)
                 .assertIsDisplayed()
-            onNodeWithTag("ScatterChart").assertDoesNotExist()
+            onNodeWithTag(SCATTER_CHART_TAG).assertDoesNotExist()
 
             runOnIdle { labelSize.value = 12.sp }
             waitForIdle()
 
-            onNodeWithTag("ScatterChart").assertIsDisplayed()
+            onNodeWithTag(SCATTER_CHART_TAG).assertIsDisplayed()
         }
 
     @OptIn(ExperimentalTestApi::class)
@@ -188,14 +191,14 @@ class ScatterChartTest {
                     )
                 }
             }
-            onNodeWithTag("ScatterChart").assertIsDisplayed()
+            onNodeWithTag(SCATTER_CHART_TAG).assertIsDisplayed()
 
             runOnIdle { density.value = Density(2f) }
             waitForIdle()
 
             onNodeWithText("X-axis label size must resolve to at most 16384 pixels.", substring = true)
                 .assertIsDisplayed()
-            onNodeWithTag("ScatterChart").assertDoesNotExist()
+            onNodeWithTag(SCATTER_CHART_TAG).assertDoesNotExist()
         }
 
     @OptIn(ExperimentalTestApi::class)
@@ -212,7 +215,7 @@ class ScatterChartTest {
             }
 
             val firstYLabel = onNodeWithText("1.8").assertIsDisplayed().fetchSemanticsNode().boundsInRoot
-            val xLabels = onNodeWithTag("ScatterChartXAxisLabels").fetchSemanticsNode().boundsInRoot
+            val xLabels = onNodeWithTag(SCATTER_CHART_X_AXIS_LABELS_TAG).fetchSemanticsNode().boundsInRoot
             assertTrue(firstYLabel.bottom <= xLabels.top)
             onNodeWithText("1.7999999999999998").assertDoesNotExist()
         }
@@ -239,8 +242,8 @@ class ScatterChartTest {
                 )
             }
 
-            onNodeWithTag("ScatterChartXAxisLabels").assertIsDisplayed()
-            onNodeWithTag("ScatterChartYAxisLabels").assertIsDisplayed()
+            onNodeWithTag(SCATTER_CHART_X_AXIS_LABELS_TAG).assertIsDisplayed()
+            onNodeWithTag(SCATTER_CHART_Y_AXIS_LABELS_TAG).assertIsDisplayed()
             onNodeWithText("distance: 1.0").assertIsDisplayed()
             onNodeWithText("cost: 2.0").assertIsDisplayed()
         }

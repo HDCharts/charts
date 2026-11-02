@@ -45,6 +45,10 @@ import io.github.hdcharts.scatter.ScatterChartStyle
 import io.github.hdcharts.scatter.ScatterData
 import kotlinx.collections.immutable.toImmutableList
 
+internal const val SCATTER_CHART_TAG = "ScatterChart"
+internal const val SCATTER_CHART_X_AXIS_LABELS_TAG = "ScatterChartXAxisLabels"
+internal const val SCATTER_CHART_Y_AXIS_LABELS_TAG = "ScatterChartYAxisLabels"
+
 @Composable
 internal fun ScatterChartContent(
     data: ScatterData,
@@ -188,7 +192,7 @@ internal fun ScatterChartContent(
                     )
                 val touchRadius = with(density) { StyleDefaults.scatterSelectionTouchRadius.toPx() }
                 Canvas(
-                    Modifier.fillMaxSize().onGloballyPositioned { show = true }.testTag("ScatterChart").then(
+                    Modifier.fillMaxSize().onGloballyPositioned { show = true }.testTag(SCATTER_CHART_TAG).then(
                         if (interactionEnabled) {
                             Modifier
                                 .pointerInput(positions, radii, layout, touchRadius, selection) {
@@ -271,7 +275,7 @@ internal fun ScatterChartContent(
                                 .offset(y = with(density) { layout.top.toDp() })
                                 .width(with(density) { yAxisLayout.widthPx.toDp() })
                                 .height(with(density) { layout.height.toDp() })
-                                .testTag("ScatterChartYAxisLabels"),
+                                .testTag(SCATTER_CHART_Y_AXIS_LABELS_TAG),
                     )
                 }
                 if (showXLabels) {
@@ -286,7 +290,7 @@ internal fun ScatterChartContent(
                                     y = with(density) { (layout.top + layout.height).toDp() },
                                 ).width(with(density) { layout.width.toDp() })
                                 .height(with(density) { xAxisHeight.toDp() })
-                                .testTag("ScatterChartXAxisLabels"),
+                                .testTag(SCATTER_CHART_X_AXIS_LABELS_TAG),
                     )
                 }
             }
