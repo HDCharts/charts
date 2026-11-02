@@ -5,6 +5,7 @@ import androidx.compose.ui.unit.IntSize
 import io.github.hdcharts.core.internal.NO_SELECTION
 import io.github.hdcharts.core.internal.model.ChartRenderData
 import io.github.hdcharts.core.internal.model.minMax
+import io.github.hdcharts.core.internal.model.normalizeByMinMax
 import io.github.hdcharts.core.internal.model.resolveOptionalRange
 import io.github.hdcharts.radar.RadarRangeStyle
 import kotlin.math.PI
@@ -25,6 +26,16 @@ internal fun ChartRenderData.resolveRadarRange(range: RadarRangeStyle): Pair<Dou
         maxValue = range.max,
     )
 }
+
+/** Normalizes Radar values, using the center only for a collapsed explicit minimum-only range. */
+internal fun ChartRenderData.normalizeRadarValues(
+    resolvedRange: Pair<Double, Double>,
+    range: RadarRangeStyle,
+): List<List<Float>> =
+    normalizeByMinMax(
+        minMax = resolvedRange,
+        zeroRangeValue = if (range.min != null && range.max == null) 0f else 1f,
+    )
 
 /** Below this a label sits straight up or sideways, where its reach is already measured exactly. */
 private const val DIAGONAL_EPSILON = 0.0001f
