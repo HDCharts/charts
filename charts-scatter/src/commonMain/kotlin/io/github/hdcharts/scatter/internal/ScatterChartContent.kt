@@ -17,7 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
@@ -244,24 +243,22 @@ internal fun ScatterChartContent(
                         drawLine(color, Offset(layout.left, layout.top), Offset(layout.left, bottom))
                         drawLine(color, Offset(layout.left, bottom), Offset(right, bottom))
                     }
-                    clipRect(layout.left, layout.top, right, bottom) {
-                        var pointIndex = 0
-                        data.series.forEachIndexed { seriesIndex, series ->
-                            series.points.forEach { _ ->
-                                val radius = radii[pointIndex] * pointAnimation
-                                val center = layout.position(positions[pointIndex])
-                                drawCircle(colors[seriesIndex].copy(alpha = style.points.alpha), radius, center)
-                                if (pointIndex == selectedIndex && pointAnimation > 0f) {
-                                    drawCircle(
-                                        style.axes.lines.color,
-                                        radius + StyleDefaults.scatterSelectionPadding.toPx() * pointAnimation,
-                                        center,
-                                        style.points.alpha,
-                                        style = Stroke(StyleDefaults.scatterSelectionWidth.toPx() * pointAnimation),
-                                    )
-                                }
-                                pointIndex++
+                    var pointIndex = 0
+                    data.series.forEachIndexed { seriesIndex, series ->
+                        series.points.forEach { _ ->
+                            val radius = radii[pointIndex] * pointAnimation
+                            val center = layout.position(positions[pointIndex])
+                            drawCircle(colors[seriesIndex].copy(alpha = style.points.alpha), radius, center)
+                            if (pointIndex == selectedIndex && pointAnimation > 0f) {
+                                drawCircle(
+                                    style.axes.lines.color,
+                                    radius + StyleDefaults.scatterSelectionPadding.toPx() * pointAnimation,
+                                    center,
+                                    style.points.alpha,
+                                    style = Stroke(StyleDefaults.scatterSelectionWidth.toPx() * pointAnimation),
+                                )
                             }
+                            pointIndex++
                         }
                     }
                 }

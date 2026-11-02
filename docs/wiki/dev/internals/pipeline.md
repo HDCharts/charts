@@ -30,7 +30,7 @@ sit either side of that split and are the interesting ones.
 | 10 | Canvas limit guard | `chartCanvasFits` | Content |
 | 11 | Domain | `resolveLineRange`, `resolveBarRange`, `minMax`, `resolveStackedTotalsRange` | Content |
 | 12 | Normalization | `normalizeByMinMax`, `barValueYFraction`, `normalizeStackedValues` | Content |
-| 13 | Animation state | `update()` → `animateTo` | Content |
+| 13 | Animation state | `update()` → `animateTo` for data transitions | Content |
 | 14 | Gesture math | `selectedIndexForTouchX`, `nearestPointIndexForContentX` | Content |
 | 15 | Draw | `drawLineChartSeries` → `drawChartPath` | Content |
 
@@ -87,7 +87,7 @@ again.
 | 10 Canvas guard | yes | yes | shared | yes | yes | — | — | — | — |
 | 11 Domain | `resolveLineRange` | `resolveBarRange` | shared | totals | totals | `minMax` | share-based | `style.range` | `scatterDomain` |
 | 12 Normalization | list | scalar per bar | shared | list | list | list | share-based | `gaugeFraction` per ring | X/Y positions and bubble radii |
-| 13 Animation | yes | yes | shared | yes | yes | yes | yes | yes | — |
+| 13 Animation | yes | yes | shared | yes | yes | yes | yes | yes | initial reveal |
 | 14 Gesture | yes | yes | shared | yes | yes | yes | yes | yes | `nearestScatterPointIndex` |
 | 15 Draw | yes | yes | shared | yes | yes | yes | yes | yes | `ScatterChartContent` |
 
@@ -108,7 +108,9 @@ indexed chart, through `PieChartEntry`.
 
 Scatter owns its input stages in `ScatterChartEntry`. It shares error UI, palette resolution and
 Cartesian axis layouts, and skips conversion, density selection, aggregation, the canvas guard and
-animation. `ScatterMath.kt` owns its domain, positions, bubble radii and nearest-point lookup.
+data-transition animation. `ScatterChartContent` still reveals its points on initial display using
+`animateFloatAsState`, controlled by `animateOnStart`. `ScatterMath.kt` owns its domain, positions,
+bubble radii and nearest-point lookup.
 
 **Domains.** Bar and both stacked charts fold zero into
 the domain, so an all-positive series starts at the axis. Line and radar take the data's own range.

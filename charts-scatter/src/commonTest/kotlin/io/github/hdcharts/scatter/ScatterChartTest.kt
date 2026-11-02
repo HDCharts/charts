@@ -5,6 +5,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.ExperimentalTestApi
@@ -15,6 +16,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.hdcharts.core.model.ChartSelection
@@ -29,6 +31,21 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class ScatterChartTest {
+    @Test
+    fun scatterPointStyle_clampsUnspecifiedMaximumAfterClampingMinimum() {
+        val style =
+            ScatterPointStyle(
+                color = Color.Blue,
+                colors = emptyList(),
+                alpha = 1f,
+                size = 4.dp,
+                minSize = 20.dp,
+                maxSize = Dp.Unspecified,
+            ).clamp(Density(1f))
+
+        assertEquals(expected = 20.dp, actual = style.maxSize)
+    }
+
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun scatterChart_displaysNumericPointsAndTitle() =

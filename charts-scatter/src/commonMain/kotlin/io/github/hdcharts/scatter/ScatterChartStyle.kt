@@ -40,18 +40,24 @@ data class ScatterPointStyle(
 
     internal fun resolveColors(count: Int) = resolvePaletteColors(color, colors, count, singleItemUsesBase = true)
 
-    internal fun clamp(density: Density) =
-        copy(
+    internal fun clamp(density: Density): ScatterPointStyle {
+        val clampedMinSize = minSize.clampSize(StyleDefaults.pointSize, density)
+        val clampedMaxSize =
+            maxSize
+                .clampSize(fallback = StyleDefaults.scatterMaxBubbleSize, density = density)
+                .coerceAtLeast(clampedMinSize)
+        return copy(
             alpha = alpha.clampAlpha(),
             size = size.clampSize(StyleDefaults.pointSize, density),
-            minSize = minSize.clampSize(StyleDefaults.pointSize, density),
-            maxSize = maxSize.coerceAtLeast(minSize).clampSize(StyleDefaults.scatterMaxBubbleSize, density),
+            minSize = clampedMinSize,
+            maxSize = clampedMaxSize,
         )
+    }
 }
 
 /**
  * Optional fixed bounds for numeric axes. Null bounds are derived from data. Out-of-range points
- * draw at the nearest plot edge; their bubbles are clipped to the plot rectangle.
+ * draw at the nearest plot edge.
  */
 @Immutable
 data class ScatterRangeStyle(

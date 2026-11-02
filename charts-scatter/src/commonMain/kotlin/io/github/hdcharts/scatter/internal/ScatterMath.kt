@@ -7,7 +7,6 @@ import io.github.hdcharts.core.internal.model.normalizeValue
 import io.github.hdcharts.core.internal.model.resolveOptionalRange
 import io.github.hdcharts.scatter.ScatterPoint
 import io.github.hdcharts.scatter.ScatterRangeStyle
-import kotlin.math.hypot
 import kotlin.math.sqrt
 
 /** Numeric bounds used to position points and label both axes. */
@@ -126,15 +125,22 @@ internal fun nearestScatterPointIndex(
     radii: List<Float>,
     layout: ScatterPlotLayout,
     touchRadius: Float,
-): Int =
-    positions.indices
-        .map { index ->
-            val target = layout.position(positions[index])
-            val distance = hypot(target.x - point.x, target.y - point.y)
-            index to distance
-        }.filter { (index, distance) -> distance <= maxOf(touchRadius, radii.getOrElse(index) { 0f }) }
-        .minByOrNull { (_, distance) -> distance }
-        ?.first ?: NO_SELECTION
+): Int {
+    var nearestIndex = NO_SELECTION
+    var nearestDistanceSquared = Float.POSITIVE_INFINITY
+    for (index in positions.indices) {
+        val target = layout.position(positions[index])
+        val dx = target.x - point.x
+        val dy = target.y - point.y
+        val distanceSquared = dx * dx + dy * dy
+        val hitRadius = maxOf(touchRadius, radii.getOrElse(index) { 0f })
+        if (distanceSquared <= hitRadius * hitRadius && distanceSquared < nearestDistanceSquared) {
+            nearestIndex = index
+            nearestDistanceSquared = distanceSquared
+        }
+    }
+    return nearestIndex
+}
 
 /** Resolves a flattened source point index to its owning series. */
 internal fun scatterSeriesIndexForPointIndex(
