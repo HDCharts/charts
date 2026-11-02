@@ -137,6 +137,21 @@ object StyleDefaults {
     val lineSelectionMarkerSize: Dp = 3.dp
 
     // ===========================================================================
+    // Scatter
+    // ===========================================================================
+
+    /** Translucent points keep overlapping observations visible. */
+    val scatterPointAlpha: Float = 0.65f
+
+    /** Largest bubble radius when point sizes are mapped to area. */
+    val scatterMaxBubbleSize: Dp = 10.dp
+
+    val scatterPlotAspectRatio: Float = 1.25f
+    val scatterPlotPadding: Dp = 28.dp
+    val scatterSelectionPadding: Dp = 3.dp
+    val scatterSelectionWidth: Dp = 2.dp
+
+    // ===========================================================================
     // Pie
     // ===========================================================================
 

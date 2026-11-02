@@ -37,6 +37,11 @@ import io.github.hdcharts.radar.RadarChart
 import io.github.hdcharts.radar.RadarChartDefaults
 import io.github.hdcharts.sampleshared.data.ChartGalleryPreview
 import io.github.hdcharts.sampleshared.theme.Dimens
+import io.github.hdcharts.scatter.ScatterChart
+import io.github.hdcharts.scatter.ScatterChartDefaults
+import io.github.hdcharts.scatter.ScatterData
+import io.github.hdcharts.scatter.ScatterPoint
+import io.github.hdcharts.scatter.ScatterSeries
 import io.github.hdcharts.stackedarea.StackedAreaChart
 import io.github.hdcharts.stackedarea.StackedAreaChartDefaults
 import io.github.hdcharts.stackedbar.StackedBarChart
@@ -98,8 +103,25 @@ internal fun ChartPreview(
         ChartDestination.HistogramChartScreen -> HistogramChartPreview(previews.histogramValues)
         ChartDestination.StackedBarChartScreen -> StackedBarChartPreview(previews.stackedSeries)
         ChartDestination.RadarChartScreen -> RadarChartPreview(previews.radarSeries)
+        ChartDestination.ScatterChartScreen -> ScatterChartPreview()
         ChartDestination.GaugeChartsScreen -> RingGaugeChartPreview(previews.ringGaugeValues)
     }
+}
+
+@Composable
+private fun ScatterChartPreview() {
+    ScatterChart(
+        data =
+            ScatterData(
+                listOf(ScatterSeries(points = listOf(ScatterPoint(1.0, 2.0), ScatterPoint(3.0, 4.0, 15.0)))),
+            ),
+        modifier = Modifier.size(PreviewChartSize),
+        style =
+            ScatterChartDefaults.style(
+                chartContainerStyle = previewChartContainerStyle(),
+            ),
+        interactionEnabled = false,
+    )
 }
 
 @Composable

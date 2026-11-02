@@ -60,6 +60,7 @@
     <string name="stacked_area_chart">Stacked Area</string>
     <string name="multi_line_chart">Multi Line</string>
     <string name="radar_chart">Radar</string>
+    <string name="scatter_chart">Scatter and bubble</string>
     <string name="gauge_charts">Gauge Charts</string>
     <string name="ring_gauge_chart">Ring Gauge</string>
     <string name="segmented_ring_gauge_chart">Segmented Ring Gauge</string>

@@ -32,6 +32,7 @@ import hdcharts.app.generated.resources.multi_line_chart
 import hdcharts.app.generated.resources.pie_chart
 import hdcharts.app.generated.resources.radar_chart
 import hdcharts.app.generated.resources.ring_gauge_chart
+import hdcharts.app.generated.resources.scatter_chart
 import hdcharts.app.generated.resources.segmented_ring_gauge_chart
 import hdcharts.app.generated.resources.stacked_area_chart
 import hdcharts.sample_shared.generated.resources.ic_bar_chart
@@ -58,6 +59,7 @@ import io.github.hdcharts.app.demo.multiline.LiveMultiLineChartDemo
 import io.github.hdcharts.app.demo.multiline.MultiLineChartDemo
 import io.github.hdcharts.app.demo.pie.PieChartDemo
 import io.github.hdcharts.app.demo.radar.RadarChartDemo
+import io.github.hdcharts.app.demo.scatter.ScatterChartDemo
 import io.github.hdcharts.app.demo.stackedarea.StackedAreaChartDemo
 import io.github.hdcharts.app.demo.stackedarea.StackedAreaGradientDemo
 import io.github.hdcharts.app.demo.stackedbar.StackedBarChartDemo
@@ -194,6 +196,14 @@ sealed class ChartDestination(
             icon = SharedRes.drawable.ic_radar_chart,
             title = Res.string.radar_chart,
             examples = listOf(defaultsExample { RadarChartDemo() }),
+        )
+
+    data object ScatterChartScreen :
+        ChartDestination(
+            route = "scatterChart",
+            icon = SharedRes.drawable.ic_radar_chart,
+            title = Res.string.scatter_chart,
+            examples = listOf(defaultsExample { ScatterChartDemo() }),
         )
 
     data object GaugeChartsScreen :

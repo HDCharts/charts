@@ -1,0 +1,264 @@
+package io.github.hdcharts.scatter.internal
+
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.width
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
+import io.github.hdcharts.core.internal.NO_SELECTION
+import io.github.hdcharts.core.internal.axis.AxisXItems
+import io.github.hdcharts.core.internal.axis.AxisXLabelsLayout
+import io.github.hdcharts.core.internal.axis.AxisYLabelsLayout
+import io.github.hdcharts.core.internal.axis.estimateXAxisLabelExtent
+import io.github.hdcharts.core.internal.axis.rememberNumericYAxisLayout
+import io.github.hdcharts.core.internal.axis.rememberXAxisLabelPlan
+import io.github.hdcharts.core.internal.axis.xAxisLabelEdgeInsetPx
+import io.github.hdcharts.core.internal.axis.xAxisLabelRowHeightPx
+import io.github.hdcharts.core.internal.composable.ChartHeading
+import io.github.hdcharts.core.internal.composable.ChartPlotLayout
+import io.github.hdcharts.core.internal.composable.Legend
+import io.github.hdcharts.core.internal.layout.modifierTopTitle
+import io.github.hdcharts.core.model.ChartSelection
+import io.github.hdcharts.core.model.ChartValueFormatter
+import io.github.hdcharts.core.style.StyleDefaults
+import io.github.hdcharts.scatter.ScatterChartStyle
+import io.github.hdcharts.scatter.ScatterData
+import kotlinx.collections.immutable.toImmutableList
+
+@Composable
+internal fun ScatterChartContent(
+    data: ScatterData,
+    modifier: Modifier,
+    style: ScatterChartStyle,
+    title: String?,
+    selection: ChartSelection,
+    interactionEnabled: Boolean,
+    xValueFormatter: ChartValueFormatter,
+    yValueFormatter: ChartValueFormatter,
+    sizeValueFormatter: ChartValueFormatter,
+) {
+    val points = remember(data) { data.series.flatMap { it.points } }
+    val selectedIndex = selection.selectedIndex?.takeIf { it in points.indices } ?: NO_SELECTION
+    val selected = points.getOrNull(selectedIndex)
+    val chartTitle =
+        buildString {
+            if (!title.isNullOrBlank()) append(title)
+            if (selected != null) {
+                if (isNotEmpty()) append(" · ")
+                append("X: ${xValueFormatter.format(selected.x)}, Y: ${yValueFormatter.format(selected.y)}")
+                selected.size?.let { append(", Size: ${sizeValueFormatter.format(it)}") }
+            }
+        }
+    val colors = remember(style.points, data.series.size) { style.points.resolveColors(data.series.size) }
+    val domain = remember(points, style.range) { scatterDomain(points, style.range) }
+    val positions = remember(points, domain) { normalizedScatterPositions(points, domain) }
+    val density = LocalDensity.current
+    val radii =
+        remember(points, style.points, density) {
+            with(density) {
+                scatterPointRadii(
+                    points = points,
+                    pointRadius = style.points.size.toPx(),
+                    minBubbleRadius = style.points.minSize.toPx(),
+                    maxBubbleRadius = style.points.maxSize.toPx(),
+                )
+            }
+        }
+    ChartPlotLayout(
+        plotAspectRatio = StyleDefaults.scatterPlotAspectRatio,
+        modifier = modifier,
+        title = {
+            ChartHeading(
+                chartTitle,
+                style.chartContainerStyle.styleTitle,
+                null,
+                style.chartContainerStyle.styleSubtitle,
+                modifier = style.chartContainerStyle.modifierTopTitle,
+            )
+        },
+        legend = {
+            Legend(
+                chartContainerStyle = style.chartContainerStyle,
+                style = style.legend,
+                legend = data.series.map { it.name.orEmpty() }.toImmutableList(),
+                colors = colors,
+                labels =
+                    data.series
+                        .map { series ->
+                            val selectedSize = selected?.takeIf { it in series.points }?.size
+                            selectedSize?.let(sizeValueFormatter::format).orEmpty()
+                        }.toImmutableList(),
+            )
+        },
+        plot = {
+            BoxWithConstraints(Modifier.fillMaxSize()) {
+                val padding = with(density) { StyleDefaults.scatterPlotPadding.toPx() }
+                val showXLabels = style.axes.visible && style.axes.xLabels.visible
+                val showYLabels = style.axes.visible && style.axes.yLabels.visible
+                val xLabelCount = style.axes.xLabels.maxCount ?: StyleDefaults.yAxisMaxLabelCount
+                val xLabels =
+                    remember(domain, xLabelCount, xValueFormatter) {
+                        scatterXAxisValues(domain, xLabelCount).map(xValueFormatter::format)
+                    }
+                val xLabelExtent =
+                    if (showXLabels) {
+                        estimateXAxisLabelExtent(
+                            labels = xLabels,
+                            dataSize = xLabels.size,
+                            fontSizePx =
+                                with(density) {
+                                    style.axes.xLabels.size
+                                        .toPx()
+                                },
+                        )
+                    } else {
+                        null
+                    }
+                val xAxisHeight = xLabelExtent?.let { with(density) { xAxisLabelRowHeightPx(it) } } ?: 0f
+                val xAxisEdgeSpace =
+                    xLabelExtent?.let {
+                        xAxisLabelEdgeInsetPx(it, edgeSlackPx = 0f, availableWidthPx = constraints.maxWidth)
+                    } ?: 0f
+                val plotHeight = (constraints.maxHeight - padding - maxOf(padding, xAxisHeight)).coerceAtLeast(1f)
+                val yAxisLayout =
+                    rememberNumericYAxisLayout(
+                        labels = style.axes.yLabels.copy(visible = showYLabels),
+                        minValue = domain.minY,
+                        maxValue = domain.maxY,
+                        chartHeightPx = plotHeight,
+                        verticalInsetPx = 0f,
+                        formatter = yValueFormatter,
+                        availableWidthPx = constraints.maxWidth,
+                    )
+                val layout =
+                    scatterPlotLayout(
+                        size = Size(constraints.maxWidth.toFloat(), constraints.maxHeight.toFloat()),
+                        padding = padding,
+                        yAxisSpace = yAxisLayout.widthPx + yAxisLayout.gapPx,
+                        xAxisSpace = xAxisHeight,
+                        xAxisEdgeSpace = xAxisEdgeSpace,
+                    )
+                val xAxisPlan =
+                    rememberXAxisLabelPlan(
+                        labels = xLabels,
+                        dataSize = xLabels.size,
+                        maxLabelCount = style.axes.xLabels.maxCount,
+                        isScrollable = false,
+                        unitWidthPx = layout.width / (xLabels.size - 1),
+                        viewportWidthPx = layout.width,
+                        fontSizePx =
+                            with(density) {
+                                style.axes.xLabels.size
+                                    .toPx()
+                            },
+                        items = AxisXItems.Points,
+                        scrollOffsetPx = 0f,
+                    )
+                Canvas(
+                    Modifier.fillMaxSize().testTag("ScatterChart").then(
+                        if (interactionEnabled) {
+                            Modifier
+                                .pointerInput(positions, layout, selection) {
+                                    detectTapGestures { position ->
+                                        val index = nearestScatterPointIndex(position, positions, layout)
+                                        if (index != NO_SELECTION) selection.select(index)
+                                    }
+                                }.pointerInput(positions, layout, selection) {
+                                    detectDragGestures { change, _ ->
+                                        val index = nearestScatterPointIndex(change.position, positions, layout)
+                                        if (index != NO_SELECTION) selection.select(index)
+                                    }
+                                }
+                        } else {
+                            Modifier
+                        },
+                    ),
+                ) {
+                    val right = layout.left + layout.width
+                    val bottom = layout.top + layout.height
+                    if (style.axes.visible && style.axes.grid.visible) {
+                        val gridColor = style.axes.grid.color
+                        xAxisPlan.ticks.forEach { tick ->
+                            val x = layout.left + tick.centerX
+                            drawLine(gridColor, Offset(x, layout.top), Offset(x, bottom))
+                        }
+                        val gridPositions =
+                            if (showYLabels) {
+                                yAxisLayout.ticks.map { it.centerY }
+                            } else {
+                                val steps = style.axes.grid.steps
+                                if (steps > 0) (0..steps).map { layout.height * it / steps } else emptyList()
+                            }
+                        gridPositions.forEach { position ->
+                            val y = layout.top + position
+                            drawLine(gridColor, Offset(layout.left, y), Offset(right, y))
+                        }
+                    }
+                    if (style.axes.visible && style.axes.lines.visible) {
+                        val color = style.axes.lines.color
+                        drawLine(color, Offset(layout.left, layout.top), Offset(layout.left, bottom))
+                        drawLine(color, Offset(layout.left, bottom), Offset(right, bottom))
+                    }
+                    var pointIndex = 0
+                    data.series.forEachIndexed { seriesIndex, series ->
+                        series.points.forEach { _ ->
+                            val radius = radii[pointIndex]
+                            val center = layout.position(positions[pointIndex])
+                            drawCircle(colors[seriesIndex].copy(alpha = style.points.alpha), radius, center)
+                            if (pointIndex == selectedIndex) {
+                                drawCircle(
+                                    style.axes.lines.color,
+                                    radius + StyleDefaults.scatterSelectionPadding.toPx(),
+                                    center,
+                                    style.points.alpha,
+                                    style = Stroke(StyleDefaults.scatterSelectionWidth.toPx()),
+                                )
+                            }
+                            pointIndex++
+                        }
+                    }
+                }
+                if (showYLabels) {
+                    AxisYLabelsLayout(
+                        ticks = yAxisLayout.ticks,
+                        color = style.axes.yLabels.color,
+                        fontSize = style.axes.yLabels.size,
+                        modifier =
+                            Modifier
+                                .offset(y = with(density) { layout.top.toDp() })
+                                .width(with(density) { yAxisLayout.widthPx.toDp() })
+                                .height(with(density) { layout.height.toDp() })
+                                .testTag("ScatterChartYAxisLabels"),
+                    )
+                }
+                if (showXLabels) {
+                    AxisXLabelsLayout(
+                        ticks = xAxisPlan.ticks,
+                        color = style.axes.xLabels.color,
+                        fontSize = style.axes.xLabels.size,
+                        modifier =
+                            Modifier
+                                .offset(
+                                    x = with(density) { layout.left.toDp() },
+                                    y = with(density) { (layout.top + layout.height).toDp() },
+                                ).width(with(density) { layout.width.toDp() })
+                                .height(with(density) { xAxisHeight.toDp() })
+                                .testTag("ScatterChartXAxisLabels"),
+                    )
+                }
+            }
+        },
+    )
+}

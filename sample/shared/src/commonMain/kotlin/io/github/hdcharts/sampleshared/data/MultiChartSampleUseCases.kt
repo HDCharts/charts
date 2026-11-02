@@ -54,3 +54,9 @@ interface RadarSampleUseCase {
     /** Demo refresh: the series of [deterministic] with random scores. */
     fun random(series: Int = DEFAULT_RADAR_SERIES): RadarSampleData
 }
+
+/** Independent numeric observations for ScatterChartScreenshotTest. */
+interface ScatterSampleUseCase {
+    /** The same X/Y points, with optional sizes for bubble charts. */
+    fun deterministic(bubbles: Boolean = false): ScatterSampleData
+}

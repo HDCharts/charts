@@ -17,6 +17,7 @@ import io.github.hdcharts.app.docs.DailyCashFlowGradient
 import io.github.hdcharts.app.docs.DailyMeasurement
 import io.github.hdcharts.app.docs.EnergyUsage
 import io.github.hdcharts.app.docs.ReadinessMetric
+import io.github.hdcharts.app.docs.ScatterBasicExample
 import io.github.hdcharts.app.docs.SelectTemperature
 import io.github.hdcharts.app.docs.ShowDailyTemperatures
 import io.github.hdcharts.app.docs.ShowMonthlySubscribers
@@ -169,6 +170,19 @@ fun StackedAreaWikiPreview() {
 fun RadarWikiPreview() {
     WikiScreenshotSurface {
         ShowPlatformReadiness(modifier = Modifier.fillMaxSize())
+    }
+}
+
+@PreviewTest
+@Preview(
+    name = "Light Tablet Landscape",
+    uiMode = Configuration.UI_MODE_NIGHT_NO,
+    device = PREVIEW_DEVICE_TABLET_LANDSCAPE,
+)
+@Composable
+fun ScatterWikiPreview() {
+    WikiScreenshotSurface {
+        ScatterBasicExample()
     }
 }
 

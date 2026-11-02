@@ -12,6 +12,7 @@ declare -a screenshot_mappings=(
   'StackedBarWikiPreview_Light Tablet Landscape_5e637cf0_0.png|wiki-stacked-bar-basic.png'
   'StackedAreaWikiPreview_Light Tablet Landscape_5e637cf0_0.png|wiki-stacked-area-basic.png'
   'RadarWikiPreview_Light Tablet Landscape_5e637cf0_0.png|wiki-radar-basic.png'
+  'ScatterWikiPreview_Light Tablet Landscape_5e637cf0_0.png|wiki-scatter-basic.png'
   'RingGaugeWikiPreview_Light Tablet Landscape_5e637cf0_0.png|wiki-ring-gauge-basic.png'
   'SegmentedRingGaugeWikiPreview_Light Tablet Landscape_5e637cf0_0.png|wiki-segmented-ring-gauge-basic.png'
   'PieSelectedShareWikiPreview_Light Tablet Landscape_5e637cf0_0.png|wiki-pie-selected-share.png'
@@ -52,10 +53,10 @@ run_self_test() {
   mkdir -p "${temp_dir}/content/snapshot/wiki/assets" "${temp_dir}/baselines"
   printf 'keep gif' > "${temp_dir}/content/snapshot/wiki/assets/existing.gif"
   printf 'keep unrelated png' > "${temp_dir}/content/snapshot/wiki/assets/hero.png"
-  local source
-  for source in "${baseline_dir}"/*.png; do
-    [[ "$(basename "${source}")" == *WikiPreview* ]] || continue
-    cp "${source}" "${temp_dir}/baselines/"
+  local mapping source_name published_name
+  for mapping in "${screenshot_mappings[@]}"; do
+    IFS='|' read -r source_name published_name <<<"${mapping}"
+    cp "${baseline_dir}/${source_name}" "${temp_dir}/baselines/"
   done
   sync_screenshots "${temp_dir}" "${temp_dir}/baselines"
   local first_hashes second_hashes mapping source_name published_name
@@ -65,7 +66,7 @@ run_self_test() {
   [[ "${first_hashes}" == "${second_hashes}" ]]
   [[ "$(cat "${temp_dir}/content/snapshot/wiki/assets/existing.gif")" == 'keep gif' ]]
   [[ "$(cat "${temp_dir}/content/snapshot/wiki/assets/hero.png")" == 'keep unrelated png' ]]
-  [[ "$(find "${temp_dir}/content/snapshot/wiki/assets" -maxdepth 1 -type f -name 'wiki-*.png' | wc -l | tr -d ' ')" == '13' ]]
+  [[ "$(find "${temp_dir}/content/snapshot/wiki/assets" -maxdepth 1 -type f -name 'wiki-*.png' | wc -l | tr -d ' ')" == '14' ]]
   for mapping in "${screenshot_mappings[@]}"; do
     IFS='|' read -r source_name published_name <<<"${mapping}"
     cmp "${temp_dir}/baselines/${source_name}" "${temp_dir}/content/snapshot/wiki/assets/${published_name}"
@@ -79,6 +80,7 @@ run_self_test() {
     'stacked-bar-chart.md|wiki-stacked-bar-basic.png' \
     'stacked-area-chart.md|wiki-stacked-area-basic.png' \
     'radar-chart.md|wiki-radar-basic.png' \
+    'scatter-chart.md|wiki-scatter-basic.png' \
     'ring-gauge-chart.md|wiki-ring-gauge-basic.png' \
     'segmented-ring-gauge-chart.md|wiki-segmented-ring-gauge-basic.png' \
     'pie-chart.md|wiki-pie-selected-share.png' \

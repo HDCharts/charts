@@ -13,6 +13,7 @@ object ChartsModules {
             ":charts-stacked-area",
             ":charts-radar",
             ":charts-gauge",
+            ":charts-scatter",
             ":charts",
         )
 

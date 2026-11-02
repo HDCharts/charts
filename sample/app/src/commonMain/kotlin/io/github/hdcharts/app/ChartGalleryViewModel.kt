@@ -151,6 +151,7 @@ class ChartGalleryViewModel(
             ChartDestination.HistogramChartScreen -> "Distribution across bins."
             ChartDestination.StackedBarChartScreen -> "Segment composition by category."
             ChartDestination.RadarChartScreen -> "Live radial signals."
+            ChartDestination.ScatterChartScreen -> "Compare numeric measures and bubble sizes."
             ChartDestination.GaugeChartsScreen -> "Ring and capacity gauges."
         }
 

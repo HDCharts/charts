@@ -5,9 +5,9 @@ order: 2
 
 # Entry Seam and Chart Policy
 
-A chart takes public data, checks it, wraps it in the render model, clamps its style, then draws.
-Everything up to the clamp is written once, in `ChartEntry` in `charts-core`. A chart declares one
-`ChartSpec` object saying which checks apply to it and how it answers them.
+Charts built on indexed `ChartData` validate, convert to a render model, and clamp their style through
+`ChartEntry` in `charts-core`. Each declares a `ChartSpec` with its policy, conversion and clamping.
+Charts with another data model own those input stages in their entry.
 
 ## The pipeline
 
@@ -51,7 +51,7 @@ public composables passes the content in as a lambda, so both share one entry �
 
 ## The spec
 
-`ChartSpec` is the whole of a chart's input declaration. One object per chart:
+`ChartSpec` is the input declaration for an indexed-series chart. One object per chart:
 
 ```kotlin
 object LineChartSpec : ChartSpec<LineChartStyle> {
@@ -115,19 +115,27 @@ cannot carry stacking or a multi-series color rule.
 | `range = { ... }` | The range-bound check and its style values |
 | `axes = { ... }` | The X and Y axis label checks and their style values |
 
-## Future chart families
+## Chart families
 
 `ChartPolicy<S>` and `SeriesRule` describe charts built on the current indexed-series `ChartData`
 model. That covers the existing line, bar, pie, radar, stacked and gauge families naturally.
 
-Future charts may use fundamentally different data models. Scatter and bubble charts need XY
-coordinates, candlesticks need OHLC values, heatmaps need two-dimensional values, Sankey charts need
-nodes and connections, and treemaps need hierarchical data. Do not force those models into
-`SeriesRule` just to reuse the current validator. The shared `ChartEntry` lifecycle may still be
-useful, but each new chart family can define a validation contract that matches its data.
+| Chart family | Data | Entry | Validation contract |
+| --- | --- | --- | --- |
+| Indexed series | `ChartData` | `ChartEntry`, through a `ChartSpec` | `ChartPolicy<S>` and `SeriesRule` |
+| Scatter and bubble | `ScatterData` | `ScatterChartEntry` | Private `ScatterChartPolicy` |
 
-A policy reads the style through its mappers. A null range or axes mapper means that capability does
-not apply. `RangeInputs(min = null, max = null)` means the chart has an explicit automatic range,
+Scatter validates independent X/Y points and optional bubble sizes. Its entry snapshots the palette
+count, X/Y bounds and axis label settings, remembers validation against the data, snapshot and density,
+and renders errors with `ChartErrors`. Valid input reaches `ScatterChartContent` with a clamped style
+and the original `ScatterData`. Axis label validation uses the shared `validateAxisLabels` helper.
+
+Candlesticks need OHLC values, heatmaps need two-dimensional values, Sankey charts need nodes and
+connections, and treemaps need hierarchical data. Each family defines validation for its own data
+model. Reuse shared entry stages where their inputs remain independent of the data model.
+
+`ChartPolicy` reads the style through its mappers. A null range or axes mapper means that capability
+does not apply. `RangeInputs(min = null, max = null)` means the chart has an explicit automatic range,
 which is distinct from a missing range mapper. A present `AxisInputs` always supplies both axis-label
 validation values, so a chart with axes cannot accidentally omit one of them. The mapper return types also
 make it impossible for a chart declaration to enable range or axis validation without supplying the
@@ -175,8 +183,9 @@ style value.
 
 ## The policy table
 
-Each chart has a row here and a row in `ChartPolicyConformanceTest`, in the `charts` module. Both are
-written by hand and change in the same commit.
+The indexed policies below each have a row here and a row in `ChartPolicyConformanceTest`, in the
+`charts` module. Both are written by hand and change together. Scatter's separate contract is recorded
+in the chart-family table above and covered by `ScatterChartTest` in `charts-scatter`.
 
 | Chart | `minValues` | `allowNegative` | `series` | `stacked` | `axes` | `range` | `expectedColors` |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -189,23 +198,32 @@ written by hand and change in the same commit.
 | Pie | 2 | no | single | no | no | no | value count |
 | Ring gauge | 1 | yes | single | no | no | yes | value count |
 
-Every chart is on the seam. Bar and histogram draw the same plot, so they share
-`BarChartInternalPlot`. Their specs differ in the policy — histogram forbids negative bin heights —
+The charts in this policy table use the shared seam. Bar and histogram share `BarChartInternalPlot`.
+Their specs differ in the policy — histogram forbids negative bin heights —
 and their entries pass the shared plot the same arguments apart from a histogram test tag.
 
 `convert` has a default implementation that passes the data through, so a chart whose render model
 is the caller's own data does not write one. **Stacked bar is the only chart that overrides it**,
 because it stacks segments and so transposes to one series per bar.
 
-Moving a chart onto the seam means writing `internal/<Name>ChartEntry.kt` with the chart's spec —
-policy mappers, clamping and conversion — pointing the public composable at it, and deleting the
+Moving an indexed-series chart onto the seam means writing `internal/<Name>ChartEntry.kt` with its
+spec — policy mappers, clamping and conversion — pointing the public composable at it, and deleting the
 validation, clamping and conversion it used to do. The seam runs those steps in the same order, so
 the chart behaves the same. One chart per change; the module's tests and the screenshot baselines show
 whether anything moved.
 
-The public composable keeps what is not an input stage: the selection lifecycle, and the layout. The
-selection index is resolved before the seam, because it counts the public data rather than the render
-model.
+Selection indices refer to public data. Resolve them before conversion so changes to the render
+model's shape preserve the selected source item.
+
+## Adding a chart or changing a policy
+
+- For an indexed-series chart, update the policy table and `ChartPolicyConformanceTest` with its
+  `ChartSpec` declaration. A change to a declared rule updates both rows.
+- For another data model, record its entry and validation contract in the chart-family table and
+  cover that contract in the chart module's tests.
+- Add the chart's column to the stage matrix in [Pipeline and Stage Ownership](pipeline.md#which-chart-runs-which-stage).
+- Update the public composable and call-chain tables in [Naming and File Structure](naming.md).
+  Record new validation rules in [Validation Errors](validation-errors.md).
 
 ## Pie names its values by category
 
@@ -214,14 +232,14 @@ the slice names. It draws no Cartesian axis and formats its readouts from its ow
 `axes = null` and `range = null`. `SeriesRule.Single` counts its colors against the value count, like
 bar's and histogram's.
 
-Empty categories are not an error for any chart, pie included. A chart with an X axis drops its
+Empty categories are valid for indexed-series charts, pie included. A chart with an X axis drops its
 labels and keeps the axis; a pie drops its legend and keeps the slices, and a selected slice with a
 blank category falls back to the chart title. See Pie Chart for what a pie shows without names.
 
 ## Adding a check
 
-A message goes in `ValidationErrors` and the check goes in `DataValidation.kt`. Charts write no
-message text and no check of their own.
+An indexed-series message goes in `ValidationErrors` and its check goes in `DataValidation.kt`.
+Checks specific to another data model live with that chart's validation contract, as scatter's do.
 
 A check that applies to every chart calling a function goes into that function. A check that applies
 to some charts gets a mapper in `ChartPolicy`, read in `ChartPolicy.errorsFor`. A chart that has not
@@ -235,6 +253,7 @@ commit.
 | A policy mapper turns on the check it names | `ChartPolicyTest` in `charts-core` |
 | Invalid data never reaches content, and clamping runs at the ambient density | `ChartEntryTest` in `charts-core` |
 | Each declared policy matches its row | `ChartPolicyConformanceTest` in `charts` |
+| Independent X/Y inputs follow their own validation contract | `ScatterChartTest` in `charts-scatter` |
 | A chart shows its errors for invalid input | Each chart's own tests |
 
 `charts-core` cannot see the chart modules' specs without a test dependency that inverts the
