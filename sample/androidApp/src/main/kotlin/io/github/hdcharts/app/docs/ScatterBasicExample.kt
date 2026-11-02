@@ -10,30 +10,27 @@ import io.github.hdcharts.scatter.ScatterSeries
 
 @Composable
 fun ScatterBasicExample(modifier: Modifier = Modifier) {
-    val data =
-        ScatterData(
-            series =
+    val north =
+        ScatterSeries(
+            name = "North",
+            points =
                 listOf(
-                    ScatterSeries(
-                        name = "North",
-                        points =
-                            listOf(
-                                ScatterPoint(x = 1.0, y = 2.4, size = 12.0),
-                                ScatterPoint(x = 2.5, y = 3.8, size = 24.0),
-                                ScatterPoint(x = 4.0, y = 3.1, size = 18.0),
-                            ),
-                    ),
-                    ScatterSeries(
-                        name = "South",
-                        points =
-                            listOf(
-                                ScatterPoint(x = 1.5, y = 1.8, size = 20.0),
-                                ScatterPoint(x = 3.0, y = 2.7, size = 10.0),
-                                ScatterPoint(x = 4.5, y = 4.2, size = 28.0),
-                            ),
-                    ),
+                    ScatterPoint(x = 1.0, y = 2.4, size = 12.0),
+                    ScatterPoint(x = 2.5, y = 3.8, size = 24.0),
+                    ScatterPoint(x = 4.0, y = 3.1, size = 18.0),
                 ),
         )
+    val south =
+        ScatterSeries(
+            name = "South",
+            points =
+                listOf(
+                    ScatterPoint(x = 1.5, y = 1.8, size = 20.0),
+                    ScatterPoint(x = 3.0, y = 2.7, size = 10.0),
+                    ScatterPoint(x = 4.5, y = 4.2, size = 28.0),
+                ),
+        )
+    val data = ScatterData(series = listOf(north, south))
     ScatterChart(data = data, modifier = modifier, title = "Regional growth")
 }
 // END WIKI EXAMPLE: scatter-basic-usage
