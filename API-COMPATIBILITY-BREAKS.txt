@@ -6,6 +6,15 @@
 # tagged, the next acknowledgment resolves the next version and opens its own section above.
 # Run 'git blame' on a line to see the pull request that accepted that break.
 
+## 3.0.1
+charts-core | io.github.hdcharts.core.style.BarBarsStyle | resolveColors(int) | METHOD_REMOVED
+charts-line | io.github.hdcharts.line.LineVisualStyle | resolveColors(int) | METHOD_REMOVED
+charts-pie | io.github.hdcharts.pie.PieChartSlicesStyle | resolveColors(int) | METHOD_REMOVED
+charts-stacked-bar | io.github.hdcharts.stackedbar.StackedBarSegmentStyle | resolveColors(int) | METHOD_REMOVED
+charts-stacked-area | io.github.hdcharts.stackedarea.StackedAreaFillStyle | resolveColors(int) | METHOD_REMOVED
+charts-radar | io.github.hdcharts.radar.RadarPolygonStyle | resolveLineColors(int) | METHOD_REMOVED
+charts-gauge | io.github.hdcharts.gauge.RingGaugeRingsStyle | resolveColors(int) | METHOD_REMOVED
+
 ## 3.0.0
 charts-core | chartsproject.charts_core.generated.resources.ActualResourceCollectorsKt |  | CLASS_REMOVED
 charts-core | chartsproject.charts_core.generated.resources.ActualResourceCollectorsKt | getAllDrawableResources(chartsproject.charts_core.generated.resources.Res) | METHOD_REMOVED

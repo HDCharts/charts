@@ -62,9 +62,8 @@ data class StackedAreaFillStyle(
      *
      * A single series uses [color]. Multiple series use [colors] when set, or generated
      * shades of [color] when [colors] is empty.
-     * @suppress
      */
-    fun resolveColors(seriesCount: Int): ImmutableList<Color> =
+    internal fun resolveColors(seriesCount: Int): ImmutableList<Color> =
         resolvePaletteColors(
             baseColor = color,
             colors = colors,
