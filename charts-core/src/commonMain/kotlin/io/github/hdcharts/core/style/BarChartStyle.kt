@@ -59,8 +59,10 @@ data class BarBarsStyle(
     /**
      * Returns the bar colors the chart draws for [barCount] bars, before [alpha] is applied:
      * [colors] when set, or [color] for every bar when [colors] is empty.
+     *
+     * @suppress
      */
-    internal fun resolveColors(barCount: Int): ImmutableList<Color> =
+    fun resolveColors(barCount: Int): ImmutableList<Color> =
         when {
             barCount <= 0 -> persistentListOf()
             colors.isEmpty() -> List(barCount) { color }.toImmutableList()
