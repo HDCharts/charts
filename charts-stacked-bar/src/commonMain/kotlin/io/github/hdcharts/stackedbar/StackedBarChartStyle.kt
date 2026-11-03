@@ -55,8 +55,10 @@ data class StackedBarSegmentStyle(
     /**
      * Returns the segment colors the chart draws for [seriesCount] series, before [alpha] is applied:
      * [colors] when set, or generated shades of [color] when [colors] is empty.
+     *
+     * @suppress
      */
-    internal fun resolveColors(seriesCount: Int): ImmutableList<Color> =
+    fun resolveColors(seriesCount: Int): ImmutableList<Color> =
         resolvePaletteColors(
             baseColor = color,
             colors = colors,
