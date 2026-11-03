@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.sp
 import io.github.hdcharts.core.model.ChartSelection
 import io.github.hdcharts.core.style.AxesDefaults
 import io.github.hdcharts.core.style.AxisLabelDefaults
+import io.github.hdcharts.core.style.ChartContainerDefaults
 import io.github.hdcharts.core.style.GridDefaults
 import io.github.hdcharts.scatter.internal.SCATTER_CHART_TAG
 import io.github.hdcharts.scatter.internal.SCATTER_CHART_X_AXIS_LABELS_TAG
@@ -77,6 +78,66 @@ class ScatterChartTest {
                 click(Offset(x = width * 0.9f, y = height * 0.1f))
             }
             runOnIdle { assertEquals(expected = null, actual = selection.selectedIndex) }
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun scatterChart_tappingPointInSecondSeriesSelectsFlattenedIndexAndUpdatesHeading() =
+        runComposeUiTest {
+            val selection = ChartSelection()
+            setContent {
+                ScatterChart(
+                    data = interactionSample,
+                    modifier = Modifier.size(width = 400.dp, height = 300.dp),
+                    style = ScatterChartDefaults.style(axes = AxesDefaults.style(visible = false)),
+                    title = "Study",
+                    selection = selection,
+                    animateOnStart = false,
+                    xValueFormatter = { it.toInt().toString() },
+                )
+            }
+
+            onNodeWithTag(SCATTER_CHART_TAG).performTouchInput { click(center) }
+
+            runOnIdle { assertEquals(expected = 1, actual = selection.selectedIndex) }
+            onNodeWithText("Study · X: 5, Y: 5, Size: 6").assertIsDisplayed()
+        }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun scatterChart_draggingBetweenPointsChangesSelectionAndHeading() =
+        runComposeUiTest {
+            val selection = ChartSelection()
+            setContent {
+                CompositionLocalProvider(LocalDensity provides Density(1f)) {
+                    ScatterChart(
+                        data = interactionSample,
+                        modifier = Modifier.size(width = 400.dp, height = 300.dp),
+                        style =
+                            ScatterChartDefaults.style(
+                                chartContainerStyle = ChartContainerDefaults.style(contentPadding = 24.dp),
+                                axes = AxesDefaults.style(visible = false),
+                            ),
+                        title = "Study",
+                        selection = selection,
+                        animateOnStart = false,
+                        xValueFormatter = { it.toInt().toString() },
+                    )
+                }
+            }
+
+            val plot = onNodeWithTag(SCATTER_CHART_TAG)
+            plot.performTouchInput {
+                down(Offset(width - 24f, 24f))
+                moveTo(center)
+            }
+            runOnIdle { assertEquals(expected = 1, actual = selection.selectedIndex) }
+            onNodeWithText("Study · X: 5, Y: 5, Size: 6").assertIsDisplayed()
+
+            plot.performTouchInput { moveTo(Offset(width - 24f, 24f)) }
+            runOnIdle { assertEquals(expected = 2, actual = selection.selectedIndex) }
+            onNodeWithText("Study · X: 10, Y: 10").assertIsDisplayed()
+            plot.performTouchInput { up() }
         }
 
     @OptIn(ExperimentalTestApi::class)
@@ -264,6 +325,14 @@ class ScatterChartTest {
             onNodeWithText("distance: 1.0").assertIsDisplayed()
             onNodeWithText("cost: 2.0").assertIsDisplayed()
         }
+
+    private val interactionSample =
+        ScatterData(
+            listOf(
+                ScatterSeries("First", listOf(ScatterPoint(0.0, 0.0))),
+                ScatterSeries("Second", listOf(ScatterPoint(5.0, 5.0, 6.0), ScatterPoint(10.0, 10.0))),
+            ),
+        )
 
     private val sample =
         ScatterData(

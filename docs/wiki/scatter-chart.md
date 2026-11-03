@@ -67,11 +67,18 @@ fun ScatterBasicExample(modifier: Modifier = Modifier) {
 
 Use `ScatterPoint(x, y)` for a scatter marker. Supply `size` when the third measure should control bubble area; points without a size use the configured fixed marker size.
 
+The smallest and largest size values across all series map to circles with radii
+`ScatterPointStyle.minSize` and `maxSize`. Bubble areas interpolate linearly between those limits.
+When all size values are equal, bubbles use the midpoint area.
+
 ## Capabilities
 
 ### Fixed Numeric Ranges
 
 Set either axis bound independently. Unset bounds use the data extent.
+
+Fully automatic axes expand constant values by 5% on each side, with at least one unit of padding.
+The expanded bounds stay finite.
 
 ```kotlin
 val style = ScatterChartDefaults.style(

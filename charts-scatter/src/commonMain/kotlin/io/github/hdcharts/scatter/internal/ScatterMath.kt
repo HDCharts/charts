@@ -7,6 +7,7 @@ import io.github.hdcharts.core.internal.model.normalizeValue
 import io.github.hdcharts.core.internal.model.resolveOptionalRange
 import io.github.hdcharts.scatter.ScatterPoint
 import io.github.hdcharts.scatter.ScatterRangeStyle
+import kotlin.math.abs
 import kotlin.math.sqrt
 
 /** Numeric bounds used to position points and label both axes. */
@@ -22,9 +23,24 @@ internal fun scatterDomain(
     points: List<ScatterPoint>,
     range: ScatterRangeStyle,
 ): ScatterDomain {
-    val xRange = resolveOptionalRange(points.minOf { it.x }, points.maxOf { it.x }, range.xMin, range.xMax)
-    val yRange = resolveOptionalRange(points.minOf { it.y }, points.maxOf { it.y }, range.yMin, range.yMax)
+    val xRange = scatterAxisRange(points.minOf { it.x }, points.maxOf { it.x }, range.xMin, range.xMax)
+    val yRange = scatterAxisRange(points.minOf { it.y }, points.maxOf { it.y }, range.yMin, range.yMax)
     return ScatterDomain(minX = xRange.first, maxX = xRange.second, minY = yRange.first, maxY = yRange.second)
+}
+
+private fun scatterAxisRange(
+    dataMin: Double,
+    dataMax: Double,
+    minValue: Double?,
+    maxValue: Double?,
+): Pair<Double, Double> {
+    if (dataMin == dataMax && minValue == null && maxValue == null) {
+        // Give constant observations 5% padding on each side, with at least one unit of space.
+        val padding = maxOf(abs(dataMin) * 0.05, 1.0)
+        return (dataMin - padding).coerceAtLeast(-Double.MAX_VALUE) to
+            (dataMax + padding).coerceAtMost(Double.MAX_VALUE)
+    }
+    return resolveOptionalRange(dataMin, dataMax, minValue, maxValue)
 }
 
 /** Normalizes points in source order, clamping out-of-range values to the plot edges. */

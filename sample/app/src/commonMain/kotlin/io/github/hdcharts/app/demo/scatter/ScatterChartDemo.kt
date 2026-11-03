@@ -24,7 +24,7 @@ fun ScatterChartDemo() {
                 ),
             ),
         )
-    ChartDemo(onRefresh = {}) {
+    ChartDemo(onRefresh = {}, refreshVisible = false) {
         ScatterChart(data = data, modifier = Modifier.fillMaxSize(), title = "Regional growth")
     }
 }

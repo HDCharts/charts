@@ -7,6 +7,7 @@ import io.github.hdcharts.scatter.ScatterPoint
 import io.github.hdcharts.scatter.ScatterRangeStyle
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class ScatterMathTest {
     @Test
@@ -34,13 +35,82 @@ class ScatterMathTest {
     }
 
     @Test
-    fun normalizedPositions_constantCoordinatesStayFinite() {
+    fun normalizedPositions_constantCoordinatesUseDistinctBoundsAndStayCentered() {
         val points = listOf(ScatterPoint(5.0, 10.0))
         val domain = scatterDomain(points, ScatterRangeStyle())
 
+        assertEquals(expected = ScatterDomain(4.0, 6.0, 9.0, 11.0), actual = domain)
+        assertEquals(expected = listOf(4.0, 5.0, 6.0), actual = scatterXAxisValues(domain, count = 3))
+        assertEquals(
+            expected = listOf(Offset(0.5f, 0.5f)),
+            actual = normalizedScatterPositions(points, domain, ScatterRangeStyle()),
+        )
+    }
+
+    @Test
+    fun scatterDomain_expandsEachConstantAxisIndependently() {
+        val constantX = listOf(ScatterPoint(-100.0, 0.0), ScatterPoint(-100.0, 10.0))
+        val constantY = listOf(ScatterPoint(0.0, 100.0), ScatterPoint(10.0, 100.0))
+        val range = ScatterRangeStyle()
+
+        assertEquals(expected = ScatterDomain(-105.0, -95.0, 0.0, 10.0), actual = scatterDomain(constantX, range))
+        assertEquals(expected = ScatterDomain(0.0, 10.0, 95.0, 105.0), actual = scatterDomain(constantY, range))
+        assertEquals(
+            expected = listOf(Offset(0.5f, 1f), Offset(0.5f, 0f)),
+            actual = normalizedScatterPositions(constantX, scatterDomain(constantX, range), range),
+        )
+        assertEquals(
+            expected = listOf(Offset(0f, 0.5f), Offset(1f, 0.5f)),
+            actual = normalizedScatterPositions(constantY, scatterDomain(constantY, range), range),
+        )
+    }
+
+    @Test
+    fun normalizedPositions_zeroAndTinyConstantCoordinatesStayCentered() {
+        val range = ScatterRangeStyle()
+        for (value in listOf(0.0, -0.0, 1e-300, -1e-300, Double.MIN_VALUE)) {
+            val points = listOf(ScatterPoint(value, value))
+            val domain = scatterDomain(points, range)
+
+            assertTrue(domain.minX < value && domain.maxX > value)
+            assertEquals(
+                expected = listOf(Offset(0.5f, 0.5f)),
+                actual = normalizedScatterPositions(points, domain, range),
+            )
+        }
+    }
+
+    @Test
+    fun scatterDomain_extremeConstantCoordinatesKeepFiniteDistinctBounds() {
+        val range = ScatterRangeStyle()
+        for (value in listOf(-Double.MAX_VALUE, -1e308, 1e308, Double.MAX_VALUE)) {
+            val points = listOf(ScatterPoint(value, value))
+            val domain = scatterDomain(points, range)
+            val position = normalizedScatterPositions(points, domain, range).single()
+
+            assertTrue(domain.minX.isFinite() && domain.maxX.isFinite() && domain.minX < domain.maxX)
+            assertTrue(domain.minY.isFinite() && domain.maxY.isFinite() && domain.minY < domain.maxY)
+            assertTrue(position.x.isFinite() && position.y.isFinite())
+            assertTrue(scatterXAxisValues(domain, count = 5).all { it.isFinite() })
+        }
+    }
+
+    @Test
+    fun scatterDomain_constantCoordinatesPreserveOneSidedFixedBounds() {
+        val points = listOf(ScatterPoint(5.0, 10.0))
+        val minimums = ScatterRangeStyle(xMin = 5.0, yMin = 10.0)
+        val maximums = ScatterRangeStyle(xMax = 5.0, yMax = 10.0)
+        val domain = ScatterDomain(5.0, 5.0, 10.0, 10.0)
+
+        assertEquals(expected = domain, actual = scatterDomain(points, minimums))
+        assertEquals(expected = domain, actual = scatterDomain(points, maximums))
         assertEquals(
             expected = listOf(Offset(0f, 1f)),
-            actual = normalizedScatterPositions(points, domain, ScatterRangeStyle()),
+            actual = normalizedScatterPositions(points, domain, minimums),
+        )
+        assertEquals(
+            expected = listOf(Offset(1f, 0f)),
+            actual = normalizedScatterPositions(points, domain, maximums),
         )
     }
 
