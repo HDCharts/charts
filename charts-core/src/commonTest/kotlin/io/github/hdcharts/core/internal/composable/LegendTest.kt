@@ -26,6 +26,24 @@ class LegendTest {
         }
 
     @Test
+    fun legend_blankValues_showsNamesOnly() =
+        runComposeUiTest {
+            setContent { TestLegend(names = listOf("North", "South"), values = listOf("", " ")) }
+
+            onNodeWithText("North").assertIsDisplayed()
+            onNodeWithText("South").assertIsDisplayed()
+        }
+
+    @Test
+    fun legend_onlySelectedSeriesHasValue_showsOtherSeriesNameOnly() =
+        runComposeUiTest {
+            setContent { TestLegend(names = listOf("North", "South"), values = listOf("", "18")) }
+
+            onNodeWithText("North").assertIsDisplayed()
+            onNodeWithText("South - 18").assertIsDisplayed()
+        }
+
+    @Test
     fun legend_blankName_showsValueOnly() =
         runComposeUiTest {
             setContent { TestLegend(names = listOf("A", ""), values = listOf("1", "2")) }

@@ -95,6 +95,6 @@ private fun legendLabel(
     labels: ImmutableList<String>,
     index: Int,
 ): String {
-    val value = labels.getOrNull(index) ?: return legendItem
+    val value = labels.getOrNull(index)?.takeIf { it.isNotBlank() } ?: return legendItem
     return if (legendItem.isBlank()) value else "$legendItem - $value"
 }
