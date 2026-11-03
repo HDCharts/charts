@@ -1,6 +1,7 @@
 package io.github.hdcharts.sampleshared.data
 
 import io.github.hdcharts.core.model.ChartData
+import io.github.hdcharts.scatter.ScatterData
 
 data class PieSampleData(
     val data: ChartData,
@@ -43,6 +44,11 @@ data class StackedAreaSampleData(
 data class RadarSampleData(
     val data: ChartData,
     val seriesKeys: List<String>,
+    val title: String,
+)
+
+data class ScatterSampleData(
+    val data: ScatterData,
     val title: String,
 )
 

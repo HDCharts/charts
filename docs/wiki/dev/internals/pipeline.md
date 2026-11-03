@@ -5,9 +5,9 @@ order: 1
 
 # Pipeline and Stage Ownership
 
-Every chart is the same fifteen stages. This page names them, says which stage belongs where, and
-records where each chart differs. Entry Seam describes the four stages that run in `ChartEntry` and
-how a chart declares them; this page is where a stage goes and why.
+The fifteen stages below describe the chart pipeline. This page records which stages each chart
+uses and where they run. Entry Seam describes the shared `ChartEntry` contract for indexed data and
+the chart-owned entry used by scatter.
 
 The pipeline splits in two. Stages 1 to 4 turn public data and a style into a render model and a
 drawable style, and run once before anything is drawn. Stages 8 to 15 work in pixels — a measured
@@ -18,9 +18,9 @@ sit either side of that split and are the interesting ones.
 
 | # | Stage | Canonical code | Runs in |
 | --- | --- | --- | --- |
-| 1 | Selection lifecycle | `rememberSelectionLifecycle` | Public composable |
-| 2 | Validation | `ChartPolicy.errorsFor` | Seam |
-| 3 | Style clamp | `ChartSpec.clamp` → `style.clamp(density)` | Seam |
+| 1 | Selection lifecycle | `rememberSelectionLifecycle` | Public composable or chart entry |
+| 2 | Validation | `ChartPolicy.errorsFor`, `ScatterChartPolicy.errorsFor` | Entry |
+| 3 | Style clamp | `style.clamp(density)`, through `ChartSpec` for indexed data | Entry |
 | 4 | Model conversion | `ChartSpec.convert` → `ChartRenderData` | Seam |
 | 5 | Density decision | `shouldUseScrollableDensity`, `maxBarsThatFit` | Content |
 | 6 | Aggregation | `aggregateForCompactDensity` | Content |
@@ -30,7 +30,7 @@ sit either side of that split and are the interesting ones.
 | 10 | Canvas limit guard | `chartCanvasFits` | Content |
 | 11 | Domain | `resolveLineRange`, `resolveBarRange`, `minMax`, `resolveStackedTotalsRange` | Content |
 | 12 | Normalization | `normalizeByMinMax`, `barValueYFraction`, `normalizeStackedValues` | Content |
-| 13 | Animation state | `update()` → `animateTo` | Content |
+| 13 | Animation state | `update()` → `animateTo` for data transitions | Content |
 | 14 | Gesture math | `selectedIndexForTouchX`, `nearestPointIndexForContentX` | Content |
 | 15 | Draw | `drawLineChartSeries` → `drawChartPath` | Content |
 
@@ -38,13 +38,14 @@ sit either side of that split and are the interesting ones.
 
 These four are the contract. Everything above is a description of them.
 
-**1. Stages 2 and 3 happen at the entry point, once.** Validation *logic* lives in `charts-core`;
-which checks apply is the chart's `ChartPolicy` and its `SeriesRule` variant. The style is clamped at the ambient density before
-any content runs.
+**1. Stages 2 and 3 happen at the entry point, once.** Indexed-series checks live in `charts-core`,
+selected by `ChartPolicy` and `SeriesRule`. Scatter owns its X/Y checks in `ScatterChartPolicy` and
+reuses shared axis label validation. Every entry validates before clamping the style at the ambient
+density and calling content.
 
-**2. Stage 4 happens once, between the entry and the content composable.** Public `ChartData`
-becomes the render model at exactly one seam. A chart does not convert at the entry and again
-below.
+**2. A required model conversion happens once, between the entry and content.** Indexed `ChartData`
+becomes `ChartRenderData` through the shared seam. Scatter passes validated `ScatterData` directly to
+its content and needs no conversion stage.
 
 **3. Stages 8 to 10 and 13 to 15 happen inside the content composable, because they work in
 pixels.** Layout, axis planning, the canvas guard, animation, gesture maths and drawing all need a
@@ -72,23 +73,23 @@ again.
 
 ## Which chart runs which stage
 
-| Stage | Line | Bar | Histogram | Stacked bar | Stacked area | Radar | Pie | Ring gauge |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 Selection lifecycle | yes | yes | shared | yes | yes | yes, twice | yes | yes |
-| 2 Validation | yes | yes | shared | yes | yes | yes | own path | yes |
-| 3 Clamping | yes | yes | shared | yes | yes | yes | yes | yes |
-| 4 Conversion | pass-through | pass-through | pass-through | transposes | pass-through | pass-through | none | pass-through |
-| 5 Density decision | yes | yes | shared | yes | yes | — | — | — |
-| 6 Aggregation | yes | yes | shared | yes | yes | — | — | — |
-| 7 Palette | frame | own colour | shared | entry | entry | entry | own file | entry |
-| 8 Chrome layout | `LineChartFrame` | `BarChartContent` | shared | `StackedBarChartFrame` | `StackedAreaChartFrame` | inline | `PieChartFrame` | inline |
-| 9 Axis planning | yes | yes | shared | yes | yes | labels only | — | range labels only |
-| 10 Canvas guard | yes | yes | shared | yes | yes | — | — | — |
-| 11 Domain | `resolveLineRange` | `resolveBarRange` | shared | totals | totals | `minMax` | share-based | `style.range` |
-| 12 Normalization | list | scalar per bar | shared | list | list | list | share-based | `gaugeFraction` per ring |
-| 13 Animation | yes | yes | shared | yes | yes | yes | yes | yes |
-| 14 Gesture | yes | yes | shared | yes | yes | yes | yes | yes |
-| 15 Draw | yes | yes | shared | yes | yes | yes | yes | yes |
+| Stage | Line | Bar | Histogram | Stacked bar | Stacked area | Radar | Pie | Ring gauge | Scatter / bubble |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 Selection lifecycle | yes | yes | shared | yes | yes | yes, twice | yes | yes | entry |
+| 2 Validation | yes | yes | shared | yes | yes | yes | own path | yes | `ScatterChartPolicy` |
+| 3 Clamping | yes | yes | shared | yes | yes | yes | yes | yes | entry |
+| 4 Conversion | pass-through | pass-through | pass-through | transposes | pass-through | pass-through | none | pass-through | — |
+| 5 Density decision | yes | yes | shared | yes | yes | — | — | — | — |
+| 6 Aggregation | yes | yes | shared | yes | yes | — | — | — | — |
+| 7 Palette | frame | own colour | shared | entry | entry | entry | own file | entry | content |
+| 8 Chrome layout | `LineChartFrame` | `BarChartContent` | shared | `StackedBarChartFrame` | `StackedAreaChartFrame` | inline | `PieChartFrame` | inline | `ChartPlotLayout` |
+| 9 Axis planning | yes | yes | shared | yes | yes | labels only | — | range labels only | shared X/Y layouts |
+| 10 Canvas guard | yes | yes | shared | yes | yes | — | — | — | — |
+| 11 Domain | `resolveLineRange` | `resolveBarRange` | shared | totals | totals | `minMax` | share-based | `style.range` | `scatterDomain` |
+| 12 Normalization | list | scalar per bar | shared | list | list | list | share-based | `gaugeFraction` per ring | X/Y positions and bubble radii |
+| 13 Animation | yes | yes | shared | yes | yes | yes | yes | yes | initial reveal |
+| 14 Gesture | yes | yes | shared | yes | yes | yes | yes | yes | `nearestScatterPointIndex` |
+| 15 Draw | yes | yes | shared | yes | yes | yes | yes | yes | `ScatterChartContent` |
 
 Bar and histogram share one plot, so they share every stage, compact aggregation included. Their
 specs differ only in the policy: histogram forbids negative bin heights.
@@ -97,15 +98,21 @@ specs differ only in the policy: histogram forbids negative bin heights.
 
 Each of these is a decision, written down so the next change reads it.
 
-**Two pipeline shapes.** Radar, pie and ring gauge run stages 1 to 4, 7, 8 and 11 to 15. None of
+**Pipeline shapes.** Radar, pie and ring gauge run stages 1 to 4, 7, 8 and 11 to 15. None of
 them compacts, so they skip the density decision and aggregation, and none runs the Cartesian canvas
 guard. Radar labels its own axes in place of stage 9, and ring gauge draws its two range labels; pie
-has no axis and skips it. Every other chart runs all
+has no axis and skips it. Line, bar, histogram and the stacked charts run all
 fifteen. A Cartesian chart with a compact mode and a polar or share-based chart are presented as one
 pipeline, and this is the shape the library has. Pie runs the same stages 1 to 4 as every other
-chart, through `PieChartEntry`.
+indexed chart, through `PieChartEntry`.
 
-**The domain has five shapes, and pie has none of them.** Bar and both stacked charts fold zero into
+Scatter owns its input stages in `ScatterChartEntry`. It shares error UI, palette resolution and
+Cartesian axis layouts, and skips conversion, density selection, aggregation, the canvas guard and
+data-transition animation. `ScatterChartContent` still reveals its points on initial display using
+`animateFloatAsState`, controlled by `animateOnStart`. `ScatterMath.kt` owns its domain, positions,
+bubble radii and nearest-point lookup.
+
+**Domains.** Bar and both stacked charts fold zero into
 the domain, so an all-positive series starts at the axis. Line and radar take the data's own range.
 Line, bar and histogram accept a caller's fixed range through `style.range`. Stacked area's domain
 is a line inside its normalizer, so finding it means opening the normalizer. Pie's axis is the caller's
@@ -113,6 +120,8 @@ own share, not a data range, which is why its matrix row reads share-based. Ring
 `style.range` and never the data's range, so a value outside it stops at the nearest end of the arc. A domain is a pair of
 doubles and reads no constraint, so by the test above it could sit in the seam; whether it should is
 open.
+
+Scatter resolves separate X and Y domains from its points and optional bounds through `scatterDomain`.
 
 **Flat data draws at a different height per chart.** Line passes `zeroRangeValue = 0f` and draws a
 flat series at the bottom. Radar passes `1f` and draws it at full radius. Both domains are the same
@@ -132,7 +141,9 @@ count instead of a series count. Stacked bar (`StackedBarChartEntry`), stacked a
 `rememberLineColors`, which is declared in `LineChartFrame` and called from `LineChartImpl` and
 `LiveLineChartImpl`, one frame above where it is declared.
 
-`singleItemUsesBase` is a boolean literal at each of the six call sites. A single-series chart draws
+Scatter resolves its series palette in `ScatterChartContent` through `ScatterPointStyle.resolveColors`.
+
+`singleItemUsesBase` is a boolean literal at the call sites. A single-series chart draws
 its base colour on line, stacked area and radar, and a generated shade on pie, stacked bar and ring
 gauge.
 
@@ -155,10 +166,10 @@ charts use and has no production caller — `BarStyleBlocksTest` is its only one
 
 ## Adding a stage or a chart
 
-A new chart runs all fifteen stages in this order. A chart that skips one says so here; radar, pie and
-ring gauge skip stages 5, 6 and 10, and stage 9 is radar's own label layout, ring gauge's range
-labels, and absent from pie.
+A new chart records its stages in the matrix above, including every skipped stage. Its data model
+determines whether it uses the indexed `ChartSpec` seam or owns validation and clamping in its entry.
 
 A new stage goes where the test puts it, and a stage whose behaviour differs between charts is
-declared in the chart's `ChartSpec`, not branched inside a content composable. A policy field
-nothing reads is the drift the seam exists to remove, so a field lands with the change that reads it.
+declared in the chart's `ChartSpec` for indexed data, or in its own entry contract for another data
+model. A policy field nothing reads is the drift the seam exists to remove, so a field lands with
+the change that reads it.

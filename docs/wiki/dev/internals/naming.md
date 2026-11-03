@@ -25,6 +25,7 @@ One public composable per file. The file is named after it and holds nothing els
 | `HistogramChart.kt` | `HistogramChart` | `charts-histogram` |
 | `PieChart.kt` | `PieChart` | `charts-pie` |
 | `RadarChart.kt` | `RadarChart` | `charts-radar` |
+| `ScatterChart.kt` | `ScatterChart` | `charts-scatter` |
 | `RingGaugeChart.kt` | `RingGaugeChart` | `charts-gauge` |
 | `StackedBarChart.kt` | `StackedBarChart` | `charts-stacked-bar` |
 | `StackedAreaChart.kt` | `StackedAreaChart` | `charts-stacked-area` |
@@ -48,7 +49,7 @@ them should be split.
 | Canvas | `Content` | A canvas and the drawing calls on it | `BarChartContent` |
 | State and interaction | `Impl` | Density mode, zoom, animation values, the header; delegates drawing | `BarChartImpl` |
 | Layout shell | `Frame` | Chrome slots — header, plot, legend — and no chart state. Not every frame has every slot | `LineChartFrame`, `StackedBarChartFrame` |
-| Input preparation | `Entry` | Names the chart's policy, style values, clamping and conversion once, runs them through the shared `ChartEntry` seam, and hands over to the content | `LineChartEntry`, `BarChartEntry`, and one per chart — see the chains below |
+| Input preparation | `Entry` | Owns validation, style clamping and any conversion before content; indexed charts delegate to shared `ChartEntry` | `LineChartEntry`, `BarChartEntry`, `ScatterChartEntry` — see the chains below |
 
 A suffix outside this table is the signal that a composable is doing two jobs.
 
@@ -68,6 +69,7 @@ two stacked charts.
 | Histogram | `HistogramChart` → `HistogramChartEntry` → `BarChartInternalPlot` → `BarChartImpl` → `BarChartContent` |
 | Pie | `PieChart` → `PieChartEntry` → `PieChartFrame` → `PieChartContent` |
 | Radar | `RadarChart` → `RadarChartEntry` → `RadarChartContent` |
+| Scatter / bubble | `ScatterChart` → `ScatterChartEntry` → `ScatterChartContent` |
 | Ring gauge | `RingGaugeChart` → `RingGaugeChartEntry` → `RingGaugeChartContent` |
 | Stacked bar | `StackedBarChart` → `StackedBarChartEntry` → `StackedBarChartFrame` → `StackedBarChartImpl` |
 | Stacked area | `StackedAreaChart` → `StackedAreaChartEntry` → `StackedAreaChartFrame` → `StackedAreaChartImpl` |
@@ -80,8 +82,9 @@ The stacked charts are the two that do not follow the rest: their `Frame` wraps 
 it the plot slot, where line and bar put the `Frame` inside the `Impl` and hand it a content slot.
 Neither stacked chart has a `Content`, so its `Impl` draws on the canvas itself.
 
-Every chart has an `Entry`: it names the chart's policy, style values, clamping and
-conversion once, and runs them through the shared `ChartEntry` seam. An entry with one public
+Every chart has an `Entry` that owns its policy, style values, clamping and any conversion.
+Indexed-series entries delegate to shared `ChartEntry`; scatter validates its own X/Y data contract
+and passes the validated data directly to content. An entry with one public
 composable calls the content itself; an entry shared by two takes the content as a lambda. Bar and
 histogram each have their own entry, because their policies differ, and then share
 `BarChartInternalPlot`.
@@ -162,9 +165,12 @@ none of the four roles on its own.
 
 - Name the public composable after the file, and give it its own file.
 - Give each internal composable the suffix for its role, and give it a file to match.
-- Declare the chart's generic `ChartPolicy<S>` in its entry file, including the style mappers for
-  colors, range and axes, and add its row to `ChartPolicyConformanceTest` in the `charts` module.
-  Entry Seam and Chart Policy has the fields and the per-chart table.
+- For indexed `ChartData`, declare `ChartPolicy<S>` in the entry file with its color, range and axis
+  mappers, and update the policy table and `ChartPolicyConformanceTest` together.
+- For another data model, define its validation contract in the chart module and record it in
+  [Entry Seam and Chart Policy](entry-seam.md#chart-families).
+- Update this page's public composable and call-chain tables, and the stage matrix in
+  [Pipeline and Stage Ownership](pipeline.md#which-chart-runs-which-stage).
 - Never repeat the public name on an internal composable, and never alias or shadow an import to
   work around a repeat.
 - Give the content composable the canvas, and keep state out of it.

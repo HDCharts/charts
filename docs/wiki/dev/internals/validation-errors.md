@@ -33,10 +33,9 @@ Three consequences worth stating, because each has been got wrong:
 - **A check reports everything it can.** `errorsFor` collects every enabled error and the container
   lists them all. The one exception is a shape error that makes the rest unreadable: with no series
   there is nothing to iterate, and a single-series chart stops at its first shape problem.
-- **Nothing downstream re-checks.** Validation runs once, at the entry seam. Conversion and drawing
-  take a validated model and may assume it: at least one series, the same number of points in each,
-  every value finite, and a label or a blank for every index. That is a precondition of the model,
-  not a check each stage repeats — and it is pinned by tests rather than by throwing.
+- **Nothing downstream re-checks.** Validation runs once, at the chart's entry. Conversion and drawing
+  rely on its data contract. Indexed series have aligned values and categories; scatter series have
+  independent point counts, finite coordinates and optional finite, non-negative bubble sizes.
 
 ## What is an error
 
@@ -51,36 +50,42 @@ Style Clamping describes.
 
 ## Messages
 
-Every message comes from `ValidationErrors` in `DataValidation.kt` in `charts-core`, so the same
-rule reads the same way in every chart.
+Indexed-series messages come from `ValidationErrors` in `DataValidation.kt` in `charts-core`.
+Scatter's data-model-specific messages live with its private `ScatterChartPolicy`.
 
 | Rule | Message | Charts |
 | --- | --- | --- |
-| No series | At least one series is required. | Line, radar, stacked bar, stacked area |
+| No series | At least one series is required. | Line, radar, stacked bar, stacked area, scatter |
 | Wrong series count | Exactly one series is required; got 2. | Bar, histogram, pie, ring gauge |
-| Too few values | At least 2 values are required. (3 on radar, 1 on ring gauge) | All |
+| Too few values | At least 2 values are required. (3 on radar, 1 on ring gauge) | Indexed-series charts |
 | Category count | Category count (3) must match value count (4). | Bar, histogram, line, pie, radar, ring gauge, stacked bar, stacked area |
-| Color count | Color count (2) must match series count (3). | All with a color list |
+| Color count | Color count (2) must match series count (3). | Indexed-series charts with a color list |
 | Series length | Series 1 is not aligned with the first series. | Line, radar, stacked bar, stacked area |
 | Not finite | Series 0 contains a non-finite value. | Line, radar, stacked bar, stacked area |
 | Not finite | Value at index 2 is not finite. | Bar, histogram, pie, ring gauge |
 | Negative | Series 0 contains a negative value. | Stacked bar, stacked area |
 | Negative | Value at index 2 is negative. | Histogram, pie |
 | Stacked total | Stacked total at index 2 is not finite. | Stacked bar, stacked area |
+| Empty point series | Every series must contain at least one point. | Scatter / bubble |
+| Missing series name | Every series must have a name when multiple series are used. | Scatter / bubble |
+| Series color count | The color count must match the series count. | Scatter / bubble, with multiple series and an explicit palette |
+| Point values | Point coordinates must be finite and sizes must be finite and non-negative. | Scatter / bubble |
+| Non-finite bounds | Fixed axis bounds must be finite. | Scatter / bubble |
+| X bounds | The X minimum must be less than the X maximum. | Scatter / bubble, with both X bounds set |
+| Y bounds | The Y minimum must be less than the Y maximum. | Scatter / bubble, with both Y bounds set |
 
 The color message names what the colors are matched to: `value` on bar, histogram, pie and ring gauge, and
 `series` on line, radar, and the stacked charts.
 
-Charts that draw several series report a problem once per series. Charts with one series report
-it per value, with its index.
+Indexed-series charts that draw several series report a problem once per series. Charts with one
+series report it per value, with its index. Scatter collects each violated rule once across its points.
 
 ## Where it happens
 
-All checks live in `DataValidation.kt` in `charts-core`. A chart writes no check and no message text
-of its own: it declares which checks apply and maps their style inputs in its `ChartPolicy<S>`, then
-lets `ChartEntry` combine them.
-Every chart is on the seam. The declaration and the per-chart table are on Entry Seam and
-Chart Policy.
+Indexed-series checks live in `DataValidation.kt` in `charts-core`. A `ChartPolicy<S>` declares the
+checks and style inputs, and `ChartEntry` combines them. Scatter's independent X/Y checks live in
+`ScatterChartEntry.kt` in `charts-scatter`. Both paths reuse `ChartErrors` and axis label validation.
+Their entry contracts are recorded in Entry Seam and Chart Policy.
 
 | Function | Checks | Charts |
 | --- | --- | --- |
@@ -89,13 +94,13 @@ Chart Policy.
 | `validateValues` | Each non-finite value, and each negative value with `allowNegative = false` | Inside `validateSingleSeries` |
 | `validateColorCount` | A color list that does not match what it colors. A null expectation skips the check, and so does a style that sets no colors | Inside the two series checks |
 | `validateRange` | Non-finite range bounds | Bar, histogram, line |
+| `ScatterChartPolicy.errorsFor` | Non-empty series and points, names for multiple series, palette count, finite coordinates, optional finite non-negative sizes, X/Y bounds and axis labels | Scatter / bubble |
 
 Axis label settings are checked by `validateAxisLabels` in `AxisLabelValidation.kt`.
 
-The seam composes the enabled checks in one order — data shape, then range, then axis labels — so two
-charts with the same policy report the same problems in the same sequence. `ChartPolicy.errorsFor` is
-the only caller of the four functions above, and Entry Seam and Chart Policy has which checks each
-chart enables and how its style supplies their inputs.
+Both entry paths collect errors in one order: data shape, then range, then axis labels. Indexed
+policies select their checks through `ChartPolicy.errorsFor`; scatter selects its checks in
+`ScatterChartPolicy.errorsFor`. Entry Seam and Chart Policy records each validation contract.
 
 The minimums are `ValidationErrors.MIN_VALUES` (2), `ValidationErrors.MIN_RADAR_VALUES` (3), and
 `ValidationErrors.MIN_RING_GAUGE_VALUES` (1).
@@ -109,8 +114,10 @@ are nullable capabilities, not separate flags.
 
 ## Adding a rule
 
-- Add the message to `ValidationErrors` and the check to `DataValidation.kt`. Do not write message
-  text or checks in a chart, and give no check parameter a default.
+- For an indexed-series rule, add the message to `ValidationErrors` and the check to `DataValidation.kt`.
+  Give no check parameter a default.
+- Put a rule specific to another data model in that chart's validation contract. Reuse shared checks
+  for shared styles, such as `validateAxisLabels`.
 - If the rule applies to more than one chart, add it to the function those charts already call.
 - Keep messages short, name the value or series, and say what is expected.
 - A rule belongs here, in the path that reports, rather than as an assertion further down. An
@@ -118,8 +125,8 @@ are nullable capabilities, not separate flags.
 
 ## Internal model types
 
-Everything below the seam reads the render model the checks make possible, and trusts it. The model
-is `ChartRenderData`: the caller's own `ChartData` plus the chart's `title`. Four constraints on it:
+Indexed-series content reads `ChartRenderData`: the caller's own `ChartData` plus the chart's `title`.
+Scatter content reads validated `ScatterData` directly. Four constraints on the indexed render model:
 
 **A value that is required is not optional, and optionality is explicit.** `ChartRenderData.title` is a
 `String`, so an absent title is written as `""`, and `ChartSeries.name` is a `String?` that a chart

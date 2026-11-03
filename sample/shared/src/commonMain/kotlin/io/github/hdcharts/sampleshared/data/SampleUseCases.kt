@@ -9,6 +9,7 @@ import io.github.hdcharts.sampleshared.data.impl.DefaultMultiLineSampleUseCase
 import io.github.hdcharts.sampleshared.data.impl.DefaultPieSampleUseCase
 import io.github.hdcharts.sampleshared.data.impl.DefaultRadarSampleUseCase
 import io.github.hdcharts.sampleshared.data.impl.DefaultRingGaugeSampleUseCase
+import io.github.hdcharts.sampleshared.data.impl.DefaultScatterSampleUseCase
 import io.github.hdcharts.sampleshared.data.impl.DefaultSegmentedRingGaugeSampleUseCase
 import io.github.hdcharts.sampleshared.data.impl.DefaultStackedAreaSampleUseCase
 import io.github.hdcharts.sampleshared.data.impl.DefaultStackedBarSampleUseCase
@@ -29,6 +30,8 @@ fun stackedBarSampleUseCase(): StackedBarSampleUseCase = DefaultStackedBarSample
 fun stackedAreaSampleUseCase(): StackedAreaSampleUseCase = DefaultStackedAreaSampleUseCase()
 
 fun radarSampleUseCase(): RadarSampleUseCase = DefaultRadarSampleUseCase()
+
+fun scatterSampleUseCase(): ScatterSampleUseCase = DefaultScatterSampleUseCase()
 
 fun ringGaugeSampleUseCase(): RingGaugeSampleUseCase = DefaultRingGaugeSampleUseCase()
 

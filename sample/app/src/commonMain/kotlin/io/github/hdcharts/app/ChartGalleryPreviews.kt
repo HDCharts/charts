@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -20,10 +21,12 @@ import androidx.compose.ui.unit.dp
 import io.github.hdcharts.bar.BarChart
 import io.github.hdcharts.core.model.toChartData
 import io.github.hdcharts.core.style.AxesDefaults
+import io.github.hdcharts.core.style.AxisLabelDefaults
 import io.github.hdcharts.core.style.BarChartDefaults
 import io.github.hdcharts.core.style.ChartContainerDefaults
 import io.github.hdcharts.core.style.ChartContainerStyle
 import io.github.hdcharts.core.style.HistogramChartDefaults
+import io.github.hdcharts.core.style.LegendDefaults
 import io.github.hdcharts.gauge.RingGaugeChart
 import io.github.hdcharts.gauge.RingGaugeChartDefaults
 import io.github.hdcharts.gauge.SegmentedRingGaugeChart
@@ -37,6 +40,11 @@ import io.github.hdcharts.radar.RadarChart
 import io.github.hdcharts.radar.RadarChartDefaults
 import io.github.hdcharts.sampleshared.data.ChartGalleryPreview
 import io.github.hdcharts.sampleshared.theme.Dimens
+import io.github.hdcharts.scatter.ScatterChart
+import io.github.hdcharts.scatter.ScatterChartDefaults
+import io.github.hdcharts.scatter.ScatterData
+import io.github.hdcharts.scatter.ScatterPoint
+import io.github.hdcharts.scatter.ScatterSeries
 import io.github.hdcharts.stackedarea.StackedAreaChart
 import io.github.hdcharts.stackedarea.StackedAreaChartDefaults
 import io.github.hdcharts.stackedbar.StackedBarChart
@@ -98,8 +106,52 @@ internal fun ChartPreview(
         ChartDestination.HistogramChartScreen -> HistogramChartPreview(previews.histogramValues)
         ChartDestination.StackedBarChartScreen -> StackedBarChartPreview(previews.stackedSeries)
         ChartDestination.RadarChartScreen -> RadarChartPreview(previews.radarSeries)
+        ChartDestination.ScatterChartScreen -> ScatterChartPreview()
         ChartDestination.GaugeChartsScreen -> RingGaugeChartPreview(previews.ringGaugeValues)
     }
+}
+
+@Composable
+private fun ScatterChartPreview() {
+    ScatterChart(
+        data =
+            ScatterData(
+                listOf(
+                    ScatterSeries(
+                        name = "North",
+                        points =
+                            listOf(
+                                ScatterPoint(1.0, 1.4),
+                                ScatterPoint(2.1, 2.8, 8.0),
+                                ScatterPoint(3.4, 2.0, 18.0),
+                                ScatterPoint(4.8, 4.4, 30.0),
+                            ),
+                    ),
+                    ScatterSeries(
+                        name = "South",
+                        points =
+                            listOf(
+                                ScatterPoint(1.3, 3.9, 14.0),
+                                ScatterPoint(2.6, 1.1),
+                                ScatterPoint(3.8, 3.5, 24.0),
+                                ScatterPoint(5.2, 2.5, 10.0),
+                            ),
+                    ),
+                ),
+            ),
+        modifier = Modifier.fillMaxSize(),
+        style =
+            ScatterChartDefaults.style(
+                chartContainerStyle = previewChartContainerStyle(),
+                legend = LegendDefaults.style(visible = false),
+                axes =
+                    AxesDefaults.style(
+                        xLabels = AxisLabelDefaults.style(visible = false),
+                        yLabels = AxisLabelDefaults.style(visible = false),
+                    ),
+            ),
+        interactionEnabled = false,
+    )
 }
 
 @Composable

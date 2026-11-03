@@ -10,6 +10,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
+import io.github.hdcharts.app.docs.ScatterBasicExample
 import io.github.hdcharts.app.gif.docs.BarViewModel
 import io.github.hdcharts.app.gif.docs.LiveSensorReadingViewModel
 import io.github.hdcharts.app.gif.docs.MorphingLineViewModel
@@ -424,6 +425,21 @@ fun StackedAreaGradientGifScenario() {
 @Composable
 fun RadarDefaultGifScenario() {
     DocsGifScene { ShowRadar() }
+}
+
+@RecordGif(
+    name = "scatter_default",
+    interactionNodeTag = "ScatterChart",
+    gestures = [
+        GifGestureStep(type = GifGestureType.TAP, xFraction = 0.44f, yFraction = 0.19f, framesAfter = 24),
+        GifGestureStep(type = GifGestureType.TAP, xFraction = 0.58f, yFraction = 0.62f, framesAfter = 24),
+        GifGestureStep(type = GifGestureType.TAP, xFraction = 0.84f, yFraction = 0.46f, framesAfter = 24),
+        GifGestureStep(type = GifGestureType.TAP, xFraction = 0.25f, yFraction = 0.25f, framesAfter = 14),
+    ],
+)
+@Composable
+fun ScatterDefaultGifScenario() {
+    DocsGifScene { ScatterBasicExample() }
 }
 
 // Taps each ring, outer to inner, 30 degrees up from the left end, inside every ring's fill. The
