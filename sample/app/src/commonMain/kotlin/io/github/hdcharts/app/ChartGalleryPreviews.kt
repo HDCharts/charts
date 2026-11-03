@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import io.github.hdcharts.bar.BarChart
 import io.github.hdcharts.core.model.toChartData
 import io.github.hdcharts.core.style.AxesDefaults
+import io.github.hdcharts.core.style.AxisLabelDefaults
 import io.github.hdcharts.core.style.BarChartDefaults
 import io.github.hdcharts.core.style.ChartContainerDefaults
 import io.github.hdcharts.core.style.ChartContainerStyle
@@ -119,6 +120,11 @@ private fun ScatterChartPreview() {
         style =
             ScatterChartDefaults.style(
                 chartContainerStyle = previewChartContainerStyle(),
+                axes =
+                    AxesDefaults.style(
+                        xLabels = AxisLabelDefaults.style(visible = false),
+                        yLabels = AxisLabelDefaults.style(visible = false),
+                    ),
             ),
         interactionEnabled = false,
     )
