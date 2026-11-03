@@ -73,7 +73,13 @@ val style = ScatterChartDefaults.style(
 
 ### Selection
 
-Tapping or dragging selects the nearest point. The chart heading shows its X, Y, and optional size values. Pass a `ChartSelection` to control selection from the application.
+Tapping or dragging near a point selects it. Tapping empty plot space clears selection. The chart
+heading shows the selected point's X, Y, and optional size values.
+
+Pass a `ChartSelection` to control selection from the application. Its zero-based index counts
+points in series order, then in point order within each series. In Basic Usage, `initialIndex = 3`
+selects the first South point, after the three North points. Set `interactionEnabled = false` to
+disable gestures while keeping programmatic selection visible.
 
 ## API Reference
 

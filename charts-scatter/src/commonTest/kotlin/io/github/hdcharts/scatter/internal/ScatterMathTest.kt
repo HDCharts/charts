@@ -59,10 +59,12 @@ class ScatterMathTest {
     fun normalizedPositions_oneSidedCollapsedRangesUseTheirFixedEdge() {
         val points = listOf(ScatterPoint(1.0, 2.0), ScatterPoint(3.0, 4.0))
         val range = ScatterRangeStyle(xMin = 10.0, yMax = 0.0)
+        val domain = scatterDomain(points, range)
 
+        assertEquals(expected = ScatterDomain(10.0, 10.0, 0.0, 0.0), actual = domain)
         assertEquals(
             expected = listOf(Offset(0f, 0f), Offset(0f, 0f)),
-            actual = normalizedScatterPositions(points, scatterDomain(points, range), range),
+            actual = normalizedScatterPositions(points, domain, range),
         )
     }
 
@@ -230,14 +232,6 @@ class ScatterMathTest {
                     touchRadius = 24f,
                 ),
         )
-    }
-
-    @Test
-    fun scatterDomain_preservesASingleFixedBoundWhenItCrossesTheData() {
-        val points = listOf(ScatterPoint(1.0, 2.0), ScatterPoint(3.0, 4.0))
-        val domain = scatterDomain(points, ScatterRangeStyle(xMin = 10.0, yMax = 0.0))
-
-        assertEquals(expected = ScatterDomain(10.0, 10.0, 0.0, 0.0), actual = domain)
     }
 
     @Test

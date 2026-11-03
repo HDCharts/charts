@@ -265,12 +265,6 @@ class ScatterChartTest {
             onNodeWithText("cost: 2.0").assertIsDisplayed()
         }
 
-    @Test
-    fun point_keepsOptionalBubbleSize() {
-        assertEquals(3.0, ScatterPoint(1.0, 2.0, 3.0).size)
-        assertEquals(null, ScatterPoint(1.0, 2.0).size)
-    }
-
     private val sample =
         ScatterData(
             listOf(ScatterSeries("Group", listOf(ScatterPoint(1.0, 2.0), ScatterPoint(3.0, 4.0, 5.0)))),

@@ -7,7 +7,12 @@ import io.github.hdcharts.core.model.ChartValueFormatter
 import io.github.hdcharts.core.model.rememberChartSelection
 import io.github.hdcharts.scatter.internal.ScatterChartEntry
 
-/** Draws points by numeric X/Y coordinates. Set [ScatterPoint.size] to encode bubble area. */
+/**
+ * Draws points by numeric X/Y coordinates. Set [ScatterPoint.size] to encode bubble area.
+ *
+ * @param selection Selection by zero-based point index, counting points in [ScatterData.series]
+ * order and then [ScatterSeries.points] order within each series.
+ */
 @Composable
 fun ScatterChart(
     data: ScatterData,

@@ -223,28 +223,39 @@ internal fun ScatterChartContent(
                 ) {
                     val right = layout.left + layout.width
                     val bottom = layout.top + layout.height
-                    if (style.axes.visible && style.axes.grid.visible) {
+                    if (style.axes.visible && style.axes.grid.visible && style.axes.grid.steps > 0) {
                         val gridColor = style.axes.grid.color
+                        val gridWidth =
+                            style.axes.grid.lineWidth
+                                .toPx()
                         xAxisPlan.ticks.forEach { tick ->
                             val x = layout.left + tick.centerX
-                            drawLine(gridColor, Offset(x, layout.top), Offset(x, bottom))
+                            drawLine(gridColor, Offset(x, layout.top), Offset(x, bottom), strokeWidth = gridWidth)
                         }
                         val gridPositions =
                             if (showYLabels) {
                                 yAxisLayout.ticks.map { it.centerY }
                             } else {
                                 val steps = style.axes.grid.steps
-                                if (steps > 0) (0..steps).map { layout.height * it / steps } else emptyList()
+                                (0..steps).map { layout.height * it / steps }
                             }
                         gridPositions.forEach { position ->
                             val y = layout.top + position
-                            drawLine(gridColor, Offset(layout.left, y), Offset(right, y))
+                            drawLine(gridColor, Offset(layout.left, y), Offset(right, y), strokeWidth = gridWidth)
                         }
                     }
                     if (style.axes.visible && style.axes.lines.visible) {
                         val color = style.axes.lines.color
-                        drawLine(color, Offset(layout.left, layout.top), Offset(layout.left, bottom))
-                        drawLine(color, Offset(layout.left, bottom), Offset(right, bottom))
+                        val lineWidth =
+                            style.axes.lines.lineWidth
+                                .toPx()
+                        drawLine(
+                            color,
+                            Offset(layout.left, layout.top),
+                            Offset(layout.left, bottom),
+                            strokeWidth = lineWidth,
+                        )
+                        drawLine(color, Offset(layout.left, bottom), Offset(right, bottom), strokeWidth = lineWidth)
                     }
                     var pointIndex = 0
                     data.series.forEachIndexed { seriesIndex, series ->
