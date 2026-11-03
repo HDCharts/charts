@@ -84,8 +84,10 @@ data class PieChartSlicesStyle(
     /**
      * Returns the default colors for [sliceCount] slices, before `alpha` is applied:
      * [colors] when set, or generated shades of [baseColor] when it is empty.
+     *
+     * @suppress
      */
-    internal fun resolveColors(sliceCount: Int): ImmutableList<Color> =
+    fun resolveColors(sliceCount: Int): ImmutableList<Color> =
         resolvePaletteColors(
             baseColor = baseColor,
             colors = colors,
