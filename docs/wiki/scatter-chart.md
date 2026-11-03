@@ -14,6 +14,14 @@ Add the scatter chart module to your dependencies:
 implementation("io.github.hdcharts:scatter:{{artifactVersion}}")
 ```
 
+![Scatter and bubble chart selecting points in two series](/content/{{version}}/wiki/assets/scatter_default.gif)
+
+The GIF selects points in both series, then taps empty plot space to clear selection. It uses the
+same data as Basic Usage.
+
+Recording source: [ScatterDefaultGifScenario](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/DocsGifScenarios.kt),
+using [ScatterBasicExample.kt](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/docs/ScatterBasicExample.kt).
+
 ## Basic Usage
 
 ![Scatter and bubble chart showing two regional series](/content/{{version}}/wiki/assets/wiki-scatter-basic.png)
