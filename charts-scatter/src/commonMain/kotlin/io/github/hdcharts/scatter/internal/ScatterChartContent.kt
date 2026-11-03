@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -126,7 +127,9 @@ internal fun ScatterChartContent(
             )
         },
         plot = {
-            BoxWithConstraints(Modifier.fillMaxSize()) {
+            BoxWithConstraints(
+                Modifier.fillMaxSize().padding(bottom = style.chartContainerStyle.contentPadding),
+            ) {
                 val padding = with(density) { StyleDefaults.scatterPlotPadding.toPx() }
                 val showXLabels = style.axes.visible && style.axes.xLabels.visible
                 val showYLabels = style.axes.visible && style.axes.yLabels.visible

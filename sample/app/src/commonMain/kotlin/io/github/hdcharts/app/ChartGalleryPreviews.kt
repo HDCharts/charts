@@ -25,6 +25,7 @@ import io.github.hdcharts.core.style.BarChartDefaults
 import io.github.hdcharts.core.style.ChartContainerDefaults
 import io.github.hdcharts.core.style.ChartContainerStyle
 import io.github.hdcharts.core.style.HistogramChartDefaults
+import io.github.hdcharts.core.style.LegendDefaults
 import io.github.hdcharts.gauge.RingGaugeChart
 import io.github.hdcharts.gauge.RingGaugeChartDefaults
 import io.github.hdcharts.gauge.SegmentedRingGaugeChart
@@ -114,12 +115,34 @@ private fun ScatterChartPreview() {
     ScatterChart(
         data =
             ScatterData(
-                listOf(ScatterSeries(points = listOf(ScatterPoint(1.0, 2.0), ScatterPoint(3.0, 4.0, 15.0)))),
+                listOf(
+                    ScatterSeries(
+                        name = "North",
+                        points =
+                            listOf(
+                                ScatterPoint(1.0, 1.4),
+                                ScatterPoint(2.1, 2.8, 8.0),
+                                ScatterPoint(3.4, 2.0, 18.0),
+                                ScatterPoint(4.8, 4.4, 30.0),
+                            ),
+                    ),
+                    ScatterSeries(
+                        name = "South",
+                        points =
+                            listOf(
+                                ScatterPoint(1.3, 3.9, 14.0),
+                                ScatterPoint(2.6, 1.1),
+                                ScatterPoint(3.8, 3.5, 24.0),
+                                ScatterPoint(5.2, 2.5, 10.0),
+                            ),
+                    ),
+                ),
             ),
         modifier = Modifier.size(PreviewChartSize),
         style =
             ScatterChartDefaults.style(
                 chartContainerStyle = previewChartContainerStyle(),
+                legend = LegendDefaults.style(visible = false),
                 axes =
                     AxesDefaults.style(
                         xLabels = AxisLabelDefaults.style(visible = false),
