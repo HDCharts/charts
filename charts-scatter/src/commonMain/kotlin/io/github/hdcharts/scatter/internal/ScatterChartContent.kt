@@ -130,7 +130,15 @@ internal fun ScatterChartContent(
             BoxWithConstraints(
                 Modifier.fillMaxSize().padding(bottom = style.chartContainerStyle.contentPadding),
             ) {
-                val padding = with(density) { StyleDefaults.scatterPlotPadding.toPx() }
+                val padding =
+                    with(density) {
+                        scatterPlotPadding(
+                            contentPadding = style.chartContainerStyle.contentPadding.toPx(),
+                            pointRadii = radii,
+                            selectionPadding = StyleDefaults.scatterSelectionPadding.toPx(),
+                            selectionWidth = StyleDefaults.scatterSelectionWidth.toPx(),
+                        )
+                    }
                 val showXLabels = style.axes.visible && style.axes.xLabels.visible
                 val showYLabels = style.axes.visible && style.axes.yLabels.visible
                 val xLabelCount = style.axes.xLabels.maxCount ?: StyleDefaults.yAxisMaxLabelCount

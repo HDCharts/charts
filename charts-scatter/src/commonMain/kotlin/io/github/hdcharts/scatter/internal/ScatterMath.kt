@@ -74,6 +74,14 @@ internal fun scatterPointRadii(
     }
 }
 
+/** Keeps the largest point and its selection outline inside the canvas at every plot edge. */
+internal fun scatterPlotPadding(
+    contentPadding: Float,
+    pointRadii: List<Float>,
+    selectionPadding: Float,
+    selectionWidth: Float,
+): Float = maxOf(contentPadding, (pointRadii.maxOrNull() ?: 0f) + selectionPadding + selectionWidth / 2f)
+
 /** Pixel bounds shared by drawing and pointer hit testing. */
 internal data class ScatterPlotLayout(
     val left: Float,

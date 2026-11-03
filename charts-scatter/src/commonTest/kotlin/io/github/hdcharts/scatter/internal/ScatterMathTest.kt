@@ -205,6 +205,35 @@ class ScatterMathTest {
     }
 
     @Test
+    fun plotPadding_usesContainerSpacingWhenPointsFitInsideIt() {
+        val padding =
+            scatterPlotPadding(
+                contentPadding = 20f,
+                pointRadii = listOf(4f, 10f),
+                selectionPadding = 3f,
+                selectionWidth = 2f,
+            )
+
+        assertEquals(expected = 20f, actual = padding)
+    }
+
+    @Test
+    fun plotPadding_keepsLargeBubblesAndSelectionOutlinesInsideAZeroPaddingChart() {
+        val padding =
+            scatterPlotPadding(
+                contentPadding = 0f,
+                pointRadii = listOf(4f, 40f),
+                selectionPadding = 3f,
+                selectionWidth = 2f,
+            )
+        val layout = scatterPlotLayout(size = Size(300f, 200f), padding = padding)
+        val selectedBubbleExtent = Offset(44f, 44f)
+
+        assertEquals(expected = Offset.Zero, actual = layout.position(Offset.Zero) - selectedBubbleExtent)
+        assertEquals(expected = Offset(300f, 200f), actual = layout.position(Offset(1f, 1f)) + selectedBubbleExtent)
+    }
+
+    @Test
     fun plotLayout_keepsAPositiveSpanInATinyViewport() {
         val layout = scatterPlotLayout(size = Size(20f, 10f), padding = 28f)
 
