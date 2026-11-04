@@ -53,22 +53,13 @@ Use the smallest applicable command:
 | Compile gate | `./gradlew ciCompile` |
 | Repository checks | `./gradlew chartsCheck` |
 | Public API compatibility | `./gradlew apiCompatibilityCheck` |
-| Playground compile (library or `sample/shared` changes) | `../charts-playground/gradlew -p ../charts-playground -DchartsLocalPath="$PWD" ciCompile` |
 | Compose or screenshots | `./gradlew :androidApp:validateDebugScreenshotTest` |
 | Intentional screenshot updates | `./gradlew updateScreenshots` |
 
-The playground command expects `charts-playground` next to this checkout. From a git worktree,
-replace both `../charts-playground` paths with the path to your playground checkout.
-
-Two rows are local only:
-
-- **`chartsCheck`** is never invoked by a workflow. Pull requests are validated by the narrower
-  `ciAssemble`, `ciCompile`, `ktlintCheck`, and `ciTest*` tasks above, which are not equivalent to
-  the root `build` that `chartsCheck` depends on. Whether `chartsCheck` becomes a merge gate is
-  undecided.
-- **The playground compile** has no pull-request gate either. The playground is built during
-  snapshot and release publishing, and the pull request template asks contributors to run the
-  command above when library or sample code changes.
+`chartsCheck` is local only and is never invoked by a workflow. Pull requests are validated by
+the narrower `ciAssemble`, `ciCompile`, `ktlintCheck`, and `ciTest*` tasks above, which are not
+equivalent to the root `build` that `chartsCheck` depends on. Whether `chartsCheck` becomes a
+merge gate is undecided.
 
 CI owns `chartsTestAndroidInstrumented`, `chartsTestWasm`, `chartsTestIos`, and
 `validateDocsGifBaselines` unless explicitly requested locally.

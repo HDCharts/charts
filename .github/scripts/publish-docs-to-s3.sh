@@ -4,7 +4,7 @@ set -euo pipefail
 mode="${1:-}"
 asset="${2:-}"
 if [[ -z "${mode}" || -z "${asset}" ]]; then
-  echo "Usage: $0 <release|snapshot> <api|demo|playground|shared|metadata>" >&2
+  echo "Usage: $0 <release|snapshot> <api|demo|shared|metadata>" >&2
   exit 1
 fi
 
@@ -15,12 +15,11 @@ fi
 
 bucket_uri="s3://${DOCS_STATIC_BUCKET}/static"
 
-sync_source_dir() {
-  local src="$1"
-  local rel_path="$2"
-  local cache_control="$3"
-  local include_only_show_errors="${4:-false}"
-  local delete_extraneous="${5:-true}"
+sync_subdir() {
+  local rel_path="$1"
+  local src="docs/static/${rel_path}"
+  local cache_control="$2"
+  local include_only_show_errors="${3:-false}"
   local dst="${bucket_uri}/${rel_path}"
 
   if [[ ! -d "${src}" ]]; then
@@ -31,23 +30,12 @@ sync_source_dir() {
   local args=(
     aws s3 sync "${src}/" "${dst}/"
     --cache-control "${cache_control}"
+    --delete
   )
-  if [[ "${delete_extraneous}" == "true" ]]; then
-    args+=(--delete)
-  fi
   if [[ "${include_only_show_errors}" == "true" ]]; then
     args+=(--only-show-errors)
   fi
-  args+=("${@:6}")
-
   "${args[@]}"
-}
-
-sync_subdir() {
-  local rel_path="$1"
-  local cache_control="$2"
-  local include_only_show_errors="${3:-false}"
-  sync_source_dir "docs/static/${rel_path}" "${rel_path}" "${cache_control}" "${include_only_show_errors}"
 }
 
 s3_prefix_has_objects() {
@@ -108,7 +96,7 @@ claim_release_asset() {
 validate_asset() {
   case "${mode}:${asset}" in
     release:api|release:demo|release:shared|release:metadata|\
-    snapshot:api|snapshot:demo|snapshot:playground|snapshot:shared|snapshot:metadata) ;;
+    snapshot:api|snapshot:demo|snapshot:shared|snapshot:metadata) ;;
     *)
       echo "Unsupported mode/asset combination: ${mode} ${asset}" >&2
       exit 1
@@ -137,7 +125,7 @@ case "${mode}" in
         ;;
       shared)
         if [[ -d docs/static ]]; then
-          aws s3 sync docs/static/ "${bucket_uri}/" --exclude "api/*" --exclude "demo/*" --exclude "playground/*"
+          aws s3 sync docs/static/ "${bucket_uri}/" --exclude "api/*" --exclude "demo/*"
         fi
         ;;
       metadata)
@@ -160,22 +148,9 @@ case "${mode}" in
       api|demo)
         sync_subdir "${asset}/snapshot" "${cache_control_snapshot}" "true"
         ;;
-      playground)
-        playground_dir="${PLAYGROUND_DIST_DIR:-playground/build/dist/wasmJs/productionExecutable}"
-        # Only content-hashed wasm is immutable; mirrors the wasm headers in charts-docs next.config.ts.
-        hashed_wasm="$(printf '[0-9a-f]%.0s' {1..20}).wasm"
-        cache_control_hashed="public, max-age=31536000, immutable"
-        # New wasm goes up first and old wasm is pruned last, so the live JS never points at a missing file.
-        sync_source_dir "${playground_dir}" "playground/snapshot" \
-          "${cache_control_hashed}" "true" "false" --exclude "*" --include "${hashed_wasm}"
-        sync_source_dir "${playground_dir}" "playground/snapshot" \
-          "${cache_control_snapshot}" "true" "true" --exclude "${hashed_wasm}"
-        sync_source_dir "${playground_dir}" "playground/snapshot" \
-          "${cache_control_hashed}" "true" "true" --exclude "*" --include "${hashed_wasm}"
-        ;;
       shared)
         if [[ -d docs/static ]]; then
-          aws s3 sync docs/static/ "${bucket_uri}/" --exclude "api/*" --exclude "demo/*" --exclude "playground/*" --only-show-errors
+          aws s3 sync docs/static/ "${bucket_uri}/" --exclude "api/*" --exclude "demo/*" --only-show-errors
         fi
         ;;
       metadata)

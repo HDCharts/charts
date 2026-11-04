@@ -22,7 +22,6 @@ not whether it is correct; use `hdc-review` for correctness.
 - `charts-*` public API, `API-COMPATIBILITY-BREAKS.txt`, and `release-notes/`.
 - `docs/wiki/`, synced into `../charts-docs`, plus `README.md` and `readme-assets/`.
 - `sample/` screens, previews, screenshot tests, and `gif-baselines/` scenarios.
-- `../charts-playground`, which exposes chart options and generates chart code.
 - `../charts-gif-recorder`, the published `compose-gif-recorder` library.
 - `.github/workflows/`, `scripts/`, and `buildSrc/` tooling.
 
@@ -33,7 +32,7 @@ not whether it is correct; use `hdc-review` for correctness.
 - **Fan-out.** Count the places above that must now stay in sync. Flag anything
   a human must remember to update by hand.
 - **Configuration growth.** New flags, modes, and options multiply the states to
-  test, document, and expose in the playground.
+  test and document.
 - **Duplication.** Copied logic, constants, snippets, or docs that will drift.
   Prefer one owner and derivation, or a check that catches drift.
 - **Fragile coupling.** Correctness that depends on an invariant held elsewhere,

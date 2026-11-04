@@ -50,5 +50,4 @@ Dependencies use a cache keyed by build files. Gradle task outputs use a separat
 runner OS, architecture, and commit, so source changes refresh the outputs that pull requests
 restore. Each warm job restores earlier outputs and saves the updated cache after a successful
 build. Pull requests restore the latest available outputs for their platform without saving them.
-Other workflows on `main` restore caches read-only. The playground job keeps its own dependency
-cache, and release jobs start fresh.
+Other workflows on `main` restore caches read-only. Release jobs start fresh.

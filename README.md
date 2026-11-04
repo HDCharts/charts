@@ -51,9 +51,6 @@ https://charts.hdcode.dev/
 ## 🟢 Interactive Demo
 https://charts.hdcode.dev/demo/snapshot/
 
-## 🏀 Playground
-https://charts.hdcode.dev/playground
-
 ## Get Started
 
 This README covers HDCharts 3.x. Replace `<version>` with the 3.x version you use.

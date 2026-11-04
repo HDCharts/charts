@@ -34,7 +34,6 @@ HDCharts
 │           ├── :app (common)
 │           ├── :androidApp
 │           └── :iosApp
-├── charts-playground (<a href="https://github.com/HDCharts/charts-playground">https://github.com/HDCharts/charts-playground</a>)
 ├── charts-docs (<a href="https://github.com/HDCharts/charts-docs">https://github.com/HDCharts/charts-docs</a>)
 └── charts-gif-recorder (<a href="https://github.com/hdcodedev/compose-gif-recorder">https://github.com/hdcodedev/compose-gif-recorder</a>)
 </pre>
@@ -57,7 +56,6 @@ See why things are built the way they are: https://charts.hdcode.dev/dev/decisio
 | `:sample-api` | Kotlin Multiplatform, Ktor, kotlinx.serialization, Koin |
 | `:androidApp` | Kotlin, Android, Jetpack Compose |
 | `:iosApp` | Swift, SwiftUI, Xcode |
-| `charts-playground` | Kotlin Multiplatform (JVM/JS), Compose Multiplatform, Ktor |
 | `charts-docs` | Next.js, React, TypeScript, MDX |
 | `charts-gif-recorder` | Kotlin (JVM), Gradle Plugin Development, Android/Jetpack Compose, KSP |
 
