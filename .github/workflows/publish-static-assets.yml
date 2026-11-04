@@ -1,6 +1,5 @@
-# Reusable publication of the static API reference, demo, and snapshot
-# playground. Releases and
-# snapshots share the mechanics but retain separate callers and policies.
+# Reusable publication of the static API reference and demo. Releases and snapshots
+# share the mechanics but retain separate callers and policies.
 name: Publish Static Assets
 
 on:
@@ -136,27 +135,15 @@ jobs:
         shell: bash
         run: bash .github/scripts/publish-docs-to-s3.sh "${{ inputs.mode }}" demo
 
-  publish-playground:
-    name: Publish playground
-    if: ${{ inputs.mode == 'snapshot' }}
-    uses: ./.github/workflows/publish-playground.yml
-    with:
-      charts-version: ${{ inputs.charts-version }}
-      source-sha: ${{ inputs.source-sha }}
-      source-ref: ${{ inputs.source-ref }}
-    secrets:
-      AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
-
   publish-shared-static-assets:
     name: Publish shared static assets
     runs-on: ubuntu-26.04
-    needs: [publish-api-reference, publish-demo, publish-playground]
+    needs: [publish-api-reference, publish-demo]
     if: >-
       ${{
         always() &&
         needs.publish-api-reference.result == 'success' &&
-        needs.publish-demo.result == 'success' &&
-        (needs.publish-playground.result == 'success' || needs.publish-playground.result == 'skipped')
+        needs.publish-demo.result == 'success'
       }}
     environment: ${{ inputs.mode == 'release' && 'Production' || 'Snapshot' }}
     steps:

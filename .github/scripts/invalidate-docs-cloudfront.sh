@@ -3,7 +3,7 @@ set -euo pipefail
 
 mode="${1:-}"
 if [[ -z "${mode}" ]]; then
-  echo "Usage: $0 <release|snapshot|playground>" >&2
+  echo "Usage: $0 <release|snapshot>" >&2
   exit 1
 fi
 
@@ -32,13 +32,7 @@ case "${mode}" in
       --paths \
         "/static/_meta/charts-snapshot-publish.json" \
         "/static/api/snapshot/*" \
-        "/static/demo/snapshot/*" \
-        "/static/playground/snapshot/*"
-    ;;
-  playground)
-    aws cloudfront create-invalidation \
-      --distribution-id "${CLOUDFRONT_DISTRIBUTION_ID}" \
-      --paths "/static/playground/snapshot/*"
+        "/static/demo/snapshot/*"
     ;;
   *)
     echo "Unsupported mode: ${mode}" >&2
