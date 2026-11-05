@@ -198,8 +198,16 @@ fun ShowTemperatureAnomalies(modifier: Modifier = Modifier) {
 
 `HeatmapRenderMode.Cells`, the default, draws one flat rectangle per cell. `cellSpacing` sets the gap
 between cells. `HeatmapRenderMode.Interpolated` draws a continuous color field computed from the
-same values, on the same color scale. This example reuses `regionalCpuLoad` and `cpuLoadScale` from
-Sequential Color Scale, so the two images differ only in the render mode:
+same values, on the same color scale.
+
+Use `Cells` when each value is an independent observation, such as categories, services, or weekdays,
+where the space between two rows or columns has no meaning. Use `Interpolated` when neighboring rows
+and columns are continuous, such as consecutive hours or nearby regions, and the trend between them
+is worth showing. The colors between cell centers are estimates computed from the neighboring values,
+not additional observations; selection and the legend marker always report a cell's own value.
+
+This example reuses `regionalCpuLoad` and `cpuLoadScale` from Sequential Color Scale, so the two
+images differ only in the render mode:
 
 <!-- BEGIN WIKI EXAMPLE: sample/androidApp/src/main/kotlin/io/github/hdcharts/app/docs/HeatmapCapabilities.kt#heatmap-interpolated -->
 ```kotlin

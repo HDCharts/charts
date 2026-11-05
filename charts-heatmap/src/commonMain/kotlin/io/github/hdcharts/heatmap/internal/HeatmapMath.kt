@@ -158,23 +158,77 @@ internal fun heatmapInterpolatedValue(
     data: HeatmapData,
     x: Double,
     y: Double,
-): Double? {
+): Double? = HeatmapField(data).value(x, y)
+
+/**
+ * The values of a validated matrix and the slope at every center, stored flat so the interpolated
+ * field reads them without boxing and computes each slope once rather than once per sample.
+ */
+internal class HeatmapField(
+    data: HeatmapData,
+) {
     val columnCount = data.columns.size
     val rowCount = data.rows.size
-    val column = floor(x).toInt().coerceIn(0, columnCount - 1)
-    val row = floor(y).toInt().coerceIn(0, rowCount - 1)
-    val own = data.valueAt(row, column) ?: return null
-    val (column0, column1) = neighborIndices(x - 0.5, columnCount)
-    val (row0, row1) = neighborIndices(y - 0.5, rowCount)
-    return smoothBlend(
-        data = data,
-        row0 = row0,
-        row1 = row1,
-        rowFraction = neighborFraction(y - 0.5, row0, row1),
-        column0 = column0,
-        column1 = column1,
-        columnFraction = neighborFraction(x - 0.5, column0, column1),
-    ) ?: own
+    private val values = DoubleArray(rowCount * columnCount)
+    private val present = BooleanArray(rowCount * columnCount)
+    private val columnSlopes = DoubleArray(rowCount * columnCount)
+    private val rowSlopes = DoubleArray(rowCount * columnCount)
+
+    init {
+        for (row in 0 until rowCount) {
+            for (column in 0 until columnCount) {
+                val value = data.valueAt(row, column) ?: continue
+                val index = row * columnCount + column
+                values[index] = value
+                present[index] = true
+                columnSlopes[index] = monotoneSlope(data.valueAt(row, column - 1), value, data.valueAt(row, column + 1))
+                rowSlopes[index] = monotoneSlope(data.valueAt(row - 1, column), value, data.valueAt(row + 1, column))
+            }
+        }
+    }
+
+    fun isPresent(
+        row: Int,
+        column: Int,
+    ): Boolean = row in 0 until rowCount && column in 0 until columnCount && present[row * columnCount + column]
+
+    /** The value of a present cell; check [isPresent] first. */
+    fun valueAt(
+        row: Int,
+        column: Int,
+    ): Double = values[row * columnCount + column]
+
+    fun columnSlope(
+        row: Int,
+        column: Int,
+    ): Double = columnSlopes[row * columnCount + column]
+
+    fun rowSlope(
+        row: Int,
+        column: Int,
+    ): Double = rowSlopes[row * columnCount + column]
+
+    /** The interpolated field at ([x], [y]); see [heatmapInterpolatedValue]. */
+    fun value(
+        x: Double,
+        y: Double,
+    ): Double? {
+        val column = floor(x).toInt().coerceIn(0, columnCount - 1)
+        val row = floor(y).toInt().coerceIn(0, rowCount - 1)
+        if (!isPresent(row, column)) return null
+        val own = valueAt(row, column)
+        val (column0, column1) = neighborIndices(x - 0.5, columnCount)
+        val (row0, row1) = neighborIndices(y - 0.5, rowCount)
+        return smoothBlend(
+            field = this,
+            row0 = row0,
+            row1 = row1,
+            rowFraction = neighborFraction(y - 0.5, row0, row1),
+            column0 = column0,
+            column1 = column1,
+            columnFraction = neighborFraction(x - 0.5, column0, column1),
+        ) ?: own
+    }
 }
 
 // Cubic Hermite basis on 0..1: the weights of the start value, end value, start slope and end slope.
@@ -214,7 +268,7 @@ private fun monotoneSlope(
  * the slopes overflow. Returns null only when every corner with weight is missing.
  */
 private fun smoothBlend(
-    data: HeatmapData,
+    field: HeatmapField,
     row0: Int,
     row1: Int,
     rowFraction: Double,
@@ -231,15 +285,16 @@ private fun smoothBlend(
         val atEndRow = corner >= 2
         val row = if (atEndRow) row1 else row0
         val column = if (atEndColumn) column1 else column0
-        val value = data.valueAt(row, column) ?: continue
+        if (!field.isPresent(row, column)) continue
+        val value = field.valueAt(row, column)
         low = min(low, value)
         high = max(high, value)
         val columnWeight = if (atEndColumn) endValueWeight(columnFraction) else startValueWeight(columnFraction)
         val rowWeight = if (atEndRow) endValueWeight(rowFraction) else startValueWeight(rowFraction)
         val columnSlopeWeight = if (atEndColumn) endSlopeWeight(columnFraction) else startSlopeWeight(columnFraction)
         val rowSlopeWeight = if (atEndRow) endSlopeWeight(rowFraction) else startSlopeWeight(rowFraction)
-        val columnSlope = monotoneSlope(data.valueAt(row, column - 1), value, data.valueAt(row, column + 1))
-        val rowSlope = monotoneSlope(data.valueAt(row - 1, column), value, data.valueAt(row + 1, column))
+        val columnSlope = field.columnSlope(row, column)
+        val rowSlope = field.rowSlope(row, column)
         totalWeight += columnWeight * rowWeight
         blended += columnWeight * rowWeight * value +
             columnSlopeWeight * rowWeight * columnSlope +
@@ -248,14 +303,19 @@ private fun smoothBlend(
     if (totalWeight <= 0.0) return null
     val result = blended / totalWeight
     if (!result.isFinite()) {
-        return blendedBilinear(data, row0, row1, rowFraction, column0, column1, columnFraction)
+        return blendedBilinear(field, row0, row1, rowFraction, column0, column1, columnFraction)
     }
     return result.coerceIn(low, high)
 }
 
+private fun HeatmapField.valueOrNull(
+    row: Int,
+    column: Int,
+): Double? = if (isPresent(row, column)) valueAt(row, column) else null
+
 /** Bilinear value of four present corners, or null when any corner is missing. */
 private fun bilinear(
-    data: HeatmapData,
+    field: HeatmapField,
     row0: Int,
     row1: Int,
     rowFraction: Double,
@@ -263,10 +323,10 @@ private fun bilinear(
     column1: Int,
     columnFraction: Double,
 ): Double? {
-    val topLeft = data.valueAt(row0, column0) ?: return null
-    val topRight = data.valueAt(row0, column1) ?: return null
-    val bottomLeft = data.valueAt(row1, column0) ?: return null
-    val bottomRight = data.valueAt(row1, column1) ?: return null
+    val topLeft = field.valueOrNull(row0, column0) ?: return null
+    val topRight = field.valueOrNull(row0, column1) ?: return null
+    val bottomLeft = field.valueOrNull(row1, column0) ?: return null
+    val bottomRight = field.valueOrNull(row1, column1) ?: return null
     val top = lerpValue(topLeft, topRight, columnFraction)
     val bottom = lerpValue(bottomLeft, bottomRight, columnFraction)
     return lerpValue(top, bottom, rowFraction)
@@ -277,7 +337,7 @@ private fun bilinear(
  * when all four corners are present. Returns null only when every corner with weight is missing.
  */
 private fun blendedBilinear(
-    data: HeatmapData,
+    field: HeatmapField,
     row0: Int,
     row1: Int,
     rowFraction: Double,
@@ -285,14 +345,14 @@ private fun blendedBilinear(
     column1: Int,
     columnFraction: Double,
 ): Double? {
-    bilinear(data, row0, row1, rowFraction, column0, column1, columnFraction)?.let { return it }
+    bilinear(field, row0, row1, rowFraction, column0, column1, columnFraction)?.let { return it }
 
     val corners =
         listOf(
-            data.valueAt(row0, column0) to (1.0 - rowFraction) * (1.0 - columnFraction),
-            data.valueAt(row0, column1) to (1.0 - rowFraction) * columnFraction,
-            data.valueAt(row1, column0) to rowFraction * (1.0 - columnFraction),
-            data.valueAt(row1, column1) to rowFraction * columnFraction,
+            field.valueOrNull(row0, column0) to (1.0 - rowFraction) * (1.0 - columnFraction),
+            field.valueOrNull(row0, column1) to (1.0 - rowFraction) * columnFraction,
+            field.valueOrNull(row1, column0) to rowFraction * (1.0 - columnFraction),
+            field.valueOrNull(row1, column1) to rowFraction * columnFraction,
         ).filter { (value, weight) -> value != null && weight > 0.0 }
     val totalWeight = corners.sumOf { it.second }
     if (corners.isEmpty() || totalWeight <= 0.0) return null
@@ -323,17 +383,23 @@ private const val STRIP_HEIGHT_PX = 2f
 // Upper bound on strips, so a very tall plot keeps a bounded drawing cost.
 private const val MAX_STRIPS = 1024
 
-// Gradient segments per half cell. The field is a smooth cubic there, so a few straight segments
-// follow it to well under one 8-bit color step.
+// Most gradient segments per half cell. The field is a smooth cubic there, so a few straight
+// segments follow it to about one 8-bit color step.
 private const val SAMPLES_PER_HALF_CELL = 4
+
+// Narrowest gradient segment in pixels. Half cells narrower than four such segments get fewer, so a
+// dense matrix costs stops in proportion to the plot width rather than to detail no pixel can show.
+private const val MIN_SEGMENT_PX = 2f
 
 /**
  * Splits the interpolated field of a validated [data] into horizontal strips for [layout].
  *
  * Within a strip, the field is evaluated at the strip's vertical center. Along the strip, each half
- * cell is sampled at [SAMPLES_PER_HALF_CELL] segments, with an extra stop wherever the value crosses a
- * color-scale stop, so the gradient follows both the field and the color scale. Missing cells are
- * transparent, and strip edges sit on whole pixels so strips leave no seams.
+ * cell is sampled at up to [SAMPLES_PER_HALF_CELL] segments of at least [MIN_SEGMENT_PX], with an
+ * extra stop wherever the value crosses a color-scale stop, so the gradient follows both the field and
+ * the color scale. Missing cells are transparent, and strip edges sit on whole pixels so strips leave
+ * no seams. Strips are at most [MAX_STRIPS] and, as zero-height strips are skipped, at most one per
+ * pixel row, so the work is bounded by the plot size.
  */
 internal fun heatmapInterpolatedStrips(
     data: HeatmapData,
@@ -341,6 +407,9 @@ internal fun heatmapInterpolatedStrips(
     layout: HeatmapPlotLayout,
 ): List<HeatmapStrip> {
     val rowCount = data.rows.size
+    val field = HeatmapField(data)
+    val samplesPerHalfCell =
+        (layout.cellWidth / 2f / MIN_SEGMENT_PX).toInt().coerceIn(1, SAMPLES_PER_HALF_CELL)
     val stripsPerRow =
         ceil(layout.cellHeight / STRIP_HEIGHT_PX)
             .toInt()
@@ -357,7 +426,7 @@ internal fun heatmapInterpolatedStrips(
                 HeatmapStrip(
                     top = topPx,
                     height = bottomPx - topPx,
-                    stops = heatmapStripStops(data, mapping, row, (startY + endY) / 2.0),
+                    stops = heatmapStripStops(field, mapping, row, (startY + endY) / 2.0, samplesPerHalfCell),
                 )
         }
     }
@@ -370,11 +439,19 @@ internal fun heatmapStripStops(
     mapping: HeatmapColorMapping,
     row: Int,
     y: Double,
+): List<Pair<Float, Color>> = heatmapStripStops(HeatmapField(data), mapping, row, y, SAMPLES_PER_HALF_CELL)
+
+private fun heatmapStripStops(
+    field: HeatmapField,
+    mapping: HeatmapColorMapping,
+    row: Int,
+    y: Double,
+    samplesPerHalfCell: Int,
 ): List<Pair<Float, Color>> {
-    val columnCount = data.columns.size
-    val (row0, row1) = neighborIndices(y - 0.5, data.rows.size)
+    val columnCount = field.columnCount
+    val (row0, row1) = neighborIndices(y - 0.5, field.rowCount)
     val rowFraction = neighborFraction(y - 0.5, row0, row1)
-    val stops = ArrayList<Pair<Float, Color>>(columnCount * (SAMPLES_PER_HALF_CELL + 2) * 2)
+    val stops = ArrayList<Pair<Float, Color>>(columnCount * (samplesPerHalfCell + 2) * 2)
 
     // Each half cell has one owning cell and one set of neighbors, so one rule covers all of it.
     for (half in 0 until columnCount * 2) {
@@ -383,21 +460,21 @@ internal fun heatmapStripStops(
         val endX = startX + 0.5
         val startOffset = (startX / columnCount).toFloat()
         val endOffset = (endX / columnCount).toFloat()
-        val own = data.valueAt(row, column)
-        if (own == null) {
+        if (!field.isPresent(row, column)) {
             stops += startOffset to Color.Transparent
             stops += endOffset to Color.Transparent
             continue
         }
+        val own = field.valueAt(row, column)
         val (column0, column1) = neighborIndices((startX + endX) / 2.0 - 0.5, columnCount)
         var previousOffset = startOffset
         var previousValue: Double = own
-        for (sample in 0..SAMPLES_PER_HALF_CELL) {
-            val x = startX + 0.5 * sample / SAMPLES_PER_HALF_CELL
+        for (sample in 0..samplesPerHalfCell) {
+            val x = startX + 0.5 * sample / samplesPerHalfCell
             val offset = (x / columnCount).toFloat()
             val value =
                 smoothBlend(
-                    data,
+                    field,
                     row0,
                     row1,
                     rowFraction,
@@ -406,7 +483,10 @@ internal fun heatmapStripStops(
                     neighborFraction(x - 0.5, column0, column1),
                 ) ?: own
             if (sample > 0) addKnotCrossings(stops, mapping, previousValue, value, previousOffset, offset)
-            stops += offset to mapping.color(value)
+            val color = mapping.color(value)
+            // The field is continuous, so a half cell usually starts with the stop the last one ended on.
+            val last = stops.lastOrNull()
+            if (sample > 0 || last == null || last.first != offset || last.second != color) stops += offset to color
             previousOffset = offset
             previousValue = value
         }
