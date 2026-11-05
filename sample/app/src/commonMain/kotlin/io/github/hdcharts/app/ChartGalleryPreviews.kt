@@ -31,6 +31,9 @@ import io.github.hdcharts.gauge.RingGaugeChart
 import io.github.hdcharts.gauge.RingGaugeChartDefaults
 import io.github.hdcharts.gauge.SegmentedRingGaugeChart
 import io.github.hdcharts.gauge.SegmentedRingGaugeChartDefaults
+import io.github.hdcharts.heatmap.HeatmapChart
+import io.github.hdcharts.heatmap.HeatmapChartDefaults
+import io.github.hdcharts.heatmap.HeatmapRenderMode
 import io.github.hdcharts.histogram.HistogramChart
 import io.github.hdcharts.line.LineChart
 import io.github.hdcharts.line.LineChartDefaults
@@ -39,6 +42,8 @@ import io.github.hdcharts.pie.PieChartDefaults
 import io.github.hdcharts.radar.RadarChart
 import io.github.hdcharts.radar.RadarChartDefaults
 import io.github.hdcharts.sampleshared.data.ChartGalleryPreview
+import io.github.hdcharts.sampleshared.data.HeatmapSampleColorScales
+import io.github.hdcharts.sampleshared.data.heatmapSampleUseCase
 import io.github.hdcharts.sampleshared.theme.Dimens
 import io.github.hdcharts.scatter.ScatterChart
 import io.github.hdcharts.scatter.ScatterChartDefaults
@@ -107,8 +112,28 @@ internal fun ChartPreview(
         ChartDestination.StackedBarChartScreen -> StackedBarChartPreview(previews.stackedSeries)
         ChartDestination.RadarChartScreen -> RadarChartPreview(previews.radarSeries)
         ChartDestination.ScatterChartScreen -> ScatterChartPreview()
+        ChartDestination.HeatmapChartScreen -> HeatmapChartPreview()
         ChartDestination.GaugeChartsScreen -> RingGaugeChartPreview(previews.ringGaugeValues)
     }
+}
+
+@Composable
+private fun HeatmapChartPreview() {
+    val data = remember { heatmapSampleUseCase().regionalCpuLoad().data }
+    HeatmapChart(
+        data = data,
+        modifier = Modifier.fillMaxSize(),
+        style =
+            HeatmapChartDefaults.style(
+                chartContainerStyle = previewChartContainerStyle(),
+                renderMode = HeatmapRenderMode.Interpolated,
+                colorScale = HeatmapSampleColorScales.cpuLoad,
+                xLabels = AxisLabelDefaults.style(visible = false),
+                yLabels = AxisLabelDefaults.style(visible = false),
+                legend = LegendDefaults.style(visible = false),
+            ),
+        interactionEnabled = false,
+    )
 }
 
 @Composable

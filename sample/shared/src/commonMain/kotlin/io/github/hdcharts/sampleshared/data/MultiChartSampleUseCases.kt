@@ -60,3 +60,15 @@ interface ScatterSampleUseCase {
     /** The same X/Y points, with optional sizes for bubble charts. */
     fun deterministic(bubbles: Boolean = false): ScatterSampleData
 }
+
+/** Category matrices for the heatmap demos and HeatmapChartScreenshotTest. */
+interface HeatmapSampleUseCase {
+    /** Sessions per weekday and hour, with no values during a Sunday night maintenance window. */
+    fun weeklyActivity(): HeatmapSampleData
+
+    /** CPU load in percent per region and UTC hour; each region's busy hours follow its time zone. */
+    fun regionalCpuLoad(): HeatmapSampleData
+
+    /** Monthly temperature anomalies per city, both below and above zero, with one missing month. */
+    fun temperatureAnomalies(): HeatmapSampleData
+}

@@ -44,6 +44,7 @@ class MainViewModel : ViewModel() {
                     ChartDestination.StackedBarChartScreen,
                     ChartDestination.RadarChartScreen,
                     ChartDestination.ScatterChartScreen,
+                    ChartDestination.HeatmapChartScreen,
                     ChartDestination.GaugeChartsScreen,
                 ),
             ),

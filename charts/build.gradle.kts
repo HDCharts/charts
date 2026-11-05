@@ -66,6 +66,7 @@ kotlin {
             api(projects.chartsRadar)
             api(projects.chartsGauge)
             api(projects.chartsScatter)
+            api(projects.chartsHeatmap)
         }
 
         commonTest.dependencies {
@@ -99,6 +100,7 @@ private val apiSourceRoots =
         project.rootDir.resolve("charts-radar/src/commonMain/kotlin/io/github/hdcharts/radar"),
         project.rootDir.resolve("charts-gauge/src/commonMain/kotlin/io/github/hdcharts/gauge"),
         project.rootDir.resolve("charts-scatter/src/commonMain/kotlin/io/github/hdcharts/scatter"),
+        project.rootDir.resolve("charts-heatmap/src/commonMain/kotlin/io/github/hdcharts/heatmap"),
     )
 
 dokka {

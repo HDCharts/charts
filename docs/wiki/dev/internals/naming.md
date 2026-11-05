@@ -26,6 +26,7 @@ One public composable per file. The file is named after it and holds nothing els
 | `PieChart.kt` | `PieChart` | `charts-pie` |
 | `RadarChart.kt` | `RadarChart` | `charts-radar` |
 | `ScatterChart.kt` | `ScatterChart` | `charts-scatter` |
+| `HeatmapChart.kt` | `HeatmapChart` | `charts-heatmap` |
 | `RingGaugeChart.kt` | `RingGaugeChart` | `charts-gauge` |
 | `StackedBarChart.kt` | `StackedBarChart` | `charts-stacked-bar` |
 | `StackedAreaChart.kt` | `StackedAreaChart` | `charts-stacked-area` |
@@ -70,6 +71,7 @@ two stacked charts.
 | Pie | `PieChart` → `PieChartEntry` → `PieChartFrame` → `PieChartContent` |
 | Radar | `RadarChart` → `RadarChartEntry` → `RadarChartContent` |
 | Scatter / bubble | `ScatterChart` → `ScatterChartEntry` → `ScatterChartContent` |
+| Heatmap | `HeatmapChart` → `HeatmapChartEntry` → `HeatmapChartContent` |
 | Ring gauge | `RingGaugeChart` → `RingGaugeChartEntry` → `RingGaugeChartContent` |
 | Stacked bar | `StackedBarChart` → `StackedBarChartEntry` → `StackedBarChartFrame` → `StackedBarChartImpl` |
 | Stacked area | `StackedAreaChart` → `StackedAreaChartEntry` → `StackedAreaChartFrame` → `StackedAreaChartImpl` |
@@ -77,14 +79,15 @@ two stacked charts.
 Radar and pie lay their plot out with `ChartSquarePlotLayout` from `charts-core`, which supplies
 the square plot, the header, and the legend. Ring gauge draws a half circle, so it uses
 `ChartPlotLayout` with a plot twice as wide as it is tall; the square layout is that with `1f`.
+Scatter and heatmap also use `ChartPlotLayout`; heatmap derives its plot ratio from the matrix shape.
 
 The stacked charts are the two that do not follow the rest: their `Frame` wraps the `Impl` and hands
 it the plot slot, where line and bar put the `Frame` inside the `Impl` and hand it a content slot.
 Neither stacked chart has a `Content`, so its `Impl` draws on the canvas itself.
 
 Every chart has an `Entry` that owns its policy, style values, clamping and any conversion.
-Indexed-series entries delegate to shared `ChartEntry`; scatter validates its own X/Y data contract
-and passes the validated data directly to content. An entry with one public
+Indexed-series entries delegate to shared `ChartEntry`; scatter and heatmap validate their own X/Y or
+matrix data contracts and pass the validated data directly to content. An entry with one public
 composable calls the content itself; an entry shared by two takes the content as a lambda. Bar and
 histogram each have their own entry, because their policies differ, and then share
 `BarChartInternalPlot`.

@@ -152,6 +152,7 @@ class ChartGalleryViewModel(
             ChartDestination.StackedBarChartScreen -> "Segment composition by category."
             ChartDestination.RadarChartScreen -> "Live radial signals."
             ChartDestination.ScatterChartScreen -> "Compare values and sizes."
+            ChartDestination.HeatmapChartScreen -> "Values across two categories."
             ChartDestination.GaugeChartsScreen -> "Ring and capacity gauges."
         }
 

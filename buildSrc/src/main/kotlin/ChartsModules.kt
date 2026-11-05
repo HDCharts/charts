@@ -14,6 +14,7 @@ object ChartsModules {
             ":charts-radar",
             ":charts-gauge",
             ":charts-scatter",
+            ":charts-heatmap",
             ":charts",
         )
 

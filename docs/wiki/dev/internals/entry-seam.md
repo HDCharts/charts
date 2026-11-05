@@ -124,13 +124,20 @@ model. That covers the existing line, bar, pie, radar, stacked and gauge familie
 | --- | --- | --- | --- |
 | Indexed series | `ChartData` | `ChartEntry`, through a `ChartSpec` | `ChartPolicy<S>` and `SeriesRule` |
 | Scatter and bubble | `ScatterData` | `ScatterChartEntry` | Private `ScatterChartPolicy` |
+| Heatmap | `HeatmapData` | `HeatmapChartEntry` | Private `HeatmapChartPolicy` |
 
 Scatter validates independent X/Y points and optional bubble sizes. Its entry snapshots the palette
 count, X/Y bounds and axis label settings, remembers validation against the data, snapshot and density,
 and renders errors with `ChartErrors`. Valid input reaches `ScatterChartContent` with a clamped style
 and the original `ScatterData`. Axis label validation uses the shared `validateAxisLabels` helper.
 
-Candlesticks need OHLC values, heatmaps need two-dimensional values, Sankey charts need nodes and
+Heatmap validates a row-major matrix against its row and column labels. A `null` value is a missing
+cell, not an error, but at least one cell needs a value. Its entry snapshots the color scale and axis
+label settings, validates the matrix shape, finite present values, the color-scale stops and bounds,
+and renders errors with `ChartErrors`. Valid input reaches `HeatmapChartContent` with a clamped style
+and the original `HeatmapData`. The entry also clears a programmatic selection of a missing cell.
+
+Candlesticks need OHLC values, Sankey charts need nodes and
 connections, and treemaps need hierarchical data. Each family defines validation for its own data
 model. Reuse shared entry stages where their inputs remain independent of the data model.
 
@@ -184,8 +191,9 @@ style value.
 ## The policy table
 
 The indexed policies below each have a row here and a row in `ChartPolicyConformanceTest`, in the
-`charts` module. Both are written by hand and change together. Scatter's separate contract is recorded
-in the chart-family table above and covered by `ScatterChartTest` in `charts-scatter`.
+`charts` module. Both are written by hand and change together. Scatter's and heatmap's separate
+contracts are recorded in the chart-family table above and covered by `ScatterChartTest` in
+`charts-scatter` and `HeatmapChartTest` in `charts-heatmap`.
 
 | Chart | `minValues` | `allowNegative` | `series` | `stacked` | `axes` | `range` | `expectedColors` |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -239,7 +247,8 @@ blank category falls back to the chart title. See Pie Chart for what a pie shows
 ## Adding a check
 
 An indexed-series message goes in `ValidationErrors` and its check goes in `DataValidation.kt`.
-Checks specific to another data model live with that chart's validation contract, as scatter's do.
+Checks specific to another data model live with that chart's validation contract, as scatter's and
+heatmap's do.
 
 A check that applies to every chart calling a function goes into that function. A check that applies
 to some charts gets a mapper in `ChartPolicy`, read in `ChartPolicy.errorsFor`. A chart that has not
@@ -254,6 +263,7 @@ commit.
 | Invalid data never reaches content, and clamping runs at the ambient density | `ChartEntryTest` in `charts-core` |
 | Each declared policy matches its row | `ChartPolicyConformanceTest` in `charts` |
 | Independent X/Y inputs follow their own validation contract | `ScatterChartTest` in `charts-scatter` |
+| Matrix inputs follow their own validation contract | `HeatmapChartTest` in `charts-heatmap` |
 | A chart shows its errors for invalid input | Each chart's own tests |
 
 `charts-core` cannot see the chart modules' specs without a test dependency that inverts the

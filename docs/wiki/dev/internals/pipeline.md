@@ -7,7 +7,7 @@ order: 1
 
 The fifteen stages below describe the chart pipeline. This page records which stages each chart
 uses and where they run. Entry Seam describes the shared `ChartEntry` contract for indexed data and
-the chart-owned entry used by scatter.
+the chart-owned entries used by scatter and heatmap.
 
 The pipeline splits in two. Stages 1 to 4 turn public data and a style into a render model and a
 drawable style, and run once before anything is drawn. Stages 8 to 15 work in pixels — a measured
@@ -19,7 +19,7 @@ sit either side of that split and are the interesting ones.
 | # | Stage | Canonical code | Runs in |
 | --- | --- | --- | --- |
 | 1 | Selection lifecycle | `rememberSelectionLifecycle` | Public composable or chart entry |
-| 2 | Validation | `ChartPolicy.errorsFor`, `ScatterChartPolicy.errorsFor` | Entry |
+| 2 | Validation | `ChartPolicy.errorsFor`, `ScatterChartPolicy.errorsFor`, `HeatmapChartPolicy.errorsFor` | Entry |
 | 3 | Style clamp | `style.clamp(density)`, through `ChartSpec` for indexed data | Entry |
 | 4 | Model conversion | `ChartSpec.convert` → `ChartRenderData` | Seam |
 | 5 | Density decision | `shouldUseScrollableDensity`, `maxBarsThatFit` | Content |
@@ -40,12 +40,12 @@ These four are the contract. Everything above is a description of them.
 
 **1. Stages 2 and 3 happen at the entry point, once.** Indexed-series checks live in `charts-core`,
 selected by `ChartPolicy` and `SeriesRule`. Scatter owns its X/Y checks in `ScatterChartPolicy` and
-reuses shared axis label validation. Every entry validates before clamping the style at the ambient
-density and calling content.
+heatmap owns its matrix checks in `HeatmapChartPolicy`; both reuse shared axis label validation.
+Every entry validates before clamping the style at the ambient density and calling content.
 
 **2. A required model conversion happens once, between the entry and content.** Indexed `ChartData`
-becomes `ChartRenderData` through the shared seam. Scatter passes validated `ScatterData` directly to
-its content and needs no conversion stage.
+becomes `ChartRenderData` through the shared seam. Scatter and heatmap pass their validated data
+directly to their content and need no conversion stage.
 
 **3. Stages 8 to 10 and 13 to 15 happen inside the content composable, because they work in
 pixels.** Layout, axis planning, the canvas guard, animation, gesture maths and drawing all need a
@@ -73,23 +73,23 @@ again.
 
 ## Which chart runs which stage
 
-| Stage | Line | Bar | Histogram | Stacked bar | Stacked area | Radar | Pie | Ring gauge | Scatter / bubble |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 Selection lifecycle | yes | yes | shared | yes | yes | yes, twice | yes | yes | entry |
-| 2 Validation | yes | yes | shared | yes | yes | yes | own path | yes | `ScatterChartPolicy` |
-| 3 Clamping | yes | yes | shared | yes | yes | yes | yes | yes | entry |
-| 4 Conversion | pass-through | pass-through | pass-through | transposes | pass-through | pass-through | none | pass-through | — |
-| 5 Density decision | yes | yes | shared | yes | yes | — | — | — | — |
-| 6 Aggregation | yes | yes | shared | yes | yes | — | — | — | — |
-| 7 Palette | frame | own colour | shared | entry | entry | entry | own file | entry | content |
-| 8 Chrome layout | `LineChartFrame` | `BarChartContent` | shared | `StackedBarChartFrame` | `StackedAreaChartFrame` | inline | `PieChartFrame` | inline | `ChartPlotLayout` |
-| 9 Axis planning | yes | yes | shared | yes | yes | labels only | — | range labels only | shared X/Y layouts |
-| 10 Canvas guard | yes | yes | shared | yes | yes | — | — | — | — |
-| 11 Domain | `resolveLineRange` | `resolveBarRange` | shared | totals | totals | `minMax` | share-based | `style.range` | `scatterDomain` |
-| 12 Normalization | list | scalar per bar | shared | list | list | list | share-based | `gaugeFraction` per ring | X/Y positions and bubble radii |
-| 13 Animation | yes | yes | shared | yes | yes | yes | yes | yes | initial reveal |
-| 14 Gesture | yes | yes | shared | yes | yes | yes | yes | yes | `nearestScatterPointIndex` |
-| 15 Draw | yes | yes | shared | yes | yes | yes | yes | yes | `ScatterChartContent` |
+| Stage | Line | Bar | Histogram | Stacked bar | Stacked area | Radar | Pie | Ring gauge | Scatter / bubble | Heatmap |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 Selection lifecycle | yes | yes | shared | yes | yes | yes, twice | yes | yes | entry | entry |
+| 2 Validation | yes | yes | shared | yes | yes | yes | own path | yes | `ScatterChartPolicy` | `HeatmapChartPolicy` |
+| 3 Clamping | yes | yes | shared | yes | yes | yes | yes | yes | entry | entry |
+| 4 Conversion | pass-through | pass-through | pass-through | transposes | pass-through | pass-through | none | pass-through | — | — |
+| 5 Density decision | yes | yes | shared | yes | yes | — | — | — | — | — |
+| 6 Aggregation | yes | yes | shared | yes | yes | — | — | — | — | — |
+| 7 Palette | frame | own colour | shared | entry | entry | entry | own file | entry | content | color scale in content |
+| 8 Chrome layout | `LineChartFrame` | `BarChartContent` | shared | `StackedBarChartFrame` | `StackedAreaChartFrame` | inline | `PieChartFrame` | inline | `ChartPlotLayout` | `ChartPlotLayout` |
+| 9 Axis planning | yes | yes | shared | yes | yes | labels only | — | range labels only | shared X/Y layouts | category labels on shared layouts |
+| 10 Canvas guard | yes | yes | shared | yes | yes | — | — | — | — | — |
+| 11 Domain | `resolveLineRange` | `resolveBarRange` | shared | totals | totals | `minMax` | share-based | `style.range` | `scatterDomain` | `heatmapColorMapping` |
+| 12 Normalization | list | scalar per bar | shared | list | list | list | share-based | `gaugeFraction` per ring | X/Y positions and bubble radii | color fraction per cell, interpolated strips |
+| 13 Animation | yes | yes | shared | yes | yes | yes | yes | yes | initial reveal | initial reveal |
+| 14 Gesture | yes | yes | shared | yes | yes | yes | yes | yes | `nearestScatterPointIndex` | `HeatmapPlotLayout.cellIndexAt` |
+| 15 Draw | yes | yes | shared | yes | yes | yes | yes | yes | `ScatterChartContent` | `HeatmapChartContent` |
 
 Bar and histogram share one plot, so they share every stage, compact aggregation included. Their
 specs differ only in the policy: histogram forbids negative bin heights.
@@ -112,6 +112,14 @@ data-transition animation. `ScatterChartContent` still reveals its points on ini
 `animateFloatAsState`, controlled by `animateOnStart`. `ScatterMath.kt` owns its domain, positions,
 bubble radii and nearest-point lookup.
 
+Heatmap owns its input stages in `HeatmapChartEntry` and has the same shape as scatter. Its value
+domain is a color-scale domain rather than an axis: `heatmapColorMapping` resolves it from the present
+cells and the optional color-scale bounds. `HeatmapMath.kt` owns the color mapping, the
+shape-preserving bicubic field, the interpolated gradient strips, cell geometry and hit testing. The
+field uses Fritsch-Butland slopes at cell centers and clamps each patch to its corner values, so it is
+smooth without overshoot. The strips depend on the plot
+size, so they are remembered in content against the data, color mapping and layout, never per frame.
+
 **Domains.** Bar and both stacked charts fold zero into
 the domain, so an all-positive series starts at the axis. Line and radar take the data's own range.
 Line, bar and histogram accept a caller's fixed range through `style.range`. Stacked area's domain
@@ -122,6 +130,8 @@ doubles and reads no constraint, so by the test above it could sit in the seam; 
 open.
 
 Scatter resolves separate X and Y domains from its points and optional bounds through `scatterDomain`.
+Heatmap resolves one value domain for its color scale, and draws a constant domain with the middle
+color.
 
 **Flat data draws at a different height per chart.** Line passes `zeroRangeValue = 0f` and draws a
 flat series at the bottom. Radar passes `1f` and draws it at full radius. Both domains are the same
@@ -142,6 +152,7 @@ count instead of a series count. Stacked bar (`StackedBarChartEntry`), stacked a
 `LiveLineChartImpl`, one frame above where it is declared.
 
 Scatter resolves its series palette in `ScatterChartContent` through `ScatterPointStyle.resolveColors`.
+Heatmap has no series palette; its color scale maps values to colors in `HeatmapChartContent`.
 
 `singleItemUsesBase` is a boolean literal at the call sites. A single-series chart draws
 its base colour on line, stacked area and radar, and a generated shade on pie, stacked bar and ring

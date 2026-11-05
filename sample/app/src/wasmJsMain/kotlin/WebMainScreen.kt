@@ -72,6 +72,7 @@ private fun rememberWebDemoStartupResources(): StartupResources {
                 ChartDestination.HistogramChartScreen,
                 ChartDestination.StackedBarChartScreen,
                 ChartDestination.RadarChartScreen,
+                ChartDestination.HeatmapChartScreen,
                 ChartDestination.GaugeChartsScreen,
             )
         }

@@ -4,6 +4,7 @@ import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.text.font.FontWeight
@@ -36,6 +37,8 @@ class StyleDefaultsTest {
                             StyleDefaults.subtitleColor,
                             StyleDefaults.pieBorderColor,
                             StyleDefaults.gaugeTrackColor,
+                            StyleDefaults.heatmapLowColor,
+                            StyleDefaults.heatmapHighColor,
                         )
                     SideEffect {
                         scheme = themeScheme
@@ -58,6 +61,8 @@ class StyleDefaultsTest {
                             scheme.onSurfaceVariant,
                             scheme.surface,
                             scheme.surfaceVariant,
+                            lerp(scheme.surface, scheme.primary, 0.12f),
+                            scheme.primary,
                         ),
                     actual = colors,
                 )
@@ -93,6 +98,12 @@ class StyleDefaultsTest {
                 assertEquals(expected = 24.dp, actual = StyleDefaults.scatterSelectionTouchRadius)
                 assertEquals(expected = 3.dp, actual = StyleDefaults.scatterSelectionPadding)
                 assertEquals(expected = 2.dp, actual = StyleDefaults.scatterSelectionWidth)
+                assertEquals(expected = 2.dp, actual = StyleDefaults.heatmapCellSpacing)
+                assertEquals(expected = 2.dp, actual = StyleDefaults.heatmapSelectionWidth)
+                assertEquals(expected = 10.dp, actual = StyleDefaults.heatmapLegendBarHeight)
+                assertEquals(expected = 240.dp, actual = StyleDefaults.heatmapLegendBarWidth)
+                assertEquals(expected = 1f, actual = StyleDefaults.heatmapMinPlotAspectRatio)
+                assertEquals(expected = 2.5f, actual = StyleDefaults.heatmapMaxPlotAspectRatio)
                 assertEquals(expected = 0f, actual = StyleDefaults.pieDonutHole)
                 assertEquals(expected = 0.25f, actual = StyleDefaults.radarFillAlpha)
                 assertEquals(expected = 0.35f, actual = StyleDefaults.radarUnfocusedSeriesAlpha)

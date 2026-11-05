@@ -18,16 +18,22 @@ import io.github.hdcharts.app.docs.DailyMeasurement
 import io.github.hdcharts.app.docs.EnergyUsage
 import io.github.hdcharts.app.docs.ReadinessMetric
 import io.github.hdcharts.app.docs.ScatterBasicExample
+import io.github.hdcharts.app.docs.SelectSessionBlock
 import io.github.hdcharts.app.docs.SelectTemperature
 import io.github.hdcharts.app.docs.ShowDailyTemperatures
+import io.github.hdcharts.app.docs.ShowInterpolatedCpuLoad
 import io.github.hdcharts.app.docs.ShowMonthlySubscribers
 import io.github.hdcharts.app.docs.ShowPie
 import io.github.hdcharts.app.docs.ShowPieWithRoundedShare
 import io.github.hdcharts.app.docs.ShowPlatformReadiness
 import io.github.hdcharts.app.docs.ShowQuarterlyRevenue
 import io.github.hdcharts.app.docs.ShowReadinessOnFixedScale
+import io.github.hdcharts.app.docs.ShowRegionalCpuLoad
 import io.github.hdcharts.app.docs.ShowRequestDurationDistribution
 import io.github.hdcharts.app.docs.ShowTeamProgress
+import io.github.hdcharts.app.docs.ShowWeeklySessions
+import io.github.hdcharts.app.docs.regionalCpuLoad
+import io.github.hdcharts.app.docs.weeklySessions
 import io.github.hdcharts.app.screenshot.shared.PREVIEW_DEVICE_TABLET_LANDSCAPE
 import io.github.hdcharts.app.screenshot.shared.ScreenshotSurface
 import io.github.hdcharts.core.model.rememberChartSelection
@@ -183,6 +189,60 @@ fun RadarWikiPreview() {
 fun ScatterWikiPreview() {
     WikiScreenshotSurface {
         ScatterBasicExample()
+    }
+}
+
+@PreviewTest
+@Preview(
+    name = "Light Tablet Landscape",
+    uiMode = Configuration.UI_MODE_NIGHT_NO,
+    device = PREVIEW_DEVICE_TABLET_LANDSCAPE,
+)
+@Composable
+fun HeatmapWikiPreview() {
+    WikiScreenshotSurface {
+        ShowWeeklySessions()
+    }
+}
+
+@PreviewTest
+@Preview(
+    name = "Light Tablet Landscape",
+    uiMode = Configuration.UI_MODE_NIGHT_NO,
+    device = PREVIEW_DEVICE_TABLET_LANDSCAPE,
+)
+@Composable
+fun HeatmapSequentialWikiPreview() {
+    WikiScreenshotSurface {
+        ShowRegionalCpuLoad()
+    }
+}
+
+/** The Heatmap Interpolated wiki example rendered with the data from the Sequential Color Scale example. */
+@PreviewTest
+@Preview(
+    name = "Light Tablet Landscape",
+    uiMode = Configuration.UI_MODE_NIGHT_NO,
+    device = PREVIEW_DEVICE_TABLET_LANDSCAPE,
+)
+@Composable
+fun HeatmapInterpolatedWikiPreview() {
+    WikiScreenshotSurface {
+        ShowInterpolatedCpuLoad(data = regionalCpuLoad)
+    }
+}
+
+/** The Heatmap Selection wiki example rendered with the data from Heatmap Basic Usage. */
+@PreviewTest
+@Preview(
+    name = "Light Tablet Landscape",
+    uiMode = Configuration.UI_MODE_NIGHT_NO,
+    device = PREVIEW_DEVICE_TABLET_LANDSCAPE,
+)
+@Composable
+fun HeatmapSelectionWikiPreview() {
+    WikiScreenshotSurface {
+        SelectSessionBlock(data = weeklySessions)
     }
 }
 

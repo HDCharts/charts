@@ -19,6 +19,7 @@ import io.github.hdcharts.core.model.ChartValueFormatter
 import io.github.hdcharts.line.LineChartDefaults
 import io.github.hdcharts.sampleshared.data.MultiLineSampleData
 import io.github.hdcharts.sampleshared.data.barSampleUseCase
+import io.github.hdcharts.sampleshared.data.heatmapSampleUseCase
 import io.github.hdcharts.sampleshared.data.histogramSampleUseCase
 import io.github.hdcharts.sampleshared.data.lineSampleUseCase
 import io.github.hdcharts.sampleshared.data.liveLatencyTimelineUseCase
@@ -45,6 +46,7 @@ internal val SCREENSHOT_STACKED_BAR_SAMPLE_USE_CASE = stackedBarSampleUseCase()
 internal val SCREENSHOT_STACKED_AREA_SAMPLE_USE_CASE = stackedAreaSampleUseCase()
 internal val SCREENSHOT_RADAR_SAMPLE_USE_CASE = radarSampleUseCase()
 internal val SCREENSHOT_SCATTER_SAMPLE_USE_CASE = scatterSampleUseCase()
+internal val SCREENSHOT_HEATMAP_SAMPLE_USE_CASE = heatmapSampleUseCase()
 internal val SCREENSHOT_RING_GAUGE_SAMPLE_USE_CASE = ringGaugeSampleUseCase()
 internal val SCREENSHOT_SEGMENTED_RING_GAUGE_SAMPLE_USE_CASE = segmentedRingGaugeSampleUseCase()
 

@@ -108,7 +108,8 @@ internal fun xAxisLabelMinSpacingPx(fontSizePx: Float): Float =
  * Smallest distance between two Y-axis label ticks that keeps their labels apart: one line of text
  * plus the same gap as between X-axis labels.
  */
-internal fun yAxisLabelMinSpacingPx(fontSizePx: Float): Float =
+@InternalChartsApi
+fun yAxisLabelMinSpacingPx(fontSizePx: Float): Float =
     fontSizePx.coerceAtLeast(0f) * AXIS_LABEL_LINE_HEIGHT_FACTOR * (1f + AXIS_LABEL_GAP_FACTOR)
 
 /**
