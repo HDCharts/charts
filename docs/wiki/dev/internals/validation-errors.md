@@ -35,7 +35,8 @@ Three consequences worth stating, because each has been got wrong:
   there is nothing to iterate, and a single-series chart stops at its first shape problem.
 - **Nothing downstream re-checks.** Validation runs once, at the chart's entry. Conversion and drawing
   rely on its data contract. Indexed series have aligned values and categories; scatter series have
-  independent point counts, finite coordinates and optional finite, non-negative bubble sizes.
+  independent point counts, finite coordinates and optional finite, non-negative bubble sizes; heatmap
+  matrices match their labels, hold finite present values, and mark missing cells with `null`.
 
 ## What is an error
 
@@ -51,7 +52,8 @@ Style Clamping describes.
 ## Messages
 
 Indexed-series messages come from `ValidationErrors` in `DataValidation.kt` in `charts-core`.
-Scatter's data-model-specific messages live with its private `ScatterChartPolicy`.
+Scatter's and heatmap's data-model-specific messages live with their private `ScatterChartPolicy` and
+`HeatmapChartPolicy`.
 
 | Rule | Message | Charts |
 | --- | --- | --- |
@@ -73,18 +75,29 @@ Scatter's data-model-specific messages live with its private `ScatterChartPolicy
 | Non-finite bounds | Fixed axis bounds must be finite. | Scatter / bubble |
 | X bounds | The X minimum must be less than the X maximum. | Scatter / bubble, with both X bounds set |
 | Y bounds | The Y minimum must be less than the Y maximum. | Scatter / bubble, with both Y bounds set |
+| No columns | At least one column is required. | Heatmap |
+| No rows | At least one row is required. | Heatmap |
+| Row count | The value matrix must have one value row per row label. | Heatmap |
+| Column count | Every value row must have one value per column label. | Heatmap |
+| Cell values | Cell values must be finite. | Heatmap |
+| No values | At least one cell must have a value. | Heatmap, with a well-formed matrix |
+| Scale colors | The color scale requires at least two colors. | Heatmap |
+| Scale bounds | Color scale bounds must be finite. | Heatmap |
+| Scale order | The color scale minimum must be less than its maximum. | Heatmap, with both bounds set |
 
 The color message names what the colors are matched to: `value` on bar, histogram, pie and ring gauge, and
 `series` on line, radar, and the stacked charts.
 
 Indexed-series charts that draw several series report a problem once per series. Charts with one
-series report it per value, with its index. Scatter collects each violated rule once across its points.
+series report it per value, with its index. Scatter collects each violated rule once across its points,
+and heatmap once across its cells. A `null` heatmap cell is missing data, not an error.
 
 ## Where it happens
 
 Indexed-series checks live in `DataValidation.kt` in `charts-core`. A `ChartPolicy<S>` declares the
 checks and style inputs, and `ChartEntry` combines them. Scatter's independent X/Y checks live in
-`ScatterChartEntry.kt` in `charts-scatter`. Both paths reuse `ChartErrors` and axis label validation.
+`ScatterChartEntry.kt` in `charts-scatter`, and heatmap's matrix checks in `HeatmapChartEntry.kt` in
+`charts-heatmap`. Every path reuses `ChartErrors` and axis label validation.
 Their entry contracts are recorded in Entry Seam and Chart Policy.
 
 | Function | Checks | Charts |
@@ -95,12 +108,14 @@ Their entry contracts are recorded in Entry Seam and Chart Policy.
 | `validateColorCount` | A color list that does not match what it colors. A null expectation skips the check, and so does a style that sets no colors | Inside the two series checks |
 | `validateRange` | Non-finite range bounds | Bar, histogram, line |
 | `ScatterChartPolicy.errorsFor` | Non-empty series and points, names for multiple series, palette count, finite coordinates, optional finite non-negative sizes, X/Y bounds and axis labels | Scatter / bubble |
+| `HeatmapChartPolicy.errorsFor` | Non-empty labels, matrix shape, finite present values, at least one value, color-scale colors and bounds, and axis labels | Heatmap |
 
 Axis label settings are checked by `validateAxisLabels` in `AxisLabelValidation.kt`.
 
-Both entry paths collect errors in one order: data shape, then range, then axis labels. Indexed
-policies select their checks through `ChartPolicy.errorsFor`; scatter selects its checks in
-`ScatterChartPolicy.errorsFor`. Entry Seam and Chart Policy records each validation contract.
+Every entry path collects errors in one order: data shape, then range, then axis labels. Indexed
+policies select their checks through `ChartPolicy.errorsFor`; scatter and heatmap select theirs in
+`ScatterChartPolicy.errorsFor` and `HeatmapChartPolicy.errorsFor`. Entry Seam and Chart Policy records
+each validation contract.
 
 The minimums are `ValidationErrors.MIN_VALUES` (2), `ValidationErrors.MIN_RADAR_VALUES` (3), and
 `ValidationErrors.MIN_RING_GAUGE_VALUES` (1).
@@ -126,7 +141,8 @@ are nullable capabilities, not separate flags.
 ## Internal model types
 
 Indexed-series content reads `ChartRenderData`: the caller's own `ChartData` plus the chart's `title`.
-Scatter content reads validated `ScatterData` directly. Four constraints on the indexed render model:
+Scatter and heatmap content read validated `ScatterData` and `HeatmapData` directly. Four constraints
+on the indexed render model:
 
 **A value that is required is not optional, and optionality is explicit.** `ChartRenderData.title` is a
 `String`, so an absent title is written as `""`, and `ChartSeries.name` is a `String?` that a chart

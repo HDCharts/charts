@@ -1,6 +1,7 @@
 package io.github.hdcharts.sampleshared.data
 
 import io.github.hdcharts.core.model.ChartData
+import io.github.hdcharts.heatmap.HeatmapData
 import io.github.hdcharts.scatter.ScatterData
 
 data class PieSampleData(
@@ -49,6 +50,11 @@ data class RadarSampleData(
 
 data class ScatterSampleData(
     val data: ScatterData,
+    val title: String,
+)
+
+data class HeatmapSampleData(
+    val data: HeatmapData,
     val title: String,
 )
 

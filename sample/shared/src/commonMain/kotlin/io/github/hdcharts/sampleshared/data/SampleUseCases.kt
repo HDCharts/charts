@@ -2,6 +2,7 @@ package io.github.hdcharts.sampleshared.data
 
 import io.github.hdcharts.sampleshared.data.impl.DefaultBarSampleUseCase
 import io.github.hdcharts.sampleshared.data.impl.DefaultChartPreviewUseCase
+import io.github.hdcharts.sampleshared.data.impl.DefaultHeatmapSampleUseCase
 import io.github.hdcharts.sampleshared.data.impl.DefaultHistogramSampleUseCase
 import io.github.hdcharts.sampleshared.data.impl.DefaultLineSampleUseCase
 import io.github.hdcharts.sampleshared.data.impl.DefaultLiveLatencyTimelineUseCase
@@ -32,6 +33,8 @@ fun stackedAreaSampleUseCase(): StackedAreaSampleUseCase = DefaultStackedAreaSam
 fun radarSampleUseCase(): RadarSampleUseCase = DefaultRadarSampleUseCase()
 
 fun scatterSampleUseCase(): ScatterSampleUseCase = DefaultScatterSampleUseCase()
+
+fun heatmapSampleUseCase(): HeatmapSampleUseCase = DefaultHeatmapSampleUseCase()
 
 fun ringGaugeSampleUseCase(): RingGaugeSampleUseCase = DefaultRingGaugeSampleUseCase()
 

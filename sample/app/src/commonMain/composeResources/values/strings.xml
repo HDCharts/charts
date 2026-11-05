@@ -61,6 +61,7 @@
     <string name="multi_line_chart">Multi Line</string>
     <string name="radar_chart">Radar</string>
     <string name="scatter_chart">Scatter and bubble</string>
+    <string name="heatmap_chart">Heatmap</string>
     <string name="gauge_charts">Gauge Charts</string>
     <string name="ring_gauge_chart">Ring Gauge</string>
     <string name="segmented_ring_gauge_chart">Segmented Ring Gauge</string>
@@ -83,6 +84,18 @@
     <string name="example_line_gradients_summary">Color the line by value or along time, or fade older points.</string>
     <string name="example_ring_gauge_summary">Progress toward a target.</string>
     <string name="example_segmented_ring_gauge_summary">Contributions toward a capacity.</string>
+    <string name="example_heatmap_render_modes_title">Cells and interpolation</string>
+    <string name="example_heatmap_render_modes_summary">Regional CPU load on a green-to-red scale, as cells or an interpolated field.</string>
+    <string name="example_heatmap_selection_title">Selection</string>
+    <string name="example_heatmap_selection_summary">Tap or drag a cell, select one from code, or turn gestures off.</string>
+    <string name="example_heatmap_diverging_title">Diverging scale</string>
+    <string name="example_heatmap_diverging_summary">Values below and above zero on three colors with fixed bounds.</string>
+    <string name="heatmap_render_cells">Cells</string>
+    <string name="heatmap_render_interpolated">Interpolated</string>
+    <string name="heatmap_selected_none">Tap or drag across the chart to select a cell.</string>
+    <string name="heatmap_selected_cell">%1$s, %2$s:00 — %3$d sessions</string>
+    <string name="heatmap_select_busiest">Select busiest hour</string>
+    <string name="heatmap_interaction_enabled">Gestures on</string>
 
     <!-- Live API demos -->
     <string name="live_api_section_title">Real data from public APIs</string>

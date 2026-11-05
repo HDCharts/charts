@@ -14,6 +14,12 @@ import hdcharts.app.generated.resources.example_bar_gradients_summary
 import hdcharts.app.generated.resources.example_defaults_summary
 import hdcharts.app.generated.resources.example_defaults_title
 import hdcharts.app.generated.resources.example_gradients_title
+import hdcharts.app.generated.resources.example_heatmap_diverging_summary
+import hdcharts.app.generated.resources.example_heatmap_diverging_title
+import hdcharts.app.generated.resources.example_heatmap_render_modes_summary
+import hdcharts.app.generated.resources.example_heatmap_render_modes_title
+import hdcharts.app.generated.resources.example_heatmap_selection_summary
+import hdcharts.app.generated.resources.example_heatmap_selection_title
 import hdcharts.app.generated.resources.example_histogram_gradients_summary
 import hdcharts.app.generated.resources.example_line_gradients_summary
 import hdcharts.app.generated.resources.example_live_gradients_summary
@@ -26,6 +32,7 @@ import hdcharts.app.generated.resources.example_ring_gauge_summary
 import hdcharts.app.generated.resources.example_segmented_ring_gauge_summary
 import hdcharts.app.generated.resources.example_stacked_gradients_summary
 import hdcharts.app.generated.resources.gauge_charts
+import hdcharts.app.generated.resources.heatmap_chart
 import hdcharts.app.generated.resources.histogram_chart
 import hdcharts.app.generated.resources.line_chart
 import hdcharts.app.generated.resources.multi_line_chart
@@ -36,6 +43,7 @@ import hdcharts.app.generated.resources.scatter_chart
 import hdcharts.app.generated.resources.segmented_ring_gauge_chart
 import hdcharts.app.generated.resources.stacked_area_chart
 import hdcharts.sample_shared.generated.resources.ic_bar_chart
+import hdcharts.sample_shared.generated.resources.ic_heatmap_chart
 import hdcharts.sample_shared.generated.resources.ic_histogram_chart
 import hdcharts.sample_shared.generated.resources.ic_line_chart
 import hdcharts.sample_shared.generated.resources.ic_multi_line_chart
@@ -48,6 +56,10 @@ import io.github.hdcharts.app.demo.bar.BarGradientDemo
 import io.github.hdcharts.app.demo.debug.DebugChartsScreen
 import io.github.hdcharts.app.demo.gauge.RingGaugeChartDemo
 import io.github.hdcharts.app.demo.gauge.SegmentedRingGaugeChartDemo
+import io.github.hdcharts.app.demo.heatmap.HeatmapChartDemo
+import io.github.hdcharts.app.demo.heatmap.HeatmapDivergingDemo
+import io.github.hdcharts.app.demo.heatmap.HeatmapRenderModesDemo
+import io.github.hdcharts.app.demo.heatmap.HeatmapSelectionDemo
 import io.github.hdcharts.app.demo.histogram.HistogramChartDemo
 import io.github.hdcharts.app.demo.histogram.HistogramGradientDemo
 import io.github.hdcharts.app.demo.line.LineChartDemo
@@ -204,6 +216,32 @@ sealed class ChartDestination(
             icon = SharedRes.drawable.ic_radar_chart,
             title = Res.string.scatter_chart,
             examples = listOf(defaultsExample { ScatterChartDemo() }),
+        )
+
+    data object HeatmapChartScreen :
+        ChartDestination(
+            route = "heatmapChart",
+            icon = SharedRes.drawable.ic_heatmap_chart,
+            title = Res.string.heatmap_chart,
+            examples =
+                listOf(
+                    defaultsExample { HeatmapChartDemo() },
+                    ChartExample(
+                        id = "render-modes",
+                        title = Res.string.example_heatmap_render_modes_title,
+                        summary = Res.string.example_heatmap_render_modes_summary,
+                    ) { HeatmapRenderModesDemo() },
+                    ChartExample(
+                        id = "selection",
+                        title = Res.string.example_heatmap_selection_title,
+                        summary = Res.string.example_heatmap_selection_summary,
+                    ) { HeatmapSelectionDemo() },
+                    ChartExample(
+                        id = "diverging",
+                        title = Res.string.example_heatmap_diverging_title,
+                        summary = Res.string.example_heatmap_diverging_summary,
+                    ) { HeatmapDivergingDemo() },
+                ),
         )
 
     data object GaugeChartsScreen :

@@ -4,6 +4,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
@@ -150,6 +151,34 @@ object StyleDefaults {
     val scatterSelectionTouchRadius: Dp = 24.dp
     val scatterSelectionPadding: Dp = 3.dp
     val scatterSelectionWidth: Dp = 2.dp
+
+    // ===========================================================================
+    // Heatmap
+    // ===========================================================================
+
+    /** Gap between neighbouring heatmap cells, so each cell reads as one value. */
+    val heatmapCellSpacing: Dp = 2.dp
+
+    /** Outline drawn around the selected heatmap cell. */
+    val heatmapSelectionWidth: Dp = 2.dp
+
+    /** Thickness and widest length of the heatmap color-scale legend bar. */
+    val heatmapLegendBarHeight: Dp = 10.dp
+    val heatmapLegendBarWidth: Dp = 240.dp
+
+    /** The plot follows the matrix shape between these width-to-height ratios. */
+    val heatmapMinPlotAspectRatio: Float = 1f
+    val heatmapMaxPlotAspectRatio: Float = 2.5f
+
+    /** Lowest value color: a light tint of [seriesColor] over the surface. */
+    val heatmapLowColor: Color
+        @Composable @ReadOnlyComposable
+        get() = lerp(MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.primary, 0.12f)
+
+    /** Highest value color. */
+    val heatmapHighColor: Color
+        @Composable @ReadOnlyComposable
+        get() = MaterialTheme.colorScheme.primary
 
     // ===========================================================================
     // Pie
