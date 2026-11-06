@@ -43,6 +43,7 @@ import io.github.hdcharts.radar.RadarChart
 import io.github.hdcharts.radar.RadarChartDefaults
 import io.github.hdcharts.sampleshared.data.ChartGalleryPreview
 import io.github.hdcharts.sampleshared.data.HeatmapSampleColorScales
+import io.github.hdcharts.sampleshared.data.WaterfallSamples
 import io.github.hdcharts.sampleshared.data.heatmapSampleUseCase
 import io.github.hdcharts.sampleshared.theme.Dimens
 import io.github.hdcharts.scatter.ScatterChart
@@ -54,6 +55,8 @@ import io.github.hdcharts.stackedarea.StackedAreaChart
 import io.github.hdcharts.stackedarea.StackedAreaChartDefaults
 import io.github.hdcharts.stackedbar.StackedBarChart
 import io.github.hdcharts.stackedbar.StackedBarChartDefaults
+import io.github.hdcharts.waterfall.WaterfallChart
+import io.github.hdcharts.waterfall.WaterfallChartDefaults
 
 private val PreviewShape = RoundedCornerShape(18.dp)
 private val PreviewChartSize = 140.dp
@@ -113,8 +116,25 @@ internal fun ChartPreview(
         ChartDestination.RadarChartScreen -> RadarChartPreview(previews.radarSeries)
         ChartDestination.ScatterChartScreen -> ScatterChartPreview()
         ChartDestination.HeatmapChartScreen -> HeatmapChartPreview()
+        ChartDestination.WaterfallChartScreen -> WaterfallChartPreview()
         ChartDestination.GaugeChartsScreen -> RingGaugeChartPreview(previews.ringGaugeValues)
     }
+}
+
+@Composable
+private fun WaterfallChartPreview() {
+    WaterfallChart(
+        data = WaterfallSamples.crossingZero,
+        modifier = Modifier.fillMaxSize(),
+        style =
+            WaterfallChartDefaults.style(
+                chartContainerStyle = previewChartContainerStyle(),
+                axes = AxesDefaults.style(visible = false),
+                legend = LegendDefaults.style(visible = false),
+            ),
+        interactionEnabled = false,
+        animateOnStart = false,
+    )
 }
 
 @Composable

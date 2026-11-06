@@ -22,6 +22,7 @@ import io.github.hdcharts.app.docs.SelectSessionBlock
 import io.github.hdcharts.app.docs.SelectTemperature
 import io.github.hdcharts.app.docs.ShowDailyTemperatures
 import io.github.hdcharts.app.docs.ShowInterpolatedCpuLoad
+import io.github.hdcharts.app.docs.ShowMonthlyCashBalance
 import io.github.hdcharts.app.docs.ShowMonthlySubscribers
 import io.github.hdcharts.app.docs.ShowPie
 import io.github.hdcharts.app.docs.ShowPieWithRoundedShare
@@ -304,6 +305,17 @@ fun SegmentedRingGaugeWikiPreview() {
     WikiScreenshotSurface {
         CalorieProgress()
     }
+}
+
+@PreviewTest
+@Preview(
+    name = "Light Tablet Landscape",
+    uiMode = Configuration.UI_MODE_NIGHT_NO,
+    device = PREVIEW_DEVICE_TABLET_LANDSCAPE,
+)
+@Composable
+fun WaterfallWikiPreview() {
+    WikiScreenshotSurface { ShowMonthlyCashBalance(modifier = Modifier.fillMaxSize()) }
 }
 
 @Composable

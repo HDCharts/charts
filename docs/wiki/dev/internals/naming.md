@@ -27,6 +27,7 @@ One public composable per file. The file is named after it and holds nothing els
 | `RadarChart.kt` | `RadarChart` | `charts-radar` |
 | `ScatterChart.kt` | `ScatterChart` | `charts-scatter` |
 | `HeatmapChart.kt` | `HeatmapChart` | `charts-heatmap` |
+| `WaterfallChart.kt` | `WaterfallChart` | `charts-waterfall` |
 | `RingGaugeChart.kt` | `RingGaugeChart` | `charts-gauge` |
 | `StackedBarChart.kt` | `StackedBarChart` | `charts-stacked-bar` |
 | `StackedAreaChart.kt` | `StackedAreaChart` | `charts-stacked-area` |

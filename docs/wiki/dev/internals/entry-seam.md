@@ -125,6 +125,7 @@ model. That covers the existing line, bar, pie, radar, stacked and gauge familie
 | Indexed series | `ChartData` | `ChartEntry`, through a `ChartSpec` | `ChartPolicy<S>` and `SeriesRule` |
 | Scatter and bubble | `ScatterData` | `ScatterChartEntry` | Private `ScatterChartPolicy` |
 | Heatmap | `HeatmapData` | `HeatmapChartEntry` | Private `HeatmapChartPolicy` |
+| Waterfall | `WaterfallData` | `WaterfallChartEntry` | Internal `WaterfallChartPolicy` |
 
 Scatter validates independent X/Y points and optional bubble sizes. Its entry snapshots the palette
 count, X/Y bounds and axis label settings, remembers validation against the data, snapshot and density,
@@ -136,6 +137,12 @@ cell, not an error, but at least one cell needs a value. Its entry snapshots the
 label settings, validates the matrix shape, finite present values, the color-scale stops and bounds,
 and renders errors with `ChartErrors`. Valid input reaches `HeatmapChartContent` with a clamped style
 and the original `HeatmapData`. The entry also clears a programmatic selection of a missing cell.
+
+Waterfall validates ordered changes and computed totals. It accepts a single entry, zero and negative
+changes, and consecutive totals. Changes and every intermediate running balance must be finite. Its
+entry uses the shared axis-label and range validation, selection lifecycle, and error container.
+Total entries display the computed balance without changing it. The dedicated model keeps total
+semantics out of the shared indexed-series data. Contract tests live in `charts-waterfall`.
 
 Candlesticks need OHLC values, Sankey charts need nodes and
 connections, and treemaps need hierarchical data. Each family defines validation for its own data

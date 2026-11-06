@@ -14,6 +14,9 @@ import io.github.hdcharts.pie.internal.PieChartSpec
 import io.github.hdcharts.radar.internal.RadarChartSpec
 import io.github.hdcharts.stackedarea.internal.StackedAreaChartSpec
 import io.github.hdcharts.stackedbar.internal.StackedBarChartSpec
+import io.github.hdcharts.waterfall.WaterfallData
+import io.github.hdcharts.waterfall.WaterfallEntry.Change
+import io.github.hdcharts.waterfall.WaterfallEntry.Total
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -25,6 +28,14 @@ import kotlin.test.assertEquals
  */
 @OptIn(InternalChartsApi::class)
 class ChartPolicyConformanceTest {
+    /** Waterfall owns a custom-model entry; totals preserve the balance and source indices. */
+    @Test
+    fun waterfallTotalsFollowTheirOwnEntryContract() {
+        val data = WaterfallData(listOf(Change("Income", 10.0), Change("Costs", -15.0), Total("Net"), Total("Final")))
+        assertEquals(-5.0, data.runningTotalAt(2))
+        assertEquals(-5.0, data.runningTotalAt(3))
+    }
+
     @Test
     fun declaredPoliciesMatchTheTable() {
         assertEquals(expected = EXPECTED_BY_CHART, actual = DECLARED_BY_CHART.mapValues { it.value.toRow() })
