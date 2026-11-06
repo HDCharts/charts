@@ -11,10 +11,6 @@ configured range, and the first value is the outer ring. Use it for progress ind
 workstreams. A [Segmented Ring Gauge](/{{version}}/wiki/segmented-ring-gauge-chart) instead shows
 contributions that add together toward one shared capacity.
 
-```kotlin
-implementation("io.github.hdcharts:gauge:{{artifactVersion}}")
-```
-
 ![Ring Gauge Demo](/content/{{version}}/wiki/assets/ring_gauge_default.gif)
 
 Recording source: [RingGaugeExample.kt](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/RingGaugeExample.kt).
@@ -144,6 +140,12 @@ fun StyledTeamProgress(data: ChartData) {
 `axisValueFormatter` formats the range endpoint labels. The temperature example in [Range and
 Clamping](#range-and-clamping) shows both formatters and keeps whole-number endpoints free of a
 trailing `.0`.
+
+## Setup
+
+```kotlin
+implementation("io.github.hdcharts:gauge:{{artifactVersion}}")
+```
 
 ## API Reference
 

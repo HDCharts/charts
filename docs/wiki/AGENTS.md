@@ -12,7 +12,8 @@ Use this order and heading levels for each chart page:
 4. `## Basic Usage` — required. Show one practical, complete Kotlin example using the public API. Include imports and a composable context so a reader can understand how to render the chart. Use small deterministic data, sensible defaults, and sizing appropriate to the surrounding layout. Favor realistic application usage over minimizing lines: a meaningful domain model can clarify data mapping or show how chart styling can come from application data. Simple input data is equally appropriate when it communicates the intended use clearly.
 5. Optional `## Data Mapping` — show how useful application data maps to chart inputs when this teaches something. Meaningful domain models are encouraged when they make the example clearer or demonstrate an API design choice. Avoid introducing models, wrappers, or transformations when they add complexity without educational value. Do not require a domain model in every example.
 6. `## Capabilities` — include when there are useful chart capabilities to explain. Organize them as focused `###` subsections with descriptive names such as `### Selection` or `### Value Formatting`. The examples are possibilities, not a required checklist. Give each example one primary capability. A snippet may reuse Basic Usage data when it says so explicitly.
-7. `## API Reference` — required. Link to the generated API documentation for the public composable and relevant defaults or styles. Follow the versioned path convention below and confirm each target exists in generated output. Do not copy the complete API signature into the page.
+7. `## Setup` — required on every chart page. Place it immediately before `## API Reference`, after `## Capabilities` when present. Include exactly one short, standalone `kotlin` fenced dependency line identifying this chart's published module. The docs site enhances this source line into an interactive, platform-aware installer; do not hand-write platform-specific Gradle instructions here.
+8. `## API Reference` — required. Link to the generated API documentation for the public composable and relevant defaults or styles. Follow the versioned path convention below and confirm each target exists in generated output. Do not copy the complete API signature into the page.
 
 Omit optional sections that add no useful information. Link to common documentation instead of repeating lengthy explanations. Use consistent names for common capabilities across chart pages, while keeping chart-specific API names and behavior clear.
 
@@ -29,7 +30,11 @@ Dokka output is published under `/static/api/{{version}}/`; `{{version}}` follow
 
 ## Chart module installation
 
-Every chart-specific page must show its correct published module dependency inside `## Overview`, after the introductory explanation and before the introductory GIF. Verify artifact coordinates against the repository publishing configuration; both Ring Gauge and Segmented Ring Gauge use the shared `gauge` artifact. Use `{{artifactVersion}}` for Maven dependency versions and do not hardcode release versions in shared wiki Markdown. Keep `{{version}}` for documentation routes and API links. Do not add separate Installation headings or independent version declarations to chart pages. Link to Getting Started when broader setup details are needed; keep chart-page installation instructions focused on the module coordinate.
+Every chart-specific page must contain a required `## Setup` heading immediately before `## API Reference`, at the same H2 level as `## Overview`, `## Basic Usage`, and `## Capabilities`. **Do not put installation code in Overview**; keep the Overview focused on the chart itself and the visual demonstration.
+
+Under `## Setup`, use exactly one standalone `kotlin` fenced block containing only `implementation("io.github.hdcharts:<module>:{{artifactVersion}}")`. Replace `<module>` with the actual published artifact ID, verified against the repository publishing configuration; both Ring Gauge and Segmented Ring Gauge use the shared `gauge` artifact. Keep the line bare (not wrapped in `dependencies {}` or `commonMain.dependencies {}`): `charts-docs` recognizes this exact format and renders platform-specific installation options for Android-only and Kotlin Multiplatform projects, including the umbrella option and snapshot repository guidance. This site-only UI is outside the synchronized wiki folder and survives documentation syncs.
+
+Use `{{artifactVersion}}` for Maven dependency versions and do not hardcode release versions in shared wiki Markdown. Keep `{{version}}` for documentation routes and API links. Do not add additional installation headings, duplicate dependency blocks, independent version declarations, or platform-specific Gradle instructions to chart pages. Link to Getting Started for broader setup guidance. The Markdown in `docs/wiki/` is the canonical source, synced automatically to `charts-docs/content/snapshot/wiki/`; never edit the generated copy as a substitute for editing this source.
 
 ## Code examples
 
@@ -108,17 +113,24 @@ already explains the data contract.]
 [Optional relevant screenshot or GIF. For a GIF, link the complete recording
 source when available and explain any difference from the teaching example.]
 
+## Setup
+
+```kotlin
+implementation("io.github.hdcharts:<module>:{{artifactVersion}}")
+```
+
 ## API Reference
 
 - [Public composable](/static/api/{{version}}/charts/PACKAGE/SYMBOL_PAGE.html)
 - [Relevant defaults or style API](/static/api/{{version}}/charts/PACKAGE/DEFAULTS_PAGE/index.html)
 ````
 
-In the template, the `Data Mapping` and `Capabilities` sections are optional; include them only when useful. Remove optional section placeholders when their sections are omitted. `Overview`, `Basic Usage`, and `API Reference` are required. Use `###` capability headings directly under `## Capabilities`; do not add an `Advanced Usage` section that combines unrelated options. The generated navigation nests relevant H3 capability headings under their parent. Replace `Chart name` in the quoted frontmatter title and replace every other placeholder with final content before publication. Replace API path placeholders with paths verified against generated output.
+In the template, the `Data Mapping` and `Capabilities` sections are optional; include them only when useful. Remove optional section placeholders when their sections are omitted. `Overview`, `Basic Usage`, `Setup`, and `API Reference` are required. Replace `<module>` in Setup with the verified published Maven artifact ID. Use `###` capability headings directly under `## Capabilities`; do not add an `Advanced Usage` section that combines unrelated options. The generated navigation nests relevant H3 capability headings under their parent. Replace `Chart name` in the quoted frontmatter title and replace every other placeholder with final content before publication. Replace API path placeholders with paths verified against generated output.
 
 ## Completion checklist
 
-- [ ] Overview, Basic Usage, relevant capabilities, and API Reference are present in that order; the site generates heading navigation automatically.
+- [ ] Overview, Basic Usage, relevant capabilities, Setup, and API Reference are present in that order; the site generates heading navigation automatically.
+- [ ] Setup appears immediately before API Reference with one standalone version-placeholder module coordinate, not in Overview or a platform-specific Gradle block.
 - [ ] Overview and capability claims match current public chart behavior.
 - [ ] Basic Usage is readable, complete, deterministic, and uses public APIs and sensible defaults.
 - [ ] Each focused example teaches one capability and identifies reused context.

@@ -10,10 +10,6 @@ title: Stacked Bar
 when both the overall total and the series contributions matter. Each series must provide one value
 for every category, in the same order.
 
-```kotlin
-implementation("io.github.hdcharts:stacked-bar:{{artifactVersion}}")
-```
-
 ![Stacked Bar Demo](/content/{{version}}/wiki/assets/stacked_bar_default.gif)
 
 Recording source: [StackedBarExample.kt](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/StackedBarExample.kt).
@@ -97,6 +93,12 @@ fun FadedQuarterlyRevenue(data: ChartData) {
 }
 ```
 <!-- END WIKI EXAMPLE: stacked-bar-fade-gradient -->
+
+## Setup
+
+```kotlin
+implementation("io.github.hdcharts:stacked-bar:{{artifactVersion}}")
+```
 
 ## API Reference
 

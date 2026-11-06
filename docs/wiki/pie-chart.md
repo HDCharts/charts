@@ -10,10 +10,6 @@ title: Pie
 nonnegative finite values. Categories are optional; when supplied, each names a slice in the legend
 and while it is selected.
 
-```kotlin
-implementation("io.github.hdcharts:pie:{{artifactVersion}}")
-```
-
 ![Pie Demo](/content/{{version}}/wiki/assets/pie_default.gif)
 
 Slice colors come from the style, either as an explicit palette or as shades generated from its base
@@ -113,6 +109,12 @@ fun ShowPieWithRoundedShare(
 <!-- END WIKI EXAMPLE: pie-selected-share -->
 
 ![Pie chart with Lighting selected and its 9% share shown](/content/{{version}}/wiki/assets/wiki-pie-selected-share.png)
+
+## Setup
+
+```kotlin
+implementation("io.github.hdcharts:pie:{{artifactVersion}}")
+```
 
 ## API Reference
 

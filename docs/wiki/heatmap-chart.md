@@ -15,12 +15,6 @@ Draw the matrix as discrete cells, or as a smooth color field interpolated from 
 modes share the data, color scale, legend and selection. The chart fits the whole matrix in its
 bounds; it does not scroll or zoom, and it thins row and column labels that would overlap.
 
-Add the heatmap chart module to your dependencies:
-
-```kotlin
-implementation("io.github.hdcharts:heatmap:{{artifactVersion}}")
-```
-
 ## Basic Usage
 
 ![Heatmap of weekly sessions with discrete cells, row and column labels, and a color-scale legend](/content/{{version}}/wiki/assets/wiki-heatmap-basic.png)
@@ -299,6 +293,12 @@ The chart shows an error instead of drawing when:
 
 A negative `cellSpacing` draws as no spacing, and spacing wider than a cell still leaves each cell at
 least one pixel wide.
+
+## Setup
+
+```kotlin
+implementation("io.github.hdcharts:heatmap:{{artifactVersion}}")
+```
 
 ## API Reference
 
