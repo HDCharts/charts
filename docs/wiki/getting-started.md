@@ -37,6 +37,8 @@ commonMain.dependencies {
     implementation("io.github.hdcharts:stacked-area:{{artifactVersion}}")
     implementation("io.github.hdcharts:radar:{{artifactVersion}}")
     implementation("io.github.hdcharts:gauge:{{artifactVersion}}")
+    implementation("io.github.hdcharts:scatter:{{artifactVersion}}")
+    implementation("io.github.hdcharts:heatmap:{{artifactVersion}}")
 }
 ```
 
@@ -55,6 +57,8 @@ dependencies {
     implementation("io.github.hdcharts:stacked-area")
     implementation("io.github.hdcharts:radar")
     implementation("io.github.hdcharts:gauge")
+    implementation("io.github.hdcharts:scatter")
+    implementation("io.github.hdcharts:heatmap")
 }
 ```
 
