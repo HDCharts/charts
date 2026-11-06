@@ -45,6 +45,7 @@ class MainViewModel : ViewModel() {
                     ChartDestination.RadarChartScreen,
                     ChartDestination.ScatterChartScreen,
                     ChartDestination.HeatmapChartScreen,
+                    ChartDestination.WaterfallChartScreen,
                     ChartDestination.GaugeChartsScreen,
                 ),
             ),

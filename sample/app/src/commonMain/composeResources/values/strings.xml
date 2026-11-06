@@ -62,6 +62,9 @@
     <string name="radar_chart">Radar</string>
     <string name="scatter_chart">Scatter and bubble</string>
     <string name="heatmap_chart">Heatmap</string>
+    <string name="waterfall_chart">Waterfall</string>
+    <string name="example_waterfall_business_title">Revenue to profit</string>
+    <string name="example_waterfall_business_summary">Revenue, costs and computed subtotals with currency formatting.</string>
     <string name="gauge_charts">Gauge Charts</string>
     <string name="ring_gauge_chart">Ring Gauge</string>
     <string name="segmented_ring_gauge_chart">Segmented Ring Gauge</string>

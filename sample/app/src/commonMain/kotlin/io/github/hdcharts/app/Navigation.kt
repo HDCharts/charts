@@ -31,6 +31,8 @@ import hdcharts.app.generated.resources.example_live_percentiles_title
 import hdcharts.app.generated.resources.example_ring_gauge_summary
 import hdcharts.app.generated.resources.example_segmented_ring_gauge_summary
 import hdcharts.app.generated.resources.example_stacked_gradients_summary
+import hdcharts.app.generated.resources.example_waterfall_business_summary
+import hdcharts.app.generated.resources.example_waterfall_business_title
 import hdcharts.app.generated.resources.gauge_charts
 import hdcharts.app.generated.resources.heatmap_chart
 import hdcharts.app.generated.resources.histogram_chart
@@ -42,6 +44,7 @@ import hdcharts.app.generated.resources.ring_gauge_chart
 import hdcharts.app.generated.resources.scatter_chart
 import hdcharts.app.generated.resources.segmented_ring_gauge_chart
 import hdcharts.app.generated.resources.stacked_area_chart
+import hdcharts.app.generated.resources.waterfall_chart
 import hdcharts.sample_shared.generated.resources.ic_bar_chart
 import hdcharts.sample_shared.generated.resources.ic_heatmap_chart
 import hdcharts.sample_shared.generated.resources.ic_histogram_chart
@@ -76,6 +79,8 @@ import io.github.hdcharts.app.demo.stackedarea.StackedAreaChartDemo
 import io.github.hdcharts.app.demo.stackedarea.StackedAreaGradientDemo
 import io.github.hdcharts.app.demo.stackedbar.StackedBarChartDemo
 import io.github.hdcharts.app.demo.stackedbar.StackedBarGradientDemo
+import io.github.hdcharts.app.demo.waterfall.WaterfallBusinessDemo
+import io.github.hdcharts.app.demo.waterfall.WaterfallChartDemo
 import io.github.hdcharts.app.library.BuildConfig
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
@@ -216,6 +221,22 @@ sealed class ChartDestination(
             icon = SharedRes.drawable.ic_radar_chart,
             title = Res.string.scatter_chart,
             examples = listOf(defaultsExample { ScatterChartDemo() }),
+        )
+
+    data object WaterfallChartScreen :
+        ChartDestination(
+            route = "waterfallChart",
+            icon = SharedRes.drawable.ic_bar_chart,
+            title = Res.string.waterfall_chart,
+            examples =
+                listOf(
+                    defaultsExample { WaterfallChartDemo() },
+                    ChartExample(
+                        id = "business",
+                        title = Res.string.example_waterfall_business_title,
+                        summary = Res.string.example_waterfall_business_summary,
+                    ) { WaterfallBusinessDemo() },
+                ),
         )
 
     data object HeatmapChartScreen :

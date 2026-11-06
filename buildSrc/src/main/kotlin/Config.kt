@@ -14,6 +14,7 @@ object Config {
     const val ARTIFACT_GAUGE_ID = "gauge"
     const val ARTIFACT_SCATTER_ID = "scatter"
     const val ARTIFACT_HEATMAP_ID = "heatmap"
+    const val ARTIFACT_WATERFALL_ID = "waterfall"
     const val ARTIFACT_BOM_ID = "bom"
     const val INCEPTION_YEAR = "2024"
     const val PROJECT_URL = "https://github.com/HDCharts/charts"
@@ -44,6 +45,7 @@ object Config {
     const val CHARTS_GAUGE_NAMESPACE = "$GROUP_ID.charts.gauge"
     const val CHARTS_SCATTER_NAMESPACE = "$GROUP_ID.charts.scatter"
     const val CHARTS_HEATMAP_NAMESPACE = "$GROUP_ID.charts.heatmap"
+    const val CHARTS_WATERFALL_NAMESPACE = "$GROUP_ID.charts.waterfall"
     const val SAMPLE_SHARED_NAMESPACE = "io.github.hdcharts.sampleshared"
     const val SAMPLE_API_NAMESPACE = "io.github.hdcharts.sampleapi"
 }
