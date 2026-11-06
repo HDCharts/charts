@@ -17,6 +17,10 @@ This `README.md` is excluded from the sync and does not appear as a wiki page.
   matching this `*-chart` suffix is picked up automatically for the wiki sidebar and the
   Agent Prompt Builder's chart picker in `charts-docs` — add a new file, nothing else to
   register.
+  Each chart page also has a `## Setup` section immediately before `## API Reference`,
+  with a single standalone published dependency line. The docs site renders that
+  source line as an interactive, platform-aware installer. Keep the source here;
+  never hand-edit the synchronized snapshot copy in `charts-docs`.
 - `customization.md` — cross-cutting styling, sizing, and interaction guide
 - `dev/` — developer docs, kept apart from the chart wiki and not versioned. They sync to
   `charts-docs/content/dev/` with `.github/scripts/sync-dev-docs.sh`, on snapshot syncs only,

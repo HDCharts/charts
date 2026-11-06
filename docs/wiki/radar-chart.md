@@ -17,10 +17,6 @@ appears at the center and the maximum at the outer web, so the center does not m
 example below, 74 is at the center and the polygon emphasizes profile shape rather than absolute
 scores. Set a shared range when values have known bounds or need to remain comparable as data changes.
 
-```kotlin
-implementation("io.github.hdcharts:radar:{{artifactVersion}}")
-```
-
 ![Radar Demo](/content/{{version}}/wiki/assets/radar_default.gif)
 
 The GIF demonstrates multi-series selection.
@@ -208,6 +204,12 @@ fun StyledReadinessRadar(data: ChartData) {
 }
 ```
 <!-- END WIKI EXAMPLE: radar-styling -->
+
+## Setup
+
+```kotlin
+implementation("io.github.hdcharts:radar:{{artifactVersion}}")
+```
 
 ## API Reference
 

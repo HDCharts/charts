@@ -10,10 +10,6 @@ title: Bar
 draws them from a zero baseline. Use it for discrete comparisons such as daily totals or category
 counts.
 
-```kotlin
-implementation("io.github.hdcharts:bar:{{artifactVersion}}")
-```
-
 ![Bar Demo](/content/{{version}}/wiki/assets/bar_default.gif)
 
 Recording source: [BarExample.kt](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/BarExample.kt).
@@ -125,6 +121,12 @@ fun DailyCashFlowGradient(data: ChartData) {
 
 For `GradientSpan.Shape` and `GradientSpan.Plot`, custom stops, and gradient direction, see the
 shared [Gradients guide](/{{version}}/wiki/gradients).
+
+## Setup
+
+```kotlin
+implementation("io.github.hdcharts:bar:{{artifactVersion}}")
+```
 
 ## API Reference
 

@@ -52,6 +52,39 @@ run_self_test() {
     [[ "$(basename "${source_file}")" == "README.md" || "$(basename "${source_file}")" == "AGENTS.md" ]] && continue
     cmp "${source_file}" "${temp_dir}/content/snapshot/wiki/$(basename "${source_file}")"
   done
+
+  # Guard the public chart-page convention as part of the existing sync
+  # self-test. This checks structure, not how examples or capabilities read.
+  local chart_file
+  for chart_file in "${source_dir}"/*-chart.md; do
+    awk '
+      /^## / {
+        if ($0 == "## Setup") {
+          setup_count++
+          setup_line = NR
+          in_setup = 1
+        } else {
+          if (in_setup && $0 != "## API Reference") invalid = 1
+          in_setup = 0
+          if ($0 == "## API Reference") {
+            api_count++
+            api_line = NR
+          }
+        }
+      }
+      /^implementation\("io.github.hdcharts:[a-z0-9-]+:\{\{artifactVersion\}\}"\)$/ {
+        dependency_count++
+        if (!in_setup) invalid = 1
+      }
+      END {
+        if (setup_count != 1 || api_count != 1 || dependency_count != 1 ||
+            setup_line >= api_line || invalid) exit 1
+      }
+    ' "${chart_file}" || {
+      echo "Chart wiki Setup convention failed: ${chart_file}" >&2
+      return 1
+    }
+  done
 }
 
 main() {

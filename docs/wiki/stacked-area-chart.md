@@ -10,10 +10,6 @@ title: Stacked Area
 their totals accumulate. Supply each series' raw value at each category; the chart stacks those
 values for display. Series must have matching lengths and share the same category order.
 
-```kotlin
-implementation("io.github.hdcharts:stacked-area:{{artifactVersion}}")
-```
-
 ![Stacked Area Demo](/content/{{version}}/wiki/assets/stacked_area_default.gif)
 
 Recording source: [StackedAreaExample.kt](https://github.com/HDCharts/charts/blob/main/sample/androidApp/src/main/kotlin/io/github/hdcharts/app/gif/docs/StackedAreaExample.kt).
@@ -94,6 +90,12 @@ fun FadedMonthlySubscribers(data: ChartData) {
 }
 ```
 <!-- END WIKI EXAMPLE: stacked-area-fade-gradient -->
+
+## Setup
+
+```kotlin
+implementation("io.github.hdcharts:stacked-area:{{artifactVersion}}")
+```
 
 ## API Reference
 

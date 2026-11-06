@@ -8,12 +8,6 @@ title: "Scatter and Bubble Chart"
 
 Scatter charts place each point at its numeric X and Y coordinates to show how two measures relate. Add a size to each point to encode a third measure as a bubble whose area scales with that value. Each series uses a palette color; overlapping bubbles use transparency.
 
-Add the scatter chart module to your dependencies:
-
-```kotlin
-implementation("io.github.hdcharts:scatter:{{artifactVersion}}")
-```
-
 ![Scatter and bubble chart selecting points in two series](/content/{{version}}/wiki/assets/scatter_default.gif)
 
 The GIF selects points in both series, then taps empty plot space to clear selection. It uses the
@@ -95,6 +89,12 @@ Pass a `ChartSelection` to control selection from the application. Its zero-base
 points in series order, then in point order within each series. In Basic Usage, `initialIndex = 3`
 selects the first South point, after the three North points. Set `interactionEnabled = false` to
 disable gestures while keeping programmatic selection visible.
+
+## Setup
+
+```kotlin
+implementation("io.github.hdcharts:scatter:{{artifactVersion}}")
+```
 
 ## API Reference
 
