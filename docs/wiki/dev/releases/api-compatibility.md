@@ -70,9 +70,9 @@ sequenceDiagram
   participant CI as API compatibility
   Dev->>PR: Push a change
   PR->>CI: Start the API workflow
-  alt Docs-only change
-    CI-->>PR: PR API Compatibility skipped
-  else Code or build change
+  alt No change to library code, build logic, or acknowledged breaks
+    CI-->>PR: PR API Compatibility passes without the check
+  else Change can affect the published API
     CI->>CI: apiCompatibilityCheck against the latest release tag
     alt Every finding is acknowledged
       CI-->>PR: Pass
