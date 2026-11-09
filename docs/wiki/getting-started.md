@@ -62,7 +62,7 @@ dependencies {
 }
 ```
 
-### Snapshot Builds [![Snapshots](https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fcentral.sonatype.com%2Frepository%2Fmaven-snapshots%2Fio%2Fgithub%2Fhdcharts%2Fcharts%2Fmaven-metadata.xml&label=Snapshots&color=4285F4)](https://central.sonatype.com/repository/maven-snapshots/io/github/hdcharts/charts/maven-metadata.xml)
+### Snapshot Builds [![Snapshots](https://img.shields.io/static/v1?label=Snapshots&message={{snapshotVersion}}&color=4285F4)](https://central.sonatype.com/repository/maven-snapshots/io/github/hdcharts/charts/maven-metadata.xml)
 Access the latest pre-release builds through the Sonatype snapshots repository. Snapshots contain the most recent features and fixes that haven't been officially released yet, allowing you to test upcoming functionality.
 ```kotlin
 commonMain.dependencies {

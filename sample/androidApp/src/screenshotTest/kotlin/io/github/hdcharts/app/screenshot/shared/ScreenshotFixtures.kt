@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.min
 import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.model.ChartValueFormatter
-import io.github.hdcharts.line.LineChartDefaults
+import io.github.hdcharts.core.style.BarChartDefaults
 import io.github.hdcharts.sampleshared.data.MultiLineSampleData
 import io.github.hdcharts.sampleshared.data.barSampleUseCase
 import io.github.hdcharts.sampleshared.data.heatmapSampleUseCase
@@ -73,9 +73,13 @@ internal fun ChartData.categoryIndex(label: String): Int {
     return index
 }
 
-/** Formats values held in thousands of dollars, such as `$552K`. */
+/**
+ * Formats values held in thousands of dollars, such as `$552K`. BarChartDefaults lives in charts-core and
+ * shares the default axis format with LineChartDefaults, so the shared fixtures depend on no chart module
+ * and CI can select screenshot classes per chart.
+ */
 internal val SCREENSHOT_THOUSANDS_OF_DOLLARS =
-    ChartValueFormatter { value -> "$" + LineChartDefaults.axisValueFormatter.format(value) + "K" }
+    ChartValueFormatter { value -> "$" + BarChartDefaults.axisValueFormatter.format(value) + "K" }
 
 @Composable
 internal fun ScreenshotSurface(content: @Composable () -> Unit) {

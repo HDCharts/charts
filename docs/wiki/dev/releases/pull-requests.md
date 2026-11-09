@@ -20,22 +20,20 @@ sequenceDiagram
   Dev->>GH: Open, push to, or reopen a pull request
   par Core checks
     GH->>Core: Start pull-request.yml
-    Core->>Core: Prepare PR detects code changes
-    alt Code or build changes
-      Core->>Core: Assemble, Compile, Lint, Test
+    Core->>Core: Prepare PR selects checks for the changed files
+    alt Code, test, or build changes
+      Core->>Core: Selected Assemble, Compile, Lint, and Test jobs
     else Docs only
-      Core->>Core: Docs-only no-op
+      Core->>Core: No-op jobs
     end
     Core-->>GH: PR Core Checks
   and API compatibility
     GH->>API: Start pull-request-api.yml
-    API->>API: Prepare PR detects code changes
-    alt Code or build changes
+    API->>API: Prepare PR selects checks for the changed files
+    opt Change can affect the published API
       API->>API: Compare Public API Against Baseline
-      API-->>GH: PR API Compatibility
-    else Docs only
-      API-->>GH: PR API Compatibility skipped
     end
+    API-->>GH: PR API Compatibility
   and GIF validation
     GH->>GIF: Start pull-request-gif-validation.yml
     opt run-gif-validation label present
@@ -60,11 +58,11 @@ sequenceDiagram
 
 | Job | What it does |
 | --- | --- |
-| `Prepare PR` | Detects code changes with `scripts/ci-has-code-changes.sh`. The core workflow also tests the KDoc-only change detector and runs the release-script self-tests. |
+| `Prepare PR` | Runs `.github/scripts/ci-impact.py` to choose the checks and writes the decision to the job summary; see [Check selection](validation-matrix.md#check-selection). The core workflow also runs the self-tests of the CI scripts. |
 | `Assemble` | Runs `./gradlew ciAssemble`. |
 | `Compile` | Runs `./gradlew ciCompile`, including the `smoke-line` consumer. |
-| `Lint` | Runs `./gradlew ktlintCheck buildSrcKtlintCheck`. |
-| `Test` | Runs the JVM, Android instrumented, screenshot, Wasm, and iOS test jobs; see [Validation Matrix](validation-matrix.md). Each job uploads Gradle's HTML and XML reports. |
+| `Lint` | Runs `./gradlew ktlintCheck buildSrcKtlintCheck ciCheckImpactGraph`. The last task fails when `ci-impact.py` misses a Gradle project or project dependency. |
+| `Test` | Runs the selected JVM, Android instrumented, screenshot, Wasm, and iOS test jobs for the selected modules; see [Validation Matrix](validation-matrix.md). Each job uploads Gradle's HTML and XML reports. |
 | `Compare Public API Against Baseline` | Runs `./gradlew apiCompatibilityCheck` against the latest release tag; see [API Compatibility](api-compatibility.md). |
 | `GIF Baseline Validation` | Records the docs GIF scenarios on an Android emulator and compares them with `gif-baselines`. |
 
@@ -75,7 +73,7 @@ full history instead.
 
 | Job | `fetch-depth` | Reason |
 | --- | --- | --- |
-| `Prepare PR`, both workflows | `0` | `scripts/ci-has-code-changes.sh` diffs the base and head SHAs, so both have to exist locally. |
+| `Prepare PR`, both workflows | `0` | `.github/scripts/ci-impact.py` diffs the base and head SHAs, so both have to exist locally. |
 | `Compare Public API Against Baseline` | `0` | The check lists `git tag` for the baseline release and adds a worktree at the baseline commit; see [API Compatibility](api-compatibility.md). |
 | `Assemble`, `Compile`, `Lint`, `Test` | `1` | Each runs one Gradle task against `source-sha` and doesn't need the project version. |
 
@@ -94,21 +92,21 @@ PR API Compatibility
 PR GIF Baseline Validation
 ```
 
-- **PR Core Checks** fails unless `Prepare PR` and every core check succeed.
-- **PR API Compatibility** fails unless the API check succeeds. On a docs-only pull request it is
-  skipped, and GitHub treats a skipped required check as passing.
+- **PR Core Checks** fails unless `Prepare PR` and every core check succeed. A check that `Prepare PR`
+  did not select runs its `No-op` job, which succeeds.
+- **PR API Compatibility** always reports. It fails when `Prepare PR` fails, passes without the API
+  check when no changed file can affect the published API, and otherwise requires the check to succeed.
 - **PR GIF Baseline Validation** always reports. It passes when the `run-gif-validation` label is
   absent, and it requires GIF validation to succeed when the label is present.
 
-## Docs-only pull requests
+## Check selection
 
-`scripts/ci-has-code-changes.sh` treats documentation, release notes, agent guidance, and
-repository metadata as non-code changes. For those pull requests, the core and API workflows run
-a `Docs-only no-op` job instead of their real validation.
+`Prepare PR` picks the checks from the changed files; [Check selection](validation-matrix.md#check-selection)
+lists the rules. Documentation, release notes, agent guidance, and repository metadata select no
+checks, and each reusable workflow then runs its `No-op` job in place of the real one.
 
-GitHub shows both paths in every run. A code-changing pull request therefore shows a skipped
-`Docs-only no-op` row next to the real job; that row is the inactive path, not a signal that the
-change was treated as docs-only.
+GitHub shows both paths in every run. A pull request that runs a check also shows a skipped `No-op`
+row next to the real job; that row is the inactive path.
 
 ## GIF validation
 
