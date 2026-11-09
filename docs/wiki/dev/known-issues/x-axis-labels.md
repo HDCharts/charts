@@ -9,44 +9,7 @@ Known issues and limits of the X-Axis Labels page in Chart Internals.
 
 ## Need Verification
 
-### Wide glyphs can make a label taller than the row
-
-`estimateXAxisLabelExtent` sizes labels at 0.58 × font size per character, but CJK and emoji
-glyphs are about 1 em wide. A long label of them can be taller than the row and, in line and
-stacked area charts, wider than the edge insets. By the same geometry, 10 CJK characters at 11sp
-need about 6.6 em of height where the estimate gives 4.2 em, so the label reaches about 1.2 em
-(13dp) above its share of the row, more than the 10dp gap, and may touch the plot. No test or
-screenshot shows it yet.
-
-Options:
-
-- Measure the few longest labels with a `TextMeasurer` once per data change, and use the measured
-  width and line height for the row height, the edge insets, and the minimum spacing.
-
-### Long edge labels can pass the edges of bar charts
-
-Bar, histogram, and stacked bar charts center the first and last labels under their bars, half a
-bar in from the plot edges, and do not move the plot in the way line and stacked area charts do.
-By the estimate, a tilted 11sp label of eight characters, such as "December", reaches about 25dp to
-each side of its tick, so on bars narrower than about 20dp it passes the 15dp chart padding on the
-right. No test or screenshot shows it yet.
-
-Options:
-
-- Inset the plot for bar charts too, by the part of the edge label that half a bar and the padding
-  cannot hold.
-
-### Live window labels can leave their points
-
-`LineChartContent` counts the points a live window has dropped with `TimelineWindowCounter`, which
-it updates while composing. If a composition is thrown away after the count moved, the next
-composition sees the same window twice. That is not a shift, so the count resets to 0 and every
-label jumps to other points once. This has not been seen on a device.
-
-Options:
-
-- Keep the count with the slide state, set in the same place as the transition.
-- Let `LiveLineChart` take the series index of its first point from the caller.
+None yet.
 
 ## Confirmed
 
@@ -82,39 +45,12 @@ Options:
   stride past each visible edge so they slide in and out. Keep `visibleRange` exact, because bar
   charts use it to draw bars.
 
-### The scrolling plan can miss a label at the left edge
-
-While scrolling, the layout draws a label whose tick is up to 1 px left of the plot, but
-`planAxisXLabels` can leave that item out when items are about 1 px wide. The missing label would
-hang almost entirely outside the plot, so nothing visible is lost.
-
-Confirmed by a random check of 200,000 scrolling plans: 29 labels the layout would draw were not
-planned, all with a tick 0.5 to 1 px left of the plot.
-
-Options:
-
-- Plan one item before `visibleRange` as well as one after it.
-
 ### Labels are always tilted
 
 Labels are tilted 34°, even when they would fit flat.
 
 Confirmed by `AxisXLabelsLayout`, which tilts every label by `X_AXIS_LABEL_TILT_DEGREES`, and by
 `HeroChartPreview`, whose six "Week" labels would fit flat.
-
-### A flat live window does not slide its labels
-
-A live window is seen as a shift only when its values move by one point. A window whose values do
-not change, such as a line of zeros, looks the same after every update: the line does not slide,
-the count of dropped points stays put, and the labels keep their places while their text changes.
-
-Confirmed by the code: `rawSeries` keys both the counter in `LineChartContent` and the effect that
-starts the slide, and an equal list does not change either key.
-
-Options:
-
-- Detect a shift from the X-axis labels as well as the values, or let the caller say that the
-  window moved.
 
 ### A live window resizes its plot when its labels change width
 
