@@ -47,24 +47,6 @@ Options:
 
 - Build points only for the visible range, plus one on each side.
 
-### Wide expanded charts show an error instead of drawing
-
-The expanded view sizes its canvas to every item, and Compose constraints cannot hold more than
-about 262,000 px. Past that, the chart shows "Chart exceeds layout limits" instead of drawing: an
-expanded line or stacked area chart at 21,847 points, or 5,463 at 4× zoom, and a bar or stacked bar
-chart with default bar sizes at 4,994 bars on a 2.625 density screen.
-
-Confirmed by `ChartCanvasLimitsTest` and by the
-`*_expandedPastLayoutLimits_displaysErrorInsteadOfCrashing` tests in `charts-line`,
-`charts-stacked-area`, and `charts-stacked-bar`.
-
-Options:
-
-- Draw on a viewport-sized canvas and offset the drawing by the scroll position, so the canvas no
-  longer grows with the item count. Positions then need to count from the first visible item:
-  past about 8.4 million px, a `Float` position can no longer hold fractions of a pixel, and past
-  about 16.8 million px it skips every other pixel.
-
 ### Gradients show steps in docs GIFs
 
 The `*_gradient*.gif` docs GIFs show visible steps (banding) in bar, histogram, and stacked
