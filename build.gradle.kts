@@ -130,10 +130,12 @@ subprojects {
     }
 }
 
+val jvmTestModules = ChartsModules.library + ChartsModules.sampleTested
+
 tasks.register("chartsTestJvm") {
     group = "verification"
     description = "Runs JVM tests for all chart modules and the sample modules"
-    dependsOn((ChartsModules.library + ChartsModules.sampleTested).map { "$it:jvmTest" })
+    dependsOn(jvmTestModules.map { "$it:jvmTest" })
 }
 
 tasks.register("chartsTestIos") {
@@ -284,12 +286,18 @@ tasks.register("validateDocsGifBaselines") {
 // The `ciTest*`, `ciCompile`, and `ciAssemble` tasks are CI entry points;
 // they define the exact scope invoked by the reusable workflows.
 // The `smoke-line` consumer compile belongs only to `ciCompile`, not to a test task.
+// Pull requests narrow the `ciTest*` tasks with -PciTestModules and -PciScreenshotTests; see CiTestSelection.
+
+val ciTestModules = CiTestSelection.parse(providers.gradleProperty(CiTestSelection.MODULES_PROPERTY).orNull)
+val ciScreenshotTests =
+    CiTestSelection.parse(providers.gradleProperty(CiTestSelection.SCREENSHOT_TESTS_PROPERTY).orNull)
 
 tasks.register("ciTestJvm") {
     group = "CI"
     description = "CI entry point for JVM tests"
-    dependsOn("chartsTestJvm")
-    dependsOn("buildSrcTest")
+    dependsOn(CiTestSelection.select(jvmTestModules, ciTestModules).map { "$it:jvmTest" })
+    // ci-impact.py selects every module whenever buildSrc or the build logic changes.
+    if (ciTestModules == null) dependsOn("buildSrcTest")
 }
 
 // CI splits instrumented tests across two emulator jobs with -PandroidTestShard=1|2.
@@ -300,12 +308,11 @@ tasks.register("ciTestAndroidInstrumented") {
     group = "CI"
     description = "CI entry point for Android instrumented tests"
     val selected =
-        when (val shard = providers.gradleProperty("androidTestShard").orNull) {
-            null -> deviceTestModules
-            "1" -> deviceTestModules.filter { it in androidTestShard1 }
-            "2" -> deviceTestModules.filterNot { it in androidTestShard1 }
-            else -> error("androidTestShard must be 1 or 2, was $shard")
-        }
+        CiTestSelection.androidShard(
+            modules = CiTestSelection.select(deviceTestModules, ciTestModules),
+            shard = providers.gradleProperty("androidTestShard").orNull,
+            firstShard = androidTestShard1,
+        )
     dependsOn(selected.map { "$it:connectedAndroidTest" })
 }
 
@@ -315,16 +322,73 @@ tasks.register("ciTestScreenshot") {
     dependsOn(":androidApp:validateDebugScreenshotTest")
 }
 
+// The validation task is a Gradle Test task, so a class filter limits which previews render and compare.
+ciScreenshotTests?.let { testClasses ->
+    project(":androidApp") {
+        tasks.withType<Test>().matching { it.name == "validateDebugScreenshotTest" }.configureEach {
+            testClasses.forEach { filter.includeTestsMatching(it) }
+        }
+    }
+}
+
 tasks.register("ciTestWeb") {
     group = "CI"
     description = "CI entry point for Wasm browser tests"
-    dependsOn("chartsTestWasm")
+    dependsOn(CiTestSelection.select(ChartsModules.library, ciTestModules).map { "$it:wasmJsTest" })
 }
 
 tasks.register("ciTestIos") {
     group = "CI"
     description = "CI entry point for iOS simulator tests"
-    dependsOn("chartsTestIos")
+    dependsOn(CiTestSelection.select(ChartsModules.library, ciTestModules).map { "$it:iosSimulatorArm64Test" })
+}
+
+// ci-impact.py picks pull request checks before any Gradle job runs, so it reads the project graph from
+// settings.gradle.kts and the build scripts. This fails when the script misses a project, directory,
+// project dependency or library module that Gradle has, or lists a project Gradle does not have.
+tasks.register("ciCheckImpactGraph") {
+    group = "CI"
+    description = "Checks that the CI change classifier sees the projects and project dependencies Gradle has"
+    val gradleProjects =
+        subprojects
+            .map { "project ${it.path} ${it.projectDir.relativeTo(rootDir).invariantSeparatorsPath}" }
+            .toSet()
+    val gradleEdges =
+        subprojects
+            .flatMap { subproject ->
+                subproject.configurations
+                    .flatMap { it.dependencies.withType<ProjectDependency>() }
+                    .map { it.path }
+                    .filter { it != subproject.path }
+                    .map { "edge ${subproject.path} $it" }
+            }.toSet()
+    val gradleLibrary = ChartsModules.library.map { "library $it" }.toSet()
+    val classifierGraph =
+        providers
+            .exec {
+                commandLine("python3", file(".github/scripts/ci-impact.py").path, "--print-graph")
+            }.standardOutput.asText
+    doLast {
+        val classifier =
+            classifierGraph
+                .get()
+                .lines()
+                .filter(String::isNotBlank)
+                .toSet()
+        val missing = (gradleProjects + gradleEdges + gradleLibrary) - classifier
+        val extraProjects = classifier.filter { it.startsWith("project ") }.toSet() - gradleProjects
+        check(missing.isEmpty() && extraProjects.isEmpty()) {
+            buildString {
+                appendLine(".github/scripts/ci-impact.py does not see the project graph Gradle has.")
+                missing.sorted().forEach { appendLine("  Only Gradle has: $it") }
+                extraProjects.sorted().forEach { appendLine("  Only the script has: $it") }
+                append("Declare projects and dependencies in a form the script parses, or update the script.")
+            }
+        }
+        logger.lifecycle(
+            "CI impact graph matches Gradle: ${gradleProjects.size} projects, ${gradleEdges.size} project dependencies",
+        )
+    }
 }
 
 tasks.register("ciCompile") {

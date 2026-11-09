@@ -20,20 +20,19 @@ jobs:
     runs-on: ubuntu-26.04
     outputs:
       source_sha: ${{ github.sha }}
-      should_run: ${{ steps.changes.outputs.should_run }}
+      api: ${{ steps.impact.outputs.api }}
     steps:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
-      - name: Detect code changes
-        id: changes
+      # The same selection as the core workflow; it runs here again because workflows cannot share outputs.
+      - name: Select checks
+        id: impact
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-        run: |
-          should_run="$(bash scripts/ci-has-code-changes.sh "$BASE_SHA" "$HEAD_SHA")"
-          echo "should_run=$should_run" >> "$GITHUB_OUTPUT"
+        run: python3 -B .github/scripts/ci-impact.py "$BASE_SHA" "$HEAD_SHA"
 
   api-compatibility:
     name: Internal API Compatibility
@@ -41,20 +40,33 @@ jobs:
     uses: ./.github/workflows/api-compatibility.yml
     with:
       source-sha: ${{ needs.prepare.outputs.source_sha }}
-      should-run: ${{ needs.prepare.outputs.should_run == 'true' }}
+      should-run: ${{ needs.prepare.outputs.api != 'false' }}
 
+  # Always reports, so a failed Prepare PR fails this gate instead of skipping it.
   api-result:
     name: PR API Compatibility
     needs:
       - prepare
       - api-compatibility
-    if: ${{ always() && needs.prepare.outputs.should_run == 'true' }}
+    if: ${{ always() }}
     runs-on: ubuntu-26.04
     steps:
       - name: Verify API compatibility
         env:
+          PREPARE_RESULT: ${{ needs.prepare.result }}
+          API_SELECTED: ${{ needs.prepare.outputs.api }}
           API_RESULT: ${{ needs.api-compatibility.result }}
         run: |
+          if [ "$PREPARE_RESULT" != "success" ]; then
+            echo "Prepare PR did not succeed: $PREPARE_RESULT"
+            exit 1
+          fi
+
+          if [ "$API_SELECTED" = "false" ]; then
+            echo "No changed file can affect the published API."
+            exit 0
+          fi
+
           if [ "$API_RESULT" != "success" ]; then
             echo "The API compatibility check did not succeed: $API_RESULT"
             exit 1

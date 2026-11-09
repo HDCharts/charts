@@ -5,7 +5,7 @@ on:
   workflow_call:
     inputs:
       should-run:
-        description: Whether the pull request contains code or build changes.
+        description: Whether Prepare PR selected the lint check.
         required: true
         type: boolean
       source-sha:
@@ -18,12 +18,12 @@ permissions:
 
 jobs:
   skipped:
-    name: Docs-only no-op
+    name: No-op
     if: ${{ !inputs.should-run }}
     runs-on: ubuntu-26.04
     steps:
-      - name: Report docs-only no-op
-        run: echo 'No code changes require the lint check.'
+      - name: Report no-op
+        run: echo 'Prepare PR found no change that needs the lint check.'
 
   lint:
     name: Lint
@@ -36,5 +36,6 @@ jobs:
           ref: ${{ inputs.source-sha }}
       - name: Set up JDK 17
         uses: ./.github/actions/setup-jdk
+      # ciCheckImpactGraph fails when the test selection in Prepare PR misses a project or dependency.
       - name: Lint
-        run: ./gradlew ktlintCheck buildSrcKtlintCheck
+        run: ./gradlew ktlintCheck buildSrcKtlintCheck ciCheckImpactGraph
