@@ -52,8 +52,8 @@ Style Clamping describes.
 ## Messages
 
 Indexed-series messages come from `ValidationErrors` in `DataValidation.kt` in `charts-core`.
-Scatter's and heatmap's data-model-specific messages live with their private `ScatterChartPolicy` and
-`HeatmapChartPolicy`.
+Scatter's, heatmap's and waterfall's data-model-specific messages live with their private
+`ScatterChartPolicy`, `HeatmapChartPolicy` and `WaterfallChartPolicy`.
 
 | Rule | Message | Charts |
 | --- | --- | --- |
@@ -84,20 +84,26 @@ Scatter's and heatmap's data-model-specific messages live with their private `Sc
 | Scale colors | The color scale requires at least two colors. | Heatmap |
 | Scale bounds | Color scale bounds must be finite. | Heatmap |
 | Scale order | The color scale minimum must be less than its maximum. | Heatmap, with both bounds set |
+| No entries | At least one waterfall entry is required. | Waterfall |
+| Change amounts | Change amounts must be finite. | Waterfall |
+| Running totals | Every running total must be finite. | Waterfall |
 
 The color message names what the colors are matched to: `value` on bar, histogram, pie and ring gauge, and
 `series` on line, radar, and the stacked charts.
 
 Indexed-series charts that draw several series report a problem once per series. Charts with one
 series report it per value, with its index. Scatter collects each violated rule once across its points,
-and heatmap once across its cells. A `null` heatmap cell is missing data, not an error.
+and heatmap once across its cells. A `null` heatmap cell is missing data, not an error. Waterfall stops
+at its first non-finite change or non-finite running total, like a single-series chart at its first
+shape problem.
 
 ## Where it happens
 
 Indexed-series checks live in `DataValidation.kt` in `charts-core`. A `ChartPolicy<S>` declares the
 checks and style inputs, and `ChartEntry` combines them. Scatter's independent X/Y checks live in
-`ScatterChartEntry.kt` in `charts-scatter`, and heatmap's matrix checks in `HeatmapChartEntry.kt` in
-`charts-heatmap`. Every path reuses `ChartErrors` and axis label validation.
+`ScatterChartEntry.kt` in `charts-scatter`, heatmap's matrix checks in `HeatmapChartEntry.kt` in
+`charts-heatmap`, and waterfall's ordered-change checks in `WaterfallChartEntry.kt` in
+`charts-waterfall`. Every path reuses `ChartErrors` and axis label validation.
 Their entry contracts are recorded in Entry Seam and Chart Policy.
 
 | Function | Checks | Charts |
@@ -109,6 +115,7 @@ Their entry contracts are recorded in Entry Seam and Chart Policy.
 | `validateRange` | Non-finite range bounds | Bar, histogram, line |
 | `ScatterChartPolicy.errorsFor` | Non-empty series and points, names for multiple series, palette count, finite coordinates, optional finite non-negative sizes, X/Y bounds and axis labels | Scatter / bubble |
 | `HeatmapChartPolicy.errorsFor` | Non-empty labels, matrix shape, finite present values, at least one value, color-scale colors and bounds, and axis labels | Heatmap |
+| `WaterfallChartPolicy.errorsFor` | At least one entry, finite change amounts, finite running totals, and the shared range and axis label checks | Waterfall |
 
 Axis label settings are checked by `validateAxisLabels` in `AxisLabelValidation.kt`.
 
