@@ -153,6 +153,7 @@ class ChartGalleryViewModel(
             ChartDestination.RadarChartScreen -> "Live radial signals."
             ChartDestination.ScatterChartScreen -> "Compare values and sizes."
             ChartDestination.HeatmapChartScreen -> "Values across two categories."
+            ChartDestination.WaterfallChartScreen -> "Changes to a running balance."
             ChartDestination.GaugeChartsScreen -> "Ring and capacity gauges."
         }
 

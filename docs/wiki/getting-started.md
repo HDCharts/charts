@@ -39,6 +39,7 @@ commonMain.dependencies {
     implementation("io.github.hdcharts:gauge:{{artifactVersion}}")
     implementation("io.github.hdcharts:scatter:{{artifactVersion}}")
     implementation("io.github.hdcharts:heatmap:{{artifactVersion}}")
+    implementation("io.github.hdcharts:waterfall:{{artifactVersion}}")
 }
 ```
 
@@ -59,6 +60,7 @@ dependencies {
     implementation("io.github.hdcharts:gauge")
     implementation("io.github.hdcharts:scatter")
     implementation("io.github.hdcharts:heatmap")
+    implementation("io.github.hdcharts:waterfall")
 }
 ```
 

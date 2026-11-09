@@ -13,6 +13,7 @@ declare -a screenshot_mappings=(
   'StackedAreaWikiPreview_Light Tablet Landscape_5e637cf0_0.png|wiki-stacked-area-basic.png'
   'RadarWikiPreview_Light Tablet Landscape_5e637cf0_0.png|wiki-radar-basic.png'
   'ScatterWikiPreview_Light Tablet Landscape_5e637cf0_0.png|wiki-scatter-basic.png'
+  'WaterfallWikiPreview_Light Tablet Landscape_5e637cf0_0.png|wiki-waterfall-basic.png'
   'HeatmapWikiPreview_Light Tablet Landscape_5e637cf0_0.png|wiki-heatmap-basic.png'
   'HeatmapSequentialWikiPreview_Light Tablet Landscape_5e637cf0_0.png|wiki-heatmap-sequential.png'
   'HeatmapInterpolatedWikiPreview_Light Tablet Landscape_5e637cf0_0.png|wiki-heatmap-interpolated.png'
@@ -70,7 +71,7 @@ run_self_test() {
   [[ "${first_hashes}" == "${second_hashes}" ]]
   [[ "$(cat "${temp_dir}/content/snapshot/wiki/assets/existing.gif")" == 'keep gif' ]]
   [[ "$(cat "${temp_dir}/content/snapshot/wiki/assets/hero.png")" == 'keep unrelated png' ]]
-  [[ "$(find "${temp_dir}/content/snapshot/wiki/assets" -maxdepth 1 -type f -name 'wiki-*.png' | wc -l | tr -d ' ')" == '18' ]]
+  [[ "$(find "${temp_dir}/content/snapshot/wiki/assets" -maxdepth 1 -type f -name 'wiki-*.png' | wc -l | tr -d ' ')" == '19' ]]
   for mapping in "${screenshot_mappings[@]}"; do
     IFS='|' read -r source_name published_name <<<"${mapping}"
     cmp "${temp_dir}/baselines/${source_name}" "${temp_dir}/content/snapshot/wiki/assets/${published_name}"
@@ -85,6 +86,7 @@ run_self_test() {
     'stacked-area-chart.md|wiki-stacked-area-basic.png' \
     'radar-chart.md|wiki-radar-basic.png' \
     'scatter-chart.md|wiki-scatter-basic.png' \
+    'waterfall-chart.md|wiki-waterfall-basic.png' \
     'heatmap-chart.md|wiki-heatmap-basic.png' \
     'heatmap-chart.md|wiki-heatmap-sequential.png' \
     'heatmap-chart.md|wiki-heatmap-interpolated.png' \

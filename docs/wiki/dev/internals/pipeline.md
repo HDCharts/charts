@@ -73,23 +73,23 @@ again.
 
 ## Which chart runs which stage
 
-| Stage | Line | Bar | Histogram | Stacked bar | Stacked area | Radar | Pie | Ring gauge | Scatter / bubble | Heatmap |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 Selection lifecycle | yes | yes | shared | yes | yes | yes, twice | yes | yes | entry | entry |
-| 2 Validation | yes | yes | shared | yes | yes | yes | own path | yes | `ScatterChartPolicy` | `HeatmapChartPolicy` |
-| 3 Clamping | yes | yes | shared | yes | yes | yes | yes | yes | entry | entry |
-| 4 Conversion | pass-through | pass-through | pass-through | transposes | pass-through | pass-through | none | pass-through | — | — |
-| 5 Density decision | yes | yes | shared | yes | yes | — | — | — | — | — |
-| 6 Aggregation | yes | yes | shared | yes | yes | — | — | — | — | — |
-| 7 Palette | frame | own colour | shared | entry | entry | entry | own file | entry | content | color scale in content |
-| 8 Chrome layout | `LineChartFrame` | `BarChartContent` | shared | `StackedBarChartFrame` | `StackedAreaChartFrame` | inline | `PieChartFrame` | inline | `ChartPlotLayout` | `ChartPlotLayout` |
-| 9 Axis planning | yes | yes | shared | yes | yes | labels only | — | range labels only | shared X/Y layouts | category labels on shared layouts |
-| 10 Canvas guard | yes | yes | shared | yes | yes | — | — | — | — | — |
-| 11 Domain | `resolveLineRange` | `resolveBarRange` | shared | totals | totals | `minMax` | share-based | `style.range` | `scatterDomain` | `heatmapColorMapping` |
-| 12 Normalization | list | scalar per bar | shared | list | list | list | share-based | `gaugeFraction` per ring | X/Y positions and bubble radii | color fraction per cell, interpolated strips |
-| 13 Animation | yes | yes | shared | yes | yes | yes | yes | yes | initial reveal | initial reveal |
-| 14 Gesture | yes | yes | shared | yes | yes | yes | yes | yes | `nearestScatterPointIndex` | `HeatmapPlotLayout.cellIndexAt` |
-| 15 Draw | yes | yes | shared | yes | yes | yes | yes | yes | `ScatterChartContent` | `HeatmapChartContent` |
+| Stage | Line | Bar | Histogram | Stacked bar | Stacked area | Radar | Pie | Ring gauge | Scatter / bubble | Heatmap | Waterfall |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 Selection lifecycle | yes | yes | shared | yes | yes | yes, twice | yes | yes | entry | entry | entry |
+| 2 Validation | yes | yes | shared | yes | yes | yes | own path | yes | `ScatterChartPolicy` | `HeatmapChartPolicy` | `WaterfallChartPolicy` |
+| 3 Clamping | yes | yes | shared | yes | yes | yes | yes | yes | entry | entry | entry |
+| 4 Conversion | pass-through | pass-through | pass-through | transposes | pass-through | pass-through | none | pass-through | — | — | bar list in entry |
+| 5 Density decision | yes | yes | shared | yes | yes | — | — | — | — | — | — |
+| 6 Aggregation | yes | yes | shared | yes | yes | — | — | — | — | — | — |
+| 7 Palette | frame | own colour | shared | entry | entry | entry | own file | entry | content | color scale in content | content |
+| 8 Chrome layout | `LineChartFrame` | `BarChartContent` | shared | `StackedBarChartFrame` | `StackedAreaChartFrame` | inline | `PieChartFrame` | inline | `ChartPlotLayout` | `ChartPlotLayout` | `ChartPlotLayout` |
+| 9 Axis planning | yes | yes | shared | yes | yes | labels only | — | range labels only | shared X/Y layouts | category labels on shared layouts | shared X/Y layouts |
+| 10 Canvas guard | yes | yes | shared | yes | yes | — | — | — | — | — | — |
+| 11 Domain | `resolveLineRange` | `resolveBarRange` | shared | totals | totals | `minMax` | share-based | `style.range` | `scatterDomain` | `heatmapColorMapping` | `waterfallRange` |
+| 12 Normalization | list | scalar per bar | shared | list | list | list | share-based | `gaugeFraction` per ring | X/Y positions and bubble radii | color fraction per cell, interpolated strips | rect per bar |
+| 13 Animation | yes | yes | shared | yes | yes | yes | yes | yes | initial reveal | initial reveal | initial reveal |
+| 14 Gesture | yes | yes | shared | yes | yes | yes | yes | yes | `nearestScatterPointIndex` | `HeatmapPlotLayout.cellIndexAt` | `waterfallHitIndex` |
+| 15 Draw | yes | yes | shared | yes | yes | yes | yes | yes | `ScatterChartContent` | `HeatmapChartContent` | `WaterfallChartContent` |
 
 Bar and histogram share one plot, so they share every stage, compact aggregation included. Their
 specs differ only in the policy: histogram forbids negative bin heights.
@@ -120,9 +120,16 @@ field uses Fritsch-Butland slopes at cell centers and clamps each patch to its c
 smooth without overshoot. The strips depend on the plot
 size, so they are remembered in content against the data, color mapping and layout, never per frame.
 
+Waterfall owns its input stages in `WaterfallChartEntry`, in the same shape as scatter and heatmap.
+Its entry derives the floating bars from the validated entries once, the one conversion-like step
+among the custom-model charts, and content derives its per-entry colors from the clamped style.
+`WaterfallMath.kt` owns the bar geometry, pixel bounds and hit testing. There is no compaction and
+no canvas guard: every bar fits the viewport by shrinking, capped by `maxBarWidth`.
+
 **Domains.** Bar and both stacked charts fold zero into
 the domain, so an all-positive series starts at the axis. Line and radar take the data's own range.
-Line, bar and histogram accept a caller's fixed range through `style.range`. Stacked area's domain
+Line, bar, histogram and waterfall accept a caller's fixed range through `style.range`. Stacked area's
+domain
 is a line inside its normalizer, so finding it means opening the normalizer. Pie's axis is the caller's
 own share, not a data range, which is why its matrix row reads share-based. Ring gauge reads only
 `style.range` and never the data's range, so a value outside it stops at the nearest end of the arc. A domain is a pair of
@@ -131,7 +138,9 @@ open.
 
 Scatter resolves separate X and Y domains from its points and optional bounds through `scatterDomain`.
 Heatmap resolves one value domain for its color scale, and draws a constant domain with the middle
-color.
+color. Waterfall folds zero and every intermediate balance into `waterfallRange`, so its floating
+bars and connectors stay inside the plot; an all-zero dataset draws against a `0..1` fallback, like
+bar's.
 
 **Flat data draws at a different height per chart.** Line passes `zeroRangeValue = 0f` and draws a
 flat series at the bottom. Radar passes `1f` and draws it at full radius. Both domains are the same
