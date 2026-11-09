@@ -109,7 +109,13 @@ jobs:
             cat dry-run.log
             exit 1
           fi
+          task_lines="$(grep -c 'connectedAndroidTest' dry-run.log || true)"
           modules="$(sed -n 's/^\(:.*\):connectedAndroidTest SKIPPED$/\1/p' dry-run.log | paste -sd ' ' -)"
+          if [ "$task_lines" -gt 0 ] && [ -z "$modules" ]; then
+            echo "The dry-run lists ${task_lines} connectedAndroidTest task(s) but none matched the expected '<project>:connectedAndroidTest SKIPPED' line format." | tee -a "$GITHUB_STEP_SUMMARY"
+            grep 'connectedAndroidTest' dry-run.log
+            exit 1
+          fi
           echo "modules=${modules}" >> "$GITHUB_OUTPUT"
           if [ -n "$modules" ]; then
             echo "Shard ${{ matrix.shard }} runs device tests for: ${modules}" | tee -a "$GITHUB_STEP_SUMMARY"
