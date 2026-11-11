@@ -9,7 +9,7 @@ min-sdk = "24"
 target-sdk = "37"
 
 # Android gradle plugin version
-agp = "9.5.0"
+agp = "9.5.1"
 
 androidx-navigation = "2.10.0"
 androidx-lifecycle = "2.11.0"
@@ -54,7 +54,7 @@ jose4j-security = "0.9.6"
 jackson-core-security = "2.18.6"
 
 # https://kotlin.github.io/dokka/
-dokka = "2.2.0"
+dokka = "2.3.0"
 # https://github.com/vanniktech/gradle-maven-publish-plugin
 mavenPublish = "0.37.0"
 # https://github.com/gmazzo/gradle-buildconfig-plugin
