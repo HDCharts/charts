@@ -185,7 +185,27 @@ jobs:
         with:
           cache-read-only: true
 
+      - name: Record snapshot publishing diagnostics
+        shell: bash
+        run: |
+          echo "Before snapshot publishing (UTC): $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+          echo "Runner CPU count: $(nproc)"
+          echo "Maven Central repository CDN trace (download path):"
+          if ! curl --fail --silent --show-error --connect-timeout 5 --max-time 15 \
+            https://repo1.maven.org/cdn-cgi/trace | awk '/^(ip|colo)=/'; then
+            echo "::warning::Could not record Maven Central repository CDN trace."
+          fi
+
+          cat > "$RUNNER_TEMP/snapshot-publishing-diagnostics.init.gradle" <<'GRADLE'
+          if (gradle.parent == null) {
+              println "Snapshot publishing Gradle: ${gradle.gradleVersion}"
+              println "Snapshot publishing max workers: ${gradle.startParameter.maxWorkerCount}"
+              println "Snapshot publishing parallel projects: ${gradle.startParameter.parallelProjectExecutionEnabled}"
+          }
+          GRADLE
+
       - name: Publish snapshot to Maven Central
+        id: publish
         uses: ./.github/actions/publish-charts-modules
         with:
           maven-central-username: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
@@ -193,6 +213,19 @@ jobs:
           signing-key-id: ${{ secrets.SIGNING_KEY_ID }}
           signing-password: ${{ secrets.SIGNING_PASSWORD }}
           signing-in-memory-key: ${{ secrets.SIGNING_IN_MEMORY_KEY }}
+          gradle-arguments: --init-script "${{ runner.temp }}/snapshot-publishing-diagnostics.init.gradle"
+
+      - name: Record snapshot publishing outcome
+        if: ${{ always() && (steps.publish.outcome == 'success' || steps.publish.outcome == 'failure') }}
+        shell: bash
+        run: |
+          echo "After snapshot publishing (UTC): $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+          echo "Snapshot publishing outcome: ${{ steps.publish.outcome }}"
+          echo "Maven Central repository CDN trace (download path):"
+          if ! curl --fail --silent --show-error --connect-timeout 5 --max-time 15 \
+            https://repo1.maven.org/cdn-cgi/trace | awk '/^(ip|colo)=/'; then
+            echo "::warning::Could not record Maven Central repository CDN trace."
+          fi
 
   announce-snapshot:
     name: Announce Snapshot Release
