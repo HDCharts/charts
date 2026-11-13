@@ -9,7 +9,7 @@ min-sdk = "24"
 target-sdk = "37"
 
 # Android gradle plugin version
-agp = "9.5.0"
+agp = "9.5.1"
 
 androidx-navigation = "2.10.0"
 androidx-lifecycle = "2.11.0"
