@@ -67,7 +67,14 @@ fun Task.isGradleSignTask(): Boolean {
     return false
 }
 
+val mavenUploadThrottle =
+    gradle.sharedServices
+        .registerIfAbsent("mavenUploadThrottle", MavenUploadThrottle::class.java) {
+            maxParallelUsages = 1
+        }
+
 val verifySigningKey =
+
     tasks.register<Exec>("verifySigningKey") {
         group = "verification"
         description =
@@ -84,6 +91,12 @@ val verifySigningKey =
 
 subprojects {
     version = rootProject.version
+
+    // Central throttles upload bursts, not builds. One publication uploads at a
+    // time; everything else keeps the configured worker count.
+    tasks.withType<PublishToMavenRepository>().configureEach {
+        usesService(mavenUploadThrottle)
+    }
 
     plugins.withId("org.jlleitschuh.gradle.ktlint") {
         extensions.configure<org.jlleitschuh.gradle.ktlint.KtlintExtension>("ktlint") {
