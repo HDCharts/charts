@@ -29,7 +29,7 @@ ROOT = Path(__file__).resolve().parents[2]
 CHANGE_FILTER = ROOT / "scripts" / "ci-has-code-changes.sh"
 KDOC_CHECK = Path(__file__).resolve().parent / "ci-kdoc-only-change.py"
 
-CHECKS = ("lint", "build", "api", "jvm", "android", "wasm", "ios", "screenshot")
+CHECKS = ("lint", "build", "api", "jvm", "android", "ios", "screenshot")
 
 # The umbrella artifact depends on every chart module, so the library is the
 # umbrella plus everything it depends on.
@@ -416,7 +416,6 @@ def plan_changes(repo: Repo, paths: list[str], notes: list[tuple[str, str]] = ()
         "api": bool(changed & repo.library) or any(change.kind == "api" for change in changes),
         "jvm": bool(test_modules & repo.jvm_tested()),
         "android": library_tests,
-        "wasm": library_tests,
         "ios": library_tests,
         "screenshot": screenshots.run,
     }
@@ -538,7 +537,6 @@ def check_rows(plan: Plan) -> list[tuple[str, str, str]]:
             "android",
             "All modules with device tests" if full else f"{names(library)}, where each shard has device tests",
         ),
-        ("Wasm tests", "wasm", "All library modules" if full else names(library)),
         ("iOS tests", "ios", "All library modules" if full else names(library)),
         ("Screenshot tests", "screenshot", screenshot_scope),
     ]

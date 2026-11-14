@@ -16,10 +16,6 @@ on:
         description: Whether Prepare PR selected the Android instrumented tests.
         required: true
         type: boolean
-      wasm:
-        description: Whether Prepare PR selected the Wasm tests.
-        required: true
-        type: boolean
       ios:
         description: Whether Prepare PR selected the iOS tests.
         required: true
@@ -47,7 +43,7 @@ permissions:
 jobs:
   skipped:
     name: No tests selected
-    if: ${{ !inputs.jvm && !inputs.android && !inputs.screenshot && !inputs.wasm && !inputs.ios }}
+    if: ${{ !inputs.jvm && !inputs.android && !inputs.screenshot && !inputs.ios }}
     runs-on: ubuntu-26.04
     steps:
       - name: Report no-op
@@ -187,37 +183,6 @@ jobs:
           path: |
             sample/androidApp/build/reports/screenshotTest/**
             sample/androidApp/build/test-results/validateDebugScreenshotTest/**
-
-  web-tests:
-    name: Wasm Tests
-    if: ${{ inputs.wasm }}
-    runs-on: ubuntu-26.04
-    env:
-      ORG_GRADLE_PROJECT_ciTestModules: ${{ inputs.test-modules }}
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 1
-          ref: ${{ inputs.source-sha }}
-
-      - name: Set up JDK 17
-        uses: ./.github/actions/setup-jdk
-        with:
-          # Only warm-gradle-cache.yml writes caches; a write here scopes the entry to the PR.
-          cache-read-only: true
-
-      - name: Run Wasm tests
-        run: ./gradlew ciTestWeb --no-daemon
-
-      - name: Upload Wasm test reports
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v7
-        with:
-          name: wasm-test-reports
-          if-no-files-found: warn
-          path: |
-            **/build/reports/tests/**
-            **/build/test-results/**
 
   ios-tests:
     name: iOS Tests
