@@ -29,6 +29,7 @@ kotlin-multiplatform = "2.4.21"
 compose-screenshot = "0.0.1-alpha16"
 # Coroutines version
 kotlinx-coroutines = "1.11.0"
+posthog-kmp = "0.10.0"
 kotlinx-collections-immutable = "0.5.2"
 # https://github.com/Kotlin/kotlinx.serialization
 kotlinx-serialization = "1.12.0"
@@ -69,6 +70,7 @@ koin-bom = "4.2.2"
 japicmp-gradle-plugin = "0.4.6"
 
 [libraries]
+posthog-kmp = { module = "com.posthog:posthog-kmp", version.ref = "posthog-kmp" }
 compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "composeUi" }
 compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "composeUi" }
 compose-mpp-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose-plugin" }

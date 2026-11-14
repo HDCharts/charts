@@ -2,6 +2,7 @@ package io.github.hdcharts.line
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import io.github.hdcharts.core.internal.telemetry.TrackChartUsage
 import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.model.ChartValueFormatter
 import io.github.hdcharts.line.internal.LineChartEntry
@@ -39,6 +40,8 @@ fun LiveLineChart(
     axisValueFormatter: ChartValueFormatter = LineChartDefaults.axisValueFormatter,
     subtitle: String? = null,
 ) {
+    TrackChartUsage("live_line")
+
     LineChartEntry(
         data = data,
         modifier = modifier,

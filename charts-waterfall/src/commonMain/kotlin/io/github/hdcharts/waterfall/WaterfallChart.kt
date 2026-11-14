@@ -2,6 +2,7 @@ package io.github.hdcharts.waterfall
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import io.github.hdcharts.core.internal.telemetry.TrackChartUsage
 import io.github.hdcharts.core.model.ChartSelection
 import io.github.hdcharts.core.model.ChartValueFormatter
 import io.github.hdcharts.core.model.rememberChartSelection
@@ -29,6 +30,8 @@ fun WaterfallChart(
     valueFormatter: ChartValueFormatter = WaterfallChartDefaults.valueFormatter,
     axisValueFormatter: ChartValueFormatter = WaterfallChartDefaults.axisValueFormatter,
 ) {
+    TrackChartUsage("waterfall")
+
     WaterfallChartEntry(
         data,
         modifier,

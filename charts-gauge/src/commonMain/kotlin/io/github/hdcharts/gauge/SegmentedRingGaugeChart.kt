@@ -8,6 +8,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import io.github.hdcharts.core.internal.InternalChartsApi
 import io.github.hdcharts.core.internal.NO_SELECTION
+import io.github.hdcharts.core.internal.telemetry.TrackChartUsage
 import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.model.ChartSelection
 import io.github.hdcharts.core.model.ChartValueFormatter
@@ -53,6 +54,8 @@ fun SegmentedRingGaugeChart(
     animateOnStart: Boolean = true,
     subtitle: String? = null,
 ) {
+    TrackChartUsage("segmented_ring_gauge")
+
     var interactionNonce by remember(data, selection) { mutableStateOf<Long?>(null) }
     val segmentCount =
         data.series

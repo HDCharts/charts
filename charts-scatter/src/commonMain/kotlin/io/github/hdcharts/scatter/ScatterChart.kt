@@ -2,6 +2,7 @@ package io.github.hdcharts.scatter
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import io.github.hdcharts.core.internal.telemetry.TrackChartUsage
 import io.github.hdcharts.core.model.ChartSelection
 import io.github.hdcharts.core.model.ChartValueFormatter
 import io.github.hdcharts.core.model.rememberChartSelection
@@ -26,6 +27,8 @@ fun ScatterChart(
     yValueFormatter: ChartValueFormatter = xValueFormatter,
     sizeValueFormatter: ChartValueFormatter = xValueFormatter,
 ) {
+    TrackChartUsage("scatter")
+
     ScatterChartEntry(
         data = data,
         modifier = modifier,

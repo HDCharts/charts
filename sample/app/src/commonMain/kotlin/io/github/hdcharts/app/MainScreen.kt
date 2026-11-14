@@ -52,6 +52,7 @@ import io.github.hdcharts.app.library.BuildConfig
 import io.github.hdcharts.app.ui.composable.InteractiveSurfaceCallbacks
 import io.github.hdcharts.app.ui.composable.LocalChartDemoSidePanel
 import io.github.hdcharts.app.ui.composable.LocalInteractiveSurfaceCallbacks
+import io.github.hdcharts.core.LocalChartsTelemetryEnabled
 import io.github.hdcharts.sampleshared.theme.AppTheme
 import io.github.hdcharts.sampleshared.theme.Dimens
 import kotlinx.coroutines.launch
@@ -346,23 +347,25 @@ fun MainScreenContent(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background,
     ) {
-        ChartGallery(
-            menuState = menuState,
-            onChartSelected = onChartSelected,
-            liveApiExamples = liveApiExamples,
-            onLiveApiExampleSelected = onLiveApiExampleSelected,
-            versionLabel =
-                listOf(
-                    "HDCharts: ${BuildConfig.CHARTS_VERSION}",
-                    BuildConfig.CHARTS_COMMIT.take(7),
-                    BuildConfig.CHARTS_COMMIT_DATE,
-                ).filter(String::isNotEmpty)
-                    .joinToString(separator = " · "),
-            versionUrl = BuildConfig.CHARTS_COMMIT.takeIf(String::isNotEmpty)?.let { "$githubUrl/commit/$it" },
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = Dimens.md),
-        )
+        CompositionLocalProvider(LocalChartsTelemetryEnabled provides false) {
+            ChartGallery(
+                menuState = menuState,
+                onChartSelected = onChartSelected,
+                liveApiExamples = liveApiExamples,
+                onLiveApiExampleSelected = onLiveApiExampleSelected,
+                versionLabel =
+                    listOf(
+                        "HDCharts: ${BuildConfig.CHARTS_VERSION}",
+                        BuildConfig.CHARTS_COMMIT.take(7),
+                        BuildConfig.CHARTS_COMMIT_DATE,
+                    ).filter(String::isNotEmpty)
+                        .joinToString(separator = " · "),
+                versionUrl = BuildConfig.CHARTS_COMMIT.takeIf(String::isNotEmpty)?.let { "$githubUrl/commit/$it" },
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = Dimens.md),
+            )
+        }
     }
 }

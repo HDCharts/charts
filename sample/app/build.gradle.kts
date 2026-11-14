@@ -49,6 +49,9 @@ kotlin {
             isStatic = true
         }
     }
+    swiftPMDependencies {
+        iosMinimumDeploymentTarget.set("15.3")
+    }
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
         browser {
@@ -110,9 +113,13 @@ compose.desktop {
     application {
         mainClass = "MainKt"
         nativeDistributions {
+            modules("jdk.unsupported")
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = Config.DEMO_NAMESPACE
             packageVersion = Config.DEMO_VERSION_NAME
+        }
+        buildTypes.release.proguard {
+            configurationFiles.from(project.file("compose-desktop.pro"))
         }
     }
 }
