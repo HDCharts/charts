@@ -21,7 +21,9 @@ platform-specific `chartsTest*` tasks in the root build.
 
 Wasm compilation remains in `ciCompile`, and `ciAssemble` builds the sample web distribution.
 Full Wasm browser tests run manually; they are outside the PR checks, including full-validation
-fallbacks. Compilation and packaging do not verify browser rendering or interaction.
+fallbacks. Compilation and packaging do not verify browser rendering or interaction. The Wasm
+test job was resource-heavy and of low value on ordinary PRs, so it was removed from default PR
+checks to conserve CI resources.
 
 ## Check selection
 
