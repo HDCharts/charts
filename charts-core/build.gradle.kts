@@ -10,6 +10,7 @@ plugins {
     alias(libs.plugins.mavenPublish)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.ktlint)
+    alias(libs.plugins.build.config)
 }
 
 kotlin {
@@ -61,6 +62,8 @@ kotlin {
             api(libs.compose.mpp.preview)
             implementation(libs.compose.mpp.resources)
             api(libs.kotlinx.collections.immutable)
+            implementation(libs.posthog.kmp)
+            implementation(libs.kotlinx.coroutines.core)
         }
 
         commonTest.dependencies {
@@ -68,6 +71,7 @@ kotlin {
             implementation(kotlin("test-common"))
             implementation(kotlin("test-annotations-common"))
             implementation(libs.compose.mpp.ui.test)
+            implementation(libs.kotlinx.coroutines.test)
         }
 
         androidMain.dependencies {
@@ -83,6 +87,18 @@ kotlin {
             implementation(kotlin("test-junit"))
         }
     }
+}
+
+buildConfig {
+    packageName("io.github.hdcharts.core.internal.telemetry")
+    className("TelemetryBuildConfig")
+    useKotlinOutput { internalVisibility = true }
+    buildConfigField("CHARTS_VERSION", project.version.toString())
+    buildConfigField("POSTHOG_PROJECT_TOKEN", "phc_B3eDZ2cM9EwUuXWp3iG3JSmNuK6waQvoMZ5GtBWudHqF")
+    buildConfigField(
+        "TELEMETRY_ENABLED",
+        providers.gradleProperty("chartsTelemetryEnabled").map(String::toBoolean).orElse(true),
+    )
 }
 
 mavenPublishing {

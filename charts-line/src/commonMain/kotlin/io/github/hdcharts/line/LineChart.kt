@@ -6,6 +6,7 @@ import io.github.hdcharts.core.internal.InternalChartsApi
 import io.github.hdcharts.core.internal.NO_SELECTION
 import io.github.hdcharts.core.internal.selectedLegendValues
 import io.github.hdcharts.core.internal.selectedTitle
+import io.github.hdcharts.core.internal.telemetry.TrackChartUsage
 import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.model.ChartSelection
 import io.github.hdcharts.core.model.ChartValueFormatter
@@ -48,6 +49,8 @@ fun LineChart(
     axisValueFormatter: ChartValueFormatter = LineChartDefaults.axisValueFormatter,
     subtitle: String? = null,
 ) {
+    TrackChartUsage("line")
+
     val pointCount =
         data.series
             .firstOrNull()

@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import io.github.hdcharts.bar.internal.rememberBarSelection
+import io.github.hdcharts.core.internal.telemetry.TrackChartUsage
 import io.github.hdcharts.core.model.ChartData
 import io.github.hdcharts.core.model.ChartSelection
 import io.github.hdcharts.core.model.ChartValueFormatter
@@ -47,6 +48,8 @@ fun HistogramChart(
     axisValueFormatter: ChartValueFormatter = BarChartDefaults.axisValueFormatter,
     subtitle: String? = null,
 ) {
+    TrackChartUsage("histogram")
+
     val barStyle =
         remember(style) {
             BarChartStyle(

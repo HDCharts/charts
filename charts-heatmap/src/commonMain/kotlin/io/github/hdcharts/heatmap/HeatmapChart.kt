@@ -2,6 +2,7 @@ package io.github.hdcharts.heatmap
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import io.github.hdcharts.core.internal.telemetry.TrackChartUsage
 import io.github.hdcharts.core.model.ChartSelection
 import io.github.hdcharts.core.model.ChartValueFormatter
 import io.github.hdcharts.core.model.rememberChartSelection
@@ -29,6 +30,8 @@ fun HeatmapChart(
     animateOnStart: Boolean = true,
     valueFormatter: ChartValueFormatter = HeatmapChartDefaults.valueFormatter,
 ) {
+    TrackChartUsage("heatmap")
+
     HeatmapChartEntry(
         data = data,
         modifier = modifier,
