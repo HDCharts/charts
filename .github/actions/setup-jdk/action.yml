@@ -56,15 +56,11 @@ runs:
         distribution: ${{ steps.daemon-jdk-spec.outputs.vendor }}
 
     # The daemon JVM lookup ignores ~/.m2/toolchains.xml, so name the JDK path explicitly.
-    # auto-download=false makes Gradle fail loudly instead of silently fetching a toolchain
-    # from foojay when the local daemon JDK does not match (#683). The daemon reads both
-    # properties from here, the same mechanism as the installations path above.
     - name: Point Gradle at the daemon JDK
       shell: bash
       run: |
         mkdir -p ~/.gradle
         echo "org.gradle.java.installations.paths=${{ steps.daemon-jdk.outputs.path }}" >> ~/.gradle/gradle.properties
-        echo "org.gradle.java.installations.auto-download=false" >> ~/.gradle/gradle.properties
 
     - name: Set up JDK 17
       id: java
