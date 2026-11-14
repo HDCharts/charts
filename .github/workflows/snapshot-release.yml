@@ -204,6 +204,34 @@ jobs:
           }
           GRADLE
 
+      - name: Resolve upload parallelism
+        id: upload-parallelism
+        shell: bash
+        env:
+          # Repository variable (Settings > Secrets and variables > Actions > Variables).
+          # 1 = fully serialized uploads (known good); 2+ = that many concurrent
+          # upload workers. Change the variable, not the workflow, to tune this.
+          MAVEN_UPLOAD_MAX_PARALLEL: ${{ vars.MAVEN_UPLOAD_MAX_PARALLEL }}
+        run: |
+          set -euo pipefail
+
+          n="${MAVEN_UPLOAD_MAX_PARALLEL:-1}"
+          if ! [[ "$n" =~ ^[1-9][0-9]*$ ]]; then
+            echo "::warning::MAVEN_UPLOAD_MAX_PARALLEL must be a positive integer, got '${n}'. Falling back to 1."
+            n=1
+          fi
+
+          if [ "$n" -eq 1 ]; then
+            # One project at a time, one worker: at most one upload in flight.
+            flags="--no-parallel --max-workers=1"
+          else
+            # N workers with parallel projects: at most N concurrent uploads.
+            flags="--max-workers=$n"
+          fi
+
+          echo "gradle-flags=$flags" >> "$GITHUB_OUTPUT"
+          echo "Snapshot upload parallelism: $n ($flags)"
+
       - name: Publish snapshot to Maven Central
         id: publish
         uses: ./.github/actions/publish-charts-modules
@@ -213,10 +241,11 @@ jobs:
           signing-key-id: ${{ secrets.SIGNING_KEY_ID }}
           signing-password: ${{ secrets.SIGNING_PASSWORD }}
           signing-in-memory-key: ${{ secrets.SIGNING_IN_MEMORY_KEY }}
-          # Serialize publishing: one Gradle task at a time, one upload stream, to stay under
-          # Maven Central's snapshot upload rate limit. Diagnostics init script prints the
-          # effective maxWorkerCount and parallelProjectExecutionEnabled to confirm it.
-          gradle-arguments: --init-script "${{ runner.temp }}/snapshot-publishing-diagnostics.init.gradle" --no-parallel --max-workers=1
+          # Diagnostics init script prints the effective maxWorkerCount and
+          # parallelProjectExecutionEnabled, confirming what the variable selected.
+          gradle-arguments: >-
+            --init-script "${{ runner.temp }}/snapshot-publishing-diagnostics.init.gradle"
+            ${{ steps.upload-parallelism.outputs.gradle-flags }}
 
       - name: Record snapshot publishing outcome
         if: ${{ always() && (steps.publish.outcome == 'success' || steps.publish.outcome == 'failure') }}
