@@ -30,12 +30,30 @@ runs:
   using: composite
   steps:
     # Runs before JDK 17 so JAVA_HOME stays 17; Gradle finds this daemon JDK locally and skips foojay.
-    - name: Set up JetBrains JDK 21
+    # The version and vendor come from gradle/gradle-daemon-jvm.properties, so updateDaemonJvm
+    # cannot quietly strand CI on an old JDK while Gradle falls back to foojay (#683).
+    - name: Resolve daemon JDK from gradle-daemon-jvm.properties
+      id: daemon-jdk-spec
+      shell: bash
+      run: |
+        set -euo pipefail
+        props="${{ github.workspace }}/gradle/gradle-daemon-jvm.properties"
+        version="$(sed -n 's/^toolchainVersion=//p' "$props" | tail -n 1)"
+        vendor="$(sed -n 's/^toolchainVendor=//p' "$props" | tail -n 1)"
+        if [[ -z "$version" || -z "$vendor" ]]; then
+          echo "gradle-daemon-jvm.properties must define toolchainVersion and toolchainVendor." >&2
+          exit 1
+        fi
+        # updateDaemonJvm writes JETBRAINS; setup-java's distribution id is lowercase.
+        vendor="$(printf '%s' "$vendor" | tr '[:upper:]' '[:lower:]')"
+        echo "version=$version" >> "$GITHUB_OUTPUT"
+        echo "vendor=$vendor" >> "$GITHUB_OUTPUT"
+    - name: Set up JetBrains daemon JDK
       id: daemon-jdk
       uses: actions/setup-java@v6.1.0
       with:
-        java-version: 21
-        distribution: 'jetbrains'
+        java-version: ${{ steps.daemon-jdk-spec.outputs.version }}
+        distribution: ${{ steps.daemon-jdk-spec.outputs.vendor }}
 
     # The daemon JVM lookup ignores ~/.m2/toolchains.xml, so name the JDK path explicitly.
     - name: Point Gradle at the daemon JDK
