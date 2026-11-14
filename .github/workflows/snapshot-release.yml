@@ -201,8 +201,6 @@ jobs:
               println "Snapshot publishing Gradle: ${gradle.gradleVersion}"
               println "Snapshot publishing max workers: ${gradle.startParameter.maxWorkerCount}"
               println "Snapshot publishing parallel projects: ${gradle.startParameter.parallelProjectExecutionEnabled}"
-              def throttle = gradle.sharedServices.registrations.findByName("mavenUploadThrottle")
-              println "Snapshot publishing upload throttle: ${throttle != null ? "maxParallelUsages=" + throttle.maxParallelUsages.get() : "NOT REGISTERED"}"
           }
           GRADLE
 
@@ -215,7 +213,10 @@ jobs:
           signing-key-id: ${{ secrets.SIGNING_KEY_ID }}
           signing-password: ${{ secrets.SIGNING_PASSWORD }}
           signing-in-memory-key: ${{ secrets.SIGNING_IN_MEMORY_KEY }}
-          gradle-arguments: --init-script "${{ runner.temp }}/snapshot-publishing-diagnostics.init.gradle"
+          # Serialize publishing: one Gradle task at a time, one upload stream, to stay under
+          # Maven Central's snapshot upload rate limit. Diagnostics init script prints the
+          # effective maxWorkerCount and parallelProjectExecutionEnabled to confirm it.
+          gradle-arguments: --init-script "${{ runner.temp }}/snapshot-publishing-diagnostics.init.gradle" --no-parallel --max-workers=1
 
       - name: Record snapshot publishing outcome
         if: ${{ always() && (steps.publish.outcome == 'success' || steps.publish.outcome == 'failure') }}
