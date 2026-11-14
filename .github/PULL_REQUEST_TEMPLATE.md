@@ -21,5 +21,8 @@
 
      ./gradlew validateDocsGifBaselines
      ./gradlew chartsTestAndroidInstrumented
-     ./gradlew chartsTestIos
-     ./gradlew chartsTestWasm -->
+     ./gradlew chartsTestIos -->
+
+<!-- Wasm browser tests are manual. When explicitly requested, use
+     ./gradlew chartsTestWasm
+     or ./gradlew ciTestWeb -PciTestModules=:charts-line -->
