@@ -62,7 +62,7 @@ class ChangeSelectionTest(unittest.TestCase):
             {":charts-line", ":charts", ":sample-shared", ":app", ":androidApp", ":smoke-line"}, result.test_modules
         )
         self.assertFalse(result.test_modules & {":charts-core", ":charts-pie", ":charts-radar", ":charts-heatmap"})
-        self.assertEqual(set(ci_impact.CHECKS), selected_checks(result))
+        self.assertEqual({"lint", "build", "api", "jvm", "android", "ios", "screenshot"}, selected_checks(result))
         self.assertIn(screenshot("LineChartScreenshotTest"), result.screenshots.classes)
         self.assertIn(screenshot("WikiChartScreenshotTest"), result.screenshots.classes)
         self.assertNotIn(screenshot("PieChartScreenshotTest"), result.screenshots.classes)
@@ -119,7 +119,7 @@ class ChangeSelectionTest(unittest.TestCase):
                 result = plan(path)
 
                 self.assertEqual("full", result.mode)
-                self.assertEqual(set(ci_impact.CHECKS), selected_checks(result))
+                self.assertEqual({"lint", "build", "api", "jvm", "android", "ios", "screenshot"}, selected_checks(result))
                 self.assertEqual("", ci_impact.github_outputs(result)["test_modules"])
 
     def test_chart_test_change_runs_only_that_modules_tests(self):
@@ -127,7 +127,7 @@ class ChangeSelectionTest(unittest.TestCase):
 
         self.assertEqual(set(), result.changed)
         self.assertEqual({":charts-bar"}, result.test_modules)
-        self.assertEqual({"lint", "jvm", "android", "wasm", "ios"}, selected_checks(result))
+        self.assertEqual({"lint", "jvm", "android", "ios"}, selected_checks(result))
 
     def test_chart_screenshot_change_selects_only_its_class(self):
         result = plan(f"{SCREENSHOT_SOURCES}/PieChartScreenshotTest.kt")
@@ -167,7 +167,7 @@ class ChangeSelectionTest(unittest.TestCase):
         result = plan("sample/api/src/commonMain/kotlin/io/github/hdcharts/sampleapi/SampleApiModule.kt")
 
         self.assertEqual({":sample-api", ":app", ":androidApp"}, result.test_modules)
-        self.assertFalse(result.checks["api"] or result.checks["android"] or result.checks["wasm"] or result.checks["ios"])
+        self.assertFalse(result.checks["api"] or result.checks["android"] or result.checks["ios"])
         self.assertTrue(result.checks["jvm"])
 
     def test_unknown_module_selects_full_validation(self):

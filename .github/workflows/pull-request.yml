@@ -25,7 +25,6 @@ jobs:
       build: ${{ steps.impact.outputs.build }}
       jvm: ${{ steps.impact.outputs.jvm }}
       android: ${{ steps.impact.outputs.android }}
-      wasm: ${{ steps.impact.outputs.wasm }}
       ios: ${{ steps.impact.outputs.ios }}
       screenshot: ${{ steps.impact.outputs.screenshot }}
       test_modules: ${{ steps.impact.outputs.test_modules }}
@@ -88,7 +87,6 @@ jobs:
       source-sha: ${{ needs.prepare.outputs.source_sha }}
       jvm: ${{ needs.prepare.outputs.jvm != 'false' }}
       android: ${{ needs.prepare.outputs.android != 'false' }}
-      wasm: ${{ needs.prepare.outputs.wasm != 'false' }}
       ios: ${{ needs.prepare.outputs.ios != 'false' }}
       screenshot: ${{ needs.prepare.outputs.screenshot != 'false' }}
       test-modules: ${{ needs.prepare.outputs.test_modules }}

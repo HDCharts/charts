@@ -14,11 +14,16 @@ Workflow: [`test.yml`](https://github.com/HDCharts/charts/blob/main/.github/work
 | JVM Tests | `./gradlew ciTestJvm` | `jvmTest` for the selected library modules and `:sample-shared`, `:sample-api`, `:app`. `buildSrc` unit tests run with full validation. | Ubuntu, Zulu JDK 17. |
 | Android Instrumented Tests 1/2 and 2/2 | `./gradlew ciTestAndroidInstrumented -PandroidTestShard=<1\|2>` | `connectedAndroidTest` for the selected chart library modules except `charts-core` and `charts`, split across two emulator jobs. A shard with no selected module skips the emulator. | Ubuntu; API 35 `aosp_atd` x86_64 Nexus 6 emulator at 280 dpi with KVM. |
 | Screenshot Tests | `./gradlew ciTestScreenshot` | `:androidApp:validateDebugScreenshotTest` for the selected screenshot classes. | Ubuntu, Zulu JDK 17. |
-| Wasm Tests | `./gradlew ciTestWeb` | `wasmJsTest` for the selected chart library modules. | Ubuntu, Kotlin/Wasm browser tests. |
 | iOS Tests | `./gradlew ciTestIos` | `iosSimulatorArm64Test` for the selected chart library modules. | macOS, ARM64 iOS Simulator. |
 
 The `ciTest*` tasks are CI entry points. Without a selection they run the same modules as the
 platform-specific `chartsTest*` tasks in the root build.
+
+Wasm compilation remains in `ciCompile`, and `ciAssemble` builds the sample web distribution.
+Full Wasm browser tests run manually; they are outside the PR checks, including full-validation
+fallbacks. Compilation and packaging do not verify browser rendering or interaction. The Wasm
+test job was resource-heavy and of low value on ordinary PRs, so it was removed from default PR
+checks to conserve CI resources.
 
 ## Check selection
 
@@ -39,7 +44,7 @@ dependencies in the build scripts, and writes its decision to the job summary.
 | `API-COMPATIBILITY-BREAKS.txt` | API compatibility |
 | Root build files, `buildSrc`, `gradle/`, `.github/`, `scripts/ci-has-code-changes.sh`, or a path outside every Gradle project | Full validation |
 
-The Wasm, iOS, and Android jobs start only when a selected module is a library module: `:charts`
+The iOS and Android jobs start only when a selected module is a library module: `:charts`
 and everything it depends on. Each Android shard runs a Gradle dry run first and starts the
 emulator only when the shard holds a selected module with device tests.
 
@@ -61,7 +66,7 @@ their module lists from `ChartsModules` in `buildSrc`:
 | Task | Modules |
 | --- | --- |
 | `chartsTestJvm` | `library` + `sampleTested` |
-| `chartsTestWasm` | `library` |
+| `chartsTestWasm` (manual) | `library` |
 | `chartsTestIos` | `library` |
 | `chartsTestAndroidInstrumented` | `library` without `:charts-core` and `:charts` |
 
@@ -99,5 +104,15 @@ the narrower `ciAssemble`, `ciCompile`, `ktlintCheck`, and `ciTest*` tasks above
 equivalent to the root `build` that `chartsCheck` depends on. Whether `chartsCheck` becomes a
 merge gate is undecided.
 
-CI owns `chartsTestAndroidInstrumented`, `chartsTestWasm`, `chartsTestIos`, and
-`validateDocsGifBaselines` unless explicitly requested locally.
+CI owns `chartsTestAndroidInstrumented`, `chartsTestIos`, and `validateDocsGifBaselines` unless
+explicitly requested locally.
+
+## Manual Wasm validation
+
+Run `./gradlew chartsTestWasm` for the full library browser suite, or
+`./gradlew ciTestWeb -PciTestModules=:charts-line` for selected library modules.
+The Wasm test targets, shared tests, and browser configuration remain available.
+
+Before a release, or when changing Kotlin, Compose, or browser-specific code, explicitly run
+this suite and check rendering and interaction in the sample web app. These checks are manual
+and do not run automatically in the PR workflow.
