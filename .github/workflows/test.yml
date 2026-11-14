@@ -67,6 +67,9 @@ jobs:
 
       - name: Set up JDK 17
         uses: ./.github/actions/setup-jdk
+        with:
+          # Only warm-gradle-cache.yml writes caches; a write here scopes the entry to the PR.
+          cache-read-only: true
 
       - name: Run JVM tests
         run: ./gradlew ciTestJvm --no-daemon
@@ -99,6 +102,9 @@ jobs:
 
       - name: Set up JDK 17
         uses: ./.github/actions/setup-jdk
+        with:
+          # Only warm-gradle-cache.yml writes caches; a write here scopes the entry to the PR.
+          cache-read-only: true
 
       # Starting the emulator takes minutes, so check first that this shard has device tests to run.
       - name: Select device test modules
@@ -165,6 +171,9 @@ jobs:
 
       - name: Set up JDK 17
         uses: ./.github/actions/setup-jdk
+        with:
+          # Only warm-gradle-cache.yml writes caches; a write here scopes the entry to the PR.
+          cache-read-only: true
 
       - name: Run screenshot tests
         run: ./gradlew ciTestScreenshot --no-daemon
@@ -193,6 +202,9 @@ jobs:
 
       - name: Set up JDK 17
         uses: ./.github/actions/setup-jdk
+        with:
+          # Only warm-gradle-cache.yml writes caches; a write here scopes the entry to the PR.
+          cache-read-only: true
 
       - name: Run Wasm tests
         run: ./gradlew ciTestWeb --no-daemon
@@ -223,6 +235,8 @@ jobs:
         uses: ./.github/actions/setup-jdk
         with:
           kotlin-native: true
+          # Only warm-gradle-cache.yml writes caches; a write here scopes the entry to the PR.
+          cache-read-only: true
 
       - name: Run iOS tests
         run: ./gradlew ciTestIos --no-daemon

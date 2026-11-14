@@ -35,5 +35,8 @@ jobs:
           fetch-depth: 1
           ref: ${{ inputs.source-sha }}
       - uses: ./.github/actions/setup-jdk
+        with:
+          # Only warm-gradle-cache.yml writes caches; a write here scopes the entry to the PR.
+          cache-read-only: true
       - name: Assemble
         run: ./gradlew ciAssemble

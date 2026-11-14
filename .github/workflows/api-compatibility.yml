@@ -42,6 +42,9 @@ jobs:
 
       - name: Set up JDK 17
         uses: ./.github/actions/setup-jdk
+        with:
+          # Only warm-gradle-cache.yml writes caches; a write here scopes the entry to the PR.
+          cache-read-only: true
 
       - name: Run API compatibility check
         id: compatibility

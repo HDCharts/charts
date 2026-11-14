@@ -36,6 +36,9 @@ jobs:
           ref: ${{ inputs.source-sha }}
       - name: Set up JDK 17
         uses: ./.github/actions/setup-jdk
+        with:
+          # Only warm-gradle-cache.yml writes caches; a write here scopes the entry to the PR.
+          cache-read-only: true
       # ciCheckImpactGraph fails when the test selection in Prepare PR misses a project or dependency.
       - name: Lint
         run: ./gradlew ktlintCheck buildSrcKtlintCheck ciCheckImpactGraph
