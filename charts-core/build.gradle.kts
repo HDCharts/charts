@@ -95,6 +95,7 @@ buildConfig {
     useKotlinOutput { internalVisibility = true }
     buildConfigField("CHARTS_VERSION", project.version.toString())
     buildConfigField("POSTHOG_PROJECT_TOKEN", "phc_B3eDZ2cM9EwUuXWp3iG3JSmNuK6waQvoMZ5GtBWudHqF")
+    buildConfigField("POSTHOG_HOST", "https://edge.hdcode.dev")
 
     val development = providers.gradleProperty("development").map { it.toBoolean() }.orElse(true)
     val chartsTelemetryEnabled = providers.gradleProperty("chartsTelemetryEnabled").map(String::toBoolean).orElse(true)

@@ -49,7 +49,7 @@ internal class PostHogTelemetryClient(
 internal fun baseTelemetryConfig(platform: TelemetryPlatform): PostHogConfig =
     PostHogConfig(
         projectToken = TelemetryBuildConfig.POSTHOG_PROJECT_TOKEN,
-        host = PostHogConfig.HOST_EU,
+        host = TelemetryBuildConfig.POSTHOG_HOST,
         captureApplicationLifecycleEvents = false,
         captureScreenViews = false,
         captureDeepLinks = false,
