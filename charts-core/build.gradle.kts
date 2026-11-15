@@ -94,15 +94,22 @@ buildConfig {
     className("TelemetryBuildConfig")
     useKotlinOutput { internalVisibility = true }
     buildConfigField("CHARTS_VERSION", project.version.toString())
-    buildConfigField("POSTHOG_PROJECT_TOKEN", "phc_B3eDZ2cM9EwUuXWp3iG3JSmNuK6waQvoMZ5GtBWudHqF")
     buildConfigField("POSTHOG_HOST", "https://edge.hdcode.dev")
 
     val development = providers.gradleProperty("development").map { it.toBoolean() }.orElse(true)
     val chartsTelemetryEnabled = providers.gradleProperty("chartsTelemetryEnabled").map(String::toBoolean).orElse(true)
 
+    val postHogProjectToken = providers.environmentVariable("POSTHOG_PROJECT_TOKEN").map(String::trim).orElse("")
+
+    buildConfigField("POSTHOG_PROJECT_TOKEN", postHogProjectToken)
+
     val telemetryEnabled =
         providers.provider {
-            !development.get() && chartsTelemetryEnabled.get()
+            val enabled = !development.get() && chartsTelemetryEnabled.get()
+            check(!enabled || postHogProjectToken.get().isNotBlank()) {
+                "Set POSTHOG_PROJECT_TOKEN for telemetry-enabled builds, or use -PchartsTelemetryEnabled=false."
+            }
+            enabled
         }
 
     buildConfigField(
