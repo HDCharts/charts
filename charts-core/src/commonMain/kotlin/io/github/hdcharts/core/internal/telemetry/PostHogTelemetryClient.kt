@@ -18,9 +18,6 @@ internal class PostHogTelemetryClient(
     private var ownsInstance = false
 
     override fun setup(platform: TelemetryPlatform) {
-        // Native surveys are enabled by default and cannot be disabled through KMP 0.10.0.
-        // Keep Apple reporting inactive until the official configuration exposes that control.
-        check(platform.name != "ios") { "PostHog KMP cannot disable the native iOS survey integration." }
         check(TelemetryBuildConfig.POSTHOG_PROJECT_TOKEN.isNotBlank())
         // The official KMP API exposes one instance. Preserve a host application's existing SDK.
         check(PostHog.getDistinctId().isNullOrBlank()) { "PostHog is already initialized by the application." }

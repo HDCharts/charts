@@ -4,7 +4,6 @@ import com.posthog.kmp.PersonProfiles
 import com.posthog.kmp.PostHogEvent
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
@@ -13,12 +12,20 @@ class PostHogTelemetryClientTest {
     private val platform = TelemetryPlatform("android")
 
     @Test
-    fun appleSetupFailsClosedUntilNativeSurveysCanBeDisabled() {
-        val failure =
-            assertFailsWith<IllegalStateException> {
-                PostHogTelemetryClient().setup(TelemetryPlatform("ios"))
-            }
-        assertEquals("PostHog KMP cannot disable the native iOS survey integration.", failure.message)
+    fun sdkConfigurationDisablesUnrelatedFeaturesOnIos() {
+        val config = PostHogTelemetryClient().telemetryConfig(TelemetryPlatform("ios"))
+
+        assertFalse(config.captureApplicationLifecycleEvents)
+        assertFalse(config.captureScreenViews)
+        assertFalse(config.captureDeepLinks)
+        assertFalse(config.capturePushNotificationSubscriptions)
+        assertFalse(config.capturePushNotificationOpened)
+        assertFalse(config.autocapture)
+        assertFalse(config.sendFeatureFlagEvent)
+        assertFalse(config.preloadFeatureFlags)
+        assertEquals(PersonProfiles.NEVER, config.personProfiles)
+        assertEquals(false, config.sessionRecording?.enabled)
+        assertEquals(false, config.errorTracking?.autoCapture)
     }
 
     @Test
