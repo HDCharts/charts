@@ -5,8 +5,8 @@ order: 3
 
 # Telemetry
 
-HDCharts reports chart usage through PostHog. Reporting is enabled by default on Android, JVM,
-and Wasm. iOS reporting is currently disabled.
+HDCharts reports chart usage through PostHog. Reporting is enabled by default on Android, iOS,
+JVM, and Wasm.
 
 ## Collected data
 
@@ -14,7 +14,7 @@ and Wasm. iOS reporting is currently disabled.
 |---|---|
 | Chart type | The chart used, such as line, bar, or pie. |
 | Installation identifier | PostHog's persistent anonymous identifier for an installation. |
-| Platform | Android, JVM, or Wasm. |
+| Platform | Android, iOS, JVM, or Wasm. |
 | HDCharts version | The library version in use. |
 | SDK metadata | PostHog SDK name and version, event timestamp, and event ID. |
 
