@@ -27,6 +27,8 @@ on:
         type: boolean
         default: false
     secrets:
+      POSTHOG_PROJECT_TOKEN:
+        required: true
       AWS_ROLE_ARN:
         required: true
 
@@ -104,6 +106,8 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ vars.AWS_REGION }}
       - name: Build demo
+        env:
+          POSTHOG_PROJECT_TOKEN: ${{ secrets.POSTHOG_PROJECT_TOKEN }}
         shell: bash
         run: |
           set -euo pipefail

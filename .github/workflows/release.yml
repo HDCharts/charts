@@ -143,6 +143,7 @@ jobs:
       source-ref: ${{ needs.prepare-release.outputs.source_sha }}
       replace-static-assets: ${{ inputs.replace_static_assets }}
     secrets:
+      POSTHOG_PROJECT_TOKEN: ${{ secrets.POSTHOG_PROJECT_TOKEN }}
       AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
 
   publish-maven:
@@ -180,6 +181,8 @@ jobs:
         run: ./gradlew createRelease -PchartsReleaseVersion="${{ needs.prepare-release.outputs.release_version }}" -Prelease.disableRemoteCheck --no-daemon --stacktrace
       - name: Publish to Maven Central
         uses: ./.github/actions/publish-charts-modules
+        env:
+          POSTHOG_PROJECT_TOKEN: ${{ secrets.POSTHOG_PROJECT_TOKEN }}
         with:
           maven-central-username: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
           maven-central-password: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}

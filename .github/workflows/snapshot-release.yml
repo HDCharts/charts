@@ -4,6 +4,8 @@ name: Snapshot Release
 on:
   workflow_call:
     secrets:
+      POSTHOG_PROJECT_TOKEN:
+        required: true
       AWS_ROLE_ARN:
         required: true
       CHARTS_WORKFLOW_TOKEN:
@@ -166,6 +168,7 @@ jobs:
       source-sha: ${{ needs.prepare-snapshot.outputs.source_sha }}
       source-ref: ${{ needs.prepare-snapshot.outputs.source_sha }}
     secrets:
+      POSTHOG_PROJECT_TOKEN: ${{ secrets.POSTHOG_PROJECT_TOKEN }}
       AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
 
   publish-maven:
@@ -235,6 +238,8 @@ jobs:
       - name: Publish snapshot to Maven Central
         id: publish
         uses: ./.github/actions/publish-charts-modules
+        env:
+          POSTHOG_PROJECT_TOKEN: ${{ secrets.POSTHOG_PROJECT_TOKEN }}
         with:
           maven-central-username: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
           maven-central-password: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}

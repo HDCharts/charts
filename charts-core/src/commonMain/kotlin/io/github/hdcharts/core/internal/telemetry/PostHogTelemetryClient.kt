@@ -18,10 +18,11 @@ internal class PostHogTelemetryClient(
     private var ownsInstance = false
 
     override fun setup(platform: TelemetryPlatform) {
-        check(TelemetryBuildConfig.POSTHOG_PROJECT_TOKEN.isNotBlank())
+        val config = telemetryConfig(platform)
+        check(config.projectToken.isNotBlank())
         // The official KMP API exposes one instance. Preserve a host application's existing SDK.
         check(PostHog.getDistinctId().isNullOrBlank()) { "PostHog is already initialized by the application." }
-        PostHog.setup(telemetryConfig(platform), platform.context ?: PostHogContext())
+        PostHog.setup(config, platform.context ?: PostHogContext())
         configurePlatformTelemetry()
         ownsInstance = true
     }
