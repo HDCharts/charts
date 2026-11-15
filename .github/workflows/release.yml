@@ -186,7 +186,7 @@ jobs:
           signing-key-id: ${{ secrets.SIGNING_KEY_ID }}
           signing-password: ${{ secrets.SIGNING_PASSWORD }}
           signing-in-memory-key: ${{ secrets.SIGNING_IN_MEMORY_KEY }}
-          gradle-arguments: -PchartsReleaseVersion=${{ needs.prepare-release.outputs.release_version }} --no-build-cache
+          gradle-arguments: -PchartsReleaseVersion=${{ needs.prepare-release.outputs.release_version }} --no-build-cache -Pdevelopment=false
           prepare-publishing: false
       - name: Push release tag with Axion
         run: ./gradlew pushRelease -Prelease.pushTagsOnly --no-daemon --stacktrace

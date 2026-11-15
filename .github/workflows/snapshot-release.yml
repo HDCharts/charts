@@ -246,6 +246,7 @@ jobs:
           gradle-arguments: >-
             --init-script "${{ runner.temp }}/snapshot-publishing-diagnostics.init.gradle"
             ${{ steps.upload-parallelism.outputs.gradle-flags }}
+            -Pdevelopment=false
 
       - name: Record snapshot publishing outcome
         if: ${{ always() && (steps.publish.outcome == 'success' || steps.publish.outcome == 'failure') }}

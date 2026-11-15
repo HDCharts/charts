@@ -111,6 +111,7 @@ jobs:
           commit_date="$(LC_ALL=C git log -1 --format=%cd --date=format:'%-d %b %Y' "${commit}")"
           ./gradlew generateWebDemo -PchartsReleaseVersion="${{ inputs.charts-version }}" \
             -PchartsCommit="${commit}" -PchartsCommitDate="${commit_date}" \
+            -Pdevelopment=false \
             --no-daemon --stacktrace --build-cache
       - name: Validate demo
         shell: bash
