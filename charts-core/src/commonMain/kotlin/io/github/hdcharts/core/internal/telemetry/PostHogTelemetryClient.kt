@@ -89,6 +89,7 @@ internal fun filterTelemetryEvent(
                 "installation_id" to installationId,
                 "platform" to platform.name,
                 "hdcharts_version" to TelemetryBuildConfig.CHARTS_VERSION,
+                "token" to event.properties["token"],
                 "\$lib" to event.properties["\$lib"],
                 "\$lib_version" to event.properties["\$lib_version"],
                 "\$process_person_profile" to false,
