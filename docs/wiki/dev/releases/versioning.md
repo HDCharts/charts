@@ -5,8 +5,8 @@ order: 7
 
 # Versioning
 
-Axion resolves the version from Git tags (`scmVersion` in `build.gradle.kts`). The
-`chartsVersionIncrementer` property in `gradle.properties` picks how the next version grows:
+Axion resolves the version from Git tags (`scmVersion` in [build.gradle.kts](https://github.com/HDCharts/charts/blob/main/build.gradle.kts)). The
+`chartsVersionIncrementer` property in [gradle.properties](https://github.com/HDCharts/charts/blob/main/gradle.properties) picks how the next version grows:
 `incrementMajor`, `incrementMinor`, or `incrementPatch`.
 
 Axion reads only the tags already in the clone. The build turns off its `unshallowRepoOnCI` fetch,
@@ -30,4 +30,4 @@ pushed, or the release ships under a different version.
 ## Patch Releases
 
 There is no patch release process yet. **Release** runs only from `main`, so a patch line from a
-hotfix branch needs changes to `release.yml` and to the environment branch rules.
+hotfix branch needs changes to [release.yml](https://github.com/HDCharts/charts/blob/main/.github/workflows/release.yml) and to the environment branch rules.

@@ -5,17 +5,14 @@ order: 5
 
 # Style Defaults
 
-Every chart takes one `style` object built with its `*ChartDefaults` factories. These rules keep the
-defaults the same across charts. Follow them when adding a chart, a style block, or a default.
-
-Every default value lives in `StyleDefaults` in `charts-core`, including the chart-specific ones.
-Factories read their defaults from it and never repeat a literal, so the same element cannot differ
-between charts. The tables below list what it holds.
+Build chart styles with their `*ChartDefaults` factories. Shared default values live in
+[`StyleDefaults`](https://github.com/HDCharts/charts/blob/main/charts-core/src/commonMain/kotlin/io/github/hdcharts/core/style/StyleDefaults.kt)
+in `charts-core`. Read the current values there when changing a default.
 
 ## Factories
 
-Chart-specific blocks live on `*ChartDefaults`. Cartesian axes use shared factories in
-`charts-core`: `AxesDefaults`, `AxisLinesDefaults`, `GridDefaults`, and `AxisLabelDefaults`.
+Chart-specific blocks live on `*ChartDefaults`. Cartesian axes use the shared `AxesDefaults`,
+`AxisLinesDefaults`, `GridDefaults`, and `AxisLabelDefaults` factories.
 
 ```kotlin
 BarChartDefaults.style(
@@ -23,134 +20,42 @@ BarChartDefaults.style(
 )
 ```
 
-- **Nesting stops at three levels:** `style`, then `axes`, then `lines`, `grid`, `xLabels`, or
-  `yLabels`. Values such as `Color`, `TextStyle`, and `ChartGradient` are not levels.
-- **Shared axes have one owner.** Charts default to `AxesDefaults.style()`. The master `visible`
-  switch gates drawing and label layout; each child keeps its own visibility setting.
-- **Label convenience factories remain available:** `*ChartDefaults.xLabels` and `yLabels`.
-  Histogram also forwards `bars` and `selection` to `BarChartDefaults`; its range keeps a zero minimum.
-- **Defaults come from `StyleDefaults`.** Forwarding factories use the same values as their shared
-  counterparts.
+- Keep factory nesting shallow: style, axes, then the axis blocks.
+- Read numeric and theme defaults from `StyleDefaults`. Forwarding factories use the same defaults
+  as the factories they call.
+- The master axes `visible` switch gates drawing and label layout. Each child keeps its own
+  visibility setting.
+- Use `Dp` for lengths so they scale with screen density. Point and marker sizes are radii.
 
-## Colors
+## Colors and selection
 
-Default colors come from `MaterialTheme.colorScheme` roles at full opacity, so they follow the app's
-theme in light and dark mode. Do not lower the alpha of a theme color, and do not check
-`isSystemInDarkTheme()`: the app's theme can differ from the system setting.
+Use `MaterialTheme.colorScheme` roles so defaults follow the app's light or dark theme. Keep theme
+colors at their supplied opacity and express chart transparency through the style's alpha fields.
 
-| Element | Role | Charts |
-| --- | --- | --- |
-| Series (bars, lines, fills, slices) | `primary`, or a palette from it | All |
-| Points | `tertiary` | Line, radar (with `colorSameAsLine = false`) |
-| Axis labels | `onSurfaceVariant` | Bar, histogram, line, stacked bar, stacked area, radar, ring gauge (range labels) |
-| Title | `onSurface` | All |
-| Grid lines | `outlineVariant` | Bar, histogram, line, stacked bar, stacked area, radar (rings and spokes) |
-| Axis lines | `outline` | Bar, histogram, line, stacked bar, stacked area |
-| Selection line | `onSurface` | Bar, histogram, line, stacked bar, stacked area |
-| Selection marker | `tertiary` | Line |
-| Slice border | `surface` | Pie |
-| Gauge track | `surfaceVariant` | Ring gauge |
+Choose a contrasting role for a selection mark drawn over a series. A mark in the series' own
+color can disappear. Bars and stacked areas also distinguish selection by dimming the unselected
+region; selection lines stop where they would overlap the selected fill.
 
-Selection indicators draw on top of series marks. A selection default must never use the series
-role (`primary` or its palette), or it disappears over the selected mark.
-
-## Sizes
-
-Sizes are `Dp`, so they scale with screen density. Point and marker sizes are radii.
-
-| Element | Default | Charts |
-| --- | --- | --- |
-| Grid lines | `1.dp` | Bar, histogram, line, stacked bar, stacked area, radar |
-| Axis lines | `1.dp` | Bar, histogram, line, stacked bar, stacked area, radar |
-| Selection line | `1.dp` | Bar, histogram, line, stacked bar, stacked area |
-| Slice border | `1.dp` | Pie |
-| Series line | `2.dp` | Line (`strokeWidth`), radar (`lineWidth`) |
-| Points | `4.dp` | Line, radar (data points) |
-| Selected point | `5.dp` (`selection.pointSize`) | Line, radar |
-| Touch marker on the line | `3.dp` (`selection.markerSize`) | Line |
-| Gap between an axis and its labels | `10.dp` | Bar, histogram, line, stacked bar, stacked area, radar, ring gauge (range labels) |
-| Radar label clamp margin | `6.dp`, only for a label that does not fit | Radar |
-| Ring width | `24.dp`, thinner when that many rings would not fit | Ring gauge |
-| Ring spacing | `4.dp` | Ring gauge |
-| Bar spacing | `10.dp`, `0.dp` on histogram | Bar, histogram, stacked bar |
-| Minimum bar width | `10.dp` | Bar, histogram, stacked bar |
-| Container padding | `15.dp` | All |
-
-## Text
-
-| Element | Default | Charts |
-| --- | --- | --- |
-| Title | `20.sp`, `ExtraBold` | All |
-| Axis labels | `11.sp` | Bar, histogram, line, stacked bar, stacked area, radar, ring gauge (range labels) |
+Keep opacity exceptions with their reason. Radar fills are translucent so overlapping polygons
+remain visible. Scatter points are translucent so overlapping observations remain visible.
+While a selection is active, dimming multiplies the alpha of unselected marks.
 
 ## Formatters
 
-| Formatter | Default | Charts |
-| --- | --- | --- |
-| `selectedValueFormatter` | Two decimals, trailing zeros trimmed, `.0` kept: `3.0`, `41.7` | Bar, histogram, line, stacked bar, stacked area, radar, ring gauge |
-| Pie `selectedValueFormatter` | The same with a `%` suffix, for the slice's share: `42.5%` | Pie |
-| `axisValueFormatter` | The same without the `.0` on whole values: `3`, `41.7` | Bar, histogram, line, live line, stacked bar, stacked area, ring gauge (range labels) |
+Use the shared selected-value and axis formatters as defaults where their output fits the chart.
+Pie formats a slice's share with a percent suffix. Chart-specific factories own any other formatter
+defaults.
 
-## Alpha
+[Legend and Selection](legend.md) describes readouts. [Y-Axis Labels](y-axis-labels.md) describes
+numeric tick formatting.
 
-Chart color `alpha` defaults to `1f`, so the colors a user passes are drawn exactly as given. Users
-who want a softer look pass `alpha` themselves.
+## Adding or changing a default
 
-| Setting | Default | Charts |
-| --- | --- | --- |
-| Series `alpha` | `1f` | Bar, histogram, line, pie, ring gauge, stacked bar, stacked area |
-| Polygon `fillAlpha` | `0.25f` | Radar |
-| Selection `unselectedAlpha` | `0.7f` | Bar, histogram, stacked bar, stacked area, radar, ring gauge (not configurable) |
-| Selection `unfocusedSeriesAlpha` | `0.35f` | Radar |
+1. Define the value in `StyleDefaults` and update [StyleDefaultsTest](https://github.com/HDCharts/charts/blob/main/charts-core/src/commonTest/kotlin/io/github/hdcharts/core/style/StyleDefaultsTest.kt).
+2. Read it from the style factory and use the same value as the clamping fallback where needed.
+3. Cover chart-specific behavior in the chart's style tests.
+4. For a visual change, update and inspect the affected screenshots using
+   [Screenshot baselines](https://charts.hdcode.dev/dev/releases/validation-matrix#screenshot-baselines).
 
-Radar is the one exception to full-opacity fills. Radar polygons overlap each other and the grid,
-so a solid fill would hide the series behind it.
-
-Selection dimming applies only while something is selected and multiplies the series alpha; it
-does not change the resting colors. `unfocusedSeriesAlpha` is lower than `unselectedAlpha`, because
-translucent radar fills barely change at `0.7f`.
-
-Do not add a default mark that draws in the series color on top of its own series, such as the
-removed stacked-area boundary line. At full opacity it cannot be seen.
-
-## Chart-specific defaults
-
-| Setting | Default | Charts |
-| --- | --- | --- |
-| Axes, axis lines, and axis labels visible | `true` | Bar, histogram, line, stacked bar, stacked area |
-| Grid visible | `true` | Bar, histogram, line, stacked bar, stacked area, radar |
-| Grid steps | `4` | Bar, histogram, line, stacked bar, stacked area, radar |
-| Range | Fitted to the data, minimum `0.0` on histogram | Bar, histogram, line |
-| Gauge range | `0.0..100.0` | Ring gauge |
-| Gauge track and range labels visible | `true` | Ring gauge |
-| Axis label `maxCount` (`axisLabelMaxCount`) | `null` (X: as many as fit; Y: up to `yAxisMaxLabelCount`) | Bar, histogram, line, stacked bar, stacked area |
-| Y-axis label maximum (`yAxisMaxLabelCount`) | `5`; short plots show fewer | Bar, histogram, line, stacked bar, stacked area |
-| Curved lines (`bezier`) | `true` on line, `false` on stacked area | Line, stacked area |
-| Points visible | `false`; the selected point is still drawn | Line, radar |
-| Radar axis labels visible | `true`; the web shrinks to leave room for them | Radar |
-| Radar points use line color | `true` | Radar |
-| Donut hole | `0f` (full pie) | Pie |
-| Zoom controls visible | `true` | Bar, histogram, line, stacked bar, stacked area |
-| Legend visible | `true`; see Legend and Selection for when it shows | Line, pie, radar, ring gauge, stacked bar, stacked area |
-
-## Invalid values
-
-Style values are never rejected; each chart draws a clamped copy of its style. Style Clamping
-describes the rules, and Validation Errors lists what is still an error.
-
-## Selection
-
-A thin line cannot contrast with both the background and every bar color, so bar, histogram, and
-stacked bar charts let the selected bar mark the selection. The other bars dim to
-`unselectedAlpha`, and the selection line is drawn only over the background.
-
-Stacked area follows the same rule. A column one data step wide around the selected point keeps
-full color, the rest of the stack dims, and the selection line stops at the top of the stack.
-
-Radar has no selection line. Dragging selects an axis, and its per-axis marks are the points: the
-data points and labels of the other axes dim to `unselectedAlpha`. Polygons stay whole, because
-their shape is what a radar chart shows. Tapping a series outline focuses the
-series and fades the others to `unfocusedSeriesAlpha`.
-
-Ring gauge has no selection line either. The selected ring keeps full color and the other rings dim
-to `unselectedAlpha`; the tracks behind them stay as they are.
+[Style Clamping](style-clamping.md) owns drawable-value corrections. [Validation
+Errors](validation-errors.md) owns input and style settings that need an error message.

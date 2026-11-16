@@ -31,20 +31,20 @@ sequenceDiagram
 
 | Stage | Workflow | What it publishes |
 | --- | --- | --- |
-| Pull request | `pull-request.yml`, `pull-request-api.yml`, `pull-request-gif-validation.yml` | Nothing; it gates the merge. |
-| Snapshot | `nightly.yml` → `snapshot-release.yml` | Maven snapshot, snapshot API reference and demo, snapshot Android APK, snapshot docs. |
-| Release | `release.yml` | Maven release and tag, versioned API reference and demo, release Android APK, versioned docs, GitHub release. |
+| Pull request | [pull-request.yml](https://github.com/HDCharts/charts/blob/main/.github/workflows/pull-request.yml), [pull-request-api.yml](https://github.com/HDCharts/charts/blob/main/.github/workflows/pull-request-api.yml), [pull-request-gif-validation.yml](https://github.com/HDCharts/charts/blob/main/.github/workflows/pull-request-gif-validation.yml) | Nothing; it gates the merge. |
+| Snapshot | [nightly.yml](https://github.com/HDCharts/charts/blob/main/.github/workflows/nightly.yml) → [snapshot-release.yml](https://github.com/HDCharts/charts/blob/main/.github/workflows/snapshot-release.yml) | Maven snapshot, snapshot API reference and demo, snapshot Android APK, snapshot docs. |
+| Release | [release.yml](https://github.com/HDCharts/charts/blob/main/.github/workflows/release.yml) | Maven release and tag, versioned API reference and demo, release Android APK, versioned docs, GitHub release. |
 
 ## What validates `main`
 
 The pull-request checks. The nightly snapshot publishes `main` as those checks left it when the
-last 24 hours brought code changes, and a maintainer starts `release.yml` by hand.
+last 24 hours brought code changes, and a maintainer starts [release.yml](https://github.com/HDCharts/charts/blob/main/.github/workflows/release.yml) by hand.
 
 That makes the pull-request checks the tests that gate every commit. See
 [Pull Requests](pull-requests.md) for the jobs they run and
 [Validation Matrix](validation-matrix.md) for what each one covers.
 
-`warm-gradle-cache.yml` runs on `main` when sources, resources, or build files change and twice a
+[warm-gradle-cache.yml](https://github.com/HDCharts/charts/blob/main/.github/workflows/warm-gradle-cache.yml) runs on `main` when sources, resources, or build files change and twice a
 week. It runs lint, the JVM tests and the API diff, and compiles the other Linux and iOS CI targets.
 Dependencies use a cache keyed by build files. Gradle task outputs use a separate cache keyed by
 runner OS, architecture, and commit, so source changes refresh the outputs that pull requests

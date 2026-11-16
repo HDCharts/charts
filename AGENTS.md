@@ -14,7 +14,7 @@ the plan under `docs/plans/`.
 ## Repository Structure
 
 - `charts-core`: shared chart models, selection, formatting, validation, and rendering foundations.
-- `charts-line`, `charts-pie`, `charts-bar`, `charts-histogram`, `charts-radar`, `charts-gauge`, `charts-stacked-bar`, and `charts-stacked-area`: published chart modules.
+- `charts-*`: chart modules; [settings.gradle.kts](settings.gradle.kts) declares the projects and [buildSrc/src/main/kotlin/ChartsModules.kt](buildSrc/src/main/kotlin/ChartsModules.kt) groups them for publishing and validation.
 - `charts`: the umbrella artifact exposing the library's combined API.
 - `charts-bom`: the published Bill of Materials.
 - `sample`: Compose Multiplatform demos, previews, screenshot tests, and platform applications.
@@ -23,10 +23,10 @@ the plan under `docs/plans/`.
 
 Read the relevant documentation before substantial changes:
 
-- `CONTRIBUTING.md` for repository layout and test types.
-- `docs/wiki/dev/releases/pull-requests.md` for PR CI and required checks.
-- `docs/wiki/dev/releases/release-checklist.md` for release readiness.
-- `release-notes/README.md` for release-note structure and synchronization.
+- [CONTRIBUTING.md](CONTRIBUTING.md) for repository layout and test types.
+- [docs/wiki/dev/releases/pull-requests.md](docs/wiki/dev/releases/pull-requests.md) for PR CI and required checks.
+- [docs/wiki/dev/releases/release-checklist.md](docs/wiki/dev/releases/release-checklist.md) for release readiness.
+- [release-notes/README.md](release-notes/README.md) for release-note structure and synchronization.
 
 ## Always-Follow Rules
 
@@ -52,6 +52,10 @@ Read the relevant documentation before substantial changes:
   default.
 - Prefer the smallest correct change. Do not add speculative abstractions or
   duplicate release metadata.
+- Keep internal guides focused on ownership, rules, and procedures. Link to code
+  for module inventories, defaults, and implementation details that change.
+- Make references to existing repository files clickable. Keep commands and
+  filename patterns as code.
 - Do not start a review unless requested. Reviews are advisory and must not
   modify files until the user explicitly asks to fix findings.
 - Run the smallest relevant validation and report exactly what ran and what was
@@ -80,26 +84,29 @@ Project skills use the `hdc-` prefix. The canonical source is
 
 | Skill | Use when | Location |
 |---|---|---|
-| `hdc-review` | Reviewing a diff, commit, branch, pull request, or implementation for bugs, regressions, API risks, and missing tests. | `.agents/skills/hdc-review/SKILL.md` |
-| `hdc-maintainability` | Reviewing a diff, branch, pull request, or plan for long-term maintenance cost, API surface growth, and cross-repo fan-out. | `.agents/skills/hdc-maintainability/SKILL.md` |
-| `hdc-architecture` | Module boundaries, public chart API layering, validation, rendering, and sample integration. | `.agents/skills/hdc-architecture/SKILL.md` |
-| `hdc-kotlin` | Kotlin and Kotlin Multiplatform source sets, models, APIs, visibility, dependencies, and formatting. | `.agents/skills/hdc-kotlin/SKILL.md` |
-| `hdc-compose` | Compose Multiplatform chart composables, drawing, interaction, previews, and screenshots. | `.agents/skills/hdc-compose/SKILL.md` |
-| `hdc-ux` | Chart usability, interaction design, accessibility, responsive behavior, and data communication. | `.agents/skills/hdc-ux/SKILL.md` |
-| `hdc-docs` | Direct, positive, concise documentation and release-note writing. | `.agents/skills/hdc-docs/SKILL.md` |
-| `hdc-concurrency` | Coroutine ownership, Compose effects, animations, live previews, delayed selection, and cancellation. | `.agents/skills/hdc-concurrency/SKILL.md` |
-| `hdc-testing` | Kotlin, Compose interaction, rendering, API, platform, and screenshot testing. | `.agents/skills/hdc-testing/SKILL.md` |
-| `hdc-pr` | The user explicitly asks to create, open, publish, or ship a pull request. | `.agents/skills/hdc-pr/SKILL.md` |
-| `hdc-issue` | The user asks to draft or create a GitHub issue. | `.agents/skills/hdc-issue/SKILL.md` |
-| `hdc-plan` | The user chooses planning for a complex or multi-step feature. | `.agents/skills/hdc-plan/SKILL.md` |
-| `hdc-changeset` | The user directly requests creating or updating a release note. | `.agents/skills/hdc-changeset/SKILL.md` |
-| `hdc-rc` | The user directly requests API compatibility or migration work. | `.agents/skills/hdc-rc/SKILL.md` |
-| `hdc-gif` | Recording or updating docs GIF scenarios locally against a running emulator. | `.agents/skills/hdc-gif/SKILL.md` |
+| `hdc-review` | Reviewing a diff, commit, branch, pull request, or implementation for bugs, regressions, API risks, and missing tests. | [.agents/skills/hdc-review/SKILL.md](.agents/skills/hdc-review/SKILL.md) |
+| `hdc-maintainability` | Reviewing a diff, branch, pull request, or plan for long-term maintenance cost, API surface growth, and cross-repo fan-out. | [.agents/skills/hdc-maintainability/SKILL.md](.agents/skills/hdc-maintainability/SKILL.md) |
+| `hdc-architecture` | Module boundaries, public chart API layering, validation, rendering, and sample integration. | [.agents/skills/hdc-architecture/SKILL.md](.agents/skills/hdc-architecture/SKILL.md) |
+| `hdc-kotlin` | Kotlin and Kotlin Multiplatform source sets, models, APIs, visibility, dependencies, and formatting. | [.agents/skills/hdc-kotlin/SKILL.md](.agents/skills/hdc-kotlin/SKILL.md) |
+| `hdc-compose` | Compose Multiplatform chart composables, drawing, interaction, previews, and screenshots. | [.agents/skills/hdc-compose/SKILL.md](.agents/skills/hdc-compose/SKILL.md) |
+| `hdc-ux` | Chart usability, interaction design, accessibility, responsive behavior, and data communication. | [.agents/skills/hdc-ux/SKILL.md](.agents/skills/hdc-ux/SKILL.md) |
+| `hdc-docs` | Direct, positive, concise documentation and release-note writing. | [.agents/skills/hdc-docs/SKILL.md](.agents/skills/hdc-docs/SKILL.md) |
+| `hdc-concurrency` | Coroutine ownership, Compose effects, animations, live previews, delayed selection, and cancellation. | [.agents/skills/hdc-concurrency/SKILL.md](.agents/skills/hdc-concurrency/SKILL.md) |
+| `hdc-testing` | Kotlin, Compose interaction, rendering, API, platform, and screenshot testing. | [.agents/skills/hdc-testing/SKILL.md](.agents/skills/hdc-testing/SKILL.md) |
+| `hdc-pr` | The user explicitly asks to create, open, publish, or ship a pull request. | [.agents/skills/hdc-pr/SKILL.md](.agents/skills/hdc-pr/SKILL.md) |
+| `hdc-issue` | The user asks to draft or create a GitHub issue. | [.agents/skills/hdc-issue/SKILL.md](.agents/skills/hdc-issue/SKILL.md) |
+| `hdc-plan` | The user chooses planning for a complex or multi-step feature. | [.agents/skills/hdc-plan/SKILL.md](.agents/skills/hdc-plan/SKILL.md) |
+| `hdc-changeset` | The user directly requests creating or updating a release note. | [.agents/skills/hdc-changeset/SKILL.md](.agents/skills/hdc-changeset/SKILL.md) |
+| `hdc-rc` | The user directly requests API compatibility or migration work. | [.agents/skills/hdc-rc/SKILL.md](.agents/skills/hdc-rc/SKILL.md) |
+| `hdc-gif` | Recording or updating docs GIF scenarios locally against a running emulator. | [.agents/skills/hdc-gif/SKILL.md](.agents/skills/hdc-gif/SKILL.md) |
 
 ## Validation
 
-Choose focused checks from `docs/wiki/dev/releases/validation-matrix.md` based on the
+Choose focused checks from [docs/wiki/dev/releases/validation-matrix.md](docs/wiki/dev/releases/validation-matrix.md) based on the
 affected scope.
+
+Use its [Screenshot baselines](docs/wiki/dev/releases/validation-matrix.md#screenshot-baselines)
+procedure for updates scoped to the affected preview or test.
 
 Do not run `./gradlew validateDocsGifBaselines` or instrumented Android tests
 locally unless the user explicitly requests them; CI owns those machine-

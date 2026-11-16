@@ -9,7 +9,17 @@ Known issues and limits of the X-Axis Labels page in Chart Internals.
 
 ## Need Verification
 
-None yet.
+### Fractional scroll positions may omit an edge label
+
+An [earlier planner investigation](https://github.com/HDCharts/charts/blob/bf27d8869609f641745098bc508f9617782db2fb/docs/wiki/dev/internals/x-axis-labels.md#brute-force-checks) found labels within
+1 px left of the plot that placement would draw but the plan omitted when items were about 1 px
+wide. Reproduce this against the current planner before treating it as a confirmed defect.
+
+### Compact stacked bars use a separate blank-label fallback
+
+[StackedBarDensity.kt](https://github.com/HDCharts/charts/blob/main/charts-stacked-bar/src/commonMain/kotlin/io/github/hdcharts/stackedbar/internal/StackedBarDensity.kt) assigns `Bucket <number>` to a blank bucket category, while axis labels use
+`resolveAxisLabel` for their fallback. Check the rendered and selected labels together before
+changing either path.
 
 ## Confirmed
 
@@ -37,7 +47,7 @@ at once when the tick leaves. The label row is not clipped, so near the edges a 
 past the plot.
 
 Confirmed by the code: `placeXAxisLabel` drops a label once its tick is more than 1 px outside the
-row, and `AxisXLabelsLayout` does not clip. `AxisHelpersTest` covers both.
+row, and `AxisXLabelsLayout` does not clip. [AxisHelpersTest](https://github.com/HDCharts/charts/blob/main/charts-core/src/commonTest/kotlin/io/github/hdcharts/core/internal/axis/AxisHelpersTest.kt) covers both.
 
 Options:
 

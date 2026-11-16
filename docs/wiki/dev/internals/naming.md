@@ -5,196 +5,92 @@ order: 10
 
 # Naming and File Structure
 
-Every chart is one public composable plus the internals behind it. These rules name both, so a
-reader can tell what a file holds from its name alone. Follow them when adding a chart, adding a
-public composable to a chart module, or moving code between layers.
+Name files and composables by their responsibility. Use these rules when adding a chart or moving
+code between layers.
 
-The rules exist because the naming drifted. Five charts once declared an internal composable with
-the same name as their public one, and two of those needed an import alias or a shadowing import to
-call it. Neither was visible at the call site.
+## Public composables
 
-## Public Composables
+Give each public chart composable its own file with the same name: `LineChart` lives in
+[LineChart.kt](https://github.com/HDCharts/charts/blob/main/charts-line/src/commonMain/kotlin/io/github/hdcharts/line/LineChart.kt), and `LiveLineChart` lives in [LiveLineChart.kt](https://github.com/HDCharts/charts/blob/main/charts-line/src/commonMain/kotlin/io/github/hdcharts/line/LiveLineChart.kt). A module can expose several charts.
+Each chart gets its own entry and style where its input or presentation differs.
 
-One public composable per file. The file is named after it and holds nothing else public.
+Name a style file after the chart it styles. [LineChartStyle.kt](https://github.com/HDCharts/charts/blob/main/charts-line/src/commonMain/kotlin/io/github/hdcharts/line/LineChartStyle.kt), for example, holds
+`LineChartStyle` and its blocks. [Style Defaults](style-defaults.md) describes their factories.
 
-| File | Composable | Module |
-| --- | --- | --- |
-| `LineChart.kt` | `LineChart` | `charts-line` |
-| `LiveLineChart.kt` | `LiveLineChart` | `charts-line` |
-| `BarChart.kt` | `BarChart` | `charts-bar` |
-| `HistogramChart.kt` | `HistogramChart` | `charts-histogram` |
-| `PieChart.kt` | `PieChart` | `charts-pie` |
-| `RadarChart.kt` | `RadarChart` | `charts-radar` |
-| `ScatterChart.kt` | `ScatterChart` | `charts-scatter` |
-| `HeatmapChart.kt` | `HeatmapChart` | `charts-heatmap` |
-| `WaterfallChart.kt` | `WaterfallChart` | `charts-waterfall` |
-| `RingGaugeChart.kt` | `RingGaugeChart` | `charts-gauge` |
-| `StackedBarChart.kt` | `StackedBarChart` | `charts-stacked-bar` |
-| `StackedAreaChart.kt` | `StackedAreaChart` | `charts-stacked-area` |
+## Internal composables
 
-A second public composable in the same module gets its own file. `charts-line` has two, because
-live line and the regular line chart are different charts that share internals.
+Use a suffix that describes the composable's role:
 
-A style file is named after the chart it styles: `LineChartStyle.kt` holds `LineChartStyle` and its
-blocks. See Style Defaults for how the styles are built.
+| Role | Suffix | Example |
+|---|---|---|
+| Input preparation | `Entry` | `LineChartEntry` validates, converts, and clamps before content |
+| State and interaction | `Impl` | `LineChartImpl` owns chart state and delegates layout and drawing |
+| Layout shell | `Frame` | `LineChartFrame` places the header, plot, and legend |
+| Canvas and drawing | `Content` | `LineChartContent` draws the chart |
 
-## Internal Composables
+Keep internal names distinct from public composables so call sites need no import alias or
+shadowing import. Split responsibilities when that makes ownership clearer.
 
-An internal composable never repeats the name of the public composable it implements. The public
-name belongs to the public composable.
+A boundary shared by charts gets a distinct name. `BarChartInternalPlot` is the shared plot used
+by bar and histogram; each keeps its own entry because their validation policies differ.
 
-The suffix says what the composable does. There are four roles, and a composable that needs two of
-them should be split.
+### Sharing internals
 
-| Role | Suffix | What it holds | Example |
-| --- | --- | --- | --- |
-| Canvas | `Content` | A canvas and the drawing calls on it | `BarChartContent` |
-| State and interaction | `Impl` | Density mode, zoom, animation values, the header; delegates drawing | `BarChartImpl` |
-| Layout shell | `Frame` | Chrome slots — header, plot, legend — and no chart state. Not every frame has every slot | `LineChartFrame`, `StackedBarChartFrame` |
-| Input preparation | `Entry` | Owns validation, style clamping and any conversion before content; indexed charts delegate to shared `ChartEntry` | `LineChartEntry`, `BarChartEntry`, `ScatterChartEntry` — see the chains below |
+Share the layer whose behavior is shared. `LineChart` and `LiveLineChart` have different state
+handling but draw through `LineChartContent`. Separate charts in a module can also keep separate
+content, as the gauge charts do.
 
-A suffix outside this table is the signal that a composable is doing two jobs.
+Indexed-series entries delegate to `ChartEntry`. Other data models own input preparation in their
+chart entry. An entry can accept a content lambda when callers share preparation and supply
+different content. See [Entry Seam and Chart Policy](entry-seam.md).
 
-A boundary that a second chart calls is named as a distinct noun rather than with a suffix.
-`BarChartInternalPlot` is shared by bar and histogram and is neither bar's entry nor bar's canvas.
-
-### The chains
-
-Every chain ends at the composable that owns the canvas, which is a `Content` everywhere except the
-two stacked charts.
-
-| Chart | Chain |
-| --- | --- |
-| Line | `LineChart` → `LineChartEntry` → `LineChartImpl` → `LineChartFrame` → `LineChartContent` |
-| Live line | `LiveLineChart` → `LineChartEntry` → `LiveLineChartImpl` → `LineChartFrame` → `LineChartContent` |
-| Bar | `BarChart` → `BarChartEntry` → `BarChartInternalPlot` → `BarChartImpl` → `BarChartContent` |
-| Histogram | `HistogramChart` → `HistogramChartEntry` → `BarChartInternalPlot` → `BarChartImpl` → `BarChartContent` |
-| Pie | `PieChart` → `PieChartEntry` → `PieChartFrame` → `PieChartContent` |
-| Radar | `RadarChart` → `RadarChartEntry` → `RadarChartContent` |
-| Scatter / bubble | `ScatterChart` → `ScatterChartEntry` → `ScatterChartContent` |
-| Heatmap | `HeatmapChart` → `HeatmapChartEntry` → `HeatmapChartContent` |
-| Ring gauge | `RingGaugeChart` → `RingGaugeChartEntry` → `RingGaugeChartContent` |
-| Stacked bar | `StackedBarChart` → `StackedBarChartEntry` → `StackedBarChartFrame` → `StackedBarChartImpl` |
-| Stacked area | `StackedAreaChart` → `StackedAreaChartEntry` → `StackedAreaChartFrame` → `StackedAreaChartImpl` |
-
-Radar and pie lay their plot out with `ChartSquarePlotLayout` from `charts-core`, which supplies
-the square plot, the header, and the legend. Ring gauge draws a half circle, so it uses
-`ChartPlotLayout` with a plot twice as wide as it is tall; the square layout is that with `1f`.
-Scatter and heatmap also use `ChartPlotLayout`; heatmap derives its plot ratio from the matrix shape.
-
-The stacked charts are the two that do not follow the rest: their `Frame` wraps the `Impl` and hands
-it the plot slot, where line and bar put the `Frame` inside the `Impl` and hand it a content slot.
-Neither stacked chart has a `Content`, so its `Impl` draws on the canvas itself.
-
-Every chart has an `Entry` that owns its policy, style values, clamping and any conversion.
-Indexed-series entries delegate to shared `ChartEntry`; scatter and heatmap validate their own X/Y or
-matrix data contracts and pass the validated data directly to content. An entry with one public
-composable calls the content itself; an entry shared by two takes the content as a lambda. Bar and
-histogram each have their own entry, because their policies differ, and then share
-`BarChartInternalPlot`.
-
-## Two Public Composables in One Module
-
-Line is the only module with two, and the split is at the input boundary, not the draw boundary.
-`LineChartImpl` and `LiveLineChartImpl` are separate, because live line has no selection and a
-window that shifts. They share `LineChartContent`, because both draw the same way.
-
-When a module gets a second public composable, copy that split: each gets its own input handling,
-and they share the content. State which stage the split falls at in the file's KDoc.
+The stacked chart frames supply the plot slot to their implementation. Follow the ownership rules
+in [Pipeline and Stage Ownership](pipeline.md) when changing that layout.
 
 ## Files
 
 | File | Holds |
-| --- | --- |
-| `<Name>Chart.kt` | The public composable, and the private helpers only it uses |
-| `<Name>ChartStyle.kt` | The chart's style and its blocks |
-| `<Name>ChartPreviews.kt` | Previews for one public composable |
-| `internal/<Name>ChartEntry.kt` | Input preparation for one public composable |
-| `internal/<Name>ChartImpl.kt` | State and interaction for one public composable |
-| `internal/<Name>ChartContent.kt` | The canvas and its drawing |
-| `internal/<Name>ChartFrame.kt` | A layout shell, when more than one composable calls it |
-| `internal/<Name>ChartHelpers.kt` | Pure functions for one chart |
-| `internal/<Name>ChartDrawing.kt` | Drawing helpers kept apart from the canvas composable |
+|---|---|
+| `<Name>Chart.kt` | Public composable and private helpers used only there |
+| `<Name>ChartStyle.kt` | Chart style and its blocks |
+| `<Name>ChartPreviews.kt` | Previews for the public chart |
+| `internal/<Name>ChartEntry.kt` | Input preparation |
+| `internal/<Name>ChartImpl.kt` | Chart state and interaction |
+| `internal/<Name>ChartContent.kt` | Canvas and drawing |
+| `internal/<Name>ChartFrame.kt` | Reusable layout shell |
+| `internal/<Name>ChartHelpers.kt` | Pure helpers |
+| `internal/<Name>ChartDrawing.kt` | Drawing helpers |
 
-Previews follow the public composable they preview, so a second public composable gets its own
-`Previews` file. `LineChartPreviews.kt` currently previews both line composables and should be
-split.
-
-A file with one narrow concern names that concern: `StackedBarDensity.kt`,
-`StackedBarInteraction.kt`, `StackedAreaDensity.kt`. A file of pure functions for a chart uses
-`<Name>ChartHelpers.kt`, which line, bar, pie, and radar all do.
-
-A `Frame` gets its own file when more than one composable calls it, which is why
-`LineChartFrame.kt` and `PieChartFrame.kt` exist. A frame with one caller stays in the file that owns
-it.
+A file with a narrower concern names it, such as [StackedBarDensity.kt](https://github.com/HDCharts/charts/blob/main/charts-stacked-bar/src/commonMain/kotlin/io/github/hdcharts/stackedbar/internal/StackedBarDensity.kt). Keep a private helper or
+layout in its caller's file while that keeps the code easy to follow.
 
 ### Test files
 
-Test source sets hold two kinds of file with no `@Test`, named differently.
+- Put shared fixtures in a file with the chart-family prefix, such as [LineTestFixtures.kt](https://github.com/HDCharts/charts/blob/main/charts-line/src/commonTest/kotlin/io/github/hdcharts/line/LineTestFixtures.kt).
+- Name test helpers for their job, such as [PixelCapture.kt](https://github.com/HDCharts/charts/blob/main/charts-line/src/commonTest/kotlin/io/github/hdcharts/line/PixelCapture.kt).
+- Use `*Test.kt` for files that contain tests.
 
-- **Shared fixtures** take the chart family prefix: `LineTestFixtures.kt` in `charts-line`,
-  `StackedBarTestFixtures.kt` in `charts-stacked-bar`. One file per module, holding the data,
-  colours, and builders that module's tests share. Never name one `*Test.kt` — nothing treats that
-  suffix as a suite unless the file holds tests.
-- **A test helper** is named for what it does, like any other file: `PixelCapture.kt` holds
-  `setCapturedContent`.
+## Module structure
 
-## Module Structure
+`charts-core` holds shared code, organized by concern under `internal/`. A chart module owns its
+chart-specific code. Keep a small internal package flat; split it by concern when navigation
+becomes difficult.
 
-`charts-core` holds everything a chart shares, and a chart module holds only what is its own. The
-shared code is organised by concern, in `internal/` sub-packages: `axis`, `bezier`, `composable`,
-`density`, `drawing`, `interaction`, `layout`, `model`, `palette`, and `theme`, plus the flat files
-`InternalChartsApi.kt`, `DataValidation.kt`, `StyleClamping.kt`, `ChartEntry.kt`, `ChartPolicy.kt`,
-`ChartSpec.kt`, `Constants.kt`, and `AnimationSpec.kt`.
+Use Kotlin visibility for implementation details. Cross-module implementation APIs need
+`@InternalChartsApi`, the error-level opt-in declared in [InternalChartsApi.kt](https://github.com/HDCharts/charts/blob/main/charts-core/src/commonMain/kotlin/io/github/hdcharts/core/internal/InternalChartsApi.kt). Check existing
+consumers and compatibility before changing the visibility or opt-in of a published declaration.
 
-A chart module's own `internal/` package stays flat. Sub-package it by stage only once it holds more
-than about ten files, and match the core naming when you do.
+Expose a shared plot through a boundary such as `BarChartInternalPlot`. Callers use that boundary
+to keep dependencies on the other chart's internals contained.
 
-Everything that is not public API should carry `@InternalChartsApi`, a `@RequiresOptIn` at error
-level declared in `InternalChartsApi.kt`. `charts-core` applies it across its own `internal/`
-packages, and a chart module applies it to anything another chart module calls.
+## Adding a chart or public composable
 
-Five composables in `internal/composable/` do not carry it yet, so they are unrestricted public API
-of the published `charts-core` artifact: `ChartErrors`, `Legend`, `LegendItems`,
-`rememberShowState`, and `rememberAnimationState`. Their siblings in the same directory are
-annotated. `rememberAnimationState` has no production caller at all and should be deleted rather
-than annotated.
+- Give the public composable and its internal layers names that match their roles.
+- Choose its input contract using [Entry Seam and Chart Policy](entry-seam.md).
+- Cover validation, selection, and rendering behavior in the chart's tests. Indexed-series policy
+  expectations live in [ChartPolicyConformanceTest](https://github.com/HDCharts/charts/blob/main/charts/src/commonTest/kotlin/io/github/hdcharts/charts/ChartPolicyConformanceTest.kt) in the umbrella `charts` module.
+- Follow [Style Defaults](style-defaults.md) and [Style Clamping](style-clamping.md) for styles.
+- Update the guide that owns any new rule or exception.
 
-Keep one boundary composable per shared plot, and have every chart that needs that plot call the
-boundary rather than the other chart's internals. Histogram calls `BarChartInternalPlot` and nothing
-else in `charts-bar`. A boundary is named as a distinct noun, not with a role suffix, because it is
-none of the four roles on its own.
-
-## Adding a Chart or a Public Composable
-
-- Name the public composable after the file, and give it its own file.
-- Give each internal composable the suffix for its role, and give it a file to match.
-- For indexed `ChartData`, declare `ChartPolicy<S>` in the entry file with its color, range and axis
-  mappers, and update the policy table and `ChartPolicyConformanceTest` together.
-- For another data model, define its validation contract in the chart module and record it in
-  [Entry Seam and Chart Policy](entry-seam.md#chart-families).
-- Update this page's public composable and call-chain tables, and the stage matrix in
-  [Pipeline and Stage Ownership](pipeline.md#which-chart-runs-which-stage).
-- Never repeat the public name on an internal composable, and never alias or shadow an import to
-  work around a repeat.
-- Give the content composable the canvas, and keep state out of it.
-- If a second chart will use part of this, put that part behind an `@InternalChartsApi` boundary
-  with a distinct name.
-- Follow the style rules in Style Defaults and the clamping rules in Style Clamping for anything
-  the user can set.
-
-## Tests
-
-| Behavior | Tests |
-| --- | --- |
-| An internal composable never repeats a public name | `grep -rn "^internal fun [A-Z][A-Za-z]*Chart(" charts-*/src/commonMain` returns nothing |
-| Every chart draws through its content composable | The screenshot suite, one directory per test file under `sample/androidApp` |
-| Style blocks clamp | `StyleClampingTest` in `charts-core/src/commonTest`, plus a `*_withInvalidNumericStyleValues_drawsClampedChart` test per chart |
-| Non-public internals are opted in | `grep -rn "@InternalChartsApi" charts-*/src/commonMain` |
-
-Naming rules are checked by reading, not by a test. The grep in the first row is the closest thing
-to one, and it is worth running before opening a pull request.
-
-## Known Issues
-
-Known issues and limits are listed in the Known Issues section.
+Check naming and visibility during code review. Rendering tests verify the behavior behind those
+boundaries.

@@ -16,15 +16,11 @@ the latest SemVer release tag itself and compares the working tree against
 it. A repository with no release tag yet falls back to `origin/main`.
 
 The baseline is fixed on purpose. That span is exactly what the pending
-section of `API-COMPATIBILITY-BREAKS.txt` describes, so the findings and the
+section of [API-COMPATIBILITY-BREAKS.txt](https://github.com/HDCharts/charts/blob/main/API-COMPATIBILITY-BREAKS.txt) describes, so the findings and the
 acknowledgments always cover the same ground. Pointing the gate at some
 other ref would break that pairing, so it refuses
 `-PapiCompatibilityBaselineRef` and directs you to `apiCompatibilityCompare`
 instead.
-
-Both a tag and `origin/main` survive squash-merge, unlike the pinned
-pre-merge SHA this replaced — see
-[issue #601](https://github.com/HDCharts/charts/issues/601).
 
 ## Comparing against an arbitrary ref
 
@@ -36,12 +32,12 @@ To answer "what changed since 2.2.0?", use the investigation task:
 
 It prints the diff and writes the usual reports under
 `build/reports/api-compatibility/`, and deliberately leaves both
-`API-COMPATIBILITY-BREAKS.txt` and the pass/fail gate alone.
+[API-COMPATIBILITY-BREAKS.txt](https://github.com/HDCharts/charts/blob/main/API-COMPATIBILITY-BREAKS.txt) and the pass/fail gate alone.
 
 ## Acknowledging a breaking change
 
 The gate fails on exactly the detected API breaks that
-`API-COMPATIBILITY-BREAKS.txt` leaves unlisted. That file groups entries by
+[API-COMPATIBILITY-BREAKS.txt](https://github.com/HDCharts/charts/blob/main/API-COMPATIBILITY-BREAKS.txt) leaves unlisted. That file groups entries by
 release, one section per version, newest first:
 
 ```text
@@ -56,36 +52,12 @@ An entry records only what was accepted. Why it was accepted lives in git:
 `git blame` a line to reach the pull request that added it.
 
 Each section heading is the **pending release version**, resolved from Axion
-(`currentVersion`, the same mechanism `resolve-release-version.sh` uses) the
+(`currentVersion`, the same mechanism [resolve-release-version.sh](https://github.com/HDCharts/charts/blob/main/.github/scripts/resolve-release-version.sh) uses) the
 moment an entry is acknowledged. Axion advances only when a tag lands, so
 every PR in the current cycle resolves the same heading, and the first
 acknowledgment after a release is tagged resolves the next version and opens
 its own section on top. Released sections stay as a permanent, append-only
 history of every accepted break.
-
-```mermaid
-sequenceDiagram
-  actor Dev as Developer
-  participant PR as Pull request
-  participant CI as API compatibility
-  Dev->>PR: Push a change
-  PR->>CI: Start the API workflow
-  alt No change to library code, build logic, or acknowledged breaks
-    CI-->>PR: PR API Compatibility passes without the check
-  else Change can affect the published API
-    CI->>CI: apiCompatibilityCheck against the latest release tag
-    alt Every finding is acknowledged
-      CI-->>PR: Pass
-    else Unacknowledged break
-      CI-->>PR: Fail with an annotation and instructions
-      Dev->>Dev: Run ./gradlew apiCompatibilityAcknowledgeBreaks
-      Dev->>Dev: Review the API-COMPATIBILITY-BREAKS.txt diff
-      Dev->>PR: Commit the updated file and push
-      PR->>CI: Run the check again
-      CI-->>PR: Pass
-    end
-  end
-```
 
 1. Push the breaking change. `apiCompatibilityCheck` fails the PR and posts a
    workflow-run annotation with instructions.
@@ -103,7 +75,7 @@ sequenceDiagram
 Rerunning the task skips lines already present in the section, so
 acknowledging twice leaves one entry.
 
-## Release Audit Flow
+## Release audit
 
 `Release` runs the same `apiCompatibilityCheck` the PR gate runs, which
 already spans the release being cut. Enforcement belongs to the PR gate,

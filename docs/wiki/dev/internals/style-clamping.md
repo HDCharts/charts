@@ -10,7 +10,7 @@ exceptions, described below. A value out of range is drawn as the closest value 
 with an error.
 
 Styles are clamped; data is reported. The two halves of that rule, and why they differ, are on
-Validation Errors.
+[Validation Errors](validation-errors.md).
 
 ## Rules
 
@@ -29,90 +29,40 @@ also falls back for a non-`sp` unit and for zero, which would draw nothing.
 
 A gradient left with no stops, or with non-finite positions or the same start and end, clamps to
 null, so the shape draws solid. A single stop is drawn as its color at both ends. That rule is
-`ChartGradient.clamp()` in `ChartGradient.kt`.
+`ChartGradient.clamp()` in [ChartGradient.kt](https://github.com/HDCharts/charts/blob/main/charts-core/src/commonMain/kotlin/io/github/hdcharts/core/style/ChartGradient.kt).
 
 The 16384 pixel cap keeps a size inside Compose layout limits. It depends on the screen density,
 which is why `clampSize` and `clampTextSize` take a `Density`.
 
 ## Where it happens
 
-Clamping runs one level at a time, from the inside out: a block clamps its own fields, and the chart
-style composes its blocks' clamps and adds nothing of its own.
+Clamping runs from the inside out. Each style block clamps its own fields; the chart style's
+`clamp(density)` extension composes those results.
 
-- The helpers are `clampAlpha()`, `clampSize(fallback, density)`,
-  `clampTextSize(fallback, density)`, and `clampGridSteps()` in `StyleClamping.kt` in `charts-core`.
-- **A style block clamps itself.** `clamp(density)` is a member of the block, next to the fields it
-  owns and beside `resolveColors()` where that exists:
+| Owner | Responsibility |
+|---|---|
+| [StyleClamping.kt](https://github.com/HDCharts/charts/blob/main/charts-core/src/commonMain/kotlin/io/github/hdcharts/core/internal/StyleClamping.kt) in `charts-core` | Shared alpha, size, text-size, and grid-step helpers |
+| Style block's `clamp` | Corrects its fields using the matching `StyleDefaults` fallbacks |
+| Chart style's `clamp` extension | Combines the clamped blocks |
+| Chart entry | Remembers a clamped copy at the current density and passes it to content |
 
-  ```kotlin
-  data class BarBarsStyle(
-      val color: Color,
-      val colors: ImmutableList<Color>,
-      val gradient: ChartGradient?,
-      val alpha: Float,
-      val space: Dp,
-      val minBarWidth: Dp,
-  ) {
-      fun resolveColors(barCount: Int): ImmutableList<Color> = ...
+Indexed-series entries use `ChartEntry`; other data models remember the clamped style in their
+own entry. See [Entry Seam and Chart Policy](entry-seam.md).
 
-      internal fun clamp(density: Density) =
-          BarBarsStyle(
-              color = color,
-              colors = colors,
-              gradient = gradient?.clamp(),
-              alpha = alpha.clampAlpha(),
-              space = space.clampSize(fallback = StyleDefaults.barSpacing, density = density),
-              minBarWidth = minBarWidth.clampSize(fallback = StyleDefaults.minBarWidth, density = density),
-          )
-  }
-  ```
+Style constructors and factories retain the caller's values. Clamping produces a separate copy
+for drawing, preserving equality and caller-visible style values.
 
-- **A chart style composes its blocks.** `clamp(density)` stays an extension on the chart style,
-  because the chart owns no rules of its own — it only names which blocks clamp. For example
-  `StackedAreaChartStyle.clamp` in `StackedAreaChartStyle.kt`:
+[`BarChartStyle.kt`](https://github.com/HDCharts/charts/blob/main/charts-core/src/commonMain/kotlin/io/github/hdcharts/core/style/BarChartStyle.kt)
+shows block-level clamping; the chart-style extensions compose the same pattern.
 
-  ```kotlin
-  internal fun StackedAreaChartStyle.clamp(density: Density) =
-      StackedAreaChartStyle(
-          chartContainerStyle = chartContainerStyle,
-          fill = fill.clamp(),
-          axes = axes.clamp(density),
-          selection = selection.clamp(density),
-          legend = legend,
-          zoomControlsVisible = zoomControlsVisible,
-      )
-  ```
+## Construct every field
 
-- Each chart calls `clamp()` once, at its entry point, and passes the copy to its drawing code.
-  Drawing code never clamps on its own. Every chart routes its entry through `ChartEntry` in
-  `charts-core`, which remembers `style.clamp(density)` and hands the copy to the content.
-- A chart's spec delegates to the chart style's extension rather than repeating it, so the rules stay
-  next to the style they describe. It is the one member of a spec that no chart varies: clamping is
-  the same for every chart, and what differs lives inside each block. Entry Seam and Chart Policy
-  says why it is on the spec at all.
-- Factories and style constructors never clamp. A style keeps exactly what the user passed, so
-  `copy()` and equality behave as users expect.
+Construct the block explicitly in `clamp()`, naming every field. Its constructor has no defaults,
+so adding a field makes the clamp fail to compile until that field is handled. A `copy()` call
+could silently pass a new field through unclamped.
 
-## Why a block's clamp constructs instead of copying
-
-**A block's `clamp()` must name every field, and must never use `copy()`.** Block constructors have
-no default parameter values — the defaults live in the chart's `Defaults` DSL — so a constructor call
-that omits a field does not compile. Adding a field to a block therefore breaks the build in exactly
-one place, its own clamp, until someone decides whether that field needs clamping:
-
-```
-e: BarChartStyle.kt:72:5 No value passed for parameter 'cornerRadius'.
-```
-
-`copy()` would compile and silently leave the new field unclamped, which is the failure this
-structure exists to prevent. The chart style's own `clamp()` already named every top-level field; it
-is the nested `copy()` calls that used to be the hole.
-
-Blocks with nothing to clamp get no `clamp()` — `BarRangeStyle` and `LineRangeStyle` hold optional
-bounds that validation reports instead of clamping.
-
-Axis label styles are passed through rather than clamped. A label size that cannot be drawn is a
-validation error reported by `validateAxisLabels`, not a value to correct silently.
+A block with no correctable values needs no clamp. Range bounds and axis-label settings pass to
+validation, which reports values that cannot be drawn.
 
 ## Adding a style value
 
@@ -127,14 +77,9 @@ validation error reported by `validateAxisLabels`, not a value to correct silent
 
 ## Tests
 
-- `StyleClampingTest` in `charts-core` covers each helper, including `NaN`, `Dp.Unspecified`, and an
-  unspelled text unit.
-- `BarStyleBlocksClampTest`, `LineStyleBlocksClampTest`, `PieStyleBlocksClampTest`,
-  `RadarStyleBlocksClampTest`, `RingGaugeStyleBlocksClampTest`, `StackedBarStyleBlocksClampTest`,
-  and `StackedAreaStyleBlocksClampTest` pin what each block clamps. They build the blocks directly,
-  so no Compose is involved.
-- `ChartGradientsTest` in `charts-core` covers `ChartGradient.clamp()`.
-- Line, radar, stacked bar, and stacked area each have a
-  `*_withInvalidNumericStyleValues_drawsClampedChart` test that draws the chart with out-of-range
-  values and checks that no error appears.
-- `BarStyleDefaultsTest` checks the clamped bar values end to end, which histogram shares.
+- [StyleClampingTest](https://github.com/HDCharts/charts/blob/main/charts-core/src/commonTest/kotlin/io/github/hdcharts/core/internal/StyleClampingTest.kt) in `charts-core` covers helper behavior, including non-finite and unspecified
+  values.
+- Chart style-block clamp tests cover each field without Compose.
+- [ChartGradientsTest](https://github.com/HDCharts/charts/blob/main/charts-core/src/commonTest/kotlin/io/github/hdcharts/core/style/ChartGradientsTest.kt) covers gradient clamping.
+- Chart interaction and style-default tests check that invalid numeric styles draw a corrected
+  chart without displaying validation errors.

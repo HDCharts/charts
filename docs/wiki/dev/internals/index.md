@@ -8,12 +8,12 @@ order: 0
 Notes on how the charts work inside, mostly the shared code in `charts-core`, for anyone changing
 them.
 
-A chart checks its data and style at a shared entry point in `charts-core`, then hands them to a
-content composable that lays out, animates and draws.
+A chart entry checks data and clamps the style, then hands them to content for layout, animation,
+and drawing. Indexed data uses the shared entry in `charts-core`; other data models own their entry.
 
 ```mermaid
 flowchart LR
-  P["Public composable<br/>ChartData + style"] --> S["Entry seam<br/>validate, convert, clamp"]
+  P["Public composable<br/>data + style"] --> S["Chart entry<br/>validate, prepare, clamp"]
   S -->|errors| E["ChartErrors"]
   S -->|valid| C["Content composable<br/>layout, animation, drawing"]
 ```
@@ -22,7 +22,7 @@ flowchart LR
 
 | Topic | Page | What it covers |
 | --- | --- | --- |
-| The whole path | [Pipeline and Stage Ownership](pipeline.md) | The pipeline stages and where each one belongs. |
+| The whole path | [Pipeline and Stage Ownership](pipeline.md) | Ownership of input preparation, layout, animation, and drawing. |
 | | [Entry Seam and Chart Policy](entry-seam.md) | The shared entry point and how a chart declares its checks. |
 | Input and style | [Validation Errors](validation-errors.md) | When a chart shows errors instead of drawing. |
 | | [Style Clamping](style-clamping.md) | How out-of-range style values are corrected. |
@@ -33,4 +33,4 @@ flowchart LR
 | | [Legend and Selection](legend.md) | When the legend and title appear and what they show. |
 | Code layout | [Naming and File Structure](naming.md) | How chart composables and files are named. |
 
-Known issues and limits of these pages are in the Known Issues section.
+See [Known Issues](https://charts.hdcode.dev/dev/known-issues) for unresolved limits.
