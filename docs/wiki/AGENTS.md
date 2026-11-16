@@ -150,7 +150,7 @@ Run the checks that cover the files changed:
 | Synchronize Kotlin snippets into Markdown | `python3 scripts/sync-wiki-examples.py` | Contributor runs after editing canonical examples. |
 | Verify snippet synchronization without writing | `python3 scripts/sync-wiki-examples.py --check` | Contributor and CI (`Prepare PR`). |
 | Run synchronizer regression tests | `python3 -B .github/scripts/tests/test_sync_wiki_examples.py` | Contributor and CI (`Prepare PR`). |
-| Generate new screenshot baselines | `./gradlew :androidApp:updateDebugScreenshotTest` | Contributor, limited to new previews; inspect generated images and preserve unrelated references. |
+| Update screenshot baselines | [Screenshot baselines](dev/releases/validation-matrix.md#screenshot-baselines) | Contributor, scoped to affected previews or tests; inspect changed images. |
 | Validate screenshot baselines | `./gradlew :androidApp:validateDebugScreenshotTest` | Contributor locally; CI validates screenshot tests. |
 | Validate wiki screenshot asset sync | `bash .github/scripts/sync-wiki-screenshots.sh --self-test` | Contributor and CI (`Prepare PR`). |
 | Synchronize wiki pages and approved assets | `bash .github/scripts/sync-wiki-docs.sh --self-test` and the release/snapshot documentation workflow | Contributor checks the sync script; release/snapshot workflow publishes synced documentation and assets. |

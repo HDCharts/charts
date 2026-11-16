@@ -5,34 +5,34 @@ order: 6
 
 # Rendering and Animation
 
-Bar, histogram, stacked bar, line, live line, and stacked area charts each draw on one `Canvas`,
-keep one animation value per drawn item, and show a compact view when they have more items than
-fit. These three choices decide how much work a frame costs. The drawing code lives in each chart
-module; the shared helpers are in `charts-core`.
+The Cartesian charts described here draw on a `Canvas` and share animation progress across their
+items. Density handling and visible-range drawing determine how much work a frame costs. Drawing
+code lives in each chart module; shared helpers live in `charts-core`.
 
 ## Dense Data
 
 | Chart | Dense when | Compact view | Expanded view |
 | --- | --- | --- | --- |
-| Line, stacked area | 50 points or more | Up to 50 points, each merging a bucket of neighbors | Every point, at least 12 px apart times the zoom, scrolling |
+| Line, stacked area | At the compact-density threshold | A bounded set of points, each merging a bucket of neighbors | Every point at the dense step times the zoom, scrolling |
 | Bar, stacked bar, histogram | More bars than fit at the minimum bar width | As many bars as fit, each merging a bucket of neighbors | Every bar at the minimum width times the zoom, scrolling |
 | Live line | Never | None: the whole window is drawn | None |
 
 Line, bar, and histogram charts average each bucket. A chart without interaction cannot be expanded, so it
 stays in the compact view.
 
+Current thresholds and step sizes live in the
+[density helpers](https://github.com/HDCharts/charts/tree/main/charts-core/src/commonMain/kotlin/io/github/hdcharts/core/internal/density).
+
 ## Canvas
 
 In the fit and compact views the canvas is the plot. In the expanded view it is as wide as every
 item and scrolls inside the plot.
 
-`chartCanvasFits` in `ChartCanvasLimits.kt` checks the canvas against the largest size Compose
-constraints can hold, about 262,000 px wide. A chart past it shows "Chart exceeds layout limits"
-instead of drawing. At 12 px per point, an expanded line or stacked area chart reaches the limit at
-21,847 points, or 5,463 at 4× zoom. With the default 10dp bars and 10dp spacing on a 2.625 density
-screen, a bar or stacked bar chart reaches it at 4,994 bars.
+`chartCanvasFits` in [ChartCanvasLimits.kt](https://github.com/HDCharts/charts/blob/main/charts-core/src/commonMain/kotlin/io/github/hdcharts/core/internal/layout/ChartCanvasLimits.kt) checks the canvas against Compose's constraint limits.
+A chart past the limit shows "Chart exceeds layout limits". The item count that fits depends on
+spacing, density, and zoom.
 
-`placedHorizontalScrollPx` in `ChartScroll.kt` clamps the scroll offset the same way
+`placedHorizontalScrollPx` in [ChartScroll.kt](https://github.com/HDCharts/charts/blob/main/charts-core/src/commonMain/kotlin/io/github/hdcharts/core/internal/layout/ChartScroll.kt) clamps the scroll offset the same way
 `horizontalScroll` places the canvas, so the frame after a zoom-out draws the bars and labels that
 are on screen.
 
@@ -40,7 +40,7 @@ are on screen.
 
 | Chart | State | On a data change |
 | --- | --- | --- |
-| Bar, histogram | One `Animatable` progress for the whole chart, from `ChartMorphState` in `rememberBarChartMorph` | A morph tweens the single progress and the draw blends the two value sets. Charts of up to 200 bars cascade: `BarChartCascade` gives each bar its own delayed, eased share of the progress |
+| Bar, histogram | One `Animatable` progress for the whole chart, from `ChartMorphState` in `rememberBarChartMorph` | A morph tweens the progress and blends the value sets. `BarChartCascade` gives bars delayed, eased progress when the dataset fits its cascade limit |
 | Stacked bar | One `Animatable` progress for the whole chart, from `ChartMorphState` | A morph tweens the single progress and the draw blends the two value sets |
 | Line, live line | One `Animatable` progress for the whole chart, from `ChartMorphState`, plus one slide progress | A morph tweens the single progress and the draw blends the two value sets. A live shift animates the slide progress over one full step |
 | Stacked area | One `Animatable` progress for the whole chart, from `ChartMorphState` | A morph tweens the single progress and the draw blends the two value sets |
@@ -52,7 +52,7 @@ or a live shift.
 
 - Line and live line: each draw blends or copies one series at a time into a reused `FloatArray`
   and builds one `Path` through the points of that series with `drawChartPath` in
-  `LineChartDrawing.kt`. The path, the canvas heights, and the bezier control points are held in a
+  [LineChartDrawing.kt](https://github.com/HDCharts/charts/blob/main/charts-line/src/commonMain/kotlin/io/github/hdcharts/line/internal/LineChartDrawing.kt). The path, the canvas heights, and the bezier control points are held in a
   `LineChartDrawScratch` the chart remembers, so a frame allocates nothing per point or per segment.
   A bezier line maps each value to its canvas height once and reads the shared heights per segment.
   An expanded chart draws only the points on screen, plus the overscan of the widest marker, so a
@@ -65,13 +65,13 @@ or a live shift.
 
 | Behavior | Tests |
 | --- | --- |
-| Canvas limit | `ChartCanvasLimitsTest` in `charts-core/src/commonTest` |
+| Canvas limit | [ChartCanvasLimitsTest](https://github.com/HDCharts/charts/blob/main/charts-core/src/commonTest/kotlin/io/github/hdcharts/core/internal/layout/ChartCanvasLimitsTest.kt) in `charts-core/src/commonTest` |
 | Error instead of a crash past the limit | `*_expandedPastLayoutLimits_displaysErrorInsteadOfCrashing` in `charts-line`, `charts-stacked-area`, and `charts-stacked-bar` |
-| Scroll clamp after a zoom-out | `ChartScrollTest` in `charts-core/src/commonTest`, `BarChartScrollFrameTest` in `charts-bar/src/jvmTest` |
-| An expanded chart draws the same line as the whole series | `LineChartVisiblePointsTest` in `charts-line/src/commonTest` |
-| Control points without an object per segment | `CubicControlPointsIntoTest` in `charts-core/src/commonTest` |
+| Scroll clamp after a zoom-out | [ChartScrollTest](https://github.com/HDCharts/charts/blob/main/charts-core/src/commonTest/kotlin/io/github/hdcharts/core/internal/layout/ChartScrollTest.kt) in `charts-core/src/commonTest`, [BarChartScrollFrameTest](https://github.com/HDCharts/charts/blob/main/charts-bar/src/jvmTest/kotlin/io/github/hdcharts/bar/internal/BarChartScrollFrameTest.kt) in `charts-bar/src/jvmTest` |
+| An expanded chart draws the same line as the whole series | [LineChartVisiblePointsTest](https://github.com/HDCharts/charts/blob/main/charts-line/src/commonTest/kotlin/io/github/hdcharts/line/internal/LineChartVisiblePointsTest.kt) in `charts-line/src/commonTest` |
+| Control points without an object per segment | [CubicControlPointsIntoTest](https://github.com/HDCharts/charts/blob/main/charts-core/src/commonTest/kotlin/io/github/hdcharts/core/internal/bezier/CubicControlPointsIntoTest.kt) in `charts-core/src/commonTest` |
 | An interrupted live shift runs a full step | `interruptedShift_startsAFullStepInsteadOfResumingTheInterruptedWindow` in `charts-line/src/commonTest` |
 
 ## Known Issues
 
-Known issues and limits are listed in Rendering and Animation Issues, in the Known Issues section.
+See [Rendering and Animation Issues](https://charts.hdcode.dev/dev/known-issues/rendering) for known limits.

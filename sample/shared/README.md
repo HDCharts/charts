@@ -6,7 +6,7 @@ Shared sample code for the HDCharts demo apps.
 
 Stateless, app-independent sample data used by the chart demos:
 
-- Per-chart sample data sources (`PieSampleUseCase`, `LineSampleUseCase`, `BarSampleUseCase`, `HistogramSampleUseCase`, `MultiLineSampleUseCase`, `StackedBarSampleUseCase`, `StackedAreaSampleUseCase`, `RadarSampleUseCase`, `RingGaugeSampleUseCase`)
+- Per-chart sample data sources, declared in [SampleUseCases.kt](src/commonMain/kotlin/io/github/hdcharts/sampleshared/data/SampleUseCases.kt)
 - Live latency timeline generator (`LiveLatencyTimelineUseCase`) for the line/multi-line live preview
 - Gallery preview seed and jitter (`ChartPreviewUseCase`)
 - Reusable sample data models and shared UI theme (`Dimens`, `LocalChartColors`, typography, color schemes)

@@ -5,38 +5,30 @@ Contributions are welcome.
 There are many ways to contribute, including feature work, bug fixes, performance improvements, test coverage, docs updates, and tooling/CI refinements.
 
 ## Requirements
-- Android Studio Rabbit 2 | 2026.2.2 Patch 1
 
-## Project hierarchy
-<pre>
-HDCharts
-├── charts
-│   ├── core
-│   │   └── :charts-core
-│   ├── umbrella
-│   │   └── :charts
-│   ├── modules
-│   │   ├── :charts-line
-│   │   ├── :charts-pie
-│   │   ├── :charts-bar
-│   │   ├── :charts-radar
-│   │   ├── :charts-gauge
-│   │   ├── :charts-stacked-bar
-│   │   └── :charts-stacked-area
-│   ├── BOM
-│   │   └── :charts-bom
-│   └── sample
-│       ├── shared demo resources
-│       │   └── :sample-shared
-│       ├── real API clients
-│       │   └── :sample-api
-│       └── apps
-│           ├── :app (common)
-│           ├── :androidApp
-│           └── :iosApp
-├── charts-docs (<a href="https://github.com/HDCharts/charts-docs">https://github.com/HDCharts/charts-docs</a>)
-└── charts-gif-recorder (<a href="https://github.com/hdcodedev/compose-gif-recorder">https://github.com/hdcodedev/compose-gif-recorder</a>)
-</pre>
+Use Android Studio with support for the Android Gradle Plugin version in
+[gradle/libs.versions.toml](gradle/libs.versions.toml).
+
+## Project layout
+
+| Location | Purpose |
+|---|---|
+| `charts-core/` | Shared models, validation, styles, and rendering helpers |
+| `charts-*/` | Chart modules |
+| `charts/` | Umbrella artifact |
+| `charts-bom/` | Bill of Materials |
+| `sample/` | Shared sample data, API clients, and platform apps |
+| `docs/wiki/` | Chart guides and internal developer documentation |
+| `release-notes/` | Versioned release notes and migrations |
+
+[settings.gradle.kts](settings.gradle.kts) declares Gradle projects and their directories.
+[ChartsModules.kt](buildSrc/src/main/kotlin/ChartsModules.kt) groups modules for publishing and
+validation.
+
+Related repositories:
+
+- [charts-docs](https://github.com/HDCharts/charts-docs): documentation site.
+- [compose-gif-recorder](https://github.com/hdcodedev/compose-gif-recorder): GIF recording tools.
 
 ## Report issues
 Open an issue: https://github.com/HDCharts/charts/issues
@@ -50,9 +42,9 @@ See why things are built the way they are: https://charts.hdcode.dev/dev/decisio
 ## Technologies
 | Module | Technologies / Languages |
 | --- | --- |
-| `:charts-*` | Kotlin Multiplatform, Compose Multiplatform (Android/iOS/JVM/JS) |
+| `:charts-*` | Kotlin Multiplatform, Compose Multiplatform (Android/iOS/JVM/Wasm) |
 | `:charts-bom` | Gradle Java Platform (BOM), Maven Publishing |
-| `:app` | Kotlin Multiplatform, Compose Multiplatform (Android/iOS/JVM/JS) |
+| `:app` | Kotlin Multiplatform, Compose Multiplatform (Android/iOS/JVM/Wasm) |
 | `:sample-api` | Kotlin Multiplatform, Ktor, kotlinx.serialization, Koin |
 | `:androidApp` | Kotlin, Android, Jetpack Compose |
 | `:iosApp` | Swift, SwiftUI, Xcode |

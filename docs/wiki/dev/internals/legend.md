@@ -5,50 +5,34 @@ order: 9
 
 # Legend and Selection
 
-The legend names what the colors stand for. While a point is selected, the title and the legend
-show its details. The rules below define when each one appears and what it says.
+The shared `Legend` names what colors distinguish. Indexed-series readouts use `selectedTitle` and
+`selectedLegendValues` from
+[SelectedTitle.kt](https://github.com/HDCharts/charts/blob/main/charts-core/src/commonMain/kotlin/io/github/hdcharts/core/internal/SelectedTitle.kt)
+to show a selected category and its values.
 
-The shared legend is `Legend` in `charts-core`, in `internal/composable/Legend.kt`. It takes the
-chart's `LegendStyle` and hides itself when `visible` is false or without two items and a name. The
-selected title and legend values come from `selectedTitle` and `selectedLegendValues` in
-`internal/SelectedTitle.kt`.
+## Visibility
 
-## Rules
+`Legend` in [Legend.kt](https://github.com/HDCharts/charts/blob/main/charts-core/src/commonMain/kotlin/io/github/hdcharts/core/internal/composable/Legend.kt) displays when its style is visible, it has
+at least two items, and at least one item has a name. A blank name alone adds no useful key.
 
-1. **The legend lists what color tells apart.** That is the series for line, live line, radar,
-   stacked bar and stacked area, and the categories for pie and ring gauge. Bar and histogram use one
-   color, so they have no legend.
-2. **A legend needs two or more items and at least one name.** One item needs no key, and a list of
-   blank names tells the reader nothing.
-3. **`legend.visible = false` always hides it.** Every chart with a legend has a `legend` style
-   block. A hidden legend also hides the selected values of several series; the caller can read
-   `selectedIndex` from `rememberChartSelection()` and show them in its own UI.
-4. **A selection names its category in the title.** The title shows the selected category, or the
-   caller's title when the category is blank.
-5. **One series puts its value in the title,** as `Category: value`. Pie uses the slice's share as
-   the value; see rule 8.
-6. **Several series put their values in the legend,** as `Name - value` on each item. An item with
-   a blank name shows only its value. The title then shows only the category.
-7. **Selected values use the chart's `selectedValueFormatter`.** Pie's formats the slice's share,
-   in percent from 0 to 100.
-8. **Pie shows the slice's share in the title**, such as `Mobile: 42.5%`, with its category, or
-   the caller's title when the category is blank, or alone when both are blank. Its legend does not
-   change.
+The chart supplies the items: series names for a multi-series chart, or category names when colors
+distinguish values within one series. A chart using a single color can omit the legend.
 
-## By Chart
+Hiding the legend also hides any selected values displayed there. Apps can read selection state
+and show those values in their own UI.
 
-| Chart | Legend lists | Shown when | Selected title | Selected legend |
-| --- | --- | --- | --- | --- |
-| Line | Series names | 2+ series, a non-blank name, and `legend.visible` | One series: `Category: value`, or the value without a category. Several: category | Several series: `Name - value` |
-| Live line | Series names | 2+ series, a non-blank name, and `legend.visible` | No selection | No selection |
-| Bar | — | Never | `Category: value`, or the value without a category | — |
-| Histogram | — | Never | Same as bar | — |
-| Pie | Categories | 2+ categories, a non-blank name, and `legend.visible` | `Category: share`, falling back to the caller's title for a blank category, or the share alone | No change |
-| Radar | Series names | 2+ series, a non-blank name, and `legend.visible` | Same as line | Several series: `Name - value` |
-| Stacked bar | Segment names | 2+ segments, a non-blank name, and `legend.visible` | Same as line | Several segments: `Name - value` |
-| Stacked area | Series names | 2+ series, a non-blank name, and `legend.visible` | Same as line | Several series: `Name - value` |
-| Ring gauge | Categories | 2+ categories, a non-blank name, and `legend.visible` | `Category: value`, or the value without a category | No change |
+## Indexed-series readouts
 
-## Known Issues
+- A selection names its category in the title, falling back to the caller's title for a blank
+  category.
+- A single-series readout uses `Category: value`, or just the value when no title is available.
+- Multi-series readouts put values in the legend as `Name - value`. The title shows the category;
+  a blank series name leaves only its value in the legend.
+- Values use the chart's `selectedValueFormatter`.
 
-Known issues and limits are listed in Legend and Selection Issues, in the Known Issues section.
+Pie formats a selected slice's share in the title, with a percent suffix, and keeps its legend
+unchanged. Ring gauges also keep category legends unchanged while displaying the selected value.
+Live line shows its series key while its window moves and has no selection readout.
+
+Charts with other data models own their readouts in their entry or content. Follow the chart's
+implementation when changing selection behavior.

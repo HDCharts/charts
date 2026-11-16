@@ -21,14 +21,12 @@ platform-specific `chartsTest*` tasks in the root build.
 
 Wasm compilation remains in `ciCompile`, and `ciAssemble` builds the sample web distribution.
 Full Wasm browser tests run manually; they are outside the PR checks, including full-validation
-fallbacks. Compilation and packaging do not verify browser rendering or interaction. The Wasm
-test job was resource-heavy and of low value on ordinary PRs, so it was removed from default PR
-checks to conserve CI resources.
+fallbacks. Compilation and packaging do not verify browser rendering or interaction.
 
 ## Check selection
 
-`Prepare PR` runs `.github/scripts/ci-impact.py` on the files the pull request changes. The script
-maps each file to the Gradle project that owns it, using `settings.gradle.kts` and the project
+`Prepare PR` runs [.github/scripts/ci-impact.py](https://github.com/HDCharts/charts/blob/main/.github/scripts/ci-impact.py) on the files the pull request changes. The script
+maps each file to the Gradle project that owns it, using [settings.gradle.kts](https://github.com/HDCharts/charts/blob/main/settings.gradle.kts) and the project
 dependencies in the build scripts, and writes its decision to the job summary.
 
 | Change | Checks |
@@ -41,8 +39,8 @@ dependencies in the build scripts, and writes its decision to the job summary.
 | A screenshot reference image | That screenshot class only |
 | Shared screenshot code, `:sample-shared`, the `:charts` umbrella, or `:androidApp` resources and build file | Every screenshot class |
 | `.editorconfig` | Lint |
-| `API-COMPATIBILITY-BREAKS.txt` | API compatibility |
-| Root build files, `buildSrc`, `gradle/`, `.github/`, `scripts/ci-has-code-changes.sh`, or a path outside every Gradle project | Full validation |
+| [API-COMPATIBILITY-BREAKS.txt](https://github.com/HDCharts/charts/blob/main/API-COMPATIBILITY-BREAKS.txt) | API compatibility |
+| Root build files, `buildSrc`, `gradle/`, `.github/`, [scripts/ci-has-code-changes.sh](https://github.com/HDCharts/charts/blob/main/scripts/ci-has-code-changes.sh), or a path outside every Gradle project | Full validation |
 
 The iOS and Android jobs start only when a selected module is a library module: `:charts`
 and everything it depends on. Each Android shard runs a Gradle dry run first and starts the
@@ -60,7 +58,7 @@ cannot read fails the pull request that adds it.
 
 ## Module coverage
 
-The test jobs do not cover the same modules. The `chartsTest*` tasks in `build.gradle.kts` take
+The test jobs do not cover the same modules. The `chartsTest*` tasks in [build.gradle.kts](https://github.com/HDCharts/charts/blob/main/build.gradle.kts) take
 their module lists from `ChartsModules` in `buildSrc`:
 
 | Task | Modules |
@@ -70,13 +68,13 @@ their module lists from `ChartsModules` in `buildSrc`:
 | `chartsTestIos` | `library` |
 | `chartsTestAndroidInstrumented` | `library` without `:charts-core` and `:charts` |
 
-`ChartsModules.kt` is where those lists change. `modulesWithoutDeviceTests` in
-`build.gradle.kts` holds the exceptions — `:charts-core` and `:charts` have no device tests — so a
+[ChartsModules.kt](https://github.com/HDCharts/charts/blob/main/buildSrc/src/main/kotlin/ChartsModules.kt) is where those lists change. `modulesWithoutDeviceTests` in
+[build.gradle.kts](https://github.com/HDCharts/charts/blob/main/build.gradle.kts) holds the exceptions — `:charts-core` and `:charts` have no device tests — so a
 new module without them needs an entry there. A new chart module otherwise joins `library` and
-picks up every job above, with no edit to this page. `ci-impact.py` finds it through
-`settings.gradle.kts` and the dependencies of the `:charts` umbrella.
+picks up every job above, with no edit to this page. [ci-impact.py](https://github.com/HDCharts/charts/blob/main/.github/scripts/ci-impact.py) finds it through
+[settings.gradle.kts](https://github.com/HDCharts/charts/blob/main/settings.gradle.kts) and the dependencies of the `:charts` umbrella.
 
-The three sample modules are multiplatform and hold `commonTest` sources, but only `chartsTestJvm`
+The `sampleTested` modules are multiplatform and hold `commonTest` sources, but only `chartsTestJvm`
 wires them. Their shared tests run in the JVM job and in no other job, so a platform difference in
 the sample code reaches CI on the JVM alone.
 
@@ -97,15 +95,25 @@ Use the smallest applicable command:
 | Repository checks | `./gradlew chartsCheck` |
 | Public API compatibility | `./gradlew apiCompatibilityCheck` |
 | Compose or screenshots | `./gradlew :androidApp:validateDebugScreenshotTest` |
-| Intentional screenshot updates | `./gradlew updateScreenshots` |
+| Intentional screenshot updates | Follow [Screenshot baselines](#screenshot-baselines). |
 
-`chartsCheck` is local only and is never invoked by a workflow. Pull requests are validated by
-the narrower `ciAssemble`, `ciCompile`, `ktlintCheck`, and `ciTest*` tasks above, which are not
-equivalent to the root `build` that `chartsCheck` depends on. Whether `chartsCheck` becomes a
-merge gate is undecided.
+`chartsCheck` is a local aggregate that includes the root `build`. PRs use the narrower
+`ciAssemble`, `ciCompile`, `ktlintCheck`, and `ciTest*` tasks above.
 
 CI owns `chartsTestAndroidInstrumented`, `chartsTestIos`, and `validateDocsGifBaselines` unless
 explicitly requested locally.
+
+## Screenshot baselines
+
+Update references only for an intentional visual change:
+
+1. Open the affected screenshot preview in Android Studio and use its reference-image update
+   action. Keep the update scoped to that preview or test.
+2. Inspect every changed image and the file diff. Keep unrelated references unchanged.
+3. Run the selected-class screenshot validation command from the local-validation table above.
+
+For command-line updates, confirm the installed screenshot plugin supports the requested filter
+and honors it. If it cannot limit the update, use the preview-specific IDE action.
 
 ## Manual Wasm validation
 

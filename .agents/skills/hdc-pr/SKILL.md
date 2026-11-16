@@ -28,16 +28,17 @@ Release notes and API migration topics use separate user-invoked workflows.
 
 ## Validation Questionnaire
 
-Ask which checks to run using the canonical matrix in
-`docs/wiki/dev/releases/validation-matrix.md`.
+Ask which checks to run using the
+[validation matrix](../../../docs/wiki/dev/releases/validation-matrix.md).
 
 Run selected tasks and list the exact commands in the PR body. CI owns
 `validateDocsGifBaselines` and instrumented Android tests unless the user asks
 to run them locally.
 
-When the diff clearly changes rendered output, offer `./gradlew updateScreenshots`
-in the questionnaire and name the affected screenshot tests. Examples: a changed
-default label format, color, size, or layout, or a changed sample scenario.
+When the diff clearly changes rendered output, offer a scoped baseline update
+using [Screenshot baselines](../../../docs/wiki/dev/releases/validation-matrix.md#screenshot-baselines)
+and name the affected tests. Examples: a changed default label format, color, size,
+or layout, or a changed sample scenario.
 Include the regenerated baselines in the same pull request. If the user declines,
 state in the PR body which baselines are expected to change.
 
@@ -53,7 +54,7 @@ fragment.
 
 1. Inspect the diff and determine the affected modules.
 2. Run the selected checks from the canonical matrix.
-3. Read `.github/PULL_REQUEST_TEMPLATE.md` and use its sections and headings.
+3. Read the [PR template](../../../.github/PULL_REQUEST_TEMPLATE.md) and use its sections and headings.
 4. Show the proposed branch, commit, push, and PR commands in one batched
    `question` prompt and wait for an explicit yes before executing them.
 5. Report the PR URL and validation.

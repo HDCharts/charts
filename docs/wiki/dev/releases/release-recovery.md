@@ -36,7 +36,7 @@ If required artifacts are missing, identify the exact coordinates and the origin
 that should contain them. Once its state is resolved:
 
 1. Validate the existing API/demo assets with the `validate-docs-static-release` action used by
-   `release.yml`. They must match the approved version and source SHA.
+   [release.yml](https://github.com/HDCharts/charts/blob/main/.github/workflows/release.yml). They must match the approved version and source SHA.
 2. Prepare an upload containing only the missing publications. Validate their coordinates,
    required POM metadata, signatures, and any relocation targets before uploading.
 3. Publish those artifacts and wait until Central reports success and serves every expected POM.
@@ -52,7 +52,7 @@ If static-asset validation fails, stop and investigate the mismatch before conti
 
 ## Complete the release
 
-Use a temporary recovery branch to modify the existing `.github/workflows/release.yml`.
+Use a temporary recovery branch to modify the existing [.github/workflows/release.yml](https://github.com/HDCharts/charts/blob/main/.github/workflows/release.yml).
 That workflow already has `workflow_dispatch` on `main`, so it can be dispatched with a recovery
 branch ref. Keep the recovery workflow on that branch; keep `main`'s normal release workflow.
 The Android workflow is reusable only and must be called by this workflow.

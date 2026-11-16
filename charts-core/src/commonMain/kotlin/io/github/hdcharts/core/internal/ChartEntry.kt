@@ -11,22 +11,17 @@ import io.github.hdcharts.core.style.ChartContainerStyle
 import kotlinx.collections.immutable.toImmutableList
 
 /**
- * Runs the input stages every chart shares, then hands the result to [content]. Pipeline stages 2,
- * 3 and 4, and the chart answers all three through [spec]:
+ * Prepares indexed chart input through [spec], then hands the result to [content].
  *
- *  1. Stage 2, validation. [data] is checked against [ChartSpec.policy] and the style values its
- *     policy maps. Errors render through [errorStyle] and nothing else runs — which is why clamping
- *     comes last rather than in stage order.
- *  2. Stage 4, conversion. The validated [data] becomes the chart's render model, once, through
- *     [ChartSpec.convert].
- *  3. Stage 3, clamping. [style] is clamped for drawing at the current density, through
- *     [ChartSpec.clamp].
+ * Validates [data] and the policy's style inputs, converts valid data through [ChartSpec.convert],
+ * then clamps [style] at the current density through [ChartSpec.clamp]. Errors render through
+ * [errorStyle] and return before conversion or clamping. [additionalErrors] joins the policy errors.
  *
- * Stages that need layout size — domain, normalization, density, drawing — belong in the content
- * composable, below this seam, because they cannot be decided before constraints are known.
+ * Content owns layout, animation, and drawing. Work that needs a measured size runs there.
  *
  * Validation extracts a value-based snapshot from [style] and remembers errors against [spec],
- * [data], the snapshot and density. Conversion is remembered against [spec], [data] and [title].
+ * [data], the snapshot, density and [additionalErrors]. Conversion is remembered against [spec],
+ * [data] and [title].
  * Clamping is remembered against [spec], [style] and density.
  */
 @InternalChartsApi

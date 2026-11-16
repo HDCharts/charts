@@ -5,185 +5,79 @@ order: 3
 
 # Validation Errors
 
-A chart shows a validation error instead of drawing when its input has no correct fallback. The
-chart draws the errors as text in its container with `ChartErrors`, one error per line.
+A chart displays errors through `ChartErrors` when its input has no correct fallback. Validation
+runs at the entry, before conversion and content.
 
-## The rule
+## What to correct and what to report
 
-**Styles are clamped, data is reported. Neither ever throws.**
+Correct drawable style values such as alpha, spacing, and size through [Style
+Clamping](style-clamping.md). Report malformed data and settings whose meaning cannot be inferred,
+such as non-finite range bounds or invalid axis labels.
 
-The two halves are deliberately different, because a wrong style value and a wrong data value are
-different mistakes:
+A negative spacing can safely become zero. A non-finite data point has no meaningful replacement,
+so the entry reports it and leaves the plot undrawn. Invalid chart input produces messages;
+programmer arguments such as formatter precision can still have argument checks.
 
-| | Out of range | Not finite | Effect |
-| --- | --- | --- | --- |
-| Style | Clamped to the nearest drawable value | Falls back to that value's `StyleDefaults` default | Drawn |
-| Data | Reported, if the chart cannot draw it | Reported | Nothing drawn |
+## Validation rules
 
-A style has an obvious correct answer — a negative bar spacing means zero spacing — so correcting it
-draws the chart the user meant. Data has no such answer: a `NaN` in a series is not a number to
-approximate, and drawing the other points as though it were fine would be a lie. So the chart says
-what is wrong and draws nothing.
+| Input | Checks |
+|---|---|
+| Indexed series | Series count, minimum values, category alignment, finite values, and the policy's negative-value rules |
+| Explicit palette | Count matches the items it colors when the policy enables matching |
+| Stacked series | Intermediate totals stay finite |
+| Scatter points | Non-empty series and points, required series names, finite X/Y values, valid bubble sizes, palette count, and axis bounds |
+| Heatmap matrix | Labels and matrix dimensions agree, present values are finite, at least one value exists, and the color scale is valid |
+| Waterfall entries | Entries exist, changes are finite, and running balances stay finite |
+| Range and axis labels | Bounds are finite and label settings can be drawn |
+| Chart-specific settings | Additional requirements such as Segmented Ring Gauge's capacity and segment total |
 
-Three consequences worth stating, because each has been got wrong:
+Current minimums and indexed error messages live in
+[`DataValidation.kt`](https://github.com/HDCharts/charts/blob/main/charts-core/src/commonMain/kotlin/io/github/hdcharts/core/internal/DataValidation.kt).
+Chart policies select the applicable rules. Model-specific messages live with their chart's entry.
+Use [Entry Seam and Chart Policy](entry-seam.md) to choose the validation path.
 
-- **A malformed value becomes a message, not an exception.** The checks below cover every value that
-  reaches them, so malformed input is reported rather than thrown. A `require` in the library is only
-  for a programmer's own argument — a formatter precision, a selection delay — never for chart data.
-- **A check reports everything it can.** `errorsFor` collects every enabled error and the container
-  lists them all. The one exception is a shape error that makes the rest unreadable: with no series
-  there is nothing to iterate, and a single-series chart stops at its first shape problem.
-- **Nothing downstream re-checks.** Validation runs once, at the chart's entry. Conversion and drawing
-  rely on its data contract. Indexed series have aligned values and categories; scatter series have
-  independent point counts, finite coordinates and optional finite, non-negative bubble sizes; heatmap
-  matrices match their labels, hold finite present values, and mark missing cells with `null`.
+## Error collection
 
-## What is an error
+The shared indexed policy checks data shape, range, then axis labels. It collects enabled errors
+where inputs are readable. Shape errors can stop checks that depend on that shape: a missing series
+has no values to inspect, and the single-series validator stops at its first shape problem.
 
-- **Data problems:** too few values, series of different lengths, values that are not finite,
-  negative values in charts that need positive ones, and stacked totals that overflow.
-- **Counts that must match:** categories that do not match the value count, and colors that do not
-  match what they color.
-- **Settings with no fallback:** non-finite range bounds and invalid axis label settings.
+Multi-series validation reports bad values by series. Single-series validation identifies values
+by index. Scatter and Heatmap collect each violated rule once across their points or cells;
+Waterfall stops at the first non-finite change or running total. A missing Heatmap cell is valid
+when the rest of the matrix contract holds.
 
-Style values such as alphas, sizes, and grid steps are never errors. They are clamped instead, as
-Style Clamping describes.
+An explicit palette is optional. A zero palette count skips matching; a nullable expected-color
+rule can also skip matching for a particular dataset. Keep these decisions in the policy.
 
-## Messages
+## Internal model
 
-Indexed-series messages come from `ValidationErrors` in `DataValidation.kt` in `charts-core`.
-Scatter's, heatmap's and waterfall's data-model-specific messages live with their private
-`ScatterChartPolicy`, `HeatmapChartPolicy` and `WaterfallChartPolicy`.
+Indexed content reads `ChartRenderData`, which holds the validated `ChartData` and the title.
+Its default conversion retains the caller's series and categories. A chart can convert their
+shape when its renderer needs it, as stacked bar does.
 
-| Rule | Message | Charts |
-| --- | --- | --- |
-| No series | At least one series is required. | Line, radar, stacked bar, stacked area, scatter |
-| Wrong series count | Exactly one series is required; got 2. | Bar, histogram, pie, ring gauge |
-| Too few values | At least 2 values are required. (3 on radar, 1 on ring gauge) | Indexed-series charts |
-| Category count | Category count (3) must match value count (4). | Bar, histogram, line, pie, radar, ring gauge, stacked bar, stacked area |
-| Color count | Color count (2) must match series count (3). | Indexed-series charts with a color list |
-| Series length | Series 1 is not aligned with the first series. | Line, radar, stacked bar, stacked area |
-| Not finite | Series 0 contains a non-finite value. | Line, radar, stacked bar, stacked area |
-| Not finite | Value at index 2 is not finite. | Bar, histogram, pie, ring gauge |
-| Negative | Series 0 contains a negative value. | Stacked bar, stacked area |
-| Negative | Value at index 2 is negative. | Histogram, pie |
-| Stacked total | Stacked total at index 2 is not finite. | Stacked bar, stacked area |
-| Empty point series | Every series must contain at least one point. | Scatter / bubble |
-| Missing series name | Every series must have a name when multiple series are used. | Scatter / bubble |
-| Series color count | The color count must match the series count. | Scatter / bubble, with multiple series and an explicit palette |
-| Point values | Point coordinates must be finite and sizes must be finite and non-negative. | Scatter / bubble |
-| Non-finite bounds | Fixed axis bounds must be finite. | Scatter / bubble |
-| X bounds | The X minimum must be less than the X maximum. | Scatter / bubble, with both X bounds set |
-| Y bounds | The Y minimum must be less than the Y maximum. | Scatter / bubble, with both Y bounds set |
-| No columns | At least one column is required. | Heatmap |
-| No rows | At least one row is required. | Heatmap |
-| Row count | The value matrix must have one value row per row label. | Heatmap |
-| Column count | Every value row must have one value per column label. | Heatmap |
-| Cell values | Cell values must be finite. | Heatmap |
-| No values | At least one cell must have a value. | Heatmap, with a well-formed matrix |
-| Scale colors | The color scale requires at least two colors. | Heatmap |
-| Scale bounds | Color scale bounds must be finite. | Heatmap |
-| Scale order | The color scale minimum must be less than its maximum. | Heatmap, with both bounds set |
-| No entries | At least one waterfall entry is required. | Waterfall |
-| Change amounts | Change amounts must be finite. | Waterfall |
-| Running totals | Every running total must be finite. | Waterfall |
+Categories can be empty or aligned with the values. Blank categories are valid. Use
+`resolveAxisLabel` for the axis-label fallback; [X-Axis Labels](x-axis-labels.md) describes it.
 
-The color message names what the colors are matched to: `value` on bar, histogram, pie and ring gauge, and
-`series` on line, radar, and the stacked charts.
+Validation establishes data invariants so conversion and drawing can rely on them. Keep guards
+that handle other inputs: caller-chosen ranges, zero-sized viewports, zoom, and intermediate
+animation states. For example, `normalizeValue` clips a line to its caller's fixed range even when
+all data values are finite.
 
-Indexed-series charts that draw several series report a problem once per series. Charts with one
-series report it per value, with its index. Scatter collects each violated rule once across its points,
-and heatmap once across its cells. A `null` heatmap cell is missing data, not an error. Waterfall stops
-at its first non-finite change or non-finite running total, like a single-series chart at its first
-shape problem.
-
-## Where it happens
-
-Indexed-series checks live in `DataValidation.kt` in `charts-core`. A `ChartPolicy<S>` declares the
-checks and style inputs, and `ChartEntry` combines them. Scatter's independent X/Y checks live in
-`ScatterChartEntry.kt` in `charts-scatter`, heatmap's matrix checks in `HeatmapChartEntry.kt` in
-`charts-heatmap`, and waterfall's ordered-change checks in `WaterfallChartEntry.kt` in
-`charts-waterfall`. Every path reuses `ChartErrors` and axis label validation.
-Their entry contracts are recorded in Entry Seam and Chart Policy.
-
-| Function | Checks | Charts |
-| --- | --- | --- |
-| `validateSeries` | No series, too few values, category count, series length, non-finite values, negative values with `allowNegative = false`, totals that overflow with `stacksValues = true`, and the series color count | Line, radar, stacked bar, stacked area |
-| `validateSingleSeries` | One series, too few values, color count, category count, and each bad value | Bar, histogram, pie |
-| `validateValues` | Each non-finite value, and each negative value with `allowNegative = false` | Inside `validateSingleSeries` |
-| `validateColorCount` | A color list that does not match what it colors. A null expectation skips the check, and so does a style that sets no colors | Inside the two series checks |
-| `validateRange` | Non-finite range bounds | Bar, histogram, line |
-| `ScatterChartPolicy.errorsFor` | Non-empty series and points, names for multiple series, palette count, finite coordinates, optional finite non-negative sizes, X/Y bounds and axis labels | Scatter / bubble |
-| `HeatmapChartPolicy.errorsFor` | Non-empty labels, matrix shape, finite present values, at least one value, color-scale colors and bounds, and axis labels | Heatmap |
-| `WaterfallChartPolicy.errorsFor` | At least one entry, finite change amounts, finite running totals, and the shared range and axis label checks | Waterfall |
-
-Axis label settings are checked by `validateAxisLabels` in `AxisLabelValidation.kt`.
-
-Every entry path collects errors in one order: data shape, then range, then axis labels. Indexed
-policies select their checks through `ChartPolicy.errorsFor`; scatter and heatmap select theirs in
-`ScatterChartPolicy.errorsFor` and `HeatmapChartPolicy.errorsFor`. Entry Seam and Chart Policy records
-each validation contract.
-
-The minimums are `ValidationErrors.MIN_VALUES` (2), `ValidationErrors.MIN_RADAR_VALUES` (3), and
-`ValidationErrors.MIN_RING_GAUGE_VALUES` (1).
-With no series, `validateSeries` reports only that error, and `validateSingleSeries` stops at the
-first shape problem.
-
-`validateSeries` takes the expected color count as `expectedColors`, read from the data by the
-policy. A chart whose count depends on the data states the rule rather than a constant, which is
-what radar does. The policy's color mapper supplies the style's color count; range and axis mappers
-are nullable capabilities, not separate flags.
+Finiteness is checked at the entry. Wrapping every numeric value in a value class inside a list
+would add boxing costs, so the render model relies on validation and contract tests.
 
 ## Adding a rule
 
-- For an indexed-series rule, add the message to `ValidationErrors` and the check to `DataValidation.kt`.
-  Give no check parameter a default.
-- Put a rule specific to another data model in that chart's validation contract. Reuse shared checks
-  for shared styles, such as `validateAxisLabels`.
-- If the rule applies to more than one chart, add it to the function those charts already call.
-- Keep messages short, name the value or series, and say what is expected.
-- A rule belongs here, in the path that reports, rather than as an assertion further down. An
-  assertion in the conversion would fire on the same data and crash instead of drawing the message.
-
-## Internal model types
-
-Indexed-series content reads `ChartRenderData`: the caller's own `ChartData` plus the chart's `title`.
-Scatter and heatmap content read validated `ScatterData` and `HeatmapData` directly. Four constraints
-on the indexed render model:
-
-**A value that is required is not optional, and optionality is explicit.** `ChartRenderData.title` is a
-`String`, so an absent title is written as `""`, and `ChartSeries.name` is a `String?` that a chart
-converts to `""` when it draws a name. That makes "no label" indistinguishable from a blank one, and
-the cost shows up where a stage has to repair it: stacked bar's compaction invents
-`"Bucket ${bucketIndex + 1}"` for a blank category, duplicating the fallback `resolveAxisLabel`
-already owns. Deciding that in the renderer — one fallback, in one place — is the fix, and it touches
-no public API.
-
-**The model holds the caller's data, not a copy.** There is no second leaf type and no per-point copy
-of the category list, so nothing below the seam can drift from what the caller passed, and there is
-only one type named `ChartData` in the library. A label at an index is `categories[index]`, and
-validation has already made the categories either empty or exactly as long as the values, so no read
-site needs a fallback for a **missing** label. Blank is a different case and stays legal: that is
-`resolveAxisLabel`'s job, and X-Axis Labels owns it.
-
-**Not every guard below the seam is redundant.** `normalizeValue` ends with `.coerceIn(0f, 1f)`
-after dividing by the domain width, and the values inside that domain are finite by construction —
-yet line resolves its domain from the caller's `style.range`, so a caller who sets a maximum below
-their highest value gets a domain that clips the data. The clamp is what stops the line drawing
-outside the plot. The same reasoning keeps every zoom, reveal-progress and canvas-bounds clamp: a
-zero-size canvas and a mid-animation frame are real states, not bad data. A guard below the seam is
-worth classifying before it is removed — viewport, caller-chosen range, or data.
-
-**A numeric payload cannot be given a NaN-free type cheaply.** Kotlin has no NaN-free `Double`, and
-the obvious wrapper is wrong for this model: a `@JvmInline value class` element inside a `List` is
-boxed on JVM, Native and JS, so a ten-million-point chart would allocate ten million boxes and every
-arithmetic site would pay to unbox. Finiteness is therefore a property of construction — the only way
-into the model is through this page's checks — and the invariant is pinned by
-`ChartRenderDataTest` rather than by throwing.
+- Put shared indexed checks and messages in [DataValidation.kt](https://github.com/HDCharts/charts/blob/main/charts-core/src/commonMain/kotlin/io/github/hdcharts/core/internal/DataValidation.kt); keep model-specific checks with
+  their chart. Reuse existing range and axis-label validation.
+- Declare optional shared checks through `ChartPolicy` and supply their style inputs.
+- Keep messages short: identify the value or series and state what is expected.
+- Cover the rule in validation tests and verify that invalid input displays errors before content.
 
 ## Tests
 
-`DataValidationTest` in `charts-core` covers every function and the message text. Each chart's
-tests check that its errors are shown for invalid input. `ChartRenderDataTest` covers the model the
-checks make possible: that it holds the caller's own series and categories, the stacked-bar transpose,
-and that `errorsFor` rejects the data the model assumes.
+[DataValidationTest](https://github.com/HDCharts/charts/blob/main/charts-core/src/commonTest/kotlin/io/github/hdcharts/core/internal/DataValidationTest.kt) covers indexed checks and message text. [ChartPolicyTest](https://github.com/HDCharts/charts/blob/main/charts-core/src/commonTest/kotlin/io/github/hdcharts/core/internal/ChartPolicyTest.kt) covers policy
+selection, and [ChartEntryTest](https://github.com/HDCharts/charts/blob/main/charts-core/src/commonTest/kotlin/io/github/hdcharts/core/internal/ChartEntryTest.kt) checks the boundary before content. [ChartRenderDataTest](https://github.com/HDCharts/charts/blob/main/charts-core/src/commonTest/kotlin/io/github/hdcharts/core/internal/model/ChartRenderDataTest.kt) covers
+retained data, conversion, and the validated model's assumptions. Each chart tests its own input
+contract and displayed errors.
