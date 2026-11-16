@@ -1,5 +1,14 @@
 /** Exclusions applied consistently by JApiCmp and its XML finding parser. */
-internal val apiCompatibilityPackageExcludes = listOf("*.internal", "*.internal.*")
+internal val apiCompatibilityPackageExcludes =
+    listOf(
+        "*.internal",
+        "*.internal.*",
+        // Compose Multiplatform generates the Res accessor classes and resource collectors into
+        // *.generated.resources packages from whatever composeResources the module ships. That
+        // package is build output, not hand-authored API, so a module dropping unused Compose
+        // resources removes it from the published binary without a public API change.
+        "*.generated.resources",
+    )
 
 /** Compose compiler implementation details whose generated members can change between Kotlin versions. */
 internal val apiCompatibilityClassExcludes = listOf("*.ComposableSingletons\$*")

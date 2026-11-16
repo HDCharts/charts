@@ -13,9 +13,15 @@ class ApiCompatibilityExclusionsTest {
                 "io.github.hdcharts.core.internal.ApiCompatibilityTestClass\$Nested" to true,
                 "io.github.hdcharts.core.internal.deep.ApiCompatibilityTestClass" to true,
                 "io.github.hdcharts.core.ComposableSingletons\$ApiCompatibilityTestKt" to true,
+                "hdcharts.charts_core.generated.resources.Res" to true,
+                "hdcharts.charts_core.generated.resources.Res\$drawable" to true,
+                "hdcharts.charts_core.generated.resources.ActualResourceCollectorsKt" to true,
+                "hdcharts.charts_core.generated.resources.Res\$drawable\$ic_chart" to true,
                 "io.github.hdcharts.core.internalUtils.ApiCompatibilityTestClass" to false,
                 "io.github.hdcharts.core.model.ApiCompatibilityTestClass" to false,
                 "io.github.hdcharts.core.model.ComposableSingletonsHelper" to false,
+                "io.github.hdcharts.core.model.resources.ChartTheme" to false,
+                "io.github.hdcharts.core.generatedResources.ApiCompatibilityTestClass" to false,
             )
 
         cases.forEach { (className, expectedExcluded) ->

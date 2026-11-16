@@ -60,7 +60,6 @@ kotlin {
             api(libs.compose.mpp.material3)
             api(libs.compose.mpp.ui)
             api(libs.compose.mpp.preview)
-            implementation(libs.compose.mpp.resources)
             api(libs.kotlinx.collections.immutable)
             implementation(libs.posthog.kmp)
             implementation(libs.kotlinx.coroutines.core)
